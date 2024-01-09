@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// import { client } from '@gradio/client'
+import { client } from '@gradio/client'
 definePageMeta({
   title: 'شکر سخن',
   layout: 'sidebar',

@@ -25,6 +25,7 @@
     "lint:eslint:fix-demo": "eslint -c layers/documentation/examples/.eslintrc.cjs --fix --ext .vue layers/documentation/examples"
   },
   "devDependencies": {
+    "@gradio/client": "^0.10.0",
     "@iconify/json": "2.2.67",
     "@parcel/watcher": "2.1.0",
     "@types/fs-extra": "11.0.1",

@@ -14,9 +14,4 @@ export default defineNuxtConfig({
     '../layers/tairo',
     '../layers/tairo-layout-sidebar',
   ],
-  vite: {
-    optimizeDeps: {
-      exclude: ['@gradio/client'], // Add the problematic package here
-    },
-  },
 })

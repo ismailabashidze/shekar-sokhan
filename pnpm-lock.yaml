@@ -11,6 +11,9 @@ importers:
 
   .:
     devDependencies:
+      '@gradio/client':
+        specifier: ^0.10.0
+        version: 0.10.0
       '@iconify/json':
         specifier: 2.2.67
         version: 2.2.67
@@ -1042,6 +1045,17 @@ packages:
     resolution: {integrity: sha512-sBm53Q8WA61CS6ic4PLCdSDukpb2Yemt/f3tjBXlikV9zz2bg40KCUDVImAg7Hdzz9J57ggWVnuNW3RHLccqlQ==}
     dev: true
 
+  /@gradio/client@0.10.0:
+    resolution: {integrity: sha512-B1Gqjm91FJ3lV0OfMfy1cRKrgH/AnhRBxJ3KIbS2z/YqGn6yb0z34LZRDm4W2jILBWfIHwe/iyWIzsnxzR/KtQ==}
+    engines: {node: '>=18.0.0'}
+    dependencies:
+      bufferutil: 4.0.8
+      semiver: 1.1.0
+      ws: 8.13.0(bufferutil@4.0.8)
+    transitivePeerDependencies:
+      - utf-8-validate
+    dev: true
+
   /@headlessui/vue@1.7.13:
     resolution: {integrity: sha512-obG5TdPdBDfs+jiA1mY29LPFqyJl93Q90EL86ontfRe1B6XvbjPkx+x1aAC5DA18bXbb0Juni1ayDbXo0w1u0A==}
     engines: {node: '>=10'}
@@ -1320,7 +1334,7 @@ packages:
       unist-util-position: 4.0.4
       unist-util-visit: 4.1.2
       unstorage: 1.5.0
-      ws: 8.13.0
+      ws: 8.13.0(bufferutil@4.0.8)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -3071,6 +3085,13 @@ packages:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+
+  /bufferutil@4.0.8:
+    resolution: {integrity: sha512-4T53u4PdgsXqKaIctwF8ifXlRTTmEPJ8iEPWFdGZvcf7sbwYo6FKFEX9eNNAnzFZ7EzJAQ3CJeOtCRA4rDp7Pw==}
+    engines: {node: '>=6.14.2'}
+    requiresBuild: true
+    dependencies:
+      node-gyp-build: 4.6.0
 
   /builtin-modules@3.3.0:
     resolution: {integrity: sha512-zhaCDicdLuWN5UbN5IMnFqNMhNfo919sH85y2/ea+5Yg9TsTkeZxpL+JLbp6cgYFS4sRLp3YV4S6yDuqVWHYOw==}
@@ -7095,7 +7116,7 @@ packages:
       tinyws: 0.1.0(ws@8.13.0)
       twemoji: 14.0.2
       ufo: 1.1.1
-      ws: 8.13.0
+      ws: 8.13.0(bufferutil@4.0.8)
       yoga-wasm-web: 0.3.3
     transitivePeerDependencies:
       - bufferutil
@@ -8769,6 +8790,11 @@ packages:
   /scule@1.0.0:
     resolution: {integrity: sha512-4AsO/FrViE/iDNEPaAQlb77tf0csuq27EsVpy6ett584EcRTp6pTDLoGWVxCD77y5iU5FauOvhsI4o1APwPoSQ==}
 
+  /semiver@1.1.0:
+    resolution: {integrity: sha512-QNI2ChmuioGC1/xjyYwyZYADILWyW6AmS1UH6gDj/SFUUUS4MBAWs/7mxnkRPc/F4iHezDP+O8t0dO8WHiEOdg==}
+    engines: {node: '>=6'}
+    dev: true
+
   /semver@5.7.1:
     resolution: {integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==}
     hasBin: true
@@ -9529,7 +9555,7 @@ packages:
     peerDependencies:
       ws: '>=8'
     dependencies:
-      ws: 8.13.0
+      ws: 8.13.0(bufferutil@4.0.8)
     dev: false
 
   /tmp@0.0.33:
@@ -10591,7 +10617,7 @@ packages:
         optional: true
     dev: true
 
-  /ws@8.13.0:
+  /ws@8.13.0(bufferutil@4.0.8):
     resolution: {integrity: sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
@@ -10602,6 +10628,8 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+    dependencies:
+      bufferutil: 4.0.8
 
   /xml-name-validator@4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}
