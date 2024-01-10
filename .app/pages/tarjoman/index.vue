@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  title: 'شکر سخن',
+  title: 'ترجمان',
   layout: 'sidebar',
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })

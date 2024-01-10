@@ -1,5 +1,7 @@
 export function useLLM() {
-  const LLM_ADDRESS = 'http://localhost:1234/v1/chat/completions'
+  // const LLM_ADDRESS = 'http://localhost:1234/v1/chat/completions'
+  const LLM_ADDRESS = 'https://rnwua-185-237-14-67.a.free.pinggy.online'
+  // https://rnwua-185-237-14-67.a.free.pinggy.online
   const answer = ref()
   const ask = async (systemMsg: string, question: string) => {
     const res = await useFetch(LLM_ADDRESS, {

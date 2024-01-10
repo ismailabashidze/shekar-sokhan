@@ -16,7 +16,7 @@ export function useSeamless() {
     }
     isTranslating.value = true
     const { data } = await seamless.value.predict('/t2tt', [text, from, to])
-    translated.value = data
+    translated.value = data[0]
     isTranslating.value = false
   }
   return {

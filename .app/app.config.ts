@@ -10,6 +10,6 @@
 
 export default defineAppConfig({
   tairo: {
-    title: 'نرم افزار',
+    title: 'پنل جامع هوش مصنوعی',
   },
 })
