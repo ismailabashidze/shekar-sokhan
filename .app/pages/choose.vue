@@ -79,8 +79,8 @@ const plans = [
     benefits: ['به زودی'],
   },
   {
-    name: 'همدل',
-    description: 'همدل، سامانه خط داغ مشاوره خودکشی است.',
+    name: 'مانی',
+    description: 'مانی، مشاور بحران',
     price: {
       monthly: 49,
       yearly: 399,
@@ -89,16 +89,6 @@ const plans = [
     benefits: ['به زودی'],
   },
 
-  {
-    name: 'همدل',
-    description: 'همدل، سامانه خط داغ مشاوره خودکشی است.',
-    price: {
-      monthly: 49,
-      yearly: 399,
-    },
-    features: ['به زودی', 'در حال تحقیق و توسعه'],
-    benefits: ['به زودی'],
-  },
   {
     name: 'تحلیل گر خبر',
     description:
@@ -126,7 +116,7 @@ const planColor = computed(() => {
       return 'text-indigo-500'
     case 'طنین آرامش':
       return 'text-primary-500'
-    case 'همدل':
+    case 'مانی':
       return 'text-orange-500'
     case 'تحلیل گر خبر':
       return 'text-green-500'
@@ -138,6 +128,8 @@ const chooseService = () => {
     navigateTo('/tarjoman')
   } else if (selectedPlan.value?.name === 'دانا، هوش مصنوعی فارسی') {
     navigateTo('/dana')
+  } else if (selectedPlan.value?.name === 'مانی') {
+    navigateTo('/Mani')
   } else {
     toaster.show({
       title: 'خطا',
@@ -297,7 +289,7 @@ const chooseService = () => {
           >
         </BaseCard>
       </BaseRadioHeadless>
-      <BaseRadioHeadless v-model="customRadio" name="radio_custom" value="همدل">
+      <BaseRadioHeadless v-model="customRadio" name="radio_custom" value="مانی">
         <BaseCard
           shape="rounded"
           class="text-muted-400/50 peer-checked:!border-orange-500 peer-checked:text-orange-500 group relative p-6 text-center peer-checked:[&_.child]:!opacity-100"
@@ -314,7 +306,7 @@ const chooseService = () => {
             weight="medium"
             class="text-muted-800 dark:text-white"
           >
-            همدل
+            مانی
           </BaseHeading>
           <BaseText size="xs" lead="tight" class="text-muted-400"
             >سیستم هوشمند مداخله پیش از اقدام برای خودکشی

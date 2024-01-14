@@ -8,10 +8,24 @@ export function useLLM() {
     'https://c6ae-2a03-ef42-4006-5e12-34a5-86cd-6829-e46f.ngrok-free.app/v1/chat/completions'
   const answer = ref()
   const messages = ref<Message[]>([])
-  const ask = async (systemMsg: string, question: string) => {
+  const personas = ref([
+    {
+      name: 'Dana',
+      description:
+        'You are Dana, The AI assistant. Answer as short and in simple terms and words as possible.',
+    },
+    {
+      name: 'Mani',
+      description:
+        'You are Mani, The Crisis Counselor. Answer in short snetences, and in simple terms and words as possible. Be Empathic, Kind, Compassionate as possible. Keep answers short and clear.',
+    },
+  ])
+  const ask = async (AIName: string, question: string) => {
     if (messages.value.length == 0) {
+      let AIdesc = personas.value.find((pr) => pr.name == AIName)?.description
+      if (!AIdesc) AIdesc = ''
       messages.value = [
-        { role: 'system', content: systemMsg },
+        { role: 'system', content: AIdesc },
         { role: 'user', content: question },
       ]
     }
