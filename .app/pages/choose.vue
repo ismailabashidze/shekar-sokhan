@@ -88,6 +88,28 @@ const plans = [
     features: ['به زودی', 'در حال تحقیق و توسعه'],
     benefits: ['به زودی'],
   },
+
+  {
+    name: 'همدل',
+    description: 'همدل، سامانه خط داغ مشاوره خودکشی است.',
+    price: {
+      monthly: 49,
+      yearly: 399,
+    },
+    features: ['به زودی', 'در حال تحقیق و توسعه'],
+    benefits: ['به زودی'],
+  },
+  {
+    name: 'تحلیل گر خبر',
+    description:
+      'تحلیل معنایی و محتوایی خبر با استفاده از تکنیک های هوش مصنوعی',
+    price: {
+      monthly: 10,
+      yearly: 120,
+    },
+    features: ['به زودی', 'در حال تحقیق و توسعه'],
+    benefits: ['به زودی'],
+  },
 ]
 
 const selectedPlan = computed(() => {
@@ -106,6 +128,8 @@ const planColor = computed(() => {
       return 'text-primary-500'
     case 'همدل':
       return 'text-orange-500'
+    case 'تحلیل گر خبر':
+      return 'text-green-500'
   }
 })
 
@@ -294,6 +318,34 @@ const chooseService = () => {
           </BaseHeading>
           <BaseText size="xs" lead="tight" class="text-muted-400"
             >سیستم هوشمند مداخله پیش از اقدام برای خودکشی
+          </BaseText>
+        </BaseCard>
+      </BaseRadioHeadless>
+      <BaseRadioHeadless
+        v-model="customRadio"
+        name="radio_custom"
+        value="تحلیل گر خبر"
+      >
+        <BaseCard
+          shape="rounded"
+          class="text-muted-400/50 peer-checked:!border-green-500 peer-checked:text-green-500 group relative p-6 text-center peer-checked:[&_.child]:!opacity-100"
+        >
+          <div
+            class="child border-muted-200 dark:border-muted-700 dark:bg-green-500 absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border bg-white opacity-0"
+          >
+            <Icon name="lucide:check" class="h-3 w-3 text-current" />
+          </div>
+          <TairoLogo class="mx-auto mb-2 h-9 w-9" />
+          <BaseHeading
+            as="h4"
+            size="sm"
+            weight="medium"
+            class="text-muted-800 dark:text-white"
+          >
+            تحلیل گر خبر
+          </BaseHeading>
+          <BaseText size="xs" lead="tight" class="text-muted-400"
+            >تحلیل معنایی و محتوایی خبر
           </BaseText>
         </BaseCard>
       </BaseRadioHeadless>
