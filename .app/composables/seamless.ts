@@ -30,25 +30,33 @@ export function useSeamless() {
     }
     isTranslating.value = true
     try {
-      const chunksResponse = await fetch(`/api/chunks/${soundAddress}`)
-      if (!chunksResponse.ok) {
-        throw new Error('Failed to fetch chunk list.')
-      }
-      const chunkFiles = await chunksResponse.json()
+      // const chunksResponse = await fetch(`/api/chunks/${soundAddress}`)
+      // if (!chunksResponse.ok) {
+      //   throw new Error('Failed to fetch chunk list.')
+      // }
+      // const chunkFiles = await chunksResponse.json()
 
-      for (const chunkFile of chunkFiles) {
-        const fileUrl = `${window.location.origin}/uploads/${soundAddress}/chunks/${chunkFile}`
-        const response = await fetch(fileUrl)
-        if (!response.ok) {
-          throw new Error('Failed to fetch chunk file.')
-        }
+      // for (const chunkFile of chunkFiles) {
+      //   const fileUrl = `${window.location.origin}/uploads/${soundAddress}/chunks/${chunkFile}`
+      //   const response = await fetch(fileUrl)
+      //   if (!response.ok) {
+      //     throw new Error('Failed to fetch chunk file.')
+      //   }
 
-        const blob = await response.blob()
-        const data = await seamless.value.predict('/s2tt', [blob, from, to])
-        translated.value = data
-        console.log(translated.value)
-        isTranslating.value = false
-      }
+      //   const blob = await response.blob()
+      //   const data = await seamless.value.predict('/s2tt', [blob, from, to])
+      //   translated.value = data
+      //   console.log(translated.value)
+      //   isTranslating.value = false
+      // }
+      const response = await fetch(
+        'https://audio-samples.github.io/samples/mp3/blizzard_unconditional/sample-0.mp3',
+      )
+      const audio_file = await response.blob()
+
+      const app = await client('abidlabs/whisper', {})
+      const transcription = await app.predict('/predict', [audio_file])
+      console.log(transcription.data)
     } catch (error) {
       console.error('Error:', error)
     }

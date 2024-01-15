@@ -22,12 +22,12 @@ const upload = async () => {
   isLoading.value = true
   const fd = new FormData()
   const name = new Date().getTime().toString()
-  fd.append(name, voice.value[0])
-  const res = await useFetch('/api/upload', {
-    method: 'POST',
-    body: fd,
-    headers: { 'cache-control': 'no-cache' },
-  })
+  // fd.append(name, voice.value[0])
+  // const res = await useFetch('/api/upload', {
+  //   method: 'POST',
+  //   body: fd,
+  //   headers: { 'cache-control': 'no-cache' },
+  // })
 
   translateS2T(name, 'Western Persian', 'English')
   isLoading.value = false
