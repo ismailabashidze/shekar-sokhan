@@ -100,6 +100,16 @@ const plans = [
     features: ['به زودی', 'در حال تحقیق و توسعه'],
     benefits: ['به زودی'],
   },
+  {
+    name: 'خبره',
+    description: 'خلاصه ساز، و نویسنده ی صورت جلسه ',
+    price: {
+      monthly: 10,
+      yearly: 120,
+    },
+    features: ['به زودی', 'در حال تحقیق و توسعه'],
+    benefits: ['به زودی'],
+  },
 ]
 
 const selectedPlan = computed(() => {
@@ -120,6 +130,8 @@ const planColor = computed(() => {
       return 'text-orange-500'
     case 'تحلیل گر خبر':
       return 'text-green-500'
+    case 'خبره':
+      return 'text-blue-500'
   }
 })
 
@@ -130,6 +142,8 @@ const chooseService = () => {
     navigateTo('/dana')
   } else if (selectedPlan.value?.name === 'مانی') {
     navigateTo('/Mani')
+  } else if (selectedPlan.value?.name === 'خبره') {
+    navigateTo('/Khebre')
   } else {
     toaster.show({
       title: 'خطا',
@@ -338,6 +352,30 @@ const chooseService = () => {
           </BaseHeading>
           <BaseText size="xs" lead="tight" class="text-muted-400"
             >تحلیل معنایی و محتوایی خبر
+          </BaseText>
+        </BaseCard>
+      </BaseRadioHeadless>
+      <BaseRadioHeadless v-model="customRadio" name="radio_custom" value="خبره">
+        <BaseCard
+          shape="rounded"
+          class="text-muted-400/50 peer-checked:!border-blue-500 peer-checked:text-blue-500 group relative p-6 text-center peer-checked:[&_.child]:!opacity-100"
+        >
+          <div
+            class="child border-muted-200 dark:border-muted-700 dark:bg-blue-500 absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border bg-white opacity-0"
+          >
+            <Icon name="lucide:check" class="h-3 w-3 text-current" />
+          </div>
+          <TairoLogo class="mx-auto mb-2 h-9 w-9" />
+          <BaseHeading
+            as="h4"
+            size="sm"
+            weight="medium"
+            class="text-muted-800 dark:text-white"
+          >
+            خبره
+          </BaseHeading>
+          <BaseText size="xs" lead="tight" class="text-muted-400"
+            >خلاصه سازی و تهیه مستندات جلسات
           </BaseText>
         </BaseCard>
       </BaseRadioHeadless>

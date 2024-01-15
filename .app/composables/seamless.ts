@@ -10,6 +10,7 @@ export function useSeamless() {
       {},
     )
   }
+  // Should rename
   const translate = async (text: string, from: string, to: string) => {
     if (!seamless.value) {
       await connect()
@@ -19,9 +20,43 @@ export function useSeamless() {
     translated.value = data[0]
     isTranslating.value = false
   }
+  const translateS2T = async (
+    soundAddress: string,
+    from: string,
+    to: string,
+  ) => {
+    if (!seamless.value) {
+      await connect()
+    }
+    isTranslating.value = true
+    try {
+      const chunksResponse = await fetch(`/api/chunks/${soundAddress}`)
+      if (!chunksResponse.ok) {
+        throw new Error('Failed to fetch chunk list.')
+      }
+      const chunkFiles = await chunksResponse.json()
+
+      for (const chunkFile of chunkFiles) {
+        const fileUrl = `${window.location.origin}/uploads/${soundAddress}/chunks/${chunkFile}`
+        const response = await fetch(fileUrl)
+        if (!response.ok) {
+          throw new Error('Failed to fetch chunk file.')
+        }
+
+        const blob = await response.blob()
+        const data = await seamless.value.predict('/s2tt', [blob, from, to])
+        translated.value = data
+        console.log(translated.value)
+        isTranslating.value = false
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
   return {
     translated,
     isTranslating,
     translate,
+    translateS2T,
   }
 }

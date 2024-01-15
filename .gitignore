@@ -11,3 +11,4 @@ nuxt.d.ts
 .demo/public/shiki/dist/*.wasm
 !.demo/public/shiki/themes/cssninja-dark-theme.json
 !.demo/public/shiki/themes/cssninja-light-theme.json
+.app/public/uploads/*
