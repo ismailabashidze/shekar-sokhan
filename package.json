@@ -40,6 +40,7 @@
     "fs-extra": "11.1.1",
     "lint-staged": "13.2.2",
     "npm-run-all": "4.1.5",
+    "pocketbase": "^0.21.0",
     "prettier": "2.8.8",
     "rimraf": "5.0.1",
     "std-env": "3.3.3",

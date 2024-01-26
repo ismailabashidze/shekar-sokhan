@@ -60,6 +60,9 @@ importers:
       npm-run-all:
         specifier: 4.1.5
         version: 4.1.5
+      pocketbase:
+        specifier: ^0.21.0
+        version: 0.21.0
       prettier:
         specifier: 2.8.8
         version: 2.8.8
@@ -7680,6 +7683,10 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
     dev: false
+
+  /pocketbase@0.21.0:
+    resolution: {integrity: sha512-WGA5qxW9jzwOTx0i3FNhkKBlT2F5EvC8qZDYv14SB3BeOZVAqs6wMTj7vAXD52V0Fg8zF4XPHJCAJK04fw1rqg==}
+    dev: true
 
   /portfinder@1.0.32:
     resolution: {integrity: sha512-on2ZJVVDXRADWE6jnQaX0ioEylzgBpQk8r55NE4wjXW1ZxO+BgDlY6DXwj20i0V8eB4SenDQ00WEaxfiIQPcxg==}

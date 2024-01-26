@@ -13,8 +13,12 @@ definePageMeta({
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
+const { generateAndSetCode } = useUser()
+const { createReport } = useReport()
 const toaster = useToaster()
 
+await generateAndSetCode()
+await createReport()
 const customRadio = ref('ترجمان')
 
 const plans = [

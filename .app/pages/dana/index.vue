@@ -50,7 +50,7 @@ const conversations = ref([
 
 const chatEl = ref<HTMLElement>()
 const expanded = ref(false)
-const loading = ref(false)
+const loading = ref(true)
 const search = ref('')
 const message = ref('')
 const messageLoading = ref(false)
@@ -62,7 +62,13 @@ const selectedConversation = computed(() => {
   )
 })
 
-onMounted(() => {
+const sleep = (time: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, time))
+}
+
+onMounted(async () => {
+  await sleep(2000)
+  loading.value = false
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
@@ -456,7 +462,7 @@ async function submitMessage() {
             <div class="relative w-full">
               <BaseInput
                 v-model.trim="message"
-                :disabled="messageLoading"
+                :loading="messageLoading"
                 shape="full"
                 :classes="{
                   input: 'h-12 ps-6 pe-24',
