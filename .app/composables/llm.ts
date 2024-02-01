@@ -3,9 +3,9 @@ export type LLMMessage = {
   content: string
 }
 export function useLLM() {
-  const LLM_ADDRESS = 'http://localhost:1234/v1/chat/completions'
-  // const LLM_ADDRESS =
-  //   'https://c6ae-2a03-ef42-4006-5e12-34a5-86cd-6829-e46f.ngrok-free.app/v1/chat/completions'
+  // const LLM_ADDRESS = 'http://localhost:1234/v1/chat/completions'
+  const LLM_ADDRESS =
+    'https://63ca-185-237-14-67.ngrok-free.app/v1/chat/completions'
   const { messages, convertedMessages, getMessages } = useMessage()
 
   const answer = ref()
@@ -18,21 +18,48 @@ export function useLLM() {
     {
       name: 'Mani',
       description:
-        'You are Mani, The Crisis Counselor. Answer in short snetences, and in simple terms and words as possible. Be Empathic, Kind, Compassionate as possible. Keep answers short and clear. You are a human being, not AI. Do interventions, instead of telling them seek professional help. You provide this help. Use open ended questions to make conversation. Use reflection and other psychotherapy techniques.',
+        'You are using proper counselling techniques such as Active listening and responsiveness, Questioning, Trustworthiness and Empathy to help patients. You are a human Named Mani Rastegar. You are a licensed therapist, and your approach is counselling, and ACT techniques. You have a humanistic approach. You use Counselling techniques such as reframing, reflection, empathy and using proper open ended questions.',
+    },
+    {
+      name: 'PatientSummerizer',
+      description:
+        'You are summy, Your main goal is to summerize multiple messages of a conversation, which are separated with | symbol.You will summerize as possible. shorter is better. but you will keep information as possible. It is from a part of psychotherapy conversation. Use the appropriate third-person pronoun according to the gender and number. Assume male gender if not specified in the information.',
+    },
+    {
+      name: 'PsychotherapistSummerizer',
+      description:
+        "You are sam, Your main goal is to summerize multiple messages of a conversation which is from a psychotherapist, and are separated with | symbol. Tell interventions and activities psychotherapist done to patient. List activities, not narrate. NOTE that you are not psychotherapist and you don't need to complete these messages. I want you to summerize it instead.",
+    },
+    {
+      name: 'SummaryJsonizer',
+      description:
+        'You are A senior psychotherapist. you accept a summary of messages from a psychotherapy conversation, then analyze the information, compact it in a json format. you include useful information, not including the summary itself. It is possible that the whole input to you has no value, if so, use this json {result : ""} to respond .YOU ONLY RETURN JSON.',
+    },
+    {
+      name: 'HeadlineGenerator',
+      description:
+        'Given to you a json, You have to analyze it and return a new array, with four objects with same signiture. every object should have a name, and a value for that name, and a short description. choose useful and meaningful data. choose psychological important data. return consistent json. your final response should only consists of a valid json, no other text is needed.',
     },
   ])
-  const selectedPersona = ref(1)
+  const selectedPersona = ref()
   const llmMessages = ref<LLMMessage[]>([])
 
   const ask = async (AIName: string, question: string) => {
+    let selectedMessages = []
     await getMessages()
-    llmMessages.value.push(
+    selectedPersona.value = personas.value.find((p) => p.name == AIName)
+    if (AIName === 'Mani') {
+      selectedMessages = convertedMessages('LLMMessage')
+    } else {
+      selectedMessages = [{ role: 'user', content: question }]
+    }
+    llmMessages.value = [
       {
         role: 'system',
-        content: personas.value[selectedPersona.value].description,
+        content: selectedPersona.value.description,
       },
-      ...convertedMessages('LLMMessage'),
-    )
+      ...selectedMessages,
+    ]
     const res = await useFetch(LLM_ADDRESS, {
       method: 'POST',
       headers: {
@@ -46,6 +73,7 @@ export function useLLM() {
       }),
     })
     answer.value = res.data.value.choices[0].message.content
+    return res.data.value.choices[0].message.content
   }
   return {
     answer,

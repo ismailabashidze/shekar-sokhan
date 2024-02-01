@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { BackendMessage } from '~/composables/conversation'
+import { AgentTask } from '~/composables/crew'
+import { UIMessage } from '~/composables/message'
+
 definePageMeta({
   title: 'Messaging',
   layout: 'empty',
@@ -21,8 +25,9 @@ const seamless = useSeamless()
 const { translated, translate } = seamless
 const llm = useLLM()
 const { answer, ask } = llm
-
+const { agentAction } = useCrew()
 const { getMessages, saveMessage, convertedMessages } = useMessage()
+const nuxtApp = useNuxtApp()
 
 const conversation = ref({
   user: {
@@ -59,13 +64,19 @@ const sleep = (time: number): Promise<void> => {
 const search = ref('')
 const message = ref('')
 const messageLoading = ref(false)
-const activeConversation = ref(1)
+const history = computed(() => {
+  return convertedMessages('LLMMessage')
+    .map((item) => `${item.role}:${item.content}`)
+    .join('; ')
+})
 
 onMounted(async () => {
-  await getMessages()
+  const msg = await getMessages()
   conversation.value.messages.push(...convertedMessages('UIMessage'))
   await sleep(2000)
   loading.value = false
+  await askFromPsychotherapist()
+  // await analyzeAllMessages('suicide_risk_labeler')
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
@@ -75,6 +86,108 @@ onMounted(async () => {
     }
   }, 300)
 })
+async function analyzeAllMessages(analyze: AgentTask) {
+  const msgs = convertedMessages('BackendMessage') as BackendMessage[]
+  for (let i = 0; i < msgs.length; i++) {
+    const currentMessage = msgs[i]
+    const { data } = await agentAction({
+      task: analyze,
+      text: currentMessage.msgEn,
+    })
+    if (data.value.result.length > 10) {
+      console.log('there is perhaps an error')
+    }
+    // data.value.result = data.value.result.replace('\n', '')
+    const updatedEvaluations = {
+      ...msgs[i].evaluations,
+      [analyze]: data.value.result, // Using computed property name
+    }
+
+    const updatedMessage = {
+      ...msgs[i],
+      evaluations: updatedEvaluations,
+    }
+
+    await nuxtApp.$pb.collection('messages').update(msgs[i].id, updatedMessage)
+  }
+}
+async function askFromPsychotherapist() {
+  const msgs = convertedMessages('LLMMessage')
+
+  let lastMessage = ''
+  if (msgs.length) {
+    lastMessage = msgs.at(-1).content
+  } else {
+    lastMessage = "Hi, there! I'm Mani. How can I help you ?"
+  }
+  const res = await agentAction({
+    task: 'happy_agent',
+    // text: `${history.value}||${lastMessage}`,
+    text: `||${lastMessage}`,
+  })
+  const msgEn = res.data.value.result
+  await translate(msgEn, 'English', 'Western Persian')
+  await saveMessage({
+    msgEn,
+    msgFa: translated.value,
+    anonymousUser: user.value.id,
+    sender: 'user',
+  })
+  const newMessage: UIMessage = {
+    type: 'sent',
+    text: translated.value,
+    time: new Date().toLocaleTimeString('fa'),
+    attachments: [],
+  }
+  conversation.value.messages.push(newMessage)
+  setTimeout(() => {
+    if (chatEl.value) {
+      chatEl.value.scrollTo({
+        top: chatEl.value.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
+  }, 30)
+  await sleep(2000)
+  await answerToPatient()
+}
+async function answerToPatient() {
+  const msgs = convertedMessages('LLMMessage')
+  let lastMessage = ''
+  if (msgs.length) {
+    lastMessage = msgs.at(-1).content
+  }
+  const res = await agentAction({
+    task: 'counselling_agent',
+    // text: `${history.value}||${lastMessage}`,
+    text: `||${lastMessage}`,
+  })
+  const msgEn = res.data.value.result
+  await translate(msgEn, 'English', 'Western Persian')
+  await saveMessage({
+    msgEn,
+    msgFa: translated.value,
+    anonymousUser: user.value.id,
+    sender: 'ai',
+  })
+  const newMessage: UIMessage = {
+    type: 'recieved',
+    text: translated.value,
+    time: new Date().toLocaleTimeString('fa'),
+    attachments: [],
+  }
+  conversation.value.messages.push(newMessage)
+  setTimeout(() => {
+    if (chatEl.value) {
+      chatEl.value.scrollTo({
+        top: chatEl.value.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
+  }, 30)
+  await sleep(2000)
+  await askFromPsychotherapist()
+}
 
 async function submitMessage() {
   if (!message.value) return
@@ -97,30 +210,31 @@ async function submitMessage() {
   }, 30)
   const m = message.value
   message.value = ''
-  await translate(m, 'Western Persian', 'English')
-
+  const t = await translate(m, 'Western Persian', 'English')
+  const userEval = await ask('SummaryJsonizer', translated.value)
   await saveMessage({
-    msgEn: translated.value,
+    msgEn: t as string,
     msgFa: m,
     anonymousUser: user.value.id,
     sender: 'user',
+    evaluations: JSON.parse(userEval),
   })
-  // udpateReport(translated.value)
-  // ask mani based on previous information (report) and this new msg
-  await ask('Mani', translated.value)
-  await translate(answer.value, 'English', 'Western Persian')
+  const answer = await ask('Mani', translated.value)
+  // const AIEval = await ask('SummaryJsonizer', translated.value)
+  const t2 = await translate(answer, 'English', 'Western Persian')
+  await saveMessage({
+    msgEn: answer,
+    msgFa: t2 as string,
+    anonymousUser: user.value.id,
+    sender: 'ai',
+    evaluations: {},
+  })
   messageLoading.value = false
   conversation.value.messages.push({
     type: 'recieved',
     text: translated.value,
     time: new Date().toLocaleTimeString('fa'),
     attachments: [],
-  })
-  saveMessage({
-    msgEn: answer.value,
-    msgFa: translated.value,
-    anonymousUser: user.value.id,
-    sender: 'ai',
   })
   await nextTick()
 

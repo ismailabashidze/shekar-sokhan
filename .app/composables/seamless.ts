@@ -20,6 +20,7 @@ export function useSeamless() {
       const { data } = await seamless.value.predict('/t2tt', [text, from, to])
       translated.value = data[0]
       isTranslating.value = false
+      return translated.value
     } catch (e) {
       isTranslating.value = false
     }
@@ -59,9 +60,7 @@ export function useSeamless() {
       const audio_file = await response.blob()
 
       const app = await client('abidlabs/whisper', {})
-      debugger
       const transcription = await app.predict('/predict', [audio_file])
-      console.log(transcription.data)
     } catch (error) {
       console.log('Error:', error)
     }

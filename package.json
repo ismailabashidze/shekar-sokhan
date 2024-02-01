@@ -75,6 +75,7 @@
     }
   },
   "dependencies": {
-    "http-errors": "^2.0.0"
+    "http-errors": "^2.0.0",
+    "vue3-apexcharts": "1.4.1"
   }
 }

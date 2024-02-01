@@ -11,5 +11,8 @@
     "build": "nuxi build",
     "generate": "nuxi generate",
     "clean": "rimraf .nuxt .output node_modules"
+  },
+  "dependencies": {
+    "vue3-apexcharts": "1.4.1"
   }
 }
