@@ -18,7 +18,7 @@ const { createReport } = useReport()
 const toaster = useToaster()
 
 await generateAndSetCode()
-await createReport()
+// await createReport()
 const customRadio = ref('ترجمان')
 
 const plans = [
@@ -145,7 +145,7 @@ const chooseService = () => {
   } else if (selectedPlan.value?.name === 'دانا، هوش مصنوعی فارسی') {
     navigateTo('/dana')
   } else if (selectedPlan.value?.name === 'مانی') {
-    navigateTo('/Mani')
+    navigateTo('/Mani/chat')
   } else if (selectedPlan.value?.name === 'خبره') {
     navigateTo('/Khebre')
   } else {

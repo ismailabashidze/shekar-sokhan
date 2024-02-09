@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { BackendMessage } from '~/composables/conversation'
-import { AgentTask } from '~/composables/crew'
-import { UIMessage } from '~/composables/message'
+import { BackendMessage } from '~/composables/message'
 
 definePageMeta({
   title: 'Messaging',
@@ -17,18 +15,24 @@ definePageMeta({
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
-// const { report, udpateReport } = useReport()
-const { user } = useUser()
 
+const PATIENT_AGENT = 'ZohrehPatient'
+
+const llm = useLLM()
+const { user } = useUser()
 const { open } = usePanels()
 const seamless = useSeamless()
-const { translated, translate } = seamless
-const llm = useLLM()
-const { answer, ask } = llm
-const { agentAction } = useCrew()
-const { getMessages, saveMessage, convertedMessages } = useMessage()
-const nuxtApp = useNuxtApp()
 
+const { translated, translate } = seamless
+const { ask } = llm
+const { getMessages, saveMessage } = useMessage()
+
+const search = ref('')
+const message = ref('')
+const messageLoading = ref(false)
+const chatEl = ref<HTMLElement>()
+const expanded = ref(false)
+const loading = ref(true)
 const conversation = ref({
   user: {
     name: 'مانی، مشاور بحران',
@@ -40,43 +44,30 @@ const conversation = ref({
   },
   messages: [
     {
-      type: 'separator',
-      text: '',
-      time: 'شروع گفت و گو',
-      attachments: [],
+      role: 'separator',
+      translatedFa: 'شروع گفت و گو',
+      content: 'Conversation Started',
     },
     {
-      type: 'recieved',
-      text: 'سلام. من مانی هستم 👋. چطور می تونم به شما کمک کنم؟',
+      role: 'assistant',
+      translatedFa: 'سلام. من مانی هستم 👋. چطور می تونم به شما کمک کنم؟',
+      content: "Hi. I'm Mani. How can I help you?",
       time: new Date().toLocaleTimeString('fa'),
-      attachments: [],
     },
-  ],
+  ] as BackendMessage[],
 })
 
-const chatEl = ref<HTMLElement>()
-const expanded = ref(false)
-const loading = ref(true)
 const sleep = (time: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, time))
 }
 
-const search = ref('')
-const message = ref('')
-const messageLoading = ref(false)
-const history = computed(() => {
-  return convertedMessages('LLMMessage')
-    .map((item) => `${item.role}:${item.content}`)
-    .join('; ')
-})
-
 onMounted(async () => {
   const msg = await getMessages()
-  conversation.value.messages.push(...convertedMessages('UIMessage'))
-  await sleep(2000)
+  msg.map((m) => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
+  conversation.value.messages.push(...msg)
   loading.value = false
-  await askFromPsychotherapist()
-  // await analyzeAllMessages('suicide_risk_labeler')
+  // await autoConversation()
+  await sleep(2000)
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
@@ -86,120 +77,62 @@ onMounted(async () => {
     }
   }, 300)
 })
-async function analyzeAllMessages(analyze: AgentTask) {
-  const msgs = convertedMessages('BackendMessage') as BackendMessage[]
-  for (let i = 0; i < msgs.length; i++) {
-    const currentMessage = msgs[i]
-    const { data } = await agentAction({
-      task: analyze,
-      text: currentMessage.msgEn,
-    })
-    if (data.value.result.length > 10) {
-      console.log('there is perhaps an error')
-    }
-    // data.value.result = data.value.result.replace('\n', '')
-    const updatedEvaluations = {
-      ...msgs[i].evaluations,
-      [analyze]: data.value.result, // Using computed property name
-    }
 
-    const updatedMessage = {
-      ...msgs[i],
-      evaluations: updatedEvaluations,
-    }
-
-    await nuxtApp.$pb.collection('messages').update(msgs[i].id, updatedMessage)
-  }
-}
-async function askFromPsychotherapist() {
-  const msgs = convertedMessages('LLMMessage')
-
-  let lastMessage = ''
-  if (msgs.length) {
-    lastMessage = msgs.at(-1).content
-  } else {
-    lastMessage = "Hi, there! I'm Mani. How can I help you ?"
-  }
-  const res = await agentAction({
-    task: 'happy_agent',
-    // text: `${history.value}||${lastMessage}`,
-    text: `||${lastMessage}`,
-  })
-  const msgEn = res.data.value.result
-  await translate(msgEn, 'English', 'Western Persian')
-  await saveMessage({
-    msgEn,
-    msgFa: translated.value,
-    anonymousUser: user.value.id,
-    sender: 'user',
-  })
-  const newMessage: UIMessage = {
-    type: 'sent',
-    text: translated.value,
+async function autoConversation() {
+  const lastContent = conversation.value.messages.at(-1)?.content as string
+  const m = await ask(PATIENT_AGENT, lastContent as string)
+  const t = await translate(m, 'English', 'Western Persian')
+  const newMessage: BackendMessage = {
+    role: 'user',
+    translatedFa: t,
+    content: m,
     time: new Date().toLocaleTimeString('fa'),
-    attachments: [],
   }
   conversation.value.messages.push(newMessage)
-  setTimeout(() => {
-    if (chatEl.value) {
-      chatEl.value.scrollTo({
-        top: chatEl.value.scrollHeight,
-        behavior: 'smooth',
-      })
-    }
-  }, 30)
-  await sleep(2000)
-  await answerToPatient()
-}
-async function answerToPatient() {
-  const msgs = convertedMessages('LLMMessage')
-  let lastMessage = ''
-  if (msgs.length) {
-    lastMessage = msgs.at(-1).content
-  }
-  const res = await agentAction({
-    task: 'counselling_agent',
-    // text: `${history.value}||${lastMessage}`,
-    text: `||${lastMessage}`,
-  })
-  const msgEn = res.data.value.result
-  await translate(msgEn, 'English', 'Western Persian')
+  // const userEval = await ask('SummaryJsonizer', translated.value)
   await saveMessage({
-    msgEn,
-    msgFa: translated.value,
+    content: m as string,
+    translatedFa: t,
     anonymousUser: user.value.id,
-    sender: 'ai',
+    role: 'user',
+    // evaluations: JSON.parse(userEval),
+    evaluations: {},
   })
-  const newMessage: UIMessage = {
-    type: 'recieved',
-    text: translated.value,
+  const answer = await ask('Mani', m)
+  // const AIEval = await ask('SummaryJsonizer', translated.value)
+  const t2 = await translate(answer, 'English', 'Western Persian')
+  await saveMessage({
+    content: answer,
+    translatedFa: t2 as string,
+    anonymousUser: user.value.id,
+    role: 'assistant',
     time: new Date().toLocaleTimeString('fa'),
-    attachments: [],
-  }
-  conversation.value.messages.push(newMessage)
-  setTimeout(() => {
-    if (chatEl.value) {
-      chatEl.value.scrollTo({
-        top: chatEl.value.scrollHeight,
-        behavior: 'smooth',
-      })
-    }
-  }, 30)
-  await sleep(2000)
-  await askFromPsychotherapist()
+    evaluations: {},
+  })
+  conversation.value.messages.push({
+    role: 'assistant',
+    translatedFa: t2,
+    content: answer,
+    created: new Date().toLocaleTimeString('fa'),
+  })
+  await autoConversation()
 }
-
 async function submitMessage() {
   if (!message.value) return
   if (messageLoading.value) return
   messageLoading.value = true
-  const newMessage: UIMessage = {
-    type: 'sent',
-    text: message.value,
+  const m = message.value
+  message.value = ''
+  const newMessage: BackendMessage = {
+    role: 'user',
+    translatedFa: m,
+    content: '',
     time: new Date().toLocaleTimeString('fa'),
-    attachments: [],
   }
   conversation.value.messages.push(newMessage)
+  const t = await translate(m, 'Western Persian', 'English')
+  conversation.value.messages[conversation.value.messages.length - 1].content =
+    t as string
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
@@ -208,34 +141,41 @@ async function submitMessage() {
       })
     }
   }, 30)
-  const m = message.value
-  message.value = ''
-  const t = await translate(m, 'Western Persian', 'English')
   const userEval = await ask('SummaryJsonizer', translated.value)
   await saveMessage({
-    msgEn: t as string,
-    msgFa: m,
+    content: t as string,
+    translatedFa: m,
     anonymousUser: user.value.id,
-    sender: 'user',
+    role: 'user',
     evaluations: JSON.parse(userEval),
   })
   const answer = await ask('Mani', translated.value)
+  conversation.value.messages.push({
+    role: 'assistant',
+    translatedFa: answer,
+    content: answer as string,
+    time: new Date().toLocaleTimeString('fa'),
+  })
+  // messageLoading.value = false
+
   // const AIEval = await ask('SummaryJsonizer', translated.value)
   const t2 = await translate(answer, 'English', 'Western Persian')
   await saveMessage({
-    msgEn: answer,
-    msgFa: t2 as string,
+    content: answer,
+    translatedFa: t2 as string,
     anonymousUser: user.value.id,
-    sender: 'ai',
+    role: 'assistant',
+    time: new Date().toLocaleTimeString('fa'),
     evaluations: {},
   })
   messageLoading.value = false
   conversation.value.messages.push({
-    type: 'recieved',
-    text: translated.value,
+    role: 'assistant',
+    translatedFa: translated.value,
+    content: t2 as string,
     time: new Date().toLocaleTimeString('fa'),
-    attachments: [],
   })
+
   await nextTick()
 
   if (chatEl.value) {
@@ -279,7 +219,7 @@ async function submitMessage() {
           <div class="flex flex-col">
             <div class="flex h-16 w-full items-center justify-center">
               <button
-                type="button"
+                role="button"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
                 title="جست و جو"
                 @click="open('search')"
@@ -425,19 +365,19 @@ async function submitMessage() {
                 :key="index"
                 class="relative flex w-full gap-4"
                 :class="[
-                  item.type === 'recieved' ? 'flex-row' : 'flex-row-reverse',
-                  item.type === 'separator' ? 'justify-center' : '',
+                  item.role === 'assistant' ? 'flex-row' : 'flex-row-reverse',
+                  item.role === 'separator' ? 'justify-center' : '',
                 ]"
               >
-                <template v-if="item.type !== 'separator'">
+                <template v-if="item.role !== 'separator'">
                   <div class="shrink-0">
                     <BaseAvatar
-                      v-if="item.type === 'recieved'"
+                      v-if="item.role === 'assistant'"
                       :src="conversation?.user.photo"
                       size="xs"
                     />
                     <BaseAvatar
-                      v-else-if="item.type === 'sent'"
+                      v-else-if="item.role === 'user'"
                       src="/img/avatars/3.svg"
                       size="xs"
                     />
@@ -446,19 +386,19 @@ async function submitMessage() {
                     <div
                       class="bg-muted-200 dark:bg-muted-800 rounded-xl p-4"
                       :class="[
-                        item.type === 'recieved' ? 'rounded-ss-none' : '',
-                        item.type === 'sent' ? 'rounded-se-none' : '',
+                        item.role === 'assistant' ? 'rounded-ss-none' : '',
+                        item.role === 'user' ? 'rounded-se-none' : '',
                       ]"
                     >
-                      <p class="font-sans text-sm">{{ item.text }}</p>
+                      <p class="font-sans text-sm">{{ item.translatedFa }}</p>
                     </div>
                     <div
                       class="text-muted-400 mt-1 font-sans text-xs"
-                      :class="item.type === 'recieved' ? 'text-right' : ''"
+                      :class="item.role === 'assistant' ? 'text-right' : ''"
                     >
                       {{ item.time }}
                     </div>
-                    <div
+                    <!-- <div
                       v-if="item.attachments.length > 0"
                       class="mt-2 space-y-2"
                     >
@@ -467,9 +407,9 @@ async function submitMessage() {
                         :key="idx"
                       >
                         <div
-                          v-if="attachment.type === 'image'"
+                          v-if="attachment.role === 'image'"
                           class="dark:bg-muted-800 max-w-xs rounded-2xl bg-white p-2"
-                          :class="item.type === 'sent' ? 'ms-auto' : ''"
+                          :class="item.role === 'user' ? 'ms-auto' : ''"
                         >
                           <img
                             :src="attachment.image"
@@ -479,9 +419,9 @@ async function submitMessage() {
                         </div>
                         <NuxtLink
                           :to="attachment.url"
-                          v-else-if="attachment.type === 'link'"
+                          v-else-if="attachment.role === 'link'"
                           class="dark:bg-muted-800 block max-w-xs rounded-2xl bg-white p-2"
-                          :class="item.type === 'sent' ? 'ms-auto' : ''"
+                          :class="item.role === 'user' ? 'ms-auto' : ''"
                         >
                           <img
                             :src="attachment.image"
@@ -500,7 +440,7 @@ async function submitMessage() {
                           </div>
                         </NuxtLink>
                       </template>
-                    </div>
+                    </div> -->
                   </div>
                 </template>
                 <div v-else>
@@ -516,7 +456,7 @@ async function submitMessage() {
                     <span
                       class="bg-muted-100 dark:bg-muted-900 text-muted-400 px-3 font-sans text-xs uppercase"
                     >
-                      {{ item.time }}
+                      {{ item.translatedFa }}
                     </span>
                   </div>
                 </div>
@@ -525,8 +465,6 @@ async function submitMessage() {
           </div>
           <!-- Compose -->
           <form
-            method="POST"
-            action=""
             @submit.prevent="submitMessage"
             class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center px-4 sm:px-8"
           >
@@ -543,13 +481,13 @@ async function submitMessage() {
               />
               <div class="absolute end-2 top-0 flex h-12 items-center gap-1">
                 <button
-                  type="button"
+                  role="button"
                   class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
                 >
                   <Icon name="lucide:smile" class="h-5 w-5" />
                 </button>
                 <button
-                  type="button"
+                  role="button"
                   class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
                 >
                   <Icon name="lucide:paperclip" class="h-5 w-5" />
@@ -644,7 +582,7 @@ async function submitMessage() {
                   <span> درباره مانی، هوش مصنوعی </span>
                 </BaseButton>
                 <button
-                  type="button"
+                  role="button"
                   class="text-primary-500 mt-3 font-sans text-sm underline-offset-4 hover:underline"
                 >
                   همرسانی گفت و گو

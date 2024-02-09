@@ -6,8 +6,8 @@ export type LLMMessage = {
   role: 'system' | 'assistant' | 'user'
   content: string
 }
-export function useLLM() {
-  const LLM_ADDRESS = 'http://localhost:1234/v1/chat/completions'
+export function useOllama() {
+  const LLM_ADDRESS = 'http://localhost:11434/api/chat'
   // const LLM_ADDRESS =
   // 'https://8a72-185-237-14-67.ngrok-free.app/v1/chat/completions'
   const { getMessages } = useMessage()
@@ -50,6 +50,11 @@ export function useLLM() {
         'Given to you a json, You have to analyze it and return a new array, with four objects with same signiture. every object should have a name, and a value for that name, and a short description. choose useful and meaningful data. choose psychological important data. return consistent json. your final response should only consists of a valid json, no other text is needed.',
     },
     {
+      name: 'SuicideRiskEvaluation',
+      description:
+        'You are a Senior Psychotherapist. Label Severeity of Risk of Sucide inside a sentence. Labels are veryhigh, high, medium, low, verylow.  Tell in one word, How much risk you evaluate inside the sentence. answer with only labels provided.',
+    },
+    {
       name: 'ZohrehPatient',
       description: ` Name: Zohreh Solemani
       Age: 34
@@ -87,14 +92,17 @@ export function useLLM() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        model: 'dol',
+
         messages: llmMessages.value,
         temperature: 0.7,
         max_tokens: 500,
         stream: false,
       }),
     })
-    answer.value = (res.data.value as FetchResponse).choices[0].message.content
-    return (res.data.value as FetchResponse).choices[0].message.content
+
+    answer.value = (res.data.value as FetchResponse).message.content
+    return (res.data.value as FetchResponse).message.content
   }
   return {
     answer,

@@ -27,7 +27,7 @@ const removeLoading = ref(false)
 
 const goToConversation = (u: User) => {
   user.value = u
-  navigateTo('/mani/chat')
+  navigateTo('/mani/chat-llm')
 }
 const goToChart = (u: User) => {
   user.value = u
