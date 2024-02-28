@@ -7,9 +7,8 @@ export type LLMMessage = {
   content: string
 }
 export function useOllama() {
-  const LLM_ADDRESS = 'http://localhost:11434/api/chat'
-  // const LLM_ADDRESS =
-  // 'https://8a72-185-237-14-67.ngrok-free.app/v1/chat/completions'
+  // const LLM_ADDRESS = 'http://localhost:11434/api/chat'
+  const LLM_ADDRESS = 'https://8cb3-2-190-129-92.ngrok-free.app/api/chat'
   const { getMessages } = useMessage()
 
   const answer = ref()

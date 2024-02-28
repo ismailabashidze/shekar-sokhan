@@ -19,23 +19,23 @@ const toaster = useToaster()
 
 await generateAndSetCode()
 // await createReport()
-const customRadio = ref('ترجمان')
+const customRadio = ref('دانا، هوش مصنوعی فارسی')
 
 const plans = [
-  {
-    name: 'ترجمان',
-    description: 'ترجمه زبانی از فارسی به انگلیسی و بالعکس',
-    price: {
-      monthly: 9,
-      yearly: 99,
-    },
-    features: [
-      'سرور اختصاصی',
-      'امکان ترجمه فایل های بزرگ',
-      'ذخیره سازی اختصاصی',
-    ],
-    benefits: ['یک سال بروز رسانی رایگان', 'یک سال پشتیبانی رایگان'],
-  },
+  // {
+  //   name: 'ترجمان',
+  //   description: 'ترجمه زبانی از فارسی به انگلیسی و بالعکس',
+  //   price: {
+  //     monthly: 9,
+  //     yearly: 99,
+  //   },
+  //   features: [
+  //     'سرور اختصاصی',
+  //     'امکان ترجمه فایل های بزرگ',
+  //     'ذخیره سازی اختصاصی',
+  //   ],
+  //   benefits: ['یک سال بروز رسانی رایگان', 'یک سال پشتیبانی رایگان'],
+  // },
   {
     name: 'دانا، هوش مصنوعی فارسی',
     description:
@@ -122,8 +122,8 @@ const selectedPlan = computed(() => {
 
 const planColor = computed(() => {
   switch (customRadio.value) {
-    case 'ترجمان':
-      return 'text-success-500'
+    // case 'ترجمان':
+    //   return 'text-success-500'
     case 'دانا، هوش مصنوعی فارسی':
       return 'text-yellow-400'
     case 'درمانا':
@@ -140,9 +140,10 @@ const planColor = computed(() => {
 })
 
 const chooseService = () => {
-  if (selectedPlan.value?.name === 'ترجمان') {
-    navigateTo('/tarjoman')
-  } else if (selectedPlan.value?.name === 'دانا، هوش مصنوعی فارسی') {
+  // if (selectedPlan.value?.name === 'ترجمان') {
+  //   navigateTo('/tarjoman')
+  // } else
+  if (selectedPlan.value?.name === 'دانا، هوش مصنوعی فارسی') {
     navigateTo('/dana')
   } else if (selectedPlan.value?.name === 'مانی') {
     navigateTo('/Mani/chat')
@@ -195,7 +196,7 @@ const chooseService = () => {
     class="dark:border-muted-800 mb-10 grid gap-4 border-b border-gray-200 pb-10 md:grid-cols-2 xl:gap-8"
   >
     <div class="grid grid-cols-2 gap-2 xl:gap-6">
-      <BaseRadioHeadless
+      <!-- <BaseRadioHeadless
         v-model="customRadio"
         name="radio_custom"
         value="ترجمان"
@@ -222,7 +223,7 @@ const chooseService = () => {
             >ترجمه متن فارسی به انگلیسی و بالعکس</BaseText
           >
         </BaseCard>
-      </BaseRadioHeadless>
+      </BaseRadioHeadless> -->
       <BaseRadioHeadless
         v-model="customRadio"
         name="radio_custom"

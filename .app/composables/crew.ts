@@ -5,8 +5,8 @@ export type AgentAction = {
 }
 
 export function useCrew() {
-  const CREW_ADDRESS = 'http://localhost:5123/action'
-  // const CREW_ADDRESS = 'https://94e2-185-237-14-67.ngrok-free.app/action'
+  // const CREW_ADDRESS = 'http://localhost:5123/action'
+  const CREW_ADDRESS = 'https://0a22-2-190-129-92.ngrok-free.app/action'
 
   const agentAction = async (action: AgentAction) => {
     return await useFetch(CREW_ADDRESS, {

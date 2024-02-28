@@ -7,9 +7,9 @@ export type LLMMessage = {
   content: string
 }
 export function useLLM() {
-  const LLM_ADDRESS = 'http://localhost:1234/v1/chat/completions'
-  // const LLM_ADDRESS =
-  // 'https://8a72-185-237-14-67.ngrok-free.app/v1/chat/completions'
+  // const LLM_ADDRESS = 'http://localhost:1234/v1/chat/completions'
+  const LLM_ADDRESS =
+    'https://f290-2-190-129-92.ngrok-free.app/v1/chat/completions'
   const { getMessages } = useMessage()
 
   const answer = ref()
