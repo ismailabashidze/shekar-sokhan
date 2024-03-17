@@ -117,6 +117,25 @@ async function autoConversation() {
   })
   await autoConversation()
 }
+async function translateAndAssemble(answer: string) {
+  const chunks = answer.split('\n').filter((chunk) => chunk.trim().length > 0)
+  const translatePromises = chunks.map((chunk, index) => {
+    return translate(chunk, 'English', 'Western Persian').then(
+      (translatedChunk) => ({
+        index,
+        translatedChunk,
+      }),
+    )
+  })
+
+  const translatedChunksWithIndex = await Promise.all(translatePromises)
+  translatedChunksWithIndex.sort((a, b) => a.index - b.index)
+  const translatedAnswer = translatedChunksWithIndex
+    .map((item) => item.translatedChunk)
+    .join('\n')
+
+  return translatedAnswer
+}
 async function submitMessage() {
   if (!message.value) return
   if (messageLoading.value) return
@@ -150,13 +169,11 @@ async function submitMessage() {
     evaluations: JSON.parse(userEval),
   })
   const answer = await ask('Mani', translated.value)
-  // messageLoading.value = false
-
-  // const AIEval = await ask('SummaryJsonizer', translated.value)
-  const t2 = await translate(answer, 'English', 'Western Persian')
+  const t2 = await translateAndAssemble(answer)
+  // const t2 = await translate(answer, 'English', 'Western Persian')
   await saveMessage({
     content: answer,
-    translatedFa: t2 as string,
+    translatedFa: t2,
     anonymousUser: user.value.id,
     role: 'assistant',
     time: new Date().toLocaleTimeString('fa'),
@@ -165,8 +182,8 @@ async function submitMessage() {
   messageLoading.value = false
   conversation.value.messages.push({
     role: 'assistant',
-    translatedFa: translated.value,
-    content: t2 as string,
+    translatedFa: t2,
+    content: answer,
     time: new Date().toLocaleTimeString('fa'),
   })
 
