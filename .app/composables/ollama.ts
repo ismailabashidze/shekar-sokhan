@@ -7,7 +7,11 @@ export type LLMMessage = {
   content: string
 }
 export function useOllama() {
-  const LLM_ADDRESS = 'http://localhost:11434/api/chat'
+  // const LLM_ADDRESS =
+  // 'https://zvfiuquih3rs4n-8000.proxy.runpod.net/v1/chat/completions'
+  const LLM_ADDRESS =
+    'https://api.runpod.ai/v2/piygbpf2k35rym/openai/v1/chat/completions'
+  // const LLM_ADDRESS = 'http://localhost:11434/api/chat'
   // const LLM_ADDRESS = 'https://bb15-2-190-129-92.ngrok-free.app/api/chat'
   const { getMessages } = useMessage()
 
@@ -89,19 +93,19 @@ export function useOllama() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: 'Bearer 8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3',
       },
       body: JSON.stringify({
-        model: 'dol',
-
+        model: 'cognitivecomputations/dolphin-2.6-mistral-7b-dpo-laser',
         messages: llmMessages.value,
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 512,
         stream: false,
       }),
     })
 
-    answer.value = (res.data.value as FetchResponse).message.content
-    return (res.data.value as FetchResponse).message.content
+    answer.value = (res.data.value as FetchResponse).choices[0].message.content
+    return (res.data.value as FetchResponse).choices[0].message.content
   }
   return {
     answer,
