@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { z } from 'zod'
+import { debounce } from 'lodash-es'
+
 definePageMeta({
-  title: 'ورود به همدل',
+  title: 'ورود به ذهنا',
   layout: 'empty',
   preview: {
     title: 'ثبت نام',
@@ -11,6 +14,31 @@ definePageMeta({
     order: 93,
   },
 })
+
+const persianToEnglishNumbers = (str) => {
+  const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
+  const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  for (let i = 0; i < 10; i++) {
+    str = str.replace(new RegExp(persianNumbers[i], 'g'), englishNumbers[i])
+  }
+  return str
+}
+const isValid = ref(false)
+
+const phoneNumberSchema = z
+  .string()
+  .length(11, 'شماره تماس باید یازده رقم باشد')
+  .regex(/^09\d{9}$/, 'شماره باید با ۰۹ شروع شود')
+
+const validatePhoneNumber = debounce((value) => {
+  const sanitizedValue = persianToEnglishNumbers(value).replace(/\D/g, '')
+  tel.value = sanitizedValue
+  const result = phoneNumberSchema.safeParse(sanitizedValue)
+  telError.value = result.success
+    ? null
+    : result.error.issues.map((issue) => issue.message).join(', ')
+  isValid.value = result.success
+}, 500)
 
 const loading = ref(false)
 const twoFaMode = ref('phoneNumber')
@@ -23,6 +51,7 @@ const onlyCheckOnLastFieldInput = ref(true)
 
 const email = ref('')
 const tel = ref('')
+const telError = ref<string | null>(null)
 const code = ref('')
 
 function goToStep(n: number) {
@@ -41,15 +70,10 @@ function goToStep(n: number) {
 }
 
 function paste(event: any) {
-  // raw pasted input
   let pasted = event.clipboardData.getData('text')
-  // only get numbers
   pasted = pasted.replace(/\D/g, '')
-  // don't get more than the PIN codeLength
   pasted = pasted.substring(0, codeLength.value)
-  // if after all that sanitazation the string is not empty
   if (pasted) {
-    // split the pasted string into an array and load it
     input.value = pasted.split('')
     if (input.value.length === codeLength.value) {
       validatePin.value = true
@@ -60,42 +84,40 @@ function paste(event: any) {
 }
 function type(event: any, index: any) {
   if (event.ctrlKey && event.key == 'v') {
-    console.log('ctrl-v')
-  } else if (event.keyCode == 8) {
+    // Handle paste
+  } else if (event.key == 'Backspace') {
     event.stopPropagation()
     event.preventDefault()
-    input.value[index - 1] = 0
+    if (index > 1) {
+      input.value[index - 1] = 0
+      nextTick(() => {
+        goto(index - 1)
+      })
+    } else {
+      input.value[0] = 0
+    }
   } else {
-    // only allow numbers
-    let key = event.key.replace(/\D/g, '')
-    if (key != '') {
-      console.log(key)
+    let key = persianToEnglishNumbers(event.key)
+    if (key) {
       input.value[index - 1] = key
+      if (index == codeLength.value) {
+        validatePin.value = true
+        verifyCodes()
+      } else {
+        nextTick(() => {
+          goto(index + 1)
+        })
+      }
     }
   }
-  // check if the PIN is correct
-  if (
-    (onlyCheckOnLastFieldInput.value && index == codeLength.value) ||
-    !onlyCheckOnLastFieldInput.value
-  ) {
-    if (input.value.length === codeLength.value) {
-      validatePin.value = true
-      verifyCodes()
-    }
-    return validatePin.value
-  }
-  // go to the next field
-  // must happen on nextTick cause the field can be disabled.
-  nextTick(() => {
-    goto(index + 1)
-  })
 }
 
-function goto(n: any) {
-  if (!n || n > codeLength.value) {
-    n = 1
-  }
-  inputElements.value[n].focus()
+function goto(n: number) {
+  nextTick(() => {
+    if (n >= 0 && n < inputElements.value.length) {
+      inputElements.value[n]?.focus()
+    }
+  })
 }
 
 const validatePin = ref(false)
@@ -131,6 +153,11 @@ const verifyCodes = async () => {
       icon: 'ph:chat-text',
       closable: true,
     })
+    validatePin.value = false
+    input.value = Array(codeLength.value).fill(0)
+    nextTick(() => {
+      goto(1)
+    })
   } else {
     const { data, error } = await useAsyncData(async (nuxtApp) => {
       const record = await nuxtApp.$pb
@@ -145,7 +172,7 @@ const verifyCodes = async () => {
     // setToken(recor)
     toaster.show({
       title: 'ثبت موفق',
-      message: 'به همدل خوش آمدید',
+      message: 'به ذهنا خوش آمدید',
       color: 'success',
       icon: 'ph:check',
       closable: true,
@@ -153,6 +180,10 @@ const verifyCodes = async () => {
     router.push('/mani/chat')
   }
 }
+watch(tel, (newValue) => {
+  isValid.value = false // Reset the valid state on new input
+  validatePhoneNumber(newValue)
+})
 </script>
 
 <template>
@@ -179,7 +210,7 @@ const verifyCodes = async () => {
       <div v-if="currentStep === 1">
         <div class="pt-8 text-center">
           <BaseHeading tag="h2" size="3xl" weight="medium" class="mb-2">
-            👋 به همدل خوش آمدید
+            👋 به ذهنا خوش آمدید
           </BaseHeading>
           <BaseParagraph class="text-muted-500 dark:text-muted-400 mb-8">
             یکی از راه های ورود را انتخاب کنید تا احراز هویت شوید
@@ -400,7 +431,10 @@ const verifyCodes = async () => {
                 wrapper: 'w-full',
                 input: '!h-12 !ps-12',
                 icon: '!h-12 !w-12',
+                'is-danger': telError,
+                'is-success': isValid,
               }"
+              :error="telError"
             />
             <div v-else-if="twoFaMode === 'app_id'" class="space-y-4">
               <div class="flex items-center gap-2">
@@ -438,7 +472,8 @@ const verifyCodes = async () => {
               color="primary"
               :loading="loading"
               @click="sendVerifyCodeSms()"
-              >ادامه</BaseButton
+              :disabled="!isValid"
+              >ارسال پیامک</BaseButton
             >
             <!-- <button
               type="button"
@@ -474,20 +509,11 @@ const verifyCodes = async () => {
             </div>
             <div class="pt-4 text-center">
               <BaseHeading tag="h2" size="3xl" weight="medium" class="mb-1">
-                Enter your code
+                کد پیامکی
               </BaseHeading>
               <BaseParagraph class="text-muted-500 dark:text-muted-400 mb-2">
-                Enter the pin code we've just sent you
+                کد پیامکی دریافت شده را در این قسمت وارد نمایید
               </BaseParagraph>
-              <BaseText
-                size="xs"
-                lead="snug"
-                class="text-muted-500 dark:text-muted-400 mb-8"
-              >
-                <span class="block">
-                  <span class="font-bold">1234</span> is the demo PIN.
-                </span>
-              </BaseText>
             </div>
             <div
               class="text-muted-800 dark:text-muted-100 mx-auto flex h-60 w-72 flex-col rounded text-center"
@@ -516,32 +542,30 @@ const verifyCodes = async () => {
                     }
                   "
                   placeholder="0"
-                  :disabled="input.length < i - 1 || validatePin"
+                  :disabled="validatePin"
                   :autofocus="i == 1"
                 />
               </div>
               <div class="mt-10">
-                validatePin {{ validatePin }}
-                <BaseButton
-                  @click="verifyCodes()"
-                  shape="curved"
-                  class="!h-12"
-                  :color="validatePin ? 'primary' : 'default'"
-                  :disabled="!validatePin"
-                  >Take me to Dashboard</BaseButton
-                >
-
                 <div class="mt-8 flex items-center justify-between">
-                  <BaseText size="sm" class="text-muted-400"
-                    >Didn't receive the code?</BaseText
-                  >
                   <button
                     type="button"
                     class="text-primary-500 font-sans text-sm underline-offset-4 hover:underline"
                   >
-                    Send it again
+                    ارسال مجدد
                   </button>
+                  <BaseText size="sm" class="text-muted-400"
+                    >کد را دریافت نکردید؟</BaseText
+                  >
                 </div>
+                <BaseButton
+                  @click="verifyCodes()"
+                  shape="curved"
+                  class="!h-12 mt-8"
+                  :color="validatePin ? 'primary' : 'default'"
+                  :disabled="!validatePin"
+                  >تایید و ورود به سامانه</BaseButton
+                >
               </div>
             </div>
           </div>

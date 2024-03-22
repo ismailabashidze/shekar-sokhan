@@ -2,6 +2,10 @@ export type User = {
   id: string
   anonymousCode: number
   lastMessageTime: Date
+  phoneNumber: string
+  email: string
+  password: string
+  passwordConfirm: string
   created: string
 }
 
@@ -9,15 +13,15 @@ export function useUser() {
   const nuxtApp = useNuxtApp()
 
   const user = useLocalStorage('user', {} as User)
-  const generateAndSetCode = async () => {
-    if (!user.value.anonymousCode && !process.server) {
-      user.value.anonymousCode = Math.ceil(Math.random() * 1000000000)
-      user.value.lastMessageTime = new Date()
-      // create and register a new anonymous user to backend
-      const nUser = await nuxtApp.$pb
-        .collection('anonymousUsers')
-        .create(user.value)
-      user.value = nUser
+  const generateAndSetCode = async (phoneNumber: string) => {
+    if (!process.server) {
+      if (!user.value.anonymousCode) {
+        user.value.anonymousCode = Math.ceil(Math.random() * 1000000000)
+        user.value.lastMessageTime = new Date()
+      }
+      user.value.phoneNumber = phoneNumber
+      user.value.password = phoneNumber + user.value.anonymousCode
+      user.value.passwordConfirm = phoneNumber + user.value.anonymousCode
     }
   }
   const getAllUsers = async () => {

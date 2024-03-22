@@ -14,6 +14,9 @@ importers:
       http-errors:
         specifier: ^2.0.0
         version: 2.0.0
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
       vue3-apexcharts:
         specifier: 1.4.1
         version: 1.4.1(apexcharts@3.40.0)
@@ -5992,6 +5995,10 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       p-locate: 5.0.0
+
+  /lodash-es@4.17.21:
+    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+    dev: false
 
   /lodash._reinterpolate@3.0.0:
     resolution: {integrity: sha512-xYHt68QRoYGjeeM/XOE1uJtvXQAgvszfBhjV4yvsQH0u2i9I6cI6c6/eG4Hh3UAOVn0y/xAXwmTzEay49Q//HA==}
