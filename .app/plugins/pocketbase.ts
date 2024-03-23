@@ -1,8 +1,8 @@
 import PocketBase from 'pocketbase'
 
 export default defineNuxtPlugin(async () => {
-  // const POCKETBASE_URL = 'https://back.zehna.ir'
-  const POCKETBASE_URL = 'http://127.0.0.1:8090'
+  const POCKETBASE_URL = 'https://back.zehna.ir'
+  // const POCKETBASE_URL = 'http://127.0.0.1:8090'
   // const POCKETBASE_URL = 'https://8ff7-2-190-129-92.ngrok-free.app'
   const pb = new PocketBase(POCKETBASE_URL)
 
