@@ -42,7 +42,7 @@ const validatePhoneNumber = debounce((value) => {
 
 const loading = ref(false)
 const twoFaMode = ref('phoneNumber')
-const currentStep = ref(1)
+const currentStep = ref(2)
 const codeLength = ref(4)
 const input = ref<number[]>([])
 const inputElements = ref<any[]>([])
@@ -124,18 +124,48 @@ const validatePin = ref(false)
 
 const router = useRouter()
 const toaster = useToaster()
-const { user, generateAndSetCode, setToken } = useUser()
+const { user, generateAndSetCode } = useUser()
 const sendVerifyCodeSms = async () => {
-  await generateAndSetCode(tel.value)
-  toaster.clearAll()
-  toaster.show({
-    title: 'کد تایید',
-    message: 'کد تایید به شماره شما پیامک شد',
-    color: 'success',
-    icon: 'ph:chat-text',
-    closable: true,
+  if (!user.value.anonymousCode) {
+    user.value.anonymousCode = Math.ceil(Math.random() * 1000000000)
+    user.value.lastMessageTime = new Date()
+  }
+  user.value.phoneNumber = tel.value
+  user.value.password = tel.value + user.value.anonymousCode
+  user.value.passwordConfirm = tel.value + user.value.anonymousCode
+  const { data, error } = await useAsyncData(async (nuxtApp) => {
+    const record = await nuxtApp.$pb.send(`/upsertUser`, {
+      body: user.value,
+      method: 'POST',
+    })
+    return structuredClone(record)
   })
-  goToStep(3)
+  if (data) {
+    toaster.clearAll()
+    toaster.show({
+      title: 'کد تایید',
+      message: 'کد تایید به شماره شما پیامک شد',
+      color: 'success',
+      icon: 'ph:chat-text',
+      closable: true,
+    })
+    const { data, error } = await useAsyncData(async (nuxtApp) => {
+      const record = await nuxtApp.$pb.send(
+        `/verifyBySms/${user.value.phoneNumber}`,
+      )
+      return structuredClone(record)
+    })
+    goToStep(3)
+  } else {
+    toaster.clearAll()
+    toaster.show({
+      title: 'کد تایید',
+      message: error.value?.message,
+      color: 'danger',
+      icon: 'ph:chat-text',
+      closable: true,
+    })
+  }
 }
 const verifyCodes = async () => {
   const { data, error } = await useAsyncData(async (nuxtApp) => {
@@ -144,6 +174,7 @@ const verifyCodes = async () => {
     )
     return structuredClone(record)
   })
+  user.value = data.value.user
   toaster.clearAll()
   if (error.value) {
     toaster.show({
@@ -163,8 +194,8 @@ const verifyCodes = async () => {
       const record = await nuxtApp.$pb
         .collection('anonymousUsers')
         .authWithPassword(
-          user.value.phoneNumber + '@gmail.com',
-          user.value.anonymousCode + 'sadjkalsdj98379@#!@#',
+          user.value.phoneNumber,
+          user.value.phoneNumber + user.value.anonymousCode,
         )
       return structuredClone(record)
     })

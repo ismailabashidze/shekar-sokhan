@@ -16,7 +16,6 @@ export function useMessage() {
   const { user } = useUser()
   const getMessages = async (): Promise<BackendMessage[]> => {
     const { items } = await nuxtApp.$pb.collection('messages').getList(1, 500, {
-      filter: `anonymousUser.anonymousCode=${user.value.anonymousCode}`,
       sort: '+created',
     })
     messages.value = items
