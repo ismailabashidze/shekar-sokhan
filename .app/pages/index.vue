@@ -12,8 +12,6 @@ definePageMeta({
   },
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
-
-navigateTo('/choose')
 </script>
 
 <template>

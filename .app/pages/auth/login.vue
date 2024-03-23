@@ -229,7 +229,7 @@ if (nuxtApp.$pb.authStore.isValid) {
                     :disabled="isSubmitting"
                     type="email"
                     label="آدرس ایمیل"
-                    placeholder="Email address"
+                    placeholder="آدرس ایمیل"
                     shape="curved"
                     :classes="{
                       input: 'h-12',
@@ -249,7 +249,7 @@ if (nuxtApp.$pb.authStore.isValid) {
                     :disabled="isSubmitting"
                     type="password"
                     label="رمز عبور"
-                    placeholder="Password"
+                    placeholder="رمز عبور"
                     shape="curved"
                     :classes="{
                       input: 'h-12',
