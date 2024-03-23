@@ -15,7 +15,7 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
 
-if (!nuxtApp.$pb.authStore.isValid && to.path !== '/auth/login') {
+if (!nuxtApp.$pb.authStore.isValid) {
   toaster.clearAll()
   toaster.show({
     title: 'احراز هویت',
@@ -25,6 +25,8 @@ if (!nuxtApp.$pb.authStore.isValid && to.path !== '/auth/login') {
     closable: true,
   })
   navigateTo('/auth/login', { redirectCode: 401 })
+} else {
+  navigateTo('/mani/chat', { redirectCode: 301 })
 }
 </script>
 
