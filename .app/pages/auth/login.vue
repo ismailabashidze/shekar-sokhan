@@ -151,7 +151,7 @@ if (nuxtApp.$pb.authStore.isValid) {
             to="https://zehna.ir"
             class="text-muted-400 hover:text-primary-500 flex items-center gap-2 font-sans font-medium transition-colors duration-300"
           >
-            <Icon name="gg:arrow-long-left" class="h-5 w-5" />
+            <Icon name="gg:arrow-long-right" class="h-5 w-5" />
             <span>بازگشت به صفحه‌ی معرفی</span>
           </NuxtLink>
           <!--Theme button-->
@@ -168,7 +168,9 @@ if (nuxtApp.$pb.authStore.isValid) {
             خوش آمدید
           </BaseHeading>
           <BaseParagraph size="sm" class="text-muted-400 mb-6 mt-3">
-            اطلاعات خود را برای ورود به سامانه وارد نمایید
+            ورود در سامانه به منزله
+            <NuxtLink to="/auth/terms" class="text-primary-600 hover:text-primary-500 font-sans font-medium underline-offset-4 transition duration-150 ease-in-out hover:underline"> پذیرش قوانین استفاده </NuxtLink> و پذیرش
+            <NuxtLink to="/auth/privacy" class="text-primary-600 hover:text-primary-500 font-sans font-medium underline-offset-4 transition duration-150 ease-in-out hover:underline">قوانین حریم خصوصی </NuxtLink> است.
           </BaseParagraph>
           <!-- 	Social Sign Up Buttons	 -->
           <div class="flex flex-wrap justify-between gap-4">
