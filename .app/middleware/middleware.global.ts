@@ -1,7 +1,7 @@
 export default defineNuxtPlugin(() => {
   const nuxtApp = useNuxtApp()
   const toaster = useToaster()
-  addRouteMiddleware((to, from) => {
+  addRouteMiddleware(async (to, from) => {
     // List of paths where navigation is allowed without authentication
     const allowedPaths = ['/auth/login', '/auth/terms', '/auth/privacy']
 

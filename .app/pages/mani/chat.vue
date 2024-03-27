@@ -59,6 +59,19 @@ const conversation = ref({
 const sleep = (time: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, time))
 }
+const nuxtApp = useNuxtApp()
+const toaster = useToaster()
+const signout = () => {
+  nuxtApp.$pb.authStore.clear()
+  toaster.show({
+    title: 'خروج از سیستم', // Authentication
+    message: `خروج موفقیت آمیز بود`, // Please log in again
+    color: 'success',
+    icon: 'ph:check',
+    closable: true,
+  })
+  navigateTo('/auth/login')
+}
 
 onMounted(async () => {
   const msg = await getMessages()
@@ -92,7 +105,7 @@ onMounted(async () => {
 //   await saveMessage({
 //     content: m as string,
 //     translatedFa: t,
-//     anonymousUser: user.value.id,
+//     anonymousUser: user.value.record.id,
 //     role: 'user',
 //     // evaluations: JSON.parse(userEval),
 //     evaluations: {},
@@ -103,7 +116,7 @@ onMounted(async () => {
 //   await saveMessage({
 //     content: answer,
 //     translatedFa: t2 as string,
-//     anonymousUser: user.value.id,
+//     anonymousUser: user.value.record.id,
 //     role: 'assistant',
 //     time: new Date().toLocaleTimeString('fa'),
 //     evaluations: {},
@@ -176,7 +189,7 @@ async function submitMessage() {
   await saveMessage({
     content: t as string,
     translatedFa: m,
-    anonymousUser: user.value.id,
+    anonymousUser: user.value.record.id,
     role: 'user',
     evaluations: JSON.parse(userEval),
   })
@@ -186,7 +199,7 @@ async function submitMessage() {
       llmMessages: [
         {
           content:
-            'You are using proper counselling techniques such as Active listening and responsiveness, Questioning, Trustworthiness and Empathy to help patients. You are a human Named Mani Rastegar. You are a licensed therapist, and your approach is counselling, and ACT techniques. You have a humanistic approach. You use Counselling techniques such as reframing, reflection, empathy and using proper open ended questions. use informal tone and use simple terms and sentences. avoid using metaphors and amphibology.  be kind, friendly and compassionate. Answer as simple as possible, since your answer will be translated to other language.',
+            'You are using proper counselling techniques such as Active listening and responsiveness, Questioning, Trustworthiness and Empathy to help patients. You are a human Named Mani Rastegar. You are a licensed therapist, and your approach is counselling, and ACT techniques. You have a humanistic approach. You use Counselling techniques such as reframing, reflection, empathy and using proper open ended questions. use informal tone and use simple terms and sentences. avoid using metaphors and amphibology.  be kind, friendly and compassionate.',
           role: 'system',
         },
         { content: translated.value, role: 'user' },
@@ -197,7 +210,7 @@ async function submitMessage() {
   await saveMessage({
     content: answer,
     translatedFa: t2,
-    anonymousUser: user.value.id,
+    anonymousUser: user.value.record.id,
     role: 'assistant',
     time: new Date().toLocaleTimeString('fa'),
     evaluations: {},
@@ -268,6 +281,16 @@ async function submitMessage() {
                 title="Settings"
               >
                 <Icon name="ph:gear-six-duotone" class="h-5 w-5" />
+              </NuxtLink>
+            </div>
+            <div class="flex h-16 w-full items-center justify-center">
+              <NuxtLink
+                to=""
+                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                title="Settings"
+                @click="signout"
+              >
+                <Icon name="ph:sign-out" class="h-5 w-5" />
               </NuxtLink>
             </div>
           </div>
