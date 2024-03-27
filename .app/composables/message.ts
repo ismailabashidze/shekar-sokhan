@@ -1,6 +1,6 @@
 export type BackendMessage = {
   role: 'system' | 'user' | 'assistant' | 'separator'
-  content: string
+  content?: string
   translatedFa?: string
   anonymousUser?: string
   evaluations?: Object

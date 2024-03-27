@@ -2,11 +2,11 @@
 import { BackendMessage } from '~/composables/message'
 
 definePageMeta({
-  title: 'Messaging',
+  title: 'پیام ها',
   layout: 'empty',
   preview: {
-    title: 'Messaging app',
-    description: 'For chat and messaging apps',
+    title: 'ذهنا',
+    description: 'سامانه همدلی هوشمند',
     categories: ['dashboards'],
     src: '/img/screens/dashboards-messaging.png',
     srcDark: '/img/screens/dashboards-messaging-dark.png',
@@ -18,13 +18,11 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const PATIENT_AGENT = 'ZohrehPatient'
 
-const llm = useOllama()
 const { user } = useUser()
 const { open } = usePanels()
 const seamless = useSeamless()
 
 const { translated, translate } = seamless
-const { ask } = llm
 const { getMessages, saveMessage } = useMessage()
 
 const search = ref('')
@@ -50,7 +48,8 @@ const conversation = ref({
     },
     {
       role: 'assistant',
-      translatedFa: 'سلام. من مانی هستم 👋. چطور می تونم به شما کمک کنم؟',
+      translatedFa:
+        'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
       content: "Hi. I'm Mani. How can I help you?",
       time: new Date().toLocaleTimeString('fa'),
     },
@@ -78,45 +77,45 @@ onMounted(async () => {
   }, 300)
 })
 
-async function autoConversation() {
-  const lastContent = conversation.value.messages.at(-1)?.content as string
-  const m = await ask(PATIENT_AGENT, lastContent as string)
-  const t = await translate(m, 'English', 'Western Persian')
-  const newMessage: BackendMessage = {
-    role: 'user',
-    translatedFa: t,
-    content: m,
-    time: new Date().toLocaleTimeString('fa'),
-  }
-  conversation.value.messages.push(newMessage)
-  // const userEval = await ask('SummaryJsonizer', translated.value)
-  await saveMessage({
-    content: m as string,
-    translatedFa: t,
-    anonymousUser: user.value.id,
-    role: 'user',
-    // evaluations: JSON.parse(userEval),
-    evaluations: {},
-  })
-  const answer = await ask('Mani', m)
-  // const AIEval = await ask('SummaryJsonizer', translated.value)
-  const t2 = await translate(answer, 'English', 'Western Persian')
-  await saveMessage({
-    content: answer,
-    translatedFa: t2 as string,
-    anonymousUser: user.value.id,
-    role: 'assistant',
-    time: new Date().toLocaleTimeString('fa'),
-    evaluations: {},
-  })
-  conversation.value.messages.push({
-    role: 'assistant',
-    translatedFa: t2,
-    content: answer,
-    created: new Date().toLocaleTimeString('fa'),
-  })
-  await autoConversation()
-}
+// async function autoConversation() {
+//   const lastContent = conversation.value.messages.at(-1)?.content as string
+//   const m = await ask(PATIENT_AGENT, lastContent as string)
+//   const t = await translate(m, 'English', 'Western Persian')
+//   const newMessage: BackendMessage = {
+//     role: 'user',
+//     translatedFa: t,
+//     content: m,
+//     time: new Date().toLocaleTimeString('fa'),
+//   }
+//   conversation.value.messages.push(newMessage)
+//   // const userEval = await ask('SummaryJsonizer', translated.value)
+//   await saveMessage({
+//     content: m as string,
+//     translatedFa: t,
+//     anonymousUser: user.value.id,
+//     role: 'user',
+//     // evaluations: JSON.parse(userEval),
+//     evaluations: {},
+//   })
+//   const answer = await ask('Mani', m)
+//   // const AIEval = await ask('SummaryJsonizer', translated.value)
+//   const t2 = await translate(answer, 'English', 'Western Persian')
+//   await saveMessage({
+//     content: answer,
+//     translatedFa: t2 as string,
+//     anonymousUser: user.value.id,
+//     role: 'assistant',
+//     time: new Date().toLocaleTimeString('fa'),
+//     evaluations: {},
+//   })
+//   conversation.value.messages.push({
+//     role: 'assistant',
+//     translatedFa: t2,
+//     content: answer,
+//     created: new Date().toLocaleTimeString('fa'),
+//   })
+//   await autoConversation()
+// }
 async function translateAndAssemble(answer: string) {
   const chunks = answer.split('\n').filter((chunk) => chunk.trim().length > 0)
   const translatePromises = chunks.map((chunk, index) => {
@@ -149,9 +148,6 @@ async function submitMessage() {
     time: new Date().toLocaleTimeString('fa'),
   }
   conversation.value.messages.push(newMessage)
-  const t = await translate(m, 'Western Persian', 'English')
-  conversation.value.messages[conversation.value.messages.length - 1].content =
-    t as string
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
@@ -160,7 +156,23 @@ async function submitMessage() {
       })
     }
   }, 30)
-  const userEval = await ask('SummaryJsonizer', translated.value)
+  const t = await translate(m, 'Western Persian', 'English')
+  conversation.value.messages[conversation.value.messages.length - 1].content =
+    t as string
+  const userEval = await $fetch('/api/llm', {
+    method: 'POST',
+    body: {
+      llmMessages: [
+        {
+          content:
+            'You are A senior psychotherapist. you accept a message from a psychotherapy conversation, then analyze the information, compact it in a json format. you include useful information, not including the summary itself. It is possible that the whole input to you has no value, if so, use this json {result : ""} to respond. YOU ONLY RETURN JSON. Emphasize on psychological information, which are useful for therapy.',
+          role: 'system',
+        },
+        { content: translated.value, role: 'user' },
+      ],
+    },
+  })
+
   await saveMessage({
     content: t as string,
     translatedFa: m,
@@ -168,9 +180,20 @@ async function submitMessage() {
     role: 'user',
     evaluations: JSON.parse(userEval),
   })
-  const answer = await ask('Mani', translated.value)
+  const answer = await $fetch('/api/llm', {
+    method: 'POST',
+    body: {
+      llmMessages: [
+        {
+          content:
+            'You are using proper counselling techniques such as Active listening and responsiveness, Questioning, Trustworthiness and Empathy to help patients. You are a human Named Mani Rastegar. You are a licensed therapist, and your approach is counselling, and ACT techniques. You have a humanistic approach. You use Counselling techniques such as reframing, reflection, empathy and using proper open ended questions. use informal tone and use simple terms and sentences. avoid using metaphors and amphibology.  be kind, friendly and compassionate. Answer as simple as possible, since your answer will be translated to other language.',
+          role: 'system',
+        },
+        { content: translated.value, role: 'user' },
+      ],
+    },
+  })
   const t2 = await translateAndAssemble(answer)
-  // const t2 = await translate(answer, 'English', 'Western Persian')
   await saveMessage({
     content: answer,
     translatedFa: t2,
