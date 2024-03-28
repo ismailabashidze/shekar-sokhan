@@ -37,7 +37,7 @@ const conversation = ref({
     photo: '/img/avatars/1.svg',
     role: 'ایجنت هوش مصنوعی',
     bio: 'مانی، مشاور بحران توانایی همدلی، و انجام مداخلات بحران و بالاخص خودکشی را دارست.',
-    age: '12500ms-17000ms',
+    age: '50s-180s',
     location: 'ایران',
   },
   messages: [
@@ -247,10 +247,26 @@ async function submitMessage() {
               class="ltablet:w-full flex h-16 w-16 shrink-0 items-center justify-center lg:w-full"
             >
               <NuxtLink to="#" class="flex items-center justify-center">
-                <TairoLogo class="text-primary-600 h-10" />
+                <div class="p-[5px] rounded-full bg-white">
+                  <img
+                    src="/img/logo-no-bg.png"
+                    width="40px"
+                    height="40px"
+                    alt=""
+                    srcset=""
+                  />
+                </div>
+
+                <!-- <TairoLogo class="text-primary-600 h-10" /> -->
               </NuxtLink>
             </div>
             <div
+              class="ltablet:w-full flex h-16 w-16 shrink-0 items-center justify-center lg:w-full"
+            >
+              <BaseThemeToggle />
+            </div>
+
+            <!-- <div
               class="ltablet:w-full flex h-16 w-16 shrink-0 items-center justify-center lg:w-full"
             >
               <a
@@ -261,7 +277,7 @@ async function submitMessage() {
               >
                 <Icon name="lucide:arrow-right" class="h-5 w-5" />
               </a>
-            </div>
+            </div> -->
           </div>
           <div class="flex flex-col">
             <div class="flex h-16 w-full items-center justify-center">
@@ -556,7 +572,7 @@ async function submitMessage() {
       </div>
       <!-- Current user -->
       <div
-        class="ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
+        class="hidden md:inline-block ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
         :class="expanded ? 'translate-x-full' : 'translate-x-0'"
       >
         <div class="flex h-16 w-full items-center justify-between px-8"></div>
@@ -638,12 +654,10 @@ async function submitMessage() {
                 <BaseButton shape="curved" class="w-full">
                   <span> درباره مانی، هوش مصنوعی </span>
                 </BaseButton>
-                <button
-                  role="button"
-                  class="text-primary-500 mt-3 font-sans text-sm underline-offset-4 hover:underline"
-                >
-                  همرسانی گفت و گو
-                </button>
+                <BaseMessage class="mt-5" type="info">
+                  لطفا توجه داشته باشید که عامل هوش مصنوعی در فاز توسعه می‌‌باشد
+                  و احتمال ارائه‌ی پاسخ‌های اشتباه را دارد.
+                </BaseMessage>
               </div>
             </div>
           </div>

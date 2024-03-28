@@ -169,8 +169,19 @@ if (nuxtApp.$pb.authStore.isValid) {
           </BaseHeading>
           <BaseParagraph size="sm" class="text-muted-400 mb-6 mt-3">
             ورود در سامانه به منزله
-            <NuxtLink to="/auth/terms" class="text-primary-600 hover:text-primary-500 font-sans font-medium underline-offset-4 transition duration-150 ease-in-out hover:underline"> پذیرش قوانین استفاده </NuxtLink> و پذیرش
-            <NuxtLink to="/auth/privacy" class="text-primary-600 hover:text-primary-500 font-sans font-medium underline-offset-4 transition duration-150 ease-in-out hover:underline">قوانین حریم خصوصی </NuxtLink> است.
+            <NuxtLink
+              to="/auth/terms"
+              class="text-primary-600 hover:text-primary-500 font-sans font-medium underline-offset-4 transition duration-150 ease-in-out hover:underline"
+            >
+              پذیرش قوانین استفاده
+            </NuxtLink>
+            و پذیرش
+            <NuxtLink
+              to="/auth/privacy"
+              class="text-primary-600 hover:text-primary-500 font-sans font-medium underline-offset-4 transition duration-150 ease-in-out hover:underline"
+              >قوانین حریم خصوصی
+            </NuxtLink>
+            است.
           </BaseParagraph>
           <!-- 	Social Sign Up Buttons	 -->
           <div class="flex flex-wrap justify-between gap-4">
@@ -186,14 +197,14 @@ if (nuxtApp.$pb.authStore.isValid) {
             <button
               class="bg-muted-200 dark:bg-muted-700 hover:bg-muted-100 dark:hover:bg-muted-600 text-muted-600 dark:text-muted-400 nui-focus w-[calc(50%_-_0.5rem)] cursor-pointer rounded-xl px-5 py-4 text-center transition-colors duration-300 md:w-auto"
             >
-              <Icon name="fa6-brands:twitter" class="mx-auto h-4 w-4" />
+              <Icon name="fa6-brands:microsoft" class="mx-auto h-4 w-4" />
             </button>
             <!--Linkedin button-->
-            <button
+            <!-- <button
               class="bg-muted-200 dark:bg-muted-700 hover:bg-muted-100 dark:hover:bg-muted-600 text-muted-600 dark:text-muted-400 nui-focus w-[calc(50%_-_0.5rem)] cursor-pointer rounded-xl px-5 py-4 text-center transition-colors duration-300 md:w-auto"
             >
               <Icon name="fa6-brands:linkedin-in" class="mx-auto h-4 w-4" />
-            </button>
+            </button> -->
           </div>
           <!-- 'or' divider		 -->
           <div class="flex-100 mt-8 flex items-center">
