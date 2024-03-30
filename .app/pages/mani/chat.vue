@@ -257,7 +257,7 @@ async function submitMessage() {
     <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen">
       <!-- Sidebar -->
       <div
-        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 hidden h-screen w-20 border-r bg-white sm:block"
+        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 h-screen w-20 border-r bg-white sm:block"
       >
         <div class="flex h-full flex-col justify-between">
           <div class="flex flex-col">
@@ -305,7 +305,11 @@ async function submitMessage() {
                 title="جست و جو"
                 @click="open('search')"
               >
-                <Icon name="ph:magnifying-glass-duotone" class="h-5 w-5" />
+                <Icon
+                  name="ph:info"
+                  class="h-5 w-5"
+                  @click="expanded = !expanded"
+                />
               </button>
             </div>
             <div class="flex h-16 w-full items-center justify-center">
@@ -611,10 +615,19 @@ async function submitMessage() {
       </div>
       <!-- Current user -->
       <div
-        class="hidden md:inline-block ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
-        :class="expanded ? 'translate-x-full' : 'translate-x-0'"
+        class="ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
+        :class="expanded ? '-translate-x-full' : 'translate-x-0'"
       >
-        <div class="flex h-16 w-full items-center justify-between px-8"></div>
+        <div
+          class="flex flex-row-reverse h-16 w-full items-center justify-between px-8"
+        >
+          <BaseButtonIcon small @click="expanded = !expanded">
+            <Icon
+              name="lucide:arrow-left"
+              class="pointer-events-none h-4 w-4"
+            />
+          </BaseButtonIcon>
+        </div>
         <div class="relative flex w-full flex-col px-8">
           <!-- Loader -->
           <div v-if="loading" class="mt-8">
