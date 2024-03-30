@@ -41,8 +41,25 @@ export function useMessage() {
     return items
   }
   const saveMessage = async (newMessage: BackendMessage) => {
-    await nuxtApp.$pb.collection('messages').create(newMessage)
-    messages.value.push(newMessage)
+    try {
+      await nuxtApp.$pb.collection('messages').create(newMessage)
+      messages.value.push(newMessage)
+      return 'success'
+    } catch (e) {
+      // if (e.status === 400 && e.message === 'You have to charge account.') {
+      if (e.status === 400) {
+        toaster.clearAll()
+        toaster.show({
+          title: 'پایان حق اشتراک',
+          message: `اشتراک شما پایان یافته و نیازمند تمدید است.`,
+          color: 'danger',
+          icon: 'ph:warning',
+          closable: true,
+        })
+        navigateTo('/onboarding')
+      }
+      return 'error'
+    }
   }
   const getMessagesByCode = async (code: string) => {
     const { items } = await nuxtApp.$pb.collection('messages').getList(1, 500, {

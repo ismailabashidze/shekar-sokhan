@@ -73,6 +73,8 @@ const signout = () => {
   navigateTo('/auth/login')
 }
 
+const showNoCharge = ref(false)
+
 onMounted(async () => {
   const msg = await getMessages()
   msg.map((m) => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
@@ -88,6 +90,21 @@ onMounted(async () => {
       })
     }
   }, 300)
+  const u = await nuxtApp.$pb
+    .collection('users')
+    .getOne(nuxtApp.$pb.authStore.model.id, {})
+  showNoCharge.value = !u.hasCharge
+  if (nuxtApp.$pb.authStore.isValid) {
+    nuxtApp.$pb.collection('users').subscribe(
+      nuxtApp.$pb.authStore.model.id,
+      (e) => {
+        if (!e.record.hasCharge) {
+          showNoCharge.value = true
+        }
+      },
+      {},
+    )
+  }
 })
 
 // async function autoConversation() {
@@ -172,64 +189,65 @@ async function submitMessage() {
   const t = await translate(m, 'Western Persian', 'English')
   conversation.value.messages[conversation.value.messages.length - 1].content =
     t as string
-  const userEval = await $fetch('/api/llm', {
-    method: 'POST',
-    body: {
-      llmMessages: [
-        {
-          content:
-            'You are A senior psychotherapist. you accept a message from a psychotherapy conversation, then analyze the information, compact it in a json format. you include useful information, not including the summary itself. It is possible that the whole input to you has no value, if so, use this json {result : ""} to respond. YOU ONLY RETURN JSON. Emphasize on psychological information, which are useful for therapy.',
-          role: 'system',
-        },
-        { content: translated.value, role: 'user' },
-      ],
-    },
-  })
+  // const userEval = await $fetch('/api/llm', {
+  //   method: 'POST',
+  //   body: {
+  //     type: 'eval',
+  //     llmMessages: [{ content: translated.value, role: 'user' }],
+  //   },
+  // })
 
-  await saveMessage({
+  const res = await saveMessage({
     content: t as string,
     translatedFa: m,
     anonymousUser: user.value.record.id,
     role: 'user',
-    evaluations: JSON.parse(userEval),
-  })
-  const answer = await $fetch('/api/llm', {
-    method: 'POST',
-    body: {
-      llmMessages: [
-        {
-          content:
-            'You are using proper counselling techniques such as Active listening and responsiveness, Questioning, Trustworthiness and Empathy to help patients. You are a human Named Mani Rastegar. You are a licensed therapist, and your approach is counselling, and ACT techniques. You have a humanistic approach. You use Counselling techniques such as reframing, reflection, empathy and using proper open ended questions. use informal tone and use simple terms and sentences. avoid using metaphors and amphibology.  be kind, friendly and compassionate.',
-          role: 'system',
-        },
-        { content: translated.value, role: 'user' },
-      ],
-    },
-  })
-  const t2 = await translateAndAssemble(answer)
-  await saveMessage({
-    content: answer,
-    translatedFa: t2,
-    anonymousUser: user.value.record.id,
-    role: 'assistant',
-    time: new Date().toLocaleTimeString('fa'),
+    // evaluations: JSON.parse(userEval),
     evaluations: {},
   })
-  messageLoading.value = false
-  conversation.value.messages.push({
-    role: 'assistant',
-    translatedFa: t2,
-    content: answer,
-    time: new Date().toLocaleTimeString('fa'),
-  })
-
-  await nextTick()
-
-  if (chatEl.value) {
-    chatEl.value.scrollTo({
-      top: chatEl.value.scrollHeight,
-      behavior: 'smooth',
+  if (res === 'success') {
+    const answer = await $fetch('/api/llm', {
+      method: 'POST',
+      body: {
+        type: 'answer',
+        llmMessages: [
+          ...conversation.value.messages
+            .map((m) => {
+              if (m.role === 'assistant' || m.role === 'user') {
+                return { role: m.role, content: m.content }
+              }
+            })
+            .filter(Boolean),
+          { content: translated.value, role: 'user' },
+        ],
+      },
     })
+    const t2 = await translateAndAssemble(answer)
+
+    await saveMessage({
+      content: answer,
+      translatedFa: t2,
+      anonymousUser: user.value.record.id,
+      role: 'assistant',
+      time: new Date().toLocaleTimeString('fa'),
+      evaluations: {},
+    })
+    messageLoading.value = false
+    conversation.value.messages.push({
+      role: 'assistant',
+      translatedFa: t2,
+      content: answer,
+      time: new Date().toLocaleTimeString('fa'),
+    })
+
+    await nextTick()
+
+    if (chatEl.value) {
+      chatEl.value.scrollTo({
+        top: chatEl.value.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
   }
 }
 </script>
@@ -250,8 +268,8 @@ async function submitMessage() {
                 <div class="p-[5px] rounded-full bg-white">
                   <img
                     src="/img/logo-no-bg.png"
-                    width="40px"
-                    height="40px"
+                    width="40"
+                    height="40"
                     alt=""
                     srcset=""
                   />
@@ -463,7 +481,9 @@ async function submitMessage() {
                         item.role === 'user' ? 'rounded-se-none' : '',
                       ]"
                     >
-                      <p class="font-sans text-sm">{{ item.translatedFa }}</p>
+                      <p class="font-sans text-sm text-justify">
+                        {{ item.translatedFa }}
+                      </p>
                     </div>
                     <div
                       class="text-muted-400 mt-1 font-sans text-xs"
@@ -471,6 +491,7 @@ async function submitMessage() {
                     >
                       {{ item.time }}
                     </div>
+
                     <!-- <div
                       v-if="item.attachments.length > 0"
                       class="mt-2 space-y-2"
@@ -534,6 +555,24 @@ async function submitMessage() {
                   </div>
                 </div>
               </div>
+              <BaseMessage
+                v-if="showNoCharge"
+                type="danger"
+                class="flex justify-evenly"
+              >
+                <div class="flex content-between">
+                  <div class="flex items-center">
+                    به نظر می‌رسد بسته مصرفی شما به اتمام رسیده است. برای ادامه
+                    استفاده از خدمات، لطفاً اقدام به خرید اشتراک نمایید.
+                  </div>
+                  <BaseButton
+                    color="primary"
+                    class="my-3 mr-2 w-[120px]"
+                    to="/onboarding"
+                    >خرید اشتراک</BaseButton
+                  >
+                </div>
+              </BaseMessage>
             </div>
           </div>
           <!-- Compose -->
@@ -545,7 +584,7 @@ async function submitMessage() {
               <BaseInput
                 v-model.trim="message"
                 :loading="messageLoading"
-                :disabled="messageLoading"
+                :disabled="messageLoading || showNoCharge"
                 shape="full"
                 :classes="{
                   input: 'h-12 ps-6 pe-24',
@@ -657,6 +696,10 @@ async function submitMessage() {
                 <BaseMessage class="mt-5" type="info">
                   لطفا توجه داشته باشید که عامل هوش مصنوعی در فاز توسعه می‌‌باشد
                   و احتمال ارائه‌ی پاسخ‌های اشتباه را دارد.
+                </BaseMessage>
+                <BaseMessage class="mt-5" type="warning">
+                  با مانی با ادبیاتی ساده صحبت کنید. او به شما گوش می کند و شما
+                  را حمایت می کند. از ادبیات پیچیده و کلمات خاص استفاده نکنید.
                 </BaseMessage>
               </div>
             </div>

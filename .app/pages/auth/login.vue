@@ -98,12 +98,12 @@ const onSubmit = handleSubmit(async (values) => {
   router.push('/dashboards')
 })
 const nuxtApp = useNuxtApp()
-const { user } = useUser()
+const { setUser } = useUser()
 const loginWithGoogle = async () => {
   const authData = await nuxtApp.$pb
     .collection('users')
     .authWithOAuth2({ provider: 'google' })
-  user.value = authData
+  setUser(authData)
 
   toaster.clearAll()
   toaster.show({

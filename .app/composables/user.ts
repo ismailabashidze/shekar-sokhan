@@ -35,10 +35,16 @@ export function useUser() {
     return true
   }
 
+  const setUser = async (u: User) => {
+    user.value = u
+    return user
+  }
+
   return {
     user,
     generateAndSetCode,
     getAllUsers,
     removeUser,
+    setUser,
   }
 }

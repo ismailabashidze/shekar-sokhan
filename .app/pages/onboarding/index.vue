@@ -29,35 +29,34 @@ const toaster = useToaster()
 const redeem = async () => {
   isModalOpen.value = false
   isSubmitting.value = true
-  try {
-    const res = await $fetch('https://back.zehna.ir/redeemDiscount', {
-      method: 'POST',
-      headers: {
-        Authorization: nuxtApp.$pb.authStore.token,
-      },
+
+  const { data, error } = await useAsyncData(async () => {
+    const record = await nuxtApp.$pb.send(`/redeemDiscount`, {
       body: {
         userId: nuxtApp.$pb.authStore.model.id,
         code: couponCode.value,
       },
+      method: 'POST',
     })
+    return structuredClone(record)
+  })
+  if (!error.value) {
     toaster.show({
       title: 'ثبت کد',
-      message: `کد با موفقیت فعال شد.`,
+      message: `کد با موفقیت فعال شد. به ذهنا خوش آمدید.`,
       color: 'success',
       icon: 'ph:check',
       closable: true,
     })
-  } catch (e) {
-    isSubmitting.value = false
-    if (e.status == 400) {
-      toaster.show({
-        title: 'عدم ثبت',
-        message: `کد نامعتبر است یا قبلا استفاده شده است`,
-        color: 'danger',
-        icon: 'ph:warning',
-        closable: true,
-      })
-    }
+    navigateTo('/mani/chat')
+  } else {
+    toaster.show({
+      title: 'عدم ثبت',
+      message: `کد نامعتبر است یا قبلا استفاده شده است`,
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
   }
   isSubmitting.value = false
 }
@@ -275,11 +274,7 @@ const redeem = async () => {
             shape="curved"
             placeholder="کد را وارد نمایید"
             v-model="couponCode"
-            :error="errorMessage"
-            :disabled="isSubmitting"
             type="text"
-            @update:model-value="handleChange"
-            @blur="handleBlur"
           />
         </div>
       </div>
@@ -291,7 +286,7 @@ const redeem = async () => {
         <div class="flex gap-x-2">
           <BaseButton @click="closeModal"> بازگشت </BaseButton>
 
-          <BaseButton color="primary" variant="solid" @click="redeem()">
+          <BaseButton color="primary" variant="solid" @click="redeem">
             ثبت و فعال‌سازی
           </BaseButton>
         </div>
