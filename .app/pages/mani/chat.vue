@@ -49,8 +49,8 @@ const conversation = ref({
     {
       role: 'assistant',
       translatedFa:
-        // 'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
-        'سلام. من زینب هستم. دوست خوب تو.',
+        'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
+      // 'سلام. من زینب هستم. دوست خوب تو.',
       content: "Hi. I'm Mani. How can I help you?",
       time: new Date().toLocaleTimeString('fa'),
     },
@@ -443,7 +443,7 @@ async function submitMessage() {
           <!-- Body -->
           <div
             ref="chatEl"
-            class="relative h-[calc(100vh_-_200px)] sm:h-[calc(100vh_-_128px)] w-full p-4 sm:p-8"
+            class="relative h-[calc(100vh_-_180px)] sm:h-[calc(100vh_-_128px)] w-full p-4 sm:p-8"
             :class="loading ? 'overflow-hidden' : 'overflow-y-auto slimscroll'"
           >
             <!-- Loader-->
