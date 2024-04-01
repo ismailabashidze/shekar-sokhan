@@ -673,6 +673,7 @@ async function submitMessage() {
                   input: 'h-12 ps-6 pe-24',
                 }"
                 placeholder="متن را بنویسید ..."
+                autocomplete="off"
               />
               <div class="absolute end-2 top-0 flex h-12 items-center gap-1">
                 <button
