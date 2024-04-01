@@ -49,7 +49,8 @@ const conversation = ref({
     {
       role: 'assistant',
       translatedFa:
-        'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
+        // 'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
+        'سلام. من زینب هستم. دوست خوب تو.',
       content: "Hi. I'm Mani. How can I help you?",
       time: new Date().toLocaleTimeString('fa'),
     },
@@ -254,10 +255,88 @@ async function submitMessage() {
 
 <template>
   <div class="relative">
+    <div
+      class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 border-r bg-white0 w-full sm:hidden block"
+    >
+      <div class="flex w-full flex-row justify-between">
+        <div class="flex flex-row">
+          <div
+            class="ltablet:w-full flex h-16 w-16 shrink-0 items-center justify-center lg:w-full"
+          >
+            <NuxtLink to="#" class="flex items-center justify-center">
+              <div class="p-[5px] rounded-full bg-white">
+                <img
+                  src="/img/logo-no-bg.png"
+                  width="40"
+                  height="40"
+                  alt=""
+                  srcset=""
+                />
+              </div>
+
+              <!-- <TairoLogo class="text-primary-600 h-10" /> -->
+            </NuxtLink>
+          </div>
+          <div
+            class="ltablet:w-full flex h-16 w-16 shrink-0 items-center justify-center lg:w-full"
+          >
+            <BaseThemeToggle />
+          </div>
+
+          <!-- <div
+              class="ltablet:w-full flex h-16 w-16 shrink-0 items-center justify-center lg:w-full"
+            >
+              <a
+                href="#"
+                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                title="Back"
+                @click.prevent="navigateTo('/choose')"
+              >
+                <Icon name="lucide:arrow-right" class="h-5 w-5" />
+              </a>
+            </div> -->
+        </div>
+        <div class="flex flex-row">
+          <div class="flex h-16 w-full items-center justify-center">
+            <button
+              role="button"
+              class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              title="جست و جو"
+              @click="open('search')"
+            >
+              <Icon
+                name="ph:info"
+                class="h-5 w-5"
+                @click="expanded = !expanded"
+              />
+            </button>
+          </div>
+          <div class="flex h-16 w-full items-center justify-center">
+            <NuxtLink
+              to="#"
+              class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              title="Settings"
+            >
+              <Icon name="ph:gear-six-duotone" class="h-5 w-5" />
+            </NuxtLink>
+          </div>
+          <div class="flex h-16 w-full items-center justify-center">
+            <NuxtLink
+              to=""
+              class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              title="Settings"
+              @click="signout"
+            >
+              <Icon name="ph:sign-out" class="h-5 w-5" />
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen">
       <!-- Sidebar -->
       <div
-        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 h-screen w-20 border-r bg-white sm:block"
+        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 h-screen w-20 border-r bg-white sm:block hidden"
       >
         <div class="flex h-full flex-col justify-between">
           <div class="flex flex-col">
@@ -364,7 +443,7 @@ async function submitMessage() {
           <!-- Body -->
           <div
             ref="chatEl"
-            class="relative h-[calc(100vh_-_128px)] w-full p-4 sm:p-8"
+            class="relative h-[calc(100vh_-_200px)] sm:h-[calc(100vh_-_128px)] w-full p-4 sm:p-8"
             :class="loading ? 'overflow-hidden' : 'overflow-y-auto slimscroll'"
           >
             <!-- Loader-->
