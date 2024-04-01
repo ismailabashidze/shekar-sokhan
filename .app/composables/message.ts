@@ -35,6 +35,7 @@ export function useMessage() {
     //   }
     // }
     const { items } = await nuxtApp.$pb.collection('messages').getList(1, 500, {
+      filter: 'isDeleted=false',
       sort: '+created',
     })
     messages.value = items
@@ -79,6 +80,13 @@ export function useMessage() {
       })
     return items
   }
+  const deleteAllMessages = async (userId: string) => {
+    const res = await $fetch('https://back.zehna.ir/deleteAllMessages', {
+      method: 'POST',
+      body: { userId },
+    })
+    return res
+  }
   return {
     messages,
     filteredMessages,
@@ -87,5 +95,6 @@ export function useMessage() {
     getMessagesByCode,
     saveSummerizedMessages,
     getSummerizedMessagesByCode,
+    deleteAllMessages,
   }
 }

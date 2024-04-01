@@ -23,7 +23,7 @@ const { open } = usePanels()
 const seamless = useSeamless()
 
 const { translated, translate } = seamless
-const { getMessages, saveMessage } = useMessage()
+const { getMessages, saveMessage, deleteAllMessages } = useMessage()
 
 const search = ref('')
 const message = ref('')
@@ -251,6 +251,47 @@ async function submitMessage() {
     }
   }
 }
+const showDeleteModal = ref(false)
+const isDeleting = ref(false)
+const deleteAll = async () => {
+  isDeleting.value = true
+  try {
+    const res = await deleteAllMessages(nuxtApp.$pb.authStore.model.id)
+    toaster.show({
+      title: 'حذف پیام ها', // Authentication
+      message: `پیام ها با موفقیت حذف شد`, // Please log in again
+      color: 'success',
+      icon: 'ph:trash',
+      closable: true,
+    })
+    await sleep(2000)
+    window.location.reload()
+  } catch (e) {
+    toaster.show({
+      title: 'حذف پیام ها', // Authentication
+      message: `مشکلی وجود دارد`, // Please log in again
+      color: 'danger',
+      icon: 'ph:trash',
+      closable: true,
+    })
+  } finally {
+    showDeleteModal.value = false
+    isDeleting.value = false
+  }
+}
+const canDelete = async () => {
+  if (conversation.value.messages.length < 3) {
+    toaster.show({
+      title: 'حذف پیام ها',
+      message: `گفت و گو هنوز آغاز نشده است. برای حذف پیام ها باید بیشتر از یک باشد.`,
+      color: 'warning',
+      icon: 'ph:warning',
+      closable: true,
+    })
+    return
+  }
+  showDeleteModal.value = true
+}
 </script>
 
 <template>
@@ -297,6 +338,16 @@ async function submitMessage() {
             </div> -->
         </div>
         <div class="flex flex-row">
+          <div class="flex h-16 w-full items-center justify-center">
+            <NuxtLink
+              to=""
+              title="Settings"
+              class="text-warning-400 hover:text-primary-500 bg-warning-500/20 hover:bg-primary-500/20 cursor-pointer flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              @click="canDelete"
+            >
+              <Icon name="ph:arrow-clockwise" class="h-5 w-5" />
+            </NuxtLink>
+          </div>
           <div class="flex h-16 w-full items-center justify-center">
             <button
               role="button"
@@ -377,6 +428,16 @@ async function submitMessage() {
             </div> -->
           </div>
           <div class="flex flex-col">
+            <div class="flex h-16 w-full items-center justify-center">
+              <NuxtLink
+                to=""
+                title="Settings"
+                class="text-warning-400 hover:text-primary-500 bg-warning-500/20 hover:bg-primary-500/20 cursor-pointer flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                @click="canDelete"
+              >
+                <Icon name="ph:arrow-clockwise" class="h-5 w-5" />
+              </NuxtLink>
+            </div>
             <div class="flex h-16 w-full items-center justify-center">
               <button
                 role="button"
@@ -803,4 +864,63 @@ async function submitMessage() {
 
     <TairoPanels />
   </div>
+  <TairoModal
+    :open="showDeleteModal"
+    size="sm"
+    @close="showDeleteModal = false"
+  >
+    <template #header>
+      <!-- Header -->
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3
+          class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
+        >
+          بازنشانی و حذف گفت و گو
+        </h3>
+
+        <BaseButtonClose @click="showDeleteModal = false" />
+      </div>
+    </template>
+
+    <!-- Body -->
+    <div class="p-4 md:p-6">
+      <div class="mx-auto w-full text-center">
+        <Icon
+          name="ph:warning"
+          class="block w-[75px] h-[75px] text-yellow-500 mb-5"
+        />
+
+        <h3
+          class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
+        >
+          لطفا توجه کنید
+        </h3>
+
+        <p
+          class="font-alt text-muted-500 dark:text-muted-400 text-sm leading-5 text-justify mt-2"
+        >
+          در صورت حذف، اطلاعات شما از بین خواهد رفت و عامل هوش مصنوعی به طور
+          کامل دانش قبلی نسبت به شما را از دست خواهد داد. مطمئن هستید؟
+        </p>
+      </div>
+    </div>
+
+    <template #footer>
+      <!-- Footer -->
+      <div class="p-4 md:p-6">
+        <div class="flex gap-x-2">
+          <BaseButton @click="showDeleteModal = false"> بازگشت </BaseButton>
+
+          <BaseButton
+            color="warning"
+            variant="solid"
+            @click="deleteAll"
+            :loading="isDeleting"
+          >
+            تایید و حذف
+          </BaseButton>
+        </div>
+      </div>
+    </template>
+  </TairoModal>
 </template>
