@@ -207,47 +207,58 @@ async function submitMessage() {
     evaluations: {},
   })
   if (res === 'success') {
-    const answer = await $fetch('/api/llm', {
-      method: 'POST',
-      body: {
-        type: 'answer',
-        llmMessages: [
-          ...conversation.value.messages
-            .map((m) => {
-              if (m.role === 'assistant' || m.role === 'user') {
-                return { role: m.role, content: m.content }
-              }
-            })
-            .filter(Boolean),
-          { content: translated.value, role: 'user' },
-        ],
-      },
-    })
-    const t2 = await translateAndAssemble(answer)
-
-    await saveMessage({
-      content: answer,
-      translatedFa: t2,
-      anonymousUser: user.value.record.id,
-      role: 'assistant',
-      time: new Date().toLocaleTimeString('fa'),
-      evaluations: {},
-    })
-    messageLoading.value = false
-    conversation.value.messages.push({
-      role: 'assistant',
-      translatedFa: t2,
-      content: answer,
-      time: new Date().toLocaleTimeString('fa'),
-    })
-
-    await nextTick()
-
-    if (chatEl.value) {
-      chatEl.value.scrollTo({
-        top: chatEl.value.scrollHeight,
-        behavior: 'smooth',
+    try {
+      const answer = await $fetch('/api/llm', {
+        method: 'POST',
+        body: {
+          type: 'warmup',
+          llmMessages: [
+            ...conversation.value.messages
+              .map((m) => {
+                if (m.role === 'assistant' || m.role === 'user') {
+                  return { role: m.role, content: m.content }
+                }
+              })
+              .filter(Boolean),
+            { content: translated.value, role: 'user' },
+          ],
+        },
       })
+      const t2 = await translateAndAssemble(answer)
+
+      await saveMessage({
+        content: answer,
+        translatedFa: t2,
+        anonymousUser: user.value.record.id,
+        role: 'assistant',
+        time: new Date().toLocaleTimeString('fa'),
+        evaluations: {},
+      })
+      messageLoading.value = false
+      conversation.value.messages.push({
+        role: 'assistant',
+        translatedFa: t2,
+        content: answer,
+        time: new Date().toLocaleTimeString('fa'),
+      })
+
+      await nextTick()
+
+      if (chatEl.value) {
+        chatEl.value.scrollTo({
+          top: chatEl.value.scrollHeight,
+          behavior: 'smooth',
+        })
+      }
+    } catch (e) {
+      toaster.show({
+        title: 'دریافت پیام', // Authentication
+        message: `مشکلی وجود دارد`, // Please log in again
+        color: 'danger',
+        icon: 'ph:envelope',
+        closable: true,
+      })
+      messageLoading.value = false
     }
   }
 }
@@ -793,10 +804,15 @@ const canDelete = async () => {
                 <div class="px-4">
                   <BasePlaceload class="h-3 w-[3.5rem] rounded" />
                 </div>
+                <div class="px-4 mt-4">
+                  <BasePlaceload class="h-3 w-[3.5rem] rounded" />
+                </div>
               </div>
               <div class="w-full">
                 <BasePlaceload class="h-10 w-full rounded-xl" />
                 <BasePlaceload class="mx-auto mt-3 h-3 w-[7.5rem] rounded" />
+                <BasePlaceload class="h-10 w-full mt-5 rounded-xl" />
+                <BasePlaceload class="h-10 w-full mt-5 rounded-xl" />
               </div>
             </div>
           </div>

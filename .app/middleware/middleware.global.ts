@@ -3,7 +3,12 @@ export default defineNuxtRouteMiddleware((to) => {
   const toaster = useToaster()
 
   // List of paths where navigation is allowed without authentication
-  const allowedPaths = ['/auth/login', '/auth/terms', '/auth/privacy']
+  const allowedPaths = [
+    '/auth/login',
+    '/auth/terms',
+    '/auth/privacy',
+    '/tarjoman',
+  ]
 
   // Check if the user is authenticated or if the target path is one of the allowed paths
   if (!nuxtApp.$pb.authStore.isValid && !allowedPaths.includes(to.path)) {
