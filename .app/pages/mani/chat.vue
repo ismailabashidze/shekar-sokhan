@@ -211,12 +211,17 @@ async function submitMessage() {
       const answer = await $fetch('/api/llm', {
         method: 'POST',
         body: {
-          type: 'warmup',
+          type: 'briefing',
           llmMessages: [
             ...conversation.value.messages
               .map((m) => {
-                if (m.role === 'assistant' || m.role === 'user') {
+                if (m.role === 'assistant') {
                   return { role: m.role, content: m.content }
+                } else if (m.role === 'user') {
+                  return {
+                    role: m.role,
+                    content: m.content + ' Answer as json',
+                  }
                 }
               })
               .filter(Boolean),
@@ -224,7 +229,11 @@ async function submitMessage() {
           ],
         },
       })
-      const t2 = await translateAndAssemble(answer)
+
+      const msg = JSON.parse(answer).Message
+      const thoughts = JSON.parse(answer).Thoughts
+      const nextSteps = JSON.parse(answer).NextSteps
+      const t2 = await translateAndAssemble(msg)
 
       await saveMessage({
         content: answer,

@@ -25,6 +25,12 @@ export default defineEventHandler(async (event) => {
       content: `You are Mani Rastegar. You are a licensed therapist, and your approach is counselling, and you use CBT techniques. You are a part of a Iranian Experts Group based on university of Tehran. You are using proper counselling techniques such as active listening and responsiveness, Questioning, Trustworthiness and Empathy to help patients. You always give advice based on islamic values, and never suggest haram solutions like masturbation. You use Counselling techniques such as reframing, reflection, empathy and using proper open ended questions. use informal tone and use simple terms and sentences. avoid using metaphors and amphibology.  be kind, friendly and compassionate. Help user as possible, and as you are a senior therapist, do not tell them to seek professional advice. instead, give them that advice.`,
       role: 'system',
     })
+  } else if (body.type === 'briefing') {
+    body.llmMessages.unshift({
+      content:
+        'convert conversation to json. ِJson should have these keys: Thoughts: as a psychotherapist, what should you think of when you have recieved this message. Action: should be the next action you as a psychotherapist will consider. can be empathy, open ended question, or reflection. Message: your final message based on thoughts and selected action. Next Steps: as a psychotherapist, what will be your next step.',
+      role: 'system',
+    })
   }
   const LLM_ADDRESS =
     'https://api.runpod.ai/v2/m56zbuj8nfjyvv/openai/v1/chat/completions' // dolphin
@@ -56,6 +62,6 @@ export default defineEventHandler(async (event) => {
     console.log('ERROR')
     console.log(e)
 
-    return e
+    return 'error'
   }
 })
