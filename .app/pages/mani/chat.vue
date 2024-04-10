@@ -60,6 +60,35 @@ const conversation = ref({
 const sleep = (time: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, time))
 }
+async function processResponse(answer) {
+  // Parsing the answer JSON to extract needed parts
+  const parsedAnswer = JSON.parse(answer);
+  const msg = parsedAnswer.Message;
+  const thoughts = parsedAnswer.Thoughts;
+  const nextSteps = parsedAnswer.NextSteps;
+
+  // Creating an array of promises for each part that needs processing
+  const promises = [
+    translateAndAssemble(msg),
+    translateAndAssemble(thoughts),
+    translateAndAssemble(nextSteps),
+  ];
+
+  try {
+    // Wait for all promises to be resolved
+    const [translatedMsg, translatedThoughts, translatedNextSteps] = await Promise.all(promises);
+
+    // At this point, all your data is processed and you can use translatedMsg, translatedThoughts, translatedNextSteps
+    // For example, log them or return them for further processing
+    console.log(translatedMsg, translatedThoughts, translatedNextSteps);
+
+    // Return an object with all processed parts if needed
+    return { translatedMsg, translatedThoughts, translatedNextSteps };
+  } catch (error) {
+    // Handle any errors that occur during the translation and assembly
+    console.error("An error occurred during translation and assembly:", error);
+  }
+}
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
 const signout = () => {
@@ -230,11 +259,10 @@ async function submitMessage() {
         },
       })
 
-      const msg = JSON.parse(answer).Message
-      const thoughts = JSON.parse(answer).Thoughts
-      const nextSteps = JSON.parse(answer).NextSteps
-      const t2 = await translateAndAssemble(msg)
-
+      // HERE
+      const {t2, thoughts, nextSteps} = await processResponse(answer)
+      console.log('here')
+      console.log(t2, thoughts, nextSteps)
       await saveMessage({
         content: answer,
         translatedFa: t2,
@@ -242,6 +270,10 @@ async function submitMessage() {
         role: 'assistant',
         time: new Date().toLocaleTimeString('fa'),
         evaluations: {},
+        thoughts: JSON.parse(answer).Thoughts,
+        thoughtsFa: thoughts,
+        nextSteps: JSON.parse(answer).NextSteps,
+        nextStepsFa: nextSteps,
       })
       messageLoading.value = false
       conversation.value.messages.push({
@@ -731,7 +763,7 @@ const canDelete = async () => {
                   </div>
                   <BaseButton
                     color="primary"
-                    class="my-3 mr-2 w-[120px]"
+                    class="my-3 mr-2 w-[150px]"
                     to="/onboarding"
                     >خرید اشتراک</BaseButton
                   >
