@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
   } else if (body.type === 'briefing') {
     body.llmMessages.unshift({
       content:
-        'convert conversation to json. ِJson should have these keys: Thoughts: as a psychotherapist, what should you think of when you have recieved this message. Action: should be the next action you as a psychotherapist will consider. can be empathy, open ended question, or reflection. Message: your final message based on thoughts and selected action. Next Steps: as a psychotherapist, what will be your next step.',
+        'answer as json. ِJson should have these keys and only be strings: thoughts: as a psychotherapist, what should you think of when you have recieved this message. action: should be the next action you as a psychotherapist will consider. nextSteps: as a psychotherapist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only.',
       role: 'system',
     })
   }
@@ -40,6 +40,9 @@ export default defineEventHandler(async (event) => {
   // const LLM_ADDRESS = 'http://localhost:11434/api/chat'
   // const LLM_ADDRESS = 'https://bb15-2-190-129-92.ngrok-free.app/api/chat'
   try {
+    console.log('body.llmMessages')
+    console.log(body.llmMessages)
+
     const res = await $fetch(LLM_ADDRESS, {
       method: 'POST',
       headers: {
@@ -50,14 +53,37 @@ export default defineEventHandler(async (event) => {
         // model: 'NousResearch/Hermes-2-Pro-Mistral-7B',
         model: 'cognitivecomputations/dolphin-2.8-mistral-7b-v02',
         messages: body.llmMessages,
-        temperature: 0.8,
-        max_tokens: 512,
-        response_format: { type: 'json_object' },
-        repeat_penalty: 1.1,
+        temperature: 0.1,
+        max_tokens: 1024,
         stream: false,
       }),
     })
-    return res.choices[0].message.content as object
+    console.log('res')
+    console.log(res)
+
+    // this means that maximum context length has been overflowed
+    // if(res.code){
+    //
+    // }
+
+    let response = ''
+    // check whether the answer of llm is a valid json.
+    // if it is string, we have to json it, validate it, stringify, then send it.
+    // if it is json, so, we have stringify and send it.
+    if (typeof res.choices[0].message.content == 'string') {
+      try {
+        response = JSON.parse(res.choices[0].message.content)
+      } catch (e) {
+        console.log(
+          'there is response from llm which is a string but inside is not json.',
+        )
+        throw e
+      }
+    }
+    console.log('response')
+    console.log(response)
+
+    return JSON.stringify(response)
   } catch (e) {
     console.log('ERROR')
     console.log(e)

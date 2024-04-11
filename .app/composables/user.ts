@@ -7,6 +7,7 @@ export type User = {
   password: string
   passwordConfirm: string
   created: string
+  record: { id: string }
 }
 
 export function useUser() {
@@ -25,13 +26,13 @@ export function useUser() {
     }
   }
   const getAllUsers = async () => {
-    const users = await nuxtApp.$pb.collection('anonymousUsers').getFullList({
+    const users = await nuxtApp.$pb.collection('users').getFullList({
       sort: '-created',
     })
     return users
   }
   const removeUser = async (userId: string) => {
-    const users = await nuxtApp.$pb.collection('anonymousUsers').delete(userId)
+    const users = await nuxtApp.$pb.collection('users').delete(userId)
     return true
   }
 

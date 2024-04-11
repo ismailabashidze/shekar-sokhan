@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { BackendMessage } from '~/composables/message'
-
+import { BackendMessage, Content } from '~/composables/message'
+interface TranslatedResponse {
+  translatedMsg: string
+  translatedThoughts: string
+  translatedAction: string
+  translatedNextSteps: string
+}
 definePageMeta({
   title: 'پیام ها',
   layout: 'empty',
@@ -15,8 +20,6 @@ definePageMeta({
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
-
-const PATIENT_AGENT = 'ZohrehPatient'
 
 const { user } = useUser()
 const { open } = usePanels()
@@ -33,25 +36,32 @@ const expanded = ref(false)
 const loading = ref(true)
 const conversation = ref({
   user: {
-    name: 'مانی، مشاور بحران',
+    name: 'مانی، همدل هوشمند',
     photo: '/img/avatars/1.svg',
-    role: 'ایجنت هوش مصنوعی',
-    bio: 'مانی، مشاور بحران توانایی همدلی، و انجام مداخلات بحران و بالاخص خودکشی را دارست.',
+    role: 'عامل هوش مصنوعی',
+    bio: 'مانی اولین عامل هوشمند همدلی',
     age: '50s-180s',
     location: 'ایران',
   },
   messages: [
     {
       role: 'separator',
-      translatedFa: 'شروع گفت و گو',
-      content: 'Conversation Started',
+      content: { message: 'Conversation Started' },
+      contentFa: { message: 'شروع گفت و گو' },
     },
     {
       role: 'assistant',
-      translatedFa:
-        'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
-      // 'سلام. من زینب هستم. دوست خوب تو.',
-      content: "Hi. I'm Mani. How can I help you?",
+      contentFa: {
+        message:
+          'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
+      },
+      content: {
+        message:
+          "Hi. I'm Mani. a Licensed Psychotherapist. My goal here is to build a great therapeutic alliance, based on trust and empathy. How can I help you?",
+        thoughts: 'I will do my best.',
+        nextSteps: 'Starting conversation',
+        action: 'intializing conversation properly.',
+      },
       time: new Date().toLocaleTimeString('fa'),
     },
   ] as BackendMessage[],
@@ -60,33 +70,40 @@ const conversation = ref({
 const sleep = (time: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, time))
 }
-async function processResponse(answer) {
-  // Parsing the answer JSON to extract needed parts
-  const parsedAnswer = JSON.parse(answer);
-  const msg = parsedAnswer.Message;
-  const thoughts = parsedAnswer.Thoughts;
-  const nextSteps = parsedAnswer.NextSteps;
+async function processResponse(answer: Content): Promise<TranslatedResponse> {
+  const msg = answer.message as string
+  const thoughts = answer.thoughts as string
+  const action = answer.action as string
+  const nextSteps = answer.nextSteps as string
 
   // Creating an array of promises for each part that needs processing
   const promises = [
-    translateAndAssemble(msg),
-    translateAndAssemble(thoughts),
-    translateAndAssemble(nextSteps),
-  ];
+    translateAndAssemble(msg, 'English', 'Western Persian'),
+    translateAndAssemble(thoughts, 'English', 'Western Persian'),
+    translateAndAssemble(action, 'English', 'Western Persian'),
+    translateAndAssemble(nextSteps, 'English', 'Western Persian'),
+  ]
 
   try {
     // Wait for all promises to be resolved
-    const [translatedMsg, translatedThoughts, translatedNextSteps] = await Promise.all(promises);
-
-    // At this point, all your data is processed and you can use translatedMsg, translatedThoughts, translatedNextSteps
-    // For example, log them or return them for further processing
-    console.log(translatedMsg, translatedThoughts, translatedNextSteps);
+    const [
+      translatedMsg,
+      translatedThoughts,
+      translatedAction,
+      translatedNextSteps,
+    ] = await Promise.all(promises)
 
     // Return an object with all processed parts if needed
-    return { translatedMsg, translatedThoughts, translatedNextSteps };
+    return {
+      translatedMsg,
+      translatedThoughts,
+      translatedAction,
+      translatedNextSteps,
+    }
   } catch (error) {
     // Handle any errors that occur during the translation and assembly
-    console.error("An error occurred during translation and assembly:", error);
+    console.error('An error occurred during translation and assembly:', error)
+    throw error
   }
 }
 const nuxtApp = useNuxtApp()
@@ -109,6 +126,7 @@ onMounted(async () => {
   const msg = await getMessages()
   msg.map((m) => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
   conversation.value.messages.push(...msg)
+
   loading.value = false
   // await autoConversation()
   await sleep(2000)
@@ -152,7 +170,7 @@ onMounted(async () => {
 //   await saveMessage({
 //     content: m as string,
 //     translatedFa: t,
-//     anonymousUser: user.value.record.id,
+//     user: user.value.record.id,
 //     role: 'user',
 //     // evaluations: JSON.parse(userEval),
 //     evaluations: {},
@@ -163,7 +181,7 @@ onMounted(async () => {
 //   await saveMessage({
 //     content: answer,
 //     translatedFa: t2 as string,
-//     anonymousUser: user.value.record.id,
+//     user: user.value.record.id,
 //     role: 'assistant',
 //     time: new Date().toLocaleTimeString('fa'),
 //     evaluations: {},
@@ -176,15 +194,15 @@ onMounted(async () => {
 //   })
 //   await autoConversation()
 // }
-async function translateAndAssemble(answer: string) {
-  const chunks = answer.split('\n').filter((chunk) => chunk.trim().length > 0)
+async function translateAndAssemble(answer: string, from: string, to: string) {
+  const chunks = answer
+    .split(/[\.\n]\s*/)
+    .filter((chunk) => chunk.trim().length > 0)
   const translatePromises = chunks.map((chunk, index) => {
-    return translate(chunk, 'English', 'Western Persian').then(
-      (translatedChunk) => ({
-        index,
-        translatedChunk,
-      }),
-    )
+    return translate(chunk, from, to).then((translatedChunk) => ({
+      index,
+      translatedChunk,
+    }))
   })
 
   const translatedChunksWithIndex = await Promise.all(translatePromises)
@@ -203,8 +221,8 @@ async function submitMessage() {
   message.value = ''
   const newMessage: BackendMessage = {
     role: 'user',
-    translatedFa: m,
-    content: '',
+    contentFa: { message: m },
+    content: { message: '' },
     time: new Date().toLocaleTimeString('fa'),
   }
   conversation.value.messages.push(newMessage)
@@ -216,24 +234,15 @@ async function submitMessage() {
       })
     }
   }, 30)
-  const t = await translate(m, 'Western Persian', 'English')
-  conversation.value.messages[conversation.value.messages.length - 1].content =
-    t as string
-  // const userEval = await $fetch('/api/llm', {
-  //   method: 'POST',
-  //   body: {
-  //     type: 'eval',
-  //     llmMessages: [{ content: translated.value, role: 'user' }],
-  //   },
-  // })
-
+  const t = await translateAndAssemble(m, 'Western Persian', 'English')
+  conversation.value.messages[
+    conversation.value.messages.length - 1
+  ].content.message = t
   const res = await saveMessage({
-    content: t as string,
-    translatedFa: m,
-    anonymousUser: user.value.record.id,
     role: 'user',
-    // evaluations: JSON.parse(userEval),
-    evaluations: {},
+    content: { message: t },
+    contentFa: { message: m },
+    user: user.value.record.id,
   })
   if (res === 'success') {
     try {
@@ -244,42 +253,50 @@ async function submitMessage() {
           llmMessages: [
             ...conversation.value.messages
               .map((m) => {
-                if (m.role === 'assistant') {
-                  return { role: m.role, content: m.content }
-                } else if (m.role === 'user') {
+                if (m.role == 'assistant' || m.role == 'user') {
                   return {
                     role: m.role,
-                    content: m.content + ' Answer as json',
+                    content: JSON.stringify(m.content),
                   }
                 }
               })
               .filter(Boolean),
-            { content: translated.value, role: 'user' },
           ],
         },
       })
+      console.log('answer')
+      console.log(answer)
+      console.log('typeof answer')
+      console.log(typeof answer)
+      const {
+        translatedMsg,
+        translatedThoughts,
+        translatedAction,
+        translatedNextSteps,
+      } = await processResponse(JSON.parse(answer))
 
-      // HERE
-      const {t2, thoughts, nextSteps} = await processResponse(answer)
-      console.log('here')
-      console.log(t2, thoughts, nextSteps)
       await saveMessage({
-        content: answer,
-        translatedFa: t2,
-        anonymousUser: user.value.record.id,
+        user: user.value.record.id,
         role: 'assistant',
         time: new Date().toLocaleTimeString('fa'),
-        evaluations: {},
-        thoughts: JSON.parse(answer).Thoughts,
-        thoughtsFa: thoughts,
-        nextSteps: JSON.parse(answer).NextSteps,
-        nextStepsFa: nextSteps,
+        content: JSON.parse(answer),
+        contentFa: {
+          message: translatedMsg,
+          thoughts: translatedThoughts,
+          action: translatedAction,
+          nextSteps: translatedNextSteps,
+        },
       })
       messageLoading.value = false
       conversation.value.messages.push({
         role: 'assistant',
-        translatedFa: t2,
-        content: answer,
+        content: JSON.parse(answer),
+        contentFa: {
+          message: translatedMsg,
+          thoughts: translatedThoughts,
+          action: translatedAction,
+          nextSteps: translatedNextSteps,
+        },
         time: new Date().toLocaleTimeString('fa'),
       })
 
@@ -292,6 +309,8 @@ async function submitMessage() {
         })
       }
     } catch (e) {
+      console.log('here')
+      console.log(e)
       toaster.show({
         title: 'دریافت پیام', // Authentication
         message: `مشکلی وجود دارد`, // Please log in again
@@ -678,7 +697,7 @@ const canDelete = async () => {
                       ]"
                     >
                       <p class="font-sans text-sm text-justify">
-                        {{ item.translatedFa }}
+                        {{ item?.contentFa.message }}
                       </p>
                     </div>
                     <div
@@ -746,7 +765,7 @@ const canDelete = async () => {
                     <span
                       class="bg-muted-100 dark:bg-muted-900 text-muted-400 px-3 font-sans text-xs uppercase"
                     >
-                      {{ item.translatedFa }}
+                      {{ item.contentFa.message }}
                     </span>
                   </div>
                 </div>

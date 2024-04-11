@@ -20,18 +20,24 @@ const selectAll = ref(false)
 const users = ref<User[]>([])
 const { user, getAllUsers, removeUser } = useUser()
 const toaster = useToaster()
-users.value = await getAllUsers()
+onMounted(async () => {
+  users.value = await getAllUsers()
+})
 const selectedToRemove = ref()
 const isRemoveModalOpen = ref(false)
 const removeLoading = ref(false)
 
 const goToConversation = (u: User) => {
   user.value = u
-  navigateTo('/mani/chat-llm')
+  navigateTo('/mani/chat')
 }
 const goToChart = (u: User) => {
   user.value = u
   navigateTo(`/mani/analysis?code=${u.anonymousCode}`)
+}
+const goToThoughts = (u: User) => {
+  user.value = u
+  navigateTo(`/mani/thoughts?userId=${u.id}`)
 }
 
 function closeRemoveModal() {
@@ -98,7 +104,7 @@ async function removeConversation() {
       <TairoFlexTableCell type="stable" data-content="u">
         <div class="flex items-center">
           <BaseAvatar
-            :src="`/img/avatars/${(u.anonymousCode % 8) + 1}.svg`"
+            :src="`/img/avatars/${(new Date(u.created).getTime() % 8) + 1}.svg`"
             size="sm"
           />
 
@@ -115,11 +121,11 @@ async function removeConversation() {
       </TairoFlexTableCell>
 
       <TairoFlexTableCell type="stable" data-content="Expertise" light>
-        {{ u.anonymousCode }}
+        {{ u.username }}
       </TairoFlexTableCell>
 
-      <TairoFlexTableCell type="stable" data-content="Rate">
-        <span class="font-medium">${{ u.id }}</span>
+      <TairoFlexTableCell type="stable">
+        <span>{{ u.id }}</span>
       </TairoFlexTableCell>
       <TairoFlexTableCell type="stable" data-content="Rate">
         <span class="font-medium">{{
@@ -164,6 +170,9 @@ async function removeConversation() {
         data-content="Actions"
       >
         <div class="flex scale-90 gap-x-3">
+          <BaseButtonIcon color="primary" shape="full" @click="goToThoughts(u)">
+            <Icon name="carbon:block-storage" class="h-5 w-5" />
+          </BaseButtonIcon>
           <BaseButtonIcon
             color="primary"
             shape="full"
