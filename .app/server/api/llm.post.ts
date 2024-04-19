@@ -26,68 +26,71 @@ export default defineEventHandler(async (event) => {
       role: 'system',
     })
   } else if (body.type === 'briefing') {
+    // 'answer as json. ِJson should have these four keys and only be strings: thoughts: as a psychotherapist, what should you think of when you have recieved this message, especially based on emotions. action: should be the next action you as a psychotherapist will consider. nextSteps: as a psychotherapist, what will be your next step. message: your final message based on thoughts and selected action, here you can use emojis, use them a lot. express your emoji in brackets like this: [sad] or [happy] or [strong] etc. use english snake case like wave_hands, not actual emoji like 👋. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychotherapist is needed.',
     body.llmMessages.unshift({
       content:
-        'answer as json. ِJson should have these keys and only be strings: thoughts: as a psychotherapist, what should you think of when you have recieved this message. action: should be the next action you as a psychotherapist will consider. nextSteps: as a psychotherapist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only.',
+      'answer as json. ِJson should have these four keys and only be strings: thoughts: as a psychotherapist, what should you think of when you have recieved this message, especially based on emotions. action: should be the next action you as a psychotherapist will consider. nextSteps: as a psychotherapist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychotherapist is needed.',
       role: 'system',
     })
+    // body.llmMessages.unshift({
+    //   content:
+    //     'you are sarah, the devoted wife. You will obey, show your empathy as possible, show your complete submissiveness. be kind, and love user as much as possible. answer as json. ِJson should have these keys and only be strings: thoughts: as a wife and slave, what should you think of when you have recieved this message, including emotions. action: should be the next action based on thoughts, you try to make user feel better. message: your final message based on thoughts and selected action. answer as valid json, only.',
+    //   role: 'system',
+    // })
   }
+
   const LLM_ADDRESS =
-    'https://api.runpod.ai/v2/m56zbuj8nfjyvv/openai/v1/chat/completions' // dolphin
-  // 'https://api.runpod.ai/v2/mp1ff6eqgp6lv9/openai/v1/chat/completions' // hermes
-  // const LLM_ADDRESS =
-  // 'https://zvfiuquih3rs4n-8000.proxy.runpod.net/v1/chat/completions'
-  // const LLM_ADDRESS = 'http://localhost:11434/api/chat'
-  // const LLM_ADDRESS = 'https://bb15-2-190-129-92.ngrok-free.app/api/chat'
-  try {
-    console.log('body.llmMessages')
-    console.log(body.llmMessages)
-
-    const res = await $fetch(LLM_ADDRESS, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer 8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3',
-      },
-      body: JSON.stringify({
-        // model: 'NousResearch/Hermes-2-Pro-Mistral-7B',
-        model: 'cognitivecomputations/dolphin-2.8-mistral-7b-v02',
-        messages: body.llmMessages,
-        temperature: 0.1,
-        max_tokens: 1024,
-        stream: false,
-      }),
-    })
-    console.log('res')
-    console.log(res)
-
-    // this means that maximum context length has been overflowed
-    // if(res.code){
-    //
-    // }
-
-    let response = ''
-    // check whether the answer of llm is a valid json.
-    // if it is string, we have to json it, validate it, stringify, then send it.
-    // if it is json, so, we have stringify and send it.
-    if (typeof res.choices[0].message.content == 'string') {
-      try {
-        response = JSON.parse(res.choices[0].message.content)
-      } catch (e) {
-        console.log(
-          'there is response from llm which is a string but inside is not json.',
-        )
-        throw e
+    'https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions' // dolphin 7b
+  const RETRIES = 3;
+  let current = 1;
+  while(current <= RETRIES){
+    try {
+      console.log('attempt number ' + current);
+      const res = await $fetch(LLM_ADDRESS, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer 8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3',
+        },
+        body: JSON.stringify({
+          model: 'cognitivecomputations/dolphin-2.8-mistral-7b-v02',
+          messages: body.llmMessages,
+          temperature: 1,
+          max_tokens: 8192,
+          repeat_penalty: 2,
+          stream: false,
+        }),
+      })
+      console.log('res')
+      console.log(res)
+      let response = ''
+      // check whether the answer of llm is a valid json.
+      // if it is string, we have to json it, validate it, stringify, then send it.
+      // if it is json, so, we have stringify and send it.
+      if (typeof res.choices[0].message.content == 'string') {
+        try {
+          response = JSON.parse(res.choices[0].message.content)
+        } catch (e) {
+          console.log(
+            'there is response from llm which is a string but inside is not json.',
+          )
+          current ++;
+          body.llmMessages.push({role: 'assistant', content: 'you have to answer as JSON only. your json should have exact these keys: thoughts, action, nextSteps, message. Answer properly.'})
+          if(current == RETRIES){
+            console.log('the maximum retries reached. throwing error ...') 
+            throw e
+          }
+        }
       }
+      console.log('response')
+      console.log(response)
+  
+      return JSON.stringify(response)
+    } catch (e) {
+      console.log('ERROR')
+      console.log(e)
+  
+      return 'error'
     }
-    console.log('response')
-    console.log(response)
-
-    return JSON.stringify(response)
-  } catch (e) {
-    console.log('ERROR')
-    console.log(e)
-
-    return 'error'
   }
 })

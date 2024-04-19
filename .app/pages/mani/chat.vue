@@ -58,7 +58,7 @@ const conversation = ref({
       content: {
         message:
           "Hi. I'm Mani. a Licensed Psychotherapist. My goal here is to build a great therapeutic alliance, based on trust and empathy. How can I help you?",
-        thoughts: 'I will do my best.',
+        thoughts: 'I will do my best. I have to be kind and positive to form a good starting point.',
         nextSteps: 'Starting conversation',
         action: 'intializing conversation properly.',
       },
