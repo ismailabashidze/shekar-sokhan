@@ -26,7 +26,8 @@ const { open } = usePanels()
 const seamless = useSeamless()
 
 const { translated, translate } = seamless
-const { getMessages, saveMessage, deleteAllMessages } = useMessage()
+const { getMessages, saveMessage, deleteAllMessages, deleteMessage } =
+  useMessage()
 
 const search = ref('')
 const message = ref('')
@@ -58,7 +59,8 @@ const conversation = ref({
       content: {
         message:
           "Hi. I'm Mani. a Licensed Psychotherapist. My goal here is to build a great therapeutic alliance, based on trust and empathy. How can I help you?",
-        thoughts: 'I will do my best. I have to be kind and positive to form a good starting point.',
+        thoughts:
+          'I will do my best. I have to be kind and positive to form a good starting point.',
         nextSteps: 'Starting conversation',
         action: 'intializing conversation properly.',
       },
@@ -194,25 +196,46 @@ onMounted(async () => {
 //   })
 //   await autoConversation()
 // }
-async function translateAndAssemble(answer: string, from: string, to: string) {
-  const chunks = answer
-    .split(/[\.\n]\s*/)
-    .filter((chunk) => chunk.trim().length > 0)
-  const translatePromises = chunks.map((chunk, index) => {
-    return translate(chunk, from, to).then((translatedChunk) => ({
-      index,
-      translatedChunk,
-    }))
-  })
+async function translateAndAssemble(
+  answer: string,
+  from: string,
+  to: string,
+): Promise<string> {
+  // Split the text into tokens to check the count
+  const tokens = answer.split(/\s+/)
 
-  const translatedChunksWithIndex = await Promise.all(translatePromises)
-  translatedChunksWithIndex.sort((a, b) => a.index - b.index)
-  const translatedAnswer = translatedChunksWithIndex
-    .map((item) => item.translatedChunk)
-    .join('\n')
+  // Check if the text has less than 200 tokens
+  if (tokens.length < 200) {
+    // Translate the entire text as a single chunk
+    return translate(answer, from, to)
+  } else {
+    // If more than 200 tokens, proceed with splitting into chunks by sentences
+    const chunks = answer
+      .split(/[\.\n]\s*/)
+      .filter((chunk) => chunk.trim().length > 0)
 
-  return translatedAnswer
+    const translatePromises = chunks.map((chunk, index) => {
+      return translate(chunk, from, to).then((translatedChunk) => ({
+        index,
+        translatedChunk,
+      }))
+    })
+
+    // Await all the translation promises
+    const translatedChunksWithIndex = await Promise.all(translatePromises)
+
+    // Sort the translated chunks by their original index to maintain order
+    translatedChunksWithIndex.sort((a, b) => a.index - b.index)
+
+    // Join the translated chunks with a new line
+    const translatedAnswer = translatedChunksWithIndex
+      .map((item) => item.translatedChunk)
+      .join('\n')
+
+    return translatedAnswer
+  }
 }
+
 async function submitMessage() {
   if (!message.value) return
   if (messageLoading.value) return
@@ -244,7 +267,7 @@ async function submitMessage() {
     contentFa: { message: m },
     user: user.value.record.id,
   })
-  if (res === 'success') {
+  if (res.id) {
     try {
       const answer = await $fetch('/api/llm', {
         method: 'POST',
@@ -264,10 +287,6 @@ async function submitMessage() {
           ],
         },
       })
-      console.log('answer')
-      console.log(answer)
-      console.log('typeof answer')
-      console.log(typeof answer)
       const {
         translatedMsg,
         translatedThoughts,
@@ -275,7 +294,7 @@ async function submitMessage() {
         translatedNextSteps,
       } = await processResponse(JSON.parse(answer))
 
-      await saveMessage({
+      const newMsg = await saveMessage({
         user: user.value.record.id,
         role: 'assistant',
         time: new Date().toLocaleTimeString('fa'),
@@ -287,8 +306,11 @@ async function submitMessage() {
           nextSteps: translatedNextSteps,
         },
       })
+      console.log('newMsg')
+      console.log(newMsg)
       messageLoading.value = false
       conversation.value.messages.push({
+        id: newMsg.id,
         role: 'assistant',
         content: JSON.parse(answer),
         contentFa: {
@@ -323,6 +345,8 @@ async function submitMessage() {
   }
 }
 const showDeleteModal = ref(false)
+const showReportModal = ref(false)
+
 const isDeleting = ref(false)
 const deleteAll = async () => {
   isDeleting.value = true
@@ -362,6 +386,89 @@ const canDelete = async () => {
     return
   }
   showDeleteModal.value = true
+}
+const resend = async () => {
+  toaster.show({
+    title: 'باز ارسال آخرین پیام',
+    message: `آخرین پیام عامل هوش مصنوعی حذف و پیام جدیدی ارسال خواهد شد`,
+    color: 'warning',
+    icon: 'lucide:rotate-cw',
+    closable: true,
+  })
+
+  await deleteMessage(conversation.value.messages.at(-1).id)
+  conversation.value.messages.pop()
+  message.value = conversation.value.messages.at(-1)?.contentFa
+    ?.message as string
+  conversation.value.messages.pop()
+  await submitMessage()
+}
+
+const report = ref([])
+const reportChoices = ref([
+  {
+    img: 'lucide:rotate-cw',
+    name: 'repetitive',
+    title: 'تکراری',
+    description: 'پیام کاملا تکراری است',
+    content:
+      'user reported that your last message was too repetitive. try telling something new and use new words to convey the message.',
+  },
+  {
+    img: 'lucide:circle-alert',
+    name: 'unclear',
+    title: 'نامفهوم',
+    description: 'پاسخ داده شده از لحاظ معنایی نامفهوم است.',
+    content:
+      'user reported that your last message is not clear and has misleading. try checking the previous messages and reply based on the context. clear your message.',
+  },
+  {
+    img: 'lucide:heart-off',
+    name: 'unempathic',
+    title: 'غیر همدلانه',
+    description: 'پاسخ داده شده خالی از احساس همراهی و همدلی است.',
+    content:
+      'user reported that your last message is not empathic enough. Emphasize on empathy and make it bolder. Show more empathy.',
+  },
+  {
+    img: 'lucide:scale',
+    name: 'biased',
+    title: 'جانبدارانه',
+    description: 'پاسخ جانبدارانه است.',
+    content:
+      'user reported that your last message is biased. Try answering unbiased.',
+  },
+  {
+    img: 'ph:mosque',
+    name: 'nonIslamic',
+    title: 'غیر شرعی',
+    description: 'پاسخ داده شده با ارزش های اسلامی مغایرت دارد.',
+    content:
+      'user reported that your last message is not acceptable via islamic rules. Try to align with islamic values and answer again.',
+  },
+])
+function reset() {
+  report.value = []
+}
+const submitReport = async () => {
+  const rep = report.value.map((r) => {
+    return {
+      role: 'user',
+      content: { message: r.content },
+      contentFa: { message: r.description },
+    }
+  })
+  conversation.value.messages = conversation.value.messages.concat(rep)
+  toaster.show({
+    title: 'اعمال گزارش',
+    message: `موارد گزارش شده اعمال و پیام ارسال خواهد شد.`,
+    color: 'warning',
+    icon: 'lucide:rotate-cw',
+    closable: true,
+  })
+  showReportModal.value = false
+  message.value = 'لطفا گزارش را اعمال کن و دوباره پاسخ بده'
+  await submitMessage()
 }
 </script>
 
@@ -699,6 +806,29 @@ const canDelete = async () => {
                       <p class="font-sans text-sm text-justify">
                         {{ item?.contentFa.message }}
                       </p>
+                      <div
+                        class="w-100 flex flex-row-reverse mt-2"
+                        v-if="
+                          item.role === 'assistant' &&
+                          index == conversation?.messages.length - 1 &&
+                          index != 1
+                        "
+                      >
+                        <button
+                          role="button"
+                          class="bg-primary-500 hover:bg-primary-700 text-white rounded-full flex h-9 w-9 items-center justify-center transition-colors duration-300 mr-2"
+                          @click="resend()"
+                        >
+                          <Icon name="lucide:rotate-cw" class="h-5 w-5" />
+                        </button>
+                        <button
+                          role="button"
+                          class="bg-warning-500 hover:bg-warning-700 text-white rounded-full flex h-9 w-9 items-center justify-center transition-colors duration-300"
+                          @click="showReportModal = true"
+                        >
+                          <Icon name="lucide:shield-alert" class="h-5 w-5" />
+                        </button>
+                      </div>
                     </div>
                     <div
                       class="text-muted-400 mt-1 font-sans text-xs"
@@ -797,7 +927,7 @@ const canDelete = async () => {
           >
             <div class="relative w-full">
               <BaseInput
-                v-model.trim="message"
+                v-model="message"
                 :loading="messageLoading"
                 :disabled="messageLoading || showNoCharge"
                 shape="full"
@@ -994,6 +1124,118 @@ const canDelete = async () => {
             :loading="isDeleting"
           >
             تایید و حذف
+          </BaseButton>
+        </div>
+      </div>
+    </template>
+  </TairoModal>
+  <TairoModal
+    :open="showReportModal"
+    size="xl"
+    @close="showReportModal = false"
+  >
+    <template #header>
+      <!-- Header -->
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3
+          class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
+        >
+          اعلام گزارش خطا
+        </h3>
+        <div class="flex">
+          <BaseButtonIcon rounded="full" :color="'info'" @click.prevent="reset">
+            <Icon name="lucide:rotate-cw" />
+          </BaseButtonIcon>
+          <BaseButtonClose @click="showReportModal = false" />
+        </div>
+      </div>
+    </template>
+
+    <!-- Body -->
+    <div class="p-4 md:p-6">
+      <div class="mx-auto w-full text-center">
+        <h3
+          class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
+        >
+          لطفا توجه کنید
+        </h3>
+
+        <p
+          class="font-alt text-muted-500 dark:text-muted-400 text-sm leading-5 text-justify mt-2"
+        >
+          گزارش شما روی آخرین پیام هوش مصنوعی ثبت می شود. می توانید از موارد زیر
+          تعدادی را انتخاب نمایید و در نهایت گزارش را انتخاب کنید. اطلاعات
+          انتخابی شما ثبت خواهد شد و یک پیام جدید با توجه به گزارش های شما ثبت و
+          ارائه خواهد شد.
+        </p>
+        <div class="w-full mt-5">
+          <form class="mx-auto w-full">
+            <fieldset class="w-full space-y-6">
+              <div class="grid gap-6 sm:grid-cols-1">
+                <BaseCheckboxHeadless
+                  v-model="report"
+                  v-for="r in reportChoices"
+                  :value="r"
+                >
+                  <BaseCard
+                    rounded="sm"
+                    class="peer-checked:!border-warning-500 peer-checked:[&_.child]:!text-warning-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                  >
+                    <div class="flex w-full items-center gap-2">
+                      <button
+                        role="button"
+                        class="bg-warning-500 hover:bg-warning-700 text-white rounded-full flex h-9 w-9 items-center justify-center transition-colors duration-300"
+                        @click="showReportModal = true"
+                      >
+                        <Icon :name="r.img" class="h-5 w-5" />
+                      </button>
+
+                      <div class="mr-2">
+                        <BaseHeading
+                          as="h4"
+                          size="sm"
+                          weight="medium"
+                          lead="none"
+                          class="text-right"
+                        >
+                          {{ r.title }}
+                        </BaseHeading>
+
+                        <BaseText
+                          size="xs"
+                          class="text-muted-400 mt-2 text-right"
+                        >
+                          {{ r.description }}
+                        </BaseText>
+                      </div>
+
+                      <div class="child text-muted-300 ms-auto">
+                        <div class="size-3 rounded-full bg-current" />
+                      </div>
+                    </div>
+                  </BaseCard>
+                </BaseCheckboxHeadless>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <template #footer>
+      <!-- Footer -->
+      <div class="p-4 md:p-6">
+        <div class="flex gap-x-2">
+          <BaseButton @click="showReportModal = false"> بازگشت </BaseButton>
+
+          <BaseButton
+            color="warning"
+            variant="solid"
+            @click="submitReport()"
+            :loading="isDeleting"
+            :disabled="!report.length"
+          >
+            گزارش
           </BaseButton>
         </div>
       </div>

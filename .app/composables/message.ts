@@ -29,9 +29,9 @@ export function useMessage() {
   }
   const saveMessage = async (newMessage: BackendMessage) => {
     try {
-      await nuxtApp.$pb.collection('messages').create(newMessage)
+      const res = await nuxtApp.$pb.collection('messages').create(newMessage)
       messages.value.push(newMessage)
-      return 'success'
+      return res
     } catch (e) {
       console.log('e')
       console.log(e)
@@ -83,6 +83,11 @@ export function useMessage() {
     })
     return res
   }
+  const deleteMessage = async (messageId: string) => {
+    const res = await nuxtApp.$pb.collection('messages').delete(messageId)
+    return res
+  }
+
   return {
     messages,
     filteredMessages,
@@ -93,5 +98,6 @@ export function useMessage() {
     saveSummerizedMessages,
     getSummerizedMessagesByCode,
     deleteAllMessages,
+    deleteMessage,
   }
 }
