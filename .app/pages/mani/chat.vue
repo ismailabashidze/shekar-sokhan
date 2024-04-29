@@ -38,7 +38,7 @@ const loading = ref(true)
 const conversation = ref({
   user: {
     name: 'مانی، همدل هوشمند',
-    photo: '/img/avatars/1.svg',
+    photo: '/img/avatars/mani.jpg',
     role: 'عامل هوش مصنوعی',
     bio: 'مانی اولین عامل هوشمند همدلی',
     age: '50s-180s',
@@ -108,6 +108,11 @@ async function processResponse(answer: Content): Promise<TranslatedResponse> {
     throw error
   }
 }
+const darkStatus = useColorMode()
+const currentStat = ref('dark')
+watch(darkStatus, (newVal) => {
+  currentStat.value = newVal.value
+})
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
 const signout = () => {
@@ -562,7 +567,14 @@ const submitReport = async () => {
         </div>
       </div>
     </div>
-    <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen">
+    <div
+      class="bg-muted-100 dark:bg-muted-900 flex min-h-screen"
+      :style="
+        currentStat === 'dark'
+          ? `background-image: url('../../img/back/back-dark.png')`
+          : `background-image: url('../../img/back/back.png')`
+      "
+    >
       <!-- Sidebar -->
       <div
         class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 h-screen w-20 border-r bg-white sm:block hidden"
@@ -688,6 +700,11 @@ const submitReport = async () => {
             <!-- Loader-->
             <div
               class="bg-muted-100 dark:bg-muted-900 pointer-events-none absolute inset-0 z-10 h-full w-full p-8 transition-opacity duration-300"
+              :style="
+                darkStatus === 'dark'
+                  ? `background-image: url('../../img/back/back-dark.png')`
+                  : `background-image: url('../../img/back/back.png')`
+              "
               :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
             >
               <div class="mt-12 space-y-12">
@@ -783,7 +800,9 @@ const submitReport = async () => {
                 ]"
               >
                 <template v-if="item.role !== 'separator'">
-                  <div class="shrink-0">
+                  <div
+                    class="shrink-0 p-[3px] bg-white flex self-start rounded-full"
+                  >
                     <BaseAvatar
                       v-if="item.role === 'assistant'"
                       :src="conversation?.user.photo"
@@ -791,13 +810,13 @@ const submitReport = async () => {
                     />
                     <BaseAvatar
                       v-else-if="item.role === 'user'"
-                      src="/img/avatars/3.svg"
+                      src="/img/avatars/user.png"
                       size="xs"
                     />
                   </div>
                   <div class="flex max-w-md flex-col">
                     <div
-                      class="bg-muted-200 dark:bg-muted-800 rounded-xl p-4"
+                      class="bg-muted-300 dark:bg-muted-800 rounded-xl p-4"
                       :class="[
                         item.role === 'assistant' ? 'rounded-ss-none' : '',
                         item.role === 'user' ? 'rounded-se-none' : '',
