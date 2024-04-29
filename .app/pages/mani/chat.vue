@@ -109,7 +109,7 @@ async function processResponse(answer: Content): Promise<TranslatedResponse> {
   }
 }
 const darkStatus = useColorMode()
-const currentStat = ref('dark')
+const currentStat = ref('light')
 watch(darkStatus, (newVal) => {
   currentStat.value = newVal.value
 })
