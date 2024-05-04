@@ -3,7 +3,18 @@ import 'v-calendar/dist/style.css'
 import '~/assets/css/vcalendar.css'
 import { AgentTask } from '~/composables/crew'
 import { BackendMessage } from '~/composables/message'
+import Slider from '@vueform/slider'
+import '~/assets/css/slider.css'
 
+const trustLevel = ref(75)
+
+// Function to format the slider value as an emoji
+const formatEmoji = (trustLevel: number): string => {
+  if (trustLevel >= 80) return '😍' // Heart eyes for 100
+  if (trustLevel >= 60) return '😊' // Happy face for 80 to 99
+  if (trustLevel >= 25) return '😐' // Stoic face for 50 to 79
+  return '😠' // Angry face for 0 to 49
+}
 definePageMeta({
   title: 'پردازش داده',
   layout: 'sidebar',
@@ -39,33 +50,33 @@ const msgs = ref([])
 const userSum = ref([])
 const headlines = ref([])
 onMounted(async () => {
-  userSum.value = await getSummerizedMessagesByCode(route.query.code as string)
-  msgs.value = await getMessagesByCode(route.query.code as string)
-  await getHeadlines()
-  msgs.value.map((m) => {
-    if (m.role === 'user') {
-      let label = 0
-      const temp = m.evaluations.SuicideRiskEvaluation.toLowerCase()
-        .replace(' ', '')
-        .replace('.', '')
-        .replace('\n', '')
-      if (temp == 'verylow') {
-        label = 0
-      } else if (temp == 'low') {
-        label = 1
-      } else if (temp == 'medium') {
-        label = 2
-      } else if (temp == 'high') {
-        label = 3
-      } else if (temp == 'veryhigh') {
-        label = 4
-      }
-      suicideRiskCondition.series[0].data.push(label)
-      suicideRiskCondition.options.xaxis.categories.push(
-        new Date(m.created).toLocaleTimeString('fa'),
-      )
-    }
-  })
+  // userSum.value = await getSummerizedMessagesByCode(route.query.code as string)
+  // msgs.value = await getMessagesByCode(route.query.code as string)
+  // await getHeadlines()
+  // msgs.value.map((m) => {
+  //   if (m.role === 'user') {
+  //     let label = 0
+  //     const temp = m.evaluations.SuicideRiskEvaluation.toLowerCase()
+  //       .replace(' ', '')
+  //       .replace('.', '')
+  //       .replace('\n', '')
+  //     if (temp == 'verylow') {
+  //       label = 0
+  //     } else if (temp == 'low') {
+  //       label = 1
+  //     } else if (temp == 'medium') {
+  //       label = 2
+  //     } else if (temp == 'high') {
+  //       label = 3
+  //     } else if (temp == 'veryhigh') {
+  //       label = 4
+  //     }
+  //     suicideRiskCondition.series[0].data.push(label)
+  //     suicideRiskCondition.options.xaxis.categories.push(
+  //       new Date(m.created).toLocaleTimeString('fa'),
+  //     )
+  //   }
+  // })
 })
 
 function useSuicideRiskCondition() {
@@ -617,6 +628,276 @@ async function getHeadlines() {
   })
   headlines.value = headlines.value.items[0].headlines
 }
+
+// here from edit profile
+import { toTypedSchema } from '@vee-validate/zod'
+import { Field, useFieldError, useForm } from 'vee-validate'
+import { z } from 'zod'
+
+// This is the object that will contain the validation messages
+const ONE_MB = 1000000
+const VALIDATION_TEXT = {
+  FIRST_REQUIRED: "Your first name can't be empty",
+  LASTNAME_REQUIRED: "Your last name can't be empty",
+  OPTION_REQUIRED: 'Please select an option',
+  AVATAR_TOO_BIG: `Avatar size must be less than 1MB`,
+}
+
+// This is the Zod schema for the form input
+// It's used to define the shape that the form data will have
+const zodSchema = z
+  .object({
+    avatar: z.custom<File>((v) => v instanceof File).nullable(),
+    profile: z.object({
+      firstName: z.string().min(1, VALIDATION_TEXT.FIRST_REQUIRED),
+      lastName: z.string().min(1, VALIDATION_TEXT.LASTNAME_REQUIRED),
+      role: z.string().optional(),
+      location: z.string(),
+      bio: z.string(),
+    }),
+    info: z.object({
+      experience: z
+        .union([
+          z.literal('0-2 years'),
+          z.literal('2-5 years'),
+          z.literal('5-10 years'),
+          z.literal('10+ years'),
+        ])
+        .nullable(),
+      firstJob: z
+        .object({
+          label: z.string(),
+          value: z.boolean(),
+        })
+        .nullable(),
+      flexible: z
+        .object({
+          label: z.string(),
+          value: z.boolean(),
+        })
+        .nullable(),
+      remote: z
+        .object({
+          label: z.string(),
+          value: z.boolean(),
+        })
+        .nullable(),
+    }),
+    social: z.object({
+      facebook: z.string(),
+      twitter: z.string(),
+      dribbble: z.string(),
+      instagram: z.string(),
+      github: z.string(),
+      gitlab: z.string(),
+    }),
+  })
+  .superRefine((data, ctx) => {
+    // This is a custom validation function that will be called
+    // before the form is submitted
+    if (!data.info.experience) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: VALIDATION_TEXT.OPTION_REQUIRED,
+        path: ['info.experience'],
+      })
+    }
+    if (!data.info.firstJob) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: VALIDATION_TEXT.OPTION_REQUIRED,
+        path: ['info.firstJob'],
+      })
+    }
+    if (!data.info.flexible) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: VALIDATION_TEXT.OPTION_REQUIRED,
+        path: ['info.flexible'],
+      })
+    }
+    if (!data.info.remote) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: VALIDATION_TEXT.OPTION_REQUIRED,
+        path: ['info.remote'],
+      })
+    }
+    if (data.avatar && data.avatar.size > ONE_MB) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: VALIDATION_TEXT.AVATAR_TOO_BIG,
+        path: ['avatar'],
+      })
+    }
+  })
+
+// Zod has a great infer method that will
+// infer the shape of the schema into a TypeScript type
+type FormInput = z.infer<typeof zodSchema>
+
+const { data, pending, error, refresh } = await useFetch('/api/profile')
+
+const validationSchema = toTypedSchema(zodSchema)
+const initialValues = computed<FormInput>(() => ({
+  avatar: null,
+  profile: {
+    firstName: data.value?.personalInfo?.firstName || '',
+    lastName: data.value?.personalInfo?.lastName || '',
+    role: data.value?.personalInfo?.role || '',
+    location: '',
+    bio: '',
+  },
+  info: {
+    experience: null,
+    firstJob: null,
+    flexible: null,
+    remote: null,
+  },
+  social: {
+    facebook: '',
+    twitter: '',
+    dribbble: '',
+    instagram: '',
+    github: '',
+    gitlab: '',
+  },
+}))
+
+// This is the list of options for the select inputs
+const experience = ['0-2 years', '2-5 years', '5-10 years', '10+ years']
+const answers = [
+  {
+    label: 'Yes',
+    value: true,
+  },
+  {
+    label: 'No',
+    value: false,
+  },
+]
+
+// This is the computed value that will be used to display the current avatar
+const currentAvatar = computed(() => data.value?.personalInfo?.picture)
+
+const {
+  handleSubmit,
+  isSubmitting,
+  setFieldError,
+  meta,
+  values,
+  errors,
+  resetForm,
+  setFieldValue,
+  setErrors,
+} = useForm({
+  validationSchema,
+  initialValues,
+})
+
+const success = ref(false)
+const fieldsWithErrors = computed(() => Object.keys(errors.value).length)
+
+// BaseInputFileHeadless gives us a listfile input, but we need to
+// extract the file from the list and set it to the form
+const inputFile = ref<FileList | null>(null)
+const fileError = useFieldError('avatar')
+watch(inputFile, (value) => {
+  const file = value?.item(0) || null
+  setFieldValue('avatar', file)
+})
+
+// Ask the user for confirmation before leaving the page if the form has unsaved changes
+onBeforeRouteLeave(() => {
+  if (meta.value.dirty) {
+    return confirm('You have unsaved changes. Are you sure you want to leave?')
+  }
+})
+
+const toaster = useToaster()
+
+// This is where you would send the form data to the server
+const onSubmit = handleSubmit(
+  async (values) => {
+    success.value = false
+
+    // here you have access to the validated form values
+    console.log('profile-edit-success', values)
+
+    try {
+      // fake delay, this will make isSubmitting value to be true
+      await new Promise((resolve, reject) => {
+        if (values.profile.firstName === 'Maya') {
+          // simulate a backend error
+          setTimeout(
+            () => reject(new Error('Fake backend validation error')),
+            2000,
+          )
+        }
+        setTimeout(resolve, 4000)
+      })
+
+      toaster.clearAll()
+      toaster.show({
+        title: 'Success',
+        message: `Your profile has been updated!`,
+        color: 'success',
+        icon: 'ph:check',
+        closable: true,
+      })
+    } catch (error: any) {
+      // this will set the error on the form
+      if (error.message === 'Fake backend validation error') {
+        // @ts-expect-error - vee validate typing bug with nested keys
+        setFieldError('profile.firstName', 'This first name is not allowed')
+
+        document.documentElement.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        })
+
+        toaster.clearAll()
+        toaster.show({
+          title: 'Oops!',
+          message: 'Please review the errors in the form',
+          color: 'danger',
+          icon: 'lucide:alert-triangle',
+          closable: true,
+        })
+      }
+      return
+    }
+
+    // we can refresh the data from the server
+    // this will update the initial values and the current avatar
+    await refresh()
+
+    resetForm()
+
+    document.documentElement.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+
+    success.value = true
+    setTimeout(() => {
+      success.value = false
+    }, 3000)
+  },
+  (error) => {
+    // this callback is optional and called only if the form has errors
+    success.value = false
+
+    // here you have access to the error
+    console.log('profile-edit-error', error)
+
+    // you can use it to scroll to the first error
+    document.documentElement.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  },
+)
 </script>
 
 <template>
@@ -642,7 +923,7 @@ async function getHeadlines() {
               </BaseHeading>
               <BaseParagraph size="sm" class="text-white opacity-70">
                 <span>
-                  پایش محتوایی و معنایی پیام های کاربران سامانه خودکشی
+                  گزارش کمی و کیفی تحلیلی اقدامات و تعاملات هوش مصنوعی با کاربر
                 </span>
               </BaseParagraph>
               <!-- <div
@@ -755,8 +1036,790 @@ async function getHeadlines() {
           <!-- Inner column -->
           <div class="ltablet:col-span-12 col-span-12 lg:col-span-12">
             <!-- Chart subgrid -->
-            <div class="grid grid-cols-12 gap-6">
+            <div class="col-span-12">
+              <BaseCard shape="curved" class="p-6">
+                <div class="mb-2 flex items-center justify-between">
+                  <BaseHeading
+                    as="h3"
+                    size="md"
+                    weight="semibold"
+                    lead="tight"
+                    class="text-muted-800 dark:text-white"
+                  >
+                    <span>مدیریت رویداد</span>
+                  </BaseHeading>
+                </div>
+                <div class="flex justify-between">
+                  <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+                    <Icon name="ph:question-duotone" class="h-4 w-4" />
+                    <span>
+                      لیست اقدامات و رویدادهای تعاملی هوش مصنوعی با کاربر در زیر
+                      آمده است.
+                    </span>
+                  </BaseParagraph>
+                  <BaseButton
+                    color="primary"
+                    @click="genereateRisks()"
+                    :loading="isLoading"
+                    :disabled="isLoading"
+                    >بروز رسانی</BaseButton
+                  >
+                </div>
+              </BaseCard>
+            </div>
+            <div class="grid grid-cols-12 gap-6 mt-5">
               <!-- Chart -->
+              <div class="col-span-8">
+                <BaseCard shape="curved" class="p-6">
+                  <div class="mb-2 flex items-center justify-between">
+                    <BaseHeading
+                      as="h3"
+                      size="md"
+                      weight="semibold"
+                      lead="tight"
+                      class="text-muted-800 dark:text-white"
+                    >
+                      <span>اطلاعات دموگرافیک</span>
+                    </BaseHeading>
+                  </div>
+                  <div class="flex justify-between">
+                    <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+                      <Icon name="ph:question-duotone" class="h-4 w-4" />
+                      <span>
+                        اطلاعات دموگرافیک کاربر که می تواند توسط خود کاربر اظهار
+                        شده یا در جریان مصاحبه و گفت و گو استخراج گردد.
+                      </span>
+                      <NuxtLink
+                        to="#"
+                        class="text-primary-500 underline-offset-4 hover:underline"
+                      >
+                        اطلاعات بیشتر
+                      </NuxtLink>
+                    </BaseParagraph>
+                  </div>
+                  <div class="grid grid-cols-12 gap-4 mt-5">
+                    <div class="col-span-12 sm:col-span-6">
+                      <Field
+                        v-slot="{
+                          field,
+                          errorMessage,
+                          handleChange,
+                          handleBlur,
+                        }"
+                        name="profile.firstName"
+                      >
+                        <BaseInput
+                          :model-value="field.value"
+                          :error="errorMessage"
+                          :disabled="isSubmitting"
+                          type="text"
+                          icon="ph:user-duotone"
+                          placeholder="First name"
+                          @update:model-value="handleChange"
+                          @blur="handleBlur"
+                        />
+                      </Field>
+                    </div>
+                    <div class="col-span-12 sm:col-span-6">
+                      <Field
+                        v-slot="{
+                          field,
+                          errorMessage,
+                          handleChange,
+                          handleBlur,
+                        }"
+                        name="profile.lastName"
+                      >
+                        <BaseInput
+                          :model-value="field.value"
+                          :error="errorMessage"
+                          :disabled="isSubmitting"
+                          type="text"
+                          icon="ph:user-duotone"
+                          placeholder="Last name"
+                          @update:model-value="handleChange"
+                          @blur="handleBlur"
+                        />
+                      </Field>
+                    </div>
+                    <div class="col-span-12">
+                      <Field
+                        v-slot="{
+                          field,
+                          errorMessage,
+                          handleChange,
+                          handleBlur,
+                        }"
+                        name="profile.role"
+                      >
+                        <BaseInput
+                          :model-value="field.value"
+                          :error="errorMessage"
+                          :disabled="isSubmitting"
+                          type="text"
+                          icon="ph:suitcase-duotone"
+                          placeholder="Job title"
+                          @update:model-value="handleChange"
+                          @blur="handleBlur"
+                        />
+                      </Field>
+                    </div>
+                    <div class="col-span-12">
+                      <Field
+                        v-slot="{
+                          field,
+                          errorMessage,
+                          handleChange,
+                          handleBlur,
+                        }"
+                        name="profile.location"
+                      >
+                        <BaseInput
+                          :model-value="field.value"
+                          :error="errorMessage"
+                          :disabled="isSubmitting"
+                          type="text"
+                          icon="ph:map-pin-duotone"
+                          placeholder="Location"
+                          @update:model-value="handleChange"
+                          @blur="handleBlur"
+                        />
+                      </Field>
+                    </div>
+                    <div class="col-span-12">
+                      <Field
+                        v-slot="{
+                          field,
+                          errorMessage,
+                          handleChange,
+                          handleBlur,
+                        }"
+                        name="profile.bio"
+                      >
+                        <BaseTextarea
+                          :model-value="field.value"
+                          :error="errorMessage"
+                          :disabled="isSubmitting"
+                          rows="4"
+                          placeholder="About you / Short bio..."
+                          @update:model-value="handleChange"
+                          @blur="handleBlur"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                  <TairoFormGroup
+                    class="mt-5"
+                    label="علاقه مندی ها و ارزش ها"
+                    sublabel="اطلاعات جمع آوری شده در مورد علاقه مندی ها، ارزش ها و باور های کاربر"
+                  >
+                    <div class="grid grid-cols-12 gap-4">
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="info.experience"
+                        >
+                          <BaseListbox
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            :items="experience"
+                            placeholder="Experience"
+                            shape="rounded"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="info.firstJob"
+                        >
+                          <BaseListbox
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            :items="answers"
+                            :properties="{ label: 'label', value: 'value' }"
+                            placeholder="Is this your first job?"
+                            shape="rounded"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="info.flexible"
+                        >
+                          <BaseListbox
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            :items="answers"
+                            :properties="{ label: 'label', value: 'value' }"
+                            placeholder="Are you flexible?"
+                            shape="rounded"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="info.remote"
+                        >
+                          <BaseListbox
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            :items="answers"
+                            :properties="{ label: 'label', value: 'value' }"
+                            placeholder="Do you work remotely?"
+                            shape="rounded"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                    </div>
+                  </TairoFormGroup>
+
+                  <TairoFormGroup
+                    class="mt-5"
+                    label="پروفایل اجتماعی"
+                    sublabel="ارزش های اجتماعی و سیاسی کاربر"
+                  >
+                    <div class="grid grid-cols-12 gap-4">
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="social.facebook"
+                        >
+                          <BaseInput
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            type="text"
+                            icon="fa6-brands:facebook-f"
+                            placeholder="Facebook URL"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="social.twitter"
+                        >
+                          <BaseInput
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            type="text"
+                            icon="fa6-brands:twitter"
+                            placeholder="Twitter URL"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="social.dribbble"
+                        >
+                          <BaseInput
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            type="text"
+                            icon="fa6-brands:dribbble"
+                            placeholder="Dribbble URL"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="social.instagram"
+                        >
+                          <BaseInput
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            type="text"
+                            icon="fa6-brands:instagram"
+                            placeholder="Instagram URL"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="social.github"
+                        >
+                          <BaseInput
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            type="text"
+                            icon="fa6-brands:github"
+                            placeholder="Github URL"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="social.gitlab"
+                        >
+                          <BaseInput
+                            :model-value="field.value"
+                            :error="errorMessage"
+                            :disabled="isSubmitting"
+                            type="text"
+                            icon="fa6-brands:gitlab"
+                            placeholder="Gitlab URL"
+                            @update:model-value="handleChange"
+                            @blur="handleBlur"
+                          />
+                        </Field>
+                      </div>
+                    </div>
+                  </TairoFormGroup>
+                </BaseCard>
+              </div>
+              <div class="col-span-4">
+                <BaseCard class="p-6">
+                  <div class="mb-4 flex items-center justify-between">
+                    <BaseHeading
+                      as="h3"
+                      size="md"
+                      weight="semibold"
+                      lead="tight"
+                      class="text-muted-800 dark:text-white"
+                    >
+                      <span>ارزیابی اعتماد</span>
+                    </BaseHeading>
+                  </div>
+                  <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+                    <Icon name="ph:question-duotone" class="h-4 w-4" />
+                    <span>
+                      میزان مشارکت و اعتماد ارزیابی شده از پیام های کاربر
+                    </span>
+                  </BaseParagraph>
+                  <div
+                    class="mt-[80px] flex flex-col gap-6 md:flex-row md:items-end"
+                  >
+                    <div class="w-full max-w-sm space-y-4 px-4">
+                      <!-- Slider component with custom formatting -->
+                      <Slider
+                        v-model="trustLevel"
+                        :format="formatEmoji"
+                        class="rounded-tooltip"
+                      />
+                    </div>
+                  </div>
+                </BaseCard>
+                <BaseCard class="p-6 mt-5">
+                  <!-- Title -->
+                  <div class="mb-8 flex items-center justify-between">
+                    <BaseHeading
+                      as="h3"
+                      size="md"
+                      weight="semibold"
+                      lead="tight"
+                      class="text-muted-800 dark:text-white"
+                    >
+                      <span>اهداف جلسه</span>
+                    </BaseHeading>
+                    <NuxtLink
+                      to="#"
+                      class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+                    >
+                      نمایش تمام موارد
+                    </NuxtLink>
+                  </div>
+                  <GoalsCompact />
+                </BaseCard>
+              </div>
+              <div class="col-span-12">
+                <BaseCard shape="curved" class="p-6">
+                  <div class="mb-2 flex items-center justify-between">
+                    <BaseHeading
+                      as="h3"
+                      size="md"
+                      weight="semibold"
+                      lead="tight"
+                      class="text-muted-800 dark:text-white"
+                    >
+                      <span>وضعیت روانی اجتماعی</span>
+                    </BaseHeading>
+                  </div>
+                  <div class="flex justify-between">
+                    <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+                      <Icon name="ph:question-duotone" class="h-4 w-4" />
+                      <span>
+                        تحلیل روانی پیام های کاربر نشان می دهد که وی در چه
+                        وضعیتی از لحاظ ارتباط روانی با هوش مصنوعی است.
+                      </span>
+                      <NuxtLink
+                        to="#"
+                        class="text-primary-500 underline-offset-4 hover:underline"
+                      >
+                        اطلاعات بیشتر
+                      </NuxtLink>
+                    </BaseParagraph>
+                  </div>
+                  <div class="w-full mt-5">
+                    <form class="mx-auto w-full">
+                      <fieldset class="w-full space-y-6">
+                        <div class="grid gap-6 sm:grid-cols-4">
+                          <BaseCheckboxHeadless
+                            v-model="value"
+                            value="team_member_1"
+                          >
+                            <BaseCard
+                              shape="rounded"
+                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                            >
+                              <div class="flex w-full items-center gap-2">
+                                <BaseAvatar src="/img/avatars/10.svg" />
+
+                                <div>
+                                  <BaseHeading
+                                    as="h4"
+                                    size="sm"
+                                    weight="medium"
+                                    lead="none"
+                                  >
+                                    Kendra Wilson
+                                  </BaseHeading>
+
+                                  <BaseText size="xs" class="text-muted-400"
+                                    >Software Engineer</BaseText
+                                  >
+                                </div>
+
+                                <div class="child text-muted-300 ms-auto">
+                                  <div
+                                    class="h-3 w-3 rounded-full bg-current"
+                                  ></div>
+                                </div>
+                              </div>
+                            </BaseCard>
+                          </BaseCheckboxHeadless>
+
+                          <BaseCheckboxHeadless
+                            v-model="value"
+                            value="team_member_2"
+                          >
+                            <BaseCard
+                              shape="rounded"
+                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                            >
+                              <div class="flex w-full items-center gap-2">
+                                <BaseAvatar src="/img/avatars/16.svg" />
+
+                                <div>
+                                  <BaseHeading
+                                    as="h4"
+                                    size="sm"
+                                    weight="medium"
+                                    lead="none"
+                                  >
+                                    Hermann Mayer
+                                  </BaseHeading>
+
+                                  <BaseText size="xs" class="text-muted-400"
+                                    >Sales Manager</BaseText
+                                  >
+                                </div>
+
+                                <div class="child text-muted-300 ms-auto">
+                                  <div
+                                    class="h-3 w-3 rounded-full bg-current"
+                                  ></div>
+                                </div>
+                              </div>
+                            </BaseCard>
+                          </BaseCheckboxHeadless>
+
+                          <BaseCheckboxHeadless
+                            v-model="value"
+                            value="team_member_3"
+                          >
+                            <BaseCard
+                              shape="rounded"
+                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                            >
+                              <div class="flex w-full items-center gap-2">
+                                <BaseAvatar src="/img/avatars/25.svg" />
+
+                                <div>
+                                  <BaseHeading
+                                    as="h4"
+                                    size="sm"
+                                    weight="medium"
+                                    lead="none"
+                                  >
+                                    Melany Lawright
+                                  </BaseHeading>
+
+                                  <BaseText size="xs" class="text-muted-400"
+                                    >HR Manager</BaseText
+                                  >
+                                </div>
+
+                                <div class="child text-muted-300 ms-auto">
+                                  <div
+                                    class="h-3 w-3 rounded-full bg-current"
+                                  ></div>
+                                </div>
+                              </div>
+                            </BaseCard>
+                          </BaseCheckboxHeadless>
+
+                          <BaseCheckboxHeadless
+                            v-model="value"
+                            value="team_member_1"
+                          >
+                            <BaseCard
+                              shape="rounded"
+                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                            >
+                              <div class="flex w-full items-center gap-2">
+                                <BaseAvatar src="/img/avatars/10.svg" />
+
+                                <div>
+                                  <BaseHeading
+                                    as="h4"
+                                    size="sm"
+                                    weight="medium"
+                                    lead="none"
+                                  >
+                                    Kendra Wilson
+                                  </BaseHeading>
+
+                                  <BaseText size="xs" class="text-muted-400"
+                                    >Software Engineer</BaseText
+                                  >
+                                </div>
+
+                                <div class="child text-muted-300 ms-auto">
+                                  <div
+                                    class="h-3 w-3 rounded-full bg-current"
+                                  ></div>
+                                </div>
+                              </div>
+                            </BaseCard>
+                          </BaseCheckboxHeadless>
+
+                          <BaseCheckboxHeadless
+                            v-model="value"
+                            value="team_member_2"
+                          >
+                            <BaseCard
+                              shape="rounded"
+                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                            >
+                              <div class="flex w-full items-center gap-2">
+                                <BaseAvatar src="/img/avatars/16.svg" />
+
+                                <div>
+                                  <BaseHeading
+                                    as="h4"
+                                    size="sm"
+                                    weight="medium"
+                                    lead="none"
+                                  >
+                                    Hermann Mayer
+                                  </BaseHeading>
+
+                                  <BaseText size="xs" class="text-muted-400"
+                                    >Sales Manager</BaseText
+                                  >
+                                </div>
+
+                                <div class="child text-muted-300 ms-auto">
+                                  <div
+                                    class="h-3 w-3 rounded-full bg-current"
+                                  ></div>
+                                </div>
+                              </div>
+                            </BaseCard>
+                          </BaseCheckboxHeadless>
+
+                          <BaseCheckboxHeadless
+                            v-model="value"
+                            value="team_member_3"
+                          >
+                            <BaseCard
+                              shape="rounded"
+                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                            >
+                              <div class="flex w-full items-center gap-2">
+                                <BaseAvatar src="/img/avatars/25.svg" />
+
+                                <div>
+                                  <BaseHeading
+                                    as="h4"
+                                    size="sm"
+                                    weight="medium"
+                                    lead="none"
+                                  >
+                                    Melany Lawright
+                                  </BaseHeading>
+
+                                  <BaseText size="xs" class="text-muted-400"
+                                    >HR Manager</BaseText
+                                  >
+                                </div>
+
+                                <div class="child text-muted-300 ms-auto">
+                                  <div
+                                    class="h-3 w-3 rounded-full bg-current"
+                                  ></div>
+                                </div>
+                              </div>
+                            </BaseCard>
+                          </BaseCheckboxHeadless>
+                          <BaseCheckboxHeadless
+                            v-model="value"
+                            value="team_member_1"
+                          >
+                            <BaseCard
+                              shape="rounded"
+                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                            >
+                              <div class="flex w-full items-center gap-2">
+                                <BaseAvatar src="/img/avatars/10.svg" />
+
+                                <div>
+                                  <BaseHeading
+                                    as="h4"
+                                    size="sm"
+                                    weight="medium"
+                                    lead="none"
+                                  >
+                                    Kendra Wilson
+                                  </BaseHeading>
+
+                                  <BaseText size="xs" class="text-muted-400"
+                                    >Software Engineer</BaseText
+                                  >
+                                </div>
+
+                                <div class="child text-muted-300 ms-auto">
+                                  <div
+                                    class="h-3 w-3 rounded-full bg-current"
+                                  ></div>
+                                </div>
+                              </div>
+                            </BaseCard>
+                          </BaseCheckboxHeadless>
+
+                          <BaseCheckboxHeadless
+                            v-model="value"
+                            value="team_member_2"
+                          >
+                            <BaseCard
+                              shape="rounded"
+                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                            >
+                              <div class="flex w-full items-center gap-2">
+                                <BaseAvatar src="/img/avatars/16.svg" />
+
+                                <div>
+                                  <BaseHeading
+                                    as="h4"
+                                    size="sm"
+                                    weight="medium"
+                                    lead="none"
+                                  >
+                                    Hermann Mayer
+                                  </BaseHeading>
+
+                                  <BaseText size="xs" class="text-muted-400"
+                                    >Sales Manager</BaseText
+                                  >
+                                </div>
+
+                                <div class="child text-muted-300 ms-auto">
+                                  <div
+                                    class="h-3 w-3 rounded-full bg-current"
+                                  ></div>
+                                </div>
+                              </div>
+                            </BaseCard>
+                          </BaseCheckboxHeadless>
+                        </div>
+                      </fieldset>
+                    </form>
+                  </div>
+                </BaseCard>
+              </div>
               <div class="col-span-12">
                 <BaseCard shape="curved" class="p-6">
                   <div class="mb-2 flex items-center justify-between">

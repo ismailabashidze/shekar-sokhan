@@ -12,6 +12,7 @@ export type BackendMessage = {
   created?: string
   Updated?: string
   user?: string
+  deletionDivider: number
 }
 
 export function useMessage() {
@@ -19,9 +20,10 @@ export function useMessage() {
   const filteredMessages = ref<string>('')
   const nuxtApp = useNuxtApp()
   const toaster = useToaster()
+  const { user } = useUser()
   const getMessages = async (): Promise<BackendMessage[]> => {
     const { items } = await nuxtApp.$pb.collection('messages').getList(1, 500, {
-      filter: 'isDeleted=false',
+      filter: 'deletionDivider=' + user.value.record.currentDeletionDivider,
       sort: '+created',
     })
     messages.value = items

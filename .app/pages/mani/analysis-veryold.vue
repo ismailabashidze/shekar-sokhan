@@ -45,7 +45,8 @@ onMounted(async () => {
   msgs.value.map((m) => {
     if (m.role === 'user') {
       let label = 0
-      const temp = m.evaluations.SuicideRiskEvaluation.toLowerCase()
+      const temp = m.evaluations.suicideRiskEvaluation
+        .toLowerCase()
         .replace(' ', '')
         .replace('.', '')
         .replace('\n', '')
@@ -484,7 +485,7 @@ const genereateRisks = async () => {
   suicideRiskCondition.series[0].data = []
   suicideRiskCondition.options.xaxis.categories = []
 
-  await analyzeAllMessages('SuicideRiskEvaluation')
+  await analyzeAllMessages('suicideRiskEvaluation')
   isLoading.value = false
 }
 async function analyzeAllMessages(analyze: AgentTask) {
@@ -497,9 +498,12 @@ async function analyzeAllMessages(analyze: AgentTask) {
     let maxRetries = 10
     while (retryCounter < maxRetries) {
       const currentMessage = userMsgs[i]
-      const res = await ask('SuicideRiskEvaluation', currentMessage.content)
+      const { data } = await agentAction({
+        task: analyze,
+        text: currentMessage.msgEn,
+      })
 
-      if (res.length > 30) {
+      if (data.value.result.length > 30) {
         console.log('There is perhaps an error, retrying...')
         retryCounter++
         continue
@@ -507,7 +511,7 @@ async function analyzeAllMessages(analyze: AgentTask) {
         retryCounter = maxRetries
         const updatedEvaluations = {
           ...(userMsgs[i]?.evaluations ?? {}),
-          [analyze]: res,
+          [analyze]: data.value.result, // Using computed property name
         }
 
         const updatedMessage = {
@@ -518,12 +522,10 @@ async function analyzeAllMessages(analyze: AgentTask) {
         const m = await nuxtApp.$pb
           .collection('messages')
           .update(userMsgs[i].id, updatedMessage)
-        console.log('analyze')
-        console.log(analyze)
-
-        if (analyze === 'SuicideRiskEvaluation') {
+        if (analyze === 'suicideRiskEvaluation') {
           let label = 0
-          const temp = m.evaluations.SuicideRiskEvaluation.toLowerCase()
+          const temp = m.evaluations.suicideRiskEvaluation
+            .toLowerCase()
             .replace(' ', '')
             .replace('.', '')
             .replace('\n', '')
@@ -538,8 +540,6 @@ async function analyzeAllMessages(analyze: AgentTask) {
           } else if (temp == 'veryhigh') {
             label = 4
           }
-          console.log(label)
-
           suicideRiskCondition.series[0].data.push(label)
           suicideRiskCondition.options.xaxis.categories.push(
             new Date(m.created).toLocaleTimeString('fa'),
@@ -843,7 +843,7 @@ async function getHeadlines() {
                 </BaseCard>
               </div>
               <!-- Chart -->
-              <!-- <div class="col-span-12 sm:col-span-6">
+              <div class="col-span-12 sm:col-span-6">
                 <BaseCard shape="curved" class="p-6">
                   <div class="mb-2 flex items-center justify-between">
                     <BaseHeading
@@ -878,9 +878,9 @@ async function getHeadlines() {
                     class="relative -start-5"
                   />
                 </BaseCard>
-              </div> -->
+              </div>
               <!-- Chart -->
-              <!-- <div class="col-span-12 sm:col-span-6">
+              <div class="col-span-12 sm:col-span-6">
                 <BaseCard shape="curved" class="p-6">
                   <div class="mb-2 flex items-center justify-between">
                     <BaseHeading
@@ -915,7 +915,7 @@ async function getHeadlines() {
                     class="relative -start-5"
                   />
                 </BaseCard>
-              </div> -->
+              </div>
             </div>
           </div>
         </div>

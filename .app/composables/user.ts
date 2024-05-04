@@ -7,12 +7,11 @@ export type User = {
   password: string
   passwordConfirm: string
   created: string
-  record: { id: string }
+  record: { id: string; currentDeletionDivider: number }
 }
 
 export function useUser() {
   const nuxtApp = useNuxtApp()
-
   const user = useLocalStorage('user', {} as User)
   const generateAndSetCode = async (phoneNumber: string) => {
     if (!process.server) {
@@ -41,11 +40,17 @@ export function useUser() {
     return user
   }
 
+  const incDivision = async () => {
+    user.value.record.currentDeletionDivider++
+    return user
+  }
+
   return {
     user,
     generateAndSetCode,
     getAllUsers,
     removeUser,
     setUser,
+    incDivision,
   }
 }

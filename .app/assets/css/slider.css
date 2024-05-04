@@ -319,13 +319,14 @@
   padding-left: 0.75rem;
   padding-right: 0.75rem;
   height: 28px;
-  font-size: 0.85rem;
+  font-size: 1.85rem;
   font-family: 'Roboto', sans-serif;
   font-weight: 500;
   display: flex;
   justify-content: center;
   align-items: center;
   line-height: 3;
+  height: 50px;
 }
 
 .curved-tooltip .slider-tooltip {

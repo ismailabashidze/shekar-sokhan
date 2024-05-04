@@ -21,7 +21,12 @@ definePageMeta({
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
-const { user } = useUser()
+// const test = await $fetch('/api/chroma', {
+//   method: 'GET',
+// })
+// console.log(test)
+
+const { user, incDivision } = useUser()
 const { open } = usePanels()
 const seamless = useSeamless()
 
@@ -109,9 +114,12 @@ async function processResponse(answer: Content): Promise<TranslatedResponse> {
   }
 }
 const darkStatus = useColorMode()
-const currentStat = ref('light')
-watch(darkStatus, (newVal) => {
-  currentStat.value = newVal.value
+const currentStat = ref(darkStatus.preference)
+if (darkStatus.preference === 'system') {
+  currentStat.value = darkStatus.value
+}
+watch(darkStatus, (newVal, oldValue) => {
+  currentStat.value = newVal.preference
 })
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
@@ -271,6 +279,7 @@ async function submitMessage() {
     content: { message: t },
     contentFa: { message: m },
     user: user.value.record.id,
+    deletionDivider: user.value.record.currentDeletionDivider,
   })
   if (res.id) {
     try {
@@ -357,6 +366,7 @@ const deleteAll = async () => {
   isDeleting.value = true
   try {
     const res = await deleteAllMessages(nuxtApp.$pb.authStore.model.id)
+    incDivision()
     toaster.show({
       title: 'حذف پیام ها', // Authentication
       message: `پیام ها با موفقیت حذف شد`, // Please log in again
@@ -475,6 +485,7 @@ const submitReport = async () => {
   message.value = 'لطفا گزارش را اعمال کن و دوباره پاسخ بده'
   await submitMessage()
 }
+const closable = ref<boolean | undefined>()
 </script>
 
 <template>
@@ -570,9 +581,9 @@ const submitReport = async () => {
     <div
       class="bg-muted-100 dark:bg-muted-900 flex min-h-screen"
       :style="
-        currentStat === 'dark'
-          ? `background-image: url('../../img/back/back-dark.png')`
-          : `background-image: url('../../img/back/back.png')`
+        currentStat === 'light'
+          ? `background-image: url('../../img/back/back.png')`
+          : `background-image: url('../../img/back/back-dark.png')`
       "
     >
       <!-- Sidebar -->
@@ -701,9 +712,9 @@ const submitReport = async () => {
             <div
               class="bg-muted-100 dark:bg-muted-900 pointer-events-none absolute inset-0 z-10 h-full w-full p-8 transition-opacity duration-300"
               :style="
-                darkStatus === 'dark'
-                  ? `background-image: url('../../img/back/back-dark.png')`
-                  : `background-image: url('../../img/back/back.png')`
+                currentStat === 'light'
+                  ? `background-image: url('../../img/back/back.png')`
+                  : `background-image: url('../../img/back/back-dark.png')`
               "
               :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
             >
@@ -790,6 +801,14 @@ const submitReport = async () => {
             </div>
             <!-- Messages loop -->
             <div v-if="!loading" class="space-y-12">
+              <BaseMessage type="info" :closable="true">
+                <div class="flex content-between">
+                  <div class="flex items-center">
+                    اولین هدف برای هوش مصنوعی آشنایی بیشتر با شما تنظیم شده است.
+                    برخی از تغییرات در اهداف با شما به اشتراک گذاشته می شود.
+                  </div>
+                </div>
+              </BaseMessage>
               <div
                 v-for="(item, index) in conversation?.messages"
                 :key="index"
@@ -919,6 +938,7 @@ const submitReport = async () => {
                   </div>
                 </div>
               </div>
+
               <BaseMessage
                 v-if="showNoCharge"
                 type="danger"
@@ -1026,7 +1046,7 @@ const submitReport = async () => {
             </div>
           </div>
           <!-- User details -->
-          <div v-else class="mt-8">
+          <div v-else class="mt-5">
             <div class="flex items-center justify-center">
               <BaseAvatar :src="conversation?.user.photo" size="2xl" />
             </div>

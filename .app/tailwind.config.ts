@@ -26,17 +26,17 @@ export default withShurikenUI({
         'monospace',
       ],
     },
-    extend: {
-      // Custom colors
-      colors: {
-        // primary: colors.indigo,
-        // muted: colors.slate,
-        // info: colors.sky,
-        // success: colors.teal,
-        // warning: colors.amber,
-        // danger: colors.rose,
-      },
-    },
+    // extend: {
+    // Custom colors
+    // colors: {
+    // primary: colors.indigo,
+    // muted: colors.slate,
+    // info: colors.sky,
+    // success: colors.teal,
+    // warning: colors.amber,
+    // danger: colors.rose,
+    // },
+    // },
   },
   plugins: [],
 })

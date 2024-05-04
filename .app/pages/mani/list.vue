@@ -33,7 +33,7 @@ const goToConversation = (u: User) => {
 }
 const goToChart = (u: User) => {
   user.value = u
-  navigateTo(`/mani/analysis?code=${u.anonymousCode}`)
+  navigateTo(`/mani/analysis?userId=${u.id}`)
 }
 const goToThoughts = (u: User) => {
   user.value = u
@@ -84,9 +84,7 @@ async function removeConversation() {
 
       <TairoFlexTableHeading type="stable">تاریخ عضویت</TairoFlexTableHeading>
 
-      <TairoFlexTableHeading style="width: 150px" type="stable"
-        >اقدامات</TairoFlexTableHeading
-      >
+      <TairoFlexTableHeading type="stable">اقدامات</TairoFlexTableHeading>
     </template>
 
     <TairoFlexTableRow v-for="u in users" :key="u.id" shape="rounded">
@@ -164,12 +162,8 @@ async function removeConversation() {
         </BaseTag>
       </TairoFlexTableCell> -->
 
-      <TairoFlexTableCell
-        style="width: 150px"
-        type="stable"
-        data-content="Actions"
-      >
-        <div class="flex scale-90 gap-x-3">
+      <TairoFlexTableCell type="stable" data-content="Actions">
+        <div class="flex flex-wrap scale-90 gap-x-1 gap-y-2 w-[100px]">
           <BaseButtonIcon color="primary" shape="full" @click="goToThoughts(u)">
             <Icon name="carbon:block-storage" class="h-5 w-5" />
           </BaseButtonIcon>
@@ -180,8 +174,9 @@ async function removeConversation() {
           >
             <Icon name="ph:chat-circle-text" class="h-5 w-5" />
           </BaseButtonIcon>
+
           <BaseButtonIcon color="muted" shape="full" @click="goToChart(u)">
-            <Icon name="ph:chart-line" class="h-5 w-5" />
+            <Icon name="ph:clipboard" class="h-5 w-5" />
           </BaseButtonIcon>
           <BaseButtonIcon
             color="muted"

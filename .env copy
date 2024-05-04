@@ -1,0 +1,6 @@
+RUNPOD_TOKEN = "8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3"
+LLM_ADDRESS = "https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions"
+LLM_MODEL = "cognitivecomputations/dolphin-2.8-mistral-7b-v02"
+LLM_TEMPERATURE = 1
+LLM_MAX_TOKENS = 8192
+LLM_REPEAT_PENALTY = 2
