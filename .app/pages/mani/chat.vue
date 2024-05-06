@@ -319,6 +319,7 @@ async function submitMessage() {
           action: translatedAction,
           nextSteps: translatedNextSteps,
         },
+        deletionDivider: user.value.record.currentDeletionDivider,
       })
       console.log('newMsg')
       console.log(newMsg)
