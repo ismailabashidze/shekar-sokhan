@@ -4,15 +4,18 @@ const app = useAppConfig()
 
 /**
  * Global head configuration
- * @see https://unhead.harlanzw.com/
- * @see https://github.com/unjs/unhead/tree/main
+ * @see https://nuxt.com/docs/getting-started/seo-meta
  */
 useHead({
-  title: route.meta.title,
+  title: () => route.meta?.title ?? '',
   titleTemplate: (titleChunk) => {
     return titleChunk
-      ? `${titleChunk} - ${app.tairo.title}`
-      : `${app.tairo.title || 'Tairo'}`
+      ? `${titleChunk} - ${app.tairo?.title}`
+      : `${app.tairo?.title}`
+  },
+  htmlAttrs: {
+    lang: 'en',
+    dir: 'ltr',
   },
   link: [
     {
@@ -23,6 +26,12 @@ useHead({
   ],
 
   meta: [
+    {
+      name: 'description',
+      content: () =>
+        route.meta.description
+        ?? 'The most advanced Nuxt and Tailwind CSS dashboard template',
+    },
     {
       name: 'twitter:card',
       content: 'summary_large_image',
@@ -46,8 +55,8 @@ useHead({
     {
       name: 'og:image',
       content: `https://media.cssninja.io/embed/marketplace/product/wide.png?headline=${encodeURIComponent(
-        route.meta.description ||
-          (route.meta.preview
+        route.meta.description
+        || (route.meta.preview
             ? `${route.meta.preview?.title} - ${route.meta.preview?.description}`
             : 'Nuxt & Tailwind CSS dashboard system'),
       )}&url=${encodeURIComponent(
@@ -64,26 +73,25 @@ useHead({
 
 <template>
   <div>
-    <!-- 
+    <!--
       Global app search modal
       @see .demo/components/DemoAppSearch.vue
     -->
     <DemoAppSearch />
-    <!-- 
+    <!--
       Global app layout switcher
       @see .demo/components/DemoAppLayoutSwitcher.vue
     -->
     <DemoAppLayoutSwitcher />
 
-    <!-- 
+    <!--
       Vue Axe Popup
       @see .demo/plugins/vue-axe.client.ts
     -->
     <VueAxePopup />
 
     <NuxtLayout>
-      <NuxtLoadingIndicator color="var(--color-primary-500)" />
-      <SeoKit />
+      <NuxtLoadingIndicator color="rgb(var(--color-primary-500))" />
       <NuxtPage />
     </NuxtLayout>
   </div>

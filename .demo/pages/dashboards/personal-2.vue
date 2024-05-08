@@ -55,7 +55,7 @@ function useAreaTaskCompletion() {
     },
   }
 
-  const series = ref([
+  const series = shallowRef([
     {
       name: 'Pending',
       data: [31, 40, 28, 51, 42, 109, 100],
@@ -140,7 +140,7 @@ function useBarTeamEfficiency() {
     },
   }
 
-  const series = ref([
+  const series = shallowRef([
     {
       name: 'Design',
       data: [-26, -15, -13, -14, -9, -12, -7, -10, -4],
@@ -236,12 +236,12 @@ function useBarTeamEfficiency() {
                   </NuxtLink>
                 </div>
                 <div
-                  class="absolute bottom-0 end-2 z-10 flex h-14 w-14 items-center justify-center"
+                  class="absolute bottom-0 end-2 z-10 flex size-14 items-center justify-center"
                 >
                   <Icon
                     name="ph:crown-duotone"
-                    class="text-primary-900/50 h-10 w-10"
-                  ></Icon>
+                    class="text-primary-900/50 size-10"
+                  />
                 </div>
               </BaseCard>
             </div>
@@ -264,12 +264,14 @@ function useBarTeamEfficiency() {
               >
                 <span>Current Projects</span>
               </BaseHeading>
-              <NuxtLink
-                to="#"
-                class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+              <BaseButton
+                color="primary"
+                size="sm"
+                variant="pastel"
+                rounded="md"
               >
-                View All
-              </NuxtLink>
+                View all
+              </BaseButton>
             </div>
             <DemoProjectListCompact />
           </BaseCard>
@@ -285,12 +287,14 @@ function useBarTeamEfficiency() {
               >
                 <span>Completion</span>
               </BaseHeading>
-              <NuxtLink
-                to="#"
-                class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+              <BaseButton
+                color="primary"
+                size="sm"
+                variant="pastel"
+                rounded="md"
               >
                 Reports
-              </NuxtLink>
+              </BaseButton>
             </div>
             <AddonApexcharts v-bind="areaTaskCompletion" />
           </BaseCard>
@@ -306,12 +310,14 @@ function useBarTeamEfficiency() {
               >
                 <span>Team Efficiency</span>
               </BaseHeading>
-              <NuxtLink
-                to="#"
-                class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+              <BaseButton
+                color="primary"
+                size="sm"
+                variant="pastel"
+                rounded="md"
               >
                 Reports
-              </NuxtLink>
+              </BaseButton>
             </div>
             <AddonApexcharts v-bind="barTeamEfficiency" />
           </BaseCard>
@@ -334,12 +340,14 @@ function useBarTeamEfficiency() {
               >
                 <span>My Team</span>
               </BaseHeading>
-              <NuxtLink
-                to="#"
-                class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+              <BaseButton
+                color="primary"
+                size="sm"
+                variant="pastel"
+                rounded="md"
               >
-                View All
-              </NuxtLink>
+                View all
+              </BaseButton>
             </div>
             <DemoTeamListCompact actions />
           </BaseCard>
@@ -356,12 +364,14 @@ function useBarTeamEfficiency() {
               >
                 <span>Todo Today</span>
               </BaseHeading>
-              <NuxtLink
-                to="#"
-                class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+              <BaseButton
+                color="primary"
+                size="sm"
+                variant="pastel"
+                rounded="md"
               >
-                View All
-              </NuxtLink>
+                View all
+              </BaseButton>
             </div>
             <DemoTodoListCompact />
           </BaseCard>
@@ -375,14 +385,14 @@ function useBarTeamEfficiency() {
                   width="225"
                   height="150"
                   alt="Placeholder illustration"
-                />
+                >
                 <img
                   src="/img/illustrations/placeholders/flat/chart-guy-dark.svg"
                   class="hidden w-full dark:block"
                   width="225"
                   height="150"
                   alt="Placeholder illustration"
-                />
+                >
               </template>
               <BaseHeading
                 as="h4"
@@ -400,7 +410,11 @@ function useBarTeamEfficiency() {
                 </span>
               </BaseParagraph>
               <template #action>
-                <BaseButton color="primary" shape="rounded" class="w-full">
+                <BaseButton
+                  color="primary"
+                  rounded="sm"
+                  class="w-full"
+                >
                   <span>Upgrade to Pro</span>
                 </BaseButton>
               </template>

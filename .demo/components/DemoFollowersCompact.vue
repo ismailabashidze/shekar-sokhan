@@ -1,16 +1,16 @@
 <script setup lang="ts">
 const followers = [
   {
-    'data-tooltip': 'Clarke Smith',
-    src: '/img/avatars/3.svg',
+    'data-nui-tooltip': 'Clarke Smith',
+    'src': '/img/avatars/3.svg',
   },
   {
-    'data-tooltip': 'John Rowner',
-    src: '/img/avatars/6.svg',
+    'data-nui-tooltip': 'John Rowner',
+    'src': '/img/avatars/6.svg',
   },
   {
-    'data-tooltip': 'Maggie Pitts',
-    src: '/img/avatars/9.svg',
+    'data-nui-tooltip': 'Maggie Pitts',
+    'src': '/img/avatars/9.svg',
   },
 ]
 </script>
@@ -27,7 +27,11 @@ const followers = [
       >
         <span>Followers</span>
       </BaseHeading>
-      <BaseAvatarGroup :avatars="followers" size="xs" :limit="3" />
+      <BaseAvatarGroup
+        :avatars="followers"
+        size="xs"
+        :limit="3"
+      />
     </div>
     <div>
       <BaseParagraph size="xs">

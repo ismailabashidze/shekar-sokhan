@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackendMessage, Content } from '~/composables/message'
+// import { BackendMessage, Content } from '~/composables/message'
 interface TranslatedResponse {
   translatedMsg: string
   translatedThoughts: string

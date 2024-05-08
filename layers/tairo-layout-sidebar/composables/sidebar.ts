@@ -17,8 +17,8 @@
  *           icon: { name: 'ph:sidebar-duotone', class: 'w-5 h-5' },
  *
  *           // Or use a component
- *           // It should be registered in the app as a global component
- *           component: { name: 'BaseThemeToggle', props: {} },
+ *           // It should be registered in the app as a global component (in components/global)
+ *           component: { name: 'AppThemeToggle', props: {} },
  *
  *           // You can chose to display a subsidebar by defining a component name
  *           // It should be registered in the app as a global component
@@ -45,19 +45,19 @@ export function useSidebar() {
 
   const sidebars = computed(() => {
     if (
-      app.tairo.sidebar?.navigation?.enabled === false ||
-      app.tairo.sidebar?.navigation?.items?.length === 0
+      (app.tairo?.sidebar?.navigation?.enabled as boolean) === false
+      || app.tairo?.sidebar?.navigation?.items?.length === 0
     ) {
       return []
     }
-    return app.tairo.sidebar?.navigation?.items
+    return app.tairo?.sidebar?.navigation?.items
   })
 
   const currentName = useState('sidebar-name', () => '')
   const isOpen = useState<boolean | undefined>('sidebar-open', () => undefined)
 
   const hasSubsidebar = computed(() => {
-    return sidebars.value?.some((sidebar) => sidebar.subsidebar?.component)
+    return sidebars.value?.some(sidebar => sidebar.subsidebar?.component)
   })
 
   const current = computed(() => {
@@ -95,27 +95,29 @@ export function useSidebar() {
   }
 
   function detect() {
-    if (isOpen.value !== undefined) {
-      return
-    }
-    if (!app.tairo.sidebar?.navigation?.startOpen) {
+    if (!app.tairo?.sidebar?.navigation?.startOpen) {
       isOpen.value = false
       return
     }
 
     const item = sidebars.value?.find(
-      (bar) => bar?.activePath && route.fullPath.startsWith(bar.activePath),
+      bar => bar?.activePath && route.fullPath.startsWith(bar.activePath),
     )
     if (item) {
       currentName.value = item.title
-      isOpen.value = Boolean(currentName.value)
+      if (!import.meta.client) {
+        isOpen.value = Boolean(currentName.value)
+      }
+      else {
+        const isXl = useTailwindBreakpoints().xl.value
+        isOpen.value = Boolean(currentName.value) && isXl
+      }
     }
-    return
   }
 
   function setup() {
     // Detect sidebar item on server page load
-    if (!process.client) {
+    if (!import.meta.client) {
       detect()
       return
     }
@@ -126,7 +128,6 @@ export function useSidebar() {
     const removeHook = nuxtApp.hook('page:finish', (e) => {
       detect()
       removeHook()
-      return
     })
 
     // register a watcher to close sidebar when screen become extra large
@@ -148,11 +149,16 @@ export function useSidebar() {
           if (xl.value) {
             isOpen.value = true
           }
-        } else {
+        }
+        else {
           isOpen.value = false
         }
       },
     )
+    onUnmounted(() => {
+      currentName.value = ''
+      isOpen.value = undefined
+    })
   }
 
   return {

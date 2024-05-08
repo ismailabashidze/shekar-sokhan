@@ -2,22 +2,22 @@
 const links = [
   {
     name: 'Activity',
-    url: '/',
+    url: '#',
     icon: 'lucide:activity',
   },
   {
     name: 'Search',
-    url: '/',
+    url: '#',
     icon: 'lucide:search',
   },
   {
     name: 'Files',
-    url: '/',
+    url: '#',
     icon: 'lucide:file-text',
   },
   {
     name: 'Home',
-    url: '/',
+    url: '#',
     icon: 'lucide:home',
   },
 ]
@@ -29,9 +29,9 @@ const links = [
       v-for="link in links"
       :key="link.name"
       :to="link.url"
-      class="text-muted-400 hover:bg-primary-500 hover:shadow-primary-500/30 dark:hover:shadow-primary-800/30 flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 hover:text-white hover:shadow-xl"
+      class="text-muted-400 hover:bg-primary-500 hover:shadow-primary-500/30 dark:hover:shadow-primary-800/30 flex size-9 items-center justify-center rounded-full transition-all duration-300 hover:text-white hover:shadow-xl"
     >
-      <Icon :name="link.icon" class="h-4 w-4" />
+      <Icon :name="link.icon" class="size-4" />
     </NuxtLink>
   </div>
 </template>

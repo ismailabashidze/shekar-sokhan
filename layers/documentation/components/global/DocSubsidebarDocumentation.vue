@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineEmits<{
-  (event: 'close'): void
+  close: []
 }>()
 
 const route = useRoute()
@@ -21,7 +21,7 @@ const { data: navigation } = await useAsyncData('navigation', () =>
 )
 
 const docNav = computed(
-  () => navigation.value?.find((n) => n._path === '/documentation')?.children,
+  () => navigation.value?.find(n => n._path === '/documentation')?.children,
 )
 </script>
 
@@ -35,7 +35,7 @@ const docNav = computed(
       <template v-for="link in docNav" :key="link?._path">
         <div
           v-if="!link.children"
-          class="mb-1 flex min-h-[1.5rem] w-full items-center"
+          class="mb-1 flex min-h-6 w-full items-center"
         >
           <NuxtLink
             :to="link._path"

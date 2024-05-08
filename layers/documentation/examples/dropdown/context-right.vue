@@ -1,13 +1,37 @@
 <template>
-  <div class="flex items-end justify-end">
-    <BaseDropdown flavor="context" label="Dropdown" orientation="end">
-      <BaseDropdownItem to="#" title="Profile" text="View your profile" />
+  <div class="flex w-full justify-end">
+    <BaseDropdown
+      variant="context"
+      label="Dropdown"
+      placement="bottom-end"
+    >
+      <BaseDropdownItem
+        to="#"
+        title="Profile"
+        text="View your profile"
+        rounded="sm"
+      />
 
-      <BaseDropdownItem to="#" title="Projects" text="View your projects" />
+      <BaseDropdownItem
+        to="#"
+        title="Projects"
+        text="View your projects"
+        rounded="sm"
+      />
 
-      <BaseDropdownItem to="#" title="Team" text="Manage your team" />
+      <BaseDropdownItem
+        to="#"
+        title="Team"
+        text="Manage your team"
+        rounded="sm"
+      />
 
-      <BaseDropdownItem to="#" title="Settings" text="Set your preferences" />
+      <BaseDropdownItem
+        to="#"
+        title="Settings"
+        text="Set your preferences"
+        rounded="sm"
+      />
     </BaseDropdown>
   </div>
 </template>

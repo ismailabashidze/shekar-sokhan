@@ -1,10 +1,9 @@
-export default defineAppConfig({
+export default {
   tairo: {
     title: 'Tairo',
     error: {
       logo: {
         component: 'TairoLogo',
-        resolve: true,
         props: { class: 'text-primary-500 mx-auto h-40 p-6' },
       },
     },
@@ -21,10 +20,10 @@ export default defineAppConfig({
         'pointer-events-none',
         'p-4',
         'flex',
-        'flex-col-reverse',
+        'flex-col',
         'overflow-hidden',
         'z-[200]',
-        'items-center',
+        'items-start',
         'gap-2',
         'space-y-3',
       ],
@@ -49,4 +48,4 @@ export default defineAppConfig({
       },
     },
   },
-})
+}

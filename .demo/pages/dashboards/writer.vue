@@ -32,7 +32,7 @@ const activePosts = ref('recent')
                   class="pointer-events-none absolute start-6 top-0 sm:-start-10"
                   src="/img/illustrations/dashboards/writer/readers.svg"
                   alt="Readers illustration"
-                />
+                >
               </div>
               <div class="mt-6 grow sm:mt-0">
                 <div class="pb-4 text-center sm:pb-0 sm:text-left">
@@ -52,10 +52,10 @@ const activePosts = ref('recent')
                     <BaseButton
                       size="sm"
                       color="light"
-                      flavor="outline"
+                      variant="outline"
                       class="w-full sm:w-auto"
                     >
-                      <Icon name="lucide:plus" class="h-4 w-4" />
+                      <Icon name="lucide:plus" class="size-4" />
                       <span>New Article</span>
                     </BaseButton>
                   </div>
@@ -74,7 +74,7 @@ const activePosts = ref('recent')
                   <div class="grid grid-cols-12 gap-4">
                     <!-- Tile -->
                     <div class="col-span-4">
-                      <BaseCard shape="curved" class="p-4">
+                      <BaseCard rounded="lg" class="p-4">
                         <BaseParagraph
                           size="xs"
                           weight="medium"
@@ -91,7 +91,7 @@ const activePosts = ref('recent')
                     </div>
                     <!-- Tile -->
                     <div class="col-span-4">
-                      <BaseCard shape="curved" class="p-4">
+                      <BaseCard rounded="lg" class="p-4">
                         <BaseParagraph
                           size="xs"
                           weight="medium"
@@ -108,7 +108,7 @@ const activePosts = ref('recent')
                     </div>
                     <!-- Tile -->
                     <div class="col-span-4">
-                      <BaseCard shape="curved" class="p-4">
+                      <BaseCard rounded="lg" class="p-4">
                         <BaseParagraph
                           size="xs"
                           weight="medium"
@@ -125,7 +125,7 @@ const activePosts = ref('recent')
                     </div>
                   </div>
                   <!-- Widget -->
-                  <BaseCard class="p-6" shape="curved">
+                  <BaseCard class="p-6" rounded="lg">
                     <!-- Title -->
                     <div class="mb-8 flex items-center justify-between">
                       <BaseHeading
@@ -137,12 +137,14 @@ const activePosts = ref('recent')
                       >
                         <span>Popular authors</span>
                       </BaseHeading>
-                      <NuxtLink
-                        to="#"
-                        class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+                      <BaseButton
+                        color="primary"
+                        size="sm"
+                        variant="pastel"
+                        rounded="md"
                       >
-                        View All
-                      </NuxtLink>
+                        View all
+                      </BaseButton>
                     </div>
                     <DemoAuthorsListCompact />
                   </BaseCard>
@@ -151,7 +153,7 @@ const activePosts = ref('recent')
               <!-- Sub column -->
               <div class="col-span-12 sm:col-span-6">
                 <!-- Widget -->
-                <BaseCard class="p-6" shape="curved">
+                <BaseCard class="p-6" rounded="lg">
                   <!-- Title -->
                   <div class="mb-8 flex items-center justify-between">
                     <BaseHeading
@@ -163,12 +165,14 @@ const activePosts = ref('recent')
                     >
                       <span>Latest comments</span>
                     </BaseHeading>
-                    <NuxtLink
-                      to="#"
-                      class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+                    <BaseButton
+                      color="primary"
+                      size="sm"
+                      variant="pastel"
+                      rounded="md"
                     >
-                      View All
-                    </NuxtLink>
+                      View all
+                    </BaseButton>
                   </div>
                   <DemoCommentListCompact />
                 </BaseCard>
@@ -216,7 +220,7 @@ const activePosts = ref('recent')
                 src="/img/illustrations/dashboards/writer/post-1.svg"
                 alt="Post image"
                 class="bg-muted-200 rounded-xl"
-              />
+              >
               <BaseCard
                 class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl"
               >
@@ -267,7 +271,7 @@ const activePosts = ref('recent')
                 src="/img/illustrations/dashboards/writer/post-2.svg"
                 alt="Post image"
                 class="bg-muted-200 rounded-xl"
-              />
+              >
               <BaseCard
                 class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl"
               >

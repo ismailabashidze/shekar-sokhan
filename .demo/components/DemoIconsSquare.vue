@@ -12,22 +12,22 @@ const links = [
   {
     title: 'Profile',
     icon: 'ph:user-duotone',
-    url: '/',
+    url: '#',
   },
   {
     title: 'Settings',
     icon: 'ph:gear-six-duotone',
-    url: '/',
+    url: '#',
   },
   {
     title: 'Messages',
     icon: 'ph:chat-circle-duotone',
-    url: '/',
+    url: '#',
   },
   {
     title: 'Tasks',
     icon: 'ph:check-circle-duotone',
-    url: '/',
+    url: '#',
   },
 ]
 </script>
@@ -47,6 +47,7 @@ const links = [
       <div class="text-center">
         <div class="mb-2">
           <BaseIconBox
+            color="none"
             class="bg-primary-500/20 text-primary-500 group-hover:bg-primary-500 transition-colors duration-300 group-hover:text-white"
           >
             <Icon :name="link.icon" />

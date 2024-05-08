@@ -21,14 +21,14 @@ export default defineNuxtModule({
         }
 
         const s = new MagicString(code)
-        s.replace(/<!--(?:.*?)-->/g, '')
+        s.replace(/<!--.*?-->/g, '')
 
         if (s.hasChanged()) {
           return {
             code: s.toString(),
             map:
-              nuxt.options.sourcemap &&
-              s.generateMap({ source: id, includeContent: true }),
+              nuxt.options.sourcemap
+              && s.generateMap({ source: id, includeContent: true }),
           }
         }
       },

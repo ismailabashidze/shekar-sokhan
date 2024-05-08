@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    shape?: 'straight' | 'rounded' | 'curved' | 'full'
+    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
     color?:
       | 'success'
       | 'info'
@@ -12,7 +12,7 @@ const props = withDefaults(
       | 'sky'
   }>(),
   {
-    shape: 'rounded',
+    rounded: 'sm',
     color: 'success',
   },
 )
@@ -58,14 +58,14 @@ const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2'])
     <DemoTabbedContent
       title="Tasks"
       :labels="['All', 'Mine']"
-      :shape="props.shape"
+      :rounded="props.rounded"
     >
       <template #tab-1>
         <div class="mb-2 space-y-6">
-          <div
+          <label
             v-for="task in todos"
             :key="task.id"
-            class="flex items-center gap-3"
+            class="text-muted-300 flex cursor-pointer items-center gap-3"
           >
             <BaseCheckboxAnimated
               v-model="tasks"
@@ -88,15 +88,15 @@ const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2'])
                 </span>
               </BaseParagraph>
             </div>
-          </div>
+          </label>
         </div>
       </template>
       <template #tab-2>
         <div class="mb-2 space-y-6">
-          <div
+          <label
             v-for="task in todos"
             :key="task.id"
-            class="flex items-center gap-3"
+            class="text-muted-300 flex cursor-pointer items-center gap-3"
           >
             <BaseCheckboxAnimated
               v-model="tasks"
@@ -129,7 +129,7 @@ const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2'])
                 </span>
               </BaseParagraph>
             </div>
-          </div>
+          </label>
         </div>
       </template>
     </DemoTabbedContent>

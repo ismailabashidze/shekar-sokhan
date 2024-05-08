@@ -5,7 +5,6 @@ export default defineNuxtSchema({
       error: {
         logo: {
           component: 'TairoLogo',
-          resolve: true,
           props: {},
         },
       },
@@ -19,8 +18,13 @@ export default defineNuxtSchema({
               name: { type: 'string' },
               position: {
                 type: 'string',
-                tsType: "'left' | 'right'",
+                tsType: '\'left\' | \'right\'',
                 $default: 'left',
+              },
+              size: {
+                type: 'string',
+                tsType: '\'sm\' | \'md\'',
+                $default: 'sm',
               },
               component: { type: 'string' },
               props: { type: 'object' },

@@ -41,7 +41,6 @@ export default defineNuxtSchema({
           startOpen: true,
           logo: {
             component: 'TairoLogo',
-            resolve: true,
             props: {},
           },
           items: {
@@ -57,7 +56,7 @@ export default defineNuxtSchema({
                   activePath: { type: 'string' },
                   position: {
                     type: 'string',
-                    tsType: "'start' | 'end'",
+                    tsType: '\'start\' | \'end\'',
                     $default: 'start',
                   },
 

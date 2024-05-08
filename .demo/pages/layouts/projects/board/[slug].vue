@@ -4,14 +4,30 @@ import { Container, Draggable } from 'vue3-smooth-dnd'
 definePageMeta({
   title: 'Project Board',
   layout: 'empty',
-  preview: {
-    title: 'Project board',
-    description: 'For displaying a kanban board',
-    categories: ['layouts', 'projects'],
-    src: '/img/screens/layouts-projects-board.png',
-    srcDark: '/img/screens/layouts-projects-board-dark.png',
-    order: 74,
-  },
+  preview: [
+    {
+      title: 'Project board',
+      description: 'For a fitness project kanban board',
+      categories: ['layouts', 'projects', 'kanban'],
+      src: '/img/screens/layouts-projects-board.png',
+      srcDark: '/img/screens/layouts-projects-board-dark.png',
+      order: 74,
+      params: {
+        slug: 'health-and-fitness-dashboard',
+      },
+    },
+    {
+      title: 'Project board',
+      description: 'For a banking project kanban board',
+      categories: ['layouts', 'projects', 'kanban'],
+      src: '/img/screens/layouts-projects-board.png',
+      srcDark: '/img/screens/layouts-projects-board-dark.png',
+      order: 74,
+      params: {
+        slug: 'banking-and-finance-dashboard',
+      },
+    },
+  ],
 })
 
 interface ColumnContent {
@@ -50,7 +66,7 @@ const columns = reactive<Column>({
   },
 })
 
-const { open } = usePanels()
+const { open, close } = usePanels()
 
 const route = useRoute()
 const slug = computed(() => route.params.slug)
@@ -105,13 +121,22 @@ const currentTask = ref()
 
 function openTaskPanel(id: number, tasks: any) {
   currentTask.value = tasks.find((task: any) => task.id === id)
-  open('task', { task: currentTask })
+  open('task', {
+    task: currentTask,
+
+    // listen to "message" event emited from panel component
+    onMessage: async (message: any) => {
+      console.log('onMessage')
+      console.log(message)
+      close()
+    },
+  })
 }
 
 function onDrop(column: ColumnContent, dropResult: any) {
   if (
-    typeof dropResult?.addedIndex !== 'number' ||
-    typeof dropResult?.removedIndex !== 'number'
+    typeof dropResult?.addedIndex !== 'number'
+    || typeof dropResult?.removedIndex !== 'number'
   ) {
     return
   }
@@ -145,7 +170,11 @@ function onDrop(column: ColumnContent, dropResult: any) {
           <BaseParagraph size="xs" class="text-muted-400">
             {{ data?.project.customer.name }}
           </BaseParagraph>
-          <BaseHeading as="h2" size="sm" weight="medium">
+          <BaseHeading
+            as="h2"
+            size="sm"
+            weight="medium"
+          >
             {{ data?.project.name }}
           </BaseHeading>
         </div>
@@ -154,13 +183,13 @@ function onDrop(column: ColumnContent, dropResult: any) {
         <BaseAvatarGroup :avatars="data?.project.team" size="xs" />
         <BaseButtonIcon
           :to="`/layouts/projects/details/${slug}`"
-          shape="curved"
-          data-tooltip="Project details"
+          rounded="lg"
+          data-nui-tooltip="Project details"
         >
-          <Icon name="lucide:layout-template" class="h-4 w-4" />
+          <Icon name="lucide:layout-template" class="size-4" />
         </BaseButtonIcon>
-        <BaseButtonIcon shape="full" data-tooltip="New task">
-          <Icon name="lucide:plus" class="h-4 w-4" />
+        <BaseButtonIcon rounded="full" data-nui-tooltip="New task">
+          <Icon name="lucide:plus" class="size-4" />
         </BaseButtonIcon>
       </div>
     </div>
@@ -179,18 +208,17 @@ function onDrop(column: ColumnContent, dropResult: any) {
           }}</span>
           <!-- Column count -->
           <span
-            class="text-primary-500 dark:text-sunny ms-2 flex h-5 w-5 items-center justify-center text-sm font-semibold"
-            >{{ column.tasks.length }}</span
-          >
+            class="text-primary-500 dark:text-sunny ms-2 flex size-5 items-center justify-center text-sm font-semibold"
+          >{{ column.tasks.length }}</span>
           <!-- Column action -->
           <button
-            class="text-primary-500 dark:text-sunny hover:bg-primary-500/20 dark:hover:bg-sunny/20 ms-auto flex h-6 w-6 items-center justify-center rounded-full transition-colors duration-300"
+            class="text-primary-500 dark:text-sunny hover:bg-primary-500/20 dark:hover:bg-sunny/20 ms-auto flex size-6 items-center justify-center rounded-full transition-colors duration-300"
           >
-            <Icon name="lucide:plus" class="h-4 w-4" />
+            <Icon name="lucide:plus" class="size-4" />
           </button>
         </div>
         <!-- Scrollable area -->
-        <div class="slimscroll overflow-auto pb-10 pe-2">
+        <div class="nui-slimscroll overflow-auto pb-10 pe-2">
           <Container
             tag="div"
             class="flex flex-col gap-y-4"
@@ -208,24 +236,29 @@ function onDrop(column: ColumnContent, dropResult: any) {
             <template v-if="column.tasks.length > 0">
               <Draggable v-for="task in column.tasks" :key="task.id">
                 <div
+                  role="button"
+                  tabindex="0"
                   class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 group relative flex cursor-pointer flex-col items-start rounded-lg border bg-white/90 p-4 hover:bg-white"
                   draggable="true"
-                  @click="() => openTaskPanel(task.id, data?.project.tasks)"
+                  @click="() => openTaskPanel(task.id, data?.project?.tasks)"
                 >
                   <div class="relative mb-2">
                     <div
                       class="mb-2 flex w-full items-center justify-between gap-2"
                     >
                       <BaseTag
-                        shape="full"
-                        flavor="pastel"
+                        rounded="full"
+                        variant="pastel"
                         color="muted"
                         class="m-0 -ms-1 inline-flex h-6 scale-90 items-center py-0 text-xs font-semibold"
-                        >Task #{{ task.id }}</BaseTag
                       >
-                      <BaseText size="xs" class="text-muted-400">{{
-                        task.created
-                      }}</BaseText>
+                        Task #{{ task.id }}
+                      </BaseTag>
+                      <BaseText size="xs" class="text-muted-400">
+                        {{
+                          task.created
+                        }}
+                      </BaseText>
                     </div>
                     <BaseHeading
                       as="h4"
@@ -245,37 +278,39 @@ function onDrop(column: ColumnContent, dropResult: any) {
                         size="xxs"
                         class="shrink-0"
                       />
-                      <BaseText size="xs" class="text-muted-400">{{
-                        task.assignee.tooltip
-                      }}</BaseText>
+                      <BaseText size="xs" class="text-muted-400">
+                        {{
+                          task.assignee.tooltip
+                        }}
+                      </BaseText>
                     </div>
                     <div class="text-muted-400 flex items-center gap-3">
                       <div
                         v-if="task.checklist.length > 0"
-                        :data-tooltip="`${task.checklist.length} subtask${
+                        :data-nui-tooltip="`${task.checklist.length} subtask${
                           task.checklist.length > 1 ? 's' : ''
                         } in checklist`"
-                        data-tooltip-position="left"
+                        data-nui-tooltip-position="start"
                       >
-                        <Icon name="lucide:check-circle" class="h-4 w-4" />
+                        <Icon name="lucide:check-circle" class="size-4" />
                       </div>
                       <div
                         v-if="task.files.length > 0"
-                        :data-tooltip="`${task.files.length} file${
+                        :data-nui-tooltip="`${task.files.length} file${
                           task.files.length > 1 ? 's' : ''
                         } uploaded`"
-                        data-tooltip-position="left"
+                        data-nui-tooltip-position="start"
                       >
-                        <Icon name="lucide:file" class="h-4 w-4" />
+                        <Icon name="lucide:file" class="size-4" />
                       </div>
                       <div
                         v-if="task.comments.length > 0"
-                        :data-tooltip="`${task.comments.length} comment${
+                        :data-nui-tooltip="`${task.comments.length} comment${
                           task.comments.length > 1 ? 's' : ''
                         }`"
-                        data-tooltip-position="left"
+                        data-nui-tooltip-position="start"
                       >
-                        <Icon name="lucide:message-circle" class="h-4 w-4" />
+                        <Icon name="lucide:message-circle" class="size-4" />
                       </div>
                     </div>
                   </div>
@@ -287,10 +322,15 @@ function onDrop(column: ColumnContent, dropResult: any) {
               <div
                 class="text-muted-400 mt-10 flex items-center justify-center"
               >
-                <Icon name="ph:kanban-thin" class="h-12 w-12" />
+                <Icon name="ph:kanban-thin" class="size-12" />
               </div>
               <div class="mt-2 text-center">
-                <BaseHeading as="h4" size="md" weight="light" class="mb-1">
+                <BaseHeading
+                  as="h4"
+                  size="md"
+                  weight="light"
+                  class="mb-1"
+                >
                   <span>Nothing to show</span>
                 </BaseHeading>
                 <BaseParagraph
@@ -298,14 +338,12 @@ function onDrop(column: ColumnContent, dropResult: any) {
                   lead="tight"
                   class="text-muted-500 dark:text-muted-400 mx-auto max-w-[200px] !font-sans"
                 >
-                  <span
-                    >There are no pending tasks to show in here for now.</span
-                  >
+                  <span>There are no pending tasks to show in here for now.</span>
                 </BaseParagraph>
                 <button
                   class="text-primary-500 dark:text-sunny mx-auto mt-2 flex items-center justify-center gap-1 font-sans text-xs underline-offset-4 hover:underline"
                 >
-                  <Icon name="lucide:plus" class="h-3 w-3" />
+                  <Icon name="lucide:plus" class="size-3" />
                   <span>New Task</span>
                 </button>
               </div>
@@ -325,12 +363,12 @@ function onDrop(column: ColumnContent, dropResult: any) {
           <button
             class="text-muted-500 dark:text-muted-400 hover:text-primary-500 dark:hover:text-sunny border-muted-300 dark:border-muted-600 hover:border-primary-500 dark:hover:border-sunny flex h-12 w-full items-center justify-center gap-x-2 rounded-xl border-2 border-dashed px-6 font-sans transition-colors duration-300 hover:border-solid"
           >
-            <Icon name="ph:gear-six-duotone" class="h-4 w-4" />
+            <Icon name="ph:gear-six-duotone" class="size-4" />
             <span class="text-sm">Manage columns</span>
           </button>
         </div>
       </div>
-      <div class="w-6 shrink-0"></div>
+      <div class="w-6 shrink-0" />
     </div>
   </TairoSidebarLayout>
 </template>

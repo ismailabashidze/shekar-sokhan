@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useIntersectionObserver } from '@vueuse/core'
 import '~/assets/css/apexcharts.css'
 
 const props = defineProps<{
@@ -28,15 +29,19 @@ const { stop } = useIntersectionObserver(target, ([{ isIntersecting }]) => {
 <template>
   <div ref="target">
     <BasePlaceload
-      class="m-4 w-[calc(100%-32px)]"
       v-if="!isLoaded && !targetIsVisible"
+      class="m-4 w-[calc(100%-32px)]"
       :style="{ height: `${height - 32}px` }"
     />
     <ClientOnly>
-      <LazyApexCharts v-if="targetIsVisible" v-show="isLoaded" v-bind="props" />
+      <LazyApexCharts
+        v-if="targetIsVisible"
+        v-show="isLoaded"
+        v-bind="props"
+      />
       <BasePlaceload
-        class="m-4 w-[calc(100%-32px)]"
         v-else
+        class="m-4 w-[calc(100%-32px)]"
         :style="{ height: `${height - 32}px` }"
       />
     </ClientOnly>

@@ -13,13 +13,21 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-profile-edit-1-dark.png',
     order: 76,
   },
+  pageTransition: {
+    enterActiveClass: 'transition-all duration-500 ease-out',
+    enterFromClass: 'translate-y-20 opacity-0',
+    enterToClass: 'translate-y-0 opacity-100',
+    leaveActiveClass: 'transition-all duration-200 ease-in',
+    leaveFromClass: 'translate-y-0 opacity-100',
+    leaveToClass: 'translate-y-20 opacity-0',
+  },
 })
 
 // This is the object that will contain the validation messages
 const ONE_MB = 1000000
 const VALIDATION_TEXT = {
-  FIRST_REQUIRED: "Your first name can't be empty",
-  LASTNAME_REQUIRED: "Your last name can't be empty",
+  FIRST_REQUIRED: 'Your first name can\'t be empty',
+  LASTNAME_REQUIRED: 'Your last name can\'t be empty',
   OPTION_REQUIRED: 'Please select an option',
   AVATAR_TOO_BIG: `Avatar size must be less than 1MB`,
 }
@@ -28,7 +36,7 @@ const VALIDATION_TEXT = {
 // It's used to define the shape that the form data will have
 const zodSchema = z
   .object({
-    avatar: z.custom<File>((v) => v instanceof File).nullable(),
+    avatar: z.custom<File>(v => v instanceof File).nullable(),
     profile: z.object({
       firstName: z.string().min(1, VALIDATION_TEXT.FIRST_REQUIRED),
       lastName: z.string().min(1, VALIDATION_TEXT.LASTNAME_REQUIRED),
@@ -120,7 +128,7 @@ type FormInput = z.infer<typeof zodSchema>
 const { data, pending, error, refresh } = await useFetch('/api/profile')
 
 const validationSchema = toTypedSchema(zodSchema)
-const initialValues = computed<FormInput>(() => ({
+const initialValues = {
   avatar: null,
   profile: {
     firstName: data.value?.personalInfo?.firstName || '',
@@ -143,7 +151,7 @@ const initialValues = computed<FormInput>(() => ({
     github: '',
     gitlab: '',
   },
-}))
+} satisfies FormInput
 
 // This is the list of options for the select inputs
 const experience = ['0-2 years', '2-5 years', '5-10 years', '10+ years']
@@ -226,10 +234,10 @@ const onSubmit = handleSubmit(
         icon: 'ph:check',
         closable: true,
       })
-    } catch (error: any) {
+    }
+    catch (error: any) {
       // this will set the error on the form
       if (error.message === 'Fake backend validation error') {
-        // @ts-expect-error - vee validate typing bug with nested keys
         setFieldError('profile.firstName', 'This first name is not allowed')
 
         document.documentElement.scrollTo({
@@ -282,7 +290,12 @@ const onSubmit = handleSubmit(
 </script>
 
 <template>
-  <form method="POST" action="" class="w-full pb-16" @submit.prevent="onSubmit">
+  <form
+    method="POST"
+    action=""
+    class="w-full pb-16"
+    @submit.prevent="onSubmit"
+  >
     <BaseCard>
       <div class="flex items-center justify-between p-4">
         <div>
@@ -300,15 +313,18 @@ const onSubmit = handleSubmit(
           </BaseText>
         </div>
         <div class="flex items-center gap-2">
-          <BaseButton class="w-24" to="/layouts/profile">Cancel</BaseButton>
+          <BaseButton class="w-24" to="/layouts/profile">
+            Cancel
+          </BaseButton>
           <BaseButton
             type="submit"
             color="primary"
             class="w-24"
             :disabled="isSubmitting"
             :loading="isSubmitting"
-            >Save</BaseButton
           >
+            Save
+          </BaseButton>
         </div>
       </div>
       <div class="p-4">
@@ -342,40 +358,44 @@ const onSubmit = handleSubmit(
                 "
               />
               <BaseInputFileHeadless
-                accept="image/*"
-                v-model="inputFile"
                 v-slot="{ open, remove, preview, files }"
+                v-model="inputFile"
+                accept="image/*"
               >
-                <div class="relative h-24 w-24">
+                <div class="relative size-24">
                   <img
                     v-if="files?.length && files.item(0)"
                     :src="preview(files.item(0)!).value"
                     alt="Upload preview"
-                    class="bg-muted-200 dark:bg-muted-700/60 h-24 w-24 rounded-full object-cover object-center"
-                  />
+                    class="bg-muted-200 dark:bg-muted-700/60 size-24 rounded-full object-cover object-center"
+                  >
                   <img
                     v-else
                     :src="currentAvatar"
                     alt="Upload preview"
-                    class="bg-muted-200 dark:bg-muted-700/60 h-24 w-24 rounded-full object-cover object-center"
-                  />
+                    class="bg-muted-200 dark:bg-muted-700/60 size-24 rounded-full object-cover object-center"
+                  >
                   <div
                     v-if="files?.length && files.item(0)"
                     class="absolute bottom-0 end-0 z-20"
                   >
                     <BaseButtonIcon
-                      condensed
-                      shape="full"
+                      size="sm"
+                      rounded="full"
+                      data-nui-tooltip="Remove image"
                       @click="remove(files.item(0)!)"
-                      data-tooltip="Remove image"
                     >
-                      <Icon name="lucide:x" class="h-4 w-4" />
+                      <Icon name="lucide:x" class="size-4" />
                     </BaseButtonIcon>
                   </div>
                   <div v-else class="absolute bottom-0 end-0 z-20">
-                    <div class="relative" data-tooltip="Upload image">
-                      <BaseButtonIcon condensed shape="full" @click="open">
-                        <Icon name="lucide:plus" class="h-4 w-4" />
+                    <div class="relative" data-nui-tooltip="Upload image">
+                      <BaseButtonIcon
+                        size="sm"
+                        rounded="full"
+                        @click="open"
+                      >
+                        <Icon name="lucide:plus" class="size-4" />
                       </BaseButtonIcon>
                     </div>
                   </div>
@@ -498,7 +518,7 @@ const onSubmit = handleSubmit(
                     :disabled="isSubmitting"
                     :items="experience"
                     placeholder="Experience"
-                    shape="rounded"
+                    rounded="sm"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
@@ -516,7 +536,7 @@ const onSubmit = handleSubmit(
                     :items="answers"
                     :properties="{ label: 'label', value: 'value' }"
                     placeholder="Is this your first job?"
-                    shape="rounded"
+                    rounded="sm"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
@@ -534,7 +554,7 @@ const onSubmit = handleSubmit(
                     :items="answers"
                     :properties="{ label: 'label', value: 'value' }"
                     placeholder="Are you flexible?"
-                    shape="rounded"
+                    rounded="sm"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
@@ -552,7 +572,7 @@ const onSubmit = handleSubmit(
                     :items="answers"
                     :properties="{ label: 'label', value: 'value' }"
                     placeholder="Do you work remotely?"
-                    shape="rounded"
+                    rounded="sm"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />

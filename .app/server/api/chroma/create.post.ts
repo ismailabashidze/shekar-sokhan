@@ -6,3 +6,4 @@ export default defineEventHandler(async (event) => {
   const collection = await client.createCollection({ name: body.name })
   return collection
 })
+

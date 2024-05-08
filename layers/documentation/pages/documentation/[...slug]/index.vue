@@ -59,6 +59,13 @@ const [{ data, pending }, { data: tree }] = await Promise.all([
   ),
 ])
 
+if (!data.value) {
+  await navigateTo('/documentation')
+}
+else if (data.value.redirect) {
+  await navigateTo(data.value?.redirect)
+}
+
 watchEffect(() => {
   const title = data.value?.title
   if (pending.value) return
@@ -75,13 +82,15 @@ const breadcrumb = computed(() => {
 
   if (indexRoute.meta.breadcrumb === false) {
     // skip breadcrumb item
-  } else if (indexRoute.meta.breadcrumb) {
+  }
+  else if (indexRoute.meta.breadcrumb) {
     const breadcrumbItem = indexRoute.meta.breadcrumb
     items.push({
       to: indexRoute.path,
       ...breadcrumbItem,
     })
-  } else if (indexRoute.meta.title) {
+  }
+  else if (indexRoute.meta.title) {
     items.push({
       label: indexRoute.meta.title as string,
       to: indexRoute.path,
@@ -89,7 +98,7 @@ const breadcrumb = computed(() => {
   }
 
   for (const item of tree.value || []) {
-    if (items.find((i) => i.to === item._path)) {
+    if (items.find(i => i.to === item._path)) {
       continue
     }
     items.push({
@@ -123,7 +132,7 @@ const metaKey = useMetaKey()
       >
         <Icon
           name="lucide:search"
-          class="h-4 w-4 transition-colors duration-300"
+          class="size-4 transition-colors duration-300"
         />
         <span
           class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 group-hover:text-muted-600 dark:group-hover:text-muted-100 rounded-lg border bg-white px-2 py-0.5 shadow transition-colors duration-300"
@@ -141,8 +150,12 @@ const metaKey = useMetaKey()
               <div>
                 <p>The page you are looking for does not exist.</p>
                 <div class="flex flex-row gap-6">
-                  <BaseButton to="/documentation">Back to Hub</BaseButton>
-                  <BaseButton color="none" to="/">Back to Home</BaseButton>
+                  <BaseButton to="/documentation">
+                    Back to Hub
+                  </BaseButton>
+                  <BaseButton color="none" to="/">
+                    Back to Home
+                  </BaseButton>
                 </div>
               </div>
             </DocComponentDemo>
@@ -153,7 +166,13 @@ const metaKey = useMetaKey()
         v-if="!pending && data && data.toc !== false"
         class="relative hidden lg:me-6 lg:block lg:w-1/4 xl:me-0"
       >
-        <TairoToc :key="`toc-${data._path}`" />
+        <TairoToc :key="`toc-${data._path}`" class="fixed pb-20 pe-1 ps-20 pt-2">
+          <template #nav-end>
+            <div
+              class="dark:bg-muted-900 bg-muted-100 pointer-events-none fixed bottom-0 z-10 h-20 w-[212px] blur-xl"
+            />
+          </template>
+        </TairoToc>
       </div>
     </div>
   </div>

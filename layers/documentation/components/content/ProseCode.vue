@@ -28,12 +28,14 @@ export default defineComponent({
       return `\`\`\`${props.language}\n${props.code}\`\`\``
     })
 
+    const inCodeGroup = inject('code-group-context', false)
     const { copy, copied, isSupported } = useClipboard({
       source: () => props.code,
     })
 
     return {
       markdown,
+      inCodeGroup,
       copy,
       copied,
       isSupported,
@@ -45,29 +47,31 @@ export default defineComponent({
 <template>
   <div class="group/prose-code relative">
     <div
-      v-if="filename || isSupported"
-      class="absolute end-2 top-2 inline-flex items-center gap-1 text-xs opacity-40 transition-opacity duration-200 group-hover/prose-code:opacity-60 dark:group-hover/prose-code:opacity-80"
+      v-if="!inCodeGroup && (filename || isSupported)"
+      class="absolute end-4 top-2 flex items-center gap-1 text-xs opacity-40 transition-opacity duration-200 group-hover/prose-code:opacity-60 dark:group-hover/prose-code:opacity-80"
+      :class="[filename && isSupported ? 'start-4 justify-between' : '']"
     >
       <span v-if="filename">{{ filename }}</span>
       <button
         v-if="isSupported"
         type="button"
-        :data-tooltip="copied ? 'Copied!' : 'Copy'"
+        :data-nui-tooltip="copied ? 'Copied!' : 'Copy'"
         class="hover:text-muted-950 dark:hover:text-white"
         @click="() => copy()"
       >
-        <Icon name="lucide:copy" class="ml-1 inline-block h-3 w-3" />
+        <Icon name="lucide:copy" class="ml-1 inline-block size-3" />
       </button>
     </div>
     <AddonMarkdownRemark
       :source="markdown"
       fullwidth
       class="doc-markdown"
+      :class="[
+        inCodeGroup
+          ? ''
+          : filename && isSupported ? '[&_.shiki]:pt-8' : '[&_.shiki]:!pe-10',
+      ]"
       :lines="false"
-      :theme="{
-        light: 'cssninja-light-theme',
-        dark: 'cssninja-dark-theme',
-      }"
     />
   </div>
 </template>

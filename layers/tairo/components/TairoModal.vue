@@ -1,9 +1,3 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false,
-}
-</script>
-
 <script setup lang="ts">
 import {
   Dialog,
@@ -20,14 +14,21 @@ const props = withDefaults(
     open?: boolean
 
     /**
+     * The HTML tag to use as modal wrapper (e.g. `div`, `form`, etc.).
+     *
+     * @default 'div'
+     */
+    as?: string
+
+    /**
      * The size of the modal.
      */
     size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
 
     /**
-     * The shape of the modal.
+     * The radius of the modal.
      */
-    shape?: 'straight' | 'rounded' | 'curved'
+    rounded?: 'none' | 'sm' | 'md' | 'lg'
 
     /**
      * The alignment of the footer content.
@@ -40,8 +41,9 @@ const props = withDefaults(
     }
   }>(),
   {
+    as: 'div',
     size: 'md',
-    shape: 'rounded',
+    rounded: 'sm',
     footerAlign: 'end',
     classes: () => ({
       wrapper: '',
@@ -50,7 +52,13 @@ const props = withDefaults(
   },
 )
 
-const emit = defineEmits(['close'])
+const emit = defineEmits<{
+  close: []
+}>()
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const dialogClasses = computed(() => {
   const classes = []
@@ -58,16 +66,23 @@ const dialogClasses = computed(() => {
   if (props.classes.dialog) {
     if (Array.isArray(props.classes.dialog)) {
       classes.push(...props.classes.dialog)
-    } else {
+    }
+    else {
       classes.push(props.classes.dialog)
     }
   }
 
-  switch (props.shape) {
-    case 'rounded':
+  switch (props.rounded) {
+    case 'none':
+      classes.push('rounded-none')
+      break
+    case 'sm':
+      classes.push('rounded-md')
+      break
+    case 'md':
       classes.push('rounded-lg')
       break
-    case 'curved':
+    case 'lg':
       classes.push('rounded-xl')
       break
   }
@@ -98,9 +113,17 @@ const dialogClasses = computed(() => {
 </script>
 
 <template>
-  <TransitionRoot appear :show="props.open" as="template">
+  <TransitionRoot
+    appear
+    :show="props.open"
+    as="template"
+  >
     <div class="fixed inset-0 z-[9999] flex items-center justify-center">
-      <Dialog class="relative z-[9999]" as="div" @close="emit('close')">
+      <Dialog
+        class="relative z-[9999]"
+        as="div"
+        @close="emit('close')"
+      >
         <TransitionChild
           as="template"
           enter="duration-300 ease-out"
@@ -110,11 +133,12 @@ const dialogClasses = computed(() => {
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="bg-muted-800/70 dark:bg-muted-900/80 fixed inset-0"></div>
+          <div class="bg-muted-800/70 dark:bg-muted-900/80 fixed inset-0" />
         </TransitionChild>
 
         <div class="fixed inset-0">
-          <div
+          <component
+            :is="props.as ? props.as : as"
             class="flex min-h-full items-center justify-center p-4 text-center"
             :class="props.classes.wrapper"
           >
@@ -131,9 +155,9 @@ const dialogClasses = computed(() => {
                 class="dark:bg-muted-800 w-full bg-white text-left align-middle shadow-xl transition-all"
                 :class="dialogClasses"
               >
-                <slot name="header"></slot>
+                <slot name="header" />
 
-                <slot></slot>
+                <slot />
 
                 <div
                   v-if="'footer' in $slots"
@@ -144,11 +168,11 @@ const dialogClasses = computed(() => {
                     props.footerAlign === 'between' && 'justify-between',
                   ]"
                 >
-                  <slot name="footer"></slot>
+                  <slot name="footer" />
                 </div>
               </DialogPanel>
             </TransitionChild>
-          </div>
+          </component>
         </div>
       </Dialog>
     </div>

@@ -4,11 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "main": "./nuxt.config.ts",
+  "packageManager": "pnpm@8.14.0",
   "scripts": {
     "clean": "rimraf .nuxt .output node_modules"
   },
   "devDependencies": {
-    "@nuxt/image-edge": "1.0.0-28050764.aaee7ac",
-    "nuxt": "3.5.0"
+    "@nuxt/image": "1.5.0",
+    "nuxt": "3.11.2",
+    "sharp": "0.33.3"
   }
 }

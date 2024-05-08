@@ -11,18 +11,19 @@ definePageMeta({
   preview: {
     title: 'Wizard — Step 5',
     description: 'For onboarding and step forms',
-    categories: ['dashboards', 'wizard', 'forms'],
+    categories: ['dashboards', 'wizards', 'forms'],
     src: '/img/screens/wizard-5.png',
     srcDark: '/img/screens/wizard-5-dark.png',
     order: 34,
   },
 })
-
-const { data: project } = useMultiStepForm<Project, ProjectStepData>()
-
 useHead({
   title: 'Team members',
 })
+
+const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>()
+
+onBeforeMount(checkPreviousSteps)
 
 const toggled = ref(false)
 
@@ -104,7 +105,7 @@ watchEffect(() => {
         return item.name === _item.name
       })
     })
-    .filter((item) => item.name.match(new RegExp(search.value, 'i')))
+    .filter(item => item.name.match(new RegExp(search.value, 'i')))
 })
 </script>
 
@@ -123,7 +124,7 @@ watchEffect(() => {
             src="/img/illustrations/wizard/team.svg"
             class="mx-auto max-w-[210px] rounded-full"
             alt=""
-          />
+          >
         </template>
         <div class="mt-2 text-center">
           <button
@@ -149,7 +150,7 @@ watchEffect(() => {
             <BaseInput
               v-model="search"
               icon="lucide:search"
-              shape="curved"
+              rounded="lg"
               placeholder="ex: Clarissa, Kendra, ..."
               :classes="{
                 wrapper: 'w-full relative z-10',
@@ -168,7 +169,7 @@ watchEffect(() => {
               <!-- Results -->
               <div
                 v-if="filteredUsers.length > 0"
-                class="slimscroll max-h-[186px] space-y-2 overflow-y-auto"
+                class="nui-slimscroll max-h-[186px] space-y-2 overflow-y-auto"
               >
                 <!-- Result -->
                 <div
@@ -193,10 +194,10 @@ watchEffect(() => {
                   <div class="ms-auto">
                     <BaseButtonIcon
                       small
-                      shape="full"
+                      rounded="full"
                       @click="addTeammate(user)"
                     >
-                      <Icon name="lucide:plus" class="h-4 w-4" />
+                      <Icon name="lucide:plus" class="size-4" />
                     </BaseButtonIcon>
                   </div>
                 </div>
@@ -228,24 +229,26 @@ watchEffect(() => {
                   <div class="ms-auto">
                     <div class="relative flex w-48 justify-between">
                       <div
+                        role="button"
                         class="relative z-10 shrink-0"
-                        data-tooltip="Reader"
+                        data-nui-tooltip="Reader"
                         tabindex="0"
                         @keydown.space.prevent="setTeammateRole(idx, 'reader')"
                         @click="setTeammateRole(idx, 'reader')"
                       >
                         <div
-                          class="h-3 w-3 rounded-full"
+                          class="size-3 rounded-full"
                           :class="[
                             getRoleLevel(member) >= 0
                               ? 'bg-primary-500'
                               : 'bg-muted-300 dark:bg-muted-700',
                           ]"
-                        ></div>
+                        />
                       </div>
                       <div
+                        role="button"
                         class="relative z-10 shrink-0"
-                        data-tooltip="Collaborator"
+                        data-nui-tooltip="Collaborator"
                         tabindex="0"
                         @keydown.space.prevent="
                           setTeammateRole(idx, 'collaborator')
@@ -253,45 +256,47 @@ watchEffect(() => {
                         @click="setTeammateRole(idx, 'collaborator')"
                       >
                         <div
-                          class="h-3 w-3 rounded-full"
+                          class="size-3 rounded-full"
                           :class="[
                             getRoleLevel(member) >= 1
                               ? 'bg-primary-500'
                               : 'bg-muted-300 dark:bg-muted-700',
                           ]"
-                        ></div>
+                        />
                       </div>
                       <div
+                        role="button"
                         class="relative z-10 shrink-0"
-                        data-tooltip="Manager"
+                        data-nui-tooltip="Manager"
                         tabindex="0"
                         @keydown.space.prevent="setTeammateRole(idx, 'manager')"
                         @click="setTeammateRole(idx, 'manager')"
                       >
                         <div
-                          class="h-3 w-3 rounded-full"
+                          class="size-3 rounded-full"
                           :class="[
                             getRoleLevel(member) >= 2
                               ? 'bg-primary-500'
                               : 'bg-muted-300 dark:bg-muted-700',
                           ]"
-                        ></div>
+                        />
                       </div>
                       <div
+                        role="button"
                         class="relative z-10 shrink-0"
-                        data-tooltip="Owner"
+                        data-nui-tooltip="Owner"
                         tabindex="0"
                         @keydown.space.prevent="setTeammateRole(idx, 'owner')"
                         @click="setTeammateRole(idx, 'owner')"
                       >
                         <div
-                          class="h-3 w-3 rounded-full"
+                          class="size-3 rounded-full"
                           :class="[
                             getRoleLevel(member) >= 3
                               ? 'bg-primary-500'
                               : 'bg-muted-300 dark:bg-muted-700',
                           ]"
-                        ></div>
+                        />
                       </div>
                       <div class="absolute top-1/2 w-full -translate-y-1/2">
                         <BaseProgress
@@ -305,10 +310,10 @@ watchEffect(() => {
                   <div class="ms-8">
                     <BaseButtonIcon
                       small
-                      shape="full"
+                      rounded="full"
                       @click="removeTeammate(idx)"
                     >
-                      <Icon name="lucide:x" class="h-4 w-4" />
+                      <Icon name="lucide:x" class="size-4" />
                     </BaseButtonIcon>
                   </div>
                 </div>

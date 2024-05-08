@@ -1,7 +1,5 @@
 export default defineEventHandler(async () => {
-  const data = await getDemoData()
-
-  return data
+  return await getDemoData()
 })
 
 async function getDemoData() {
@@ -210,7 +208,7 @@ async function getDemoData() {
           name: 'Vue',
           experience: 10,
           level: 75,
-          logo: '/img//stacks/vuejs.svg',
+          logo: '/img/stacks/vuejs.svg',
           related: {
             total: '2K',
             people: [

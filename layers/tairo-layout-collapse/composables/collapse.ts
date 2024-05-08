@@ -40,8 +40,8 @@ export interface TairoCollapseResolvedConfig {
  *           icon: { name: 'ph:sidebar-duotone', class: 'w-5 h-5' },
  *
  *           // Or use a component
- *           // It should be registered in the app as a global component
- *           component: { name: 'BaseThemeToggle', props: {} },
+ *           // It should be registered in the app as a global component (in components/global)
+ *           component: { name: 'AppThemeToggle', props: {} },
  *
  *           // You can chose to display a subsidebar by defining a component name
  *           // It should be registered in the app as a global component
@@ -67,13 +67,13 @@ export function useCollapse() {
 
   const menuItems = computed(() => {
     if (
-      app.tairo.collapse?.navigation?.enabled === false ||
-      app.tairo.collapse?.navigation?.items?.length === 0
+      (app.tairo?.collapse?.navigation?.enabled as boolean) === false
+      || app.tairo?.collapse?.navigation?.items?.length === 0
     ) {
       return []
     }
-    return app.tairo.collapse?.navigation?.items?.map(
-      (navigation) =>
+    return app.tairo?.collapse?.navigation?.items?.map(
+      navigation =>
         <TairoCollapseResolvedConfig>{
           ...navigation,
           position: navigation.position ?? 'start',
@@ -85,11 +85,11 @@ export function useCollapse() {
   const isMobileOpen = useState('collapse-mobile-open', () => false)
 
   const header = computed(() => {
-    return app.tairo.collapse?.navigation?.header
+    return app.tairo?.collapse?.navigation?.header
   })
 
   const footer = computed(() => {
-    return app.tairo.collapse?.navigation?.footer
+    return app.tairo?.collapse?.navigation?.footer
   })
 
   function toggle() {
@@ -97,23 +97,28 @@ export function useCollapse() {
     const { lg } = useTailwindBreakpoints()
     if (lg.value) {
       isOpen.value = !isOpen.value
-    } else {
+    }
+    else {
       isMobileOpen.value = !isMobileOpen.value
     }
   }
 
-  if (process.client) {
+  if (import.meta.client) {
+    const route = useRoute()
     const { lg, xl } = useTailwindBreakpoints()
-    /*watch(xl, (isXl) => {
-      if (!isXl) {
-        isOpen.value = false
-      }
-    })*/
     watch(lg, (isLg) => {
       if (isLg) {
         isMobileOpen.value = false
       }
     })
+    watch(
+      () => route.fullPath,
+      () => {
+        if (!lg.value) {
+          isMobileOpen.value = false
+        }
+      },
+    )
   }
 
   return {

@@ -20,12 +20,10 @@ const props = withDefaults(
 
 const demoRE = /^#examples\/([\w-]+)\/([\w-]+).vue$/
 
-if (process.dev) {
-  if (props.demo && !demoRE.test(props.demo)) {
-    console.error(
-      `Invalid demo path: ${props.demo}. Expected format: #examples/<folder>/<file>.vue`,
-    )
-  }
+if (import.meta.dev && props.demo && !demoRE.test(props.demo)) {
+  console.error(
+    `Invalid demo path: ${props.demo}. Expected format: #examples/<folder>/<file>.vue`,
+  )
 }
 
 const info = computed(() => {
@@ -58,7 +56,11 @@ await loadDemo()
 watch(info, loadDemo)
 
 async function loadDemo() {
-  if (!info.value.folder || !info.value.file) return
+  if (!info.value.folder || !info.value.file) {
+    exampleComponent.value = null
+    exampleSource.value = ''
+    return
+  }
   demoPending.value = true
 
   // dynamically import the example component and source
@@ -67,15 +69,20 @@ async function loadDemo() {
   try {
     const [compo, source] = await Promise.all([
       import(`../../examples/${info.value.folder}/${info.value.file}.vue`).then(
-        (m) => m.default,
+        m => m.default,
       ),
       import(
         `../../examples/${info.value.folder}/${info.value.file}.vue?raw`
-      ).then((m) => m.default),
+      ).then(m => m.default),
     ])
     exampleComponent.value = markRaw(compo)
     exampleSource.value = source
-  } finally {
+  }
+  catch {
+    exampleComponent.value = null
+    exampleSource.value = ''
+  }
+  finally {
     demoPending.value = false
   }
 }
@@ -88,16 +95,16 @@ async function loadDemo() {
       class="mb-4 flex items-center"
     >
       <BaseHeading
-        as="h2"
+        v-if="props.title"
+        as="h3"
         size="xl"
         anchor
         weight="medium"
         class="text-muted-800 dark:text-white"
-        v-if="props.title"
       >
         <TairoTocAnchor :label="props.title">
           <template #prefix>
-            <Icon name="lucide:hash" class="h-4 w-4" />
+            <Icon name="lucide:hash" class="size-4" />
           </template>
         </TairoTocAnchor>
       </BaseHeading>
@@ -115,7 +122,6 @@ async function loadDemo() {
       >
         <BaseCheckbox
           v-model="forceDark"
-          condensed
           :classes="{
             label: '!text-xs mt-1',
             wrapper:
@@ -128,12 +134,12 @@ async function loadDemo() {
     </div>
 
     <div v-if="'grid' in $slots" class="mb-4 grid gap-4 md:grid-cols-3">
-      <ContentSlot :use="$slots.grid"></ContentSlot>
+      <ContentSlot :use="$slots.grid" />
     </div>
 
     <div
       :class="[
-        condensed ? 'max-w-[640px] pb-6' : 'pb-6',
+        condensed ? 'max-w-screen-sm pb-6' : 'pb-6',
         forceDark ? 'dark' : '',
       ]"
     >
@@ -142,9 +148,9 @@ async function loadDemo() {
       >
         <div v-if="'default' in $slots" :class="[hasDemoContent && 'mb-10']">
           <div
-            class="prose prose-primary prose-muted dark:prose-invert prose-th:p-4 prose-td:p-4 prose-table:bg-white dark:prose-table:bg-muted-800 prose-table:border prose-table:border-muted-200 dark:prose-table:border-muted-700 prose-sm prose-p:text-muted-500 dark:prose-p:text-muted-400 prose-a:decoration-from-font prose-a:underline-offset-1"
+            class="prose prose-primary prose-muted dark:prose-invert prose-th:p-4 prose-td:p-4 prose-table:bg-white dark:prose-table:bg-muted-800 prose-table:border prose-table:border-muted-200 prose-tr:border-muted-200 prose-thead:border-muted-200 dark:prose-tr:border-muted-700 dark:prose-thead:border-muted-700 dark:prose-table:border-muted-700 prose-sm prose-p:text-muted-500 dark:prose-p:text-muted-400 prose-a:decoration-from-font prose-a:underline-offset-1"
           >
-            <ContentSlot :use="$slots.default"></ContentSlot>
+            <ContentSlot :use="$slots.default" :unwrap="false" />
           </div>
         </div>
 
@@ -161,29 +167,23 @@ async function loadDemo() {
               <span class="hidden group-open:inline">Hide code</span>
               <Icon
                 name="lucide:chevron-down"
-                class="text-muted-400 h-4 w-4 transition-transform duration-200 group-open:rotate-180"
+                class="text-muted-400 size-4 transition-transform duration-200 group-open:rotate-180"
               />
             </summary>
-            <AddonMarkdownRemark
-              :source="exampleMarkdown"
-              fullwidth
-              :lines="md ? true : false"
-              class="doc-markdown"
-              :mode="forceDark ? 'dark' : undefined"
-              :theme="{
-                light: 'cssninja-light-theme',
-                dark: 'cssninja-dark-theme',
-              }"
-            />
+            <CodeGroup>
+              <code filename="<app>/components/MyComponent.vue" language="vue">
+                <AddonMarkdownRemark
+                  :source="exampleMarkdown"
+                  fullwidth
+                  :lines="md ? true : false"
+                  class="doc-markdown"
+                  :mode="forceDark ? 'dark' : undefined"
+                />
+              </code>
+            </CodeGroup>
           </details>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.doc-markdown:deep(.shiki) {
-  @apply mt-2;
-}
-</style>

@@ -4,24 +4,25 @@ export type Content = {
   action?: string
   nextSteps?: string
 }
-export type BackendMessage = {
-  role: 'system' | 'user' | 'assistant' | 'separator'
-  content: Content
-  contentFa?: Content
-  time?: string
-  created?: string
-  Updated?: string
-  user?: string
-  deletionDivider: number
-}
+// export type BackendMessage = {
+//   role: 'system' | 'user' | 'assistant' | 'separator'
+//   content: Content
+//   contentFa?: Content
+//   time?: string
+//   created?: string
+//   Updated?: string
+//   user?: string
+//   deletionDivider: number
+// }
 
 export function useMessage() {
-  const messages = ref<BackendMessage[]>([])
+  const messages = ref([])
+  // const messages = ref<BackendMessage[]>([])
   const filteredMessages = ref<string>('')
   const nuxtApp = useNuxtApp()
   const toaster = useToaster()
   const { user } = useUser()
-  const getMessages = async (): Promise<BackendMessage[]> => {
+  const getMessages = async () => {
     const { items } = await nuxtApp.$pb.collection('messages').getList(1, 500, {
       filter: 'deletionDivider=' + user.value.record.currentDeletionDivider,
       sort: '+created',
@@ -29,7 +30,7 @@ export function useMessage() {
     messages.value = items
     return items
   }
-  const saveMessage = async (newMessage: BackendMessage) => {
+  const saveMessage = async (newMessage) => {
     try {
       const res = await nuxtApp.$pb.collection('messages').create(newMessage)
       messages.value.push(newMessage)

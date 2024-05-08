@@ -1,4 +1,4 @@
-export default defineAppConfig({
+export default {
   tairo: {
     sidebar: {
       circularMenu: {
@@ -16,11 +16,10 @@ export default defineAppConfig({
         startOpen: true,
         logo: {
           component: 'TairoLogo',
-          resolve: true,
           props: { class: 'text-primary-600 h-10' },
         },
         items: [],
       },
     },
   },
-})
+}

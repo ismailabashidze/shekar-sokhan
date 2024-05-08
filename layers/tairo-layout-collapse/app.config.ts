@@ -1,15 +1,13 @@
-export default defineAppConfig({
+export default {
   tairo: {
     collapse: {
       navigation: {
         enabled: true,
         header: {
           component: '',
-          resolve: true,
         },
         footer: {
           component: '',
-          resolve: true,
         },
         items: [],
       },
@@ -25,4 +23,4 @@ export default defineAppConfig({
       },
     },
   },
-})
+}

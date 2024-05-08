@@ -50,8 +50,9 @@ const isAllVisibleSelected = computed(() => {
 function toggleAllVisibleSelection() {
   if (isAllVisibleSelected.value) {
     selected.value = []
-  } else {
-    selected.value = data.value?.data.map((item) => item.id) ?? []
+  }
+  else {
+    selected.value = data.value?.data.map(item => item.id) ?? []
   }
 }
 </script>
@@ -77,10 +78,18 @@ function toggleAllVisibleSelection() {
             wrapper: 'w-full sm:w-40',
           }"
         >
-          <option :value="10">10 per page</option>
-          <option :value="25">25 per page</option>
-          <option :value="50">50 per page</option>
-          <option :value="100">100 per page</option>
+          <option :value="10">
+            10 per page
+          </option>
+          <option :value="25">
+            25 per page
+          </option>
+          <option :value="50">
+            50 per page
+          </option>
+          <option :value="100">
+            100 per page
+          </option>
         </BaseSelect>
       </template>
       <div>
@@ -94,20 +103,24 @@ function toggleAllVisibleSelection() {
                 class="block dark:hidden"
                 src="/img/illustrations/placeholders/flat/placeholder-search-4.svg"
                 alt="Placeholder image"
-              />
+              >
               <img
                 class="hidden dark:block"
                 src="/img/illustrations/placeholders/flat/placeholder-search-4-dark.svg"
                 alt="Placeholder image"
-              />
+              >
             </template>
           </BasePlaceholderPage>
         </div>
         <div v-else>
           <div class="w-full">
-            <TairoTable shape="rounded">
+            <TairoTable rounded="sm" :scrollable="false">
               <template #header>
-                <TairoTableHeading uppercase spaced class="p-4">
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="p-4"
+                >
                   <div class="flex items-center">
                     <BaseCheckbox
                       :model-value="isAllVisibleSelected"
@@ -115,8 +128,8 @@ function toggleAllVisibleSelection() {
                         selected.length > 0 && !isAllVisibleSelected
                       "
                       name="table-1-main"
-                      shape="rounded"
-                      class="text-primary-500"
+                      rounded="sm"
+                      color="primary"
                       @click="toggleAllVisibleSelection"
                     />
                   </div>
@@ -124,12 +137,22 @@ function toggleAllVisibleSelection() {
                 <TairoTableHeading uppercase spaced>
                   Collaborator
                 </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>Location</TairoTableHeading>
-                <TairoTableHeading uppercase spaced>Status</TairoTableHeading>
+                <TairoTableHeading uppercase spaced>
+                  Location
+                </TairoTableHeading>
+                <TairoTableHeading uppercase spaced>
+                  Status
+                </TairoTableHeading>
                 <TairoTableHeading uppercase spaced>
                   Completed
                 </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>Action</TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-end"
+                >
+                  Action
+                </TairoTableHeading>
               </template>
 
               <TairoTableRow v-if="selected.length > 0" :hoverable="false">
@@ -142,8 +165,7 @@ function toggleAllVisibleSelection() {
                   <a
                     href="#"
                     class="outline-none hover:underline focus:underline"
-                    >Click here to everything</a
-                  >
+                  >Click here to everything</a>
                 </TairoTableCell>
               </TairoTableRow>
 
@@ -154,8 +176,8 @@ function toggleAllVisibleSelection() {
                       v-model="selected"
                       :value="item.id"
                       :name="`item-checkbox-${item.id}`"
-                      shape="rounded"
-                      class="text-primary-500"
+                      rounded="sm"
+                      color="primary"
                     />
                   </div>
                 </TairoTableCell>
@@ -183,9 +205,9 @@ function toggleAllVisibleSelection() {
                   <BaseTag
                     v-if="item.status === 'available'"
                     color="success"
-                    flavor="pastel"
-                    shape="full"
-                    condensed
+                    variant="pastel"
+                    rounded="full"
+                    size="sm"
                     class="font-medium"
                   >
                     {{ item.status }}
@@ -193,9 +215,9 @@ function toggleAllVisibleSelection() {
                   <BaseTag
                     v-else-if="item.status === 'new'"
                     color="info"
-                    flavor="pastel"
-                    shape="full"
-                    condensed
+                    variant="pastel"
+                    rounded="full"
+                    size="sm"
                     class="font-medium"
                   >
                     {{ item.status }}
@@ -203,9 +225,9 @@ function toggleAllVisibleSelection() {
                   <BaseTag
                     v-else-if="item.status === 'busy'"
                     color="warning"
-                    flavor="pastel"
-                    shape="full"
-                    condensed
+                    variant="pastel"
+                    rounded="full"
+                    size="sm"
                     class="font-medium"
                   >
                     {{ item.status }}
@@ -213,9 +235,9 @@ function toggleAllVisibleSelection() {
                   <BaseTag
                     v-else-if="item.status === 'offline'"
                     color="muted"
-                    flavor="pastel"
-                    shape="full"
-                    condensed
+                    variant="pastel"
+                    rounded="full"
+                    size="sm"
                     class="font-medium"
                   >
                     {{ item.status }}
@@ -231,7 +253,7 @@ function toggleAllVisibleSelection() {
                         class="text-success-500"
                       />
                       <span
-                        class="absolute start-1/2 top-1/2 z-10 ms-0.5 -translate-x-1/2 -translate-y-1/2 font-sans text-[0.65rem] font-semibold"
+                        class="absolute start-1/2 top-1/2 z-10 ms-0.5 -translate-x-1/2 -translate-y-1/2 font-sans text-[0.65rem] font-semibold rtl:me-0.5 rtl:ms-0 rtl:translate-x-1/2"
                       >
                         {{ item.completed }}%
                       </span>
@@ -242,7 +264,21 @@ function toggleAllVisibleSelection() {
                   </div>
                 </TairoTableCell>
                 <TairoTableCell spaced>
-                  <BaseButtonAction muted>Manage</BaseButtonAction>
+                  <div class="flex justify-end">
+                    <BaseDropdown
+                      variant="context"
+                      label="Dropdown"
+                      placement="bottom-end"
+                      rounded="md"
+                    >
+                      <BaseDropdownItem
+                        to="#"
+                        title="User"
+                        text="View details"
+                        rounded="md"
+                      />
+                    </BaseDropdown>
+                  </div>
                 </TairoTableCell>
               </TairoTableRow>
             </TairoTable>
@@ -252,7 +288,7 @@ function toggleAllVisibleSelection() {
               :total-items="data?.total ?? 0"
               :item-per-page="perPage"
               :current-page="page"
-              shape="curved"
+              rounded="lg"
             />
           </div>
         </div>

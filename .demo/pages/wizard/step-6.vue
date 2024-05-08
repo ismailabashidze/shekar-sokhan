@@ -6,17 +6,19 @@ definePageMeta({
   preview: {
     title: 'Wizard — Step 6',
     description: 'For onboarding and step forms',
-    categories: ['dashboards', 'wizard', 'forms'],
+    categories: ['dashboards', 'wizards', 'forms'],
     src: '/img/screens/wizard-6.png',
     srcDark: '/img/screens/wizard-6-dark.png',
     order: 35,
   },
 })
-
-const { data: project } = useMultiStepForm<Project, ProjectStepData>()
 useHead({
   title: 'Project tools',
 })
+
+const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>()
+
+onBeforeMount(checkPreviousSteps)
 
 const tools: Tool[] = [
   {
@@ -88,25 +90,35 @@ const tools: Tool[] = [
 
     <div class="mx-auto grid max-w-4xl gap-4 px-4 sm:grid-cols-3">
       <!-- Tools -->
-      <div v-for="tool in tools" :key="tool.name" class="relative">
+      <div
+        v-for="tool in tools"
+        :key="tool.name"
+        class="relative"
+      >
         <BaseCheckboxHeadless
           v-model="project.tools"
           :value="tool"
           :name="tool.name"
         >
           <BaseCard
-            shape="curved"
+            rounded="lg"
             class="peer-checked:border-primary-500 peer-checked:shadow-muted-300/30 dark:peer-checked:shadow-muted-900/30 p-4 peer-checked:shadow-xl"
           >
             <div class="flex items-center gap-3">
-              <img :src="tool.logo" class="h-8 w-8" />
+              <img
+                :src="tool.logo"
+                class="size-8"
+                alt=""
+              >
               <div>
                 <div
                   class="text-muted-800 dark:text-muted-100 text-sm font-medium"
                 >
                   {{ tool.name }}
                 </div>
-                <div class="text-muted-400 text-xs">{{ tool.description }}</div>
+                <div class="text-muted-400 text-xs">
+                  {{ tool.description }}
+                </div>
               </div>
             </div>
           </BaseCard>

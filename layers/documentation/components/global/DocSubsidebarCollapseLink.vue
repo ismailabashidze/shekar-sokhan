@@ -31,9 +31,9 @@ function onDropClick() {
 <template>
   <div class="group">
     <button
-      type="button"
       ref="buttonRef"
-      class="nui-focus group mb-1 mt-8 flex min-h-[1.5rem] w-full items-center justify-between focus-within:outline-0 focus-visible:outline-1"
+      type="button"
+      class="nui-focus group mb-1 mt-8 flex min-h-6 w-full items-center justify-between focus-within:outline-0 focus-visible:outline-1"
       @click.stop.prevent="onDropClick"
     >
       <span
@@ -44,8 +44,16 @@ function onDropClick() {
       <div
         class="text-muted-400 group-hover:text-primary-400 group-focus-visible:text-primary-400 dark:text-muted-500"
       >
-        <Icon v-if="isOpen" name="mdi:minus-box-outline" class="h-4 w-4" />
-        <Icon v-else name="mdi:plus-box-outline" class="h-4 w-4" />
+        <Icon
+          v-if="isOpen"
+          name="mdi:minus-box-outline"
+          class="size-4"
+        />
+        <Icon
+          v-else
+          name="mdi:plus-box-outline"
+          class="size-4"
+        />
       </div>
     </button>
     <ul
@@ -60,7 +68,7 @@ function onDropClick() {
         <li
           v-if="!child.children"
           :key="`link-${child._path}`"
-          class="mb-1 flex min-h-[1.5rem] w-full items-center"
+          class="mb-1 flex min-h-6 w-full items-center"
         >
           <NuxtLink
             :to="child._path"
@@ -72,7 +80,11 @@ function onDropClick() {
             <span class="font-sans text-[0.8rem]">{{ child?.title }}</span>
           </NuxtLink>
         </li>
-        <li v-else :key="`nested-${child._path}`" class="mt-2">
+        <li
+          v-else
+          :key="`nested-${child._path}`"
+          class="mt-2"
+        >
           <span
             class="text-muted-500 dark:text-muted-100 mb-2 mt-6 block font-sans text-[.6rem] font-semibold uppercase tracking-wider"
           >
@@ -83,7 +95,7 @@ function onDropClick() {
             <li
               v-for="nested in child.children"
               :key="nested._path"
-              class="mb-1 flex min-h-[1.5rem] w-full items-center"
+              class="mb-1 flex min-h-6 w-full items-center"
             >
               <NuxtLink
                 :to="nested._path"

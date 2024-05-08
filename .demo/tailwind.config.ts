@@ -10,13 +10,17 @@ import defaultTheme from 'tailwindcss/defaultTheme'
  */
 export default withShurikenUI({
   content: [join(__dirname, `/utils/**/*.ts`)], // Parse the utils folder for demo
+  safelist: [
+    // Those classes are used in the pageTransition config in nuxt.config.ts
+    'transition-all', 'duration-200', 'duration-75', 'ease-out', 'ease-in', 'opacity-0', 'opacity-100',
+  ],
   theme: {
     // Custom fonts
     fontFamily: {
-      sans: ['Inter', 'sans-serif'],
-      heading: ['Inter', 'sans-serif'],
-      alt: ['Karla', 'sans-serif'],
-      mono: ['Fira Code', ...defaultTheme.fontFamily.mono],
+      sans: ['Inter Variable', 'sans-serif'],
+      heading: ['Inter Variable', 'sans-serif'],
+      alt: ['Karla Variable', 'sans-serif'],
+      mono: ['Fira Code Variable', ...defaultTheme.fontFamily.mono],
     },
     extend: {
       // Custom colors

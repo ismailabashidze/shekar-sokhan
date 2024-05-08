@@ -1,21 +1,35 @@
 <template>
-  <div class="flex items-end">
-    <BaseButtonAction shape="rounded" class="rounded-e-none border-e-0 focus:z-10">
+  <BaseButtonGroup>
+    <BaseButtonAction rounded="md">
       View
     </BaseButtonAction>
 
-    <BaseButtonAction shape="straight" class="focus:z-10">
-      <Icon name="ph:pen" class="h-4 w-4" />
+    <BaseButtonAction rounded="md">
+      <Icon name="ph:pen" class="size-4" />
     </BaseButtonAction>
 
-    <BaseButtonAction muted shape="straight" class="border-s-0 focus:z-10">Muted</BaseButtonAction>
+    <BaseButtonAction muted rounded="md">
+      Muted
+    </BaseButtonAction>
 
-    <BaseButtonAction disabled shape="straight" class="border-s-0 focus:z-10">
+    <BaseDropdown label="plus">
+      <template #button>
+        <BaseButtonAction rounded="none">
+          plus
+        </BaseButtonAction>
+      </template>
+
+      <BaseDropdownItem> Edit </BaseDropdownItem>
+
+      <BaseDropdownItem> Cancel </BaseDropdownItem>
+    </BaseDropdown>
+
+    <BaseButtonAction disabled rounded="md">
       Disabled
     </BaseButtonAction>
 
-    <BaseButtonAction shape="rounded" class="rounded-s-none border-s-0 focus:z-10">
+    <BaseButtonAction rounded="md">
       Share
     </BaseButtonAction>
-  </div>
+  </BaseButtonGroup>
 </template>

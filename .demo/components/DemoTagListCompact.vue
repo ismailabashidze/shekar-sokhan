@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    shape?: 'straight' | 'rounded' | 'curved'
+    rounded?: 'none' | 'sm' | 'md' | 'lg'
   }>(),
   {
-    shape: 'rounded',
+    rounded: 'sm',
   },
 )
 
@@ -47,10 +47,10 @@ const tags = [
     <BaseTag
       v-for="tag in tags"
       :key="tag.id"
-      :shape="props.shape"
-      :flavor="tag.highlight ? 'solid' : 'outline'"
+      :rounded="props.rounded"
+      :variant="tag.highlight ? 'solid' : 'outline'"
       color="primary"
-      condensed
+      size="sm"
     >
       <span>{{ tag.name }}</span>
     </BaseTag>

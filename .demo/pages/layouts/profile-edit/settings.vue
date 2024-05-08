@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import IMask from 'imask'
+import IMask, { type InputMask } from 'imask'
 import { Field, useForm } from 'vee-validate'
 import { z } from 'zod'
 
@@ -19,6 +19,14 @@ definePageMeta({
     src: '/img/screens/layouts-subpages-profile-edit-4.png',
     srcDark: '/img/screens/layouts-subpages-profile-edit-4-dark.png',
     order: 79,
+  },
+  pageTransition: {
+    enterActiveClass: 'transition-all duration-500 ease-out',
+    enterFromClass: 'translate-y-20 opacity-0',
+    enterToClass: 'translate-y-0 opacity-100',
+    leaveActiveClass: 'transition-all duration-200 ease-in',
+    leaveFromClass: 'translate-y-0 opacity-100',
+    leaveToClass: 'translate-y-20 opacity-0',
   },
 })
 
@@ -61,14 +69,12 @@ const zodSchema = z
       }
     }
 
-    if (data.twoFactor.enabled) {
-      if (!data.twoFactor.phoneNumber) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'A phone number is required',
-          path: ['twoFactor.phoneNumber'],
-        })
-      }
+    if (data.twoFactor.enabled && !data.twoFactor.phoneNumber) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'A phone number is required',
+        path: ['twoFactor.phoneNumber'],
+      })
     }
   })
 
@@ -79,7 +85,7 @@ type FormInput = z.infer<typeof zodSchema>
 const { data, pending, error, refresh } = await useFetch('/api/profile')
 
 const validationSchema = toTypedSchema(zodSchema)
-const initialValues = computed<FormInput>(() => ({
+const initialValues = {
   currentPassword: 'password',
   newPassword: '',
   confirmPassword: '',
@@ -93,7 +99,7 @@ const initialValues = computed<FormInput>(() => ({
     marketing: false,
     partners: false,
   },
-}))
+} satisfies FormInput
 
 const {
   handleSubmit,
@@ -115,9 +121,7 @@ const fieldsWithErrors = computed(() => Object.keys(errors.value).length)
 
 // Here we register the phone number input with IMask
 const phoneInput = ref<any>()
-const mask = shallowRef<IMask.InputMask<{ mask: string }> | undefined>(
-  undefined,
-)
+const mask = shallowRef<InputMask<{ mask: string }> | undefined>(undefined)
 onMounted(() => {
   mask.value = IMask(phoneInput.value?.el, {
     mask: '(000) 000-0000',
@@ -133,11 +137,8 @@ watch(
   () => values.notifications?.enabled,
   (value) => {
     if (!value) {
-      // @ts-expect-error - vee validate typing bug with nested keys
       setFieldValue('notifications.flushLowPriority', false)
-      // @ts-expect-error - vee validate typing bug with nested keys
       setFieldValue('notifications.marketing', false)
-      // @ts-expect-error - vee validate typing bug with nested keys
       setFieldValue('notifications.partners', false)
     }
   },
@@ -181,7 +182,8 @@ const onSubmit = handleSubmit(
         icon: 'ph:check',
         closable: true,
       })
-    } catch (error: any) {
+    }
+    catch (error: any) {
       // this will set the error on the form
       if (error.message === 'Fake backend validation error') {
         setFieldError('currentPassword', 'Your current password is incorrect')
@@ -232,7 +234,12 @@ const onSubmit = handleSubmit(
 </script>
 
 <template>
-  <form method="POST" action="" class="w-full pb-16" @submit.prevent="onSubmit">
+  <form
+    method="POST"
+    action=""
+    class="w-full pb-16"
+    @submit.prevent="onSubmit"
+  >
     <BaseCard>
       <div class="flex items-center justify-between p-4">
         <div>
@@ -250,15 +257,18 @@ const onSubmit = handleSubmit(
           </BaseText>
         </div>
         <div class="flex items-center gap-2">
-          <BaseButton class="w-24" to="/layouts/profile">Cancel</BaseButton>
+          <BaseButton class="w-24" to="/layouts/profile">
+            Cancel
+          </BaseButton>
           <BaseButton
             type="submit"
             color="primary"
             class="w-24"
             :disabled="isSubmitting"
             :loading="isSubmitting"
-            >Save</BaseButton
           >
+            Save
+          </BaseButton>
         </div>
       </div>
       <div class="p-4">

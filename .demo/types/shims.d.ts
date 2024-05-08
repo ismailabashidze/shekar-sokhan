@@ -3,14 +3,24 @@ declare module 'nuxt/dist/pages/runtime/composables' {
     title?: string
     description?: string
     breadcrumb?: any
-    preview?: {
-      title: string
-      description: string
-      categories?: string[]
-      src: string
-      srcDark?: string
-      order?: number
-    }
+    preview?:
+      | {
+        title: string
+        description: string
+        categories?: string[]
+        src: string
+        srcDark?: string
+        order?: number
+      }
+      | {
+        title: string
+        description: string
+        categories?: string[]
+        src: string
+        srcDark?: string
+        order?: number
+        params: Record<string, string>
+      }[]
   }
 }
 
@@ -27,6 +37,7 @@ declare module 'vue-router' {
       src: string
       srcDark?: string
       order?: number
+      new?: boolean
     }
   }
 }

@@ -17,7 +17,7 @@ definePageMeta({
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard shape="curved" class="p-6">
+      <BaseCard rounded="lg" class="p-6">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -29,12 +29,14 @@ definePageMeta({
           >
             <span>Members</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
         <DemoUserList />
       </BaseCard>
@@ -42,7 +44,7 @@ definePageMeta({
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard shape="curved" class="p-6">
+      <BaseCard rounded="lg" class="p-6">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -54,27 +56,29 @@ definePageMeta({
           >
             <span>Members</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
-        <DemoUserList shape="full" />
+        <DemoUserList rounded="full" />
       </BaseCard>
     </div>
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard shape="curved" class="p-6">
-        <DemoFileListTabbed shape="full" />
+      <BaseCard rounded="lg" class="p-6">
+        <DemoFileListTabbed rounded="full" />
       </BaseCard>
     </div>
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard shape="curved" class="p-6">
+      <BaseCard rounded="lg" class="p-6">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -86,12 +90,14 @@ definePageMeta({
           >
             <span>My Tasks</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
         <DemoTodoListCompact color="lime" />
       </BaseCard>
@@ -99,7 +105,7 @@ definePageMeta({
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard shape="curved" class="p-6">
+      <BaseCard rounded="lg" class="p-6">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -111,12 +117,14 @@ definePageMeta({
           >
             <span>My Tasks</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
         <DemoTodoListCompact color="sky" />
       </BaseCard>
@@ -124,14 +132,14 @@ definePageMeta({
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard shape="curved" class="p-6">
-        <DemoTodoListTabbed shape="rounded" color="primary" />
+      <BaseCard rounded="lg" class="p-6">
+        <DemoTodoListTabbed rounded="sm" color="primary" />
       </BaseCard>
     </div>
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard class="p-6" shape="curved">
+      <BaseCard class="p-6" rounded="lg">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -143,12 +151,14 @@ definePageMeta({
           >
             <span>Latest comments</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
         <DemoCommentListCompact />
       </BaseCard>
@@ -156,7 +166,7 @@ definePageMeta({
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard class="p-6" shape="curved">
+      <BaseCard class="p-6" rounded="lg">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -168,12 +178,14 @@ definePageMeta({
           >
             <span>Topics</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
         <DemoTopicListCompact />
       </BaseCard>
@@ -181,7 +193,7 @@ definePageMeta({
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard class="p-6" shape="curved">
+      <BaseCard class="p-6" rounded="lg">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -193,20 +205,22 @@ definePageMeta({
           >
             <span>Topics</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
-        <DemoTopicListCompact shape="full" />
+        <DemoTopicListCompact rounded="full" />
       </BaseCard>
     </div>
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard class="p-6" shape="curved">
+      <BaseCard class="p-6" rounded="lg">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -218,20 +232,22 @@ definePageMeta({
           >
             <span>Timeline</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
-        <DemoTimelineCompact shape="rounded" />
+        <DemoTimelineCompact rounded="sm" />
       </BaseCard>
     </div>
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard class="p-6" shape="curved">
+      <BaseCard class="p-6" rounded="lg">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -243,20 +259,22 @@ definePageMeta({
           >
             <span>Timeline</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
-        <DemoTimelineCompact shape="curved" />
+        <DemoTimelineCompact rounded="lg" />
       </BaseCard>
     </div>
     <!-- Column -->
     <div class="relative">
       <!-- Widget -->
-      <BaseCard class="p-6" shape="curved">
+      <BaseCard class="p-6" rounded="lg">
         <!-- Title -->
         <div class="mb-8 flex items-center justify-between">
           <BaseHeading
@@ -268,14 +286,16 @@ definePageMeta({
           >
             <span>Timeline</span>
           </BaseHeading>
-          <NuxtLink
-            to="#"
-            class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
+          <BaseButton
+            color="primary"
+            size="sm"
+            variant="pastel"
+            rounded="md"
           >
-            View All
-          </NuxtLink>
+            View all
+          </BaseButton>
         </div>
-        <DemoTimelineCompact shape="full" />
+        <DemoTimelineCompact rounded="full" />
       </BaseCard>
     </div>
   </div>

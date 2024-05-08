@@ -142,7 +142,7 @@ if (nuxtApp.$pb.authStore.isValid) {
       </div>
     </div>
     <div
-      class="relative flex flex-1 flex-col justify-center px-6 py-12 lg:w-2/5 lg:flex-none"
+      class="relative flex flex-1 flex-col justify-center px-6 py-8 lg:w-2/5 lg:flex-none"
     >
       <div class="dark:bg-muted-800 relative mx-auto w-full max-w-sm bg-white">
         <!--Nav-->
@@ -221,7 +221,7 @@ if (nuxtApp.$pb.authStore.isValid) {
         </div>
 
         <!--Form section-->
-        <div class="mt-6">
+        <div>
           <div class="mt-5">
             <!--Form-->
             <form

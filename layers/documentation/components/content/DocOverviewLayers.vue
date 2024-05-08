@@ -662,7 +662,7 @@ const mergedTree = [
     >
       <div>
         <div class="border-muted-200 dark:border-muted-700 border-b px-8 py-6">
-          <span>Your project ...</span>
+          <span>All your layers ...</span>
         </div>
         <div class="px-8 py-6">
           <BaseTreeSelect
@@ -673,28 +673,36 @@ const mergedTree = [
               closed: 'clarity:folder-line',
               item: 'clarity:file-line',
               empty: 'clarity:alert-line',
+              pending: '',
             }"
             :classes="{
               treeline: 'border-muted-300 dark:border-muted-700',
+              checkbox: { wrapper: '' },
+              emptyIcon: '',
+              itemIcon: '',
+              pendingIcon: '',
+              treeIcon: '',
             }"
           >
             <template #item-icon="{ child }">
               <span
-                class="text-muted-400 me-1 flex h-5 w-5 items-center justify-center"
+                class="text-muted-400 me-1 flex size-5 items-center justify-center"
               >
-                <Icon :name="child?.item?.icon" class="h-4 w-4" />
+                <Icon :name="child?.item?.icon" class="size-4" />
               </span>
             </template>
             <template #item-label="{ child, toggle }">
               <span class="inline-flex items-center gap-2">
                 <span
                   v-if="child?.item?.color"
-                  class="inline-block h-2 w-2 rounded-sm"
+                  class="inline-block size-2 rounded-sm"
                   :class="child?.item?.color"
-                ></span>
+                />
                 <span
-                  :data-tooltip="child?.item?.tooltip"
-                  data-tooltip-position="right"
+                  role="button"
+                  tabindex="0"
+                  :data-nui-tooltip="child?.item?.tooltip"
+                  data-nui-tooltip-position="right"
                   :class="[
                     child?.children ? 'cursor-pointer' : 'cursor-default',
                     child?.item?.tooltip
@@ -712,7 +720,7 @@ const mergedTree = [
       </div>
       <div>
         <div class="border-muted-200 dark:border-muted-700 border-b px-8 py-6">
-          <span>... is merged into a unique app!</span>
+          <span>... are merged into a unique app!</span>
         </div>
         <div class="px-8 py-6">
           <BaseTreeSelect
@@ -730,21 +738,23 @@ const mergedTree = [
           >
             <template #item-icon="{ child }">
               <span
-                class="text-muted-400 me-1 flex h-5 w-5 items-center justify-center"
+                class="text-muted-400 me-1 flex size-5 items-center justify-center"
               >
-                <Icon :name="child?.item?.icon" class="h-4 w-4" />
+                <Icon :name="child?.item?.icon" class="size-4" />
               </span>
             </template>
             <template #item-label="{ child, toggle }">
               <span class="inline-flex items-center gap-2">
                 <span
                   v-if="child?.item?.color"
-                  class="inline-block h-2 w-2 rounded-sm"
+                  class="inline-block size-2 rounded-sm"
                   :class="child?.item?.color"
-                ></span>
+                />
                 <span
-                  :data-tooltip="child?.item?.tooltip"
-                  data-tooltip-position="right"
+                  role="button"
+                  tabindex="0"
+                  :data-nui-tooltip="child?.item?.tooltip"
+                  data-nui-tooltip-position="right"
                   :class="[
                     child?.children ? 'cursor-pointer' : 'cursor-default',
                     child?.item?.tooltip
