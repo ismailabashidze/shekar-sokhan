@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { User } from '~/composables/user'
+// import { User } from '~/composables/user'
 
 definePageMeta({
   title: 'لیست مشاوره ها',
@@ -179,7 +179,7 @@ async function removeConversation() {
             <Icon name="ph:clipboard" class="h-5 w-5" />
           </BaseButtonIcon>
           <BaseButtonIcon
-            color="muted"
+            color="danger"
             shape="full"
             @click="openRemoveModal(u)"
           >

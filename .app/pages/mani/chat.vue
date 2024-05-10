@@ -114,6 +114,8 @@ async function processResponse(answer: Content): Promise<TranslatedResponse> {
   }
 }
 const darkStatus = useColorMode()
+console.log("darkStatus.preference")
+console.log(darkStatus.preference)
 const currentStat = ref(darkStatus.preference)
 if (darkStatus.preference === 'system') {
   currentStat.value = darkStatus.value
@@ -706,8 +708,8 @@ const closable = ref<boolean | undefined>()
           <!-- Body -->
           <div
             ref="chatEl"
-            class="relative h-[calc(100vh_-_180px)] sm:h-[calc(100vh_-_128px)] w-full p-4 sm:p-8"
-            :class="loading ? 'overflow-hidden' : 'overflow-y-auto slimscroll'"
+            class="relative h-[calc(100vh_-_128px)] sm:h-[calc(100vh_-_128px)] w-full p-4 sm:p-8"
+            :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
           >
             <!-- Loader-->
             <div
@@ -802,13 +804,9 @@ const closable = ref<boolean | undefined>()
             </div>
             <!-- Messages loop -->
             <div v-if="!loading" class="space-y-12">
-              <BaseMessage type="info" :closable="true">
-                <div class="flex content-between">
-                  <div class="flex items-center">
-                    اولین هدف برای هوش مصنوعی آشنایی بیشتر با شما تنظیم شده است.
-                    برخی از تغییرات در اهداف با شما به اشتراک گذاشته می شود.
-                  </div>
-                </div>
+              <BaseMessage color="info">
+                اولین هدف برای هوش مصنوعی آشنایی بیشتر با شما تنظیم شده است.
+                برخی از تغییرات در اهداف با شما به اشتراک گذاشته می شود.
               </BaseMessage>
               <div
                 v-for="(item, index) in conversation?.messages"
@@ -942,7 +940,7 @@ const closable = ref<boolean | undefined>()
 
               <BaseMessage
                 v-if="showNoCharge"
-                type="danger"
+                color="danger"
                 class="flex justify-evenly"
               >
                 <div class="flex content-between">
@@ -970,7 +968,7 @@ const closable = ref<boolean | undefined>()
                 v-model="message"
                 :loading="messageLoading"
                 :disabled="messageLoading || showNoCharge"
-                shape="full"
+                rounded="full"
                 :classes="{
                   input: 'h-12 ps-6 pe-24',
                 }"
@@ -1093,11 +1091,11 @@ const closable = ref<boolean | undefined>()
                 <BaseButton shape="curved" class="w-full">
                   <span> درباره مانی، هوش مصنوعی </span>
                 </BaseButton>
-                <BaseMessage class="mt-5" type="info">
+                <BaseMessage class="mt-5" color="info">
                   لطفا توجه داشته باشید که عامل هوش مصنوعی در فاز توسعه می‌‌باشد
                   و احتمال ارائه‌ی پاسخ‌های اشتباه را دارد.
                 </BaseMessage>
-                <BaseMessage class="mt-5" type="warning">
+                <BaseMessage class="mt-5" color="warning">
                   با مانی با ادبیاتی ساده صحبت کنید. او به شما گوش می کند و شما
                   را حمایت می کند. از ادبیات پیچیده و کلمات خاص استفاده نکنید.
                 </BaseMessage>
