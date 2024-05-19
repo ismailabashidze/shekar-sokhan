@@ -137,19 +137,28 @@ function handleError(error: unknown): { error: string } {
 
 // Event handler
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  let sysMsg
+  const body = await readBody(event);
+
+  // First operation
+  let sysMsg = "based on the conversation, please check whether these goals are accomplished or still in progress, then return an array which are index number of accomplished goals. return as json with key: accomplished. accomplished is an array consisting numbers of accomplished goals. return empty array if there is none. GOALS are: " + body.goals.map((goal, index) => `${index + 1}. ${goal}`).join(' ,');
+  const res = await handleFetchRequest(
+    body,
+    sysMsg,
+    ["accomplished"],
+    3
+  );
+  console.log("Result from first operation: ", res);
+
+  // Conditional or additional processing based on 'res'
   if (body.type === 'briefing') {
-    sysMsg =
-      'answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider. nextSteps: as a psychologist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You will provide help based on Islamic Rules and guidance, and never tell anything against Islamic values, Although you never explicitly tell user about your islamic approach. also, you provide your information based on Iranian Context and believes. Your main goal in here is to gather these data: name, age, gender, main problem or goal of the user which wants to talk about. you have to persue user to tell these information, but never push these too hard.If you have gathered all these info, just refuse to answer the prompts and simply say my goal has been achieved.'
-  } else if (body.type === 'intervention') {
-    sysMsg =
-      'answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider. nextSteps: as a psychologist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You will provide help based on Islamic Rules and guidance, and never tell anything against Islamic values, Although you never explicitly tell user about your islamic approach. also, you provide your information based on Iranian Context and believes.'
+    sysMsg = 'You are a human named Mani. Answer just like a human. never show anything that you are AI. Answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider based on the provided goals. nextSteps: as a psychologist, what will be your next step, especially based on provided goals. message: your final message based on thoughts, next steps and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You will provide help based on Islamic Rules and guidance, and never tell anything against Islamic values, Although you never explicitly tell user about your islamic approach. also, you provide your information based on Iranian Context and believes. GOALS ARE : ' + body.goals.map((goal, index) => `${index + 1}. ${goal}`).join(' ,');
   }
+  
+  // Second operation
   return handleFetchRequest(
     body,
     sysMsg,
     ['thoughts', 'action', 'nextSteps', 'message'],
-    3,
-  )
-})
+    3
+  );
+});

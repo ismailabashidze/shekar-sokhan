@@ -1,547 +1,621 @@
 <script setup lang="ts">
 definePageMeta({
-  title: 'Messaging',
-  layout: 'empty',
+  title: 'داشبورد',
+  layout: "sidebar",
   preview: {
-    title: 'Messaging app',
-    description: 'For chat and messaging apps',
+    title: 'صفحه اصلی',
+    description: 'برای نمایش بخش های مختلف، اطلاعات و ارتباطات',
     categories: ['dashboards'],
-    src: '/img/screens/dashboards-messaging.png',
-    srcDark: '/img/screens/dashboards-messaging-dark.png',
-    order: 26,
+    src: '/img/screens/dashboards-writer.png',
+    srcDark: '/img/screens/dashboards-writer-dark.png',
+    order: 18,
   },
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
-// const { report, udpateReport } = useReport()
-const { user } = useUser()
 
-const { open } = usePanels()
-const seamless = useSeamless()
-const { translated, translate } = seamless
-const llm = useLLM()
-const { answer, ask } = llm
 
-const { getMessages, saveMessage, convertedMessages } = useMessage()
-
-const conversation = ref({
-  user: {
-    name: 'مانی، مشاور بحران',
-    photo: '/img/avatars/1.svg',
-    role: 'ایجنت هوش مصنوعی',
-    bio: 'مانی، مشاور بحران توانایی همدلی، و انجام مداخلات بحران و بالاخص خودکشی را دارست.',
-    age: '12500ms-17000ms',
-    location: 'ایران',
+const activePosts = ref('recent')
+const candidates = [
+  {
+    id: 0,
+    tooltip: 'Adam Wrangler',
+    src: '/img/avatars/15.svg',
+    text: 'EC',
+    role: 'UI/UX designer',
   },
-  messages: [
-    {
-      type: 'separator',
-      text: '',
-      time: 'شروع گفت و گو',
-      attachments: [],
+  {
+    id: 1,
+    tooltip: 'Jennifer Miller',
+    src: '/img/avatars/5.svg',
+    text: 'JM',
+    role: 'Frontend developer',
+  },
+  {
+    id: 2,
+    tooltip: 'Tara Svenson',
+    src: '/img/avatars/4.svg',
+    text: 'TS',
+    role: 'Software architect',
+  },
+  {
+    id: 3,
+    tooltip: 'Naomi Liversky',
+    src: undefined,
+    text: 'NL',
+    role: 'UI/UX designer',
+  },
+]
+const showFeatures = ref(true)
+const featuredVideos = [
+  {
+    id: 1,
+    title: 'Code a responsive landing page using Tailwind CSS',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/1.png',
+    uploaded: '2 hours ago',
+    category: 'Frontend',
+    author: {
+      name: 'Hermann Mayer',
+      avatar: '/img/avatars/16.svg',
     },
-    {
-      type: 'recieved',
-      text: 'سلام. من مانی هستم 👋. چطور می تونم به شما کمک کنم؟',
-      time: new Date().toLocaleTimeString('fa'),
-      attachments: [],
+  },
+  {
+    id: 2,
+    title: 'Designing a consistent UI framework for your app',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/2.jpg',
+    uploaded: '6 hours ago',
+    category: 'UI/UX',
+    author: {
+      name: 'Kendra Wilson',
+      avatar: '/img/avatars/10.svg',
     },
-  ],
-})
+  },
+  {
+    id: 3,
+    title: 'Designing a set of chart widgets for my next dashboard',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/3.png',
+    uploaded: 'Yesterday',
+    category: 'Frontend',
+    author: {
+      name: 'Anna Lopez',
+      avatar: '/img/avatars/12.svg',
+    },
+  },
+  {
+    id: 4,
+    title: 'Integrating minimalism and negative space in your designs',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/4.png',
+    uploaded: '2 days ago',
+    category: 'Design',
+    author: {
+      name: 'John Polack',
+      avatar: '/img/avatars/17.svg',
+    },
+  },
+  {
+    id: 5,
+    title: 'Creating reusable sections using Tailwind CSS',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/5.png',
+    uploaded: 'Last week',
+    category: 'UI/UX',
+    author: {
+      name: 'Maya Rosselini',
+      avatar: '/img/avatars/2.svg',
+    },
+  },
+]
 
-const chatEl = ref<HTMLElement>()
-const expanded = ref(false)
-const loading = ref(true)
-const sleep = (time: number): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, time))
-}
-
-const search = ref('')
-const message = ref('')
-const messageLoading = ref(false)
-const activeConversation = ref(1)
-
-onMounted(async () => {
-  await getMessages()
-  conversation.value.messages.push(...convertedMessages('UIMessage'))
-  await sleep(2000)
-  loading.value = false
-  setTimeout(() => {
-    if (chatEl.value) {
-      chatEl.value.scrollTo({
-        top: chatEl.value.scrollHeight,
-        behavior: 'smooth',
-      })
-    }
-  }, 300)
-})
-
-async function submitMessage() {
-  if (!message.value) return
-  if (messageLoading.value) return
-  messageLoading.value = true
-  const newMessage: UIMessage = {
-    type: 'sent',
-    text: message.value,
-    time: new Date().toLocaleTimeString('fa'),
-    attachments: [],
-  }
-  conversation.value.messages.push(newMessage)
-  setTimeout(() => {
-    if (chatEl.value) {
-      chatEl.value.scrollTo({
-        top: chatEl.value.scrollHeight,
-        behavior: 'smooth',
-      })
-    }
-  }, 30)
-  const m = message.value
-  message.value = ''
-  await translate(m, 'Western Persian', 'English')
-
-  await saveMessage({
-    msgEn: translated.value,
-    msgFa: m,
-    anonymousUser: user.value.id,
-    sender: 'user',
-  })
-  // udpateReport(translated.value)
-  // ask mani based on previous information (report) and this new msg
-  await ask('Mani', translated.value)
-  await translate(answer.value, 'English', 'Western Persian')
-  messageLoading.value = false
-  conversation.value.messages.push({
-    type: 'recieved',
-    text: translated.value,
-    time: new Date().toLocaleTimeString('fa'),
-    attachments: [],
-  })
-  saveMessage({
-    msgEn: answer.value,
-    msgFa: translated.value,
-    anonymousUser: user.value.id,
-    sender: 'ai',
-  })
-  await nextTick()
-
-  if (chatEl.value) {
-    chatEl.value.scrollTo({
-      top: chatEl.value.scrollHeight,
-      behavior: 'smooth',
-    })
-  }
-}
+const videos = [
+  {
+    id: 6,
+    title: 'How to think a mobile app landing page design',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/6.png',
+    uploaded: '7 hours ago',
+    category: 'Frontend',
+    author: {
+      name: 'Alan Skelli',
+      avatar: '/img/avatars/11.svg',
+    },
+  },
+  {
+    id: 6,
+    title: '8 tips to deliver the right message when talking to personas',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/7.jpg',
+    uploaded: 'Yesterday',
+    category: 'UI/UX',
+    author: {
+      name: 'Kendra Wilson',
+      avatar: '/img/avatars/10.svg',
+    },
+  },
+  {
+    id: 7,
+    title: '5 Differences between promoting your services and a product',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/8.jpg',
+    uploaded: 'Yesterday',
+    category: 'Branding',
+    author: {
+      name: 'Clarissa Miller',
+      avatar: '/img/avatars/5.svg',
+    },
+  },
+  {
+    id: 8,
+    title: 'Speed up your mobile development velocity using Flutter',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/9.png',
+    uploaded: '2 days ago',
+    category: 'Mobile',
+    author: {
+      name: 'Hermann Mayer',
+      avatar: '/img/avatars/16.svg',
+    },
+  },
+  {
+    id: 9,
+    title: 'How I created a full featured design system for my last project',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/10.png',
+    uploaded: 'Yesterday',
+    category: 'UI/UX',
+    author: {
+      name: 'Anna Lopez',
+      avatar: '/img/avatars/12.svg',
+    },
+  },
+  {
+    id: 9,
+    title: 'The never ending debate between development and low code projects',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/11.png',
+    uploaded: '5 days ago',
+    category: 'Engineering',
+    author: {
+      name: 'Ron Smith',
+      avatar: '/img/avatars/14.svg',
+    },
+  },
+  {
+    id: 10,
+    title:
+      'Using javascript component to enforce code reusability in your project',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/12.png',
+    uploaded: '2 weeks ago',
+    category: 'Engineering',
+    author: {
+      name: 'Peter Weyland',
+      avatar: '/img/avatars/15.svg',
+    },
+  },
+  {
+    id: 11,
+    title:
+      'How to use minimalism to emphasize the right message in your designs',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/13.png',
+    uploaded: '1 month ago',
+    category: 'UI/UX',
+    author: {
+      name: 'Clark Hamilton',
+      avatar: '/img/avatars/3.svg',
+    },
+  },
+  {
+    id: 12,
+    title: '10 Challenges UX designers should be able to face in their career',
+    slug: '',
+    cover: '/img/illustrations/dashboards/video/14.png',
+    uploaded: '1 month ago',
+    category: 'UI/UX',
+    author: {
+      name: 'Maya Rosselini',
+      avatar: '/img/avatars/2.svg',
+    },
+  },
+]
 </script>
 
 <template>
   <div class="relative">
-    <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen">
-      <!-- Sidebar -->
-      <div
-        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 hidden h-screen w-20 border-r bg-white sm:block"
-      >
-        <div class="flex h-full flex-col justify-between">
-          <div class="flex flex-col">
-            <div
-              class="ltablet:w-full flex h-16 w-16 shrink-0 items-center justify-center lg:w-full"
-            >
-              <NuxtLink to="#" class="flex items-center justify-center">
-                <TairoLogo class="text-primary-600 h-10" />
-              </NuxtLink>
-            </div>
-            <div
-              class="ltablet:w-full flex h-16 w-16 shrink-0 items-center justify-center lg:w-full"
-            >
-              <a
-                href="#"
-                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="Back"
-                @click.prevent="navigateTo('/choose')"
-              >
-                <Icon name="lucide:arrow-right" class="h-5 w-5" />
-              </a>
-            </div>
-          </div>
-          <div class="flex flex-col">
-            <div class="flex h-16 w-full items-center justify-center">
-              <button
-                type="button"
-                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="جست و جو"
-                @click="open('search')"
-              >
-                <Icon name="ph:magnifying-glass-duotone" class="h-5 w-5" />
-              </button>
-            </div>
-            <div class="flex h-16 w-full items-center justify-center">
-              <NuxtLink
-                to="#"
-                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="Settings"
-              >
-                <Icon name="ph:gear-six-duotone" class="h-5 w-5" />
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="relative w-full transition-all duration-300"
-        :class="
-          expanded
-            ? 'ltablet:max-w-[calc(100%_-_160px)] lg:max-w-[calc(100%_-_160px)]'
-            : 'ltablet:max-w-[calc(100%_-_470px)] lg:max-w-[calc(100%_-_550px)]'
-        "
-      >
-        <div class="flex w-full flex-col">
+    <!-- Grid -->
+    <div class="grid grid-cols-12 gap-6">
+      <!-- Column -->
+      <div class="ltablet:col-span-8 col-span-12 lg:col-span-8">
+        <!-- Inner grid -->
+        <div class="grid grid-cols-12 gap-6">
           <!-- Header -->
-          <div
-            class="flex h-16 w-full items-center justify-between px-4 sm:px-8"
-          >
-            <div class="flex items-center gap-2">
-              <BaseInput
-                v-model="search"
-                shape="curved"
-                icon="lucide:search"
-                placeholder="جست و جو"
-              />
-            </div>
-
-            <TairoSidebarTools
-              class="relative -end-4 z-20 flex h-16 w-full scale-90 items-center justify-end gap-2 sm:end-0 sm:scale-100"
-            />
-          </div>
-          <!-- Body -->
-          <div
-            ref="chatEl"
-            class="relative h-[calc(100vh_-_128px)] w-full p-4 sm:p-8"
-            :class="loading ? 'overflow-hidden' : 'overflow-y-auto slimscroll'"
-          >
-            <!-- Loader-->
-            <div
-              class="bg-muted-100 dark:bg-muted-900 pointer-events-none absolute inset-0 z-10 h-full w-full p-8 transition-opacity duration-300"
-              :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-            >
-              <div class="mt-12 space-y-12">
-                <div class="flex w-full max-w-md gap-4">
-                  <BasePlaceload
-                    class="h-8 w-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload class="h-3 w-full max-w-[14rem] rounded" />
-                    <BasePlaceload class="h-3 w-full max-w-[8rem] rounded" />
-                  </div>
-                </div>
-                <div class="flex w-full max-w-md gap-4">
-                  <BasePlaceload
-                    class="h-8 w-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload class="h-3 w-full max-w-[16rem] rounded" />
-                    <BasePlaceload class="h-3 w-full max-w-[12rem] rounded" />
-                  </div>
-                </div>
-                <div
-                  class="ms-auto flex w-full max-w-md flex-row-reverse justify-end gap-4"
-                >
-                  <BasePlaceload
-                    class="h-8 w-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload
-                      class="ms-auto h-3 w-full max-w-[16rem] rounded"
-                    />
-                    <BasePlaceload
-                      class="ms-auto h-3 w-full max-w-[12rem] rounded"
-                    />
-                  </div>
-                </div>
-                <div
-                  class="ms-auto flex w-full max-w-md flex-row-reverse justify-end gap-4"
-                >
-                  <BasePlaceload
-                    class="h-8 w-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload
-                      class="ms-auto h-3 w-full max-w-[14rem] rounded"
-                    />
-                    <BasePlaceload
-                      class="ms-auto h-3 w-full max-w-[8rem] rounded"
-                    />
-                  </div>
-                </div>
-                <div class="flex w-full max-w-md gap-4">
-                  <BasePlaceload
-                    class="h-8 w-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload class="h-3 w-full max-w-[14rem] rounded" />
-                    <BasePlaceload class="h-3 w-full max-w-[8rem] rounded" />
-                  </div>
-                </div>
-                <div class="flex w-full max-w-md gap-4">
-                  <BasePlaceload
-                    class="h-8 w-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload class="h-3 w-full max-w-[16rem] rounded" />
-                    <BasePlaceload class="h-3 w-full max-w-[12rem] rounded" />
-                  </div>
-                </div>
+          <div class="col-span-12">
+            <div class="bg-primary-800 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
+              <div class="relative h-[150px] w-[320px] shrink-0 sm:h-[175px]">
+                <img class="pointer-events-none absolute start-6 top-0 sm:-start-10"
+                  src="/img/illustrations/dashboards/writer/readers.svg" alt="Readers illustration">
               </div>
-            </div>
-            <!-- Messages loop -->
-            <div v-if="!loading" class="space-y-12">
-              <div
-                v-for="(item, index) in conversation?.messages"
-                :key="index"
-                class="relative flex w-full gap-4"
-                :class="[
-                  item.type === 'recieved' ? 'flex-row' : 'flex-row-reverse',
-                  item.type === 'separator' ? 'justify-center' : '',
-                ]"
-              >
-                <template v-if="item.type !== 'separator'">
-                  <div class="shrink-0">
-                    <BaseAvatar
-                      v-if="item.type === 'recieved'"
-                      :src="conversation?.user.photo"
-                      size="xs"
-                    />
-                    <BaseAvatar
-                      v-else-if="item.type === 'sent'"
-                      src="/img/avatars/3.svg"
-                      size="xs"
-                    />
-                  </div>
-                  <div class="flex max-w-md flex-col">
-                    <div
-                      class="bg-muted-200 dark:bg-muted-800 rounded-xl p-4"
-                      :class="[
-                        item.type === 'recieved' ? 'rounded-ss-none' : '',
-                        item.type === 'sent' ? 'rounded-se-none' : '',
-                      ]"
-                    >
-                      <p class="font-sans text-sm">{{ item.text }}</p>
-                    </div>
-                    <div
-                      class="text-muted-400 mt-1 font-sans text-xs"
-                      :class="item.type === 'recieved' ? 'text-right' : ''"
-                    >
-                      {{ item.time }}
-                    </div>
-                    <div
-                      v-if="item.attachments.length > 0"
-                      class="mt-2 space-y-2"
-                    >
-                      <template
-                        v-for="(attachment, idx) in item.attachments"
-                        :key="idx"
-                      >
-                        <div
-                          v-if="attachment.type === 'image'"
-                          class="dark:bg-muted-800 max-w-xs rounded-2xl bg-white p-2"
-                          :class="item.type === 'sent' ? 'ms-auto' : ''"
-                        >
-                          <img
-                            :src="attachment.image"
-                            :alt="attachment.text"
-                            class="rounded-xl"
-                          />
-                        </div>
-                        <NuxtLink
-                          :to="attachment.url"
-                          v-else-if="attachment.type === 'link'"
-                          class="dark:bg-muted-800 block max-w-xs rounded-2xl bg-white p-2"
-                          :class="item.type === 'sent' ? 'ms-auto' : ''"
-                        >
-                          <img
-                            :src="attachment.image"
-                            :alt="attachment.text"
-                            class="rounded-xl"
-                          />
-                          <div class="px-1 py-2">
-                            <p
-                              class="text-muted-800 dark:text-muted-100 font-sans"
-                            >
-                              {{ attachment.url?.replace(/(^\w+:|^)\/\//, '') }}
-                            </p>
-                            <p class="text-muted-400 font-sans text-xs">
-                              {{ attachment.text }}
-                            </p>
-                          </div>
-                        </NuxtLink>
-                      </template>
-                    </div>
-                  </div>
-                </template>
-                <div v-else>
-                  <div
-                    class="absolute inset-0 flex items-center"
-                    aria-hidden="true"
-                  >
-                    <div
-                      class="border-muted-300/50 dark:border-muted-800 w-full border-t"
-                    ></div>
-                  </div>
-                  <div class="relative flex justify-center">
-                    <span
-                      class="bg-muted-100 dark:bg-muted-900 text-muted-400 px-3 font-sans text-xs uppercase"
-                    >
-                      {{ item.time }}
+              <div class="mt-6 grow sm:mt-0">
+                <div class="pb-4 text-center sm:pb-0 sm:text-right">
+                  <BaseHeading tag="h1" class="text-white opacity-90">
+                    <span>سلام، علی ! 👋</span>
+                  </BaseHeading>
+                  <BaseParagraph size="sm" class="max-w-xs text-white opacity-70">
+                    <span>
+                      این جا پنل شماست. در این بخش می توانید جلسات و برنامه ها، اطلاعات جلسات، محتوای متنی و دیگر بخش ها
+                      را مدیریت و نظارت کنید.
                     </span>
+                  </BaseParagraph>
+                  <div class="mt-2">
+                    <BaseButton size="sm" color="light" variant="outline" class="w-full sm:w-auto">
+                      <Icon name="lucide:message-circle-plus" class="size-4 ml-2" />
+                      <span>رفتن به گفت و گو</span>
+                    </BaseButton>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- Compose -->
-          <form
-            method="POST"
-            action=""
-            @submit.prevent="submitMessage"
-            class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center px-4 sm:px-8"
-          >
-            <div class="relative w-full">
-              <BaseInput
-                v-model.trim="message"
-                :loading="messageLoading"
-                :disabled="messageLoading"
-                shape="full"
-                :classes="{
-                  input: 'h-12 ps-6 pe-24',
-                }"
-                placeholder="متن را بنویسید ..."
-              />
-              <div class="absolute end-2 top-0 flex h-12 items-center gap-1">
-                <button
-                  type="button"
-                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                >
-                  <Icon name="lucide:smile" class="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                >
-                  <Icon name="lucide:paperclip" class="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-      <!-- Current user -->
-      <div
-        class="ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
-        :class="expanded ? 'translate-x-full' : 'translate-x-0'"
-      >
-        <div class="flex h-16 w-full items-center justify-between px-8"></div>
-        <div class="relative flex w-full flex-col px-8">
-          <!-- Loader -->
-          <div v-if="loading" class="mt-8">
-            <div class="mb-3 flex items-center justify-center">
-              <BasePlaceload
-                class="h-24 w-24 shrink-0 rounded-full"
-                :width="96"
-                :height="96"
-              />
-            </div>
-            <div class="flex flex-col items-center">
-              <BasePlaceload class="mb-2 h-3 w-full max-w-[10rem] rounded" />
-              <BasePlaceload class="mb-2 h-3 w-full max-w-[6rem] rounded" />
-              <div class="my-4 flex w-full flex-col items-center">
-                <BasePlaceload class="mb-2 h-2 w-full max-w-[15rem] rounded" />
-                <BasePlaceload class="mb-2 h-2 w-full max-w-[13rem] rounded" />
-              </div>
-              <div class="mb-6 flex w-full items-center justify-center">
-                <div class="px-4">
-                  <BasePlaceload class="h-3 w-[3.5rem] rounded" />
-                </div>
-                <div class="px-4">
-                  <BasePlaceload class="h-3 w-[3.5rem] rounded" />
-                </div>
-              </div>
-              <div class="w-full">
-                <BasePlaceload class="h-10 w-full rounded-xl" />
-                <BasePlaceload class="mx-auto mt-3 h-3 w-[7.5rem] rounded" />
-              </div>
-            </div>
-          </div>
-          <!-- User details -->
-          <div v-else class="mt-8">
-            <div class="flex items-center justify-center">
-              <BaseAvatar :src="conversation?.user.photo" size="2xl" />
-            </div>
-            <div class="text-center">
-              <BaseHeading tag="h3" size="lg" class="mt-4">
-                <span>{{ conversation?.user.name }}</span>
-              </BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-400">
-                <span>{{ conversation?.user.role }}</span>
-              </BaseParagraph>
-              <div class="my-4">
-                <BaseParagraph
-                  size="sm"
-                  class="text-muted-500 dark:text-muted-400"
-                >
-                  <span>{{ conversation?.user.bio }}</span>
-                </BaseParagraph>
-              </div>
-              <div
-                class="divide-muted-200 dark:divide-muted-700 flex items-center justify-center divide-x"
-                dir="ltr"
-              >
-                <div class="flex items-center justify-center gap-2 px-4">
-                  <Icon
-                    name="ph:timer-duotone"
-                    class="text-muted-400 h-4 w-4"
-                  />
-                  <span class="text-muted-400 font-sans text-xs">
-                    {{ conversation?.user.age }}
-                  </span>
-                </div>
-                <div class="flex items-center justify-center gap-2 px-4">
-                  <Icon
-                    name="ph:map-pin-duotone"
-                    class="text-muted-400 h-4 w-4"
-                  />
-                  <span class="text-muted-400 font-sans text-xs">
-                    {{ conversation?.user.location }}
-                  </span>
+          <!-- Content -->
+          <div class="col-span-12">
+            <!-- Sub grid -->
+            <div class="grid grid-cols-12 gap-6">
+              <!-- Sub column -->
+              <div class="col-span-12">
+                <div class="flex flex-col gap-6">
+                  <!-- Tile grid -->
+                  <div class="grid grid-cols-4 gap-4">
+                    <!-- Inner item -->
+                    <BaseCard rounded="lg" class="flex items-center gap-2 p-3">
+                      <BaseIconBox size="sm"
+                        class="bg-info-100 text-info-500 dark:bg-info-500/20 dark:text-info-400 dark:border-info-500 dark:border-2"
+                        rounded="full" color="none">
+                        <Icon name="ph:timer-duotone" class="size-5" />
+                      </BaseIconBox>
+                      <div>
+                        <BaseHeading as="h2" size="sm" weight="semibold" lead="tight"
+                          class="text-muted-800 dark:text-white">
+                          <span>62K</span>
+                        </BaseHeading>
+                        <BaseParagraph size="xs">
+                          <span class="text-muted-500 dark:text-muted-400">Minutes</span>
+                        </BaseParagraph>
+                      </div>
+                    </BaseCard>
+                    <!-- Inner item -->
+                    <BaseCard rounded="lg" class="flex items-center gap-2 p-3">
+                      <BaseIconBox size="sm"
+                        class="bg-primary-100 text-primary-500 dark:bg-primary-500/20 dark:text-primary-400 dark:border-primary-500 dark:border-2"
+                        rounded="full" color="none">
+                        <Icon name="ph:broadcast-duotone" class="size-5" />
+                      </BaseIconBox>
+                      <div>
+                        <BaseHeading as="h2" size="sm" weight="semibold" lead="tight"
+                          class="text-muted-800 dark:text-white">
+                          <span>263</span>
+                        </BaseHeading>
+                        <BaseParagraph size="xs">
+                          <span class="text-muted-500 dark:text-muted-400">Interviews</span>
+                        </BaseParagraph>
+                      </div>
+                    </BaseCard>
+                    <!-- Inner item -->
+                    <BaseCard rounded="lg" class="flex items-center gap-2 p-3">
+                      <BaseIconBox size="sm"
+                        class="bg-lime-100 text-lime-500 dark:border-2 dark:border-lime-500 dark:bg-lime-500/20 dark:text-lime-400"
+                        rounded="full" color="none">
+                        <Icon name="ph:user-plus-duotone" class="size-5" />
+                      </BaseIconBox>
+                      <div>
+                        <BaseHeading as="h2" size="sm" weight="semibold" lead="tight"
+                          class="text-muted-800 dark:text-white">
+                          <span>49</span>
+                        </BaseHeading>
+                        <BaseParagraph size="xs">
+                          <span class="text-muted-500 dark:text-muted-400">Approved</span>
+                        </BaseParagraph>
+                      </div>
+                    </BaseCard>
+                    <!-- Inner item -->
+                    <BaseCard rounded="lg" class="flex items-center gap-2 p-3">
+                      <BaseIconBox size="sm"
+                        class="bg-amber-100 text-amber-500 dark:border-2 dark:border-amber-500 dark:bg-amber-500/20 dark:text-amber-400"
+                        rounded="full" color="none">
+                        <Icon name="ph:door-duotone" class="size-5" />
+                      </BaseIconBox>
+                      <div>
+                        <BaseHeading as="h2" size="sm" weight="semibold" lead="tight"
+                          class="text-muted-800 dark:text-white">
+                          <span>214</span>
+                        </BaseHeading>
+                        <BaseParagraph size="xs">
+                          <span class="text-muted-500 dark:text-muted-400">Rejected</span>
+                        </BaseParagraph>
+                      </div>
+                    </BaseCard>
+                  </div>
                 </div>
               </div>
-              <div class="mt-6">
-                <BaseButton shape="curved" class="w-full">
-                  <span> درباره مانی، هوش مصنوعی </span>
-                </BaseButton>
-                <button
-                  type="button"
-                  class="text-primary-500 mt-3 font-sans text-sm underline-offset-4 hover:underline"
-                >
-                  همرسانی گفت و گو
-                </button>
+              <div class="col-span-12">
+                <Transition leave-active-class="transition origin-top duration-75 ease-in"
+                  leave-from-class="transform scale-y-100 opacity-100" leave-to-class="transform scale-y-0 opacity-0">
+                  <div v-if="showFeatures" class="w-full pb-6">
+                    <!--Features widget-->
+                    <DemoWidgetFeatures>
+                      <template #actions>
+                        <BaseButtonClose size="sm" color="muted" data-nui-tooltip="Hide this"
+                          @click="showFeatures = false" />
+                      </template>
+                    </DemoWidgetFeatures>
+                  </div>
+                </Transition>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <!-- Column -->
+      <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
+        <div class="bg-muted-200 dark:bg-muted-800/70 rounded-2xl p-6">
+          <!-- Title -->
+          <div class="mb-8 flex items-center justify-between">
+            <BaseHeading as="h3" size="md" weight="semibold" lead="tight" class="text-muted-800 dark:text-white">
+              <span>آخرین مطالب</span>
+            </BaseHeading>
+            <div class="flex scale-90 gap-2 sm:justify-end">
+              <BaseButtonAction small :color="activePosts === 'recent' ? 'primary' : 'default'"
+                @click="activePosts = 'recent'">
+                مقالات اخیر
+              </BaseButtonAction>
+              <BaseButtonAction small :color="activePosts === 'popular' ? 'primary' : 'default'"
+                @click="activePosts = 'popular'">
+                مقالات محبوب
+              </BaseButtonAction>
+            </div>
+          </div>
+          <!-- Posts-->
+          <div class="ptablet:grid ptablet:grid-cols-2 flex flex-col gap-6">
+            <!-- Post -->
+            <NuxtLink to="#" class="flex flex-col">
+              <img src="/img/illustrations/dashboards/writer/post-1.svg" alt="Post image"
+                class="bg-muted-200 rounded-xl">
+              <BaseCard class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl">
+                <div class="mb-3">
+                  <BaseHeading as="h4" size="md" weight="light" lead="tight"
+                    class="text-muted-800 mb-1 dark:text-white">
+                    <span>Learning the modern novel</span>
+                  </BaseHeading>
+                  <BaseParagraph size="xs">
+                    <span class="text-muted-400">
+                      Some article content and lorem ipsum sit dolor amet as a
+                      nice dummy subtitle
+                    </span>
+                  </BaseParagraph>
+                </div>
+                <div class="flex gap-3">
+                  <BaseAvatar src="/img/avatars/6.svg" text="BT" size="xs"
+                    class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0" />
+                  <div>
+                    <BaseHeading as="h4" size="xs" weight="light" lead="tight" class="text-muted-800 dark:text-white">
+                      <span>Mike Janovski</span>
+                    </BaseHeading>
+                    <BaseParagraph size="xs">
+                      <span class="text-muted-400">Novel writer</span>
+                    </BaseParagraph>
+                  </div>
+                </div>
+              </BaseCard>
+            </NuxtLink>
+            <!-- Post -->
+            <NuxtLink to="#" class="flex flex-col">
+              <img src="/img/illustrations/dashboards/writer/post-2.svg" alt="Post image"
+                class="bg-muted-200 rounded-xl">
+              <BaseCard class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl">
+                <div class="mb-3">
+                  <BaseHeading as="h4" size="md" weight="light" lead="tight"
+                    class="text-muted-800 mb-1 dark:text-white">
+                    <span>5 writing tips just for you</span>
+                  </BaseHeading>
+                  <BaseParagraph size="xs">
+                    <span class="text-muted-400">
+                      Some article content and lorem ipsum sit dolor amet as a
+                      nice dummy subtitle
+                    </span>
+                  </BaseParagraph>
+                </div>
+                <div class="flex gap-3">
+                  <BaseAvatar src="/img/avatars/5.svg" text="BT" size="xs"
+                    class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0" />
+                  <div>
+                    <BaseHeading as="h4" size="xs" weight="light" lead="tight" class="text-muted-800 dark:text-white">
+                      <span>Clarissa Miller</span>
+                    </BaseHeading>
+                    <BaseParagraph size="xs">
+                      <span class="text-muted-400">Novel writer</span>
+                    </BaseParagraph>
+                  </div>
+                </div>
+              </BaseCard>
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+      
     </div>
+    <div class="grid min-h-[440px] grid-cols-12 gap-6 mt-5">
+        <!-- Column -->
+        <div
+          v-for="video in featuredVideos.slice(0, 1)"
+          :key="video.id"
+          class="ltablet:col-span-6 col-span-12 lg:col-span-6"
+        >
+          <div class="flex h-full flex-col">
+            <div
+              class="bg-muted-200 dark:bg-muted-800 group relative size-full overflow-hidden rounded-2xl"
+            >
+              <img
+                :src="video.cover"
+                :alt="video.title"
+                class="w-full object-cover object-center"
+              >
+              <div
+                class="absolute inset-x-0 bottom-0 z-10 h-3/5 w-full bg-gradient-to-t from-black transition-all duration-500 ease-in-out group-hover:h-full"
+              />
+              <div
+                class="absolute inset-0 z-20 flex size-full flex-col justify-between"
+              >
+                <div class="ptablet:p-10 p-6">
+                  <NuxtLink
+                    to="#"
+                    class="group-hover:border-primary-500 text-muted-300 group-hover:text-primary-500 shadow-muted-300/30 dark:shadow-muted-900/20 flex size-14 items-center justify-center rounded-full border-2 border-transparent bg-white shadow-2xl transition-colors duration-300"
+                  >
+                    <Icon name="ic:round-play-arrow" class="size-7" />
+                  </NuxtLink>
+                </div>
+                <div class="ptablet:p-10 p-6">
+                  <NuxtLink to="#">
+                    <BaseHeading
+                      as="h3"
+                      size="3xl"
+                      weight="bold"
+                      lead="tight"
+                      class="xs:text-xl hover:text-primary-300 mb-4 line-clamp-2 text-white transition-colors duration-300"
+                    >
+                      <span>{{ video.title }}</span>
+                    </BaseHeading>
+                  </NuxtLink>
+                  <div class="flex gap-3">
+                    <BaseAvatar
+                      :src="video.author.avatar"
+                      :text="video.author.name.slice(0, 1)"
+                      size="xs"
+                      class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
+                    />
+                    <div>
+                      <NuxtLink to="#">
+                        <BaseHeading
+                          as="h4"
+                          size="xs"
+                          weight="light"
+                          lead="tight"
+                          class="hover:text-primary-500 text-white transition-colors duration-300"
+                        >
+                          <span>{{ video.author.name }}</span>
+                        </BaseHeading>
+                      </NuxtLink>
 
-    <TairoPanels />
+                      <BaseParagraph size="xs">
+                        <span class="text-muted-400">{{ video.uploaded }}</span>
+                      </BaseParagraph>
+                    </div>
+                    <div class="ms-auto">
+                      <BaseTag
+                        color="primary"
+                        rounded="full"
+                        size="sm"
+                      >
+                        <span>{{ video.category }}</span>
+                      </BaseTag>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Column -->
+        <div class="ltablet:col-span-6 col-span-12 lg:col-span-6">
+          <div class="flex h-full flex-col">
+            <div class="grid h-full grid-cols-12 gap-6">
+              <!-- Subcolumn -->
+              <div
+                v-for="video in featuredVideos.slice(1)"
+                :key="video.id"
+                class="col-span-12 sm:col-span-6"
+              >
+                <div class="group flex h-full flex-col">
+                  <div
+                    class="bg-muted-200 dark:bg-muted-800 relative size-full overflow-hidden rounded-2xl"
+                  >
+                    <img
+                      :src="video.cover"
+                      :alt="video.title"
+                      class="w-full object-cover object-center"
+                    >
+                    <div
+                      class="absolute inset-x-0 bottom-0 z-10 h-3/5 w-full bg-gradient-to-t from-black transition-all duration-500 ease-in-out group-hover:h-full"
+                    />
+                    <div
+                      class="absolute inset-0 z-20 flex size-full flex-col justify-between"
+                    >
+                      <div class="p-4">
+                        <NuxtLink
+                          to="#"
+                          class="group-hover:border-primary-500 text-muted-300 group-hover:text-primary-500 shadow-muted-300/30 dark:shadow-muted-900/20 flex size-10 items-center justify-center rounded-full border-2 border-transparent bg-white shadow-2xl transition-colors duration-300"
+                        >
+                          <Icon name="ic:round-play-arrow" class="size-5" />
+                        </NuxtLink>
+                      </div>
+                      <div class="p-4">
+                        <NuxtLink to="#">
+                          <BaseHeading
+                            as="h3"
+                            size="md"
+                            weight="medium"
+                            lead="tight"
+                            class="xs:text-xl ptablet:text-xl ptablet:font-bold xs:font-bold hover:text-primary-300 mb-4 line-clamp-2 text-white transition-colors duration-300"
+                          >
+                            <span>{{ video.title }}</span>
+                          </BaseHeading>
+                        </NuxtLink>
+                        <div class="flex gap-3">
+                          <BaseAvatar
+                            :src="video.author.avatar"
+                            :text="video.author.name.slice(0, 1)"
+                            size="xs"
+                            class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
+                          />
+                          <div>
+                            <NuxtLink to="#">
+                              <BaseHeading
+                                as="h4"
+                                size="xs"
+                                weight="light"
+                                lead="tight"
+                                class="hover:text-primary-500 text-white transition-colors duration-300"
+                              >
+                                <span>{{ video.author.name }}</span>
+                              </BaseHeading>
+                            </NuxtLink>
+
+                            <BaseParagraph size="xs">
+                              <span class="text-muted-400">
+                                {{ video.uploaded }}
+                              </span>
+                            </BaseParagraph>
+                          </div>
+                          <div class="ms-auto">
+                            <BaseTag
+                              color="primary"
+                              rounded="full"
+                              size="sm"
+                            >
+                              <span>{{ video.category }}</span>
+                            </BaseTag>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
   </div>
 </template>

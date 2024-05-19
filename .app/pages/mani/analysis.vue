@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import 'v-calendar/dist/style.css'
 import '~/assets/css/vcalendar.css'
-import { AgentTask } from '~/composables/crew'
-import { BackendMessage } from '~/composables/message'
+// import { AgentTask } from '~/composables/crew'
+// import { BackendMessage } from '~/composables/message'
 import Slider from '@vueform/slider'
 import '~/assets/css/slider.css'
 
@@ -48,7 +48,28 @@ const { ask } = useOllama()
 const nuxtApp = useNuxtApp()
 const msgs = ref([])
 const userSum = ref([])
-const headlines = ref([])
+const headlines = ref([
+  {
+    nameFa: "شکایت اصلی",
+    valueFa: "مشکلات خانوادگی",
+    descriptionFa: "مریم با خانواده و بالاخص مادرش مشکل دارد. از نوجوانی این فاصله زیاد شده و الان تشدید شده است."
+  },
+  {
+    nameFa: "نشانگان",
+    valueFa: "افسردگی",
+    descriptionFa: "مریم از خود نشگان قدرتمندی از افسردگی با ریشه هایی از اختلال شخصیت نشان می دهد."
+  },
+  {
+    nameFa: "بنیاد شخصیت",
+    valueFa: "رشد یافته",
+    descriptionFa: "از لحاظ تحولی شخصیت مریم رشد یافته است. او از مکانیزم های دفاعی سطح بالا استفاده می کند."
+  },
+  {
+    nameFa: "خطر خودکشی",
+    valueFa: "پایین",
+    descriptionFa: "مریم صریحا اعلام کرده که به خودکشی فکر نمی کند و این یک پیش آگهی خوب است."
+  }
+])
 onMounted(async () => {
   // userSum.value = await getSummerizedMessagesByCode(route.query.code as string)
   // msgs.value = await getMessagesByCode(route.query.code as string)

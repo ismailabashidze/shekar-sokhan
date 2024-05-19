@@ -29,6 +29,7 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 const { user, incDivision } = useUser()
 const { open } = usePanels()
 const seamless = useSeamless()
+const {goals, getGoals} = useGoal()
 
 const { translated, translate } = seamless
 const { getMessages, saveMessage, deleteAllMessages, deleteMessage } =
@@ -140,6 +141,7 @@ const signout = () => {
 const showNoCharge = ref(false)
 
 onMounted(async () => {
+  getGoals()
   const msg = await getMessages()
   msg.map((m) => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
   conversation.value.messages.push(...msg)
@@ -301,6 +303,7 @@ async function submitMessage() {
               })
               .filter(Boolean),
           ],
+          goals: goals.value.map(g=>g.expand.generalTherapicGoal.description)
         },
       })
       const {
