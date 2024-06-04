@@ -2,7 +2,7 @@ export type SelectedTherapicGoals = {
   user: string
   currentDivision: number
   generalTherapicGoal: string
-  progress: "not started" | "initialized" | "in progress" | "completed" | "closed"
+  progress: 'not started' | 'initialized' | 'in progress' | 'completed' | 'closed'
   title: string
   shortDescription: string
   description: string
@@ -23,11 +23,11 @@ export function useGoal() {
     const { items } = await nuxtApp.$pb.collection('SelectedTherapicGoals').getList(1, 500, {
       filter: 'currentDivision=' + user.value.record.currentDeletionDivider + ` && user.id = "${user.value.record.id}"`,
       sort: '+created',
-      expand: "generalTherapicGoal"
+      expand: 'generalTherapicGoal',
     })
     goals.value = items
     return items
-}
+  }
 
   return {
     goals,

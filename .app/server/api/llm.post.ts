@@ -1,9 +1,16 @@
-const RUNPOD_TOKEN = process.env.RUNPOD_TOKEN
-const LLM_ADDRESS = process.env.LLM_ADDRESS!
-const LLM_MODEL = process.env.LLM_MODEL
-const LLM_TEMPERATURE = Number(process.env.LLM_TEMPERATURE || 1)
-const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS || 8192)
-const LLM_REPEAT_PENALTY = Number(process.env.LLM_REPEAT_PENALTY || 2)
+// const RUNPOD_TOKEN = process.env.RUNPOD_TOKEN
+// const LLM_ADDRESS = process.env.LLM_ADDRESS!
+// const LLM_MODEL = process.env.LLM_MODEL
+// const LLM_TEMPERATURE = Number(process.env.LLM_TEMPERATURE || 1)
+// const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS || 8192)
+// const LLM_REPEAT_PENALTY = Number(process.env.LLM_REPEAT_PENALTY || 2)
+
+const RUNPOD_TOKEN = '8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3'
+const LLM_ADDRESS = 'https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions'
+const LLM_MODEL = 'cognitivecomputations/dolphin-2.8-mistral-7b-v02'
+const LLM_TEMPERATURE = 1
+const LLM_MAX_TOKENS = 8192
+const LLM_REPEAT_PENALTY = 2
 
 interface FetchResponse {
   choices: { message: { content: string } }[]
@@ -23,7 +30,7 @@ export type LLMMessage = {
 function hasExactKeys(obj: any, keys: string[]): boolean {
   const objKeys = Object.keys(obj)
   return (
-    keys.length === objKeys.length && keys.every((key) => objKeys.includes(key))
+    keys.length === objKeys.length && keys.every(key => objKeys.includes(key))
   )
 }
 
@@ -46,7 +53,7 @@ async function checkSemanticValidity(
 async function fetchLLM(body: any): Promise<string> {
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${RUNPOD_TOKEN}`,
+    'Authorization': `Bearer ${RUNPOD_TOKEN}`,
   }
 
   const response = await $fetch<FetchResponse>(LLM_ADDRESS, {
@@ -78,13 +85,15 @@ async function retryFetchLLM(
     try {
       console.log(`Attempt number ${attempt}`)
       const content = await fetchLLM(body)
-      let jsonResponse = JSON.parse(content)
+      const jsonResponse = JSON.parse(content)
       if (hasExactKeys(jsonResponse, keys)) {
         return JSON.stringify(jsonResponse)
-      } else {
+      }
+      else {
         addRetryMessage(body, keys, systemPrompt)
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error:', error)
       if (attempt === retries) {
         throw new Error(
@@ -102,8 +111,8 @@ function addRetryMessage(body: any, keys: string[], systemPrompt: string) {
   body.llmMessages.push({
     role: 'assistant',
     content:
-      systemPrompt +
-      ` Your JSON should have exactly these keys: ${keys.join(
+      systemPrompt
+      + ` Your JSON should have exactly these keys: ${keys.join(
         ',',
       )}. Answer properly. Check your answer and ensure that it is in JSON format and with these ${
         keys.length
@@ -118,9 +127,9 @@ export async function handleFetchRequest(
   retries: number,
 ): Promise<string | { error: string }> {
   try {
-    const response = await retryFetchLLM(body, retries, SystemMessage, jsonKeys)
-    return response
-  } catch (error: unknown) {
+    return await retryFetchLLM(body, retries, SystemMessage, jsonKeys)
+  }
+  catch (error: unknown) {
     return handleError(error)
   }
 }
@@ -129,7 +138,8 @@ function handleError(error: unknown): { error: string } {
   if (error instanceof Error) {
     console.error('Final error:', error.message)
     return { error: error.message }
-  } else {
+  }
+  else {
     console.error('Final error:', error)
     return { error: 'An unknown error occurred' }
   }
@@ -137,28 +147,21 @@ function handleError(error: unknown): { error: string } {
 
 // Event handler
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
-
-  // First operation
-  let sysMsg = "based on the conversation, please check whether these goals are accomplished or still in progress, then return an array which are index number of accomplished goals. return as json with key: accomplished. accomplished is an array consisting numbers of accomplished goals. return empty array if there is none. GOALS are: " + body.goals.map((goal, index) => `${index + 1}. ${goal}`).join(' ,');
-  const res = await handleFetchRequest(
-    body,
-    sysMsg,
-    ["accomplished"],
-    3
-  );
-  console.log("Result from first operation: ", res);
-
-  // Conditional or additional processing based on 'res'
+  const body = await readBody(event)
+  let sysMsg
   if (body.type === 'briefing') {
-    sysMsg = 'You are a human named Mani. Answer just like a human. never show anything that you are AI. Answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider based on the provided goals. nextSteps: as a psychologist, what will be your next step, especially based on provided goals. message: your final message based on thoughts, next steps and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You will provide help based on Islamic Rules and guidance, and never tell anything against Islamic values, Although you never explicitly tell user about your islamic approach. also, you provide your information based on Iranian Context and believes. GOALS ARE : ' + body.goals.map((goal, index) => `${index + 1}. ${goal}`).join(' ,');
+    sysMsg
+    = 'answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider. nextSteps: as a psychologist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You provide your information based on Iranian Context and believes.'
+    // 'answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider. nextSteps: as a psychologist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You provide your information based on Iranian Context and believes. Your main goal in here is to gather these data: name, age, gender, main problem or goal of the user which wants to talk about. you have to persue user to tell these information, but never push these too hard.If you have gathered all these info, just refuse to answer the prompts and simply say my goal has been achieved.'
   }
-  
-  // Second operation
+  else if (body.type === 'intervention') {
+    sysMsg
+      = 'answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider. nextSteps: as a psychologist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You will provide help based on Islamic Rules and guidance, and never tell anything against Islamic values, Although you never explicitly tell user about your islamic approach. also, you provide your information based on Iranian Context and believes.'
+  }
   return handleFetchRequest(
     body,
     sysMsg,
     ['thoughts', 'action', 'nextSteps', 'message'],
-    3
-  );
-});
+    3,
+  )
+})

@@ -11,5 +11,31 @@
 export default defineAppConfig({
   tairo: {
     title: 'پنل جامع هوش مصنوعی',
+    sidebar: {
+      // toolbar: {
+      //   tools: [
+      //     {
+      //       component: 'DemoThemeToggle',
+      //       props: {
+      //         disableTransitions: false,
+      //       },
+      //     },
+      //   ],
+      // },
+      navigation: {
+        items: [
+          {
+            // Title displayed in the sidebar
+            title: 'صفحه گفت و گو',
+            icon: { name: 'ph:sidebar-duotone', class: 'w-5 h-5' },
+            activePath: '/mani/chat',
+            to: '/mani/chat',
+            click: () => {
+              alert('clicked on layouts')
+            },
+          },
+        ],
+      },
+    },
   },
 })

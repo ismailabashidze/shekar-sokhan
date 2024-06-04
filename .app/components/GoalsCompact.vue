@@ -49,49 +49,47 @@ const todos = [
 ]
 
 const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2'])
-const {goals , getGoals} = useGoal()
+const { goals, getGoals } = useGoal()
 
-const progressFaText =  (p: string) => {
-  
-  if(p == 'not started'){
+const progressFaText = (p: string) => {
+  if (p == 'not started') {
     return 'هنوز آغاز نشده است'
   }
-  else if(p == 'initialized'){
+  else if (p == 'initialized') {
     return 'مقدار دهی اولیه'
   }
-  else if(p == 'in progress'){
+  else if (p == 'in progress') {
     return 'در حال انجام'
   }
-  else if(p == 'completed'){
+  else if (p == 'completed') {
     return 'انجام شده'
   }
-  else if(p == 'closed'){
+  else if (p == 'closed') {
     return 'بسته شده'
   }
-  return 'Unknown';
+  return 'Unknown'
 }
-const progressFaColor =  (p: string) => {
-  
-  if(p == 'not started'){
+const progressFaColor = (p: string) => {
+  if (p == 'not started') {
     return 'primary'
   }
-  else if(p == 'initialized'){
+  else if (p == 'initialized') {
     return 'primary'
   }
-  else if(p == 'in progress'){
+  else if (p == 'in progress') {
     return 'info'
   }
-  else if(p == 'completed'){
+  else if (p == 'completed') {
     return 'success'
   }
-  else if(p == 'closed'){
+  else if (p == 'closed') {
     return 'danger'
   }
-  return 'default';
+  return 'default'
 }
-onMounted(async ()=>{
+onMounted(async () => {
   await getGoals()
-  goals.value = goals.value.map(g => { 
+  goals.value = goals.value.map((g) => {
     return {
       ...g,
       ...g.expand.generalTherapicGoal,
@@ -102,7 +100,11 @@ onMounted(async ()=>{
 
 <template>
   <div class="mb-2 space-y-6">
-    <div v-for="task in goals" :key="task.id" class="flex items-center gap-3">
+    <div
+      v-for="task in goals"
+      :key="task.id"
+      class="flex items-center gap-3"
+    >
       <BaseCheckboxAnimated
         v-model="tasks"
         color="success"

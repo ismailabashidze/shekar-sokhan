@@ -158,7 +158,7 @@ definePageMeta({
       </BaseCard>
       <!-- Widget -->
       <BaseCard rounded="lg" class="p-4">
-        <DemoInfoImage
+        <InfoImage
           rounded="lg"
           image="/img/illustrations/widgets/8.svg"
           title="You've unlocked 2 new Achievements"

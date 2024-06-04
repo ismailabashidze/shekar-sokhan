@@ -2,14 +2,14 @@ interface FetchResponse {
   choices: { message: { content: string } }[]
 }
 
-export type LLMMessage = {
-  role: 'system' | 'assistant' | 'user'
-  content: string
-}
+// export type LLMMessage = {
+//   role: 'system' | 'assistant' | 'user'
+//   content: string
+// }
 export function useLLM() {
   // const LLM_ADDRESS = 'http://localhost:1234/v1/chat/completions'
-  const LLM_ADDRESS =
-    'https://f290-2-190-129-92.ngrok-free.app/v1/chat/completions'
+  const LLM_ADDRESS
+    = 'https://f290-2-190-129-92.ngrok-free.app/v1/chat/completions'
   const { getMessages } = useMessage()
 
   const answer = ref()
@@ -37,7 +37,7 @@ export function useLLM() {
     {
       name: 'PsychotherapistSummerizer',
       description:
-        "You are sam, Your main goal is to summerize multiple messages of a conversation which is from a psychotherapist, and are separated with | symbol. Tell interventions and activities psychotherapist done to patient. List activities, not narrate. NOTE that you are not psychotherapist and you don't need to complete these messages. I want you to summerize it instead.",
+        'You are sam, Your main goal is to summerize multiple messages of a conversation which is from a psychotherapist, and are separated with | symbol. Tell interventions and activities psychotherapist done to patient. List activities, not narrate. NOTE that you are not psychotherapist and you don\'t need to complete these messages. I want you to summerize it instead.',
     },
     {
       name: 'SummaryJsonizer',
@@ -63,7 +63,7 @@ export function useLLM() {
   const ask = async (AIName: string, question: string) => {
     let selectedMessages = [] as LLMMessage[]
     const msgs = await getMessages()
-    selectedPersona.value = personas.value.find((p) => p.name == AIName)
+    selectedPersona.value = personas.value.find(p => p.name == AIName)
     if (AIName === 'Mani') {
       selectedMessages = msgs.map((m) => {
         return {
@@ -71,7 +71,8 @@ export function useLLM() {
           content: m.content,
         }
       })
-    } else {
+    }
+    else {
       selectedMessages = [{ role: 'user', content: question }]
     }
     llmMessages.value = [

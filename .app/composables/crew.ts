@@ -1,8 +1,8 @@
-export type AgentTask = 'counselling_agent' | 'patient_agent'
-export type AgentAction = {
-  task: AgentTask
-  text: string
-}
+// export type AgentTask = 'counselling_agent' | 'patient_agent'
+// export type AgentAction = {
+// task: AgentTask
+// text: string
+// }
 
 export function useCrew() {
   const CREW_ADDRESS = 'http://localhost:5123/action'
