@@ -15,36 +15,6 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const activePosts = ref('recent')
-const candidates = [
-  {
-    id: 0,
-    tooltip: 'Adam Wrangler',
-    src: '/img/avatars/15.svg',
-    text: 'EC',
-    role: 'UI/UX designer',
-  },
-  {
-    id: 1,
-    tooltip: 'Jennifer Miller',
-    src: '/img/avatars/5.svg',
-    text: 'JM',
-    role: 'Frontend developer',
-  },
-  {
-    id: 2,
-    tooltip: 'Tara Svenson',
-    src: '/img/avatars/4.svg',
-    text: 'TS',
-    role: 'Software architect',
-  },
-  {
-    id: 3,
-    tooltip: 'Naomi Liversky',
-    src: undefined,
-    text: 'NL',
-    role: 'UI/UX designer',
-  },
-]
 const showFeatures = ref(true)
 const featuredVideos = [
   {
@@ -347,7 +317,7 @@ function useDemoAreaMulti() {
                         <BaseButtonClose
                           size="sm"
                           color="muted"
-                          data-nui-tooltip="Hide this"
+                          data-nui-tooltip="بستن"
                           @click="showFeatures = false"
                         />
                       </template>
