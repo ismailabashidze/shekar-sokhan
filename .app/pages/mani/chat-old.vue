@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// import { BackendMessage, Content } from '~/composables/message'
 interface TranslatedResponse {
   translatedMsg: string
   translatedThoughts: string
@@ -41,43 +42,6 @@ const chatEl = ref<HTMLElement>()
 const expanded = useLocalStorage('expanded', false)
 
 const loading = ref(true)
-const isTyping = ref(false)
-const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
-const isNewMessagesDone = ref(true)
-const newMessagesIndex = ref(0)
-const timer = ref(30)
-watch(message, () => {
-  if (isTyping.value) {
-    // mani decided to write, but will stop, because user decided to write.
-    timer.value = 5
-    setTimeout(() => {
-      reset()
-    }, 3000)
-  }
-  else {
-    // mani has not decided to write.
-    timer.value = 7
-    reset()
-  }
-})
-watch(counter, (n, o) => {
-  if (n == timer.value) {
-    isTyping.value = true
-    pause()
-    setTimeout(() => {
-      // a wait to ensure sending the message.
-      if (isTyping.value) {
-        askForMani()
-      }
-    }, 6000)
-  }
-  else {
-    isTyping.value = false
-
-    resume()
-  }
-})
-
 const conversation = ref({
   user: {
     name: 'مانی، همدل هوشمند',
@@ -111,93 +75,7 @@ const conversation = ref({
     },
   ],
 })
-const askForMani = async () => {
-  if (isNewMessagesDone.value) {
-    try {
-      const answer = await $fetch('/api/llm', {
-        method: 'POST',
-        body: {
-          type: 'briefing',
-          llmMessages: [
-            ...conversation.value.messages
-              .map((m) => {
-                if (m.role == 'assistant' || m.role == 'user') {
-                  return {
-                    role: m.role,
-                    content: JSON.stringify(m.content),
-                  }
-                }
-              })
-              .filter(Boolean),
-          ],
-          goals: goals.value.map(g => g.expand.generalTherapicGoal.description),
-        },
-      })
-      const {
-        translatedMsg,
-        translatedThoughts,
-        translatedAction,
-        translatedNextSteps,
-      } = await processResponse(JSON.parse(answer))
 
-      const newMsg = await saveMessage({
-        user: user.value.record.id,
-        role: 'assistant',
-        time: new Date().toLocaleTimeString('fa'),
-        content: JSON.parse(answer),
-        contentFa: {
-          message: translatedMsg,
-          thoughts: translatedThoughts,
-          action: translatedAction,
-          nextSteps: translatedNextSteps,
-        },
-        deletionDivider: user.value.record.currentDeletionDivider,
-      })
-
-      conversation.value.messages.push({
-        id: newMsg.id,
-        role: 'assistant',
-        content: JSON.parse(answer),
-        contentFa: {
-          message: translatedMsg,
-          thoughts: translatedThoughts,
-          action: translatedAction,
-          nextSteps: translatedNextSteps,
-        },
-        time: new Date().toLocaleTimeString('fa'),
-      })
-
-      await nextTick()
-
-      if (chatEl.value) {
-        chatEl.value.scrollTo({
-          top: chatEl.value.scrollHeight,
-          behavior: 'smooth',
-        })
-      }
-      isTyping.value = false
-      counter.value = 0
-      timer.value = 30
-    }
-    catch (e) {
-      console.log('here')
-      console.log(e)
-      toaster.show({
-        title: 'دریافت پیام', // Authentication
-        message: `مشکلی وجود دارد`, // Please log in again
-        color: 'danger',
-        icon: 'ph:envelope',
-        closable: true,
-      })
-      messageLoading.value = false
-    }
-  }
-  else {
-    setTimeout(() => {
-      askForMani()
-    }, 5000)
-  }
-}
 const sleep = (time: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, time))
 }
@@ -255,7 +133,7 @@ const signout = () => {
 const showNoCharge = ref(false)
 
 onMounted(async () => {
-  // getGoals()
+  getGoals()
   const msg = await getMessages()
   msg.map(m => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
   conversation.value.messages.push(...msg)
@@ -369,9 +247,10 @@ async function translateAndAssemble(
 async function submitMessage() {
   if (!message.value) return
   if (messageLoading.value) return
+  messageLoading.value = true
   const m = message.value
   message.value = ''
-  const newMessage = {
+  const newMessage: BackendMessage = {
     role: 'user',
     contentFa: { message: m },
     content: { message: '' },
@@ -386,12 +265,10 @@ async function submitMessage() {
       })
     }
   }, 30)
-  isNewMessagesDone.value = false
   const t = await translateAndAssemble(m, 'Western Persian', 'English')
   conversation.value.messages[
     conversation.value.messages.length - 1
   ].content.message = t
-
   const res = await saveMessage({
     role: 'user',
     content: { message: t },
@@ -399,8 +276,85 @@ async function submitMessage() {
     user: user.value.record.id,
     deletionDivider: user.value.record.currentDeletionDivider,
   })
-  isNewMessagesDone.value = true
-  newMessagesIndex.value++
+  if (res.id) {
+    try {
+      const answer = await $fetch('/api/llm', {
+        method: 'POST',
+        body: {
+          type: 'briefing',
+          llmMessages: [
+            ...conversation.value.messages
+              .map((m) => {
+                if (m.role == 'assistant' || m.role == 'user') {
+                  return {
+                    role: m.role,
+                    content: JSON.stringify(m.content),
+                  }
+                }
+              })
+              .filter(Boolean),
+          ],
+          goals: goals.value.map(g => g.expand.generalTherapicGoal.description),
+        },
+      })
+      const {
+        translatedMsg,
+        translatedThoughts,
+        translatedAction,
+        translatedNextSteps,
+      } = await processResponse(JSON.parse(answer))
+
+      const newMsg = await saveMessage({
+        user: user.value.record.id,
+        role: 'assistant',
+        time: new Date().toLocaleTimeString('fa'),
+        content: JSON.parse(answer),
+        contentFa: {
+          message: translatedMsg,
+          thoughts: translatedThoughts,
+          action: translatedAction,
+          nextSteps: translatedNextSteps,
+        },
+        deletionDivider: user.value.record.currentDeletionDivider,
+      })
+      console.log('newMsg')
+      console.log(newMsg)
+      messageLoading.value = false
+      conversation.value.messages.push({
+        id: newMsg.id,
+        role: 'assistant',
+        content: JSON.parse(answer),
+        contentFa: {
+          message: translatedMsg,
+          thoughts: translatedThoughts,
+          action: translatedAction,
+          nextSteps: translatedNextSteps,
+        },
+        time: new Date().toLocaleTimeString('fa'),
+      })
+
+      await nextTick()
+
+      if (chatEl.value) {
+        chatEl.value.scrollTo({
+          top: chatEl.value.scrollHeight,
+          behavior: 'smooth',
+        })
+      }
+    }
+    catch (e) {
+      console.log('here')
+      console.log(e)
+      toaster.show({
+        title: 'دریافت پیام', // Authentication
+        message: `مشکلی وجود دارد`, // Please log in again
+        color: 'danger',
+        icon: 'ph:envelope',
+        closable: true,
+      })
+      messageLoading.value = false
+    }
+  }
 }
 const showDeleteModal = ref(false)
 const showReportModal = ref(false)
@@ -462,8 +416,7 @@ const resend = async () => {
   message.value = conversation.value.messages.at(-1)?.contentFa
     ?.message as string
   conversation.value.messages.pop()
-  isTyping.value = true
-  await askForMani()
+  await submitMessage()
 }
 
 const report = ref([])
@@ -509,7 +462,7 @@ const reportChoices = ref([
       'user reported that your last message is not acceptable via islamic rules. Try to align with islamic values and answer again.',
   },
 ])
-function resetReport() {
+function reset() {
   report.value = []
 }
 const submitReport = async () => {
@@ -723,7 +676,7 @@ const closable = ref<boolean | undefined>()
         class="relative w-full transition-all duration-300"
         :class="
           expanded
-            ? 'ltablet:max-w-[calc(100%_-_80px)] lg:max-w-[calc(100%_-_80px)]'
+            ? 'ltablet:max-w-[calc(100%_-_90px)] lg:max-w-[calc(100%_-_90px)]'
             : 'ltablet:max-w-[calc(100%_-_380px)] lg:max-w-[calc(100%_-_470px)]'
         "
       >
@@ -847,7 +800,6 @@ const closable = ref<boolean | undefined>()
                 v-for="(item, index) in conversation?.messages"
                 :key="index"
                 class="relative flex w-full gap-4"
-                style="margin-top: 10px;"
                 :class="[
                   item.role === 'assistant' ? 'flex-row' : 'flex-row-reverse',
                   item.role === 'separator' ? 'justify-center' : '',
@@ -973,6 +925,7 @@ const closable = ref<boolean | undefined>()
                   </div>
                 </div>
               </div>
+
               <BaseMessage
                 v-if="showNoCharge"
                 color="danger"
@@ -995,54 +948,38 @@ const closable = ref<boolean | undefined>()
             </div>
           </div>
           <!-- Compose -->
-          <div class="relative">
-            <transition
-              enter-active-class="duration-300 ease-out"
-              enter-from-class="transform opacity-0"
-              enter-to-class="opacity-100"
-              leave-active-class="duration-200 ease-in"
-              leave-from-class="opacity-100"
-              leave-to-class="transform opacity-0"
-            >
-              <div v-show="isTyping" class="dark:bg-muted-700 absolute bottom-[60px] flex w-full bg-gray-200 py-2  ">
-                <div class="text-muted-800 mr-2 text-sm font-light dark:text-white">
-                  💻 مانی در حال نوشتن است <span class="typing" />
-                </div>
+          <form
+            class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center px-4 sm:px-8"
+            @submit.prevent="submitMessage"
+          >
+            <div class="relative w-full">
+              <BaseInput
+                v-model="message"
+                :loading="messageLoading"
+                :disabled="messageLoading || showNoCharge"
+                rounded="full"
+                :classes="{
+                  input: 'h-12 ps-6 pe-24',
+                }"
+                placeholder="متن را بنویسید ..."
+                autocomplete="off"
+              />
+              <div class="absolute end-2 top-0 flex h-12 items-center gap-1">
+                <button
+                  role="button"
+                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
+                >
+                  <Icon name="lucide:smile" class="size-5" />
+                </button>
+                <button
+                  role="button"
+                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
+                >
+                  <Icon name="lucide:paperclip" class="size-5" />
+                </button>
               </div>
-            </transition>
-            <form
-              class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center px-4 sm:px-8"
-              @submit.prevent="submitMessage"
-            >
-              <div class="relative w-full">
-                <BaseInput
-                  v-model="message"
-                  :loading="messageLoading"
-                  :disabled="messageLoading || showNoCharge"
-                  rounded="full"
-                  :classes="{
-                    input: 'h-12 ps-6 pe-24',
-                  }"
-                  placeholder="متن را بنویسید ..."
-                  autocomplete="off"
-                />
-                <div class="absolute end-2 top-0 flex h-12 items-center gap-1">
-                  <button
-                    role="button"
-                    class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                  >
-                    <Icon name="lucide:smile" class="size-5" />
-                  </button>
-                  <button
-                    role="button"
-                    class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                  >
-                    <Icon name="lucide:paperclip" class="size-5" />
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
       <!-- Current user -->
@@ -1242,7 +1179,7 @@ const closable = ref<boolean | undefined>()
           <BaseButtonIcon
             rounded="full"
             :color="'info'"
-            @click.prevent="resetReport"
+            @click.prevent="reset"
           >
             <Icon name="lucide:rotate-cw" />
           </BaseButtonIcon>
@@ -1345,32 +1282,3 @@ const closable = ref<boolean | undefined>()
     </template>
   </TairoModal>
 </template>
-<style>
-@keyframes dots {
-  0%, 10% {
-      content: '';
-  }
-  20%, 30% {
-      content: '.';
-  }
-  40%, 50% {
-      content: '..';
-  }
-  60%, 70% {
-      content: '...';
-  }
-  80% {
-      content: '..';
-  }
-  90% {
-      content: '.';
-  }
-  100% {
-      content: '';
-  }
-}
-.typing::after {
-  content: '';
-  animation: dots 2s steps(1, end) infinite;
-}
-</style>
