@@ -279,6 +279,10 @@ onMounted(async () => {
     )
   }
   userDetails.value = await getUserDetails(nuxtApp.$pb.authStore.model.id)
+  console.log('userDetails.value')
+  if (userDetails.value.length === 0) {
+    navigateTo('/mani/initiation')
+  }
   if (conversation.value.messages.length == 1) {
     timer.value = 3
     type.value = 'introduce'
