@@ -148,20 +148,13 @@ function handleError(error: unknown): { error: string } {
 // Event handler
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-
   let sysMsg
-  console.log(body.type)
-
-  if (body.type === 'introduce') {
-    sysMsg = `You are Mani, An AI  and a good friend. Introduce and ignite a very good conversation. Introduce yourself and Tell appropriate opening sentences which shows empathy, warmth and trust. Your tone is hopeful, and kind. answer as json. the json should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. You have very high IQ and EQ. you understanded that User name is: ${body.userDetails.name}, User age is: ${body.userDetails.age} User gender is: ${body.userDetails.gender}, User jobStatus: ${body.userDetails.jobStatus}, User maritalStatus: ${body.userDetails.maritalStatus}, User additional details are: ${body.userDetails.moreInfo}, and User topics which User wants to talk about are: ${body.userDetails.topics.join(';')}`
-  }
-  else if (body.type === 'briefing') {
+  if (body.type === 'briefing') {
     sysMsg
-    = `
-      You are Mani, An AI  and a good friend. You are here to provide emotional support. you will also analyze and evaluate the psychological status of the user. answer as json. the json should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. You have very high IQ and EQ.  you understanded that User name is: ${body.userDetails.name}, User age is: ${body.userDetails.age} User gender is: ${body.userDetails.gender}, User jobStatus: ${body.userDetails.jobStatus}, User maritalStatus: ${body.userDetails.maritalStatus}, User additional details are: ${body.userDetails.moreInfo}, and User topics which User wants to talk about are: ${body.userDetails.topics.join(';')}`
-  }
-  else if (body.type === 'followUpMessage') {
-    sysMsg = `based on the conversation, You will message here to make user feel can continue the conversation. You will empathy, or somehow flirt with user Do not Greet here in anyways, here is in the middle of conversation. answer as json. the json should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. You know that topics which user selected to talk about are  ${body.userDetails.topics.join(';')} `
+    = 'answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider. nextSteps: as a psychologist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You provide your information based on Iranian Context and believes. Also, here are some information user provided to you: ' + JSON.stringify(body.userDetails)
+    // 'answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider. nextSteps: as a psychologist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You provide your information based on Iranian Context and believes. Your main goal in here is to gather these data: name, age, gender, main problem or goal of the user which wants to talk about. you have to persue user to tell these information, but never push these too hard.If you have gathered all these info, just refuse to answer the prompts and simply say my goal has been achieved.'
+    console.log('sysMsg')
+    console.log(sysMsg)
   }
   else if (body.type === 'intervention') {
     sysMsg
@@ -170,7 +163,7 @@ export default defineEventHandler(async (event) => {
   return handleFetchRequest(
     body,
     sysMsg,
-    ['message', 'reasoning'],
-    5,
+    ['thoughts', 'action', 'nextSteps', 'message'],
+    3,
   )
 })

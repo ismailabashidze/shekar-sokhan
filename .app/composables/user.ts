@@ -7,7 +7,7 @@ export type User = {
   password: string
   passwordConfirm: string
   created: string
-  record: { id: string; currentDeletionDivider: number }
+  record: { id: string, currentDeletionDivider: number }
 }
 
 export function useUser() {
@@ -25,10 +25,9 @@ export function useUser() {
     }
   }
   const getAllUsers = async () => {
-    const users = await nuxtApp.$pb.collection('users').getFullList({
+    return await nuxtApp.$pb.collection('users').getFullList({
       sort: '-created',
     })
-    return users
   }
   const removeUser = async (userId: string) => {
     const users = await nuxtApp.$pb.collection('users').delete(userId)
@@ -44,7 +43,15 @@ export function useUser() {
     user.value.record.currentDeletionDivider++
     return user
   }
-
+  const getUserDetails = async (userId: string) => {
+    return await nuxtApp.$pb.collection('userDetails').getFullList({
+      sort: '-created',
+      filter: `user.id = "${userId}"`,
+    })
+  }
+  const createUserDetails = async (ud) => {
+    return await nuxtApp.$pb.collection('userDetails').create(ud)
+  }
   return {
     user,
     generateAndSetCode,
@@ -52,5 +59,7 @@ export function useUser() {
     removeUser,
     setUser,
     incDivision,
+    getUserDetails,
+    createUserDetails,
   }
 }

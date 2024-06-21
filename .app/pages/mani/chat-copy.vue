@@ -1,7 +1,9 @@
 <script setup lang="ts">
 interface TranslatedResponse {
   translatedMsg: string
-  translatedReasoning: string
+  translatedThoughts: string
+  translatedAction: string
+  translatedNextSteps: string
 }
 definePageMeta({
   title: 'پیام ها',
@@ -45,7 +47,6 @@ const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
 const isNewMessagesDone = ref(true)
 const newMessagesIndex = ref(0)
 const timer = ref(30)
-const type = ref('briefing')
 watch(message, () => {
   if (isTyping.value) {
     // mani decided to write, but will stop, because user decided to write.
@@ -67,12 +68,6 @@ watch(counter, (n, o) => {
     setTimeout(() => {
       // a wait to ensure sending the message.
       if (isTyping.value) {
-        if (conversation.value.messages.length == 1) {
-          type.value = 'introduce'
-        }
-        else {
-          type.value = 'followUpMessage'
-        }
         askForMani()
       }
     }, 6000)
@@ -99,19 +94,22 @@ const conversation = ref({
       content: { message: 'Conversation Started' },
       contentFa: { message: 'شروع گفت و گو' },
     },
-    // {
-    //   role: 'assistant',
-    //   contentFa: {
-    //     message:
-    //       'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
-    //   },
-    //   content: {
-    //     message:
-    //       `Hi. I'm Mani. A good friend and supporter. My goal here is to build a great friendship, based on trust and empathy. How can I help you?`,
-    //     reasoning: 'This is a good start. I will introduce myself.',
-    //   },
-    //   time: new Date().toLocaleTimeString('fa'),
-    // },
+    {
+      role: 'assistant',
+      contentFa: {
+        message:
+          'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
+      },
+      content: {
+        message:
+          'Hi. I\'m Mani. a Licensed Psychotherapist. My goal here is to build a great therapeutic alliance, based on trust and empathy. How can I help you?',
+        thoughts:
+          'I will do my best. I have to be kind and positive to form a good starting point.',
+        nextSteps: 'Starting conversation',
+        action: 'intializing conversation properly.',
+      },
+      time: new Date().toLocaleTimeString('fa'),
+    },
   ],
 })
 const askForMani = async () => {
@@ -120,7 +118,7 @@ const askForMani = async () => {
       const answer = await $fetch('/api/llm', {
         method: 'POST',
         body: {
-          type: type.value,
+          type: 'briefing',
           llmMessages: [
             ...conversation.value.messages
               .map((m) => {
@@ -139,7 +137,9 @@ const askForMani = async () => {
       })
       const {
         translatedMsg,
-        translatedReasoning,
+        translatedThoughts,
+        translatedAction,
+        translatedNextSteps,
       } = await processResponse(JSON.parse(answer))
 
       const newMsg = await saveMessage({
@@ -149,7 +149,9 @@ const askForMani = async () => {
         content: JSON.parse(answer),
         contentFa: {
           message: translatedMsg,
-          reasoning: translatedReasoning,
+          thoughts: translatedThoughts,
+          action: translatedAction,
+          nextSteps: translatedNextSteps,
         },
         deletionDivider: user.value.record.currentDeletionDivider,
       })
@@ -160,7 +162,9 @@ const askForMani = async () => {
         content: JSON.parse(answer),
         contentFa: {
           message: translatedMsg,
-          reasoning: translatedReasoning,
+          thoughts: translatedThoughts,
+          action: translatedAction,
+          nextSteps: translatedNextSteps,
         },
         time: new Date().toLocaleTimeString('fa'),
       })
@@ -201,27 +205,33 @@ const sleep = (time: number): Promise<void> => {
 }
 async function processResponse(answer: Content): Promise<TranslatedResponse> {
   const msg = answer.message as string
-  const reasoning = answer.reasoning as string
-  console.log('reasoning')
-  console.log(reasoning)
+  const thoughts = answer.thoughts as string
+  const action = answer.action as string
+  const nextSteps = answer.nextSteps as string
 
   // Creating an array of promises for each part that needs processing
   const promises = [
     translateAndAssemble(msg, 'English', 'Western Persian'),
-    translateAndAssemble(reasoning, 'English', 'Western Persian'),
+    translateAndAssemble(thoughts, 'English', 'Western Persian'),
+    translateAndAssemble(action, 'English', 'Western Persian'),
+    translateAndAssemble(nextSteps, 'English', 'Western Persian'),
   ]
 
   try {
     // Wait for all promises to be resolved
     const [
       translatedMsg,
-      translatedReasoning,
+      translatedThoughts,
+      translatedAction,
+      translatedNextSteps,
     ] = await Promise.all(promises)
 
     // Return an object with all processed parts if needed
     return {
       translatedMsg,
-      translatedReasoning,
+      translatedThoughts,
+      translatedAction,
+      translatedNextSteps,
     }
   }
   catch (error) {
@@ -279,13 +289,6 @@ onMounted(async () => {
     )
   }
   userDetails.value = await getUserDetails(nuxtApp.$pb.authStore.model.id)
-  if (conversation.value.messages.length == 1) {
-    timer.value = 3
-    type.value = 'introduce'
-  }
-  else {
-    type.value = 'briefing'
-  }
 })
 
 // async function autoConversation() {
@@ -335,35 +338,35 @@ async function translateAndAssemble(
   // Split the text into tokens to check the count
   const tokens = answer.split(/\s+/)
 
-  // If more than 200 tokens, proceed with splitting into chunks by sentences
-  const chunks = answer
-    .split(/[\.\n]\s*/)
-    .filter(chunk => chunk.trim().length > 0)
+  // Check if the text has less than 200 tokens
+  if (tokens.length < 200) {
+    // Translate the entire text as a single chunk
+    return translate(answer, from, to)
+  }
+  else {
+    // If more than 200 tokens, proceed with splitting into chunks by sentences
+    const chunks = answer
+      .split(/[\.\n]\s*/)
+      .filter(chunk => chunk.trim().length > 0)
 
-  const translatePromises = chunks.map((chunk, index) => {
-    return translate(chunk, from, to).then(translatedChunk => ({
-      index,
-      translatedChunk,
-    }))
-  })
-
-  // Await all the translation promises
-  const translatedChunksWithIndex = await Promise.all(translatePromises)
-
-  // Sort the translated chunks by their original index to maintain order
-  translatedChunksWithIndex.sort((a, b) => a.index - b.index)
-
-  // Join the translated chunks with a new line, ensuring each ends with proper punctuation
-  return translatedChunksWithIndex
-    .map((item) => {
-      let { translatedChunk } = item
-      // Check if the translated chunk ends with ., ,, !, or ?
-      if (!/[.,!?؟]$/.test(translatedChunk.trim())) {
-        translatedChunk += '.'
-      }
-      return translatedChunk
+    const translatePromises = chunks.map((chunk, index) => {
+      return translate(chunk, from, to).then(translatedChunk => ({
+        index,
+        translatedChunk,
+      }))
     })
-    .join('\n')
+
+    // Await all the translation promises
+    const translatedChunksWithIndex = await Promise.all(translatePromises)
+
+    // Sort the translated chunks by their original index to maintain order
+    translatedChunksWithIndex.sort((a, b) => a.index - b.index)
+
+    // Join the translated chunks with a new line
+    return translatedChunksWithIndex
+      .map(item => item.translatedChunk)
+      .join('\n')
+  }
 }
 
 async function submitMessage() {
@@ -459,12 +462,11 @@ const resend = async () => {
 
   await deleteMessage(conversation.value.messages.at(-1).id)
   conversation.value.messages.pop()
-  // message.value = conversation.value.messages.at(-1)?.contentFa
-  //   ?.message as string
-  // conversation.value.messages.pop()
-  isNewMessagesDone.value = true
-  counter.value = timer.value
-  // await askForMani()
+  message.value = conversation.value.messages.at(-1)?.contentFa
+    ?.message as string
+  conversation.value.messages.pop()
+  isTyping.value = true
+  await askForMani()
 }
 
 const report = ref([])
@@ -884,7 +886,7 @@ const closable = ref<boolean | undefined>()
                         v-if="
                           item.role === 'assistant' &&
                             index == conversation?.messages.length - 1 &&
-                            index != 1 && isTyping == false
+                            index != 1
                         "
                         class="w-100 mt-2 flex flex-row-reverse"
                       >
