@@ -167,6 +167,105 @@ function combineMessages(dataArray, targetRole) {
   }
   return dataCopy
 }
+function convertToInformal(text) {
+  text = text.replace(/می\s(.*?)ید/g, 'می $1ین') // General pattern for conjugations
+  text = text.replace(/\bرا\b/g, ' رو ')
+  text = text.replace(/\sرا\s/g, ' رو ')
+  text = text.replace(/ است\./g, 'ه.')
+  text = text.replace(/چگونه بود/g, 'چطور بود')
+  text = text.replace(/در ابتدا/g, 'اولش')
+  text = text.replace(/می توانم/g, 'می تونم')
+  text = text.replace(/آنها/g, 'اونها')
+  text = text.replace(/توانستم/g, 'تونستم')
+  text = text.replace(/به شما دادم/g, 'بهتون دادم')
+  text = text.replace(/پیام های من/g, 'پیامام')
+  text = text.replace(/به نظر می رسد/g, 'بنظر میاد')
+  text = text.replace(/ هستید/g, 'ید ')
+  text = text.replace(/هنگامی که/g, 'وقتی که')
+  text = text.replace(/می شویم/g, 'می شیم')
+  text = text.replace(/می تواند/g, 'می تونه')
+  text = text.replace(/شود/g, 'بشه')
+  text = text.replace(/\sیک\s/g, ' یه ')
+  text = text.replace(/به یاد داشته باشید/g, 'بدونین')
+  text = text.replace(/احساس بسیار قابل ارتباطه/g, 'احساس بسیار قابل درکه')
+  text = text.replace(/\sآن\s/g, ' اون ')
+  text = text.replace(/در مورد اون/g, 'درموردش')
+  text = text.replace(/باشید/g, 'باشین')
+  text = text.replace(/یافتن/g, 'پیدا کردن')
+  text = text.replace(/نشوی/g, 'نشی')
+  text = text.replace(/\sاگر\s/g, ' اگه ')
+  text = text.replace(/تا به حال/g, 'تا حالا')
+  text = text.replace(/می دهند/g, 'می دن')
+  text = text.replace(/می توانند/g, 'می تونن')
+  text = text.replace(/کنند/g, 'کنن')
+  text = text.replace(/گاهی اوقات/g, 'بعضی وقتا')
+  text = text.replace(/می تواند/g, 'می تونه')
+  text = text.replace(/ایجاد کند/g, 'ایجاد کنه')
+  text = text.replace(/می توانم/g, 'می تونم')
+  text = text.replace(/کاملا خوب است/g, 'اوکیه')
+  text = text.replace(/\sکنید\s/g, ' کنین ')
+  text = text.replace(/\bکنید\b/g, ' کنین ') // Corrected this pattern
+  text = text.replace(/خویشاوند/g, 'فامیل')
+  text = text.replace(/ندارید/g, 'ندارین')
+  text = text.replace(/به دنبال/g, 'گشتن دنبال')
+  text = text.replace(/خواهید شد/g, 'می شین')
+  text = text.replace(/دارد/g, 'داره')
+  text = text.replace(/دارید/g, 'دارین')
+  text = text.replace(/ببرید/g, 'ببرین')
+  text = text.replace(/خودتان/g, 'خودتون')
+  text = text.replace(/فعالیت های/g, 'فعالیتای')
+  text = text.replace(/هرگز از خودتان دست نکشید/g, 'هرگز خودتونو فراموش نکنین')
+  text = text.replace(/ هستید/g, 'هستین')
+  text = text.replace(/ هایی/g, 'ایی')
+  text = text.replace(/می آورین/g, 'میارین')
+  text = text.replace(/از زمان به زمان/g, 'بعضی وقتا')
+  text = text.replace(/کند/g, 'کنه')
+  text = text.replace(/شماه/g, 'شماست')
+  text = text.replace(/می توان/g, 'می شه')
+  text = text.replace(/بپذیرید/g, 'بپذیرین')
+  text = text.replace(/بدانید/g, 'بدونین')
+  text = text.replace(/اگه بیش از حد احساس می کنین/g, 'اگه فکر می کنین احساستون بیش از حده')
+  text = text.replace(/بحث کنیم/g, 'گپ بزنیم')
+  text = text.replace(/بگذرانید/g, 'بذارید')
+  text = text.replace(/آن ها/g, 'اونا')
+  text = text.replace(/دهید/g, 'بدین')
+  text = text.replace(/به نظرت چطوره/g, 'نظرت چیه')
+  text = text.replace(/گشتن دنبال/g, 'دنبال')
+  text = text.replace(/گوش گوش/g, 'گوش')
+  text = text.replace(/پینا/g, 'پیدا')
+  text = text.replace(/می شهیم/g, 'می شه')
+  text = text.replace(/دادهه/g, 'داده')
+  text = text.replace(/ هستم\s/g, 'م ')
+  text = text.replace(/از طریق احساسات خود حرکت کنید/g, 'با احساسات خود کنار بیای')
+  text = text.replace(/بیایید/g, 'بیا')
+  text = text.replace(/شویم/g, 'شیم')
+  text = text.replace(/ است،/g, 'ه، ')
+  text = text.replace(/خوش آمدید!/g, 'خواهش می کنم!')
+  text = text.replace(/گذراندن/g, 'گذروندن')
+  text = text.replace(/آنه/g, 'اونه')
+  text = text.replace(/ است\s/g, 'ه ')
+  text = text.replace(/آیا\s/g, '')
+  text = text.replace(/دهیم/g, 'بدیم')
+  text = text.replace(/ هستم\./g, 'م.')
+  text = text.replace(/می دانم/g, 'می دونم')
+  text = text.replace(/من می دونم/g, 'می دونم')
+  text = text.replace(/باشد/g, 'باشه')
+  text = text.replace(/شجاعانهه/g, 'شجاعانه س ')
+  text = text.replace(/کننه/g, 'کننده')
+  text = text.replace(/ است\s/g, 'ه ')
+  text = text.replace(/ من\s/g, 'م ')
+  text = text.replace(/ شما\s/g, 'تون ')
+  text = text.replace(/باشد/g, 'باشه')
+  text = text.replace(/کهتون/g, 'که شما ')
+  text = text.replace(/نیستید،/g, 'نیستین،')
+  text = text.replace(/اولیهم/g, 'اولیه ام')
+  text = text.replace(/؟م /g, '؟ ')
+  text = text.replace(/اولیهم/g, 'اولیه ام')
+  text = text.replace(/اولیهم/g, 'اولیه ام')
+
+  // Add more generalized patterns here
+  return text
+}
 
 const askForMani = async () => {
   if (isNewMessagesDone.value) {
@@ -197,6 +296,7 @@ const askForMani = async () => {
         translatedMsg,
         translatedReasoning,
       } = await processResponse(JSON.parse(answer))
+      let informalTranslatedMsg = convertToInformal(translatedMsg)
 
       const newMsg = await saveMessage({
         user: user.value.record.id,
@@ -215,7 +315,7 @@ const askForMani = async () => {
         role: 'assistant',
         content: JSON.parse(answer),
         contentFa: {
-          message: translatedMsg,
+          message: informalTranslatedMsg,
           reasoning: translatedReasoning,
         },
         time: new Date().toLocaleTimeString('fa'),
@@ -308,7 +408,11 @@ onMounted(async () => {
   const msg = await getMessages()
   msg.map(m => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
   conversation.value.messages.push(...msg)
+  console.log('informals')
 
+  conversation.value.messages.map((m) => {
+    m.contentFa.message = convertToInformal(m.contentFa.message)
+  })
   loading.value = false
   // await autoConversation()
   await sleep(2000)
