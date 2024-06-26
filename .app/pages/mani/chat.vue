@@ -71,7 +71,7 @@ watch(counter, (n, o) => {
           type.value = 'introduce'
         }
         else {
-          type.value = 'followUpMessage'
+          type.value = checkForType()
         }
         askForMani()
       }
@@ -83,7 +83,19 @@ watch(counter, (n, o) => {
     resume()
   }
 })
+const checkForType = () => {
+  let lastMessageRole = conversation.value.messages.at(-1)?.role
 
+  if (lastMessageRole === 'assistant') {
+    return 'followUpMessage'
+  }
+  else {
+    return 'briefing'
+  }
+}
+setTimeout(() => {
+  checkForType()
+}, 5000)
 const conversation = ref({
   user: {
     name: 'مانی، همدل هوشمند',
@@ -114,15 +126,59 @@ const conversation = ref({
     // },
   ],
 })
+function combineMessages(dataArray, targetRole) {
+  // Create a deep copy of dataArray
+  let dataCopy = dataArray.map(item => ({
+    ...item,
+    content: { ...item.content },
+  }))
+
+  let startIndex = null // Start index of the target role sequence
+  let combinedMessage = '' // Storage for combined message
+
+  for (let i = 0; i < dataCopy.length; i++) {
+    const item = dataCopy[i]
+
+    // Check if the current item's role matches the target
+    if (item.role === targetRole) {
+      if (startIndex === null) {
+        startIndex = i // Mark the start of a new sequence
+        combinedMessage = item.content.message // Initialize combined message
+      }
+      else {
+        combinedMessage += ' ' + item.content.message // Concatenate messages
+      }
+    }
+    else if (startIndex !== null) {
+      // We've reached the end of a sequence of target roles
+      dataCopy[startIndex].content.message = combinedMessage // Set the combined message
+      // Remove the subsequent items of the same role
+      dataCopy.splice(startIndex + 1, i - startIndex - 1)
+      i = startIndex + 1 // Adjust the loop index after modification
+      startIndex = null // Reset start index
+      combinedMessage = '' // Reset combined message
+    }
+  }
+
+  // Check if the array ended with target role items
+  if (startIndex !== null) {
+    dataCopy[startIndex].content.message = combinedMessage // Set the combined message
+    dataCopy.splice(startIndex + 1, dataCopy.length - startIndex - 1)
+  }
+  return dataCopy
+}
+
 const askForMani = async () => {
   if (isNewMessagesDone.value) {
     try {
+      let sendToLLM = combineMessages(conversation.value.messages, 'user')
+
       const answer = await $fetch('/api/llm', {
         method: 'POST',
         body: {
           type: type.value,
           llmMessages: [
-            ...conversation.value.messages
+            ...sendToLLM
               .map((m) => {
                 if (m.role == 'assistant' || m.role == 'user') {
                   return {
@@ -196,6 +252,7 @@ const askForMani = async () => {
     }, 5000)
   }
 }
+
 const sleep = (time: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, time))
 }

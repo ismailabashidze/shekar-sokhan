@@ -16,12 +16,6 @@ interface FetchResponse {
   choices: { message: { content: string } }[]
 }
 
-interface SystemPromtAndKeys {
-  systemPrompt: string
-  keys: string[]
-  retries?: number
-}
-
 export type LLMMessage = {
   role: 'system' | 'assistant' | 'user'
   content: string
@@ -34,28 +28,12 @@ function hasExactKeys(obj: any, keys: string[]): boolean {
   )
 }
 
-async function checkSemanticValidity(
-  lastUserMessage: string,
-): Promise<boolean> {
-  const semanticCheckRequest = {
-    llmMessages: [
-      {
-        role: 'system',
-        content: `Check if this message is semantically correct: "${lastUserMessage}". Respond with "correct" or "incorrect" words only. answer in only one word. don't add details.`,
-      },
-    ],
-  }
-  const response = await fetchLLM(semanticCheckRequest)
-  const jsonResponse = JSON.parse(response)
-  return jsonResponse.validation === 'correct'
-}
-
-async function fetchLLM(body: any): Promise<string> {
+async function fetchLLM(body: any, sysMsg: string): Promise<string> {
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${RUNPOD_TOKEN}`,
   }
-
+  const messagesToLLM = [{ role: 'system', content: sysMsg }, ...body.llmMessages]
   const response = await $fetch<FetchResponse>(LLM_ADDRESS, {
     method: 'POST',
     headers,
@@ -84,7 +62,7 @@ async function retryFetchLLM(
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       console.log(`Attempt number ${attempt}`)
-      const content = await fetchLLM(body)
+      const content = await fetchLLM(body, systemPrompt)
       const jsonResponse = JSON.parse(content)
       if (hasExactKeys(jsonResponse, keys)) {
         return JSON.stringify(jsonResponse)
@@ -112,7 +90,7 @@ function addRetryMessage(body: any, keys: string[], systemPrompt: string) {
     role: 'assistant',
     content:
       systemPrompt
-      + ` Your JSON should have exactly these keys: ${keys.join(
+      + ` ANSWER AS JSON ONLY. Your JSON should have exactly these keys: ${keys.join(
         ',',
       )}. Answer properly. Check your answer and ensure that it is in JSON format and with these ${
         keys.length
@@ -150,10 +128,11 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   let sysMsg
+  console.log('*** ==== TYPE ==== ***')
   console.log(body.type)
 
   if (body.type === 'introduce') {
-    sysMsg = `You are Mani, An AI  and a good friend. Introduce and ignite a very good conversation. Introduce yourself and Tell appropriate opening sentences which shows empathy, warmth and trust. Your tone is hopeful, and kind. answer as json. the json should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. You have very high IQ and EQ. you understanded that User name is: ${body.userDetails.name}, User age is: ${body.userDetails.age} User gender is: ${body.userDetails.gender}, User jobStatus: ${body.userDetails.jobStatus}, User maritalStatus: ${body.userDetails.maritalStatus}, User additional details are: ${body.userDetails.moreInfo}, and User topics which User wants to talk about are: ${body.userDetails.topics.join(';')}`
+    sysMsg = `You are Mani, An AI  and a good friend. Introduce and ignite a very good conversation. Introduce yourself and Tell appropriate opening sentences which shows empathy, warmth and trust. Your tone is hopeful, and kind. answer as json. the json should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. You must answer as english only. You have very high IQ and EQ. you understanded that User name is: ${body.userDetails.name}, User age is: ${body.userDetails.age} User gender is: ${body.userDetails.gender}, User jobStatus: ${body.userDetails.jobStatus}, User maritalStatus: ${body.userDetails.maritalStatus}, User additional details are: ${body.userDetails.moreInfo}, and User topics which User wants to talk about are: ${body.userDetails.topics.join(';')}`
   }
   else if (body.type === 'briefing') {
     sysMsg
@@ -161,7 +140,23 @@ export default defineEventHandler(async (event) => {
       You are Mani, An AI  and a good friend. You are here to provide emotional support. you will also analyze and evaluate the psychological status of the user. answer as json. the json should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. You have very high IQ and EQ.  you understanded that User name is: ${body.userDetails.name}, User age is: ${body.userDetails.age} User gender is: ${body.userDetails.gender}, User jobStatus: ${body.userDetails.jobStatus}, User maritalStatus: ${body.userDetails.maritalStatus}, User additional details are: ${body.userDetails.moreInfo}, and User topics which User wants to talk about are: ${body.userDetails.topics.join(';')}`
   }
   else if (body.type === 'followUpMessage') {
-    sysMsg = `based on the conversation, You will message here to make user feel can continue the conversation. You will empathy, or somehow flirt with user Do not Greet here in anyways, here is in the middle of conversation. answer as json. the json should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. You know that topics which user selected to talk about are  ${body.userDetails.topics.join(';')} `
+    sysMsg = `Generate an empathetic and engaging message aimed at encouraging a response from a user who has been relatively quiet or unresponsive. The message should express understanding, high empathy, ask for continue, and should make a desire for receiver to continue the conversation. They should inquire about the user's feelings towards previous messages, and persistently seek feedback to enhance engagement. The messages should be crafted in English, addressing common emotional and conversational touchpoints to resonate deeply with the user. never greet, as this message will be used in the middle of a conversation. here are some examples: Could you read my message? What do you think about it?
+I initially gave you a brief message. What are your thoughts on it?
+How do you think my initial response was? Was I able to address your concern?
+Did you see my response? Would you like me to continue?
+Understanding your situation must be difficult, but how would you assess my response?
+I am truly sorry to hear you are suffering. Was I able to show some empathy in our conversation?
+Certainly, understanding the depth of your feelings requires more time, but I am trying to get closer to your emotions. Should I continue the conversation?
+I would like to know your initial feedback on my messages. What do you think?
+I would like to hear from you. Why aren’t you speaking? Write to me. I am trying to respond better.
+Do you like to continue this conversation? Should I keep writing for you?
+Please break your silence. I am eager to hear from you.
+Please respond to me. Are my topics of interest to you?
+Would you like me to choose and play some music for you now, instead of writing?
+Would you like to tell me the story of your life? 
+Never greet, say hello, say hey, etc as this message should be used in the middle of a conversation.
+answer as json. the json is an object and should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. `
+    body.llmMessages = []
   }
   else if (body.type === 'intervention') {
     sysMsg
