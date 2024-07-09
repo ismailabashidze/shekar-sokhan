@@ -46,6 +46,32 @@ const isNewMessagesDone = ref(true)
 const newMessagesIndex = ref(0)
 const timer = ref(30)
 const type = ref('briefing')
+const isGoingToDone = ref(false)
+const showTenMin = ref(false)
+
+const goToDoneAndEnd = async () => {
+  type.value = 'summary'
+  isGoingToDone.value = true
+  conversation.value.messages.push({
+    role: 'separator',
+    content: { message: 'Summary and conclusion in the last ten minutes.' },
+    contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
+  })
+  saveMessage({
+    role: 'separator',
+    content: { message: 'Summary and conclusion in the last ten minutes.' },
+    contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
+    user: user.value.record.id,
+    deletionDivider: user.value.record.currentDeletionDivider,
+  })
+  messageLoading.value = true
+  pause()
+  isGoingToDone.value = false
+  showTenMin.value = false
+  await askForMani()
+  messageLoading.value = false
+}
+
 watch(message, () => {
   if (isTyping.value) {
     // mani decided to write, but will stop, because user decided to write.
@@ -56,7 +82,7 @@ watch(message, () => {
   }
   else {
     // mani has not decided to write.
-    timer.value = 7
+    timer.value = 20
     reset()
   }
 })
@@ -168,6 +194,7 @@ function combineMessages(dataArray, targetRole) {
   return dataCopy
 }
 function convertToInformal(text) {
+  if (typeof text != 'string') return text
   text = text.replace(/می\s(.*?)ید/g, 'می $1ین') // General pattern for conjugations
   text = text.replace(/\bرا\b/g, ' رو ')
   text = text.replace(/\sرا\s/g, ' رو ')
@@ -184,6 +211,8 @@ function convertToInformal(text) {
   text = text.replace(/هنگامی که/g, 'وقتی که')
   text = text.replace(/می شویم/g, 'می شیم')
   text = text.replace(/می تواند/g, 'می تونه')
+  text = text.replace(/می توانید/g, 'می تونین')
+
   text = text.replace(/شود/g, 'بشه')
   text = text.replace(/\sیک\s/g, ' یه ')
   text = text.replace(/به یاد داشته باشید/g, 'بدونین')
@@ -253,22 +282,121 @@ function convertToInformal(text) {
   text = text.replace(/شجاعانهه/g, 'شجاعانه س ')
   text = text.replace(/کننه/g, 'کننده')
   text = text.replace(/ است\s/g, 'ه ')
-  text = text.replace(/ من\s/g, 'م ')
-  text = text.replace(/ شما\s/g, 'تون ')
   text = text.replace(/باشد/g, 'باشه')
   text = text.replace(/کهتون/g, 'که شما ')
   text = text.replace(/نیستید،/g, 'نیستین،')
   text = text.replace(/اولیهم/g, 'اولیه ام')
   text = text.replace(/؟م /g, '؟ ')
-  text = text.replace(/اولیهم/g, 'اولیه ام')
-  text = text.replace(/اولیهم/g, 'اولیه ام')
+  text = text.replace(/کرده اید./g, 'کرده این.')
+  text = text.replace(/در حال حاضر/g, 'الان')
+  text = text.replace(/با من/g, 'باهام')
+  text = text.replace(/با شما/g, 'باهات')
+  text = text.replace(/بگذاری/g, 'بذاری')
+  text = text.replace(/می خواهم/g, 'می خوام')
+  text = text.replace(/بدانین/g, 'بدونین')
+  text = text.replace(/دانستن/g, 'دونستن')
+  text = text.replace(/وقت ميگيره/g, 'ممکنه زمان بر باشه')
+  text = text.replace(/احساسات خود/g, 'احساساتتون')
+  text = text.replace(/می خواهین/g, 'می خواین')
+  text = text.replace(/می شهین/g, 'می شه')
+  text = text.replace(/با اون/g, 'باهاش')
+  text = text.replace(/بگویید؟/g, 'بگین؟')
+  text = text.replace(/ماید/g, 'ما هستید')
+  text = text.replace(/علناً/g, 'راحت')
+  text = text.replace(/زیرا/g, 'چون')
+  text = text.replace(/ترویج می دهد./g, 'ایجاد می کنه.')
+  text = text.replace(/اینگونه/g, 'این طوری')
+  text = text.replace(/بسیار دوستانهه/g, 'خیلی عاطفی بود!')
+  text = text.replace(/می رسد،/g, 'می رسه،')
+  text = text.replace(/کدام یه رو/g, 'کدومو')
+  text = text.replace(/می دانستین؟/g, 'می دونی؟')
+  text = text.replace(/چه اتفاقی می افتد؟/g, 'چی شد؟')
+  text = text.replace(/اینگونه/g, 'این طوری')
+  text = text.replace(/مفین/g, 'خوب')
+  text = text.replace(/نبودند/g, 'نبودن')
+  text = text.replace(/ي/g, 'ی')
+  text = text.replace(/پیام های/g, 'پیامای')
+  text = text.replace(/به نظر شما/g, 'بنظرت')
+  text = text.replace(/عذرخواهی می کنم/g, 'می بخشین')
+  text = text.replace(/پاسخ هایم رو/g, 'پاسخامو')
+  text = text.replace(/بهبود بخشم/g, 'بهتر کنم')
+  text = text.replace(/مطمئن شوم/g, 'مطمئن بشم')
+  text = text.replace(/اونها برای شما ارزشی دارند./g, 'اونا مناسب هستن.')
+  text = text.replace(/از اطلاعات ما/g, 'با توجه به اطلاعات')
+  text = text.replace(/احساس غرق شدن/g, 'با توجه به اطلاعات')
+  text = text.replace(/اعتقاد دارم/g, 'ایمان دارم')
+  text = text.replace(/احساس غرق شدن/g, 'با توجه به اطلاعات')
+  text = text.replace(/باهاشها/g, 'باهاشون')
+  text = text.replace(/بدانم./g, 'بدونم.')
+  text = text.replace(/بدهم/g, 'بدم')
+  text = text.replace(/باین/g, 'باید')
+  text = text.replace(/من می فهمم که شما باید احساس کمی پایین به تازگی/g, 'می فهمم که یکم احساس کمبود می کنی')
+  text = text.replace(/کنید./g, 'کنین.')
+  text = text.replace(/می گذارد/g, 'می ذاره')
+  text = text.replace(/شاین/g, 'شاید')
+  text = text.replace(/به او/g, 'بهش')
+  text = text.replace(/به من/g, 'بهم')
+  text = text.replace(/به شما/g, 'بهت')
+  text = text.replace(/از شما/g, 'ازت')
+  text = text.replace(/از من/g, 'ازم')
+  text = text.replace(/کردهه/g, 'کرده')
+  text = text.replace(/طریق اون/g, 'اون طریق')
+  text = text.replace(/بازم/g, 'آماده ام')
+  text = text.replace(/باز بیان/g, 'راحت')
+  text = text.replace(/در حالی که/g, 'اگرچه')
+  text = text.replace(/بگذارم/g, 'بذارم')
+  text = text.replace(/چگونه کار می کنین/g, 'نظرتون چیه')
+  text = text.replace(/بهشن/g, 'بهش')
+  text = text.replace(/شماه/g, 'شماست')
+  text = text.replace(/ماه./g, 'ماست.')
+  text = text.replace(/خودمان/g, 'خودمون')
+  text = text.replace(/برای شما/g, 'براتون')
+  text = text.replace(/دهم؟/g, 'بدم؟')
+  text = text.replace(/ نشان /g, ' نشون ')
+  text = text.replace(/در نظر بگیرید/g, 'بدونین')
+  text = text.replace(/می خواند/g, 'می خونه')
+  text = text.replace(/بدانی/g, 'بدونی')
+  text = text.replace(/می دهم/g, 'می دم')
+  text = text.replace(/باز بودن/g, 'راحت بودن')
+  text = text.replace(/شنینن/g, 'شنیدن')
+  text = text.replace(/کنندهه/g, 'کننده ست')
+  text = text.replace(/هنوز هم/g, 'هنوزم')
+  text = text.replace(/باز شوید/g, 'راحت باشید')
+  text = text.replace(/می بشه/g, 'می شه')
+  text = text.replace(/می مانم/g, 'می مونم')
+  text = text.replace(/ما می شه/g, 'می شه')
+  text = text.replace(/استراتژی/g, 'راه حل')
+  text = text.replace(/می دهد/g, 'می ده')
+  text = text.replace(/شمی شه/g, 'می شه')
+  text = text.replace(/تشویق/g, 'دلگرم')
+  text = text.replace(/گرما/g, 'گرمی')
+  text = text.replace(/پیشنهادات باز/g, 'پیشنهادات آماده')
+  text = text.replace(/چیست/g, 'چیه')
+  text = text.replace(/ همان /g, 'همون')
+  text = text.replace(/می دانین/g, 'می دونین')
+  text = text.replace(/از تماس با ما دریغ نکنین/g, 'حتما با من صحبت رو ادامه بدین')
+  text = text.replace(/آمابدین/g, 'آماده این')
+  text = text.replace(/پشت سر دارین/g, 'پشت سر می ذارین')
+  text = text.replace(/نبدین/g, 'ندین')
+  text = text.replace(/ادامه یابد/g, 'ادامه پیدا کنه')
+  text = text.replace(/همسرتان/g, 'همسرتون')
+  text = text.replace(/دهد؟/g, 'بده؟')
+  text = text.replace(/غرق شدن/g, 'ناتوانی')
+  text = text.replace(/بهشها/g, 'بهشون')
+  text = text.replace(/بگویید/g, 'بگین')
+  text = text.replace(/بگویید/g, 'بگین')
+  text = text.replace(/بگویید/g, 'بگین')
+  text = text.replace(/بگویید/g, 'بگین')
+  text = text.replace(/بگویید/g, 'بگین')
+  text = text.replace(/بگویید/g, 'بگین')
+  text = text.replace(/بگویید/g, 'بگین')
 
   // Add more generalized patterns here
   return text
 }
 
 const askForMani = async () => {
-  if (isNewMessagesDone.value) {
+  if (isNewMessagesDone.value && !showNoCharge.value) {
     try {
       let sendToLLM = combineMessages(conversation.value.messages, 'user')
 
@@ -332,6 +460,7 @@ const askForMani = async () => {
       isTyping.value = false
       counter.value = 0
       timer.value = 30
+      messageLoading.value = false
     }
     catch (e) {
       console.log('here')
@@ -402,6 +531,8 @@ const signout = () => {
 }
 
 const showNoCharge = ref(false)
+const remainingTime = ref()
+const timeToShow = ref()
 
 onMounted(async () => {
   // getGoals()
@@ -428,12 +559,45 @@ onMounted(async () => {
     .collection('users')
     .getOne(nuxtApp.$pb.authStore.model.id, {})
   showNoCharge.value = !u.hasCharge
+  remainingTime.value = new Date(u.expireChargeTime)
+  timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
+  if (timeToShow.value <= 0) {
+    pause()
+  }
+  setInterval(() => {
+    timeToShow.value = timeToShow.value - 1
+    if (timeToShow.value == 10) {
+      showTenMin.value = true
+      conversation.value.messages.push({
+        role: 'separator',
+        content: { message: 'Summary and conclusion in the last ten minutes.' },
+        contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
+      })
+      saveMessage({
+        role: 'separator',
+        content: { message: 'Summary and conclusion in the last ten minutes.' },
+        contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
+        user: user.value.record.id,
+        deletionDivider: user.value.record.currentDeletionDivider,
+      })
+    }
+  }, 60000)
   if (nuxtApp.$pb.authStore.isValid) {
     nuxtApp.$pb.collection('users').subscribe(
       nuxtApp.$pb.authStore.model.id,
       (e) => {
+        timeToShow.value = Math.floor((new Date(e.record.expireChangeTime).getTime() - new Date().getTime()) / (1000 * 60))
         if (!e.record.hasCharge) {
           showNoCharge.value = true
+          setTimeout(() => {
+            if (chatEl.value) {
+              chatEl.value.scrollTo({
+                top: chatEl.value.scrollHeight,
+                behavior: 'smooth',
+              })
+            }
+          }, 300)
+          pause()
         }
       },
       {},
@@ -447,6 +611,7 @@ onMounted(async () => {
   if (conversation.value.messages.length == 1) {
     timer.value = 3
     type.value = 'introduce'
+    messageLoading.value = true
   }
   else {
     type.value = 'briefing'
@@ -601,6 +766,16 @@ const deleteAll = async () => {
   }
 }
 const canDelete = async () => {
+  if (showNoCharge.value) {
+    toaster.show({
+      title: 'حذف پیام ها',
+      message: `لطفا اشتراک تهیه کنید`,
+      color: 'warning',
+      icon: 'ph:warning',
+      closable: true,
+    })
+    return
+  }
   if (conversation.value.messages.length < 3) {
     toaster.show({
       title: 'حذف پیام ها',
@@ -702,7 +877,7 @@ const closable = ref<boolean | undefined>()
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative max-h-screen overflow-hidden">
     <div
       class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 bg-white0 relative z-10 block w-full border-r sm:hidden"
     >
@@ -744,7 +919,7 @@ const closable = ref<boolean | undefined>()
               </a>
             </div> -->
         </div>
-        <div class="flex flex-row">
+        <div class="ml-5 flex flex-row gap-x-2">
           <div class="flex h-16 w-full items-center justify-center">
             <NuxtLink
               to=""
@@ -754,20 +929,6 @@ const closable = ref<boolean | undefined>()
             >
               <Icon name="ph:arrow-clockwise" class="size-5" />
             </NuxtLink>
-          </div>
-          <div class="flex h-16 w-full items-center justify-center">
-            <button
-              role="button"
-              class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-              title="جست و جو"
-              @click="open('search')"
-            >
-              <Icon
-                name="ph:info"
-                class="size-5"
-                @click="expanded = !expanded"
-              />
-            </button>
           </div>
           <div class="flex h-16 w-full items-center justify-center">
             <NuxtLink
@@ -861,12 +1022,11 @@ const closable = ref<boolean | undefined>()
                 role="button"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                 title="نمایش اطلاعات"
-                @click="open('search')"
+                @click="expanded = !expanded"
               >
                 <Icon
-                  name="ph:info"
+                  name="ph:robot"
                   class="size-5"
-                  @click="expanded = !expanded"
                 />
               </button>
             </div>
@@ -910,11 +1070,48 @@ const closable = ref<boolean | undefined>()
             <TairoSidebarTools
               class="relative -end-4 z-20 flex h-16 w-full scale-90 items-center justify-end gap-2 sm:end-0 sm:scale-100"
             />
+            <BaseMessage
+              v-if="!showNoCharge"
+              class="w-[380px]"
+              :color="timeToShow > 10 ? 'success' : 'warning'"
+            >
+              <span v-if="timeToShow > 0">⏱ {{ timeToShow ?? '--' }} دقیقه</span>
+              <span v-else>وقت تقریبا تمام است</span>
+            </BaseMessage>
+            <BaseMessage
+              v-else
+              class="w-[480px] justify-center !pl-2"
+              color="warning"
+            >
+              لطفا اشتراک تهیه فرمایید.
+              <BaseButtonIcon
+                rounded="full"
+                size="sm"
+                color="success"
+                class="mr-3"
+                to="/onboarding"
+              >
+                <Icon name="ph:shopping-cart" class="size-5" />
+              </BaseButtonIcon>
+            </BaseMessage>
+            <div class="w-[100px]">
+              <button
+                class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                title="نمایش اطلاعات"
+                @click="expanded = !expanded"
+              >
+                <Icon
+                  name="ph:robot"
+                  class="size-5"
+                />
+              </button>
+            </div>
           </div>
           <!-- Body -->
+          <!-- HERE -->
           <div
             ref="chatEl"
-            class="relative h-[calc(100vh_-_128px)] w-full p-4 sm:h-[calc(100vh_-_128px)] sm:p-8"
+            class="relative h-[calc(100vh_-193px)] w-full p-4 sm:h-[calc(100vh_-125px)] sm:p-8"
             :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
           >
             <!-- Loader-->
@@ -1049,7 +1246,7 @@ const closable = ref<boolean | undefined>()
                         v-if="
                           item.role === 'assistant' &&
                             index == conversation?.messages.length - 1 &&
-                            index != 1 && isTyping == false
+                            index != 1 && isTyping == false && showNoCharge == false
                         "
                         class="w-100 mt-2 flex flex-row-reverse"
                       >
@@ -1161,54 +1358,52 @@ const closable = ref<boolean | undefined>()
             </div>
           </div>
           <!-- Compose -->
-          <div class="relative">
-            <transition
-              enter-active-class="duration-300 ease-out"
-              enter-from-class="transform opacity-0"
-              enter-to-class="opacity-100"
-              leave-active-class="duration-200 ease-in"
-              leave-from-class="opacity-100"
-              leave-to-class="transform opacity-0"
-            >
-              <div v-show="isTyping" class="dark:bg-muted-700 absolute bottom-[60px] flex w-full bg-gray-200 py-2  ">
-                <div class="text-muted-800 mr-2 text-sm font-light dark:text-white">
-                  💻 مانی در حال نوشتن است <span class="typing" />
-                </div>
+          <transition
+            enter-active-class="duration-300 ease-out"
+            enter-from-class="transform opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="duration-200 ease-in"
+            leave-from-class="opacity-100"
+            leave-to-class="transform opacity-0"
+          >
+            <div v-show="isTyping" class="dark:bg-muted-700 absolute bottom-[60px] flex w-full bg-gray-200 py-2  ">
+              <div class="text-muted-800 mr-2 text-sm font-light dark:text-white">
+                💻 مانی در حال نوشتن است <span class="typing" />
               </div>
-            </transition>
-            <form
-              class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center px-4 sm:px-8"
-              @submit.prevent="submitMessage"
-            >
-              <div class="relative w-full">
-                <BaseInput
-                  v-model="message"
-                  :loading="messageLoading"
-                  :disabled="messageLoading || showNoCharge"
-                  rounded="full"
-                  :classes="{
-                    input: 'h-12 ps-6 pe-24',
-                  }"
-                  placeholder="متن را بنویسید ..."
-                  autocomplete="off"
-                />
-                <div class="absolute end-2 top-0 flex h-12 items-center gap-1">
-                  <button
-                    role="button"
-                    class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                  >
-                    <Icon name="lucide:smile" class="size-5" />
-                  </button>
-                  <button
-                    role="button"
-                    class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                  >
-                    <Icon name="lucide:paperclip" class="size-5" />
-                  </button>
-                </div>
+            </div>
+          </transition>
+          <form
+            class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center px-4 sm:px-8"
+            @submit.prevent="submitMessage"
+          >
+            <div class="relative w-full">
+              <BaseInput
+                v-model="message"
+                :loading="messageLoading"
+                :disabled="messageLoading || showNoCharge"
+                rounded="full"
+                :classes="{
+                  input: 'h-12 ps-6 pe-24',
+                }"
+                placeholder="متن را بنویسید ..."
+                autocomplete="off"
+              />
+              <div class="absolute end-2 top-0 flex h-12 items-center gap-1">
+                <button
+                  role="button"
+                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
+                >
+                  <Icon name="lucide:smile" class="size-5" />
+                </button>
+                <button
+                  role="button"
+                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
+                >
+                  <Icon name="lucide:paperclip" class="size-5" />
+                </button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
       <!-- Current user -->
@@ -1313,6 +1508,7 @@ const closable = ref<boolean | undefined>()
                 <BaseButton shape="curved" class="w-full">
                   <span> درباره مانی، هوش مصنوعی </span>
                 </BaseButton>
+
                 <BaseMessage class="mt-5" color="info">
                   لطفا توجه داشته باشید که عامل هوش مصنوعی در فاز توسعه می‌‌باشد
                   و احتمال ارائه‌ی پاسخ‌های اشتباه را دارد.
@@ -1330,6 +1526,67 @@ const closable = ref<boolean | undefined>()
 
     <TairoPanels />
   </div>
+  <TairoModal
+    :open="showTenMin"
+    size="sm"
+    @close="showTenMin = false"
+  >
+    <template #header>
+      <!-- Header -->
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3
+          class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
+        >
+          به پایان گفت و گو نزدیک شده ایم
+        </h3>
+
+        <BaseButtonClose @click="showTenMin = false" />
+      </div>
+    </template>
+
+    <!-- Body -->
+    <div class="p-4 md:p-6">
+      <div class="mx-auto w-full text-center">
+        <Icon
+          name="ph:timer"
+          class="mb-5 block size-[75px] text-yellow-500"
+        />
+
+        <h3
+          class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
+        >
+          ۱۰ دقیقه پایانی
+        </h3>
+
+        <p
+          class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-justify text-sm leading-5"
+        >
+          به ده دقیقه پایانی صحبت نزدیک شده ایم. می توانید جلسه را پایان و چارچوب بندی کنید، یا به همین شکل ادامه بدهید. البته بدانید که هر موقع بخواهید می توانید اشتراک تهیه کرده و صحبت را ادامه بدهید.
+        </p>
+      </div>
+    </div>
+
+    <template #footer>
+      <!-- Footer -->
+      <div class="p-4 md:p-6">
+        <div class="flex gap-x-2">
+          <BaseButton @click="showTenMin = false">
+            ادامه می دم
+          </BaseButton>
+
+          <BaseButton
+            color="warning"
+            variant="solid"
+            :loading="isGoingToDone"
+            @click="goToDoneAndEnd"
+          >
+            چارچوب بندی و پایان
+          </BaseButton>
+        </div>
+      </div>
+    </template>
+  </TairoModal>
+
   <TairoModal
     :open="showDeleteModal"
     size="sm"

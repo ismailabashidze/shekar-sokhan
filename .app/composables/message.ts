@@ -23,8 +23,13 @@ export function useMessage() {
   const toaster = useToaster()
   const { user } = useUser()
   const getMessages = async () => {
+    if (typeof user.value.record == 'undefined') {
+      user.value.record = {}
+      user.value.record.currentDeletionDivider = 0
+    }
+
     const { items } = await nuxtApp.$pb.collection('messages').getList(1, 500, {
-      filter: 'deletionDivider=' + user.value.record.currentDeletionDivider,
+      filter: 'deletionDivider=' + user.value.record?.currentDeletionDivider,
       sort: '+created',
     })
     messages.value = items
@@ -35,7 +40,8 @@ export function useMessage() {
       const res = await nuxtApp.$pb.collection('messages').create(newMessage)
       messages.value.push(newMessage)
       return res
-    } catch (e) {
+    }
+    catch (e) {
       console.log('e')
       console.log(e)
 
@@ -80,15 +86,13 @@ export function useMessage() {
     return items
   }
   const deleteAllMessages = async (userId: string) => {
-    const res = await $fetch('https://back.zehna.ir/deleteAllMessages', {
+    return await $fetch('https://back.zehna.ir/deleteAllMessages', {
       method: 'POST',
       body: { userId },
     })
-    return res
   }
   const deleteMessage = async (messageId: string) => {
-    const res = await nuxtApp.$pb.collection('messages').delete(messageId)
-    return res
+    return await nuxtApp.$pb.collection('messages').delete(messageId)
   }
 
   return {

@@ -6,7 +6,8 @@ export function useSeamless() {
   const isTranslating = ref(false)
   const connect = async () => {
     seamless.value = await client(
-      'https://facebook-seamless-m4t-v2-large.hf.space/--replicas/2bmbx/',
+      // 'https://facebook-seamless-m4t-v2-large.hf.space/--replicas/2bmbx/',
+      'https://bluman1-seamless-m4t-v2-large.hf.space/--replicas/y1arv/',
       {},
     )
   }
@@ -21,7 +22,8 @@ export function useSeamless() {
       translated.value = data[0]
       isTranslating.value = false
       return translated.value
-    } catch (e) {
+    }
+    catch (e) {
       isTranslating.value = false
     }
   }
@@ -61,7 +63,8 @@ export function useSeamless() {
 
       const app = await client('abidlabs/whisper', {})
       const transcription = await app.predict('/predict', [audio_file])
-    } catch (error) {
+    }
+    catch (error) {
       console.log('Error:', error)
     }
   }

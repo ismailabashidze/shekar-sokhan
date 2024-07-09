@@ -105,7 +105,7 @@ onBeforeMount(checkPreviousSteps)
         </BaseParagraph>
         <div class="flex justify-center">
           <BaseButton
-            to="/layouts/members"
+            to="/mani/chat"
             color="primary"
             rounded="md"
             class="w-48"
