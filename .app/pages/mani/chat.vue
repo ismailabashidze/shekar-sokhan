@@ -17,7 +17,12 @@ definePageMeta({
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
-
+const { textToVoice, voice } = useMMTTS()
+const play = async (t) => {
+  await textToVoice(t)
+  audioPlayer.value.play()
+}
+const audioPlayer = ref(null)
 // const test = await $fetch('/api/chroma', {
 //   method: 'GET',
 // })
@@ -78,7 +83,7 @@ watch(message, () => {
     timer.value = 5
     setTimeout(() => {
       reset()
-    }, 3000)
+    }, 10000)
   }
   else {
     // mani has not decided to write.
@@ -101,7 +106,7 @@ watch(counter, (n, o) => {
         }
         askForMani()
       }
-    }, 6000)
+    }, 20000)
   }
   else {
     isTyping.value = false
@@ -110,18 +115,18 @@ watch(counter, (n, o) => {
   }
 })
 const checkForType = () => {
-  let lastMessageRole = conversation.value.messages.at(-1)?.role
+  // let lastMessageRole = conversation.value.messages.at(-1)?.role
 
-  if (lastMessageRole === 'assistant') {
-    return 'followUpMessage'
-  }
-  else {
-    return 'briefing'
-  }
+  // if (lastMessageRole === 'assistant') {
+  //   return 'followUpMessage'
+  // }
+  // else {
+  return 'briefing'
+  // }
 }
 setTimeout(() => {
   checkForType()
-}, 5000)
+}, 30000)
 const conversation = ref({
   user: {
     name: 'مانی، همدل هوشمند',
@@ -195,201 +200,202 @@ function combineMessages(dataArray, targetRole) {
 }
 function convertToInformal(text) {
   if (typeof text != 'string') return text
-  text = text.replace(/می\s(.*?)ید/g, 'می $1ین') // General pattern for conjugations
-  text = text.replace(/\bرا\b/g, ' رو ')
-  text = text.replace(/\sرا\s/g, ' رو ')
-  text = text.replace(/ است\./g, 'ه.')
-  text = text.replace(/چگونه بود/g, 'چطور بود')
-  text = text.replace(/در ابتدا/g, 'اولش')
-  text = text.replace(/می توانم/g, 'می تونم')
-  text = text.replace(/آنها/g, 'اونها')
-  text = text.replace(/توانستم/g, 'تونستم')
-  text = text.replace(/به شما دادم/g, 'بهتون دادم')
-  text = text.replace(/پیام های من/g, 'پیامام')
-  text = text.replace(/به نظر می رسد/g, 'بنظر میاد')
-  text = text.replace(/ هستید/g, 'ید ')
-  text = text.replace(/هنگامی که/g, 'وقتی که')
-  text = text.replace(/می شویم/g, 'می شیم')
-  text = text.replace(/می تواند/g, 'می تونه')
-  text = text.replace(/می توانید/g, 'می تونین')
+  text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+  // text = text.replace(/می\s(.*?)ید/g, 'می $1ین') // General pattern for conjugations
+  // text = text.replace(/\bرا\b/g, ' رو ')
+  // text = text.replace(/\sرا\s/g, ' رو ')
+  // text = text.replace(/ است\./g, 'ه.')
+  // text = text.replace(/چگونه بود/g, 'چطور بود')
+  // text = text.replace(/در ابتدا/g, 'اولش')
+  // text = text.replace(/می توانم/g, 'می تونم')
+  // text = text.replace(/آنها/g, 'اونها')
+  // text = text.replace(/توانستم/g, 'تونستم')
+  // text = text.replace(/به شما دادم/g, 'بهتون دادم')
+  // text = text.replace(/پیام های من/g, 'پیامام')
+  // text = text.replace(/به نظر می رسد/g, 'بنظر میاد')
+  // text = text.replace(/ هستید/g, 'ید ')
+  // text = text.replace(/هنگامی که/g, 'وقتی که')
+  // text = text.replace(/می شویم/g, 'می شیم')
+  // text = text.replace(/می تواند/g, 'می تونه')
+  // text = text.replace(/می توانید/g, 'می تونین')
 
-  text = text.replace(/شود/g, 'بشه')
-  text = text.replace(/\sیک\s/g, ' یه ')
-  text = text.replace(/به یاد داشته باشید/g, 'بدونین')
-  text = text.replace(/احساس بسیار قابل ارتباطه/g, 'احساس بسیار قابل درکه')
-  text = text.replace(/\sآن\s/g, ' اون ')
-  text = text.replace(/در مورد اون/g, 'درموردش')
-  text = text.replace(/باشید/g, 'باشین')
-  text = text.replace(/یافتن/g, 'پیدا کردن')
-  text = text.replace(/نشوی/g, 'نشی')
-  text = text.replace(/\sاگر\s/g, ' اگه ')
-  text = text.replace(/تا به حال/g, 'تا حالا')
-  text = text.replace(/می دهند/g, 'می دن')
-  text = text.replace(/می توانند/g, 'می تونن')
-  text = text.replace(/کنند/g, 'کنن')
-  text = text.replace(/گاهی اوقات/g, 'بعضی وقتا')
-  text = text.replace(/می تواند/g, 'می تونه')
-  text = text.replace(/ایجاد کند/g, 'ایجاد کنه')
-  text = text.replace(/می توانم/g, 'می تونم')
-  text = text.replace(/کاملا خوب است/g, 'اوکیه')
-  text = text.replace(/\sکنید\s/g, ' کنین ')
-  text = text.replace(/\bکنید\b/g, ' کنین ') // Corrected this pattern
-  text = text.replace(/خویشاوند/g, 'فامیل')
-  text = text.replace(/ندارید/g, 'ندارین')
-  text = text.replace(/به دنبال/g, 'گشتن دنبال')
-  text = text.replace(/خواهید شد/g, 'می شین')
-  text = text.replace(/دارد/g, 'داره')
-  text = text.replace(/دارید/g, 'دارین')
-  text = text.replace(/ببرید/g, 'ببرین')
-  text = text.replace(/خودتان/g, 'خودتون')
-  text = text.replace(/فعالیت های/g, 'فعالیتای')
-  text = text.replace(/هرگز از خودتان دست نکشید/g, 'هرگز خودتونو فراموش نکنین')
-  text = text.replace(/ هستید/g, 'هستین')
-  text = text.replace(/ هایی/g, 'ایی')
-  text = text.replace(/می آورین/g, 'میارین')
-  text = text.replace(/از زمان به زمان/g, 'بعضی وقتا')
-  text = text.replace(/کند/g, 'کنه')
-  text = text.replace(/شماه/g, 'شماست')
-  text = text.replace(/می توان/g, 'می شه')
-  text = text.replace(/بپذیرید/g, 'بپذیرین')
-  text = text.replace(/بدانید/g, 'بدونین')
-  text = text.replace(/اگه بیش از حد احساس می کنین/g, 'اگه فکر می کنین احساستون بیش از حده')
-  text = text.replace(/بحث کنیم/g, 'گپ بزنیم')
-  text = text.replace(/بگذرانید/g, 'بذارید')
-  text = text.replace(/آن ها/g, 'اونا')
-  text = text.replace(/دهید/g, 'بدین')
-  text = text.replace(/به نظرت چطوره/g, 'نظرت چیه')
-  text = text.replace(/گشتن دنبال/g, 'دنبال')
-  text = text.replace(/گوش گوش/g, 'گوش')
-  text = text.replace(/پینا/g, 'پیدا')
-  text = text.replace(/می شهیم/g, 'می شه')
-  text = text.replace(/دادهه/g, 'داده')
-  text = text.replace(/ هستم\s/g, 'م ')
-  text = text.replace(/از طریق احساسات خود حرکت کنید/g, 'با احساسات خود کنار بیای')
-  text = text.replace(/بیایید/g, 'بیا')
-  text = text.replace(/شویم/g, 'شیم')
-  text = text.replace(/ است،/g, 'ه، ')
-  text = text.replace(/خوش آمدید!/g, 'خواهش می کنم!')
-  text = text.replace(/گذراندن/g, 'گذروندن')
-  text = text.replace(/آنه/g, 'اونه')
-  text = text.replace(/ است\s/g, 'ه ')
-  text = text.replace(/آیا\s/g, '')
-  text = text.replace(/دهیم/g, 'بدیم')
-  text = text.replace(/ هستم\./g, 'م.')
-  text = text.replace(/می دانم/g, 'می دونم')
-  text = text.replace(/من می دونم/g, 'می دونم')
-  text = text.replace(/باشد/g, 'باشه')
-  text = text.replace(/شجاعانهه/g, 'شجاعانه س ')
-  text = text.replace(/کننه/g, 'کننده')
-  text = text.replace(/ است\s/g, 'ه ')
-  text = text.replace(/باشد/g, 'باشه')
-  text = text.replace(/کهتون/g, 'که شما ')
-  text = text.replace(/نیستید،/g, 'نیستین،')
-  text = text.replace(/اولیهم/g, 'اولیه ام')
-  text = text.replace(/؟م /g, '؟ ')
-  text = text.replace(/کرده اید./g, 'کرده این.')
-  text = text.replace(/در حال حاضر/g, 'الان')
-  text = text.replace(/با من/g, 'باهام')
-  text = text.replace(/با شما/g, 'باهات')
-  text = text.replace(/بگذاری/g, 'بذاری')
-  text = text.replace(/می خواهم/g, 'می خوام')
-  text = text.replace(/بدانین/g, 'بدونین')
-  text = text.replace(/دانستن/g, 'دونستن')
-  text = text.replace(/وقت ميگيره/g, 'ممکنه زمان بر باشه')
-  text = text.replace(/احساسات خود/g, 'احساساتتون')
-  text = text.replace(/می خواهین/g, 'می خواین')
-  text = text.replace(/می شهین/g, 'می شه')
-  text = text.replace(/با اون/g, 'باهاش')
-  text = text.replace(/بگویید؟/g, 'بگین؟')
-  text = text.replace(/ماید/g, 'ما هستید')
-  text = text.replace(/علناً/g, 'راحت')
-  text = text.replace(/زیرا/g, 'چون')
-  text = text.replace(/ترویج می دهد./g, 'ایجاد می کنه.')
-  text = text.replace(/اینگونه/g, 'این طوری')
-  text = text.replace(/بسیار دوستانهه/g, 'خیلی عاطفی بود!')
-  text = text.replace(/می رسد،/g, 'می رسه،')
-  text = text.replace(/کدام یه رو/g, 'کدومو')
-  text = text.replace(/می دانستین؟/g, 'می دونی؟')
-  text = text.replace(/چه اتفاقی می افتد؟/g, 'چی شد؟')
-  text = text.replace(/اینگونه/g, 'این طوری')
-  text = text.replace(/مفین/g, 'خوب')
-  text = text.replace(/نبودند/g, 'نبودن')
-  text = text.replace(/ي/g, 'ی')
-  text = text.replace(/پیام های/g, 'پیامای')
-  text = text.replace(/به نظر شما/g, 'بنظرت')
-  text = text.replace(/عذرخواهی می کنم/g, 'می بخشین')
-  text = text.replace(/پاسخ هایم رو/g, 'پاسخامو')
-  text = text.replace(/بهبود بخشم/g, 'بهتر کنم')
-  text = text.replace(/مطمئن شوم/g, 'مطمئن بشم')
-  text = text.replace(/اونها برای شما ارزشی دارند./g, 'اونا مناسب هستن.')
-  text = text.replace(/از اطلاعات ما/g, 'با توجه به اطلاعات')
-  text = text.replace(/احساس غرق شدن/g, 'با توجه به اطلاعات')
-  text = text.replace(/اعتقاد دارم/g, 'ایمان دارم')
-  text = text.replace(/احساس غرق شدن/g, 'با توجه به اطلاعات')
-  text = text.replace(/باهاشها/g, 'باهاشون')
-  text = text.replace(/بدانم./g, 'بدونم.')
-  text = text.replace(/بدهم/g, 'بدم')
-  text = text.replace(/باین/g, 'باید')
-  text = text.replace(/من می فهمم که شما باید احساس کمی پایین به تازگی/g, 'می فهمم که یکم احساس کمبود می کنی')
-  text = text.replace(/کنید./g, 'کنین.')
-  text = text.replace(/می گذارد/g, 'می ذاره')
-  text = text.replace(/شاین/g, 'شاید')
-  text = text.replace(/به او/g, 'بهش')
-  text = text.replace(/به من/g, 'بهم')
-  text = text.replace(/به شما/g, 'بهت')
-  text = text.replace(/از شما/g, 'ازت')
-  text = text.replace(/از من/g, 'ازم')
-  text = text.replace(/کردهه/g, 'کرده')
-  text = text.replace(/طریق اون/g, 'اون طریق')
-  text = text.replace(/بازم/g, 'آماده ام')
-  text = text.replace(/باز بیان/g, 'راحت')
-  text = text.replace(/در حالی که/g, 'اگرچه')
-  text = text.replace(/بگذارم/g, 'بذارم')
-  text = text.replace(/چگونه کار می کنین/g, 'نظرتون چیه')
-  text = text.replace(/بهشن/g, 'بهش')
-  text = text.replace(/شماه/g, 'شماست')
-  text = text.replace(/ماه./g, 'ماست.')
-  text = text.replace(/خودمان/g, 'خودمون')
-  text = text.replace(/برای شما/g, 'براتون')
-  text = text.replace(/دهم؟/g, 'بدم؟')
-  text = text.replace(/ نشان /g, ' نشون ')
-  text = text.replace(/در نظر بگیرید/g, 'بدونین')
-  text = text.replace(/می خواند/g, 'می خونه')
-  text = text.replace(/بدانی/g, 'بدونی')
-  text = text.replace(/می دهم/g, 'می دم')
-  text = text.replace(/باز بودن/g, 'راحت بودن')
-  text = text.replace(/شنینن/g, 'شنیدن')
-  text = text.replace(/کنندهه/g, 'کننده ست')
-  text = text.replace(/هنوز هم/g, 'هنوزم')
-  text = text.replace(/باز شوید/g, 'راحت باشید')
-  text = text.replace(/می بشه/g, 'می شه')
-  text = text.replace(/می مانم/g, 'می مونم')
-  text = text.replace(/ما می شه/g, 'می شه')
-  text = text.replace(/استراتژی/g, 'راه حل')
-  text = text.replace(/می دهد/g, 'می ده')
-  text = text.replace(/شمی شه/g, 'می شه')
-  text = text.replace(/تشویق/g, 'دلگرم')
-  text = text.replace(/گرما/g, 'گرمی')
-  text = text.replace(/پیشنهادات باز/g, 'پیشنهادات آماده')
-  text = text.replace(/چیست/g, 'چیه')
-  text = text.replace(/ همان /g, 'همون')
-  text = text.replace(/می دانین/g, 'می دونین')
-  text = text.replace(/از تماس با ما دریغ نکنین/g, 'حتما با من صحبت رو ادامه بدین')
-  text = text.replace(/آمابدین/g, 'آماده این')
-  text = text.replace(/پشت سر دارین/g, 'پشت سر می ذارین')
-  text = text.replace(/نبدین/g, 'ندین')
-  text = text.replace(/ادامه یابد/g, 'ادامه پیدا کنه')
-  text = text.replace(/همسرتان/g, 'همسرتون')
-  text = text.replace(/دهد؟/g, 'بده؟')
-  text = text.replace(/غرق شدن/g, 'ناتوانی')
-  text = text.replace(/بهشها/g, 'بهشون')
-  text = text.replace(/بگویید/g, 'بگین')
-  text = text.replace(/بگویید/g, 'بگین')
-  text = text.replace(/بگویید/g, 'بگین')
-  text = text.replace(/بگویید/g, 'بگین')
-  text = text.replace(/بگویید/g, 'بگین')
-  text = text.replace(/بگویید/g, 'بگین')
-  text = text.replace(/بگویید/g, 'بگین')
+  // text = text.replace(/شود/g, 'بشه')
+  // text = text.replace(/\sیک\s/g, ' یه ')
+  // text = text.replace(/به یاد داشته باشید/g, 'بدونین')
+  // text = text.replace(/احساس بسیار قابل ارتباطه/g, 'احساس بسیار قابل درکه')
+  // text = text.replace(/\sآن\s/g, ' اون ')
+  // text = text.replace(/در مورد اون/g, 'درموردش')
+  // text = text.replace(/باشید/g, 'باشین')
+  // text = text.replace(/یافتن/g, 'پیدا کردن')
+  // text = text.replace(/نشوی/g, 'نشی')
+  // text = text.replace(/\sاگر\s/g, ' اگه ')
+  // text = text.replace(/تا به حال/g, 'تا حالا')
+  // text = text.replace(/می دهند/g, 'می دن')
+  // text = text.replace(/می توانند/g, 'می تونن')
+  // text = text.replace(/کنند/g, 'کنن')
+  // text = text.replace(/گاهی اوقات/g, 'بعضی وقتا')
+  // text = text.replace(/می تواند/g, 'می تونه')
+  // text = text.replace(/ایجاد کند/g, 'ایجاد کنه')
+  // text = text.replace(/می توانم/g, 'می تونم')
+  // text = text.replace(/کاملا خوب است/g, 'اوکیه')
+  // text = text.replace(/\sکنید\s/g, ' کنین ')
+  // text = text.replace(/\bکنید\b/g, ' کنین ') // Corrected this pattern
+  // text = text.replace(/خویشاوند/g, 'فامیل')
+  // text = text.replace(/ندارید/g, 'ندارین')
+  // text = text.replace(/به دنبال/g, 'گشتن دنبال')
+  // text = text.replace(/خواهید شد/g, 'می شین')
+  // text = text.replace(/دارد/g, 'داره')
+  // text = text.replace(/دارید/g, 'دارین')
+  // text = text.replace(/ببرید/g, 'ببرین')
+  // text = text.replace(/خودتان/g, 'خودتون')
+  // text = text.replace(/فعالیت های/g, 'فعالیتای')
+  // text = text.replace(/هرگز از خودتان دست نکشید/g, 'هرگز خودتونو فراموش نکنین')
+  // text = text.replace(/ هستید/g, 'هستین')
+  // text = text.replace(/ هایی/g, 'ایی')
+  // text = text.replace(/می آورین/g, 'میارین')
+  // text = text.replace(/از زمان به زمان/g, 'بعضی وقتا')
+  // text = text.replace(/کند/g, 'کنه')
+  // text = text.replace(/شماه/g, 'شماست')
+  // text = text.replace(/می توان/g, 'می شه')
+  // text = text.replace(/بپذیرید/g, 'بپذیرین')
+  // text = text.replace(/بدانید/g, 'بدونین')
+  // text = text.replace(/اگه بیش از حد احساس می کنین/g, 'اگه فکر می کنین احساستون بیش از حده')
+  // text = text.replace(/بحث کنیم/g, 'گپ بزنیم')
+  // text = text.replace(/بگذرانید/g, 'بذارید')
+  // text = text.replace(/آن ها/g, 'اونا')
+  // text = text.replace(/دهید/g, 'بدین')
+  // text = text.replace(/به نظرت چطوره/g, 'نظرت چیه')
+  // text = text.replace(/گشتن دنبال/g, 'دنبال')
+  // text = text.replace(/گوش گوش/g, 'گوش')
+  // text = text.replace(/پینا/g, 'پیدا')
+  // text = text.replace(/می شهیم/g, 'می شه')
+  // text = text.replace(/دادهه/g, 'داده')
+  // text = text.replace(/ هستم\s/g, 'م ')
+  // text = text.replace(/از طریق احساسات خود حرکت کنید/g, 'با احساسات خود کنار بیای')
+  // text = text.replace(/بیایید/g, 'بیا')
+  // text = text.replace(/شویم/g, 'شیم')
+  // text = text.replace(/ است،/g, 'ه، ')
+  // text = text.replace(/خوش آمدید!/g, 'خواهش می کنم!')
+  // text = text.replace(/گذراندن/g, 'گذروندن')
+  // text = text.replace(/آنه/g, 'اونه')
+  // text = text.replace(/ است\s/g, 'ه ')
+  // text = text.replace(/آیا\s/g, '')
+  // text = text.replace(/دهیم/g, 'بدیم')
+  // text = text.replace(/ هستم\./g, 'م.')
+  // text = text.replace(/می دانم/g, 'می دونم')
+  // text = text.replace(/من می دونم/g, 'می دونم')
+  // text = text.replace(/باشد/g, 'باشه')
+  // text = text.replace(/شجاعانهه/g, 'شجاعانه س ')
+  // text = text.replace(/کننه/g, 'کننده')
+  // text = text.replace(/ است\s/g, 'ه ')
+  // text = text.replace(/باشد/g, 'باشه')
+  // text = text.replace(/کهتون/g, 'که شما ')
+  // text = text.replace(/نیستید،/g, 'نیستین،')
+  // text = text.replace(/اولیهم/g, 'اولیه ام')
+  // text = text.replace(/؟م /g, '؟ ')
+  // text = text.replace(/کرده اید./g, 'کرده این.')
+  // text = text.replace(/در حال حاضر/g, 'الان')
+  // text = text.replace(/با من/g, 'باهام')
+  // text = text.replace(/با شما/g, 'باهات')
+  // text = text.replace(/بگذاری/g, 'بذاری')
+  // text = text.replace(/می خواهم/g, 'می خوام')
+  // text = text.replace(/بدانین/g, 'بدونین')
+  // text = text.replace(/دانستن/g, 'دونستن')
+  // text = text.replace(/وقت ميگيره/g, 'ممکنه زمان بر باشه')
+  // text = text.replace(/احساسات خود/g, 'احساساتتون')
+  // text = text.replace(/می خواهین/g, 'می خواین')
+  // text = text.replace(/می شهین/g, 'می شه')
+  // text = text.replace(/با اون/g, 'باهاش')
+  // text = text.replace(/بگویید؟/g, 'بگین؟')
+  // text = text.replace(/ماید/g, 'ما هستید')
+  // text = text.replace(/علناً/g, 'راحت')
+  // text = text.replace(/زیرا/g, 'چون')
+  // text = text.replace(/ترویج می دهد./g, 'ایجاد می کنه.')
+  // text = text.replace(/اینگونه/g, 'این طوری')
+  // text = text.replace(/بسیار دوستانهه/g, 'خیلی عاطفی بود!')
+  // text = text.replace(/می رسد،/g, 'می رسه،')
+  // text = text.replace(/کدام یه رو/g, 'کدومو')
+  // text = text.replace(/می دانستین؟/g, 'می دونی؟')
+  // text = text.replace(/چه اتفاقی می افتد؟/g, 'چی شد؟')
+  // text = text.replace(/اینگونه/g, 'این طوری')
+  // text = text.replace(/مفین/g, 'خوب')
+  // text = text.replace(/نبودند/g, 'نبودن')
+  // text = text.replace(/ي/g, 'ی')
+  // text = text.replace(/پیام های/g, 'پیامای')
+  // text = text.replace(/به نظر شما/g, 'بنظرت')
+  // text = text.replace(/عذرخواهی می کنم/g, 'می بخشین')
+  // text = text.replace(/پاسخ هایم رو/g, 'پاسخامو')
+  // text = text.replace(/بهبود بخشم/g, 'بهتر کنم')
+  // text = text.replace(/مطمئن شوم/g, 'مطمئن بشم')
+  // text = text.replace(/اونها برای شما ارزشی دارند./g, 'اونا مناسب هستن.')
+  // text = text.replace(/از اطلاعات ما/g, 'با توجه به اطلاعات')
+  // text = text.replace(/احساس غرق شدن/g, 'با توجه به اطلاعات')
+  // text = text.replace(/اعتقاد دارم/g, 'ایمان دارم')
+  // text = text.replace(/احساس غرق شدن/g, 'با توجه به اطلاعات')
+  // text = text.replace(/باهاشها/g, 'باهاشون')
+  // text = text.replace(/بدانم./g, 'بدونم.')
+  // text = text.replace(/بدهم/g, 'بدم')
+  // text = text.replace(/باین/g, 'باید')
+  // text = text.replace(/من می فهمم که شما باید احساس کمی پایین به تازگی/g, 'می فهمم که یکم احساس کمبود می کنی')
+  // text = text.replace(/کنید./g, 'کنین.')
+  // text = text.replace(/می گذارد/g, 'می ذاره')
+  // text = text.replace(/شاین/g, 'شاید')
+  // text = text.replace(/به او/g, 'بهش')
+  // text = text.replace(/به من/g, 'بهم')
+  // text = text.replace(/به شما/g, 'بهت')
+  // text = text.replace(/از شما/g, 'ازت')
+  // text = text.replace(/از من/g, 'ازم')
+  // text = text.replace(/کردهه/g, 'کرده')
+  // text = text.replace(/طریق اون/g, 'اون طریق')
+  // text = text.replace(/بازم/g, 'آماده ام')
+  // text = text.replace(/باز بیان/g, 'راحت')
+  // text = text.replace(/در حالی که/g, 'اگرچه')
+  // text = text.replace(/بگذارم/g, 'بذارم')
+  // text = text.replace(/چگونه کار می کنین/g, 'نظرتون چیه')
+  // text = text.replace(/بهشن/g, 'بهش')
+  // text = text.replace(/شماه/g, 'شماست')
+  // text = text.replace(/ماه./g, 'ماست.')
+  // text = text.replace(/خودمان/g, 'خودمون')
+  // text = text.replace(/برای شما/g, 'براتون')
+  // text = text.replace(/دهم؟/g, 'بدم؟')
+  // text = text.replace(/ نشان /g, ' نشون ')
+  // text = text.replace(/در نظر بگیرید/g, 'بدونین')
+  // text = text.replace(/می خواند/g, 'می خونه')
+  // text = text.replace(/بدانی/g, 'بدونی')
+  // text = text.replace(/می دهم/g, 'می دم')
+  // text = text.replace(/باز بودن/g, 'راحت بودن')
+  // text = text.replace(/شنینن/g, 'شنیدن')
+  // text = text.replace(/کنندهه/g, 'کننده ست')
+  // text = text.replace(/هنوز هم/g, 'هنوزم')
+  // text = text.replace(/باز شوید/g, 'راحت باشید')
+  // text = text.replace(/می بشه/g, 'می شه')
+  // text = text.replace(/می مانم/g, 'می مونم')
+  // text = text.replace(/ما می شه/g, 'می شه')
+  // text = text.replace(/استراتژی/g, 'راه حل')
+  // text = text.replace(/می دهد/g, 'می ده')
+  // text = text.replace(/شمی شه/g, 'می شه')
+  // text = text.replace(/تشویق/g, 'دلگرم')
+  // text = text.replace(/گرما/g, 'گرمی')
+  // text = text.replace(/پیشنهادات باز/g, 'پیشنهادات آماده')
+  // text = text.replace(/چیست/g, 'چیه')
+  // text = text.replace(/ همان /g, 'همون')
+  // text = text.replace(/می دانین/g, 'می دونین')
+  // text = text.replace(/از تماس با ما دریغ نکنین/g, 'حتما با من صحبت رو ادامه بدین')
+  // text = text.replace(/آمابدین/g, 'آماده این')
+  // text = text.replace(/پشت سر دارین/g, 'پشت سر می ذارین')
+  // text = text.replace(/نبدین/g, 'ندین')
+  // text = text.replace(/ادامه یابد/g, 'ادامه پیدا کنه')
+  // text = text.replace(/همسرتان/g, 'همسرتون')
+  // text = text.replace(/دهد؟/g, 'بده؟')
+  // text = text.replace(/غرق شدن/g, 'ناتوانی')
+  // text = text.replace(/پیشین/g, 'قبلی')
+  // text = text.replace(/بگویید/g, 'بگین')
+  // text = text.replace(/بگویید/g, 'بگین')
+  // text = text.replace(/بگویید/g, 'بگین')
+  // text = text.replace(/بگویید/g, 'بگین')
+  // text = text.replace(/بگویید/g, 'بگین')
+  // text = text.replace(/بگویید/g, 'بگین')
+  // text = text.replace(/بگویید/g, 'بگین')
 
   // Add more generalized patterns here
   return text
@@ -416,25 +422,23 @@ const askForMani = async () => {
               })
               .filter(Boolean),
           ],
-          goals: goals.value.map(g => g.expand.generalTherapicGoal.description),
+          // goals: goals.value.map(g => g.expand.generalTherapicGoal.description),
           userDetails: userDetails.value[0],
         },
       })
-      const {
-        translatedMsg,
-        translatedReasoning,
-      } = await processResponse(JSON.parse(answer))
-      let informalTranslatedMsg = convertToInformal(translatedMsg)
 
+      const res = await processResponse(JSON.parse(answer))
+      console.log('JSON.parse(answer)')
+      console.log(JSON.parse(answer))
+      let informalTranslatedMsg = convertToInformal(res.message)
+
+      // HERE
       const newMsg = await saveMessage({
         user: user.value.record.id,
         role: 'assistant',
         time: new Date().toLocaleTimeString('fa'),
         content: JSON.parse(answer),
-        contentFa: {
-          message: translatedMsg,
-          reasoning: translatedReasoning,
-        },
+        contentFa: res,
         deletionDivider: user.value.record.currentDeletionDivider,
       })
 
@@ -442,10 +446,7 @@ const askForMani = async () => {
         id: newMsg.id,
         role: 'assistant',
         content: JSON.parse(answer),
-        contentFa: {
-          message: informalTranslatedMsg,
-          reasoning: translatedReasoning,
-        },
+        contentFa: res,
         time: new Date().toLocaleTimeString('fa'),
       })
 
@@ -478,37 +479,43 @@ const askForMani = async () => {
   else {
     setTimeout(() => {
       askForMani()
-    }, 5000)
+    }, 10000)
   }
 }
 
 const sleep = (time: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, time))
 }
-async function processResponse(answer: Content): Promise<TranslatedResponse> {
-  const msg = answer.message as string
-  const reasoning = answer.reasoning as string
-  console.log('reasoning')
-  console.log(reasoning)
+async function processResponse(answer: Record<string, any>): Promise<Record<string, any>> {
+  // Creating an array to hold promises for each key-value pair that needs processing
+  const promises = []
+  const result: Record<string, any> = {}
+  // Iterate over the keys in the answer object
+  for (const key in answer) {
+    if (typeof answer[key] === 'string') {
+      // Create a promise to translate and assemble the string value
+      const promise = translateAndAssemble(answer[key], 'English', 'Western Persian')
+        .then((translatedValue) => {
+          result[key] = translatedValue
+        })
+        .catch((error) => {
+          console.error(`An error occurred during translation and assembly of ${key}:`, error)
+          throw error
+        })
 
-  // Creating an array of promises for each part that needs processing
-  const promises = [
-    translateAndAssemble(msg, 'English', 'Western Persian'),
-    translateAndAssemble(reasoning, 'English', 'Western Persian'),
-  ]
+      promises.push(promise)
+    }
+    else {
+    // Directly assign non-string values to the result object
+      result[key] = answer[key]
+    }
+  }
 
   try {
     // Wait for all promises to be resolved
-    const [
-      translatedMsg,
-      translatedReasoning,
-    ] = await Promise.all(promises)
-
-    // Return an object with all processed parts if needed
-    return {
-      translatedMsg,
-      translatedReasoning,
-    }
+    await Promise.all(promises)
+    // Return an object with all processed parts
+    return result
   }
   catch (error) {
     // Handle any errors that occur during the translation and assembly
@@ -516,6 +523,7 @@ async function processResponse(answer: Content): Promise<TranslatedResponse> {
     throw error
   }
 }
+
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
 const signout = () => {
@@ -546,7 +554,7 @@ onMounted(async () => {
   })
   loading.value = false
   // await autoConversation()
-  await sleep(2000)
+  await sleep(200)
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
@@ -662,9 +670,6 @@ async function translateAndAssemble(
   from: string,
   to: string,
 ): Promise<string> {
-  // Split the text into tokens to check the count
-  const tokens = answer.split(/\s+/)
-
   // If more than 200 tokens, proceed with splitting into chunks by sentences
   const chunks = answer
     .split(/[\.\n]\s*/)
@@ -1239,9 +1244,17 @@ const closable = ref<boolean | undefined>()
                         item.role === 'user' ? 'rounded-se-none' : '',
                       ]"
                     >
-                      <p class="text-justify font-sans text-sm">
-                        {{ item?.contentFa.message }}
-                      </p>
+                      <!-- <p class="whitespace-pre-line text-justify font-sans text-sm" v-html=" item?.role === 'assistant' ? item?.contentFa.empathy + '\n\n' + item?.contentFa.solutions + '\n\n' + item?.contentFa.investigating : item?.contentFa.message " /> -->
+                      <p class="whitespace-pre-line text-justify font-sans text-sm" v-html="item.contentFa.message" />
+                      <!-- <button
+                        class="bg-primary-500 hover:bg-primary-700 mr-2 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
+                        @click="play( item?.role === 'assistant' ? item?.contentFa.empathy + '\n\n' + item?.contentFa.solutions + '\n\n' + item?.contentFa.investigating : item?.contentFa.message )"
+                      >
+                        <Icon name="lucide:play" class="size-5" />
+                      </button>
+                      <audio ref="audioPlayer" controls>
+                        <source :src="voice" type="audio/wav">
+                      </audio> -->
                       <div
                         v-if="
                           item.role === 'assistant' &&
@@ -1251,14 +1264,12 @@ const closable = ref<boolean | undefined>()
                         class="w-100 mt-2 flex flex-row-reverse"
                       >
                         <button
-                          role="button"
                           class="bg-primary-500 hover:bg-primary-700 mr-2 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
                           @click="resend()"
                         >
                           <Icon name="lucide:rotate-cw" class="size-5" />
                         </button>
                         <button
-                          role="button"
                           class="bg-warning-500 hover:bg-warning-700 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
                           @click="showReportModal = true"
                         >

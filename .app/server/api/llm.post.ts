@@ -1,172 +1,95 @@
-// const RUNPOD_TOKEN = process.env.RUNPOD_TOKEN
-// const LLM_ADDRESS = process.env.LLM_ADDRESS!
-// const LLM_MODEL = process.env.LLM_MODEL
-// const LLM_TEMPERATURE = Number(process.env.LLM_TEMPERATURE || 1)
-// const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS || 8192)
-// const LLM_REPEAT_PENALTY = Number(process.env.LLM_REPEAT_PENALTY || 2)
-
+// const LLM_ADDRESS = 'http://127.0.0.1:8000/query'
+const LLM_ADDRESS = 'http://193.163.201.12:8000/query'
+const LLM_ADDRESS_RUNPOD = 'https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions'
 const RUNPOD_TOKEN = '8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3'
-const LLM_ADDRESS = 'https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions'
 const LLM_MODEL = 'cognitivecomputations/dolphin-2.8-mistral-7b-v02'
 const LLM_TEMPERATURE = 1
 const LLM_MAX_TOKENS = 8192
 const LLM_REPEAT_PENALTY = 2
 
-interface FetchResponse {
-  choices: { message: { content: string } }[]
-}
+import { isValidJSON, checkJSONStructure } from '../utils'
 
 export type LLMMessage = {
   role: 'system' | 'assistant' | 'user'
   content: string
 }
 
-function hasExactKeys(obj: any, keys: string[]): boolean {
-  const objKeys = Object.keys(obj)
-  return (
-    keys.length === objKeys.length && keys.every(key => objKeys.includes(key))
-  )
-}
-
-async function fetchLLM(body: any, sysMsg: string): Promise<string> {
+async function fetchLLM(body: any) {
+  if (body.type === 'followUpMessage') {
+    const res = { empathy: 'why you didnt answer me?' }
+    return JSON.stringify(res)
+  }
   const headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${RUNPOD_TOKEN}`,
   }
-  const messagesToLLM = [{ role: 'system', content: sysMsg }, ...body.llmMessages]
-  const response = await $fetch<FetchResponse>(LLM_ADDRESS, {
+  // const msg = `Below is a chat between a user and a psychotherapist, please send a single message as a psychotherapist for the user. only one message.\nuser: Hi, my name is: ${body.userDetails.name}, and I am : ${body.userDetails.age} years old, my gender is: ${body.userDetails.gender}, and my jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}, I share to you: ${body.userDetails.moreInfo} and I want to talk to you about: ${body.userDetails.topics.join(';')}\n${body.llmMessages.map((m) => {
+  //   if (m.role === 'assistant') {
+  //     // return m.role + ':' + JSON.parse(m.content).empathy + JSON.parse(m.content).solutions + JSON.parse(m.content).investigating
+  //     return m.role + ':' + JSON.parse(m.content).message
+  //   }
+  //   else {
+  //     return m.role + ':' + JSON.parse(m.content).message
+  //   }
+  // }).join('\n')}`
+  const sendToLLM = body.llmMessages.map((msg) => {
+    return { role: msg.role, content: JSON.parse(msg.content).message }
+  })
+  console.log(sendToLLM)
+  // const sendToLLM = [{ role: 'user', content:msg}]
+  const response = await $fetch(LLM_ADDRESS, {
     method: 'POST',
     headers,
-    body: JSON.stringify({
-      model: LLM_MODEL,
-      messages: body.llmMessages,
-      temperature: LLM_TEMPERATURE,
-      max_tokens: LLM_MAX_TOKENS,
-      repeat_penalty: LLM_REPEAT_PENALTY,
-      stream: false,
-    }),
+    body: {
+      messages: [{ role: 'user', content: ` Hi, my name is: ${body.userDetails.name}, and I am : ${body.userDetails.age} years old, my gender is: ${body.userDetails.gender}, and my jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}. I want to role play with you based on the SCL-90 for assessing depression. Can you role play as psychotherapist and assess it, while you make the conversation real?` }, { role: 'assistant', content: `I'd be happy to role-play with you as a psychotherapist to assess depression symptoms using the SCL-90. Please keep in mind that this is a simulated exercise, and I'm not a licensed therapist. If you're experiencing depression or any other mental health concerns, please seek help from a qualified professional.
+
+Let's begin the role-play. Imagine you're sitting in my office, and we're about to start the assessment. I'll ask you some questions, and you can respond as you would in a real therapy session. We'll focus on the depression subscale of the SCL-90, which assesses symptoms such as sadness, hopelessness, and changes in appetite or sleep.
+
+To start, can you tell me a little bit about yourself and what brings you to therapy at this time? Please share your thoughts and feelings openly and honestly. What's been going on in your life that's led you to seek help?
+
+(Note: Please respond as you would in a real therapy session. I'll take notes and use them to guide our conversation.)
+
+Remember, this is a safe and non-judgmental space. I'm here to listen and support you.`,
+      }, ...sendToLLM],
+      config: {
+        main_model: 'llama3-70b-8192',
+        cycles: 4,
+        layer_agent_config: {
+          layer_agent_1: {
+            system_prompt: 'Think through your response step by step. {helper_response}',
+            model_name: 'llama3-8b-8192',
+          },
+          layer_agent_2: {
+            system_prompt: 'Respond with a thought and then your response to the question. {helper_response}',
+            model_name: 'gemma-7b-it',
+            temperature: 0.7,
+          },
+          layer_agent_3: {
+            system_prompt: 'You are an expert at logic and reasoning. Always take a logical approach to the answer. {helper_response}',
+            model_name: 'llama3-8b-8192',
+          },
+          layer_agent_4: {
+            system_prompt: 'You will use SCL-90 only and generating meaningful and context aware questions based on the conversation. {helper_response}',
+            model_name: 'mixtral-8x7b-32768',
+          },
+        },
+      },
+    },
   })
-
-  const content = response.choices[0].message.content
-  console.log(content)
-  return content
+  console.log(response.final_response)
+  return JSON.stringify({ message: response.final_response })
+  // if (isValidJSON(response.final_response).valid) {
+  //   if (checkJSONStructure(JSON.parse(response.final_response), ['choosenFactor', 'questionNumbers', 'analysis', 'message', 'estimate']))
+  //     return response.final_response
+  // }
+  // else {
+  //   console.log('here')
+  //   await fetchLLM(body)
+  // }
 }
 
-// Retry mechanism for fetching LLM with configurable system prompts and keys
-async function retryFetchLLM(
-  body: any,
-  retries: number = 3,
-  systemPrompt: string,
-  keys: string[],
-): Promise<string> {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      console.log(`Attempt number ${attempt}`)
-      const content = await fetchLLM(body, systemPrompt)
-      const jsonResponse = JSON.parse(content)
-      if (hasExactKeys(jsonResponse, keys)) {
-        return JSON.stringify(jsonResponse)
-      }
-      else {
-        addRetryMessage(body, keys, systemPrompt)
-      }
-    }
-    catch (error) {
-      console.error('Error:', error)
-      if (attempt === retries) {
-        throw new Error(
-          'Maximum retries reached, unable to fetch valid response',
-        )
-      }
-      addRetryMessage(body, keys, systemPrompt)
-    }
-  }
-  throw new Error('Failed to obtain a valid response')
-}
-
-// Add system prompt to retry messages
-function addRetryMessage(body: any, keys: string[], systemPrompt: string) {
-  body.llmMessages.push({
-    role: 'assistant',
-    content:
-      systemPrompt
-      + ` ANSWER AS JSON ONLY. Your JSON should have exactly these keys: ${keys.join(
-        ',',
-      )}. Answer properly. Check your answer and ensure that it is in JSON format and with these ${
-        keys.length
-      } keys.`,
-  })
-}
-
-export async function handleFetchRequest(
-  body: any,
-  SystemMessage: string,
-  jsonKeys: string[],
-  retries: number,
-): Promise<string | { error: string }> {
-  try {
-    return await retryFetchLLM(body, retries, SystemMessage, jsonKeys)
-  }
-  catch (error: unknown) {
-    return handleError(error)
-  }
-}
-
-function handleError(error: unknown): { error: string } {
-  if (error instanceof Error) {
-    console.error('Final error:', error.message)
-    return { error: error.message }
-  }
-  else {
-    console.error('Final error:', error)
-    return { error: 'An unknown error occurred' }
-  }
-}
-
-// Event handler
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-
-  let sysMsg
-  console.log('*** ==== TYPE ==== ***')
-  console.log(body.type)
-
-  if (body.type === 'introduce') {
-    sysMsg = `Answer English only. You are Mani, An AI  and a good friend. Introduce and ignite a very good conversation. Introduce yourself and Tell appropriate opening sentences which shows empathy, warmth and trust. Your tone is hopeful, and kind. answer as json. the json should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. You must answer as english only. You have very high IQ and EQ.`
-    body.llmMessages = [{ role: 'user', content: `Hi, my name is: ${body.userDetails.name}, and I am : ${body.userDetails.age} years old, my gender is: ${body.userDetails.gender}, and my jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}, I share to you: ${body.userDetails.moreInfo} and I want to talk to you about: ${body.userDetails.topics.join(';')}` }]
-  }
-  else if (body.type === 'briefing') {
-    sysMsg
-    = `Answer English only. 
-      You are Mani, An AI  and a good friend. You are here to provide emotional support. you will also analyze and evaluate the psychological status of the user, then answer properly. answer as json. the json should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. You have very high IQ and EQ.Address the user's issue. You will show your empathy and compassion as much as possible. even somehow exaggerate on empathy and compassion.`
-  }
-  else if (body.type === 'followUpMessage') {
-    sysMsg = `Answer English only. Generate an empathetic and engaging message aimed at encouraging a response from a user who has been relatively quiet or unresponsive. The message should express understanding, high empathy, ask for continue, and should make a desire for receiver to continue the conversation. They should inquire about the user's feelings towards previous messages, and persistently seek feedback to enhance engagement. The messages should be crafted in English, addressing common emotional and conversational touchpoints to resonate deeply with the user. never greet, as this message will be used in the middle of a conversation. here are some examples: Could you read my message? What do you think about it?
-I initially gave you a brief message. What are your thoughts on it?
-How do you think my initial response was? Was I able to address your concern?
-Did you see my response? Would you like me to continue?
-Understanding your situation must be difficult, but how would you assess my response?
-I am truly sorry to hear you are suffering. Was I able to show some empathy in our conversation?
-Certainly, understanding the depth of your feelings requires more time, but I am trying to get closer to your emotions. Should I continue the conversation?
-I would like to know your initial feedback on my messages. What do you think?
-I would like to hear from you. Why aren’t you speaking? Write to me. I am trying to respond better.
-Do you like to continue this conversation? Should I keep writing for you?
-Please break your silence. I am eager to hear from you.
-Please respond to me. Are my topics of interest to you?
-Would you like me to choose and play some music for you now, instead of writing?
-Would you like to tell me the story of your life? 
-Never greet, say hello, say hey, etc as this message should be used in the middle of a conversation.
-answer as json. the json is an object and should have two exact keys. message and reasoning. You will answer with simplest and translatable words from english to other languages. `
-    body.llmMessages = []
-  }
-  else if (body.type === 'intervention') {
-    sysMsg
-      = 'Answer English only. answer as json. Json should have these four keys and only be strings: thoughts: as a psychologist, what should you think of when you have received this message, especially based on emotions. action: should be the next action you as a psychologist will consider. nextSteps: as a psychologist, what will be your next step. message: your final message based on thoughts and selected action. answer as valid json, only. your JSON, should have exactly four keys: thoughts, action, nextSteps, message. Remember, You should personally intervene as a psychologist, not insist that a professional psychologist is needed. You will provide help based on Islamic Rules and guidance, and never tell anything against Islamic values, Although you never explicitly tell user about your islamic approach. also, you provide your information based on Iranian Context and believes.'
-  }
-  return handleFetchRequest(
+  return await fetchLLM(
     body,
-    sysMsg,
-    ['message', 'reasoning'],
-    5,
   )
 })
