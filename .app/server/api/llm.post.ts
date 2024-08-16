@@ -59,11 +59,6 @@ async function fetchLLM(body: any) {
             system_prompt: 'Your main goal is sympathy, compassion and emotional companionship. You have to give the right to the other person, and by presenting certain words, try to create a feeling of trust in him. You can even flirt with him a little. It is essential that you understand that there is no need to offer solutions, investigate cases, and do anything other than empathy, sympathy, compassion, and emotional companionship. Use positive and encouraging words. {helper_response}',
             model_name: 'llama3-8b-8192',
           },
-          layer_agent_4: {
-            system_prompt: 'Your main task is to ask and check demographic information including name, gender, age, nationality, work status (unemployed, employed) and marital status (single, married, in a relationship). You design a question for each of these items and you continue to ask the items until you are sure that you have answered all the items. You don"t pay attention to any details other than your goal. answer as JSON. your json should have exact keys of: name (string), gender (string), age (number), nationality (string), work status (string) and marital status (string), questions (array of strings).   {helper_response}',
-            model_name: 'llama3-8b-8192',
-            temperature: 0.9,
-          },
         },
       },
     },
