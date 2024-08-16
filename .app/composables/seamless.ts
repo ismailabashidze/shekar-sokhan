@@ -1,11 +1,11 @@
-import { client } from '@gradio/client'
+import { Client } from '@gradio/client'
 
 export function useSeamless() {
   const seamless = ref()
   const translated = ref('')
   const isTranslating = ref(false)
   const connect = async () => {
-    seamless.value = await client(
+    seamless.value = await Client.connect(
       // 'https://facebook-seamless-m4t-v2-large.hf.space/--replicas/2bmbx/',
       'https://bluman1-seamless-m4t-v2-large.hf.space/--replicas/y1arv/',
       {},
@@ -61,8 +61,10 @@ export function useSeamless() {
       )
       const audio_file = await response.blob()
 
-      const app = await client('abidlabs/whisper', {})
-      const transcription = await app.predict('/predict', [audio_file])
+      const app = await Client.connect('abidlabs/whisper')
+      // const result = await app.predict('/predict', [handle_file(audio_file)])
+
+      // console.log(result.data)
     }
     catch (error) {
       console.log('Error:', error)

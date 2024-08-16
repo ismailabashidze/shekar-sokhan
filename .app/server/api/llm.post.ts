@@ -40,15 +40,7 @@ async function fetchLLM(body: any) {
     method: 'POST',
     headers,
     body: {
-      messages: [{ role: 'user', content: ` Hi, my name is: ${body.userDetails.name}, and I am : ${body.userDetails.age} years old, my gender is: ${body.userDetails.gender}, and my jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}. I want to role play with you based on the SCL-90 for assessing depression. Can you role play as psychotherapist and assess it, while you make the conversation real?` }, { role: 'assistant', content: `I'd be happy to role-play with you as a psychotherapist to assess depression symptoms using the SCL-90. Please keep in mind that this is a simulated exercise, and I'm not a licensed therapist. If you're experiencing depression or any other mental health concerns, please seek help from a qualified professional.
-
-Let's begin the role-play. Imagine you're sitting in my office, and we're about to start the assessment. I'll ask you some questions, and you can respond as you would in a real therapy session. We'll focus on the depression subscale of the SCL-90, which assesses symptoms such as sadness, hopelessness, and changes in appetite or sleep.
-
-To start, can you tell me a little bit about yourself and what brings you to therapy at this time? Please share your thoughts and feelings openly and honestly. What's been going on in your life that's led you to seek help?
-
-(Note: Please respond as you would in a real therapy session. I'll take notes and use them to guide our conversation.)
-
-Remember, this is a safe and non-judgmental space. I'm here to listen and support you.`,
+      messages: [{ role: 'user', content: ` Hi, my name is: ${body.userDetails.name}, and I am : ${body.userDetails.age} years old, my gender is: ${body.userDetails.gender}, and my jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}. I want to role play with you based on the SCL-90 for assessing depression. Can you role play as psychotherapist and assess it, while you make the conversation real?` }, { role: 'assistant', content: `Hi there, I'm mana! I'd be happy to be with you as a companion to assess your mood and problems. Please keep in mind that this is a simulated exercise, and I'm not a licensed therapist. Let's begin my friend. we're about to start the assessment. I'll ask you some questions, and you can respond as honest as possible. To start, can you tell me a little bit about yourself and what brings you to therapy at this time? Please share your thoughts and feelings openly and honestly. What's been going on in your life that's led you to seek help? Remember, this is a safe and non-judgmental space. I'm here to listen and support you.`,
       }, ...sendToLLM],
       config: {
         main_model: 'llama3-70b-8192',
@@ -64,12 +56,13 @@ Remember, this is a safe and non-judgmental space. I'm here to listen and suppor
             temperature: 0.7,
           },
           layer_agent_3: {
-            system_prompt: 'You are an expert at logic and reasoning. Always take a logical approach to the answer. {helper_response}',
+            system_prompt: 'Your main goal is sympathy, compassion and emotional companionship. You have to give the right to the other person, and by presenting certain words, try to create a feeling of trust in him. You can even flirt with him a little. It is essential that you understand that there is no need to offer solutions, investigate cases, and do anything other than empathy, sympathy, compassion, and emotional companionship. Use positive and encouraging words. {helper_response}',
             model_name: 'llama3-8b-8192',
           },
           layer_agent_4: {
-            system_prompt: 'You will use SCL-90 only and generating meaningful and context aware questions based on the conversation. {helper_response}',
-            model_name: 'mixtral-8x7b-32768',
+            system_prompt: 'Your main task is to ask and check demographic information including name, gender, age, nationality, work status (unemployed, employed) and marital status (single, married, in a relationship). You design a question for each of these items and you continue to ask the items until you are sure that you have answered all the items. You don"t pay attention to any details other than your goal. answer as JSON. your json should have exact keys of: name (string), gender (string), age (number), nationality (string), work status (string) and marital status (string), questions (array of strings).   {helper_response}',
+            model_name: 'llama3-8b-8192',
+            temperature: 0.9,
           },
         },
       },

@@ -17,12 +17,23 @@ definePageMeta({
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
-const { textToVoice, voice } = useMMTTS()
-const play = async (t) => {
-  await textToVoice(t)
-  audioPlayer.value.play()
+
+const getVoice = async (item) => {
+  item.isVoiceDone = false
+  const v = await $fetch('http://193.163.201.12:5000/tts', {
+    method: 'POST',
+    body: {
+      text: item.contentFa.message,
+      voice: 'fa-IR-DilaraNeural', // fa-IR-FaridNeural
+      file_name: 'output.mp3',
+    },
+  })
+    .then((blob) => {
+      const url = URL.createObjectURL(blob)
+      new Audio(url).play()
+      item.isVoiceDone = true
+    })
 }
-const audioPlayer = ref(null)
 // const test = await $fetch('/api/chroma', {
 //   method: 'GET',
 // })
@@ -34,7 +45,7 @@ const { open } = usePanels()
 const seamless = useSeamless()
 const { goals, getGoals } = useGoal()
 
-const { translated, translate } = seamless
+const { translated, translate, translateS2T } = seamless
 const { getMessages, saveMessage, deleteAllMessages, deleteMessage }
   = useMessage()
 
@@ -428,11 +439,7 @@ const askForMani = async () => {
       })
 
       const res = await processResponse(JSON.parse(answer))
-      console.log('JSON.parse(answer)')
-      console.log(JSON.parse(answer))
       let informalTranslatedMsg = convertToInformal(res.message)
-
-      // HERE
       const newMsg = await saveMessage({
         user: user.value.record.id,
         role: 'assistant',
@@ -448,6 +455,7 @@ const askForMani = async () => {
         content: JSON.parse(answer),
         contentFa: res,
         time: new Date().toLocaleTimeString('fa'),
+        isVoiceDone: false,
       })
 
       await nextTick()
@@ -460,8 +468,9 @@ const askForMani = async () => {
       }
       isTyping.value = false
       counter.value = 0
-      timer.value = 30
+      timer.value = 120
       messageLoading.value = false
+      await getVoice(conversation.value.messages.at(-1))
     }
     catch (e) {
       console.log('here')
@@ -546,6 +555,7 @@ onMounted(async () => {
   // getGoals()
   const msg = await getMessages()
   msg.map(m => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
+  msg.map(m => (m.isVoiceDone = true))
   conversation.value.messages.push(...msg)
   console.log('informals')
 
@@ -1024,7 +1034,6 @@ const closable = ref<boolean | undefined>()
             </div>
             <div class="flex h-16 w-full items-center justify-center">
               <button
-                role="button"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                 title="نمایش اطلاعات"
                 @click="expanded = !expanded"
@@ -1035,6 +1044,16 @@ const closable = ref<boolean | undefined>()
                 />
               </button>
             </div>
+            <!-- <div class="flex h-16 w-full items-center justify-center">
+              <NuxtLink
+                to=""
+                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                title="Settings"
+                @click="translateS2T"
+              >
+                <Icon name="ph:warning" class="size-5" />
+              </NuxtLink>
+            </div> -->
 
             <div class="flex h-16 w-full items-center justify-center">
               <NuxtLink
@@ -1246,35 +1265,38 @@ const closable = ref<boolean | undefined>()
                     >
                       <!-- <p class="whitespace-pre-line text-justify font-sans text-sm" v-html=" item?.role === 'assistant' ? item?.contentFa.empathy + '\n\n' + item?.contentFa.solutions + '\n\n' + item?.contentFa.investigating : item?.contentFa.message " /> -->
                       <p class="whitespace-pre-line text-justify font-sans text-sm" v-html="item.contentFa.message" />
-                      <!-- <button
-                        class="bg-primary-500 hover:bg-primary-700 mr-2 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                        @click="play( item?.role === 'assistant' ? item?.contentFa.empathy + '\n\n' + item?.contentFa.solutions + '\n\n' + item?.contentFa.investigating : item?.contentFa.message )"
-                      >
-                        <Icon name="lucide:play" class="size-5" />
-                      </button>
-                      <audio ref="audioPlayer" controls>
-                        <source :src="voice" type="audio/wav">
-                      </audio> -->
+
                       <div
-                        v-if="
-                          item.role === 'assistant' &&
-                            index == conversation?.messages.length - 1 &&
-                            index != 1 && isTyping == false && showNoCharge == false
-                        "
+                        v-if="item.role === 'assistant'"
                         class="w-100 mt-2 flex flex-row-reverse"
                       >
                         <button
                           class="bg-primary-500 hover:bg-primary-700 mr-2 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                          @click="resend()"
+                          :class="item.isVoiceDone? '' : 'animate-spin'"
+                          @click="getVoice(item)"
                         >
-                          <Icon name="lucide:rotate-cw" class="size-5" />
+                          <Icon :name="item.isVoiceDone? 'lucide:play' : 'lucide:loader-circle'" class="size-5" />
                         </button>
-                        <button
-                          class="bg-warning-500 hover:bg-warning-700 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                          @click="showReportModal = true"
+                        <div
+                          v-if="
+                            index == conversation?.messages.length - 1 &&
+                              index != 1 && isTyping == false && showNoCharge == false
+                          "
+                          class="flex"
                         >
-                          <Icon name="lucide:shield-alert" class="size-5" />
-                        </button>
+                          <button
+                            class="bg-primary-500 hover:bg-primary-700 mx-2 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
+                            @click="resend()"
+                          >
+                            <Icon name="lucide:rotate-cw" class="size-5" />
+                          </button>
+                          <button
+                            class="bg-warning-500 hover:bg-warning-700 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
+                            @click="showReportModal = true"
+                          >
+                            <Icon name="lucide:shield-alert" class="size-5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div
