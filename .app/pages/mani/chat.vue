@@ -20,7 +20,7 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const getVoice = async (item) => {
   item.isVoiceDone = false
-  const v = await $fetch('http://193.163.201.12:5000/tts', {
+  const v = await $fetch('https://seam.brro.ir/tts', {
     method: 'POST',
     body: {
       text: item.contentFa.message,
