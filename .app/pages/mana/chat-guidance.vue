@@ -16,58 +16,68 @@ definePageMeta({
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
-const PATIENT_AGENT = 'ZohrehPatient'
-
-const llm = useLLM()
 const { user } = useUser()
 const { open } = usePanels()
 const seamless = useSeamless()
-
-const { translated, translate } = seamless
-const { ask } = llm
+const { agentAction } = useGuidance()
+const { translate } = seamless
 const { getMessages, saveMessage } = useMessage()
 
-const search = ref('')
-const message = ref('')
-const messageLoading = ref(false)
-const chatEl = ref<HTMLElement>()
-const expanded = ref(false)
-const loading = ref(true)
 const conversation = ref({
   user: {
-    name: 'مانی، مشاور بحران',
+    name: 'مانا، مشاور بحران',
     photo: '/img/avatars/1.svg',
     role: 'ایجنت هوش مصنوعی',
     bio: 'مانی، مشاور بحران توانایی همدلی، و انجام مداخلات بحران و بالاخص خودکشی را دارست.',
     age: '12500ms-17000ms',
     location: 'ایران',
   },
-  messages: [
-    {
-      role: 'separator',
-      translatedFa: 'شروع گفت و گو',
-      content: 'Conversation Started',
-    },
-    {
-      role: 'assistant',
-      translatedFa: 'سلام. من مانی هستم 👋. چطور می تونم به شما کمک کنم؟',
-      content: "Hi. I'm Mani. How can I help you?",
-      time: new Date().toLocaleTimeString('fa'),
-    },
-  ] as BackendMessage[],
+  messages: [] as BackendMessage[],
 })
+
+const chatEl = ref<HTMLElement>()
+const expanded = ref(false)
+const loading = ref(true)
 
 const sleep = (time: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, time))
 }
 
+const search = ref('')
+const message = ref('')
+const messageLoading = ref(false)
+
 onMounted(async () => {
-  const msg = await getMessages()
-  msg.map((m) => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
-  conversation.value.messages.push(...msg)
-  loading.value = false
-  // await autoConversation()
+  conversation.value.messages = await getMessages()
+  const temp = conversation.value.messages.map((m) => {
+    return {
+      role: m.role,
+      content: m.content,
+    }
+  })
+  console.log(JSON.stringify(temp))
+  const res = await agentAction({
+    task: 'chatSummerization',
+    text: JSON.stringify(temp),
+  })
+  console.log(res.data.value)
+
+  conversation.value.messages.unshift({
+    role: 'assistant',
+    content: "Hi, I'm Mana. How Can I help you?",
+    translatedFa: 'سلام. من مانا هستم 👋. چطور می تونم به شما کمک کنم؟',
+    created: new Date().toDateString(),
+    attachments: [],
+  })
+  conversation.value.messages.unshift({
+    role: 'separator',
+    content: '',
+    created: 'شروع گفت و گو',
+    attachments: [],
+  })
+
   await sleep(2000)
+  loading.value = false
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
@@ -78,61 +88,17 @@ onMounted(async () => {
   }, 300)
 })
 
-async function autoConversation() {
-  const lastContent = conversation.value.messages.at(-1)?.content as string
-  const m = await ask(PATIENT_AGENT, lastContent as string)
-  const t = await translate(m, 'English', 'Western Persian')
-  const newMessage: BackendMessage = {
-    role: 'user',
-    translatedFa: t,
-    content: m,
-    time: new Date().toLocaleTimeString('fa'),
-  }
-  conversation.value.messages.push(newMessage)
-  // const userEval = await ask('SummaryJsonizer', translated.value)
-  await saveMessage({
-    content: m as string,
-    translatedFa: t,
-    anonymousUser: user.value.id,
-    role: 'user',
-    // evaluations: JSON.parse(userEval),
-    evaluations: {},
-  })
-  const answer = await ask('Mani', m)
-  // const AIEval = await ask('SummaryJsonizer', translated.value)
-  const t2 = await translate(answer, 'English', 'Western Persian')
-  await saveMessage({
-    content: answer,
-    translatedFa: t2 as string,
-    anonymousUser: user.value.id,
-    role: 'assistant',
-    time: new Date().toLocaleTimeString('fa'),
-    evaluations: {},
-  })
-  conversation.value.messages.push({
-    role: 'assistant',
-    translatedFa: t2,
-    content: answer,
-    created: new Date().toLocaleTimeString('fa'),
-  })
-  await autoConversation()
-}
 async function submitMessage() {
   if (!message.value) return
   if (messageLoading.value) return
   messageLoading.value = true
-  const m = message.value
-  message.value = ''
   const newMessage: BackendMessage = {
     role: 'user',
-    translatedFa: m,
-    content: '',
+    content: message.value,
     time: new Date().toLocaleTimeString('fa'),
+    attachments: [],
   }
   conversation.value.messages.push(newMessage)
-  const t = await translate(m, 'Western Persian', 'English')
-  conversation.value.messages[conversation.value.messages.length - 1].content =
-    t as string
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
@@ -141,40 +107,9 @@ async function submitMessage() {
       })
     }
   }, 30)
-  const userEval = await ask('SummaryJsonizer', translated.value)
-  await saveMessage({
-    content: t as string,
-    translatedFa: m,
-    anonymousUser: user.value.id,
-    role: 'user',
-    evaluations: JSON.parse(userEval),
-  })
-  const answer = await ask('Mani', translated.value)
-  conversation.value.messages.push({
-    role: 'assistant',
-    translatedFa: answer,
-    content: answer as string,
-    time: new Date().toLocaleTimeString('fa'),
-  })
-  // messageLoading.value = false
-
-  // const AIEval = await ask('SummaryJsonizer', translated.value)
-  const t2 = await translate(answer, 'English', 'Western Persian')
-  await saveMessage({
-    content: answer,
-    translatedFa: t2 as string,
-    anonymousUser: user.value.id,
-    role: 'assistant',
-    time: new Date().toLocaleTimeString('fa'),
-    evaluations: {},
-  })
-  messageLoading.value = false
-  conversation.value.messages.push({
-    role: 'assistant',
-    translatedFa: translated.value,
-    content: t2 as string,
-    time: new Date().toLocaleTimeString('fa'),
-  })
+  const m = message.value
+  message.value = ''
+  const t = (await translate(m, 'Western Persian', 'English')) as string
 
   await nextTick()
 
@@ -396,7 +331,7 @@ async function submitMessage() {
                       class="text-muted-400 mt-1 font-sans text-xs"
                       :class="item.role === 'assistant' ? 'text-right' : ''"
                     >
-                      {{ item.time }}
+                      {{ new Date(item.created).toLocaleTimeString('fa') }}
                     </div>
                     <!-- <div
                       v-if="item.attachments.length > 0"
@@ -456,7 +391,7 @@ async function submitMessage() {
                     <span
                       class="bg-muted-100 dark:bg-muted-900 text-muted-400 px-3 font-sans text-xs uppercase"
                     >
-                      {{ item.translatedFa }}
+                      {{ item.time }}
                     </span>
                   </div>
                 </div>
@@ -465,6 +400,8 @@ async function submitMessage() {
           </div>
           <!-- Compose -->
           <form
+            method="POST"
+            action=""
             @submit.prevent="submitMessage"
             class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center px-4 sm:px-8"
           >

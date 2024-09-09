@@ -27,8 +27,8 @@ if (!nuxtApp.$pb.authStore.isValid) {
   navigateTo('/auth/login', { redirectCode: 401 })
 }
 else {
-  // navigateTo('/mani/chat', { redirectCode: 301 })
-  navigateTo('/clinic', { redirectCode: 301 })
+  // navigateTo('/mana/chat', { redirectCode: 301 })
+  navigateTo('/dashboard', { redirectCode: 301 })
 }
 </script>
 

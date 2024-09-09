@@ -19,7 +19,7 @@ definePageMeta({
   title: 'پردازش داده',
   layout: 'sidebar',
   preview: {
-    title: 'داشبورد مانی',
+    title: 'داشبورد مانا',
     description: 'بررسی جزییات پیام ها',
     categories: ['dashboards'],
     src: '/img/screens/dashboards-health.png',

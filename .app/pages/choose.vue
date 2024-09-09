@@ -74,7 +74,7 @@ const plans = [
   {
     name: 'طنین آرامش',
     description:
-      'طنین، اولین و تنها هوش مصنوعی با رویکرد مداخلات درمانی است که به مشاوران و مراجعان کمک می کند درمان اثر بخشی را تجربه نمایند.',
+      'طنین، اولین و تنها هوش مصنوعی با رویکرد مداخلات درمانا است که به مشاوران و مراجعان کمک می کند درمان اثر بخشی را تجربه نمایند.',
     price: {
       monthly: 10,
       yearly: 120,
@@ -83,7 +83,7 @@ const plans = [
     benefits: ['به زودی'],
   },
   {
-    name: 'مانی',
+    name: 'مانا',
     description: 'مانی، مشاور بحران',
     price: {
       monthly: 49,
@@ -130,7 +130,7 @@ const planColor = computed(() => {
       return 'text-indigo-500'
     case 'طنین آرامش':
       return 'text-primary-500'
-    case 'مانی':
+    case 'مانا':
       return 'text-orange-500'
     case 'تحلیل گر خبر':
       return 'text-green-500'
@@ -145,8 +145,8 @@ const chooseService = () => {
   // } else
   if (selectedPlan.value?.name === 'دانا، هوش مصنوعی فارسی') {
     navigateTo('/dana')
-  } else if (selectedPlan.value?.name === 'مانی') {
-    navigateTo('/Mani/chat')
+  } else if (selectedPlan.value?.name === 'مانا') {
+    navigateTo('/Mana/chat')
   } else if (selectedPlan.value?.name === 'خبره') {
     navigateTo('/Khebre')
   } else {
@@ -308,7 +308,7 @@ const chooseService = () => {
           >
         </BaseCard>
       </BaseRadioHeadless>
-      <BaseRadioHeadless v-model="customRadio" name="radio_custom" value="مانی">
+      <BaseRadioHeadless v-model="customRadio" name="radio_custom" value="مانا">
         <BaseCard
           shape="rounded"
           class="text-muted-400/50 peer-checked:!border-orange-500 peer-checked:text-orange-500 group relative p-6 text-center peer-checked:[&_.child]:!opacity-100"
@@ -325,7 +325,7 @@ const chooseService = () => {
             weight="medium"
             class="text-muted-800 dark:text-white"
           >
-            مانی
+            مانا
           </BaseHeading>
           <BaseText size="xs" lead="tight" class="text-muted-400"
             >سیستم هوشمند مداخله پیش از اقدام برای خودکشی

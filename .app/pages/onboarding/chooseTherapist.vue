@@ -3,7 +3,7 @@ definePageMeta({
   title: 'عامل ها',
   preview: {
     title: 'عامل های هوش مصنوعی',
-    description: 'عامل های هوش مصنوعی برای رویکرد های مختلف درمانی',
+    description: 'عامل های هوش مصنوعی برای رویکرد های مختلف درمانا',
     categories: ['layouts'],
     src: '/img/screens/layouts-user-grid-4.png',
     srcDark: '/img/screens/layouts-user-grid-4-dark.png',
@@ -39,12 +39,12 @@ const data = ref({
   data: [
     {
       id: 0,
-      username: 'مانی رستگار',
-      position: 'مشاور و روانشناس',
-      src: '/img/avatars/1.svg',
+      username: 'مانا',
+      position: 'عامل هوشمند ارزیابی سلامت روان',
+      src: '/img/avatars/mana.jpg',
       badge: '/img/logo.png',
       location: 'ایران، تهران',
-      industry: 'روان درمانی',
+      industry: 'روان درمانا',
       status: 'online',
       tasks: {
         pending: 37,
@@ -52,12 +52,12 @@ const data = ref({
         status: 0,
       },
       description:
-        'مانی رستگار اولین عامل هوشمند فارسی برای حمایت‌های روانی و همدلی است.',
+        'مانا اولین عامل هوشمند ارزیابی سلامت روان با سیستم تصمیم گیری و هدف گذاری برای تشخیص موضوعات مرتبط با سلامت روان است.',
     },
     {
-      id: 1,
-      username: 'مرتضی علوی',
-      position: 'درمانگر وجودی',
+      id: 2,
+      username: 'یارا',
+      position: 'عامل هوشمند همدلی',
       src: '/img/avatars/3.svg',
       badge: '/img/logo.png',
       location: 'ایران، تهران',
@@ -69,8 +69,60 @@ const data = ref({
         status: 1,
       },
       description:
-        'اولین روانشناس با رویکرد وجودی در دنیا، فعال به زبان فارسی و به زیبایی (بزودی)',
+        'یارا، اولین عامل هوشمند همدلی است که با توجه به وضعیت روانی و موضوعات فرد، از کاربران سیستم حمایت عاطفی و روانی انجام می دهد.',
     },
+    {
+      id: 3,
+      username: 'صبا',
+      position: 'عامل هوشمند مداخله در بحران',
+      src: '/img/avatars/saba.webp',
+      badge: '/img/logo.png',
+      location: 'ایران، تهران',
+      industry: 'Business',
+      status: 'working',
+      tasks: {
+        pending: 21,
+        done: 598,
+        status: 1,
+      },
+      description:
+        'صبا، اولین عامل هوشمند در مداخله های بحران، مناسب برای خطوط داغ مشاوره های بحران هایی مانند آسیب به خود و خودکشی است.',
+    },
+    {
+      id: 4,
+      username: 'زیگا',
+      position: 'عامل هوشمند مشاوره پویشی',
+      src: '/img/avatars/3.svg',
+      badge: '/img/logo.png',
+      location: 'ایران، تهران',
+      industry: 'Business',
+      status: 'working',
+      tasks: {
+        pending: 21,
+        done: 598,
+        status: 1,
+      },
+      description:
+        'زیگا، اولین عامل هوشمند در جهان است که توانایی برنامه ریزی و مداخله با استفاده از تکنیک های روانپویشی و تکنیک های ISTPD را دارد.',
+    },
+    {
+      id: 5,
+      username: 'کیا',
+      position: 'دستیار هوشمند مشاوره',
+      src: '/img/avatars/kia.webp',
+      badge: '/img/logo.png',
+      location: 'ایران، تهران',
+      industry: 'Business',
+      status: 'working',
+      tasks: {
+        pending: 21,
+        done: 598,
+        status: 1,
+      },
+      description:
+        'کیا، اولین دستیار هوشمند روان درمانگران با ارائه ی امکانات ویژه برای کمک به درمان',
+    },
+
     // {
     //   id: 2,
     //   username: 'Melany W.',
@@ -353,12 +405,12 @@ const refresh = ref()
                 class="block dark:hidden"
                 src="/img/illustrations/placeholders/flat/placeholder-search-2.svg"
                 alt="Placeholder image"
-              />
+              >
               <img
                 class="hidden dark:block"
                 src="/img/illustrations/placeholders/flat/placeholder-search-2-dark.svg"
                 alt="Placeholder image"
-              />
+              >
             </template>
           </BasePlaceholderPage>
         </div>
@@ -414,17 +466,17 @@ const refresh = ref()
                     <Icon
                       v-if="item.tasks.status === 0"
                       name="ph:check-circle-duotone"
-                      class="text-success-500 h-7 w-7"
+                      class="text-success-500 size-7"
                     />
                     <Icon
                       v-else-if="item.tasks.status === 1"
                       name="ph:warning-circle-duotone"
-                      class="text-warning-500 h-7 w-7"
+                      class="text-warning-500 size-7"
                     />
                     <Icon
                       v-else-if="item.tasks.status === 2"
                       name="ph:x-circle-duotone"
-                      class="text-danger-500 h-7 w-7"
+                      class="text-danger-500 size-7"
                     />
                   </div>
                 </div>
@@ -433,8 +485,7 @@ const refresh = ref()
                 <div class="mb-3 flex w-full items-center justify-center">
                   <BaseAvatar
                     size="xl"
-                    rounded="none"
-                    mask="hex"
+                    rounded="full"
                     :src="item.src"
                     :badge-src="item.badge"
                     :text="item.initials"
@@ -442,7 +493,12 @@ const refresh = ref()
                   />
                 </div>
                 <div class="text-center">
-                  <BaseHeading tag="h3" size="md" weight="medium" lead="none">
+                  <BaseHeading
+                    tag="h3"
+                    size="md"
+                    weight="medium"
+                    lead="none"
+                  >
                     {{ item.username }}
                   </BaseHeading>
                   <BaseParagraph size="sm" class="text-muted-400 mt-1">
@@ -450,7 +506,7 @@ const refresh = ref()
                   </BaseParagraph>
                 </div>
                 <div
-                  class="mb-6 mt-4 flex items-center justify-center text-center gap-3"
+                  class="mb-6 mt-4 flex items-center justify-center gap-3 text-center"
                 >
                   {{ item.description }}
                 </div>
@@ -460,16 +516,17 @@ const refresh = ref()
                     class="w-full"
                     :disabled="item.tasks.status === 1"
                   >
-                    <Icon name="ph:user-duotone" class="h-4 w-4 ml-2" />
+                    <Icon name="ph:user-duotone" class="ml-2 size-4" />
                     <span>نمایه</span>
                   </BaseButton>
                   <BaseButton
                     shape="curved"
                     class="w-full"
                     :disabled="item.tasks.status === 1"
+                    to="/mana/chat"
                   >
-                    <Icon name="ph:chat-circle-duotone" class="h-4 w-4 ml-2" />
-                    <span>صحبت با مشاور</span>
+                    <Icon name="ph:chat-circle-duotone" class="ml-2 size-4" />
+                    <span>گفت و گو</span>
                   </BaseButton>
                 </div>
               </div>

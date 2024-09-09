@@ -48,8 +48,9 @@ const redeem = async () => {
       icon: 'ph:check',
       closable: true,
     })
-    navigateTo('/mani/chat')
-  } else {
+    navigateTo('/mana/chat')
+  }
+  else {
     toaster.show({
       title: 'عدم ثبت',
       message: `کد نامعتبر است یا قبلا استفاده شده است`,
@@ -63,7 +64,7 @@ const redeem = async () => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen py-8">
+  <div class="flex min-h-screen items-center justify-center py-8">
     <div class="mx-auto w-full max-w-4xl">
       <BaseCard>
         <div
@@ -74,14 +75,19 @@ const redeem = async () => {
             <BaseAvatar
               class="mx-auto"
               size="xl"
-              src="/img/avatars/1.svg"
+              src="/img/avatars/mana.jpg"
               badge-src="/img/logo.png"
             />
             <div class="mx-auto mb-4 max-w-xs text-center">
-              <BaseHeading as="h2" size="md" weight="medium" class="mt-4">
+              <BaseHeading
+                as="h2"
+                size="md"
+                weight="medium"
+                class="mt-4"
+              >
                 ذهنا اولین
                 <span class="text-primary-500">عامل هوش مصنوعی</span>
-                به زبان فارسی (به نام مانی) را ساخته‌است که به شما حمایت‌های
+                به زبان فارسی (به نام مانا) را ساخته‌است که به شما حمایت‌های
                 روانشناختی ارائه می‌دهد.
               </BaseHeading>
             </div>
@@ -111,26 +117,35 @@ const redeem = async () => {
               </BaseCard>
 
               <div class="mt-6 flex items-center justify-between gap-2">
-                <BaseButton color="primary" class="w-full"
-                  >پرداخت اشتراک</BaseButton
+                <BaseButton
+                  color="primary"
+                  class="w-full"
                 >
+                  پرداخت اشتراک
+                </BaseButton>
                 <BaseButton
                   class="w-full"
-                  @click="openModal"
                   :loading="isSubmitting"
-                  >کد تخفیف دارم</BaseButton
+                  @click="openModal"
                 >
+                  کد تخفیف دارم
+                </BaseButton>
               </div>
             </div>
           </div>
           <div>
             <div class="flex flex-col p-8">
-              <BaseHeading tag="h2" size="md" weight="medium" class="mt-8">
+              <BaseHeading
+                tag="h2"
+                size="md"
+                weight="medium"
+                class="mt-8"
+              >
                 با کمک هم می توانیم!
               </BaseHeading>
               <BaseText
                 size="xs"
-                class="text-muted-500 dark:text-muted-400 max-w-xs mt-1"
+                class="text-muted-500 dark:text-muted-400 mt-1 max-w-xs"
               >
                 کمک‌های مالی شما در فعالیت‌ها و موارد زیر هزینه خواهد شد:
               </BaseText>
@@ -138,20 +153,24 @@ const redeem = async () => {
                 <ul class="space-y-6">
                   <li class="flex gap-3">
                     <div
-                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex h-9 w-9 items-center justify-center rounded-full border bg-white shadow-xl"
+                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
                     >
                       <Icon
                         name="lucide:check"
-                        class="text-success-500 h-4 w-4"
+                        class="text-success-500 size-4"
                       />
                     </div>
                     <div>
-                      <BaseHeading as="h3" size="sm" weight="medium">
+                      <BaseHeading
+                        as="h3"
+                        size="sm"
+                        weight="medium"
+                      >
                         توسعه و بهبود نرم افزاری
                       </BaseHeading>
                       <BaseText
                         size="xs"
-                        class="text-muted-500 dark:text-muted-400 max-w-[100%] text-justify"
+                        class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
                       >
                         با کمک شما می توانیم امکانات بیشتری را به سامانه اضافه
                         کنیم.
@@ -160,20 +179,24 @@ const redeem = async () => {
                   </li>
                   <li class="flex gap-3">
                     <div
-                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex h-9 w-9 items-center justify-center rounded-full border bg-white shadow-xl"
+                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
                     >
                       <Icon
                         name="lucide:check"
-                        class="text-success-500 h-4 w-4"
+                        class="text-success-500 size-4"
                       />
                     </div>
                     <div>
-                      <BaseHeading as="h3" size="sm" weight="medium">
+                      <BaseHeading
+                        as="h3"
+                        size="sm"
+                        weight="medium"
+                      >
                         سخت افزار و سرور
                       </BaseHeading>
                       <BaseText
                         size="xs"
-                        class="text-muted-500 dark:text-muted-400 max-w-[100%] text-justify"
+                        class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
                       >
                         هزینه‌های پردازنده‌های گرافیکی بسیار پیشرفته را پوشش
                         می‌دهیم.
@@ -183,20 +206,24 @@ const redeem = async () => {
 
                   <li class="flex gap-3">
                     <div
-                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex h-9 w-9 items-center justify-center rounded-full border bg-white shadow-xl"
+                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
                     >
                       <Icon
                         name="lucide:check"
-                        class="text-success-500 h-4 w-4"
+                        class="text-success-500 size-4"
                       />
                     </div>
                     <div>
-                      <BaseHeading as="h3" size="sm" weight="medium">
+                      <BaseHeading
+                        as="h3"
+                        size="sm"
+                        weight="medium"
+                      >
                         نگه داری و دردسترس پذیری
                       </BaseHeading>
                       <BaseText
                         size="xs"
-                        class="text-muted-500 dark:text-muted-400 max-w-[100%] text-justify"
+                        class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
                       >
                         شما به تیم ذهنا کمک می کنید که سرویس را پایدار و بدون
                         مشکل ارائه دهند.
@@ -205,20 +232,24 @@ const redeem = async () => {
                   </li>
                   <li class="flex gap-3">
                     <div
-                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex h-9 w-9 items-center justify-center rounded-full border bg-white shadow-xl"
+                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
                     >
                       <Icon
                         name="lucide:check"
-                        class="text-success-500 h-4 w-4"
+                        class="text-success-500 size-4"
                       />
                     </div>
                     <div>
-                      <BaseHeading as="h3" size="sm" weight="medium">
+                      <BaseHeading
+                        as="h3"
+                        size="sm"
+                        weight="medium"
+                      >
                         حمایت از ذهنا
                       </BaseHeading>
                       <BaseText
                         size="xs"
-                        class="text-muted-500 dark:text-muted-400 max-w-[100%] text-justify"
+                        class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
                       >
                         شما به تیم ذهنا و کمک رسانی به افرادی که نیاز به حمایت
                         روانی دارند کمک می کنید.
@@ -237,8 +268,8 @@ const redeem = async () => {
   <TairoModal
     :open="isModalOpen"
     size="sm"
-    @close="closeModal"
     footer-align="center"
+    @close="closeModal"
   >
     <template #header>
       <!-- Header -->
@@ -263,17 +294,17 @@ const redeem = async () => {
         </h3>
 
         <p
-          class="font-alt text-muted-500 dark:text-muted-400 text-sm leading-5 mt-2"
+          class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-sm leading-5"
         >
           کد خود را در زیر وارد نمایید.
         </p>
         <div class="mt-4">
           <BaseInput
+            v-model="couponCode"
             icon="ph:tag"
             label=""
             shape="curved"
             placeholder="کد را وارد نمایید"
-            v-model="couponCode"
             type="text"
           />
         </div>
@@ -284,9 +315,15 @@ const redeem = async () => {
       <!-- Footer -->
       <div class="p-4 md:p-6">
         <div class="flex gap-x-2">
-          <BaseButton @click="closeModal"> بازگشت </BaseButton>
+          <BaseButton @click="closeModal">
+            بازگشت
+          </BaseButton>
 
-          <BaseButton color="primary" variant="solid" @click="redeem">
+          <BaseButton
+            color="primary"
+            variant="solid"
+            @click="redeem"
+          >
             ثبت و فعال‌سازی
           </BaseButton>
         </div>

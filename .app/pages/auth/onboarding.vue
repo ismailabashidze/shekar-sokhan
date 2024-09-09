@@ -208,7 +208,7 @@ const verifyCodes = async () => {
       icon: 'ph:check',
       closable: true,
     })
-    router.push('/mani/chat')
+    router.push('/mana/chat')
   }
 }
 watch(tel, (newValue) => {

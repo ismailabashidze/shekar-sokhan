@@ -9,8 +9,7 @@ useHead({
   htmlAttrs: { dir: 'rtl' },
 })
 
-const { createUserDetails, getUserDetails } = useUser()
-
+const { newPsychoRegister } = usePsychotherapist()
 const initialState = ref<Invite>({
   name: '',
   email: '',
@@ -25,108 +24,127 @@ const initialState = ref<Invite>({
 const toaster = useToaster()
 const nuxtApp = useNuxtApp()
 
-const res = await getUserDetails(nuxtApp.$pb.authStore.model.id)
-if (res.length) {
-  toaster.clearAll()
-  toaster.show({
-    title: 'اطلاعات ثبت شده',
-    message: `اطلاعات قبلی ثبت شده است. `,
-    color: 'warning',
-    icon: 'ph:warning',
-    closable: true,
-  })
-  navigateTo('/mani/')
-}
+// const res = await getUserDetails(nuxtApp.$pb.authStore.model.id)
+// if (res.length) {
+//   toaster.clearAll()
+//   toaster.show({
+//     title: 'اطلاعات ثبت شده',
+//     message: `اطلاعات قبلی ثبت شده است. `,
+//     color: 'warning',
+//     icon: 'ph:warning',
+//     closable: true,
+//   })
+//   navigateTo('/mana/')
+// }
 
 function convertLabels(label) {
   const maritalStatus = {
-    'مجرد': 'single',
-    'متاهل': 'married',
-    'در رابطه عاطفی': 'inRelation',
-    'اقدام برای جدایی': 'breakUp',
-    'طلاق گرفته': 'divorced',
-  }
-
-  const employmentStatus = {
-    'دانش آموز': 'schoolStudent',
-    'دانشجو': 'universityStudent',
-    'استخدام بخش دولتی': 'publicSectorRecruitment',
-    'استخدام بخش خصوصی': 'privateSectorRecruitment',
-    'شغل آزاد': 'freelance',
-    'جویای کار': 'seekingForJob',
-    'خانه دار': 'houseWife',
-    'بیکار': 'jobless',
+    مجرد: 'single',
+    متاهل: 'married',
   }
 
   const gender = {
-    'مرد': 'male',
-    'زن': 'female',
-    'ترجیح می دهم نگویم': 'NA',
+    مرد: 'male',
+    زن: 'female',
+  }
+  const licenseStatus = {
+    'بدون پروانه - فعالیت داوطلبانه': 'notHaveVolunteer',
+    'بدون پروانه - دانشجوی روانشناسی': 'notHavePsychologyStudent',
+    'پروانه در دست اقدام': 'inProgress',
+    'دارای پروانه': 'haveOne',
   }
 
   if (maritalStatus[label]) {
     return maritalStatus[label]
   }
-  else if (employmentStatus[label]) {
-    return employmentStatus[label]
-  }
   else if (gender[label]) {
     return gender[label]
+  }
+  else if (licenseStatus[label]) {
+    return licenseStatus[label]
   }
   else {
     return 'Unknown label' // Return the label as is if no translation is found
   }
 }
+function convertPersianToEnglishAndRemoveNonDigits(input) {
+  if (typeof input === 'number') {
+    input = input.toString()
+  }
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
+  const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
+  let converted = input.split('').map((char) => {
+    const index = persianDigits.indexOf(char)
+    return index !== -1 ? englishDigits[index] : char
+  }).join('')
+
+  // Step 2: Remove all non-digit characters
+  converted = converted.replace(/\D/g, '')
+
+  return converted
+}
 const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = provideMultiStepForm({
   initialState,
   steps: [
     {
-      to: '/mani/initiation',
+      to: '/clinic/psychotherapist-register',
       meta: {
         name: 'اطلاعات اولیه',
         title: 'اطلاعات اولیه',
         subtitle:
-          'کمی بیشتر از خودتان بگویید. این به ما کمک می کند تا خدمات را بهتر به شما ارائه کنیم.',
+          'کمی بیشتر از خودتان بگویید. لطفا فرم زیر را پر کنید. این فرم دارای چند بخش است. پس از تکمیل هر بخش روی دکمه ی ادامه کلیک کنید.',
       },
       async validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['name', 'age', 'gender', 'maritalStatus', 'jobStatus'])
+        if (data.value.phoneNumber)
+          data.value.phoneNumber = convertPersianToEnglishAndRemoveNonDigits(data.value.phoneNumber)
+        if (data.value.age)
+          data.value.age = (convertPersianToEnglishAndRemoveNonDigits(data.value.age))
+
+        resetFieldError(['firstName', 'lastName', 'phoneNumber', 'email', 'age', 'gender', 'maritalStatus', 'licenseStatus'])
+        if (!data.value.firstName) setFieldError('firstName', 'نام خود را وارد نمایید')
+        if (!data.value.lastName) setFieldError('lastName', 'نام خانوادگی خود را وارد نمایید')
+        if (!data.value.phoneNumber) setFieldError('phoneNumber', 'شماره تماس خود را وارد نمایید')
+        if (!data.value.email) setFieldError('email', 'ایمیل خود را وارد نمایید')
         if (!data.value.age) setFieldError('age', 'سن خود را وارد نمایید')
         if (!data.value.gender) setFieldError('gender', 'جنسیت را به درستی انتخاب نمایید')
         if (!data.value.maritalStatus) setFieldError('maritalStatus', 'وضعیت تاهل را به درستی وارد نمایید')
-        if (!data.value.jobStatus) setFieldError('jobStatus', 'وضعیت شغلی را به درستی وارد نمایید')
+        if (!data.value.licenseStatus) setFieldError('licenseStatus', 'وضعیت پروانه را به درستی وارد نمایید')
+        if (data.value.phoneNumber) {
+          if (data.value.phoneNumber[0] != '0' && data.value.phoneNumber[1] != '9') setFieldError('phoneNumber', 'شماره باید با ۰۹ شروع شود')
+          if (data.value.phoneNumber.length != 11) setFieldError('phoneNumber', 'شماره باید یازده رقم باشد')
+        }
       },
+
     },
     {
-      to: '/mani/initiation/topic',
+      to: '/clinic/psychotherapist-register/topic',
       meta: {
-        name: 'موضوع صحبت',
-        title: 'انتخاب کنید',
+        name: 'انتخاب سوپروایزر',
+        title: 'انتخاب سوپروایزر',
         subtitle:
-          'لطفا از موارد زیر، موضوعاتی که می خواهید در مورد آن ها در این جلسه ی گفت و گو صحبت کنید را انتخاب نمایید. می توانید یک یا چند مورد را انتخاب نمایید.',
+          'سوپرویژن به بهبود ارائه ی خدمات و رشد حرفه ای کمک می کند. در صورتی که امتیاز شما بالای پانصد باشد، می توانید بدون سوپروایزر به مشاوره بپردازید.',
       },
       async validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['role'])
-        if (!data.value.role?.length) setFieldError('role', 'حداقل یک عدد باید انتخاب گردد.')
+        resetFieldError(['selectedSupervisor'])
+        if (!data.value.selectedSupervisor) setFieldError('selectedSupervisor', 'حداقل یک عدد باید انتخاب گردد.')
       },
     },
     {
-      to: '/mani/initiation/review',
+      to: '/clinic/psychotherapist-register/review',
       meta: {
-        name: 'کمی توضیح بیشتر',
-        title: 'کمی توضیح بیشتر',
+        name: 'بارگذاری مدارک',
+        title: 'بارگذاری مدارک',
         subtitle:
-          'هر آنچه که فکر می کنید برای توضیح لازم است بنویسید. اطلاعات بیشتر همواره کمک کننده است. لطفا وقت بگذارید و چند خطی بنویسید!',
+          'مدارک مورد نیاز را آپلود نمایید. این مدارک را به صورت انتخاب چندین فایل از روی دستگاه خود انجام دهید.',
       },
     },
   ],
   onSubmit: async (data, ctx) => {
-    // Simulate async request
-    await new Promise(resolve => setTimeout(resolve, 4000))
     data.gender = convertLabels(data.gender)
     data.maritalStatus = convertLabels(data.maritalStatus)
     data.jobStatus = convertLabels(data.jobStatus)
-    await createUserDetails({ ...data, user: nuxtApp.$pb.authStore.model.id, topics: data.role })
+    await newPsychoRegister(data)
     toaster.clearAll()
     toaster.show({
       title: 'ثبت موفق',

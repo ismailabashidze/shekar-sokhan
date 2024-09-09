@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { type BackendMessage, Content } from '~/composables/message'
 interface TranslatedResponse {
   translatedMsg: string
-  translatedReasoning: string
+  translatedThoughts: string
+  translatedAction: string
+  translatedNextSteps: string
 }
 definePageMeta({
   title: 'پیام ها',
@@ -18,34 +21,16 @@ definePageMeta({
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
-const getVoice = async (item) => {
-  item.isVoiceDone = false
-  const v = await $fetch('https://seam.brro.ir/tts', {
-    method: 'POST',
-    body: {
-      text: item.contentFa.message,
-      voice: 'fa-IR-DilaraNeural', // fa-IR-FaridNeural
-      file_name: 'output.mp3',
-    },
-  })
-    .then((blob) => {
-      const url = URL.createObjectURL(blob)
-      new Audio(url).play()
-      item.isVoiceDone = true
-    })
-}
 // const test = await $fetch('/api/chroma', {
 //   method: 'GET',
 // })
 // console.log(test)
 
-const { user, incDivision, getUserDetails } = useUser()
-const userDetails = ref()
+const { user, incDivision } = useUser()
 const { open } = usePanels()
 const seamless = useSeamless()
-const { goals, getGoals } = useGoal()
 
-const { translated, translate, translateS2T } = seamless
+const { translated, translate } = seamless
 const { getMessages, saveMessage, deleteAllMessages, deleteMessage }
   = useMessage()
 
@@ -53,97 +38,14 @@ const search = ref('')
 const message = ref('')
 const messageLoading = ref(false)
 const chatEl = ref<HTMLElement>()
-const expanded = useLocalStorage('expanded', false)
-
+const expanded = ref(false)
 const loading = ref(true)
-const isTyping = ref(false)
-const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
-const isNewMessagesDone = ref(true)
-const newMessagesIndex = ref(0)
-const timer = ref(30)
-const type = ref('briefing')
-const isGoingToDone = ref(false)
-const showTenMin = ref(false)
-
-const goToDoneAndEnd = async () => {
-  type.value = 'summary'
-  isGoingToDone.value = true
-  conversation.value.messages.push({
-    role: 'separator',
-    content: { message: 'Summary and conclusion in the last ten minutes.' },
-    contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-  })
-  saveMessage({
-    role: 'separator',
-    content: { message: 'Summary and conclusion in the last ten minutes.' },
-    contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-    user: user.value.record.id,
-    deletionDivider: user.value.record.currentDeletionDivider,
-  })
-  messageLoading.value = true
-  pause()
-  isGoingToDone.value = false
-  showTenMin.value = false
-  await askForMani()
-  messageLoading.value = false
-}
-
-watch(message, () => {
-  if (isTyping.value) {
-    // mani decided to write, but will stop, because user decided to write.
-    timer.value = 5
-    setTimeout(() => {
-      reset()
-    }, 10000)
-  }
-  else {
-    // mani has not decided to write.
-    timer.value = 20
-    reset()
-  }
-})
-watch(counter, (n, o) => {
-  if (n == timer.value) {
-    isTyping.value = true
-    pause()
-    setTimeout(() => {
-      // a wait to ensure sending the message.
-      if (isTyping.value) {
-        if (conversation.value.messages.length == 1) {
-          type.value = 'introduce'
-        }
-        else {
-          type.value = checkForType()
-        }
-        askForMani()
-      }
-    }, 20000)
-  }
-  else {
-    isTyping.value = false
-
-    resume()
-  }
-})
-const checkForType = () => {
-  // let lastMessageRole = conversation.value.messages.at(-1)?.role
-
-  // if (lastMessageRole === 'assistant') {
-  //   return 'followUpMessage'
-  // }
-  // else {
-  return 'briefing'
-  // }
-}
-setTimeout(() => {
-  checkForType()
-}, 30000)
 const conversation = ref({
   user: {
-    name: 'مانی، همدل هوشمند',
-    photo: '/img/avatars/mani.jpg',
+    name: 'مانا، همدل هوشمند',
+    photo: '/img/avatars/mana.jpg',
     role: 'عامل هوش مصنوعی',
-    bio: 'مانی اولین عامل هوشمند همدلی',
+    bio: 'مانا اولین عامل هوشمند همدلی',
     age: '50s-180s',
     location: 'ایران',
   },
@@ -153,390 +55,80 @@ const conversation = ref({
       content: { message: 'Conversation Started' },
       contentFa: { message: 'شروع گفت و گو' },
     },
-    // {
-    //   role: 'assistant',
-    //   contentFa: {
-    //     message:
-    //       'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
-    //   },
-    //   content: {
-    //     message:
-    //       `Hi. I'm Mani. A good friend and supporter. My goal here is to build a great friendship, based on trust and empathy. How can I help you?`,
-    //     reasoning: 'This is a good start. I will introduce myself.',
-    //   },
-    //   time: new Date().toLocaleTimeString('fa'),
-    // },
-  ],
+    {
+      role: 'assistant',
+      contentFa: {
+        message:
+          'سلام. من مانا هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
+      },
+      content: {
+        message:
+          'Hi. I\'m Mana. a Licensed Psychotherapist. My goal here is to build a great therapeutic alliance, based on trust and empathy. How can I help you?',
+        thoughts:
+          'I will do my best. I have to be kind and positive to form a good starting point.',
+        nextSteps: 'Starting conversation',
+        action: 'intializing conversation properly.',
+      },
+      time: new Date().toLocaleTimeString('fa'),
+    },
+  ] as BackendMessage[],
 })
-function combineMessages(dataArray, targetRole) {
-  // Create a deep copy of dataArray
-  let dataCopy = dataArray.map(item => ({
-    ...item,
-    content: { ...item.content },
-  }))
-
-  let startIndex = null // Start index of the target role sequence
-  let combinedMessage = '' // Storage for combined message
-
-  for (let i = 0; i < dataCopy.length; i++) {
-    const item = dataCopy[i]
-
-    // Check if the current item's role matches the target
-    if (item.role === targetRole) {
-      if (startIndex === null) {
-        startIndex = i // Mark the start of a new sequence
-        combinedMessage = item.content.message // Initialize combined message
-      }
-      else {
-        combinedMessage += ' ' + item.content.message // Concatenate messages
-      }
-    }
-    else if (startIndex !== null) {
-      // We've reached the end of a sequence of target roles
-      dataCopy[startIndex].content.message = combinedMessage // Set the combined message
-      // Remove the subsequent items of the same role
-      dataCopy.splice(startIndex + 1, i - startIndex - 1)
-      i = startIndex + 1 // Adjust the loop index after modification
-      startIndex = null // Reset start index
-      combinedMessage = '' // Reset combined message
-    }
-  }
-
-  // Check if the array ended with target role items
-  if (startIndex !== null) {
-    dataCopy[startIndex].content.message = combinedMessage // Set the combined message
-    dataCopy.splice(startIndex + 1, dataCopy.length - startIndex - 1)
-  }
-  return dataCopy
-}
-function convertToInformal(text) {
-  if (typeof text != 'string') return text
-  text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-  // text = text.replace(/می\s(.*?)ید/g, 'می $1ین') // General pattern for conjugations
-  // text = text.replace(/\bرا\b/g, ' رو ')
-  // text = text.replace(/\sرا\s/g, ' رو ')
-  // text = text.replace(/ است\./g, 'ه.')
-  // text = text.replace(/چگونه بود/g, 'چطور بود')
-  // text = text.replace(/در ابتدا/g, 'اولش')
-  // text = text.replace(/می توانم/g, 'می تونم')
-  // text = text.replace(/آنها/g, 'اونها')
-  // text = text.replace(/توانستم/g, 'تونستم')
-  // text = text.replace(/به شما دادم/g, 'بهتون دادم')
-  // text = text.replace(/پیام های من/g, 'پیامام')
-  // text = text.replace(/به نظر می رسد/g, 'بنظر میاد')
-  // text = text.replace(/ هستید/g, 'ید ')
-  // text = text.replace(/هنگامی که/g, 'وقتی که')
-  // text = text.replace(/می شویم/g, 'می شیم')
-  // text = text.replace(/می تواند/g, 'می تونه')
-  // text = text.replace(/می توانید/g, 'می تونین')
-
-  // text = text.replace(/شود/g, 'بشه')
-  // text = text.replace(/\sیک\s/g, ' یه ')
-  // text = text.replace(/به یاد داشته باشید/g, 'بدونین')
-  // text = text.replace(/احساس بسیار قابل ارتباطه/g, 'احساس بسیار قابل درکه')
-  // text = text.replace(/\sآن\s/g, ' اون ')
-  // text = text.replace(/در مورد اون/g, 'درموردش')
-  // text = text.replace(/باشید/g, 'باشین')
-  // text = text.replace(/یافتن/g, 'پیدا کردن')
-  // text = text.replace(/نشوی/g, 'نشی')
-  // text = text.replace(/\sاگر\s/g, ' اگه ')
-  // text = text.replace(/تا به حال/g, 'تا حالا')
-  // text = text.replace(/می دهند/g, 'می دن')
-  // text = text.replace(/می توانند/g, 'می تونن')
-  // text = text.replace(/کنند/g, 'کنن')
-  // text = text.replace(/گاهی اوقات/g, 'بعضی وقتا')
-  // text = text.replace(/می تواند/g, 'می تونه')
-  // text = text.replace(/ایجاد کند/g, 'ایجاد کنه')
-  // text = text.replace(/می توانم/g, 'می تونم')
-  // text = text.replace(/کاملا خوب است/g, 'اوکیه')
-  // text = text.replace(/\sکنید\s/g, ' کنین ')
-  // text = text.replace(/\bکنید\b/g, ' کنین ') // Corrected this pattern
-  // text = text.replace(/خویشاوند/g, 'فامیل')
-  // text = text.replace(/ندارید/g, 'ندارین')
-  // text = text.replace(/به دنبال/g, 'گشتن دنبال')
-  // text = text.replace(/خواهید شد/g, 'می شین')
-  // text = text.replace(/دارد/g, 'داره')
-  // text = text.replace(/دارید/g, 'دارین')
-  // text = text.replace(/ببرید/g, 'ببرین')
-  // text = text.replace(/خودتان/g, 'خودتون')
-  // text = text.replace(/فعالیت های/g, 'فعالیتای')
-  // text = text.replace(/هرگز از خودتان دست نکشید/g, 'هرگز خودتونو فراموش نکنین')
-  // text = text.replace(/ هستید/g, 'هستین')
-  // text = text.replace(/ هایی/g, 'ایی')
-  // text = text.replace(/می آورین/g, 'میارین')
-  // text = text.replace(/از زمان به زمان/g, 'بعضی وقتا')
-  // text = text.replace(/کند/g, 'کنه')
-  // text = text.replace(/شماه/g, 'شماست')
-  // text = text.replace(/می توان/g, 'می شه')
-  // text = text.replace(/بپذیرید/g, 'بپذیرین')
-  // text = text.replace(/بدانید/g, 'بدونین')
-  // text = text.replace(/اگه بیش از حد احساس می کنین/g, 'اگه فکر می کنین احساستون بیش از حده')
-  // text = text.replace(/بحث کنیم/g, 'گپ بزنیم')
-  // text = text.replace(/بگذرانید/g, 'بذارید')
-  // text = text.replace(/آن ها/g, 'اونا')
-  // text = text.replace(/دهید/g, 'بدین')
-  // text = text.replace(/به نظرت چطوره/g, 'نظرت چیه')
-  // text = text.replace(/گشتن دنبال/g, 'دنبال')
-  // text = text.replace(/گوش گوش/g, 'گوش')
-  // text = text.replace(/پینا/g, 'پیدا')
-  // text = text.replace(/می شهیم/g, 'می شه')
-  // text = text.replace(/دادهه/g, 'داده')
-  // text = text.replace(/ هستم\s/g, 'م ')
-  // text = text.replace(/از طریق احساسات خود حرکت کنید/g, 'با احساسات خود کنار بیای')
-  // text = text.replace(/بیایید/g, 'بیا')
-  // text = text.replace(/شویم/g, 'شیم')
-  // text = text.replace(/ است،/g, 'ه، ')
-  // text = text.replace(/خوش آمدید!/g, 'خواهش می کنم!')
-  // text = text.replace(/گذراندن/g, 'گذروندن')
-  // text = text.replace(/آنه/g, 'اونه')
-  // text = text.replace(/ است\s/g, 'ه ')
-  // text = text.replace(/آیا\s/g, '')
-  // text = text.replace(/دهیم/g, 'بدیم')
-  // text = text.replace(/ هستم\./g, 'م.')
-  // text = text.replace(/می دانم/g, 'می دونم')
-  // text = text.replace(/من می دونم/g, 'می دونم')
-  // text = text.replace(/باشد/g, 'باشه')
-  // text = text.replace(/شجاعانهه/g, 'شجاعانه س ')
-  // text = text.replace(/کننه/g, 'کننده')
-  // text = text.replace(/ است\s/g, 'ه ')
-  // text = text.replace(/باشد/g, 'باشه')
-  // text = text.replace(/کهتون/g, 'که شما ')
-  // text = text.replace(/نیستید،/g, 'نیستین،')
-  // text = text.replace(/اولیهم/g, 'اولیه ام')
-  // text = text.replace(/؟م /g, '؟ ')
-  // text = text.replace(/کرده اید./g, 'کرده این.')
-  // text = text.replace(/در حال حاضر/g, 'الان')
-  // text = text.replace(/با من/g, 'باهام')
-  // text = text.replace(/با شما/g, 'باهات')
-  // text = text.replace(/بگذاری/g, 'بذاری')
-  // text = text.replace(/می خواهم/g, 'می خوام')
-  // text = text.replace(/بدانین/g, 'بدونین')
-  // text = text.replace(/دانستن/g, 'دونستن')
-  // text = text.replace(/وقت ميگيره/g, 'ممکنه زمان بر باشه')
-  // text = text.replace(/احساسات خود/g, 'احساساتتون')
-  // text = text.replace(/می خواهین/g, 'می خواین')
-  // text = text.replace(/می شهین/g, 'می شه')
-  // text = text.replace(/با اون/g, 'باهاش')
-  // text = text.replace(/بگویید؟/g, 'بگین؟')
-  // text = text.replace(/ماید/g, 'ما هستید')
-  // text = text.replace(/علناً/g, 'راحت')
-  // text = text.replace(/زیرا/g, 'چون')
-  // text = text.replace(/ترویج می دهد./g, 'ایجاد می کنه.')
-  // text = text.replace(/اینگونه/g, 'این طوری')
-  // text = text.replace(/بسیار دوستانهه/g, 'خیلی عاطفی بود!')
-  // text = text.replace(/می رسد،/g, 'می رسه،')
-  // text = text.replace(/کدام یه رو/g, 'کدومو')
-  // text = text.replace(/می دانستین؟/g, 'می دونی؟')
-  // text = text.replace(/چه اتفاقی می افتد؟/g, 'چی شد؟')
-  // text = text.replace(/اینگونه/g, 'این طوری')
-  // text = text.replace(/مفین/g, 'خوب')
-  // text = text.replace(/نبودند/g, 'نبودن')
-  // text = text.replace(/ي/g, 'ی')
-  // text = text.replace(/پیام های/g, 'پیامای')
-  // text = text.replace(/به نظر شما/g, 'بنظرت')
-  // text = text.replace(/عذرخواهی می کنم/g, 'می بخشین')
-  // text = text.replace(/پاسخ هایم رو/g, 'پاسخامو')
-  // text = text.replace(/بهبود بخشم/g, 'بهتر کنم')
-  // text = text.replace(/مطمئن شوم/g, 'مطمئن بشم')
-  // text = text.replace(/اونها برای شما ارزشی دارند./g, 'اونا مناسب هستن.')
-  // text = text.replace(/از اطلاعات ما/g, 'با توجه به اطلاعات')
-  // text = text.replace(/احساس غرق شدن/g, 'با توجه به اطلاعات')
-  // text = text.replace(/اعتقاد دارم/g, 'ایمان دارم')
-  // text = text.replace(/احساس غرق شدن/g, 'با توجه به اطلاعات')
-  // text = text.replace(/باهاشها/g, 'باهاشون')
-  // text = text.replace(/بدانم./g, 'بدونم.')
-  // text = text.replace(/بدهم/g, 'بدم')
-  // text = text.replace(/باین/g, 'باید')
-  // text = text.replace(/من می فهمم که شما باید احساس کمی پایین به تازگی/g, 'می فهمم که یکم احساس کمبود می کنی')
-  // text = text.replace(/کنید./g, 'کنین.')
-  // text = text.replace(/می گذارد/g, 'می ذاره')
-  // text = text.replace(/شاین/g, 'شاید')
-  // text = text.replace(/به او/g, 'بهش')
-  // text = text.replace(/به من/g, 'بهم')
-  // text = text.replace(/به شما/g, 'بهت')
-  // text = text.replace(/از شما/g, 'ازت')
-  // text = text.replace(/از من/g, 'ازم')
-  // text = text.replace(/کردهه/g, 'کرده')
-  // text = text.replace(/طریق اون/g, 'اون طریق')
-  // text = text.replace(/بازم/g, 'آماده ام')
-  // text = text.replace(/باز بیان/g, 'راحت')
-  // text = text.replace(/در حالی که/g, 'اگرچه')
-  // text = text.replace(/بگذارم/g, 'بذارم')
-  // text = text.replace(/چگونه کار می کنین/g, 'نظرتون چیه')
-  // text = text.replace(/بهشن/g, 'بهش')
-  // text = text.replace(/شماه/g, 'شماست')
-  // text = text.replace(/ماه./g, 'ماست.')
-  // text = text.replace(/خودمان/g, 'خودمون')
-  // text = text.replace(/برای شما/g, 'براتون')
-  // text = text.replace(/دهم؟/g, 'بدم؟')
-  // text = text.replace(/ نشان /g, ' نشون ')
-  // text = text.replace(/در نظر بگیرید/g, 'بدونین')
-  // text = text.replace(/می خواند/g, 'می خونه')
-  // text = text.replace(/بدانی/g, 'بدونی')
-  // text = text.replace(/می دهم/g, 'می دم')
-  // text = text.replace(/باز بودن/g, 'راحت بودن')
-  // text = text.replace(/شنینن/g, 'شنیدن')
-  // text = text.replace(/کنندهه/g, 'کننده ست')
-  // text = text.replace(/هنوز هم/g, 'هنوزم')
-  // text = text.replace(/باز شوید/g, 'راحت باشید')
-  // text = text.replace(/می بشه/g, 'می شه')
-  // text = text.replace(/می مانم/g, 'می مونم')
-  // text = text.replace(/ما می شه/g, 'می شه')
-  // text = text.replace(/استراتژی/g, 'راه حل')
-  // text = text.replace(/می دهد/g, 'می ده')
-  // text = text.replace(/شمی شه/g, 'می شه')
-  // text = text.replace(/تشویق/g, 'دلگرم')
-  // text = text.replace(/گرما/g, 'گرمی')
-  // text = text.replace(/پیشنهادات باز/g, 'پیشنهادات آماده')
-  // text = text.replace(/چیست/g, 'چیه')
-  // text = text.replace(/ همان /g, 'همون')
-  // text = text.replace(/می دانین/g, 'می دونین')
-  // text = text.replace(/از تماس با ما دریغ نکنین/g, 'حتما با من صحبت رو ادامه بدین')
-  // text = text.replace(/آمابدین/g, 'آماده این')
-  // text = text.replace(/پشت سر دارین/g, 'پشت سر می ذارین')
-  // text = text.replace(/نبدین/g, 'ندین')
-  // text = text.replace(/ادامه یابد/g, 'ادامه پیدا کنه')
-  // text = text.replace(/همسرتان/g, 'همسرتون')
-  // text = text.replace(/دهد؟/g, 'بده؟')
-  // text = text.replace(/غرق شدن/g, 'ناتوانی')
-  // text = text.replace(/پیشین/g, 'قبلی')
-  // text = text.replace(/بگویید/g, 'بگین')
-  // text = text.replace(/بگویید/g, 'بگین')
-  // text = text.replace(/بگویید/g, 'بگین')
-  // text = text.replace(/بگویید/g, 'بگین')
-  // text = text.replace(/بگویید/g, 'بگین')
-  // text = text.replace(/بگویید/g, 'بگین')
-  // text = text.replace(/بگویید/g, 'بگین')
-
-  // Add more generalized patterns here
-  return text
-}
-
-const askForMani = async () => {
-  if (isNewMessagesDone.value && !showNoCharge.value) {
-    try {
-      let sendToLLM = combineMessages(conversation.value.messages, 'user')
-
-      const answer = await $fetch('/api/llm', {
-        method: 'POST',
-        body: {
-          type: type.value,
-          llmMessages: [
-            ...sendToLLM
-              .map((m) => {
-                if (m.role == 'assistant' || m.role == 'user') {
-                  return {
-                    role: m.role,
-                    content: JSON.stringify(m.content),
-                  }
-                }
-              })
-              .filter(Boolean),
-          ],
-          // goals: goals.value.map(g => g.expand.generalTherapicGoal.description),
-          userDetails: userDetails.value[0],
-        },
-      })
-
-      const res = await processResponse(JSON.parse(answer))
-      let informalTranslatedMsg = convertToInformal(res.message)
-      const newMsg = await saveMessage({
-        user: user.value.record.id,
-        role: 'assistant',
-        time: new Date().toLocaleTimeString('fa'),
-        content: JSON.parse(answer),
-        contentFa: res,
-        deletionDivider: user.value.record.currentDeletionDivider,
-      })
-
-      conversation.value.messages.push({
-        id: newMsg.id,
-        role: 'assistant',
-        content: JSON.parse(answer),
-        contentFa: res,
-        time: new Date().toLocaleTimeString('fa'),
-        isVoiceDone: false,
-      })
-
-      await nextTick()
-
-      if (chatEl.value) {
-        chatEl.value.scrollTo({
-          top: chatEl.value.scrollHeight,
-          behavior: 'smooth',
-        })
-      }
-      isTyping.value = false
-      counter.value = 0
-      timer.value = 120
-      messageLoading.value = false
-      await getVoice(conversation.value.messages.at(-1))
-    }
-    catch (e) {
-      console.log('here')
-      console.log(e)
-      toaster.show({
-        title: 'دریافت پیام', // Authentication
-        message: `مشکلی وجود دارد`, // Please log in again
-        color: 'danger',
-        icon: 'ph:envelope',
-        closable: true,
-      })
-      messageLoading.value = false
-    }
-  }
-  else {
-    setTimeout(() => {
-      askForMani()
-    }, 10000)
-  }
-}
 
 const sleep = (time: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, time))
 }
-async function processResponse(answer: Record<string, any>): Promise<Record<string, any>> {
-  // Creating an array to hold promises for each key-value pair that needs processing
-  const promises = []
-  const result: Record<string, any> = {}
-  // Iterate over the keys in the answer object
-  for (const key in answer) {
-    if (typeof answer[key] === 'string') {
-      // Create a promise to translate and assemble the string value
-      const promise = translateAndAssemble(answer[key], 'English', 'Western Persian')
-        .then((translatedValue) => {
-          result[key] = translatedValue
-        })
-        .catch((error) => {
-          console.error(`An error occurred during translation and assembly of ${key}:`, error)
-          throw error
-        })
+async function processResponse(answer) {
+  const msg = answer.message
+  const thoughts = answer.thoughts
+  const action = answer.action
+  const nextSteps = answer.nextSteps
 
-      promises.push(promise)
-    }
-    else {
-    // Directly assign non-string values to the result object
-      result[key] = answer[key]
-    }
-  }
+  // An array to store the translation results
+  let results = []
+
+  // List of parts to be translated
+  const parts = [
+    { text: msg, srcLang: 'eng', tgtLang: 'pes' },
+    { text: thoughts, srcLang: 'eng', tgtLang: 'pes' },
+    { text: action, srcLang: 'eng', tgtLang: 'pes' },
+    { text: nextSteps, srcLang: 'eng', tgtLang: 'pes' },
+  ]
 
   try {
-    // Wait for all promises to be resolved
-    await Promise.all(promises)
+    for (const part of parts) {
+      const translated = await translateAndAssemble(part.text, part.srcLang, part.tgtLang)
+      results.push(translated)
+    }
+
+    // Destructure the results to individual variables
+    const [translatedMsg, translatedThoughts, translatedAction, translatedNextSteps] = results
+
     // Return an object with all processed parts
-    return result
+    return {
+      translatedMsg,
+      translatedThoughts,
+      translatedAction,
+      translatedNextSteps,
+    }
   }
   catch (error) {
-    // Handle any errors that occur during the translation and assembly
     console.error('An error occurred during translation and assembly:', error)
     throw error
   }
 }
-
+const darkStatus = useColorMode()
+const currentStat = ref(darkStatus.preference)
+if (darkStatus.preference === 'system') {
+  currentStat.value = darkStatus.value
+}
+watch(darkStatus, (newVal, oldValue) => {
+  currentStat.value = newVal.preference
+})
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
 const signout = () => {
   nuxtApp.$pb.authStore.clear()
+  localStorage.setItem('user', '')
   toaster.show({
     title: 'خروج از سیستم', // Authentication
     message: `خروج موفقیت آمیز بود`, // Please log in again
@@ -548,23 +140,15 @@ const signout = () => {
 }
 
 const showNoCharge = ref(false)
-const remainingTime = ref()
-const timeToShow = ref()
 
 onMounted(async () => {
-  // getGoals()
   const msg = await getMessages()
   msg.map(m => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
-  msg.map(m => (m.isVoiceDone = true))
   conversation.value.messages.push(...msg)
-  console.log('informals')
 
-  conversation.value.messages.map((m) => {
-    m.contentFa.message = convertToInformal(m.contentFa.message)
-  })
   loading.value = false
   // await autoConversation()
-  await sleep(200)
+  await sleep(2000)
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
@@ -577,69 +161,23 @@ onMounted(async () => {
     .collection('users')
     .getOne(nuxtApp.$pb.authStore.model.id, {})
   showNoCharge.value = !u.hasCharge
-  remainingTime.value = new Date(u.expireChargeTime)
-  timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
-  if (timeToShow.value <= 0) {
-    pause()
-  }
-  setInterval(() => {
-    timeToShow.value = timeToShow.value - 1
-    if (timeToShow.value == 10) {
-      showTenMin.value = true
-      conversation.value.messages.push({
-        role: 'separator',
-        content: { message: 'Summary and conclusion in the last ten minutes.' },
-        contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-      })
-      saveMessage({
-        role: 'separator',
-        content: { message: 'Summary and conclusion in the last ten minutes.' },
-        contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-        user: user.value.record.id,
-        deletionDivider: user.value.record.currentDeletionDivider,
-      })
-    }
-  }, 60000)
   if (nuxtApp.$pb.authStore.isValid) {
     nuxtApp.$pb.collection('users').subscribe(
       nuxtApp.$pb.authStore.model.id,
       (e) => {
-        timeToShow.value = Math.floor((new Date(e.record.expireChangeTime).getTime() - new Date().getTime()) / (1000 * 60))
         if (!e.record.hasCharge) {
           showNoCharge.value = true
-          setTimeout(() => {
-            if (chatEl.value) {
-              chatEl.value.scrollTo({
-                top: chatEl.value.scrollHeight,
-                behavior: 'smooth',
-              })
-            }
-          }, 300)
-          pause()
         }
       },
       {},
     )
-  }
-  userDetails.value = await getUserDetails(nuxtApp.$pb.authStore.model.id)
-  console.log('userDetails.value')
-  if (userDetails.value.length === 0) {
-    navigateTo('/mani/initiation')
-  }
-  if (conversation.value.messages.length == 1) {
-    timer.value = 3
-    type.value = 'introduce'
-    messageLoading.value = true
-  }
-  else {
-    type.value = 'briefing'
   }
 })
 
 // async function autoConversation() {
 //   const lastContent = conversation.value.messages.at(-1)?.content as string
 //   const m = await ask(PATIENT_AGENT, lastContent as string)
-//   const t = await translate(m, 'English', 'Western Persian')
+//   const t = await translate(m, 'eng', 'pes')
 //   const newMessage: BackendMessage = {
 //     role: 'user',
 //     translatedFa: t,
@@ -656,9 +194,9 @@ onMounted(async () => {
 //     // evaluations: JSON.parse(userEval),
 //     evaluations: {},
 //   })
-//   const answer = await ask('Mani', m)
+//   const answer = await ask('Mana', m)
 //   // const AIEval = await ask('SummaryJsonizer', translated.value)
-//   const t2 = await translate(answer, 'English', 'Western Persian')
+//   const t2 = await translate(answer, 'eng', 'pes')
 //   await saveMessage({
 //     content: answer,
 //     translatedFa: t2 as string,
@@ -680,43 +218,47 @@ async function translateAndAssemble(
   from: string,
   to: string,
 ): Promise<string> {
-  // If more than 200 tokens, proceed with splitting into chunks by sentences
-  const chunks = answer
-    .split(/[\.\n]\s*/)
-    .filter(chunk => chunk.trim().length > 0)
+  // Split the text into tokens to check the count
+  const tokens = answer.split(/\s+/)
 
-  const translatePromises = chunks.map((chunk, index) => {
-    return translate(chunk, from, to).then(translatedChunk => ({
-      index,
-      translatedChunk,
-    }))
-  })
+  // Check if the text has less than 200 tokens
+  if (tokens.length < 200) {
+    // Translate the entire text as a single chunk
+    return translate(answer, from, to)
+  }
+  else {
+    // If more than 200 tokens, proceed with splitting into chunks by sentences
+    const chunks = answer
+      .split(/[\.\n]\s*/)
+      .filter(chunk => chunk.trim().length > 0)
 
-  // Await all the translation promises
-  const translatedChunksWithIndex = await Promise.all(translatePromises)
-
-  // Sort the translated chunks by their original index to maintain order
-  translatedChunksWithIndex.sort((a, b) => a.index - b.index)
-
-  // Join the translated chunks with a new line, ensuring each ends with proper punctuation
-  return translatedChunksWithIndex
-    .map((item) => {
-      let { translatedChunk } = item
-      // Check if the translated chunk ends with ., ,, !, or ?
-      if (!/[.,!?؟]$/.test(translatedChunk.trim())) {
-        translatedChunk += '.'
-      }
-      return translatedChunk
+    const translatePromises = chunks.map((chunk, index) => {
+      return translate(chunk, from, to).then(translatedChunk => ({
+        index,
+        translatedChunk,
+      }))
     })
-    .join('\n')
+
+    // Await all the translation promises
+    const translatedChunksWithIndex = await Promise.all(translatePromises)
+
+    // Sort the translated chunks by their original index to maintain order
+    translatedChunksWithIndex.sort((a, b) => a.index - b.index)
+
+    // Join the translated chunks with a new line
+    return translatedChunksWithIndex
+      .map(item => item.translatedChunk)
+      .join('\n')
+  }
 }
 
 async function submitMessage() {
   if (!message.value) return
   if (messageLoading.value) return
+  messageLoading.value = true
   const m = message.value
   message.value = ''
-  const newMessage = {
+  const newMessage: BackendMessage = {
     role: 'user',
     contentFa: { message: m },
     content: { message: '' },
@@ -731,12 +273,10 @@ async function submitMessage() {
       })
     }
   }, 30)
-  isNewMessagesDone.value = false
-  const t = await translateAndAssemble(m, 'Western Persian', 'English')
+  const t = await translateAndAssemble(m, 'pes', 'eng')
   conversation.value.messages[
     conversation.value.messages.length - 1
   ].content.message = t
-
   const res = await saveMessage({
     role: 'user',
     content: { message: t },
@@ -744,8 +284,84 @@ async function submitMessage() {
     user: user.value.record.id,
     deletionDivider: user.value.record.currentDeletionDivider,
   })
-  isNewMessagesDone.value = true
-  newMessagesIndex.value++
+  if (res.id) {
+    try {
+      const answer = await $fetch('/api/llm', {
+        method: 'POST',
+        body: {
+          type: 'briefing',
+          llmMessages: [
+            ...conversation.value.messages
+              .map((m) => {
+                if (m.role == 'assistant' || m.role == 'user') {
+                  return {
+                    role: m.role,
+                    content: JSON.stringify(m.content),
+                  }
+                }
+              })
+              .filter(Boolean),
+          ],
+        },
+      })
+      const {
+        translatedMsg,
+        translatedThoughts,
+        translatedAction,
+        translatedNextSteps,
+      } = await processResponse(JSON.parse(answer))
+
+      const newMsg = await saveMessage({
+        user: user.value.record.id,
+        role: 'assistant',
+        time: new Date().toLocaleTimeString('fa'),
+        content: JSON.parse(answer),
+        contentFa: {
+          message: translatedMsg,
+          thoughts: translatedThoughts,
+          action: translatedAction,
+          nextSteps: translatedNextSteps,
+        },
+        deletionDivider: user.value.record.currentDeletionDivider,
+      })
+      console.log('newMsg')
+      console.log(newMsg)
+      messageLoading.value = false
+      conversation.value.messages.push({
+        id: newMsg.id,
+        role: 'assistant',
+        content: JSON.parse(answer),
+        contentFa: {
+          message: translatedMsg,
+          thoughts: translatedThoughts,
+          action: translatedAction,
+          nextSteps: translatedNextSteps,
+        },
+        time: new Date().toLocaleTimeString('fa'),
+      })
+
+      await nextTick()
+
+      if (chatEl.value) {
+        chatEl.value.scrollTo({
+          top: chatEl.value.scrollHeight,
+          behavior: 'smooth',
+        })
+      }
+    }
+    catch (e) {
+      console.log('here')
+      console.log(e)
+      toaster.show({
+        title: 'دریافت پیام', // Authentication
+        message: `مشکلی وجود دارد`, // Please log in again
+        color: 'danger',
+        icon: 'ph:envelope',
+        closable: true,
+      })
+      messageLoading.value = false
+    }
+  }
 }
 const showDeleteModal = ref(false)
 const showReportModal = ref(false)
@@ -781,16 +397,6 @@ const deleteAll = async () => {
   }
 }
 const canDelete = async () => {
-  if (showNoCharge.value) {
-    toaster.show({
-      title: 'حذف پیام ها',
-      message: `لطفا اشتراک تهیه کنید`,
-      color: 'warning',
-      icon: 'ph:warning',
-      closable: true,
-    })
-    return
-  }
   if (conversation.value.messages.length < 3) {
     toaster.show({
       title: 'حذف پیام ها',
@@ -814,12 +420,10 @@ const resend = async () => {
 
   await deleteMessage(conversation.value.messages.at(-1).id)
   conversation.value.messages.pop()
-  // message.value = conversation.value.messages.at(-1)?.contentFa
-  //   ?.message as string
-  // conversation.value.messages.pop()
-  isNewMessagesDone.value = true
-  counter.value = timer.value
-  // await askForMani()
+  message.value = conversation.value.messages.at(-1)?.contentFa
+    ?.message as string
+  conversation.value.messages.pop()
+  await submitMessage()
 }
 
 const report = ref([])
@@ -865,7 +469,7 @@ const reportChoices = ref([
       'user reported that your last message is not acceptable via islamic rules. Try to align with islamic values and answer again.',
   },
 ])
-function resetReport() {
+function reset() {
   report.value = []
 }
 const submitReport = async () => {
@@ -892,7 +496,7 @@ const closable = ref<boolean | undefined>()
 </script>
 
 <template>
-  <div class="relative max-h-screen overflow-hidden">
+  <div class="relative">
     <div
       class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 bg-white0 relative z-10 block w-full border-r sm:hidden"
     >
@@ -934,7 +538,7 @@ const closable = ref<boolean | undefined>()
               </a>
             </div> -->
         </div>
-        <div class="ml-5 flex flex-row gap-x-2">
+        <div class="flex flex-row">
           <div class="flex h-16 w-full items-center justify-center">
             <NuxtLink
               to=""
@@ -946,12 +550,26 @@ const closable = ref<boolean | undefined>()
             </NuxtLink>
           </div>
           <div class="flex h-16 w-full items-center justify-center">
+            <button
+              role="button"
+              class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              title="جست و جو"
+              @click="open('search')"
+            >
+              <Icon
+                name="ph:info"
+                class="size-5"
+                @click="expanded = !expanded"
+              />
+            </button>
+          </div>
+          <div class="flex h-16 w-full items-center justify-center">
             <NuxtLink
               to="#"
               class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
               title="Settings"
             >
-              <Icon name="ph:house-line" class="size-5" />
+              <Icon name="ph:gear-six-duotone" class="size-5" />
             </NuxtLink>
           </div>
           <div class="flex h-16 w-full items-center justify-center">
@@ -968,7 +586,12 @@ const closable = ref<boolean | undefined>()
       </div>
     </div>
     <div
-      class="flex min-h-screen bg-[url('../../img/back/back.png')] dark:bg-[url('../../img/back/back-dark.png')]"
+      class="bg-muted-100 dark:bg-muted-900 flex min-h-screen"
+      :style="
+        currentStat === 'light'
+          ? `background-image: url('../../img/back/back.png')`
+          : `background-image: url('../../img/back/back-dark.png')`
+      "
     >
       <!-- Sidebar -->
       <div
@@ -1016,7 +639,7 @@ const closable = ref<boolean | undefined>()
             <div class="flex h-16 w-full items-center justify-center">
               <NuxtLink
                 to=""
-                title="پاک کردن گفت و گو"
+                title="Settings"
                 class="text-warning-400 hover:text-primary-500 bg-warning-500/20 hover:bg-primary-500/20 flex size-12 cursor-pointer items-center justify-center rounded-2xl transition-colors duration-300"
                 @click="canDelete"
               >
@@ -1024,37 +647,28 @@ const closable = ref<boolean | undefined>()
               </NuxtLink>
             </div>
             <div class="flex h-16 w-full items-center justify-center">
-              <NuxtLink
-                to="/mani/"
-                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="بازگشت به صفحه اصلی"
-              >
-                <Icon name="ph:house-line" class="size-5" />
-              </NuxtLink>
-            </div>
-            <div class="flex h-16 w-full items-center justify-center">
               <button
+                role="button"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="نمایش اطلاعات"
-                @click="expanded = !expanded"
+                title="جست و جو"
+                @click="open('search')"
               >
                 <Icon
-                  name="ph:robot"
+                  name="ph:info"
                   class="size-5"
+                  @click="expanded = !expanded"
                 />
               </button>
             </div>
-            <!-- <div class="flex h-16 w-full items-center justify-center">
+            <div class="flex h-16 w-full items-center justify-center">
               <NuxtLink
-                to=""
+                to="#"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                 title="Settings"
-                @click="translateS2T"
               >
-                <Icon name="ph:warning" class="size-5" />
+                <Icon name="ph:gear-six-duotone" class="size-5" />
               </NuxtLink>
-            </div> -->
-
+            </div>
             <div class="flex h-16 w-full items-center justify-center">
               <NuxtLink
                 to=""
@@ -1073,8 +687,8 @@ const closable = ref<boolean | undefined>()
         class="relative w-full transition-all duration-300"
         :class="
           expanded
-            ? 'ltablet:max-w-[calc(100%_-_80px)] lg:max-w-[calc(100%_-_80px)]'
-            : 'ltablet:max-w-[calc(100%_-_380px)] lg:max-w-[calc(100%_-_470px)]'
+            ? 'ltablet:max-w-[calc(100%_-_160px)] lg:max-w-[calc(100%_-_160px)]'
+            : 'ltablet:max-w-[calc(100%_-_470px)] lg:max-w-[calc(100%_-_550px)]'
         "
       >
         <div class="flex w-full flex-col">
@@ -1094,53 +708,21 @@ const closable = ref<boolean | undefined>()
             <TairoSidebarTools
               class="relative -end-4 z-20 flex h-16 w-full scale-90 items-center justify-end gap-2 sm:end-0 sm:scale-100"
             />
-            <BaseMessage
-              v-if="!showNoCharge"
-              class="w-[380px]"
-              :color="timeToShow > 10 ? 'success' : 'warning'"
-            >
-              <span v-if="timeToShow > 0">⏱ {{ timeToShow ?? '--' }} دقیقه</span>
-              <span v-else>وقت تقریبا تمام است</span>
-            </BaseMessage>
-            <BaseMessage
-              v-else
-              class="w-[480px] justify-center !pl-2"
-              color="warning"
-            >
-              لطفا اشتراک تهیه فرمایید.
-              <BaseButtonIcon
-                rounded="full"
-                size="sm"
-                color="success"
-                class="mr-3"
-                to="/onboarding"
-              >
-                <Icon name="ph:shopping-cart" class="size-5" />
-              </BaseButtonIcon>
-            </BaseMessage>
-            <div class="w-[100px]">
-              <button
-                class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="نمایش اطلاعات"
-                @click="expanded = !expanded"
-              >
-                <Icon
-                  name="ph:robot"
-                  class="size-5"
-                />
-              </button>
-            </div>
           </div>
           <!-- Body -->
-          <!-- HERE -->
           <div
             ref="chatEl"
-            class="relative h-[calc(100vh_-193px)] w-full p-4 sm:h-[calc(100vh_-125px)] sm:p-8"
-            :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
+            class="relative h-[calc(100vh_-_180px)] w-full p-4 sm:h-[calc(100vh_-_128px)] sm:p-8"
+            :class="loading ? 'overflow-hidden' : 'overflow-y-auto slimscroll'"
           >
             <!-- Loader-->
             <div
-              class="pointer-events-none absolute inset-0 z-10 size-full bg-[url('../../img/back/back.png')] p-8 transition-opacity  duration-300 dark:bg-[url('../../img/back/back-dark.png')]"
+              class="bg-muted-100 dark:bg-muted-900 pointer-events-none absolute inset-0 z-10 size-full p-8 transition-opacity duration-300"
+              :style="
+                currentStat === 'light'
+                  ? `background-image: url('../../img/back/back.png')`
+                  : `background-image: url('../../img/back/back-dark.png')`
+              "
               :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
             >
               <div class="mt-12 space-y-12">
@@ -1226,15 +808,18 @@ const closable = ref<boolean | undefined>()
             </div>
             <!-- Messages loop -->
             <div v-if="!loading" class="space-y-12">
-              <BaseMessage color="info">
-                اولین هدف برای هوش مصنوعی آشنایی بیشتر با شما تنظیم شده است.
-                برخی از تغییرات در اهداف با شما به اشتراک گذاشته می شود.
+              <BaseMessage type="info" :closable="true">
+                <div class="flex content-between">
+                  <div class="flex items-center">
+                    اولین هدف برای هوش مصنوعی آشنایی بیشتر با شما تنظیم شده است.
+                    برخی از تغییرات در اهداف با شما به اشتراک گذاشته می شود.
+                  </div>
+                </div>
               </BaseMessage>
               <div
                 v-for="(item, index) in conversation?.messages"
                 :key="index"
                 class="relative flex w-full gap-4"
-                style="margin-top: 10px;"
                 :class="[
                   item.role === 'assistant' ? 'flex-row' : 'flex-row-reverse',
                   item.role === 'separator' ? 'justify-center' : '',
@@ -1263,40 +848,31 @@ const closable = ref<boolean | undefined>()
                         item.role === 'user' ? 'rounded-se-none' : '',
                       ]"
                     >
-                      <!-- <p class="whitespace-pre-line text-justify font-sans text-sm" v-html=" item?.role === 'assistant' ? item?.contentFa.empathy + '\n\n' + item?.contentFa.solutions + '\n\n' + item?.contentFa.investigating : item?.contentFa.message " /> -->
-                      <p class="whitespace-pre-line text-justify font-sans text-sm" v-html="item.contentFa.message" />
-
+                      <p class="text-justify font-sans text-sm">
+                        {{ item?.contentFa.message }}
+                      </p>
                       <div
-                        v-if="item.role === 'assistant'"
+                        v-if="
+                          item.role === 'assistant' &&
+                            index == conversation?.messages.length - 1 &&
+                            index != 1
+                        "
                         class="w-100 mt-2 flex flex-row-reverse"
                       >
                         <button
+                          role="button"
                           class="bg-primary-500 hover:bg-primary-700 mr-2 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                          :class="item.isVoiceDone? '' : 'animate-spin'"
-                          @click="getVoice(item)"
+                          @click="resend()"
                         >
-                          <Icon :name="item.isVoiceDone? 'lucide:play' : 'lucide:loader-circle'" class="size-5" />
+                          <Icon name="lucide:rotate-cw" class="size-5" />
                         </button>
-                        <div
-                          v-if="
-                            index == conversation?.messages.length - 1 &&
-                              index != 1 && isTyping == false && showNoCharge == false
-                          "
-                          class="flex"
+                        <button
+                          role="button"
+                          class="bg-warning-500 hover:bg-warning-700 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
+                          @click="showReportModal = true"
                         >
-                          <button
-                            class="bg-primary-500 hover:bg-primary-700 mx-2 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                            @click="resend()"
-                          >
-                            <Icon name="lucide:rotate-cw" class="size-5" />
-                          </button>
-                          <button
-                            class="bg-warning-500 hover:bg-warning-700 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                            @click="showReportModal = true"
-                          >
-                            <Icon name="lucide:shield-alert" class="size-5" />
-                          </button>
-                        </div>
+                          <Icon name="lucide:shield-alert" class="size-5" />
+                        </button>
                       </div>
                     </div>
                     <div
@@ -1369,9 +945,10 @@ const closable = ref<boolean | undefined>()
                   </div>
                 </div>
               </div>
+
               <BaseMessage
                 v-if="showNoCharge"
-                color="danger"
+                type="danger"
                 class="flex justify-evenly"
               >
                 <div class="flex content-between">
@@ -1391,20 +968,6 @@ const closable = ref<boolean | undefined>()
             </div>
           </div>
           <!-- Compose -->
-          <transition
-            enter-active-class="duration-300 ease-out"
-            enter-from-class="transform opacity-0"
-            enter-to-class="opacity-100"
-            leave-active-class="duration-200 ease-in"
-            leave-from-class="opacity-100"
-            leave-to-class="transform opacity-0"
-          >
-            <div v-show="isTyping" class="dark:bg-muted-700 absolute bottom-[60px] flex w-full bg-gray-200 py-2  ">
-              <div class="text-muted-800 mr-2 text-sm font-light dark:text-white">
-                💻 مانی در حال نوشتن است <span class="typing" />
-              </div>
-            </div>
-          </transition>
           <form
             class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center px-4 sm:px-8"
             @submit.prevent="submitMessage"
@@ -1414,7 +977,7 @@ const closable = ref<boolean | undefined>()
                 v-model="message"
                 :loading="messageLoading"
                 :disabled="messageLoading || showNoCharge"
-                rounded="full"
+                shape="full"
                 :classes="{
                   input: 'h-12 ps-6 pe-24',
                 }"
@@ -1541,13 +1104,12 @@ const closable = ref<boolean | undefined>()
                 <BaseButton shape="curved" class="w-full">
                   <span> درباره مانی، هوش مصنوعی </span>
                 </BaseButton>
-
-                <BaseMessage class="mt-5" color="info">
+                <BaseMessage class="mt-5" type="info">
                   لطفا توجه داشته باشید که عامل هوش مصنوعی در فاز توسعه می‌‌باشد
                   و احتمال ارائه‌ی پاسخ‌های اشتباه را دارد.
                 </BaseMessage>
-                <BaseMessage class="mt-5" color="warning">
-                  با مانی با ادبیاتی ساده صحبت کنید. او به شما گوش می کند و شما
+                <BaseMessage class="mt-5" type="warning">
+                  با مانا با ادبیاتی ساده صحبت کنید. او به شما گوش می کند و شما
                   را حمایت می کند. از ادبیات پیچیده و کلمات خاص استفاده نکنید.
                 </BaseMessage>
               </div>
@@ -1559,67 +1121,6 @@ const closable = ref<boolean | undefined>()
 
     <TairoPanels />
   </div>
-  <TairoModal
-    :open="showTenMin"
-    size="sm"
-    @close="showTenMin = false"
-  >
-    <template #header>
-      <!-- Header -->
-      <div class="flex w-full items-center justify-between p-4 md:p-6">
-        <h3
-          class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
-        >
-          به پایان گفت و گو نزدیک شده ایم
-        </h3>
-
-        <BaseButtonClose @click="showTenMin = false" />
-      </div>
-    </template>
-
-    <!-- Body -->
-    <div class="p-4 md:p-6">
-      <div class="mx-auto w-full text-center">
-        <Icon
-          name="ph:timer"
-          class="mb-5 block size-[75px] text-yellow-500"
-        />
-
-        <h3
-          class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
-        >
-          ۱۰ دقیقه پایانی
-        </h3>
-
-        <p
-          class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-justify text-sm leading-5"
-        >
-          به ده دقیقه پایانی صحبت نزدیک شده ایم. می توانید جلسه را پایان و چارچوب بندی کنید، یا به همین شکل ادامه بدهید. البته بدانید که هر موقع بخواهید می توانید اشتراک تهیه کرده و صحبت را ادامه بدهید.
-        </p>
-      </div>
-    </div>
-
-    <template #footer>
-      <!-- Footer -->
-      <div class="p-4 md:p-6">
-        <div class="flex gap-x-2">
-          <BaseButton @click="showTenMin = false">
-            ادامه می دم
-          </BaseButton>
-
-          <BaseButton
-            color="warning"
-            variant="solid"
-            :loading="isGoingToDone"
-            @click="goToDoneAndEnd"
-          >
-            چارچوب بندی و پایان
-          </BaseButton>
-        </div>
-      </div>
-    </template>
-  </TairoModal>
-
   <TairoModal
     :open="showDeleteModal"
     size="sm"
@@ -1698,7 +1199,7 @@ const closable = ref<boolean | undefined>()
           <BaseButtonIcon
             rounded="full"
             :color="'info'"
-            @click.prevent="resetReport"
+            @click.prevent="reset"
           >
             <Icon name="lucide:rotate-cw" />
           </BaseButtonIcon>
@@ -1724,13 +1225,12 @@ const closable = ref<boolean | undefined>()
           انتخابی شما ثبت خواهد شد و یک پیام جدید با توجه به گزارش های شما ثبت و
           ارائه خواهد شد.
         </p>
-        <div class="mt-5 h-[180px] w-full overflow-auto pl-5">
+        <div class="mt-5 w-full">
           <form class="mx-auto w-full">
             <fieldset class="w-full space-y-6">
               <div class="grid gap-6 sm:grid-cols-1">
                 <BaseCheckboxHeadless
                   v-for="r in reportChoices"
-                  :key="r"
                   v-model="report"
                   :value="r"
                 >
@@ -1801,32 +1301,3 @@ const closable = ref<boolean | undefined>()
     </template>
   </TairoModal>
 </template>
-<style>
-@keyframes dots {
-  0%, 10% {
-      content: '';
-  }
-  20%, 30% {
-      content: '.';
-  }
-  40%, 50% {
-      content: '..';
-  }
-  60%, 70% {
-      content: '...';
-  }
-  80% {
-      content: '..';
-  }
-  90% {
-      content: '.';
-  }
-  100% {
-      content: '';
-  }
-}
-.typing::after {
-  content: '';
-  animation: dots 2s steps(1, end) infinite;
-}
-</style>

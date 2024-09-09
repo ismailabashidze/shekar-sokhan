@@ -49,14 +49,14 @@ const newMessagesIndex = ref(0)
 const timer = ref(30)
 watch(message, () => {
   if (isTyping.value) {
-    // mani decided to write, but will stop, because user decided to write.
+    // mana decided to write, but will stop, because user decided to write.
     timer.value = 5
     setTimeout(() => {
       reset()
     }, 3000)
   }
   else {
-    // mani has not decided to write.
+    // mana has not decided to write.
     timer.value = 7
     reset()
   }
@@ -81,10 +81,10 @@ watch(counter, (n, o) => {
 
 const conversation = ref({
   user: {
-    name: 'مانی، همدل هوشمند',
-    photo: '/img/avatars/mani.jpg',
+    name: 'مانا، همدل هوشمند',
+    photo: '/img/avatars/mana.jpg',
     role: 'عامل هوش مصنوعی',
-    bio: 'مانی اولین عامل هوشمند همدلی',
+    bio: 'مانا اولین عامل هوشمند همدلی',
     age: '50s-180s',
     location: 'ایران',
   },
@@ -98,11 +98,11 @@ const conversation = ref({
       role: 'assistant',
       contentFa: {
         message:
-          'سلام. من مانی هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
+          'سلام. من مانا هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
       },
       content: {
         message:
-          'Hi. I\'m Mani. a Licensed Psychotherapist. My goal here is to build a great therapeutic alliance, based on trust and empathy. How can I help you?',
+          'Hi. I\'m Mana. a Licensed Psychotherapist. My goal here is to build a great therapeutic alliance, based on trust and empathy. How can I help you?',
         thoughts:
           'I will do my best. I have to be kind and positive to form a good starting point.',
         nextSteps: 'Starting conversation',
@@ -311,7 +311,7 @@ onMounted(async () => {
 //     // evaluations: JSON.parse(userEval),
 //     evaluations: {},
 //   })
-//   const answer = await ask('Mani', m)
+//   const answer = await ask('Mana', m)
 //   // const AIEval = await ask('SummaryJsonizer', translated.value)
 //   const t2 = await translate(answer, 'English', 'Western Persian')
 //   await saveMessage({
@@ -686,7 +686,7 @@ const closable = ref<boolean | undefined>()
             </div>
             <div class="flex h-16 w-full items-center justify-center">
               <NuxtLink
-                to="/mani/"
+                to="/mana/"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                 title="بازگشت به صفحه اصلی"
               >
@@ -1009,7 +1009,7 @@ const closable = ref<boolean | undefined>()
             >
               <div v-show="isTyping" class="dark:bg-muted-700 absolute bottom-[60px] flex w-full bg-gray-200 py-2  ">
                 <div class="text-muted-800 mr-2 text-sm font-light dark:text-white">
-                  💻 مانی در حال نوشتن است <span class="typing" />
+                  💻 مانا در حال نوشتن است <span class="typing" />
                 </div>
               </div>
             </transition>
@@ -1155,7 +1155,7 @@ const closable = ref<boolean | undefined>()
                   و احتمال ارائه‌ی پاسخ‌های اشتباه را دارد.
                 </BaseMessage>
                 <BaseMessage class="mt-5" color="warning">
-                  با مانی با ادبیاتی ساده صحبت کنید. او به شما گوش می کند و شما
+                  با مانا با ادبیاتی ساده صحبت کنید. او به شما گوش می کند و شما
                   را حمایت می کند. از ادبیات پیچیده و کلمات خاص استفاده نکنید.
                 </BaseMessage>
               </div>

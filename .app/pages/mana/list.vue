@@ -29,15 +29,15 @@ const removeLoading = ref(false)
 
 const goToConversation = (u: User) => {
   user.value = u
-  navigateTo('/mani/chat')
+  navigateTo('/mana/chat')
 }
 const goToChart = (u: User) => {
   user.value = u
-  navigateTo(`/mani/analysis?userId=${u.id}`)
+  navigateTo(`/mana/analysis?userId=${u.id}`)
 }
 const goToThoughts = (u: User) => {
   user.value = u
-  navigateTo(`/mani/thoughts?userId=${u.id}`)
+  navigateTo(`/mana/thoughts?userId=${u.id}`)
 }
 
 function closeRemoveModal() {
