@@ -65,7 +65,7 @@ const timer = ref(30)
 const type = ref('briefing')
 const isGoingToDone = ref(false)
 const showTenMin = ref(false)
-
+const selectedEmoji = ref()
 const goToDoneAndEnd = async () => {
   type.value = 'summary'
   isGoingToDone.value = true
@@ -439,7 +439,7 @@ const askForMani = async () => {
           userDetails: userDetails.value[0],
         },
       })
-
+      selectedEmoji.value = JSON.parse(answer).emoji
       const res = await processResponse(JSON.parse(answer))
       let informalTranslatedMsg = convertToInformal(res.message)
       const newMsg = await saveMessage({
@@ -554,6 +554,35 @@ const showNoCharge = ref(false)
 const remainingTime = ref()
 const timeToShow = ref()
 
+console.log(JSON.stringify(`You are given a chat between a user, which details are in first message, and an evaluater, and psychologist AI, named Mana. The goals here in the session are: 
+
+1- Evaluate four factors of GHQ questionaire, which are depression, anxiety, somatic symptoms and social dysfunction, without explicitly telling user about evaluation and GHQ questionaire. you have to ask exact questions and you can ask more clearify questions, too. also, convert the questions from a likert scale, to questions which evaluate and then will be scored based on information. 
+2- Based on evidence, find problems and difficulties which user faces in the life, and categorize and collocate them in a form, which is addressable and can be worked on later. these are more in pattern of behavioral cases, not cognitional and emotional.
+3- find emotions which user experience more, and have an emotional analysis from user, which may be used in the report. 
+4- Form a real conversation which while providing emotional support, is reach and moving to the point of problems.
+5- Improve trustAndOppennessOfUser, so user feel more safe and open to the conversation.
+as this is the first session, you should assess the amount of user companionship, openness and willingness to move on, and based on that advancing the other goals. If user is open, you can ask for more deep and sensitive information, while when user is not open and have defensive manner, more compassion, empathy and effort for breaking the ice in the conversation, while staying away from sensitive information.
+
+you should answer only as JSON. You have to return only json response, nothing else. your json should have these keys:
+"trustAndOppennessOfUser": type is string. indicates the status of overall user trust and openness. One of exact values of ["veryLow", "low", "medium", "high", "veryHigh", "N/A"] 
+"trustAndOppennessOfUserEvaluationDescription": type is string. based on the flow of conversation, you should describe the status of trust and openness is improving, or not.
+"GHQAnalysis": type is array, which holds objects with this type (it should have exact 4 , EXACT 4 objects inside the array):
+type AnalysisObj {
+    "factorName": "depression" | "anxiety" | "somaticSymptoms" | "socialDysfunction"
+    "severityLevel": "veryLow" | "low" | "high" | "veryHigh" | "N/A" 
+    "confidenceLevel": "veryLow" | "low" | "high" | "veryHigh" | "N/A" 
+}
+"behavioralAnalysis": type is array of strings. a list of behavioral observations from user which should be completed here.
+"emotionalAnalysis": type is array of strings. a list of emotions and conditions which emotions experienced.
+"thoughtsAndConcerns": type is string. as a psychotherapist, thoughts and concerns will be note here.
+"emoji": type is string. a emoji which describes the status and context of the conversation the best. 
+"actionDescription": type is string. reasons why this action choosed.
+"action": type is string. the main action Mana wants to take. can be exact one of these values: ["general-empathy", "general-showingCompassion", "general-sympathize", "general-psychoEducation", "GHQ-depression", "GHQ-anxiety", "GHQ-somaticSymptoms", "GHQ-socialDysfunction"]. this value will set based on the value of trustAndOppennessOfUser, and context of conversation. when trustAndOppennessOfUser is above medium, which means you can ask more questions and investigate more sensitive information. when it is low, you should try your best to uplift its values by empathy and other proper techniques. for factors of GHQ only, when user is not comfortable for answering specific factor, change the factor immediately.
+"message": type is string. Final message delivered to user, based on selected action, actionDescription, GHQAnalysis, behavioralAnalysis, emotionalAnalysis, thoughtsAndConcerns and trustAndOppennessOfUser.
+
+final answer should be a valid JSON. Never say "Here is the JSON response," just return a valid JSON response. Responses from models: {responses}
+`))
+
 onMounted(async () => {
   // getGoals()
   const msg = await getMessages()
@@ -581,6 +610,7 @@ onMounted(async () => {
     .getOne(nuxtApp.$pb.authStore.model.id, {})
   showNoCharge.value = !u.hasCharge
   remainingTime.value = new Date(u.expireChargeTime)
+
   timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
   if (timeToShow.value <= 0) {
     pause()
@@ -1498,7 +1528,12 @@ const closable = ref<boolean | undefined>()
           <!-- User details -->
           <div v-else class="mt-5">
             <div class="flex items-center justify-center">
-              <BaseAvatar :src="conversation?.user.photo" size="4xl" />
+              <div class="relative">
+                <BaseAvatar :src="conversation?.user.photo" size="4xl" />
+                <div class="absolute bottom-0 left-0 text-2xl">
+                  {{ selectedEmoji }}
+                </div>
+              </div>
             </div>
             <div class="text-center">
               <BaseHeading
