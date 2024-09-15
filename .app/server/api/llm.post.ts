@@ -1,5 +1,5 @@
-const LLM_ADDRESS = 'http://127.0.0.1:8000/query'
-// const LLM_ADDRESS = 'http://193.163.201.12:8000/query'
+// const LLM_ADDRESS = 'http://127.0.0.1:8000/query'
+const LLM_ADDRESS = 'http://193.163.201.12:8000/query'
 const LLM_ADDRESS_RUNPOD = 'https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions'
 const RUNPOD_TOKEN = '8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3'
 const LLM_MODEL = 'cognitivecomputations/dolphin-2.8-mistral-7b-v02'
