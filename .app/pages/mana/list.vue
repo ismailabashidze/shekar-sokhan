@@ -18,10 +18,10 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 const selected = ref([])
 const selectAll = ref(false)
 const users = ref<User[]>([])
-const { user, getAllUsers, removeUser } = useUser()
+const { user, getAllUsers, removeUser, getAllUsersDetailsWithUsers } = useUser()
 const toaster = useToaster()
 onMounted(async () => {
-  users.value = await getAllUsers()
+  users.value = await getAllUsersDetailsWithUsers()
 })
 const selectedToRemove = ref()
 const isRemoveModalOpen = ref(false)
@@ -31,9 +31,9 @@ const goToConversation = (u: User) => {
   user.value = u
   navigateTo('/mana/chat')
 }
-const goToChart = (u: User) => {
-  user.value = u
-  navigateTo(`/mana/analysis?userId=${u.id}`)
+const gotoAnalysis = (u) => {
+  // user.value = u
+  navigateTo(`/mana/analysis?userDetailsId=${u.id}`)
 }
 const goToThoughts = (u: User) => {
   user.value = u
@@ -60,14 +60,15 @@ async function removeConversation() {
     icon: 'lucide:check',
     closable: true,
   })
-  users.value = await getAllUsers()
+  users.value = await getAllUsersDetailsWithUsers()
 }
+
 </script>
 
 <template>
   <TairoFlexTable>
     <template #header>
-      <TairoFlexTableHeading type="shrink">
+      <TairoFlexTableHeading type="stable">
         <div class="flex items-center">
           <BaseCheckbox
             v-model="selectAll"
@@ -77,18 +78,25 @@ async function removeConversation() {
         </div>
       </TairoFlexTableHeading>
 
-      <TairoFlexTableHeading type="stable">آواتار</TairoFlexTableHeading>
-      <TairoFlexTableHeading type="stable">کد اختصاصی</TairoFlexTableHeading>
+      <TairoFlexTableHeading type="stable">
+        آواتار
+      </TairoFlexTableHeading>
 
-      <TairoFlexTableHeading type="stable">شناسه</TairoFlexTableHeading>
+      <TairoFlexTableHeading type="stable">
+        نام وارد شده
+      </TairoFlexTableHeading>
 
-      <TairoFlexTableHeading type="stable">تاریخ عضویت</TairoFlexTableHeading>
-
-      <TairoFlexTableHeading type="stable">اقدامات</TairoFlexTableHeading>
+      <TairoFlexTableHeading type="stable">
+        اقدامات
+      </TairoFlexTableHeading>
     </template>
 
-    <TairoFlexTableRow v-for="u in users" :key="u.id" shape="rounded">
-      <TairoFlexTableCell type="shrink" data-content="Selection">
+    <TairoFlexTableRow
+      v-for="u in users"
+      :key="u.id"
+      shape="rounded"
+    >
+      <TairoFlexTableCell type="stable" data-content="Selection">
         <div class="flex items-center">
           <BaseCheckbox
             v-model="selected"
@@ -100,97 +108,58 @@ async function removeConversation() {
       </TairoFlexTableCell>
 
       <TairoFlexTableCell type="stable" data-content="u">
-        <div class="flex items-center">
-          <BaseAvatar
-            :src="`/img/avatars/${(new Date(u.created).getTime() % 8) + 1}.svg`"
-            size="sm"
-          />
-
-          <!-- <div class="ms-3 leading-none">
-            <h4 class="font-sans text-sm font-medium">
-              {{ u.anonymousCode }}
-            </h4>
-
-            <p class="text-muted-400 font-sans text-xs font-normal">
-              {{ u.role }}
-            </p>
-          </div> -->
-        </div>
+        <BaseAvatar
+          :src="`/img/avatars/${(new Date(u.created).getTime() % 8) + 1}.svg`"
+          size="sm"
+        />
       </TairoFlexTableCell>
 
-      <TairoFlexTableCell type="stable" data-content="Expertise" light>
-        {{ u.username }}
-      </TairoFlexTableCell>
-
-      <TairoFlexTableCell type="stable">
-        <span>{{ u.id }}</span>
-      </TairoFlexTableCell>
       <TairoFlexTableCell type="stable" data-content="Rate">
         <span class="font-medium">{{
-          new Date(u.created).toLocaleDateString('fa')
+          u.name
         }}</span>
       </TairoFlexTableCell>
-      <!-- <TairoFlexTableCell type="stable" data-content="Status">
-        <BaseTag
-          v-if="u.status === 'Available'"
-          color="success"
-          flavor="pastel"
-          shape="full"
-          class="font-medium"
-        >
-          {{ u.status }}
-        </BaseTag>
-
-        <BaseTag
-          v-else-if="u.status === 'New'"
-          color="info"
-          flavor="pastel"
-          shape="full"
-          class="font-medium"
-        >
-          {{ u.status }}
-        </BaseTag>
-
-        <BaseTag
-          v-else-if="u.status === 'Hired'"
-          color="warning"
-          flavor="pastel"
-          shape="full"
-          class="font-medium"
-        >
-          {{ u.status }}
-        </BaseTag>
-      </TairoFlexTableCell> -->
-
-      <TairoFlexTableCell type="stable" data-content="Actions">
-        <div class="flex flex-wrap scale-90 gap-x-1 gap-y-2 w-[100px]">
-          <BaseButtonIcon color="primary" shape="full" @click="goToThoughts(u)">
-            <Icon name="carbon:block-storage" class="h-5 w-5" />
+      <TairoFlexTableCell type="shrink" data-content="Actions">
+        <div class="flex scale-90 flex-wrap gap-x-1 gap-y-2">
+          <BaseButtonIcon
+            color="primary"
+            shape="full"
+            @click="goToThoughts(u)"
+          >
+            <Icon name="carbon:block-storage" class="size-5" />
           </BaseButtonIcon>
           <BaseButtonIcon
             color="primary"
             shape="full"
             @click="goToConversation(u)"
           >
-            <Icon name="ph:chat-circle-text" class="h-5 w-5" />
+            <Icon name="ph:chat-circle-text" class="size-5" />
           </BaseButtonIcon>
 
-          <BaseButtonIcon color="muted" shape="full" @click="goToChart(u)">
-            <Icon name="ph:clipboard" class="h-5 w-5" />
+          <BaseButtonIcon
+            color="muted"
+            shape="full"
+            @click="gotoAnalysis(u)"
+          >
+            <Icon name="ph:clipboard" class="size-5" />
           </BaseButtonIcon>
           <BaseButtonIcon
             color="danger"
             shape="full"
             @click="openRemoveModal(u)"
           >
-            <Icon name="ph:trash" class="h-5 w-5" />
+            <Icon name="ph:trash" class="size-5" />
           </BaseButtonIcon>
         </div>
       </TairoFlexTableCell>
     </TairoFlexTableRow>
   </TairoFlexTable>
   <!-- Modal component -->
-  <TairoModal :open="isRemoveModalOpen" size="sm" @close="closeRemoveModal">
+  <TairoModal
+    :open="isRemoveModalOpen"
+    size="sm"
+    @close="closeRemoveModal"
+  >
     <template #header>
       <!-- Header -->
       <div class="flex w-full items-center justify-between p-4 md:p-6">
@@ -212,7 +181,7 @@ async function removeConversation() {
             src="/img/illustrations/components/button-close-icon.svg"
             class="max-w-[100px] rounded-full object-cover shadow-sm dark:border-transparent"
             alt=""
-          />
+          >
         </div>
 
         <h3
@@ -236,8 +205,8 @@ async function removeConversation() {
           <BaseButton
             color="primary"
             variant="solid"
-            @click="removeConversation()"
             :loading="removeLoading"
+            @click="removeConversation()"
           >
             تایید
           </BaseButton>

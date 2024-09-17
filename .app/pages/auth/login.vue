@@ -86,7 +86,8 @@ const onSubmit = handleSubmit(async (values) => {
       icon: 'ph:user-circle-fill',
       closable: true,
     })
-  } catch (error: any) {
+  }
+  catch (error: any) {
     // this will set the error on the form
     if (error.message === 'Fake backend validation error') {
       setFieldError('email', 'نام کاربری یا رمز عبور اشتباه است')
@@ -129,16 +130,16 @@ if (nuxtApp.$pb.authStore.isValid) {
       class="bg-muted-100 dark:bg-muted-900 relative hidden w-0 flex-1 items-center justify-center lg:flex lg:w-3/5"
     >
       <div
-        class="mx-auto w-full h-full flex items-center justify-center max-w-4xl"
+        class="mx-auto flex size-full max-w-4xl items-center justify-center"
       >
         <!--Media image-->
         <img
-          class="max-w-xl mx-auto"
-          src="/img/illustrations/station.svg"
+          class="mx-auto max-w-xl rounded-md"
+          src="/img/illustrations/login.webp"
           alt=""
           width="619"
           height="594"
-        />
+        >
       </div>
     </div>
     <div
@@ -151,7 +152,7 @@ if (nuxtApp.$pb.authStore.isValid) {
             to="https://zehna.ir"
             class="text-muted-400 hover:text-primary-500 flex items-center gap-2 font-sans font-medium transition-colors duration-300"
           >
-            <Icon name="gg:arrow-long-right" class="h-5 w-5" />
+            <Icon name="gg:arrow-long-right" class="size-5" />
             <span>بازگشت به صفحه‌ی معرفی</span>
           </NuxtLink>
           <!--Theme button-->
@@ -179,7 +180,8 @@ if (nuxtApp.$pb.authStore.isValid) {
             <NuxtLink
               to="/auth/privacy"
               class="text-primary-600 hover:text-primary-500 font-sans font-medium underline-offset-4 transition duration-150 ease-in-out hover:underline"
-              >قوانین حریم خصوصی
+            >
+              قوانین حریم خصوصی
             </NuxtLink>
             است.
           </BaseParagraph>
@@ -190,14 +192,14 @@ if (nuxtApp.$pb.authStore.isValid) {
               class="dark:bg-muted-700 text-muted-800 border-muted-300 dark:border-muted-600 nui-focus relative inline-flex grow items-center justify-center gap-2 rounded-xl border bg-white px-6 py-4 dark:text-white"
               @click="loginWithGoogle"
             >
-              <Icon name="logos:google-icon" class="h-5 w-5" />
+              <Icon name="logos:google-icon" class="size-5" />
               <div>ورود با گوگل</div>
             </button>
             <!--Twitter button-->
             <button
               class="bg-muted-200 dark:bg-muted-700 hover:bg-muted-100 dark:hover:bg-muted-600 text-muted-600 dark:text-muted-400 nui-focus w-[calc(50%_-_0.5rem)] cursor-pointer rounded-xl px-5 py-4 text-center transition-colors duration-300 md:w-auto"
             >
-              <Icon name="fa6-brands:microsoft" class="mx-auto h-4 w-4" />
+              <Icon name="fa6-brands:microsoft" class="mx-auto size-4" />
             </button>
             <!--Linkedin button-->
             <!-- <button
@@ -210,13 +212,13 @@ if (nuxtApp.$pb.authStore.isValid) {
           <div class="flex-100 mt-8 flex items-center">
             <hr
               class="border-muted-200 dark:border-muted-700 flex-auto border-t-2"
-            />
+            >
             <span class="text-muted-400 px-4 font-sans font-light">
               یا با استفاده از
             </span>
             <hr
               class="border-muted-200 dark:border-muted-700 flex-auto border-t-2"
-            />
+            >
           </div>
         </div>
 
@@ -227,9 +229,9 @@ if (nuxtApp.$pb.authStore.isValid) {
             <form
               method="POST"
               action=""
-              @submit.prevent="onSubmit"
               class="mt-6"
               novalidate
+              @submit.prevent="onSubmit"
             >
               <div class="space-y-4">
                 <Field

@@ -18,14 +18,17 @@ const { getThoughtsByUserId } = useMessage()
 
 const notifications = ref([])
 onMounted(async () => {
-  notifications.value = await getThoughtsByUserId(route.query.userId)
+  // notifications.value = await getThoughtsByUserId(route.query.userId)
 })
 </script>
 
 <template>
+  <!-- <FullscreenLoading v-if="true" /> -->
+  <!-- <AudioVisualizer /> -->
+  <AudioToTextBtn />
   <div class="min-h-screen overflow-hidden">
     <div class="mx-auto w-full max-w-4xl pt-12">
-      <div v-if="notifications.length === 0"></div>
+      <div v-if="notifications.length === 0" />
       <div v-else class="">
         <div
           v-for="item in notifications"
@@ -38,24 +41,24 @@ onMounted(async () => {
             </BaseText>
           </div>
           <div
-            class="dark:bg-muted-800 relative z-10 h-4 w-4 shrink-0 rounded-full bg-white"
+            class="dark:bg-muted-800 relative z-10 size-4 shrink-0 rounded-full bg-white"
           >
             <div
-              class="h-4 w-4 rounded-full border-2 border-current"
+              class="size-4 rounded-full border-2 border-current"
               :class="getRandomColor()"
-            ></div>
+            />
           </div>
 
           <BaseCard class="p-4">
             <div class="flex w-full items-center gap-4">
               <div
-                class="h-2 w-2 shrink-0 rounded-full"
+                class="size-2 shrink-0 rounded-full"
                 :class="
                   item.status === 0
                     ? 'bg-primary-500'
                     : 'bg-muted-300 dark:bg-muted-700/50'
                 "
-              ></div>
+              />
               <BaseAvatar
                 :src="
                   item.role === 'user'
@@ -71,7 +74,7 @@ onMounted(async () => {
                   </div>
                   <div>
                     <div
-                      class="title text-muted-700 dark:text-muted-200 mt-3 mb-1"
+                      class="title text-muted-700 dark:text-muted-200 mb-1 mt-3"
                     >
                       پیام ها:
                     </div>
@@ -81,8 +84,8 @@ onMounted(async () => {
                   </div>
                   <div>
                     <div
-                      class="title text-muted-700 dark:text-muted-200 mt-3 mb-1"
                       v-if="item.contentFa.thoughts"
+                      class="title text-muted-700 dark:text-muted-200 mb-1 mt-3"
                     >
                       فکرها:
                     </div>
@@ -92,8 +95,8 @@ onMounted(async () => {
                   </div>
                   <div>
                     <div
-                      class="title text-muted-700 dark:text-muted-200 mt-3 mb-1"
                       v-if="item.contentFa.action"
+                      class="title text-muted-700 dark:text-muted-200 mb-1 mt-3"
                     >
                       اقدام:
                     </div>
@@ -103,8 +106,8 @@ onMounted(async () => {
                   </div>
                   <div class="mb-4">
                     <div
-                      class="title text-muted-700 dark:text-muted-200 mt-3 mb-1"
                       v-if="item.contentFa.nextSteps"
+                      class="title text-muted-700 dark:text-muted-200 mb-1 mt-3"
                     >
                       گام های بعدی:
                     </div>
@@ -123,8 +126,7 @@ onMounted(async () => {
                 </BaseText>
                 <BaseText size="xs" class="text-muted-400">
                   <span class="ltablet:hidden lg:hidden">
-                    {{ new Date(item.created).toLocaleDateString('fa') }}</span
-                  >
+                    {{ new Date(item.created).toLocaleDateString('fa') }}</span>
                   <span class="ltablet:hidden px-2 lg:hidden">&middot;</span>
                   <span>{{
                     new Date(item.created).toLocaleDateString('fa')

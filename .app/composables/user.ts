@@ -52,14 +52,29 @@ export function useUser() {
   const createUserDetails = async (ud) => {
     return await nuxtApp.$pb.collection('userDetails').create(ud)
   }
+  const getAllUsersDetailsWithUsers = async () => {
+    const { items } = await nuxtApp.$pb.collection('userDetails').getList(1, 500, {
+      sort: '+created',
+      expand: 'user',
+    })
+    return items
+  }
+  const getUserDetailsWithUserId = async (userDetailsId: string) => {
+    return await nuxtApp.$pb.collection('userDetails').getOne(userDetailsId, {
+      expand: 'user',
+    })
+  }
+
   return {
     user,
     generateAndSetCode,
     getAllUsers,
+    getAllUsersDetailsWithUsers,
     removeUser,
     setUser,
     incDivision,
     getUserDetails,
     createUserDetails,
+    getUserDetailsWithUserId,
   }
 }
