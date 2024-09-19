@@ -66,6 +66,14 @@ const type = ref('briefing')
 const isGoingToDone = ref(false)
 const showTenMin = ref(false)
 const selectedEmoji = ref()
+const showDoneModal = ref(false)
+const isRequestForReport = ref(false)
+const requestForReport = async () => {
+  isRequestForReport.value = true
+  setTimeout(() => {
+    isRequestForReport.value = false
+  }, 3000)
+}
 const goToDoneAndEnd = async () => {
   type.value = 'summary'
   isGoingToDone.value = true
@@ -553,35 +561,6 @@ const signout = () => {
 const showNoCharge = ref(false)
 const remainingTime = ref()
 const timeToShow = ref()
-
-console.log(JSON.stringify(`You are given a chat between a user, which details are in first message, and an evaluater, and psychologist AI, named Mana. The goals here in the session are: 
-
-1- Evaluate four factors of GHQ questionaire, which are depression, anxiety, somatic symptoms and social dysfunction, without explicitly telling user about evaluation and GHQ questionaire. you have to ask exact questions and you can ask more clearify questions, too. also, convert the questions from a likert scale, to questions which evaluate and then will be scored based on information. 
-2- Based on evidence, find problems and difficulties which user faces in the life, and categorize and collocate them in a form, which is addressable and can be worked on later. these are more in pattern of behavioral cases, not cognitional and emotional.
-3- find emotions which user experience more, and have an emotional analysis from user, which may be used in the report. 
-4- Form a real conversation which while providing emotional support, is reach and moving to the point of problems.
-5- Improve trustAndOppennessOfUser, so user feel more safe and open to the conversation.
-as this is the first session, you should assess the amount of user companionship, openness and willingness to move on, and based on that advancing the other goals. If user is open, you can ask for more deep and sensitive information, while when user is not open and have defensive manner, more compassion, empathy and effort for breaking the ice in the conversation, while staying away from sensitive information.
-
-you should answer only as JSON. You have to return only json response, nothing else. your json should have these keys:
-"trustAndOppennessOfUser": type is string. indicates the status of overall user trust and openness. One of exact values of ["veryLow", "low", "medium", "high", "veryHigh", "N/A"] 
-"trustAndOppennessOfUserEvaluationDescription": type is string. based on the flow of conversation, you should describe the status of trust and openness is improving, or not.
-"GHQAnalysis": type is array, which holds objects with this type (it should have exact 4 , EXACT 4 objects inside the array):
-type AnalysisObj {
-    "factorName": "depression" | "anxiety" | "somaticSymptoms" | "socialDysfunction"
-    "severityLevel": "veryLow" | "low" | "high" | "veryHigh" | "N/A" 
-    "confidenceLevel": "veryLow" | "low" | "high" | "veryHigh" | "N/A" 
-}
-"behavioralAnalysis": type is array of strings. a list of behavioral observations from user which should be completed here.
-"emotionalAnalysis": type is array of strings. a list of emotions and conditions which emotions experienced.
-"thoughtsAndConcerns": type is string. as a psychotherapist, thoughts and concerns will be note here.
-"emoji": type is string. a emoji which describes the status and context of the conversation the best. 
-"actionDescription": type is string. reasons why this action choosed.
-"action": type is string. the main action Mana wants to take. can be exact one of these values: ["general-empathy", "general-showingCompassion", "general-sympathize", "general-psychoEducation", "GHQ-depression", "GHQ-anxiety", "GHQ-somaticSymptoms", "GHQ-socialDysfunction"]. this value will set based on the value of trustAndOppennessOfUser, and context of conversation. when trustAndOppennessOfUser is above medium, which means you can ask more questions and investigate more sensitive information. when it is low, you should try your best to uplift its values by empathy and other proper techniques. for factors of GHQ only, when user is not comfortable for answering specific factor, change the factor immediately.
-"message": type is string. Final message delivered to user, based on selected action, actionDescription, GHQAnalysis, behavioralAnalysis, emotionalAnalysis, thoughtsAndConcerns and trustAndOppennessOfUser.
-
-final answer should be a valid JSON. Never say "Here is the JSON response," just return a valid JSON response. Responses from models: {responses}
-`))
 
 onMounted(async () => {
   // getGoals()
@@ -1152,7 +1131,7 @@ const closable = ref<boolean | undefined>()
                   <Icon name="ph:shopping-cart" class="size-5" />
                 </BaseButtonIcon>
               </BaseMessage>
-              <div>
+              <div class="flex">
                 <button
                   class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                   title="نمایش اطلاعات"
@@ -1160,6 +1139,17 @@ const closable = ref<boolean | undefined>()
                 >
                   <Icon
                     name="ph:robot"
+                    class="size-5"
+                  />
+                </button>
+                <button
+                  class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                  title="ثبت و تکمیل"
+                  :disabled="showNoCharge"
+                  @click="showDoneModal = true"
+                >
+                  <Icon
+                    name="ph:check-fat"
                     class="size-5"
                   />
                 </button>
@@ -1654,6 +1644,68 @@ const closable = ref<boolean | undefined>()
             @click="goToDoneAndEnd"
           >
             چارچوب بندی و پایان
+          </BaseButton>
+        </div>
+      </div>
+    </template>
+  </TairoModal>
+
+  <TairoModal
+    :open="showDoneModal"
+    size="sm"
+    @close="showDoneModal = false"
+  >
+    <template #header>
+      <!-- Header -->
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3
+          class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
+        >
+          پایان گفت و گو و ساخت گزارش
+        </h3>
+
+        <BaseButtonClose @click="showDoneModal = false" />
+      </div>
+    </template>
+
+    <!-- Body -->
+    <div class="p-4 md:p-6">
+      <div class="mx-auto w-full text-center">
+        <Icon
+          name="ph:clipboard"
+          class="text-success-500 mb-5 block size-[75px]"
+        />
+
+        <h3
+          class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
+        >
+          پایان گفت و گو و ساخت گزارش
+        </h3>
+
+        <p
+          class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-justify text-sm leading-5"
+        >
+          با انتخاب گزینه ی ساخت گزارش، این جلسه به پایان خواهد رسید و زمان باقی مانده از بین خواهد رفت. شما به صفحه ی ارائه گزارش جلسه جا به جا خواهید شد.
+        </p>
+      </div>
+    </div>
+
+    <template #footer>
+      <!-- Footer -->
+      <div class="p-4 md:p-6">
+        <div class="flex gap-x-2">
+          <BaseButton @click="showDoneModal = false">
+            ادامه می دم
+          </BaseButton>
+
+          <BaseButton
+            color="success"
+            variant="solid"
+            :loading="isRequestForReport"
+            :disabled="remainingTime"
+            @click="requestForReport"
+          >
+            ساخت گزارش timeToShow {{ timeToShow }}
           </BaseButton>
         </div>
       </div>

@@ -24,7 +24,7 @@ onMounted(async () => {
 
 <template>
   <!-- <FullscreenLoading v-if="true" /> -->
-  <!-- <AudioVisualizer /> -->
+  <AudioVisualizer />
   <AudioToTextBtn />
   <div class="min-h-screen overflow-hidden">
     <div class="mx-auto w-full max-w-4xl pt-12">
