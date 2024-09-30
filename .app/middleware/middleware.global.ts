@@ -5,6 +5,7 @@ export default defineNuxtRouteMiddleware((to) => {
   // List of paths where navigation is allowed without authentication
   const allowedPaths = [
     '/auth/login',
+    '/auth/login-psychotherapist',
     '/auth/terms',
     '/auth/privacy',
     '/tarjoman',

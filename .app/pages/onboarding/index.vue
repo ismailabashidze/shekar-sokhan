@@ -43,7 +43,7 @@ const redeem = async () => {
   if (!error.value) {
     toaster.show({
       title: 'ثبت کد',
-      message: `کد با موفقیت فعال شد. به ذهنا خوش آمدید.`,
+      message: `کد با موفقیت فعال شد.`,
       color: 'success',
       icon: 'ph:check',
       closable: true,

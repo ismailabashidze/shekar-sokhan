@@ -23,9 +23,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <!-- <FullscreenLoading v-if="true" /> -->
-  <AudioVisualizer />
-  <AudioToTextBtn />
+  <FullscreenLoading loader-type="psychotherapist" />
+  <!-- <AudioVisualizer /> -->
+  <!-- <AudioToTextBtn /> -->
   <div class="min-h-screen overflow-hidden">
     <div class="mx-auto w-full max-w-4xl pt-12">
       <div v-if="notifications.length === 0" />

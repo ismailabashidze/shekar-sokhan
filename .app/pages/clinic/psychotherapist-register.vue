@@ -117,28 +117,28 @@ const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = pro
       },
 
     },
-    {
-      to: '/clinic/psychotherapist-register/topic',
-      meta: {
-        name: 'انتخاب سوپروایزر',
-        title: 'انتخاب سوپروایزر',
-        subtitle:
-          'سوپرویژن به بهبود ارائه ی خدمات و رشد حرفه ای کمک می کند. در صورتی که امتیاز شما بالای پانصد باشد، می توانید بدون سوپروایزر به مشاوره بپردازید.',
-      },
-      async validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['selectedSupervisor'])
-        if (!data.value.selectedSupervisor) setFieldError('selectedSupervisor', 'حداقل یک عدد باید انتخاب گردد.')
-      },
-    },
-    {
-      to: '/clinic/psychotherapist-register/review',
-      meta: {
-        name: 'بارگذاری مدارک',
-        title: 'بارگذاری مدارک',
-        subtitle:
-          'مدارک مورد نیاز را آپلود نمایید. این مدارک را به صورت انتخاب چندین فایل از روی دستگاه خود انجام دهید.',
-      },
-    },
+    // {
+    //   to: '/clinic/psychotherapist-register/topic',
+    //   meta: {
+    //     name: 'انتخاب سوپروایزر',
+    //     title: 'انتخاب سوپروایزر',
+    //     subtitle:
+    //       'سوپرویژن به بهبود ارائه ی خدمات و رشد حرفه ای کمک می کند. در صورتی که امتیاز شما بالای پانصد باشد، می توانید بدون سوپروایزر به مشاوره بپردازید.',
+    //   },
+    //   async validate({ data, setFieldError, resetFieldError }) {
+    //     resetFieldError(['selectedSupervisor'])
+    //     if (!data.value.selectedSupervisor) setFieldError('selectedSupervisor', 'حداقل یک عدد باید انتخاب گردد.')
+    //   },
+    // },
+    // {
+    //   to: '/clinic/psychotherapist-register/review',
+    //   meta: {
+    //     name: 'بارگذاری مدارک',
+    //     title: 'بارگذاری مدارک',
+    //     subtitle:
+    //       'مدارک مورد نیاز را آپلود نمایید. این مدارک را به صورت انتخاب چندین فایل از روی دستگاه خود انجام دهید.',
+    //   },
+    // },
   ],
   onSubmit: async (data, ctx) => {
     data.gender = convertLabels(data.gender)

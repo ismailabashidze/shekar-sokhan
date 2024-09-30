@@ -84,6 +84,15 @@ const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = pro
     {
       to: '/mana/initiation',
       meta: {
+        name: 'توضیحات',
+        title: 'معرفی',
+        subtitle:
+          'ذهنا اولین سامانه خدمات همدلی هوشمند و پیشتاز در حوزه ی زبان فارسی است.',
+      },
+    },
+    {
+      to: '/mana/initiation/desc',
+      meta: {
         name: 'اطلاعات اولیه',
         title: 'اطلاعات اولیه',
         subtitle:

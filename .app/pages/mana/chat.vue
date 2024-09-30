@@ -1,8 +1,5 @@
 <script setup lang="ts">
-interface TranslatedResponse {
-  translatedMsg: string
-  translatedReasoning: string
-}
+
 definePageMeta({
   title: 'پیام ها',
   layout: 'empty',
@@ -17,7 +14,6 @@ definePageMeta({
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
-
 const getVoice = async (item) => {
   item.isVoiceDone = false
   const v = await $fetch('https://seam.brro.ir/tts', {
@@ -25,7 +21,7 @@ const getVoice = async (item) => {
     body: {
       text: item.contentFa.message,
       // voice: 'fa-IR-DilaraNeural', // fa-IR-FaridNeural
-      voice: 'fa-IR-FaridNeural', //
+      voice: voice, //
       file_name: 'output.mp3',
     },
   })
@@ -39,8 +35,7 @@ const getVoice = async (item) => {
 //   method: 'GET',
 // })
 // console.log(test)
-
-const { user, incDivision, getUserDetails } = useUser()
+const { user, incDivision, getUserDetails, getAnalysis } = useUser()
 const userDetails = ref()
 const { open } = usePanels()
 const seamless = useSeamless()
@@ -54,8 +49,7 @@ const search = ref('')
 const message = ref('')
 const messageLoading = ref(false)
 const chatEl = ref<HTMLElement>()
-const expanded = useLocalStorage('expanded', false)
-
+const expanded = ref(false)
 const loading = ref(true)
 const isTyping = ref(false)
 const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
@@ -68,11 +62,43 @@ const showTenMin = ref(false)
 const selectedEmoji = ref()
 const showDoneModal = ref(false)
 const isRequestForReport = ref(false)
+const startChargeTime = ref()
 const requestForReport = async () => {
   isRequestForReport.value = true
-  setTimeout(() => {
-    isRequestForReport.value = false
-  }, 3000)
+  let analysis = await getAnalysis(user.value.record.id, user.value.record.currentDeletionDivider)
+  analysis = analysis.map((a) => {
+    return { ...a, type: 'analysis' }
+  })
+  let conv = conversation.value.messages.filter(m => m.role === 'user' || m.role === 'assistant')
+  conv = conv.map((m) => {
+    return { ...m, type: 'chat' }
+  })
+  // const combined = [...analysis, ...conv]
+  // const sorted = combined.sort((a, b) => new Date(a.created) - new Date(b.created))
+  let sendToLLM = combineMessages(conv, 'user')
+
+  const answer = await $fetch('/api/analysis', {
+    method: 'POST',
+    body: {
+      llmMessages: [
+        ...sendToLLM
+          .map((m) => {
+            return {
+              role: m.role ?? 'assistant',
+              content: m.role === 'user' || m.role === 'assistant' ? 'CHAT:' + m.content.message : 'ASSESSMENT:' + JSON.stringify({ GHQAnalysis: m.GHQAnalysis, behavioralAnalysis: m.behavioralAnalysis, emotionalAnalysis: m.emotionalAnalysis, thoughtsAndConcerns: m.thoughtsAndConcerns }),
+
+            }
+          })
+          .filter(Boolean),
+      ],
+      userId: user.value.record.id,
+      currentDivision: user.value.record.currentDeletionDivider,
+      userDetails: userDetails.value[0],
+    },
+  })
+  console.log(answer)
+
+  isRequestForReport.value = false
 }
 const goToDoneAndEnd = async () => {
   type.value = 'summary'
@@ -93,7 +119,7 @@ const goToDoneAndEnd = async () => {
   pause()
   isGoingToDone.value = false
   showTenMin.value = false
-  await askForMani()
+  await askForMana()
   messageLoading.value = false
 }
 
@@ -118,15 +144,9 @@ watch(counter, (n, o) => {
     setTimeout(() => {
       // a wait to ensure sending the message.
       if (isTyping.value) {
-        if (conversation.value.messages.length == 1) {
-          type.value = 'introduce'
-        }
-        else {
-          type.value = checkForType()
-        }
-        askForMani()
+        askForMana()
       }
-    }, 20000)
+    }, 2000)
   }
   else {
     isTyping.value = false
@@ -134,19 +154,6 @@ watch(counter, (n, o) => {
     resume()
   }
 })
-const checkForType = () => {
-  // let lastMessageRole = conversation.value.messages.at(-1)?.role
-
-  // if (lastMessageRole === 'assistant') {
-  //   return 'followUpMessage'
-  // }
-  // else {
-  return 'briefing'
-  // }
-}
-setTimeout(() => {
-  checkForType()
-}, 30000)
 const conversation = ref({
   user: {
     name: 'مانا، همدل هوشمند',
@@ -162,19 +169,6 @@ const conversation = ref({
       content: { message: 'Conversation Started' },
       contentFa: { message: 'شروع گفت و گو' },
     },
-    // {
-    //   role: 'assistant',
-    //   contentFa: {
-    //     message:
-    //       'سلام. من مانا هستم 👋، و این جا هستم که به شما کمک کنم. توجه داشته باشید که تمام پیام هایی که رد و بدل می کنیم محرمانه، و بر طبق قوانین و مقررات در سایت هستن که در ابتدای ورودتون داخل نرم افزار، اون ها رو پذیرفته اید.',
-    //   },
-    //   content: {
-    //     message:
-    //       `Hi. I'm Mana. A good friend and supporter. My goal here is to build a great friendship, based on trust and empathy. How can I help you?`,
-    //     reasoning: 'This is a good start. I will introduce myself.',
-    //   },
-    //   time: new Date().toLocaleTimeString('fa'),
-    // },
   ],
 })
 function combineMessages(dataArray, targetRole) {
@@ -421,7 +415,7 @@ function convertToInformal(text) {
   return text
 }
 
-const askForMani = async () => {
+const askForMana = async () => {
   if (isNewMessagesDone.value && !showNoCharge.value) {
     try {
       let sendToLLM = combineMessages(conversation.value.messages, 'user')
@@ -447,7 +441,7 @@ const askForMani = async () => {
           userDetails: userDetails.value[0],
         },
       })
-      selectedEmoji.value = JSON.parse(answer).emoji
+      selectedEmoji.value = '🕊'
       const res = await processResponse(JSON.parse(answer))
       let informalTranslatedMsg = convertToInformal(res.message)
       const newMsg = await saveMessage({
@@ -492,13 +486,13 @@ const askForMani = async () => {
         icon: 'ph:envelope',
         closable: true,
       })
-      await askForMani()
+      await askForMana()
       // messageLoading.value = false
     }
   }
   else {
     setTimeout(() => {
-      askForMani()
+      askForMana()
     }, 10000)
   }
 }
@@ -561,8 +555,19 @@ const signout = () => {
 const showNoCharge = ref(false)
 const remainingTime = ref()
 const timeToShow = ref()
+let voice = ''
 
 onMounted(async () => {
+  voice = localStorage.getItem('voice') as string
+
+  const local = localStorage.getItem('expanded')
+  if (local === null) {
+    localStorage.setItem('expanded', 'false')
+    expanded.value = false
+  }
+  else {
+    expanded.value = localStorage.getItem('expanded') == 'true'
+  }
   // getGoals()
   const msg = await getMessages()
   msg.map(m => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
@@ -589,28 +594,28 @@ onMounted(async () => {
     .getOne(nuxtApp.$pb.authStore.model.id, {})
   showNoCharge.value = !u.hasCharge
   remainingTime.value = new Date(u.expireChargeTime)
-
+  startChargeTime.value = new Date(u.startChargeTime)
   timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
   if (timeToShow.value <= 0) {
     pause()
   }
   setInterval(() => {
     timeToShow.value = timeToShow.value - 1
-    if (timeToShow.value == 10) {
-      showTenMin.value = true
-      conversation.value.messages.push({
-        role: 'separator',
-        content: { message: 'Summary and conclusion in the last ten minutes.' },
-        contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-      })
-      saveMessage({
-        role: 'separator',
-        content: { message: 'Summary and conclusion in the last ten minutes.' },
-        contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-        user: user.value.record.id,
-        deletionDivider: user.value.record.currentDeletionDivider,
-      })
-    }
+    // if (timeToShow.value == 10) {
+    //   showTenMin.value = true
+    //   conversation.value.messages.push({
+    //     role: 'separator',
+    //     content: { message: 'Summary and conclusion in the last ten minutes.' },
+    //     contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
+    //   })
+    //   saveMessage({
+    //     role: 'separator',
+    //     content: { message: 'Summary and conclusion in the last ten minutes.' },
+    //     contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
+    //     user: user.value.record.id,
+    //     deletionDivider: user.value.record.currentDeletionDivider,
+    //   })
+    // }
   }, 60000)
   if (nuxtApp.$pb.authStore.isValid) {
     nuxtApp.$pb.collection('users').subscribe(
@@ -626,7 +631,7 @@ onMounted(async () => {
                 behavior: 'smooth',
               })
             }
-          }, 300)
+          }, 600)
           pause()
         }
       },
@@ -831,7 +836,7 @@ const resend = async () => {
   // conversation.value.messages.pop()
   isNewMessagesDone.value = true
   counter.value = timer.value
-  // await askForMani()
+  await askForMana()
 }
 
 const report = ref([])
@@ -900,7 +905,22 @@ const submitReport = async () => {
   message.value = 'لطفا گزارش را اعمال کن و دوباره پاسخ بده'
   await submitMessage()
 }
-const closable = ref<boolean | undefined>()
+const checkForHalfTime = () => {
+  const start = new Date(startChargeTime.value)
+  const now = new Date()
+  const temp = Math.floor((now.getTime() - start.getTime()) / 60000)
+
+  return (temp / timeToShow.value > 1)
+}
+const fatBtn = () => {
+  expanded.value = true
+  localStorage.setItem('expanded', expanded.value + '')
+  showDoneModal.value = true
+}
+const changeExpanded = () => {
+  expanded.value = !expanded.value
+  localStorage.setItem('expanded', expanded.value + '')
+}
 </script>
 
 <template>
@@ -1044,11 +1064,11 @@ const closable = ref<boolean | undefined>()
                 <Icon name="ph:house-line" class="size-5" />
               </NuxtLink>
             </div>
-            <div class="flex h-16 w-full items-center justify-center">
+            <div class=" hidden h-16 w-full items-center justify-center md:flex">
               <button
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                 title="نمایش اطلاعات"
-                @click="expanded = !expanded"
+                @click="changeExpanded()"
               >
                 <Icon
                   name="ph:robot"
@@ -1135,7 +1155,7 @@ const closable = ref<boolean | undefined>()
                 <button
                   class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                   title="نمایش اطلاعات"
-                  @click="expanded = !expanded"
+                  @click="changeExpanded()"
                 >
                   <Icon
                     name="ph:robot"
@@ -1145,8 +1165,8 @@ const closable = ref<boolean | undefined>()
                 <button
                   class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                   title="ثبت و تکمیل"
-                  :disabled="showNoCharge"
-                  @click="showDoneModal = true"
+                  :disabled="!checkForHalfTime || conversation.messages.length < 10"
+                  @click="fatBtn()"
                 >
                   <Icon
                     name="ph:check-fat"
@@ -1411,6 +1431,15 @@ const closable = ref<boolean | undefined>()
                   >
                     خرید اشتراک
                   </BaseButton>
+                  <BaseButton
+                    v-if="conversation.messages.length > 10"
+                    color="success"
+                    class="my-3 mr-2 w-[150px]"
+
+                    @click="showDoneModal = true"
+                  >
+                    ساخت گزارش
+                  </BaseButton>
                 </div>
               </BaseMessage>
             </div>
@@ -1467,12 +1496,12 @@ const closable = ref<boolean | undefined>()
       <!-- Current user -->
       <div
         class="ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
-        :class="expanded ? '-translate-x-full' : 'translate-x-0'"
+        :class="!expanded ? 'translate-x-0' : '-translate-x-full'"
       >
         <div
           class="flex h-16 w-full flex-row-reverse items-center justify-between px-8"
         >
-          <BaseButtonIcon small @click="expanded = !expanded">
+          <BaseButtonIcon small @click="changeExpanded()">
             <Icon
               name="lucide:arrow-left"
               class="pointer-events-none size-4"
@@ -1652,7 +1681,7 @@ const closable = ref<boolean | undefined>()
 
   <TairoModal
     :open="showDoneModal"
-    size="sm"
+    size="md"
     @close="showDoneModal = false"
   >
     <template #header>
@@ -1687,6 +1716,9 @@ const closable = ref<boolean | undefined>()
         >
           با انتخاب گزینه ی ساخت گزارش، این جلسه به پایان خواهد رسید و زمان باقی مانده از بین خواهد رفت. شما به صفحه ی ارائه گزارش جلسه جا به جا خواهید شد.
         </p>
+        <div v-if="!checkForHalfTime() && !timeToShow" class="text-danger-500 mt-3">
+          حداقل نیمی از زمان جلسه باید گذشته باشد
+        </div>
       </div>
     </div>
 
@@ -1702,10 +1734,10 @@ const closable = ref<boolean | undefined>()
             color="success"
             variant="solid"
             :loading="isRequestForReport"
-            :disabled="remainingTime"
+            :disabled="!checkForHalfTime || conversation.messages.length < 10"
             @click="requestForReport"
           >
-            ساخت گزارش timeToShow {{ timeToShow }}
+            ساخت گزارش
           </BaseButton>
         </div>
       </div>

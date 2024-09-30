@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { PsychoReg, StepData } from '../../../types'
+import type { Invite, StepData } from '../../../types'
 
 definePageMeta({
   preview: {
-    title: 'ثبت نام - مشاور',
-    description: 'بخش ثبت نام مشاوران با موضوع ورود اطلاعات اولیه',
+    title: 'Invite - Step 1',
+    description: 'For inviting people',
     categories: ['layouts', 'wizards', 'forms'],
     src: '/img/screens/layouts-invite.png',
     srcDark: '/img/screens/layouts-invite-dark.png',
@@ -13,7 +13,7 @@ definePageMeta({
   },
 })
 useHead({
-  title: 'ثبت نام مشاوران',
+  title: 'اطلاعات اولیه',
 })
 
 const {
@@ -24,7 +24,7 @@ const {
   getPrevStep,
   steps,
   checkPreviousSteps,
-} = useMultiStepForm<PsychoReg, StepData>()
+} = useMultiStepForm<Invite, StepData>()
 
 onBeforeMount(checkPreviousSteps)
 </script>
@@ -50,40 +50,6 @@ onBeforeMount(checkPreviousSteps)
 
     <div class="w-full max-w-md">
       <div class="grid grid-cols-12 gap-4">
-        <div class="sm:col-span-12 md:col-span-6">
-          <BaseInput
-            v-model="request.firstName"
-            v-focus
-            :error="errors.fields.firstName"
-            label="نام شما"
-            placeholder="وارد نمایید"
-          />
-        </div>
-        <div class="sm:col-span-12 md:col-span-6">
-          <BaseInput
-            v-model="request.lastName"
-            v-focus
-            :error="errors.fields.lastName"
-            label="نام خانوادگی شما"
-            placeholder="وارد نمایید"
-          />
-        </div>
-        <div class="col-span-12">
-          <BaseInput
-            v-model="request.phoneNumber"
-            :error="errors.fields.phoneNumber"
-            label="شماره تماس"
-            placeholder="با ۰۹ شروع می شود"
-          />
-        </div>
-        <div class="col-span-12">
-          <BaseInput
-            v-model="request.email"
-            :error="errors.fields.email"
-            label="آدرس ایمیل"
-            placeholder="معتبر"
-          />
-        </div>
         <div class="col-span-12 sm:col-span-6">
           <BaseInputNumber
             v-model="request.age"
@@ -98,7 +64,7 @@ onBeforeMount(checkPreviousSteps)
           <BaseListbox
             v-model="request.gender"
             label="جنسیت"
-            :items="['مرد', 'زن']"
+            :items="['مرد', 'زن', `ترجیح می دهم نگویم`]"
             placeholder="جنسیت را انتخاب نمایید"
             :error="errors.fields.gender"
             rounded="lg"
@@ -108,7 +74,7 @@ onBeforeMount(checkPreviousSteps)
           <BaseListbox
             v-model="request.maritalStatus"
             label="وضعیت تاهل"
-            :items="['مجرد', 'متاهل']"
+            :items="['مجرد', 'متاهل', `در رابطه عاطفی` , `اقدام برای جدایی`, `طلاق گرفته`]"
             placeholder="انتخاب نمایید"
             :error="errors.fields.maritalStatus"
             rounded="lg"
@@ -116,12 +82,29 @@ onBeforeMount(checkPreviousSteps)
         </div>
         <div class="col-span-12 sm:col-span-6">
           <BaseListbox
-            v-model="request.licenseStatus"
-            label="وضعیت پروانه فعالیت"
-            :items="[`بدون پروانه - فعالیت داوطلبانه`, `بدون پروانه - دانشجوی روانشناسی`, `پروانه در دست اقدام`, 'دارای پروانه']"
+            v-model="request.jobStatus"
+            label="وضعیت شغلی"
+            :items="['دانش آموز', 'دانشجو', `استخدام بخش دولتی` , `استخدام بخش خصوصی`, `شغل آزاد`, 'جویای کار', 'خانه دار', 'بیکار']"
             placeholder="انتخاب نمایید"
-            :error="errors.fields.licenseStatus"
+            :error="errors.fields.jobStatus"
             rounded="lg"
+          />
+        </div>
+        <div class="col-span-12">
+          <BaseInput
+            v-model="request.name"
+            v-focus
+            :error="errors.fields.name"
+            label="نام شما"
+            placeholder="به صورت اختیاری"
+          />
+        </div>
+        <div class="col-span-12">
+          <BaseInput
+            v-model="request.email"
+            :error="errors.fields.email"
+            label="آدرس ایمیل"
+            placeholder="اختیاری"
           />
         </div>
       </div>

@@ -393,7 +393,45 @@ const {
           <!-- Inner column -->
           <div class="ltablet:col-span-12 col-span-12 lg:col-span-12">
             <!-- Chart subgrid -->
-            <div class="col-span-12">
+            <div class="col-span-12 sm:col-span-12">
+              <BaseCard shape="curved" class="p-6">
+                <div class="mb-2 flex items-center justify-between">
+                  <BaseHeading
+                    as="h3"
+                    size="md"
+                    weight="semibold"
+                    lead="tight"
+                    class="text-muted-800 dark:text-white"
+                  >
+                    <span>خلاصه پیام های جلسه</span>
+                  </BaseHeading>
+                </div>
+                <div class="flex justify-between">
+                  <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+                    <Icon name="ph:question-duotone" class="size-4" />
+                    <span>
+                      پیام های رد و بدل شده بین کاربر و مشاور به صورت محتوایی بررسی شده و خلاصه سازی
+                      گردیده است.
+                    </span>
+                    <NuxtLink
+                      to="#"
+                      class="text-primary-500 underline-offset-4 hover:underline"
+                    >
+                      اطلاعات بیشتر
+                    </NuxtLink>
+                  </BaseParagraph>
+                </div>
+                <div class="mt-5 text-justify">
+                  summaryOfSession
+                  {{
+                    userSum?.[0]?.summaryFa ??
+                      `در حال حاضر اطلاعاتی وجود ندارد.`
+                  }}
+                </div>
+                <!-- <AddonApexcharts v-bind="scatterEnergy" /> -->
+              </BaseCard>
+            </div>
+            <div class="col-span-12 mt-5">
               <BaseCard shape="curved" class="p-6">
                 <div class="mb-2 flex items-center justify-between">
                   <BaseHeading
@@ -414,14 +452,32 @@ const {
                       آمده است.
                     </span>
                   </BaseParagraph>
-                  <BaseButton
-                    color="primary"
-                    :loading="isLoading"
-                    :disabled="isLoading"
-                    @click="genereateRisks()"
+                </div>
+              </BaseCard>
+            </div>
+            <div class="col-span-12 mt-5">
+              <BaseCard shape="curved" class="p-6">
+                <div class="mb-2 flex items-center justify-between">
+                  <BaseHeading
+                    as="h3"
+                    size="md"
+                    weight="semibold"
+                    lead="tight"
+                    class="text-muted-800 dark:text-white"
                   >
-                    بروز رسانی
-                  </BaseButton>
+                    <span>بررسی درمانگر</span>
+                  </BaseHeading>
+                </div>
+                <div class="flex justify-between">
+                  <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+                    <Icon name="ph:question-duotone" class="size-4" />
+                    <span>
+                      تحلیلی از روانشناس و اقدامات، همراه با امتیاز و توضیحات امتیاز در بخش زیر آمده است.
+                    </span>
+                    psychotherapistEvaluation
+                    psychotherapistEvaluationScore
+                    psychotherapistEvaluationScoreDescription
+                  </BaseParagraph>
                 </div>
               </BaseCard>
             </div>
@@ -457,6 +513,7 @@ const {
                   </div>
                   <div class="mt-5 grid grid-cols-12 gap-4">
                     <div class="col-span-12 sm:col-span-6">
+                      DemographicData
                       <Field
                         v-slot="{
                           field,
@@ -673,6 +730,9 @@ const {
                   >
                     <div class="grid grid-cols-12 gap-4">
                       <div class="col-span-12 sm:col-span-6">
+                        behavioralAnalysisSummary
+                        emotionalAnalysisSummary
+                        thoughtsAndConcernsSummary
                         <Field
                           v-slot="{
                             field,
@@ -827,6 +887,8 @@ const {
                       میزان مشارکت و اعتماد ارزیابی شده از پیام های کاربر
                     </span>
                   </BaseParagraph>
+                  finalTrustAndOppennessOfUser
+                  finalTrustAndOppennessOfUserEvaluationDescription
                   <div
                     class="mt-[80px] flex flex-col gap-6 md:flex-row md:items-end"
                   >
@@ -874,6 +936,9 @@ const {
                     >
                       <span>وضعیت روانی اجتماعی</span>
                     </BaseHeading>
+                    psychoAnalysis
+                    defenceMechanisms
+                    schemas
                   </div>
                   <div class="flex justify-between">
                     <BaseParagraph size="xs" class="text-muted-400 max-w-full">
@@ -1212,6 +1277,44 @@ const {
                       lead="tight"
                       class="text-muted-800 dark:text-white"
                     >
+                      <span>بررسی فاکتور: افسردگی</span>
+                    </BaseHeading>
+                  </div>
+                  <div class="flex justify-between">
+                    <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+                      <Icon name="ph:question-duotone" class="size-4" />
+                      <span>
+                        نمودار زیر بررسی وضعیت اطمینان و مقدار افسردگی را در طول جلسه نشان می دهد.
+                      </span>
+                      <NuxtLink
+                        to="#"
+                        class="text-primary-500 underline-offset-4 hover:underline"
+                      >
+                        اطلاعات بیشتر
+                      </NuxtLink>
+                    </BaseParagraph>
+                  </div>
+                  <div class="grid grid-cols-2 items-center justify-center gap-4">
+                    <div class="flex justify-center">
+                      <DemoChartPie class="w-[350px]" />
+                    </div>
+                    <AddonApexcharts
+                      v-bind="suicideRiskCondition"
+                      class="relative -start-5"
+                    />
+                  </div>
+                </BaseCard>
+              </div>
+              <div class="col-span-6">
+                <BaseCard shape="curved" class="p-6">
+                  <div class="mb-2 flex items-center justify-between">
+                    <BaseHeading
+                      as="h3"
+                      size="md"
+                      weight="semibold"
+                      lead="tight"
+                      class="text-muted-800 dark:text-white"
+                    >
                       <span>ریسک خودکشی</span>
                     </BaseHeading>
                   </div>
@@ -1244,51 +1347,7 @@ const {
                 </BaseCard>
               </div>
               <!-- Chart -->
-              <div class="col-span-12 sm:col-span-12">
-                <BaseCard shape="curved" class="p-6">
-                  <div class="mb-2 flex items-center justify-between">
-                    <BaseHeading
-                      as="h3"
-                      size="md"
-                      weight="semibold"
-                      lead="tight"
-                      class="text-muted-800 dark:text-white"
-                    >
-                      <span>خلاصه پیام های مراجع</span>
-                    </BaseHeading>
-                  </div>
-                  <div class="flex justify-between">
-                    <BaseParagraph size="xs" class="text-muted-400 max-w-full">
-                      <Icon name="ph:question-duotone" class="size-4" />
-                      <span>
-                        پیام های مراجع به صورت محتوایی بررسی شده و خلاصه سازی
-                        گردیده است.
-                      </span>
-                      <NuxtLink
-                        to="#"
-                        class="text-primary-500 underline-offset-4 hover:underline"
-                      >
-                        اطلاعات بیشتر
-                      </NuxtLink>
-                    </BaseParagraph>
-                    <BaseButton
-                      color="primary"
-                      :loading="isLoading"
-                      @click="generateUserSummary()"
-                    >
-                      ایجاد
-                    </BaseButton>
-                  </div>
-                  <div class="mt-5 text-justify">
-                    {{
-                      userSum?.[0]?.summaryFa ??
-                        `در حال حاضر اطلاعاتی وجود ندارد. از دکمه ی ایجاد استفاده
-                    نمایید.`
-                    }}
-                  </div>
-                  <!-- <AddonApexcharts v-bind="scatterEnergy" /> -->
-                </BaseCard>
-              </div>
+
               <!-- Chart -->
               <!-- <div class="col-span-12 sm:col-span-6">
                 <BaseCard shape="curved" class="p-6">

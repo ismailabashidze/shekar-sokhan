@@ -3,19 +3,46 @@ import type { Invite, StepData } from '../../../types'
 
 definePageMeta({
   preview: {
-    title: 'Invite - Step 1',
-    description: 'For inviting people',
+    title: 'انتخاب موضوع - گام 2',
+    description: 'انتخاب موضوعات می تواند به تشخیص و فرایند صحبت کمک کند',
     categories: ['layouts', 'wizards', 'forms'],
-    src: '/img/screens/layouts-invite.png',
-    srcDark: '/img/screens/layouts-invite-dark.png',
+    src: '/img/screens/layouts-invite-permissions.png',
+    srcDark: '/img/screens/layouts-invite-permissions-dark.png',
     order: 37,
     new: true,
   },
 })
 useHead({
-  title: 'اطلاعات اولیه',
+  title: 'انتخاب موضوع',
+})
+const item = ref({ isVoiceDone: true, message: 'سلام، من مانا هستم! دستیار سلامت روان شما', voice: 'fa-IR-FaridNeural' })
+const getVoice = async () => {
+  item.value.isVoiceDone = false
+  const v = await $fetch('https://seam.brro.ir/tts', {
+    method: 'POST',
+    body: {
+      text: item.value.message,
+      voice: item.value.voice,
+      file_name: 'output.mp3',
+    },
+  })
+    .then((blob) => {
+      const url = URL.createObjectURL(blob)
+      new Audio(url).play()
+      item.value.isVoiceDone = true
+    })
+}
+onMounted(() => {
+  const temp = localStorage.getItem('voice')
+  console.log(temp)
+  if (temp === null) {
+    localStorage.setItem('voice', 'fa-IR-FaridNeural')
+  }
 })
 
+watch(() => item.value.voice, (n, o) => {
+  localStorage.setItem('voice', n)
+})
 const {
   data: request,
   currentStepId,
@@ -49,84 +76,114 @@ onBeforeMount(checkPreviousSteps)
     </div>
 
     <div class="w-full max-w-md">
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 sm:col-span-6">
-          <BaseInputNumber
-            v-model="request.age"
-            v-focus
-            :error="errors.fields.age"
-            label="سن شما"
-            placeholder="به صورت عددی"
-            :min="8"
-          />
+      <div class="w-full space-y-4">
+        <div>
+          لطفا توجه داشته باشید که ...
         </div>
-        <div class="col-span-12 sm:col-span-6">
-          <BaseListbox
-            v-model="request.gender"
-            label="جنسیت"
-            :items="['مرد', 'زن', `ترجیح می دهم نگویم`]"
-            placeholder="جنسیت را انتخاب نمایید"
-            :error="errors.fields.gender"
-            rounded="lg"
-          />
-        </div>
-        <div class="col-span-12 sm:col-span-6">
-          <BaseListbox
-            v-model="request.maritalStatus"
-            label="وضعیت تاهل"
-            :items="['مجرد', 'متاهل', `در رابطه عاطفی` , `اقدام برای جدایی`, `طلاق گرفته`]"
-            placeholder="انتخاب نمایید"
-            :error="errors.fields.maritalStatus"
-            rounded="lg"
-          />
-        </div>
-        <div class="col-span-12 sm:col-span-6">
-          <BaseListbox
-            v-model="request.jobStatus"
-            label="وضعیت شغلی"
-            :items="['دانش آموز', 'دانشجو', `استخدام بخش دولتی` , `استخدام بخش خصوصی`, `شغل آزاد`, 'جویای کار', 'خانه دار', 'بیکار']"
-            placeholder="انتخاب نمایید"
-            :error="errors.fields.jobStatus"
-            rounded="lg"
-          />
-        </div>
-        <div class="col-span-12">
-          <BaseInput
-            v-model="request.name"
-            v-focus
-            :error="errors.fields.name"
-            label="نام شما"
-            placeholder="به صورت اختیاری"
-          />
-        </div>
-        <div class="col-span-12">
-          <BaseInput
-            v-model="request.email"
-            :error="errors.fields.email"
-            label="آدرس ایمیل"
-            placeholder="اختیاری"
-          />
-        </div>
-      </div>
+        <div class="grid gap-10 sm:grid-cols-2">
+          <BaseRadioHeadless
+            v-model="item.voice"
+            name="fa-IR-FaridNeural"
+            value="fa-IR-FaridNeural"
+          >
+            <BaseCard
+              rounded="lg"
+              class="peer-checked:!border-success-500 peer-checked:!bg-success-500/10 relative border-2 p-5 peer-checked:[&_.child]:!opacity-100"
+            >
+              <div class="flex flex-col items-center">
+                <h4
+                  class="text-muted-500 dark:text-muted-200 mb-3 font-sans text-sm font-medium uppercase leading-tight"
+                >
+                  صدای مردانه
+                </h4>
+                <BaseAvatar size="lg">
+                  <img
+                    src="/img/avatars/male.webp"
+                    rounded="full"
+                    alt=""
+                  >
+                </BaseAvatar>
+              </div>
 
-      <div class="mt-6 flex gap-4">
-        <BaseButton
-          v-if="currentStepId > 0"
-          :to="loading ? undefined : getPrevStep()?.to"
-          :disabled="!getPrevStep()"
-          size="lg"
-          class="w-full"
-        >
-          <span>بخش قبلی</span>
-        </BaseButton>
-        <BaseButton
-          type="submit"
-          color="primary"
-          size="lg"
-          class="w-full"
-        >
-          <span>ادامه</span>
-        </BaseButton>
+              <div class="child absolute end-2 top-3 opacity-0">
+                <Icon name="ph:check-circle-duotone" class="text-success-500 size-7" />
+              </div>
+            </BaseCard>
+          </BaseRadioHeadless>
+
+          <BaseRadioHeadless
+            v-model="item.voice"
+            name="fa-IR-DilaraNeural"
+            value="fa-IR-DilaraNeural"
+          >
+            <BaseCard
+              rounded="lg"
+              class="peer-checked:!border-success-500 peer-checked:!bg-success-500/10 relative border-2 p-5 peer-checked:[&_.child]:!opacity-100"
+            >
+              <div class="flex flex-col items-center">
+                <h4
+                  class="text-muted-500 dark:text-muted-200 mb-3 font-sans text-sm font-medium uppercase leading-tight"
+                >
+                  صدای زنانه
+                </h4>
+
+                <BaseAvatar size="lg">
+                  <img
+                    src="/img/avatars/female.webp"
+                    rounded="full"
+                    alt=""
+                  >
+                </BaseAvatar>
+              </div>
+
+              <div class="child absolute end-2 top-3 opacity-0">
+                <Icon name="ph:check-circle-duotone" class="text-success-500 size-7" />
+              </div>
+            </BaseCard>
+          </BaseRadioHeadless>
+        </div>
+        <div class="mt-4 flex items-center gap-4">
+          <BaseCard
+            color="primary"
+            rounded="md"
+            class="p-6"
+          >
+            <BaseParagraph
+              size="sm"
+              lead="tight"
+              class="text-muted-400 flex items-center gap-4"
+            >
+              <BaseButtonIcon
+                rounded="full"
+                color="primary"
+                :class="item.isVoiceDone? '' : 'animate-spin'"
+                @click="getVoice()"
+              >
+                <Icon :name="item.isVoiceDone? 'lucide:play' : 'lucide:loader-circle'" class="size-5" />
+              </BaseButtonIcon>
+              <div>«سلام، من مانا هستم! دستیار سلامت روان شما»</div>
+            </BaseParagraph>
+          </BaseCard>
+        </div>
+        <div class="mt-4 flex gap-4">
+          <BaseButton
+            v-if="currentStepId > 0"
+            :to="loading ? undefined : getPrevStep()?.to"
+            :disabled="!getPrevStep()"
+            size="lg"
+            class="w-full"
+          >
+            <span>بازگشت</span>
+          </BaseButton>
+          <BaseButton
+            type="submit"
+            color="primary"
+            size="lg"
+            class="w-full"
+          >
+            <span>ادامه</span>
+          </BaseButton>
+        </div>
       </div>
     </div>
   </div>

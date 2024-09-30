@@ -7,7 +7,7 @@ definePageMeta({
   layout: 'empty',
   title: 'ورود',
   preview: {
-    title: 'ورود',
+    title: 'ورود مشاوران',
     description: 'برای سامانه ذهنا',
     categories: ['layouts', 'authentication'],
     src: '/img/screens/auth-login-2.png',
@@ -104,7 +104,7 @@ const loginWithGoogle = async () => {
   const authData = await nuxtApp.$pb
     .collection('users')
     .authWithOAuth2({ provider: 'google' })
-  setUser(authData, 'user')
+  setUser(authData, 'psychotherapist')
 
   toaster.clearAll()
   toaster.show({
@@ -115,12 +115,12 @@ const loginWithGoogle = async () => {
     closable: true,
   })
   setTimeout(() => {
-    router.push('/mana/chat')
+    router.push('clinic/psychotherapist-register')
   }, 2000)
 }
 
 if (nuxtApp.$pb.authStore.isValid) {
-  navigateTo('/mana/chat')
+  navigateTo('/dashboard')
 }
 </script>
 
@@ -166,7 +166,7 @@ if (nuxtApp.$pb.authStore.isValid) {
             weight="medium"
             class="mt-6"
           >
-            کاربر عزیز، خوش آمدید
+            روانشناس عزیز، خوش آمدید
           </BaseHeading>
           <BaseParagraph size="sm" class="text-muted-400 mb-6 mt-3">
             ورود در سامانه به منزله

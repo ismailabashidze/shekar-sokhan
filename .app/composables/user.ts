@@ -13,6 +13,8 @@ export type User = {
 export function useUser() {
   const nuxtApp = useNuxtApp()
   const user = useLocalStorage('user', {} as User)
+  const role = useLocalStorage('role', '')
+
   const generateAndSetCode = async (phoneNumber: string) => {
     if (!process.server) {
       if (!user.value.anonymousCode) {
@@ -34,8 +36,9 @@ export function useUser() {
     return true
   }
 
-  const setUser = async (u: User) => {
+  const setUser = async (u: User, r: string) => {
     user.value = u
+    role.value = r
     return user
   }
 
@@ -64,6 +67,14 @@ export function useUser() {
       expand: 'user',
     })
   }
+  const getAnalysis = async (userId: string, currentDeletionDivider: number) => {
+    return await nuxtApp.$pb.collection('analysis').getFullList({
+      sort: '-created',
+      // filter: 'currentDivision=' + currentDeletionDivider + ` && user.id = "${userId}"`,
+      filter: 'currentDivision=' + currentDeletionDivider + ` && userId.id = "${userId}"`,
+
+    })
+  }
 
   return {
     user,
@@ -76,5 +87,6 @@ export function useUser() {
     getUserDetails,
     createUserDetails,
     getUserDetailsWithUserId,
+    getAnalysis,
   }
 }
