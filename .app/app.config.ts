@@ -27,9 +27,10 @@ export default defineAppConfig({
           {
             // Title displayed in the sidebar
             title: 'صفحه گفت و گو',
-            icon: { name: 'ph:sidebar-duotone', class: 'w-5 h-5' },
+            icon: { name: 'ph:chat-circle', class: 'w-5 h-5' },
             activePath: '/mana/chat',
             to: '/mana/chat',
+            class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
             click: () => {
               alert('clicked on layouts')
             },

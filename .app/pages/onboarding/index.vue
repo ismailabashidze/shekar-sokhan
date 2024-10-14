@@ -48,7 +48,7 @@ const redeem = async () => {
       icon: 'ph:check',
       closable: true,
     })
-    navigateTo('/mana/chat')
+    navigateTo('/mana/chat-therapist')
   }
   else {
     toaster.show({

@@ -1,16 +1,3 @@
-<template>
-  <div>
-    <canvas ref="canvas" class="visualizer-canvas" />
-    <button
-      v-if="!isStarted"
-      class="start-button"
-      @click="start"
-    >
-      شروع
-    </button>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useHead } from '@vueuse/head'
@@ -162,6 +149,18 @@ onMounted(() => {
   gui.close() // Hide controls initially
 })
 </script>
+<template>
+  <div>
+    <canvas ref="canvas" class="visualizer-canvas" />
+    <button
+      v-if="!isStarted"
+      class="start-button"
+      @click="start"
+    >
+      شروع
+    </button>
+  </div>
+</template>
 
   <style>
   .visualizer-canvas {

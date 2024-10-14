@@ -31,19 +31,16 @@ const getVoice = async (item) => {
       item.isVoiceDone = true
     })
 }
-// const test = await $fetch('/api/chroma', {
-//   method: 'GET',
-// })
-// console.log(test)
-const { user, incDivision, getUserDetails, getAnalysis } = useUser()
+const { user, incDivision, getUserDetails } = useUser()
 const userDetails = ref()
-const { open } = usePanels()
 const seamless = useSeamless()
-const { goals, getGoals } = useGoal()
 
-const { translated, translate, translateS2T } = seamless
-const { getMessages, saveMessage, deleteAllMessages, deleteMessage }
+const { translate } = seamless
+const { getMessages, saveMessage, deleteAllMessages, deleteMessage, addEditToMessage }
   = useMessage()
+
+const { saveSuggest, getLastSuggestion }
+  = useSuggestion()
 
 const search = ref('')
 const message = ref('')
@@ -52,97 +49,86 @@ const chatEl = ref<HTMLElement>()
 const expanded = ref(false)
 const loading = ref(true)
 const isTyping = ref(false)
-const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
 const isNewMessagesDone = ref(true)
 const newMessagesIndex = ref(0)
-const timer = ref(30)
-const type = ref('briefing')
-const isGoingToDone = ref(false)
-const showTenMin = ref(false)
-const selectedEmoji = ref()
 const showDoneModal = ref(false)
-const isRequestForReport = ref(false)
 const startChargeTime = ref()
-const requestForReport = async () => {
-  isRequestForReport.value = true
-  let conv = conversation.value.messages.filter(m => m.role === 'user' || m.role === 'assistant')
-  let sendToLLM = combineMessages(conv, 'user')
-  const answer = await $fetch('/api/analysis', {
-    method: 'POST',
-    body: {
-      llmMessages: [
-        ...sendToLLM
-          .map((m) => {
-            return {
-              role: m.role ?? 'assistant',
-              content: m.role === 'user' || m.role === 'assistant' ? 'CHAT:' + m.content.message : 'ASSESSMENT:' + JSON.stringify({ GHQAnalysis: m.GHQAnalysis, behavioralAnalysis: m.behavioralAnalysis, emotionalAnalysis: m.emotionalAnalysis, thoughtsAndConcerns: m.thoughtsAndConcerns }),
-
-            }
-          })
-          .filter(Boolean),
-      ],
-      userId: user.value.record.id,
-      currentDivision: user.value.record.currentDeletionDivider,
-      userDetails: userDetails.value[0],
-    },
-  })
-  isRequestForReport.value = false
-  navigateTo('/mana/waitForReport')
-}
-const goToDoneAndEnd = async () => {
-  type.value = 'summary'
-  isGoingToDone.value = true
-  conversation.value.messages.push({
-    role: 'separator',
-    content: { message: 'Summary and conclusion in the last ten minutes.' },
-    contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-  })
-  saveMessage({
-    role: 'separator',
-    content: { message: 'Summary and conclusion in the last ten minutes.' },
-    contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-    user: user.value.record.id,
-    deletionDivider: user.value.record.currentDeletionDivider,
-  })
-  messageLoading.value = true
-  pause()
-  isGoingToDone.value = false
-  showTenMin.value = false
-  await askForMana()
-  messageLoading.value = false
-}
-
-watch(message, () => {
-  if (isTyping.value) {
-    // mana decided to write, but will stop, because user decided to write.
-    timer.value = 5
-    setTimeout(() => {
-      reset()
-    }, 10000)
-  }
-  else {
-    // mana has not decided to write.
-    timer.value = 20
-    reset()
-  }
-})
-watch(counter, (n, o) => {
-  if (n == timer.value) {
+const suggestionLoading = ref(true)
+const askForPatient = async () => {
+  suggestionLoading.value = true
+  if (isNewMessagesDone.value) {
     isTyping.value = true
-    pause()
-    setTimeout(() => {
-      // a wait to ensure sending the message.
-      if (isTyping.value) {
-        askForMana()
-      }
-    }, 2000)
-  }
-  else {
-    isTyping.value = false
+    try {
+      let sendToLLM = combineMessages(conversation.value.messages, 'user')
+      const answer = await $fetch('/api/user', {
+        method: 'POST',
+        body: {
+          llmMessages: [
+            ...sendToLLM
+              .map((m) => {
+                if (m.role == 'assistant' || m.role == 'user') {
+                  return {
+                    role: m.role,
+                    content: JSON.stringify(m.content),
+                  }
+                }
+              })
+              .filter(Boolean),
+          ],
+          userId: user.value.record.id,
+          currentDivision: user.value.record.currentDeletionDivider,
+          userDetails: userDetails.value[0],
+        },
+      })
+      const res = await processResponse(JSON.parse(answer))
+      let informalTranslatedMsg = convertToInformal(res.message)
 
-    resume()
+      const newMsg = await saveMessage({
+        role: 'user',
+        user: user.value.record.id,
+        time: new Date().toLocaleTimeString('fa'),
+        content: JSON.parse(answer),
+        contentFa: res,
+        deletionDivider: user.value.record.currentDeletionDivider,
+      })
+
+      conversation.value.messages.push({
+        id: newMsg.id,
+        role: 'user',
+        content: JSON.parse(answer),
+        contentFa: res,
+        time: new Date().toLocaleTimeString('fa'),
+        isVoiceDone: false,
+      })
+
+      await nextTick()
+
+      if (chatEl.value) {
+        chatEl.value.scrollTo({
+          top: chatEl.value.scrollHeight,
+          behavior: 'smooth',
+        })
+      }
+      isTyping.value = false
+      isNewMessagesDone.value = true
+      // getVoice(conversation.value.messages.at(-1))
+      await askForMana()
+    }
+    catch (e) {
+      console.log('here')
+      console.log(e)
+      toaster.show({
+        title: 'دریافت پیام', // Authentication
+        message: `مشکلی وجود دارد`, // Please log in again
+        color: 'danger',
+        icon: 'ph:envelope',
+        closable: true,
+      })
+      await askForPatient()
+    }
   }
-})
+}
+
 const conversation = ref({
   user: {
     name: 'مانا، همدل هوشمند',
@@ -407,12 +393,11 @@ function convertToInformal(text) {
 const askForMana = async () => {
   if (isNewMessagesDone.value && !showNoCharge.value) {
     try {
+      selectedByTherapist.value = []
       let sendToLLM = combineMessages(conversation.value.messages, 'user')
-
-      const answer = await $fetch('/api/llm', {
+      const answer = await $fetch('/api/therapist', {
         method: 'POST',
         body: {
-          type: type.value,
           llmMessages: [
             ...sendToLLM
               .map((m) => {
@@ -430,27 +415,23 @@ const askForMana = async () => {
           userDetails: userDetails.value[0],
         },
       })
-      selectedEmoji.value = '🕊'
-      const res = await processResponse(JSON.parse(answer))
-      let informalTranslatedMsg = convertToInformal(res.message)
-      const newMsg = await saveMessage({
-        user: user.value.record.id,
-        role: 'assistant',
-        time: new Date().toLocaleTimeString('fa'),
-        content: JSON.parse(answer),
-        contentFa: res,
-        deletionDivider: user.value.record.currentDeletionDivider,
+      const res = await processArrayWithTranslatedTitlesAndValues(JSON.parse(answer))
+      const msgId = conversation.value.messages.at(-1).id
+      const uId = user.value.record.id
+      sgg.value = await saveSuggest({ message: msgId, user: uId, suggestions: JSON.parse(answer), suggestionsFa: res })
+      sggList.value = []
+      sgg.value.suggestionsFa.map((s, i) => {
+        if (Array.isArray(s.value)) {
+          s.value.forEach((element, index) => {
+            sggList.value.push ({ title: s.title, value: element })
+            sggList.value.at(-1).valueEn = sgg.value.suggestions[i].value[index]
+          })
+        }
+        else {
+          sggList.value.push ({ title: s.title, value: s.value, valueEn: sgg.value.suggestions[i].value })
+        }
       })
-
-      conversation.value.messages.push({
-        id: newMsg.id,
-        role: 'assistant',
-        content: JSON.parse(answer),
-        contentFa: res,
-        time: new Date().toLocaleTimeString('fa'),
-        isVoiceDone: false,
-      })
-
+      conversation.value.messages.push({ role: 'assistant', content: { message: '' }, contentFa: { message: 'از پنل پایین انتخاب نمایید' }, correctedContentFa: null })
       await nextTick()
 
       if (chatEl.value) {
@@ -459,29 +440,26 @@ const askForMana = async () => {
           behavior: 'smooth',
         })
       }
-      isTyping.value = false
-      counter.value = 0
-      timer.value = 120
-      messageLoading.value = false
-      await getVoice(conversation.value.messages.at(-1))
+
+      suggestionLoading.value = false
     }
     catch (e) {
       console.log('here')
       console.log(e)
-      toaster.show({
-        title: 'دریافت پیام', // Authentication
-        message: `مشکلی وجود دارد`, // Please log in again
-        color: 'danger',
-        icon: 'ph:envelope',
-        closable: true,
-      })
+      // toaster.show({
+      //   title: 'دریافت پیام', // Authentication
+      //   message: `مشکلی وجود دارد`, // Please log in again
+      //   color: 'danger',
+      //   icon: 'ph:envelope',
+      //   closable: true,
+      // })
       await askForMana()
       // messageLoading.value = false
     }
   }
   else {
     setTimeout(() => {
-      askForMana()
+      // askForMana()
     }, 10000)
   }
 }
@@ -526,6 +504,55 @@ async function processResponse(answer: Record<string, any>): Promise<Record<stri
     throw error
   }
 }
+async function processArrayWithTranslatedTitlesAndValues(inputArray: Array<Record<string, any>>): Promise<Array<Record<string, any>>> {
+  // Create an array to hold promises for each item in the input array
+  const promises = inputArray.map(async (item) => {
+    const translatedItem: Record<string, any> = {}
+
+    // Translate the 'title'
+    const translatedTitle = await translateAndAssemble(item.title, 'English', 'Western Persian')
+      .catch((error) => {
+        console.error(`An error occurred during translation of title: ${item.title}`, error)
+        throw error
+      })
+
+    translatedItem.title = translatedTitle
+
+    // Check if 'value' is a string or an array of strings, then translate accordingly
+    if (typeof item.value === 'string') {
+      // Translate a single string value
+      translatedItem.value = await translateAndAssemble(item.value, 'English', 'Western Persian')
+        .catch((error) => {
+          console.error(`An error occurred during translation of value: ${item.value}`, error)
+          throw error
+        })
+    }
+    else if (Array.isArray(item.value) && item.value.every(val => typeof val === 'string')) {
+      // Translate an array of string values
+      translatedItem.value = await Promise.all(
+        item.value.map(val => translateAndAssemble(val, 'English', 'Western Persian')),
+      ).catch((error) => {
+        console.error(`An error occurred during translation of value array: ${item.value}`, error)
+        throw error
+      })
+    }
+    else {
+      // Assign non-string or non-array-of-string values directly
+      translatedItem.value = item.value
+    }
+
+    return translatedItem
+  })
+
+  try {
+    // Wait for all promises to be resolved and return the array of translated items
+    return await Promise.all(promises)
+  }
+  catch (error) {
+    console.error('An error occurred during the translation process:', error)
+    throw error
+  }
+}
 
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
@@ -540,7 +567,7 @@ const signout = () => {
   })
   navigateTo('/auth/login')
 }
-
+const expandForm = ref(false)
 const showNoCharge = ref(false)
 const remainingTime = ref()
 const timeToShow = ref()
@@ -548,7 +575,6 @@ let voice = ''
 
 onMounted(async () => {
   voice = localStorage.getItem('voice') as string
-
   const local = localStorage.getItem('expanded')
   if (local === null) {
     localStorage.setItem('expanded', 'false')
@@ -557,18 +583,14 @@ onMounted(async () => {
   else {
     expanded.value = localStorage.getItem('expanded') == 'true'
   }
-  // getGoals()
   const msg = await getMessages()
   msg.map(m => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
   msg.map(m => (m.isVoiceDone = true))
   conversation.value.messages.push(...msg)
-  console.log('informals')
-
   conversation.value.messages.map((m) => {
     m.contentFa.message = convertToInformal(m.contentFa.message)
   })
   loading.value = false
-  // await autoConversation()
   await sleep(200)
   setTimeout(() => {
     if (chatEl.value) {
@@ -585,13 +607,10 @@ onMounted(async () => {
   remainingTime.value = new Date(u.expireChargeTime)
   startChargeTime.value = new Date(u.startChargeTime)
   timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
-  if (timeToShow.value <= 0) {
-    pause()
-  }
   setInterval(() => {
     timeToShow.value = timeToShow.value - 1
     // if (timeToShow.value == 10) {
-    //   showTenMin.value = true
+    //   showEditModal.value = true
     //   conversation.value.messages.push({
     //     role: 'separator',
     //     content: { message: 'Summary and conclusion in the last ten minutes.' },
@@ -621,66 +640,42 @@ onMounted(async () => {
               })
             }
           }, 600)
-          pause()
+          // pause()
         }
       },
       {},
     )
   }
-  userDetails.value = await getUserDetails(nuxtApp.$pb.authStore.model.id)
-  console.log('userDetails.value')
-  if (userDetails.value.length === 0) {
-    navigateTo('/mana/initiation')
-  }
-  if (conversation.value.messages.length == 1) {
-    timer.value = 3
-    type.value = 'introduce'
-    messageLoading.value = true
+  // TODO: IMPLEMENT A SYSTEM FOR AI PATIENTS TO ROLE PLAY AND READ THEM FROM HERE
+  userDetails.value = await getUserDetails('dldw6y1ueeqmcft')
+  if (conversation.value.messages.at(-1)?.role == 'assistant' || conversation.value.messages.length == 1 && showNoCharge.value == false) {
+    await askForPatient()
   }
   else {
-    type.value = 'briefing'
+    sgg.value = await getLastSuggestion(conversation.value.messages.at(-1).id)
+
+    if (sgg.value) {
+      sgg.value.suggestionsFa.map((s, i) => {
+        if (Array.isArray(s.value)) {
+          s.value.forEach((element, index) => {
+            sggList.value.push ({ title: s.title, value: element })
+            sggList.value.at(-1).valueEn = sgg.value.suggestions[i].value[index]
+          })
+        }
+        else {
+          sggList.value.push ({ title: s.title, value: s.value, valueEn: sgg.value.suggestions[i].value })
+        }
+      })
+      conversation.value.messages.push({ role: 'assistant', content: { message: '' }, contentFa: { message: 'از پنل پایین انتخاب نمایید' }, correctedContentFa: null })
+      suggestionLoading.value = false
+    }
+    else {
+      await askForMana()
+    }
   }
 })
-
-// async function autoConversation() {
-//   const lastContent = conversation.value.messages.at(-1)?.content as string
-//   const m = await ask(PATIENT_AGENT, lastContent as string)
-//   const t = await translate(m, 'English', 'Western Persian')
-//   const newMessage: BackendMessage = {
-//     role: 'user',
-//     translatedFa: t,
-//     content: m,
-//     time: new Date().toLocaleTimeString('fa'),
-//   }
-//   conversation.value.messages.push(newMessage)
-//   // const userEval = await ask('SummaryJsonizer', translated.value)
-//   await saveMessage({
-//     content: m as string,
-//     translatedFa: t,
-//     user: user.value.record.id,
-//     role: 'user',
-//     // evaluations: JSON.parse(userEval),
-//     evaluations: {},
-//   })
-//   const answer = await ask('Mana', m)
-//   // const AIEval = await ask('SummaryJsonizer', translated.value)
-//   const t2 = await translate(answer, 'English', 'Western Persian')
-//   await saveMessage({
-//     content: answer,
-//     translatedFa: t2 as string,
-//     user: user.value.record.id,
-//     role: 'assistant',
-//     time: new Date().toLocaleTimeString('fa'),
-//     evaluations: {},
-//   })
-//   conversation.value.messages.push({
-//     role: 'assistant',
-//     translatedFa: t2,
-//     content: answer,
-//     created: new Date().toLocaleTimeString('fa'),
-//   })
-//   await autoConversation()
-// }
+const sgg = ref()
+const sggList = ref([])
 async function translateAndAssemble(
   answer: string,
   from: string,
@@ -743,7 +738,7 @@ async function submitMessage() {
     conversation.value.messages.length - 1
   ].content.message = t
 
-  const res = await saveMessage({
+  await saveMessage({
     role: 'user',
     content: { message: t },
     contentFa: { message: m },
@@ -754,7 +749,6 @@ async function submitMessage() {
   newMessagesIndex.value++
 }
 const showDeleteModal = ref(false)
-const showReportModal = ref(false)
 
 const isDeleting = ref(false)
 const deleteAll = async () => {
@@ -786,29 +780,6 @@ const deleteAll = async () => {
     isDeleting.value = false
   }
 }
-const canDelete = async () => {
-  if (showNoCharge.value) {
-    toaster.show({
-      title: 'حذف پیام ها',
-      message: `لطفا اشتراک تهیه کنید`,
-      color: 'warning',
-      icon: 'ph:warning',
-      closable: true,
-    })
-    return
-  }
-  if (conversation.value.messages.length < 3) {
-    toaster.show({
-      title: 'حذف پیام ها',
-      message: `گفت و گو هنوز آغاز نشده است. برای حذف پیام ها باید بیشتر از یک باشد.`,
-      color: 'warning',
-      icon: 'ph:warning',
-      closable: true,
-    })
-    return
-  }
-  showDeleteModal.value = true
-}
 const resend = async () => {
   toaster.show({
     title: 'باز ارسال آخرین پیام',
@@ -817,98 +788,181 @@ const resend = async () => {
     icon: 'lucide:rotate-cw',
     closable: true,
   })
-
+  isTyping.value = true
+  conversation.value.messages.pop()
   await deleteMessage(conversation.value.messages.at(-1).id)
   conversation.value.messages.pop()
-  // message.value = conversation.value.messages.at(-1)?.contentFa
-  //   ?.message as string
-  // conversation.value.messages.pop()
   isNewMessagesDone.value = true
-  counter.value = timer.value
-  await askForMana()
-}
-
-const report = ref([])
-const reportChoices = ref([
-  {
-    img: 'lucide:rotate-cw',
-    name: 'repetitive',
-    title: 'تکراری',
-    description: 'پیام کاملا تکراری است',
-    content:
-      'user reported that your last message was too repetitive. try telling something new and use new words to convey the message.',
-  },
-  {
-    img: 'lucide:circle-alert',
-    name: 'unclear',
-    title: 'نامفهوم',
-    description: 'پاسخ داده شده از لحاظ معنایی نامفهوم است.',
-    content:
-      'user reported that your last message is not clear and has misleading. try checking the previous messages and reply based on the context. clear your message.',
-  },
-  {
-    img: 'lucide:heart-off',
-    name: 'unempathic',
-    title: 'غیر همدلانه',
-    description: 'پاسخ داده شده خالی از احساس همراهی و همدلی است.',
-    content:
-      'user reported that your last message is not empathic enough. Emphasize on empathy and make it bolder. Show more empathy.',
-  },
-  {
-    img: 'lucide:scale',
-    name: 'biased',
-    title: 'جانبدارانه',
-    description: 'پاسخ جانبدارانه است.',
-    content:
-      'user reported that your last message is biased. Try answering unbiased.',
-  },
-  {
-    img: 'ph:mosque',
-    name: 'nonIslamic',
-    title: 'غیر شرعی',
-    description: 'پاسخ داده شده با ارزش های اسلامی مغایرت دارد.',
-    content:
-      'user reported that your last message is not acceptable via islamic rules. Try to align with islamic values and answer again.',
-  },
-])
-function resetReport() {
-  report.value = []
-}
-const submitReport = async () => {
-  const rep = report.value.map((r) => {
-    return {
-      role: 'user',
-      content: { message: r.content },
-      contentFa: { message: r.description },
-    }
-  })
-  conversation.value.messages = conversation.value.messages.concat(rep)
-  toaster.show({
-    title: 'اعمال گزارش',
-    message: `موارد گزارش شده اعمال و پیام ارسال خواهد شد.`,
-    color: 'warning',
-    icon: 'lucide:rotate-cw',
-    closable: true,
-  })
-  showReportModal.value = false
-  message.value = 'لطفا گزارش را اعمال کن و دوباره پاسخ بده'
-  await submitMessage()
-}
-const checkForHalfTime = () => {
-  const start = new Date(startChargeTime.value)
-  const now = new Date()
-  const temp = Math.floor((now.getTime() - start.getTime()) / 60000)
-
-  return (temp / timeToShow.value > 1)
-}
-const fatBtn = () => {
-  expanded.value = true
-  localStorage.setItem('expanded', expanded.value + '')
-  showDoneModal.value = true
+  await askForPatient()
 }
 const changeExpanded = () => {
   expanded.value = !expanded.value
   localStorage.setItem('expanded', expanded.value + '')
+}
+const selectedByTherapist = ref([])
+const submitLoading = ref(false)
+const submitTherapist = async () => {
+  if (conversation.value.messages.at(-1).contentFa.message === 'از پنل پایین انتخاب نمایید') {
+    toaster.show({
+      title: 'ثبت',
+      message: `ابتدا موارد را انتخاب نمایید`,
+      color: 'warning',
+      icon: 'ph:pencil',
+      closable: true,
+    })
+    return
+  }
+  submitLoading.value = true
+  const newMsg = await saveMessage({
+    user: user.value.record.id,
+    role: 'assistant',
+    time: new Date().toLocaleTimeString('fa'),
+    content: conversation.value.messages.at(-1).content,
+    contentFa: conversation.value.messages.at(-1)?.contentFa,
+    correctedContentFa: conversation.value.messages.at(-1)?.correctedContentFa,
+    deletionDivider: user.value.record.currentDeletionDivider,
+  })
+  conversation.value.messages.at(-1).id = newMsg.id
+  conversation.value.messages.at(-1).role = 'assistant'
+  conversation.value.messages.at(-1).time = new Date().toLocaleTimeString('fa')
+  conversation.value.messages.at(-1).isVoiceDone = false
+
+  await nextTick()
+
+  if (chatEl.value) {
+    chatEl.value.scrollTo({
+      top: chatEl.value.scrollHeight,
+      behavior: 'smooth',
+    })
+  }
+
+  await askForPatient()
+  submitLoading.value = false
+}
+const submitEdit = ref(false)
+const showEditModal = ref(false)
+const selectedForEdit = ref()
+const selectionType = ref('sentences')
+const openEditModal = async (text, index) => {
+  if (text.contentFa.message === 'از پنل پایین انتخاب نمایید') {
+    toaster.show({
+      title: 'ویرایش',
+      message: `ابتدا موارد را انتخاب نمایید`,
+      color: 'warning',
+      icon: 'ph:pencil',
+      closable: true,
+    })
+    return
+  }
+
+  showEditModal.value = true
+  selectedForEdit.value = text
+  selectedForEdit.value.index = index
+  if (selectionType.value === 'words') {
+    selectedForEdit.value.sliced = selectedForEdit.value.contentFa.message.match(/[\p{L}\p{M}\p{N}_']+|[^\s\p{L}\p{M}\p{N}_]+/gu)
+  }
+  else {
+    const segmenter = new Intl.Segmenter('fa', { granularity: 'sentence' })
+    const sentences = []
+
+    for (const { segment } of segmenter.segment(selectedForEdit.value.contentFa.message)) {
+      sentences.push(segment.trim())
+    }
+
+    selectedForEdit.value.sliced = sentences
+    const segmenterEn = new Intl.Segmenter('en', { granularity: 'sentence' })
+    const sentencesEn = []
+
+    for (const { segment } of segmenterEn.segment(selectedForEdit.value.content.message)) {
+      sentencesEn.push(segment.trim())
+    }
+    selectedForEdit.value.slicedEn = sentencesEn
+  }
+}
+const submitEditFinal = async () => {
+  if (editedText.value != '') {
+    alert('لطفا تغییرات را ثبت و سپس ثبت نهایی کنید')
+    return
+  }
+  submitEdit.value = true
+  await sleep(2000)
+  submitEdit.value = false
+  showEditModal.value = false
+  if (conversation.value.messages.at(-1)?.role == 'user') {
+    await addEditToMessage(selectedForEdit.value)
+  }
+  conversation.value.messages.at(selectedForEdit.value.index).correctedContentFa = selectedForEdit.value.sliced.join('\n')
+  toaster.show({
+    title: 'ثبت تغییرات',
+    message: `تغییرات با موفقیت ثبت شد`,
+    color: 'success',
+    icon: 'ph:check',
+    closable: true,
+  })
+}
+watch(selectionType, () => {
+  openEditModal(selectedForEdit.value)
+})
+const selectedForEditIndex = ref ()
+const updateSelectedIndex = async (i) => {
+  if (i !== -1 && !editedText.value) {
+    selectedForEditIndex.value = i
+  }
+}
+const editedTextIndex = ref(-1)
+const clickedOnText = (i) => {
+  if (editedText.value) {
+    errorText.value = 'تغییرات را ذخیره نمایید.'
+    errorTextColor.value = 'danger'
+    setTimeout(() => {
+      errorText.value = ''
+      errorTextColor.value = ''
+    }, 2000)
+    return
+  }
+  editedTextIndex.value = i
+  editedText.value = selectedForEdit.value.sliced[i]
+  // errorText.value = 'تغییرات را ذخیره نمایید یا متن را بازنشانی فرمایید.'
+}
+const editedText = ref()
+const errorText = ref()
+const errorTextColor = ref()
+
+watch(editedText, () => {
+
+})
+const updateEditedToNew = () => {
+  selectedForEdit.value.sliced[selectedForEditIndex.value] = editedText.value
+  errorText.value = 'جمله ثبت شد'
+  errorTextColor.value = 'success'
+  setTimeout(() => {
+    errorText.value = ''
+    errorTextColor.value = ''
+    editedText.value = ''
+  }, 1000)
+}
+watch(selectedByTherapist, (n) => {
+  if (conversation.value.messages.at(-1).role === 'assistant') {
+    let temp = selectedByTherapist.value.map(s => s.value).join(' ')
+    let tempEn = selectedByTherapist.value.map(s => s.valueEn).join(' ')
+
+    if (temp == '') {
+      temp = 'از پنل پایین انتخاب نمایید'
+    }
+    conversation.value.messages.at(-1).contentFa.message = temp
+    conversation.value.messages.at(-1).content.message = tempEn
+  }
+})
+const expandFormFn = async () => {
+  expandForm.value = !expandForm.value
+  await nextTick()
+
+  if (chatEl.value) {
+    chatEl.value.scrollTo({
+      top: chatEl.value.scrollHeight,
+      behavior: 'smooth',
+    })
+  }
 }
 </script>
 
@@ -961,7 +1015,7 @@ const changeExpanded = () => {
               to=""
               title="Settings"
               class="text-warning-400 hover:text-primary-500 bg-warning-500/20 hover:bg-primary-500/20 flex size-12 cursor-pointer items-center justify-center rounded-2xl transition-colors duration-300"
-              @click="canDelete"
+              @click="deleteAll"
             >
               <Icon name="ph:arrow-clockwise" class="size-5" />
             </NuxtLink>
@@ -1039,7 +1093,7 @@ const changeExpanded = () => {
                 to=""
                 title="پاک کردن گفت و گو"
                 class="text-warning-400 hover:text-primary-500 bg-warning-500/20 hover:bg-primary-500/20 flex size-12 cursor-pointer items-center justify-center rounded-2xl transition-colors duration-300"
-                @click="canDelete"
+                @click="deleteAll"
               >
                 <Icon name="ph:arrow-clockwise" class="size-5" />
               </NuxtLink>
@@ -1129,7 +1183,7 @@ const changeExpanded = () => {
                 class="w-[280px] justify-center !pl-2"
                 color="warning"
               >
-                لطفا اشتراک تهیه فرمایید.
+                کد خود را وارد نمایید
                 <BaseButtonIcon
                   rounded="full"
                   size="sm"
@@ -1137,7 +1191,7 @@ const changeExpanded = () => {
                   class="mr-3"
                   to="/onboarding"
                 >
-                  <Icon name="ph:shopping-cart" class="size-5" />
+                  <Icon name="ph:tag" class="size-5" />
                 </BaseButtonIcon>
               </BaseMessage>
               <div class="flex">
@@ -1151,17 +1205,6 @@ const changeExpanded = () => {
                     class="size-5"
                   />
                 </button>
-                <button
-                  class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                  title="ثبت و تکمیل"
-                  :disabled="!checkForHalfTime || conversation.messages.length < 10"
-                  @click="fatBtn()"
-                >
-                  <Icon
-                    name="ph:check-fat"
-                    class="size-5"
-                  />
-                </button>
               </div>
             </div>
           </div>
@@ -1169,7 +1212,7 @@ const changeExpanded = () => {
           <!-- HERE -->
           <div
             ref="chatEl"
-            class="relative h-[calc(100vh_-193px)] w-full p-4 sm:h-[calc(100vh_-125px)] sm:p-8"
+            class="relative h-[calc(100vh_-193px)] w-full p-4 sm:h-[calc(100vh_-330px)] sm:p-8"
             :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
           >
             <!-- Loader-->
@@ -1260,10 +1303,14 @@ const changeExpanded = () => {
             </div>
             <!-- Messages loop -->
             <div v-if="!loading" class="space-y-12">
-              <BaseMessage color="info">
-                اولین هدف برای هوش مصنوعی آشنایی بیشتر با شما تنظیم شده است.
-                برخی از تغییرات در اهداف با شما به اشتراک گذاشته می شود.
-              </BaseMessage>
+              <div>
+                <BaseMessage color="info">
+                  پس از دریافت پیام مراجع، از لیست ارائه شده موارد را انتخاب و دکمه ی ثبت را فشار دهید. سپس منتظر پیام بعدی مراجع باشید.
+                </BaseMessage>
+                <BaseMessage color="warning" class="mt-3">
+                  لطفا توجه داشته باشید که کاربر از اسم مانا به عنوان روانشناس یاد می کند، نه از نامی که شما به عنوان کاربر وارد کرده اید.
+                </BaseMessage>
+              </div>
               <div
                 v-for="(item, index) in conversation?.messages"
                 :key="index"
@@ -1285,7 +1332,7 @@ const changeExpanded = () => {
                     />
                     <BaseAvatar
                       v-else-if="item.role === 'user'"
-                      src="/img/avatars/user.png"
+                      src="/img/avatars/tara.webp"
                       size="md"
                     />
                   </div>
@@ -1298,24 +1345,12 @@ const changeExpanded = () => {
                       ]"
                     >
                       <!-- <p class="whitespace-pre-line text-justify font-sans text-sm" v-html=" item?.role === 'assistant' ? item?.contentFa.empathy + '\n\n' + item?.contentFa.solutions + '\n\n' + item?.contentFa.investigating : item?.contentFa.message " /> -->
-                      <p class="whitespace-pre-line text-justify font-sans text-sm" v-html="item.contentFa.message" />
-
+                      <p class="whitespace-pre-line text-justify font-sans text-sm" v-html="item.correctedContentFa ?? item.contentFa.message" />
                       <div
-                        v-if="item.role === 'assistant'"
+                        v-if="item.role === 'user' && index +2 === conversation.messages.length "
                         class="w-100 mt-2 flex flex-row-reverse"
                       >
-                        <button
-                          class="bg-primary-500 hover:bg-primary-700 mr-2 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                          :class="item.isVoiceDone? '' : 'animate-spin'"
-                          @click="getVoice(item)"
-                        >
-                          <Icon :name="item.isVoiceDone? 'lucide:play' : 'lucide:loader-circle'" class="size-5" />
-                        </button>
                         <div
-                          v-if="
-                            index == conversation?.messages.length - 1 &&
-                              index != 1 && isTyping == false && showNoCharge == false
-                          "
                           class="flex"
                         >
                           <button
@@ -1326,10 +1361,36 @@ const changeExpanded = () => {
                           </button>
                           <button
                             class="bg-warning-500 hover:bg-warning-700 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                            @click="showReportModal = true"
+                            @click="openEditModal(item, index)"
                           >
-                            <Icon name="lucide:shield-alert" class="size-5" />
+                            <Icon name="ph:pencil" class="size-5" />
                           </button>
+                        </div>
+                      </div>
+                      <div
+                        v-if="item.role === 'assistant' && !showNoCharge && index +1 === conversation.messages.length"
+                        class="w-100 mt-2 flex flex-row-reverse"
+                      >
+                        <div
+                          class="flex gap-2"
+                        >
+                          <BaseButtonIcon
+                            rounded="full"
+                            color="warning"
+                            :loading="submitLoading || suggestionLoading"
+                            @click="openEditModal(item, index)"
+                          >
+                            <Icon name="ph:pencil" class="size-5" />
+                          </BaseButtonIcon>
+                          <BaseButtonIcon
+                            type="reset"
+                            rounded="full"
+                            color="success"
+                            :loading="submitLoading || suggestionLoading"
+                            @click.prevent="submitTherapist"
+                          >
+                            <Icon name="ph:check" class="size-5" />
+                          </BaseButtonIcon>
                         </div>
                       </div>
                     </div>
@@ -1410,15 +1471,14 @@ const changeExpanded = () => {
               >
                 <div class="flex content-between">
                   <div class="flex items-center">
-                    به نظر می‌رسد بسته مصرفی شما به اتمام رسیده است. برای ادامه
-                    استفاده از خدمات، لطفاً اقدام به خرید اشتراک نمایید.
+                    برای شروع گفت و گو لازم است کد خود را وارد نمایید.
                   </div>
                   <BaseButton
                     color="primary"
                     class="my-3 mr-2 w-[150px]"
                     to="/onboarding"
                   >
-                    خرید اشتراک
+                    ورود کد
                   </BaseButton>
                   <BaseButton
                     v-if="conversation.messages.length > 10"
@@ -1442,43 +1502,104 @@ const changeExpanded = () => {
             leave-from-class="opacity-100"
             leave-to-class="transform opacity-0"
           >
-            <div v-show="isTyping" class="dark:bg-muted-700 absolute bottom-[110px] flex  w-full bg-gray-200 py-2 sm:bottom-[60px]  ">
+            <div v-show="isTyping" class="dark:bg-muted-700 absolute bottom-3 flex  w-full bg-gray-200 py-2">
               <div class="text-muted-800 mr-2 text-sm font-light dark:text-white">
-                💻 مانا در حال نوشتن است <span class="typing" />
+                💻 کاربر در حال نوشتن است <span class="typing" />
               </div>
             </div>
           </transition>
           <form
-            class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-end px-4 pb-2 sm:px-8 md:items-center"
+            v-show="!isTyping"
+            class="bg-muted-100 dark:bg-muted-900 flex w-full items-end px-2 pb-2 sm:px-2 md:items-center"
+            :class="expandForm ? 'special-exapnd': ''"
             @submit.prevent="submitMessage"
           >
-            <div class="relative w-full">
-              <BaseInput
-                v-model="message"
-                :loading="messageLoading"
-                :disabled="messageLoading || showNoCharge"
-                rounded="full"
-                :classes="{
-                  input: 'h-12 ps-6 pe-24',
-                }"
-                placeholder="متن را بنویسید ..."
-                autocomplete="off"
-              />
-              <!-- <div class="absolute end-2 top-0 flex h-12 items-center gap-1">
-                <button
-                  role="button"
-                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                >
-                  <Icon name="lucide:smile" class="size-5" />
-                </button>
-                <button
-                  role="button"
-                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                >
-                  <Icon name="lucide:paperclip" class="size-5" />
-                </button>
-              </div> -->
-            </div>
+            <BaseCard class="p-3" :style="expandForm? 'height:98vh' : ''">
+              <div class="w-full">
+                <form class="mx-auto w-full">
+                  <fieldset class="w-full space-y-6">
+                    <div
+                      class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b pb-4"
+                    >
+                      <legend class="text-muted-800 dark:text-muted-100 font-sans text-xl font-medium">
+                        پیشنهادات هوش مصنوعی
+                      </legend>
+                      <div class="flex gap-2">
+                        <BaseButtonIcon
+                          type="reset"
+                          rounded="full"
+                          color="primary"
+                          :loading="submitLoading || suggestionLoading"
+                          @click.prevent="expandFormFn"
+                        >
+                          <Icon :name="expandForm? 'ph:arrows-in': 'ph:arrows-out'" class="size-5" />
+                        </BaseButtonIcon>
+                      </div>
+                    </div>
+                    <div
+                      class="overflow-auto"
+                      :class="expandForm? 'h-[500px]':'h-[150px]'"
+                    >
+                      <div
+                        v-if="suggestionLoading"
+                        class="flex items-center "
+                      >
+                        <div class="grow space-y-2">
+                          <BasePlaceload class="h-3 w-4/5 rounded-lg" />
+                          <BasePlaceload class="h-3 w-3/5 rounded-lg" />
+                        </div>
+                        <div class="grow space-y-2">
+                          <BasePlaceload class="h-3 w-4/5 rounded-lg" />
+                          <BasePlaceload class="h-3 w-3/5 rounded-lg" />
+                        </div>
+                        <div class="grow space-y-2">
+                          <BasePlaceload class="h-3 w-4/5 rounded-lg" />
+                          <BasePlaceload class="h-3 w-3/5 rounded-lg" />
+                        </div>
+                      </div>
+                      <div
+                        v-else
+                        class="grid gap-x-3 gap-y-2 overflow-auto sm:grid-cols-2"
+                        :class="expandForm? 'h-[500px]':'h-[150px]'"
+                      >
+                        <BaseCheckboxHeadless
+                          v-for="(s,i) in sggList"
+                          :key="i"
+                          v-model="selectedByTherapist"
+                          :value="s"
+                        >
+                          <BaseCard
+                            rounded="sm"
+                            class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
+                          >
+                            <div class="flex w-full items-center gap-2">
+                              <div>
+                                <BaseHeading
+                                  as="h4"
+                                  size="sm"
+                                  weight="medium"
+                                  lead="none"
+                                >
+                                  {{ s.title }}
+                                </BaseHeading>
+
+                                <BaseText size="xs" class="text-muted-400">
+                                  {{ s.value }}
+                                </BaseText>
+                              </div>
+
+                              <div class="child text-muted-300 ms-auto">
+                                <div class="size-3 rounded-full bg-current" />
+                              </div>
+                            </div>
+                          </BaseCard>
+                        </BaseCheckboxHeadless>
+                      </div>
+                    </div>
+                  </fieldset>
+                </form>
+              </div>
+            </BaseCard>
           </form>
         </div>
       </div>
@@ -1538,9 +1659,6 @@ const changeExpanded = () => {
             <div class="flex items-center justify-center">
               <div class="relative">
                 <BaseAvatar :src="conversation?.user.photo" size="4xl" />
-                <div class="absolute bottom-0 left-0 text-2xl">
-                  {{ selectedEmoji }}
-                </div>
               </div>
             </div>
             <div class="text-center">
@@ -1608,9 +1726,9 @@ const changeExpanded = () => {
     <TairoPanels />
   </div>
   <TairoModal
-    :open="showTenMin"
-    size="sm"
-    @close="showTenMin = false"
+    :open="showEditModal"
+    size="3xl"
+    @close="showEditModal = false"
   >
     <template #header>
       <!-- Header -->
@@ -1618,276 +1736,121 @@ const changeExpanded = () => {
         <h3
           class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
         >
-          به پایان گفت و گو نزدیک شده ایم
+          ثبت بهبود
         </h3>
 
-        <BaseButtonClose @click="showTenMin = false" />
+        <BaseButtonClose @click="showEditModal = false" />
       </div>
     </template>
 
     <!-- Body -->
     <div class="p-4 md:p-6">
-      <div class="mx-auto w-full text-center">
-        <Icon
-          name="ph:timer"
-          class="mb-5 block size-[75px] text-yellow-500"
-        />
-
+      <div class="mx-auto max-h-[400px] w-full overflow-y-auto text-center">
         <h3
           class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
         >
-          ۱۰ دقیقه پایانی
+          تصحیح ترجمه یا بهبود معنا
         </h3>
 
         <p
           class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-justify text-sm leading-5"
         >
-          به ده دقیقه پایانی صحبت نزدیک شده ایم. می توانید جلسه را پایان و چارچوب بندی کنید، یا به همین شکل ادامه بدهید. البته بدانید که هر موقع بخواهید می توانید اشتراک تهیه کرده و صحبت را ادامه بدهید.
+          با استفاده از پنل زیر می توانید پیام را ویرایش نمایید. می توانید جمله را به صورت کامل انتخاب کنید و تغییرات را جمله به جمله اعمال کنید یا اگر تغییرات محدود به چند کلمه است، آن ها را انتخاب و ویرایش نمایید.
         </p>
-      </div>
-    </div>
-
-    <template #footer>
-      <!-- Footer -->
-      <div class="p-4 md:p-6">
-        <div class="flex gap-x-2">
-          <BaseButton @click="showTenMin = false">
-            ادامه می دم
-          </BaseButton>
-
-          <BaseButton
-            color="warning"
-            variant="solid"
-            :loading="isGoingToDone"
-            @click="goToDoneAndEnd"
-          >
-            چارچوب بندی و پایان
-          </BaseButton>
+        <div class="mt-4 grid grid-cols-2 gap-6 md:max-w-lg">
+          <BaseRadio
+            v-model="selectionType"
+            name="checkbox_base"
+            value="sentences"
+            label="انتخاب جمله"
+            color="primary"
+          />
+          <BaseRadio
+            v-model="selectionType2"
+            name="checkbox_base"
+            label="انتخاب کلمات (بزودی)"
+            value="words"
+            color="primary"
+          />
         </div>
-      </div>
-    </template>
-  </TairoModal>
-
-  <TairoModal
-    :open="showDoneModal"
-    size="md"
-    @close="showDoneModal = false"
-  >
-    <template #header>
-      <!-- Header -->
-      <div class="flex w-full items-center justify-between p-4 md:p-6">
-        <h3
-          class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
-        >
-          پایان گفت و گو و ساخت گزارش
-        </h3>
-
-        <BaseButtonClose @click="showDoneModal = false" />
-      </div>
-    </template>
-
-    <!-- Body -->
-    <div class="p-4 md:p-6">
-      <div class="mx-auto w-full text-center">
-        <Icon
-          name="ph:clipboard"
-          class="text-success-500 mb-5 block size-[75px]"
-        />
-
-        <h3
-          class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
-        >
-          پایان گفت و گو و ساخت گزارش
-        </h3>
-
-        <p
-          class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-justify text-sm leading-5"
-        >
-          با انتخاب گزینه ی ساخت گزارش، این جلسه به پایان خواهد رسید. شما به صفحه ی ارائه گزارش جلسه جا به جا خواهید شد و امکان بازگشت و ویرایش این گفت و گو را نخواهید داشت.
-        </p>
-        <div v-if="!checkForHalfTime() && !timeToShow" class="text-danger-500 mt-3">
-          حداقل نیمی از زمان جلسه باید گذشته باشد
-        </div>
-      </div>
-    </div>
-
-    <template #footer>
-      <!-- Footer -->
-      <div class="p-4 md:p-6">
-        <div class="flex gap-x-2">
-          <BaseButton @click="showDoneModal = false">
-            ادامه می دم
-          </BaseButton>
-
-          <BaseButton
-            color="success"
-            variant="solid"
-            :loading="isRequestForReport"
-            :disabled="!checkForHalfTime || conversation.messages.length < 10"
-            @click="requestForReport"
-          >
-            ساخت گزارش
-          </BaseButton>
-        </div>
-      </div>
-    </template>
-  </TairoModal>
-
-  <TairoModal
-    :open="showDeleteModal"
-    size="sm"
-    @close="showDeleteModal = false"
-  >
-    <template #header>
-      <!-- Header -->
-      <div class="flex w-full items-center justify-between p-4 md:p-6">
-        <h3
-          class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
-        >
-          بازنشانی و حذف گفت و گو
-        </h3>
-
-        <BaseButtonClose @click="showDeleteModal = false" />
-      </div>
-    </template>
-
-    <!-- Body -->
-    <div class="p-4 md:p-6">
-      <div class="mx-auto w-full text-center">
-        <Icon
-          name="ph:warning"
-          class="mb-5 block size-[75px] text-yellow-500"
-        />
-
-        <h3
-          class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
-        >
-          لطفا توجه کنید
-        </h3>
-
-        <p
-          class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-justify text-sm leading-5"
-        >
-          در صورت حذف، اطلاعات شما از بین خواهد رفت و عامل هوش مصنوعی به طور
-          کامل دانش قبلی نسبت به شما را از دست خواهد داد. مطمئن هستید؟
-        </p>
-      </div>
-    </div>
-
-    <template #footer>
-      <!-- Footer -->
-      <div class="p-4 md:p-6">
-        <div class="flex gap-x-2">
-          <BaseButton @click="showDeleteModal = false">
-            بازگشت
-          </BaseButton>
-
-          <BaseButton
-            color="warning"
-            variant="solid"
-            :loading="isDeleting"
-            @click="deleteAll"
-          >
-            تایید و حذف
-          </BaseButton>
-        </div>
-      </div>
-    </template>
-  </TairoModal>
-  <TairoModal
-    :open="showReportModal"
-    size="xl"
-    @close="showReportModal = false"
-  >
-    <template #header>
-      <!-- Header -->
-      <div class="flex w-full items-center justify-between p-4 md:p-6">
-        <h3
-          class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
-        >
-          اعلام گزارش خطا
-        </h3>
-        <div class="flex">
-          <BaseButtonIcon
-            rounded="full"
-            :color="'info'"
-            @click.prevent="resetReport"
-          >
-            <Icon name="lucide:rotate-cw" />
-          </BaseButtonIcon>
-          <BaseButtonClose @click="showReportModal = false" />
-        </div>
-      </div>
-    </template>
-
-    <!-- Body -->
-    <div class="p-4 md:p-6">
-      <div class="mx-auto w-full text-center">
-        <h3
-          class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
-        >
-          لطفا توجه کنید
-        </h3>
-
-        <p
-          class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-justify text-sm leading-5"
-        >
-          گزارش شما روی آخرین پیام هوش مصنوعی ثبت می شود. می توانید از موارد زیر
-          تعدادی را انتخاب نمایید و در نهایت گزارش را انتخاب کنید. اطلاعات
-          انتخابی شما ثبت خواهد شد و یک پیام جدید با توجه به گزارش های شما ثبت و
-          ارائه خواهد شد.
-        </p>
-        <div class="mt-5 h-[180px] w-full overflow-auto pl-5">
-          <form class="mx-auto w-full">
-            <fieldset class="w-full space-y-6">
-              <div class="grid gap-6 sm:grid-cols-1">
-                <BaseCheckboxHeadless
-                  v-for="r in reportChoices"
-                  :key="r"
-                  v-model="report"
-                  :value="r"
+        <div class="grid grid-cols-2 gap-1">
+          <div class="mt-2 text-justify">
+            <Legend>متن انگلیسی</Legend>
+            <BaseMessage dir="ltr" class="flex-col text-left">
+              <div>
+                <div
+                  v-for="(s, i) in selectedForEdit.slicedEn"
+                  :key="i"
+                  class=" my-3 flex w-fit"
+                  :class="selectedForEditIndex === i ? 'selectedEn': ''"
                 >
-                  <BaseCard
-                    rounded="sm"
-                    class="peer-checked:!border-warning-500 peer-checked:[&_.child]:!text-warning-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
-                  >
-                    <div class="flex w-full items-center gap-2">
-                      <button
-                        role="button"
-                        class="bg-warning-500 hover:bg-warning-700 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                        @click="showReportModal = true"
-                      >
-                        <Icon :name="r.img" class="size-5" />
-                      </button>
-
-                      <div class="mr-2">
-                        <BaseHeading
-                          as="h4"
-                          size="sm"
-                          weight="medium"
-                          lead="none"
-                          class="text-right"
-                        >
-                          {{ r.title }}
-                        </BaseHeading>
-
-                        <BaseText
-                          size="xs"
-                          class="text-muted-400 mt-2 text-right"
-                        >
-                          {{ r.description }}
-                        </BaseText>
-                      </div>
-
-                      <div class="child text-muted-300 ms-auto">
-                        <div class="size-3 rounded-full bg-current" />
-                      </div>
-                    </div>
-                  </BaseCard>
-                </BaseCheckboxHeadless>
+                  {{ s }}
+                </div>
               </div>
-            </fieldset>
-          </form>
+            </BaseMessage>
+          </div>
+          <div class="mt-2 text-justify">
+            <Legend>متن فارسی</Legend>
+            <BaseMessage>
+              <div v-if="selectionType === 'words'" class="flex flex-wrap">
+                <span
+                  v-for="(s, i) in selectedForEdit.sliced"
+                  :key="i"
+                  class="elemental my-3 cursor-pointer"
+                  :class="selectedForEditIndex === i ? 'selectedFa': ''"
+                > {{ s }}</span>
+              </div>
+              <div v-if="selectionType === 'sentences'">
+                <div
+                  v-for="(s, i) in selectedForEdit.sliced"
+                  :key="i"
+                  class="elemental my-3 flex w-fit cursor-pointer"
+                  :class="selectedForEditIndex === i ? 'selectedFa': ''"
+                  @mouseenter="updateSelectedIndex(i)"
+                  @mouseleave="updateSelectedIndex(-1)"
+                  @click="clickedOnText(i)"
+                >
+                  {{ s }}
+                </div>
+              </div>
+            </BaseMessage>
+          </div>
+        </div>
+        <div class="mt-2 text-justify">
+          <Legend>تغییرات</Legend>
+          <BaseTextarea
+            v-model="editedText"
+            rounded="md"
+            placeholder="جمله را از بالا انتخاب نمایید . . . "
+            :rows="2"
+            class="mt-2"
+            addon
+          >
+            <template #addon>
+              <div class="flex items-center gap-2">
+                <BaseHeading
+                  as="h4"
+                  size="sm"
+                  weight="semibold"
+                  class="text-muted-800 dark:text-white"
+                >
+                  <div :class="errorTextColor === 'danger'? 'text-danger-500' : 'text-success-500'">
+                    {{ errorText }}
+                  </div>
+                </BaseHeading>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <BaseButton
+                  color="primary"
+                  size="sm"
+                  @click="updateEditedToNew"
+                >
+                  ثبت
+                </BaseButton>
+              </div>
+            </template>
+          </BaseTextarea>
         </div>
       </div>
     </div>
@@ -1896,83 +1859,22 @@ const changeExpanded = () => {
       <!-- Footer -->
       <div class="p-4 md:p-6">
         <div class="flex gap-x-2">
-          <BaseButton @click="showReportModal = false">
+          <BaseButton @click="showEditModal = false">
             بازگشت
           </BaseButton>
 
           <BaseButton
             color="warning"
             variant="solid"
-            :loading="isDeleting"
-            :disabled="!report.length"
-            @click="submitReport()"
+            :loading="submitEdit"
+            @click="submitEditFinal"
           >
-            گزارش
+            ثبت نهایی
           </BaseButton>
         </div>
       </div>
     </template>
   </TairoModal>
-  <!-- <TairoModal
-    :open="showWelcome"
-    size="sm"
-    @close="showWelcome = false"
-  >
-    <template #header>
-      <div class="flex w-full items-center justify-between p-4 md:p-6">
-        <h3
-          class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white"
-        >
-          مانا یک طرح اولیه دانش بنیان است
-        </h3>
-
-        <BaseButtonClose @click="showTenMin = false" />
-      </div>
-    </template>
-
-    <div class="p-4 md:p-6">
-      <div class="mx-auto w-full text-center">
-        <Icon
-          name="ph:brain"
-          class="mb-5 block size-[75px] text-green-500"
-        />
-
-        <h3
-          class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white"
-        >
-          مانا، اولین هوش مصنوعی در حوزه ی انسانی است که برای کمک به انسان ها در بحران ها و تنهایی های زندگی طراحی شده است. او تلاش می کند تا شما را بشناسد و همدلی و کمک ارائه نماید.
-          با این حال، مانا یک طرح اولیه دانش بنیان است و بخش هایی دارد که باید تکمیل شوند. برای این منظور و برای این که بهتر بتوانید از نرم افزار استفاده کنید، موارد زیر را در نظر داشته باشید:
-        </h3>
-        <ul>
-          <li>از معادل های ساده استفاده کنید. از استعاره، ترکیبات مبهم و واژگان دارای چند معنی است، استفاده نکنید.</li>
-          <li>از معادل های ساده استفاده کنید. از استعاره، ترکیبات مبهم و واژگان دارای چند معنی است، استفاده نکنید.</li>
-          <li>از معادل های ساده استفاده کنید. از استعاره، ترکیبات مبهم و واژگان دارای چند معنی است، استفاده نکنید.</li>
-        </ul>
-        انتخاب صدا
-        مردانه
-        زنانه
-      </div>
-    </div>
-
-    <template #footer>
-      <div class="p-4 md:p-6">
-        <div class="flex gap-x-2">
-          <BaseButton @click="showTenMin = false">
-            ادامه می دم
-          </BaseButton>
-
-          <BaseButton
-            color="warning"
-            variant="solid"
-            :loading="isGoingToDone"
-            @click="goToDoneAndEnd"
-          >
-            چارچوب بندی و پایان
-          </BaseButton>
-        </div>
-      </div>
-    </template>
-  </TairoModal> -->
 </template>
 <style>
 @keyframes dots {
@@ -2001,5 +1903,21 @@ const changeExpanded = () => {
 .typing::after {
   content: '';
   animation: dots 2s steps(1, end) infinite;
+}
+.elemental{
+  padding: 3px;
+}
+.selectedFa{
+  background-color: aqua;
+  border-radius: 5px;
+}
+.selectedEn {
+  background-color:greenyellow;
+  border-radius: 5px;
+}
+.special-exapnd{
+  position: absolute;
+    height: 100vh;
+    z-index: 100;
 }
 </style>

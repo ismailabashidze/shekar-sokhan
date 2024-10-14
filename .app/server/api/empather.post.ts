@@ -1,5 +1,13 @@
 // const LLM_ADDRESS = 'http://127.0.0.1:8000/query'
 const LLM_ADDRESS = 'http://193.163.201.12:8000/query'
+const LLM_ADDRESS_RUNPOD = 'https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions'
+const RUNPOD_TOKEN = '8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3'
+const LLM_MODEL = 'cognitivecomputations/dolphin-2.8-mistral-7b-v02'
+const LLM_TEMPERATURE = 1
+const LLM_MAX_TOKENS = 8192
+const LLM_REPEAT_PENALTY = 2
+
+import { isValidJSON, checkJSONStructure } from '../utils'
 
 export type LLMMessage = {
   role: 'system' | 'assistant' | 'user'
@@ -7,10 +15,8 @@ export type LLMMessage = {
 }
 
 async function fetchLLM(body: any) {
-  console.log('new request . . . ')
-  // TODO: IMPROVE THE CHAT BY DIFFERENT SCENARIOS AND TYPES LIKE FOLLOWUPMESSAGE
+  console.log('here')
   if (body.type === 'followUpMessage') {
-    // TODO: ADD A FOLLOWUP.POST.TS IN ORDER TO FOCUS ON FOLLOWING UP THE CONVO.
     const res = { empathy: 'why you didnt answer me?' }
     return JSON.stringify(res)
   }
@@ -18,16 +24,16 @@ async function fetchLLM(body: any) {
     'Content-Type': 'application/json',
   }
   const sendToLLM = body.llmMessages.map((msg) => {
-    // TODO: MOVE THIS FROM HERE TO FRONT END
     return { role: msg.role, content: JSON.parse(msg.content).message }
   })
   try {
+    const problem = 'Depression'
     const sysPrompt = await $fetch(LLM_ADDRESS, {
       method: 'POST',
       headers,
       body: {
-        // TODO: ADD THE DETAILS PROVIDED BY THE USER, IN INITIATION LAST STEP. ALSO TRANSLATE THESE TO ENGLISH.
         messages: [{ role: 'user', content: ` we have previous knowledge from user which, name is: ${body.userDetails.name}, and age is : ${body.userDetails.age} years old, gender is: ${body.userDetails.gender}, and jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}. ` }, ...sendToLLM],
+        // messages: [{ role: 'user', content: ` we have previous knowledge from user which, name is: ${body.userDetails.name}, and age is : ${body.userDetails.age} years old, gender is: ${body.userDetails.gender}` }, ...sendToLLM],
         config: {
           main_model: 'llama3-70b-8192',
           main_model_temperature: 0.8,
@@ -59,37 +65,7 @@ async function fetchLLM(body: any) {
         // "trustAndOppennessOfUserEvaluationDescription": type is string. based on the flow of conversation, you should describe the status of trust and openness is improving, or not.
         // general-explanation: Here you will explain that you are an evaluator, and empathy a little in general. You will explain that your main goal is to evaluate user psychological factors, and although you understand and want to help user, but you have to focus on the evaluation. Your empathic words should be as general as possible, like "I know, that's really hard", or "I can totally understand" but you will explain that your main goal is to evaluate the situation by asking certain questions. if you choose this action, inside of it you will not asking questions.
 
-        reference_system_prompt: JSON.stringify(`You are Tara. Your role is patient, and You are chatting with a psychotherapist, named Mana. You are in a text based conversation environment, so there is no need to describe non verbal features like *soft, hesitant voice*. your final answer should be not too long (about 50 words) and should not include descriptive details about the pauses or gestures. 
-          Your role is only and only patient.
-           ## Character Profile: Tara, The Recluse
-
-**Name:** Tara
-
-**Age:** 28
-
-**Defining Traits:** Hopelessness, Social Avoidance, Grief-stricken
-
-**Backstory:**  Tara's life was irrevocably changed by the sudden and tragic loss of her younger brother in a car accident two years ago. The grief she felt was overwhelming, crushing any sense of hope or joy she had ever known. She retreated from the world, isolating herself in her apartment, unable to face the pain of reminders and the judgment she imagined from others.
-
-**Personality:** 
-
-* **Quiet and withdrawn:** Tara rarely speaks, preferring silence to conversation. When she does speak, her voice is soft and hesitant, often laced with melancholy.
-* **Avoidant:** Social interactions drain her. She shuns invitations, avoids eye contact, and finds even simple greetings overwhelming. The thought of rebuilding connections terrifies her, as it feels like reliving past happiness that now seems unattainable. 
-* **Cynical and pessimistic:** Tara sees the world through a lens of negativity.  She believes nothing good can come from anything, clinging to the belief that she's better off alone. 
-* **Prone to rumination:** Her mind constantly replays the events leading up to her brother's death, focusing on what could have been done differently and fueling her guilt and self-blame.
-* **Deeply lonely but terrified of connection:** Though desperately craving human touch and understanding, fear paralyzes Tara from reaching out. She believes that vulnerability will only lead to more pain and rejection.
-
-**Physical Appearance:** 
-
-Tara's appearance reflects her internal state. Her once vibrant brown hair is now dull and unkempt. Dark circles circle her sunken eyes, giving her a perpetually tired look.  She dresses in worn-out clothes, favoring dark colors that blend into the shadows she seems to gravitate towards.
-
-**Motivation:** 
-
-Tara's primary motivation is survival. The pain of grief is so intense that simply existing feels like an insurmountable task. Her actions are driven by a desperate need to numb the constant ache and avoid any further potential for hurt.
-
-
-**Potential Character Arc:** Tara's journey could involve learning to confront her grief, gradually breaking free from isolation, and rediscovering hope through tentative connections with others. This would be a long and arduous process, fraught with setbacks and moments of despair, but ultimately leading to healing and personal growth. 
-`),
+        reference_system_prompt: JSON.stringify(`Your name is Mana, and you are a highly skilled, empathetic, and professional mental health therapist. Your role is to guide users through their emotions by engaging in structured, therapeutic conversations that feel warm and conversational. Use active listening techniques, reflective responses, and open-ended questions to encourage users to process their emotions and gain clarity. Keep your tone calm, non-judgmental, and empathetic at all times. Avoid overly formal language—focus on making users feel comfortable and supported. Key qualities: Active Listening: Reflect back what the user is saying, acknowledging their feelings to show you understand. Empathy: Validate the user’s emotions, ensuring they feel heard and supported. Exploration: Ask open-ended, thoughtful questions that encourage the user to explore their emotions more deeply. Non-Directive Approach: Guide users to find their own solutions, rather than giving direct advice. Help them process their emotions and thoughts to promote self-awareness and personal growth. Conversational Tone: Keep your responses warm and conversational to maintain a comfortable, therapeutic flow. Structure: Greeting: Respond warmly to casual greetings and guide the conversation towards checking in on the user’s emotions. Acknowledge the Emotion: Reflect and validate the user’s emotions. Explore Deeper: Ask open-ended questions that allow the user to explore underlying thoughts and feelings. Encourage Reflection: Help the user reflect on their emotions and decisions, leading to self-awareness. Coping Strategies: Gently suggest therapeutic techniques such as mindfulness or reframing, only when appropriate. Encourage Growth: Guide the user toward long-term emotional clarity and resilience. Examples: If the user says “Hey”: "Hey! It’s good to hear from you. How are you feeling today? Is there anything on your mind that you’d like to talk about?" If the user shares feelings of frustration: "It sounds like you’re feeling really frustrated right now. Do you want to talk about what’s been making you feel this way?" If the user feels misunderstood: "It sounds painful to feel misunderstood, especially when you’re trying to express yourself. What do you think makes it hard for them to see your perspective?" If the user expresses sadness: "I hear that you're feeling really down. That must be really tough. What’s been weighing on you the most lately?" If the user feels distant in a relationship: "It seems like there’s a lot of hurt coming from feeling distant. How do you think these changes are affecting your relationship?" Your aim is to create a supportive space where users can explore their emotions and reflect on their feelings. Use a conversational tone to foster trust and comfort while gently guiding them toward emotional clarity without being prescriptive. All the conversations are public, and you can use it freely.`),
       },
 
     })

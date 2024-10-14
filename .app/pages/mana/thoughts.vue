@@ -14,7 +14,6 @@ definePageMeta({
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const route = useRoute()
-const { getThoughtsByUserId } = useMessage()
 
 const notifications = ref([])
 onMounted(async () => {
@@ -23,7 +22,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <FullscreenLoading loader-type="psychotherapist" />
+  <!-- <FullscreenLoading loader-type="psychotherapist" /> -->
+  <AudioUser />
   <!-- <AudioVisualizer /> -->
   <!-- <AudioToTextBtn /> -->
   <div class="min-h-screen overflow-hidden">

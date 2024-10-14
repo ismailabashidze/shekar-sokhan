@@ -89,60 +89,6 @@ const requestForReport = async () => {
   isRequestForReport.value = false
   navigateTo('/mana/waitForReport')
 }
-const goToDoneAndEnd = async () => {
-  type.value = 'summary'
-  isGoingToDone.value = true
-  conversation.value.messages.push({
-    role: 'separator',
-    content: { message: 'Summary and conclusion in the last ten minutes.' },
-    contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-  })
-  saveMessage({
-    role: 'separator',
-    content: { message: 'Summary and conclusion in the last ten minutes.' },
-    contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-    user: user.value.record.id,
-    deletionDivider: user.value.record.currentDeletionDivider,
-  })
-  messageLoading.value = true
-  pause()
-  isGoingToDone.value = false
-  showTenMin.value = false
-  await askForMana()
-  messageLoading.value = false
-}
-
-watch(message, () => {
-  if (isTyping.value) {
-    // mana decided to write, but will stop, because user decided to write.
-    timer.value = 5
-    setTimeout(() => {
-      reset()
-    }, 10000)
-  }
-  else {
-    // mana has not decided to write.
-    timer.value = 20
-    reset()
-  }
-})
-watch(counter, (n, o) => {
-  if (n == timer.value) {
-    isTyping.value = true
-    pause()
-    setTimeout(() => {
-      // a wait to ensure sending the message.
-      if (isTyping.value) {
-        askForMana()
-      }
-    }, 2000)
-  }
-  else {
-    isTyping.value = false
-
-    resume()
-  }
-})
 const conversation = ref({
   user: {
     name: 'مانا، همدل هوشمند',
@@ -405,10 +351,10 @@ function convertToInformal(text) {
 }
 
 const askForMana = async () => {
-  if (isNewMessagesDone.value && !showNoCharge.value) {
+  if (isNewMessagesDone.value) {
     try {
+      isNewMessagesDone.value = false
       let sendToLLM = combineMessages(conversation.value.messages, 'user')
-
       const answer = await $fetch('/api/llm', {
         method: 'POST',
         body: {
@@ -460,10 +406,9 @@ const askForMana = async () => {
         })
       }
       isTyping.value = false
-      counter.value = 0
-      timer.value = 120
-      messageLoading.value = false
-      await getVoice(conversation.value.messages.at(-1))
+      isNewMessagesDone.value = false
+      // await getVoice(conversation.value.messages.at(-1))
+      await askForPatient()
     }
     catch (e) {
       console.log('here')
@@ -482,6 +427,86 @@ const askForMana = async () => {
   else {
     setTimeout(() => {
       askForMana()
+    }, 10000)
+  }
+}
+const askForPatient = async () => {
+  if (!isNewMessagesDone.value) {
+    try {
+      let sendToLLM = combineMessages(conversation.value.messages, 'user')
+      const answer = await $fetch('/api/user', {
+        method: 'POST',
+        body: {
+          type: type.value,
+          llmMessages: [
+            ...sendToLLM
+              .map((m) => {
+                if (m.role == 'assistant' || m.role == 'user') {
+                  return {
+                    role: m.role,
+                    content: JSON.stringify(m.content),
+                  }
+                }
+              })
+              .filter(Boolean),
+          ],
+          userId: user.value.record.id,
+          currentDivision: user.value.record.currentDeletionDivider,
+          userDetails: userDetails.value[0],
+        },
+      })
+      selectedEmoji.value = '🕊'
+      const res = await processResponse(JSON.parse(answer))
+      let informalTranslatedMsg = convertToInformal(res.message)
+
+      const newMsg = await saveMessage({
+        role: 'user',
+        user: user.value.record.id,
+        time: new Date().toLocaleTimeString('fa'),
+        content: JSON.parse(answer),
+        contentFa: res,
+        deletionDivider: user.value.record.currentDeletionDivider,
+      })
+
+      conversation.value.messages.push({
+        id: newMsg.id,
+        role: 'user',
+        content: JSON.parse(answer),
+        contentFa: res,
+        time: new Date().toLocaleTimeString('fa'),
+        isVoiceDone: false,
+      })
+
+      await nextTick()
+
+      if (chatEl.value) {
+        chatEl.value.scrollTo({
+          top: chatEl.value.scrollHeight,
+          behavior: 'smooth',
+        })
+      }
+      isTyping.value = false
+      isNewMessagesDone.value = true
+      // await getVoice(conversation.value.messages.at(-1))
+      await askForMana()
+    }
+    catch (e) {
+      console.log('here')
+      console.log(e)
+      toaster.show({
+        title: 'دریافت پیام', // Authentication
+        message: `مشکلی وجود دارد`, // Please log in again
+        color: 'danger',
+        icon: 'ph:envelope',
+        closable: true,
+      })
+      await askForPatient()
+      // messageLoading.value = false
+    }
+  }
+  else {
+    setTimeout(() => {
+      askForPatient()
     }, 10000)
   }
 }
@@ -640,6 +665,7 @@ onMounted(async () => {
   else {
     type.value = 'briefing'
   }
+  await askForMana()
 })
 
 // async function autoConversation() {
@@ -787,27 +813,7 @@ const deleteAll = async () => {
   }
 }
 const canDelete = async () => {
-  if (showNoCharge.value) {
-    toaster.show({
-      title: 'حذف پیام ها',
-      message: `لطفا اشتراک تهیه کنید`,
-      color: 'warning',
-      icon: 'ph:warning',
-      closable: true,
-    })
-    return
-  }
-  if (conversation.value.messages.length < 3) {
-    toaster.show({
-      title: 'حذف پیام ها',
-      message: `گفت و گو هنوز آغاز نشده است. برای حذف پیام ها باید بیشتر از یک باشد.`,
-      color: 'warning',
-      icon: 'ph:warning',
-      closable: true,
-    })
-    return
-  }
-  showDeleteModal.value = true
+  deleteAll()
 }
 const resend = async () => {
   toaster.show({
@@ -825,7 +831,12 @@ const resend = async () => {
   // conversation.value.messages.pop()
   isNewMessagesDone.value = true
   counter.value = timer.value
-  await askForMana()
+  if (conversation.value.messages.at(-1).role === 'assistant') {
+    await askForPatient()
+  }
+  else {
+    await askForMana()
+  }
 }
 
 const report = ref([])
@@ -1129,7 +1140,7 @@ const changeExpanded = () => {
                 class="w-[280px] justify-center !pl-2"
                 color="warning"
               >
-                لطفا اشتراک تهیه فرمایید.
+                بخش مکالمه خودکار
                 <BaseButtonIcon
                   rounded="full"
                   size="sm"
@@ -1137,7 +1148,7 @@ const changeExpanded = () => {
                   class="mr-3"
                   to="/onboarding"
                 >
-                  <Icon name="ph:shopping-cart" class="size-5" />
+                  <Icon name="ph:info" class="size-5" />
                 </BaseButtonIcon>
               </BaseMessage>
               <div class="flex">
@@ -1261,8 +1272,7 @@ const changeExpanded = () => {
             <!-- Messages loop -->
             <div v-if="!loading" class="space-y-12">
               <BaseMessage color="info">
-                اولین هدف برای هوش مصنوعی آشنایی بیشتر با شما تنظیم شده است.
-                برخی از تغییرات در اهداف با شما به اشتراک گذاشته می شود.
+                این یک گفت و گوی خودکار بین دو عامل هوش مصنوعی است
               </BaseMessage>
               <div
                 v-for="(item, index) in conversation?.messages"
@@ -1403,34 +1413,6 @@ const changeExpanded = () => {
                   </div>
                 </div>
               </div>
-              <BaseMessage
-                v-if="showNoCharge"
-                color="danger"
-                class="flex justify-evenly"
-              >
-                <div class="flex content-between">
-                  <div class="flex items-center">
-                    به نظر می‌رسد بسته مصرفی شما به اتمام رسیده است. برای ادامه
-                    استفاده از خدمات، لطفاً اقدام به خرید اشتراک نمایید.
-                  </div>
-                  <BaseButton
-                    color="primary"
-                    class="my-3 mr-2 w-[150px]"
-                    to="/onboarding"
-                  >
-                    خرید اشتراک
-                  </BaseButton>
-                  <BaseButton
-                    v-if="conversation.messages.length > 10"
-                    color="success"
-                    class="my-3 mr-2 w-[150px]"
-
-                    @click="showDoneModal = true"
-                  >
-                    ساخت گزارش
-                  </BaseButton>
-                </div>
-              </BaseMessage>
             </div>
           </div>
           <!-- Compose -->
@@ -1444,7 +1426,7 @@ const changeExpanded = () => {
           >
             <div v-show="isTyping" class="dark:bg-muted-700 absolute bottom-[110px] flex  w-full bg-gray-200 py-2 sm:bottom-[60px]  ">
               <div class="text-muted-800 mr-2 text-sm font-light dark:text-white">
-                💻 مانا در حال نوشتن است <span class="typing" />
+                💻 در حال نوشتن است <span class="typing" />
               </div>
             </div>
           </transition>

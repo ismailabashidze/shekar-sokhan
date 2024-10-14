@@ -1,4 +1,6 @@
 <template>
+  console.log(isPressed.value)
+  {{ isPressed }}
   <div>
     <div id="results">
       <span id="final_span" class="final">{{ finalText }}</span>
@@ -34,92 +36,85 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-export default {
-  setup() {
-    const finalText = ref('')
-    const interimText = ref('')
-    const recognizing = ref(false)
-    const showTip = ref(false)
-    let recognition
-    let tipTimeout
+const { isPressed, setIsPressed } = useUser()
+const finalText = ref('')
+const interimText = ref('')
+const recognizing = ref(false)
+const showTip = ref(false)
+let recognition
+let tipTimeout
 
-    const initSpeechRecognition = () => {
-      if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition()
-        recognition.interimResults = true
-        recognition.continuous = true
+const initSpeechRecognition = () => {
+  if ('webkitSpeechRecognition' in window) {
+    recognition = new webkitSpeechRecognition()
+    recognition.interimResults = true
+    recognition.continuous = true
 
-        recognition.onresult = (event) => {
-          let finalTranscript = ''
-          let interimTranscript = ''
+    recognition.onresult = (event) => {
+      let finalTranscript = ''
+      let interimTranscript = ''
 
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript
-            }
-            else {
-              interimTranscript += event.results[i][0].transcript
-            }
-          }
-
-          finalText.value = finalTranscript
-          interimText.value = interimTranscript
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript
         }
-
-        recognition.onend = () => {
-          recognizing.value = false
-          if (finalText.value.trim() === '') {
-            showTipMessage()
-          }
+        else {
+          interimTranscript += event.results[i][0].transcript
         }
       }
+
+      finalText.value = finalTranscript
+      interimText.value = interimTranscript
     }
 
-    const startRecognition = () => {
-      if (!recognizing.value) {
-        finalText.value = ''
-        interimText.value = ''
-        recognizing.value = true
-        recognition.start()
+    recognition.onend = () => {
+      recognizing.value = false
+      if (finalText.value.trim() === '') {
+        showTipMessage()
       }
     }
-
-    const endRecognition = () => {
-      if (recognizing.value) {
-        recognition.stop()
-        recognizing.value = false
-      }
-    }
-
-    const showTipMessage = () => {
-      showTip.value = true
-      clearTimeout(tipTimeout)
-      tipTimeout = setTimeout(() => {
-        showTip.value = false
-      }, 3000)
-    }
-
-    onMounted(() => {
-      initSpeechRecognition()
-    })
-
-    onBeforeUnmount(() => {
-      if (recognition) recognition.abort()
-    })
-
-    return {
-      finalText,
-      interimText,
-      recognizing,
-      showTip,
-      startRecognition,
-      endRecognition,
-    }
-  },
+  }
 }
+
+const startRecognition = () => {
+  if (!recognizing.value) {
+    finalText.value = ''
+    interimText.value = ''
+    recognizing.value = true
+    setIsPressed(true)
+    console.log(isPressed.value)
+    recognition.start()
+  }
+}
+
+const endRecognition = () => {
+  if (recognizing.value) {
+    recognition.stop()
+    recognizing.value = false
+    setIsPressed(false)
+    console.log(isPressed.value)
+  }
+}
+
+const showTipMessage = () => {
+  showTip.value = true
+  clearTimeout(tipTimeout)
+  tipTimeout = setTimeout(() => {
+    showTip.value = false
+  }, 3000)
+}
+
+onMounted(() => {
+  initSpeechRecognition()
+})
+
+onBeforeUnmount(() => {
+  if (recognition) recognition.abort()
+})
+
 </script>
 
   <style scoped>

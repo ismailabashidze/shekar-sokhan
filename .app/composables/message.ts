@@ -94,6 +94,19 @@ export function useMessage() {
   const deleteMessage = async (messageId: string) => {
     return await nuxtApp.$pb.collection('messages').delete(messageId)
   }
+  const addEditToMessage = async (v) => {
+    const messageId = v.id
+    const data = {
+      content: v.content,
+      contentFa: v.contentFa,
+      user: v.user,
+      deletionDivider: v.deletionDivider,
+      role: v.role,
+      correctedContentFa: v.sliced.join('\n'),
+    }
+
+    return await nuxtApp.$pb.collection('messages').update(messageId, data)
+  }
 
   return {
     messages,
@@ -106,5 +119,6 @@ export function useMessage() {
     getSummerizedMessagesByCode,
     deleteAllMessages,
     deleteMessage,
+    addEditToMessage,
   }
 }

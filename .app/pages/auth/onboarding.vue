@@ -36,7 +36,7 @@ const validatePhoneNumber = debounce((value) => {
   const result = phoneNumberSchema.safeParse(sanitizedValue)
   telError.value = result.success
     ? null
-    : result.error.issues.map((issue) => issue.message).join(', ')
+    : result.error.issues.map(issue => issue.message).join(', ')
   isValid.value = result.success
 }, 500)
 
@@ -60,9 +60,11 @@ function goToStep(n: number) {
     loading.value = false
     if (n < 1) {
       currentStep.value = 1
-    } else if (n > 3) {
+    }
+    else if (n > 3) {
       currentStep.value = 3
-    } else {
+    }
+    else {
       currentStep.value = n
     }
     clearTimeout(timer)
@@ -85,7 +87,8 @@ function paste(event: any) {
 function type(event: any, index: any) {
   if (event.ctrlKey && event.key == 'v') {
     // Handle paste
-  } else if (event.key == 'Backspace') {
+  }
+  else if (event.key == 'Backspace') {
     event.stopPropagation()
     event.preventDefault()
     if (index > 1) {
@@ -93,17 +96,20 @@ function type(event: any, index: any) {
       nextTick(() => {
         goto(index - 1)
       })
-    } else {
+    }
+    else {
       input.value[0] = 0
     }
-  } else {
+  }
+  else {
     let key = persianToEnglishNumbers(event.key)
     if (key) {
       input.value[index - 1] = key
       if (index == codeLength.value) {
         validatePin.value = true
         verifyCodes()
-      } else {
+      }
+      else {
         nextTick(() => {
           goto(index + 1)
         })
@@ -156,7 +162,8 @@ const sendVerifyCodeSms = async () => {
       return structuredClone(record)
     })
     goToStep(3)
-  } else {
+  }
+  else {
     toaster.clearAll()
     toaster.show({
       title: 'کد تایید',
@@ -189,7 +196,8 @@ const verifyCodes = async () => {
     nextTick(() => {
       goto(1)
     })
-  } else {
+  }
+  else {
     const { data, error } = await useAsyncData(async (nuxtApp) => {
       const record = await nuxtApp.$pb
         .collection('anonymousUsers')
@@ -208,7 +216,7 @@ const verifyCodes = async () => {
       icon: 'ph:check',
       closable: true,
     })
-    router.push('/mana/chat')
+    router.push('/mana/chat-therapist')
   }
 }
 watch(tel, (newValue) => {
@@ -226,7 +234,7 @@ watch(tel, (newValue) => {
         to="/"
         class="text-muted-400 hover:text-primary-500 dark:text-muted-700 dark:hover:text-primary-500 transition-colors duration-300"
       >
-        <TherapiLogo class="h-10 w-10" />
+        <TherapiLogo class="size-10" />
       </NuxtLink>
       <div class="flex items-center gap-4">
         <BaseThemeToggle />
@@ -235,12 +243,17 @@ watch(tel, (newValue) => {
     <form
       action=""
       method="POST"
-      @submit.prevent
       class="mx-auto max-w-7xl px-4"
+      @submit.prevent
     >
       <div v-if="currentStep === 1">
         <div class="pt-8 text-center">
-          <BaseHeading tag="h2" size="3xl" weight="medium" class="mb-2">
+          <BaseHeading
+            tag="h2"
+            size="3xl"
+            weight="medium"
+            class="mb-2"
+          >
             👋 به ذهنا خوش آمدید
           </BaseHeading>
           <BaseParagraph class="text-muted-500 dark:text-muted-400 mb-8">
@@ -267,10 +280,13 @@ watch(tel, (newValue) => {
                           src="/img/illustrations/onboarding/2fa-sms.svg"
                           alt="2 factor authentication with SMS"
                           class="mx-auto max-w-[160px]"
-                        />
-                        <BaseHeading size="md" weight="medium"
-                          >با پیامک</BaseHeading
                         >
+                        <BaseHeading
+                          size="md"
+                          weight="medium"
+                        >
+                          با پیامک
+                        </BaseHeading>
                         <BaseParagraph
                           size="xs"
                           lead="snug"
@@ -283,7 +299,7 @@ watch(tel, (newValue) => {
                       <div class="child absolute end-2 top-3 opacity-0">
                         <Icon
                           name="ph:check-circle-duotone"
-                          class="text-primary-500 h-7 w-7"
+                          class="text-primary-500 size-7"
                         />
                       </div>
                     </BaseCard>
@@ -296,17 +312,20 @@ watch(tel, (newValue) => {
                   >
                     <BaseCard
                       shape="curved"
-                      class="relative border-2 p-8 !border-yellow-500 !opacity-100 !grayscale-0 [&_.child]:!opacity-100"
+                      class="relative border-2 !border-yellow-500 p-8 !opacity-100 !grayscale-0 [&_.child]:!opacity-100"
                     >
                       <div class="flex flex-col text-center">
                         <img
                           src="/img/illustrations/onboarding/2fa-web.svg"
                           alt="2 factor authentication with email"
                           class="mx-auto max-w-[160px]"
-                        />
-                        <BaseHeading size="md" weight="medium"
-                          >با ایمیل</BaseHeading
                         >
+                        <BaseHeading
+                          size="md"
+                          weight="medium"
+                        >
+                          با ایمیل
+                        </BaseHeading>
                         <BaseParagraph
                           size="xs"
                           lead="snug"
@@ -319,14 +338,14 @@ watch(tel, (newValue) => {
                       <div class="child absolute end-2 top-3 opacity-0">
                         <Icon
                           name="ph:warning"
-                          class="text-yellow-500 h-7 w-7"
+                          class="size-7 text-yellow-500"
                         />
                       </div>
                       <div
-                        class="absolute -top-10 right-0 bottom-0 left-0 flex items-center justify-center"
+                        class="absolute inset-x-0 -top-10 bottom-0 flex items-center justify-center"
                       >
                         <span
-                          class="text-yellow-500 text-4xl font-semibold opacity-50 rotate-45 transform"
+                          class="rotate-45 text-4xl font-semibold text-yellow-500 opacity-50"
                           style="transform: rotate(45deg) scale(1.5)"
                         >
                           بزودی
@@ -342,17 +361,20 @@ watch(tel, (newValue) => {
                   >
                     <BaseCard
                       shape="curved"
-                      class="relative border-2 p-8 !border-yellow-500 !opacity-100 !grayscale-0 [&_.child]:!opacity-100"
+                      class="relative border-2 !border-yellow-500 p-8 !opacity-100 !grayscale-0 [&_.child]:!opacity-100"
                     >
                       <div class="flex flex-col text-center">
                         <img
                           src="/img/illustrations/onboarding/2fa-app.svg"
                           alt="2 factor authentication with app"
                           class="mx-auto max-w-[160px]"
-                        />
-                        <BaseHeading size="md" weight="medium"
-                          >با آیدال</BaseHeading
                         >
+                        <BaseHeading
+                          size="md"
+                          weight="medium"
+                        >
+                          با آیدال
+                        </BaseHeading>
                         <BaseParagraph
                           size="xs"
                           lead="snug"
@@ -362,22 +384,23 @@ watch(tel, (newValue) => {
                           <NuxtLink
                             to="https://authy.com/"
                             class="text-yellow-500 underline-offset-4 hover:underline"
-                            >سامانه آیدال</NuxtLink
                           >
+                            سامانه آیدال
+                          </NuxtLink>
                           نیز می توانید وارد شوید
                         </BaseParagraph>
                       </div>
                       <div class="child absolute end-2 top-3 opacity-100">
                         <Icon
                           name="ph:warning"
-                          class="text-yellow-500 h-7 w-7"
+                          class="size-7 text-yellow-500"
                         />
                       </div>
                       <div
-                        class="absolute -top-10 right-0 bottom-0 left-0 flex items-center justify-center"
+                        class="absolute inset-x-0 -top-10 bottom-0 flex items-center justify-center"
                       >
                         <span
-                          class="text-yellow-500 text-4xl font-semibold opacity-50 rotate-45 transform"
+                          class="rotate-45 text-4xl font-semibold text-yellow-500 opacity-50"
                           style="transform: rotate(45deg) scale(1.5)"
                         >
                           بزودی
@@ -394,8 +417,9 @@ watch(tel, (newValue) => {
                     color="primary"
                     :loading="loading"
                     @click="goToStep(2)"
-                    >ادامه</BaseButton
                   >
+                    ادامه
+                  </BaseButton>
                   <!-- <NuxtLink
                     to="/dashboards"
                     class="text-muted-400 hover:text-primary-500 mt-4 text-xs font-medium underline-offset-4 transition-colors duration-300 hover:underline"
@@ -408,30 +432,40 @@ watch(tel, (newValue) => {
         </div>
       </div>
       <div v-if="currentStep === 2" class="w-full">
-        <div class="flex h-full w-full flex-col">
+        <div class="flex size-full flex-col">
           <div
             class="pointer-events-none flex w-full items-center justify-center pt-8"
           >
-            <BaseIconBox color="primary" size="lg" shape="full" class="mx-auto">
+            <BaseIconBox
+              color="primary"
+              size="lg"
+              shape="full"
+              class="mx-auto"
+            >
               <Icon
                 v-if="twoFaMode === 'email_address'"
                 name="ph:envelope-duotone"
-                class="text-primary-500 mx-auto h-8 w-8"
+                class="text-primary-500 mx-auto size-8"
               />
               <Icon
                 v-else-if="twoFaMode === 'phoneNumber'"
                 name="ph:device-mobile-speaker-duotone"
-                class="text-primary-500 mx-auto h-8 w-8"
+                class="text-primary-500 mx-auto size-8"
               />
               <Icon
                 v-else-if="twoFaMode === 'app_id'"
                 name="ph:fingerprint-duotone"
-                class="text-primary-500 mx-auto h-8 w-8"
+                class="text-primary-500 mx-auto size-8"
               />
             </BaseIconBox>
           </div>
           <div class="pt-4 text-center">
-            <BaseHeading tag="h2" size="3xl" weight="medium" class="mb-1">
+            <BaseHeading
+              tag="h2"
+              size="3xl"
+              weight="medium"
+              class="mb-1"
+            >
               لطفا شماره تماس خود را وارد نمایید
             </BaseHeading>
             <BaseParagraph class="text-muted-500 dark:text-muted-400">
@@ -469,17 +503,21 @@ watch(tel, (newValue) => {
             />
             <div v-else-if="twoFaMode === 'app_id'" class="space-y-4">
               <div class="flex items-center gap-2">
-                <Icon name="logos:authy" class="h-6 w-6" />
+                <Icon name="logos:authy" class="size-6" />
                 <div>
-                  <BaseText size="sm" class="text-muted-500 dark:text-muted-400"
-                    >Only
+                  <BaseText
+                    size="sm"
+                    class="text-muted-500 dark:text-muted-400"
+                  >
+                    Only
                     <NuxtLink
                       to="https://authy.com/"
                       class="text-primary-500 underline-offset-4 hover:underline"
-                      >Authy</NuxtLink
                     >
-                    is supported so far</BaseText
-                  >
+                      Authy
+                    </NuxtLink>
+                    is supported so far
+                  </BaseText>
                 </div>
               </div>
               <BaseInput
@@ -502,10 +540,11 @@ watch(tel, (newValue) => {
               class="!h-12 w-48"
               color="primary"
               :loading="loading"
-              @click="sendVerifyCodeSms()"
               :disabled="!isValid"
-              >ارسال پیامک</BaseButton
+              @click="sendVerifyCodeSms()"
             >
+              ارسال پیامک
+            </BaseButton>
             <!-- <button
               type="button"
               class="text-muted-400 hover:text-primary-500 mt-4 text-xs font-medium underline-offset-4 transition-colors duration-300 hover:underline"
@@ -518,7 +557,7 @@ watch(tel, (newValue) => {
       </div>
       <div v-else-if="currentStep === 3">
         <div class="mx-auto max-w-4xl">
-          <div class="flex h-full w-full flex-col">
+          <div class="flex size-full flex-col">
             <div
               class="pointer-events-none flex w-full items-center justify-center pt-8"
             >
@@ -533,13 +572,18 @@ watch(tel, (newValue) => {
                 >
                   <Icon
                     name="ph:lock-duotone"
-                    class="text-primary-500 mx-auto h-8 w-8"
+                    class="text-primary-500 mx-auto size-8"
                   />
                 </BaseIconBox>
               </div>
             </div>
             <div class="pt-4 text-center">
-              <BaseHeading tag="h2" size="3xl" weight="medium" class="mb-1">
+              <BaseHeading
+                tag="h2"
+                size="3xl"
+                weight="medium"
+                class="mb-1"
+              >
                 کد پیامکی
               </BaseHeading>
               <BaseParagraph class="text-muted-500 dark:text-muted-400 mb-2">
@@ -554,28 +598,28 @@ watch(tel, (newValue) => {
                 :class="validatePin && 'pointer-events-none'"
               >
                 <input
-                  type="text"
-                  :name="'pin' + i"
                   v-for="i in codeLength"
                   :key="'pin' + i"
+                  type="text"
+                  :name="'pin' + i"
+                  :ref="
+                    (el) => {
+                      inputElements[i] = el
+                    }
+                  "
                   maxlength="1"
                   class="dark:bg-muted-800 unselectable nui-focus inline w-16 select-none rounded-lg bg-white py-5 text-center text-4xl font-bold transition-all"
+                  :value="input[i - 1] != null ? input[i - 1] : 0"
+                  placeholder="0"
+                  :disabled="validatePin"
+                  :autofocus="i == 1"
                   @paste.prevent="paste($event)"
                   @keydown.exact="type($event, i)"
                   @keydown.ctrl.a.prevent
                   @mousemove.prevent.stop
                   @keydown.arrow-right.prevent="goto(i + 1)"
                   @keydown.arrow-left.prevent="goto(i - 1)"
-                  :value="input[i - 1] != null ? input[i - 1] : 0"
-                  :ref="
-                    (el) => {
-                      inputElements[i] = el
-                    }
-                  "
-                  placeholder="0"
-                  :disabled="validatePin"
-                  :autofocus="i == 1"
-                />
+                >
               </div>
               <div class="mt-10">
                 <div class="mt-8 flex items-center justify-between">
@@ -585,18 +629,22 @@ watch(tel, (newValue) => {
                   >
                     ارسال مجدد
                   </button>
-                  <BaseText size="sm" class="text-muted-400"
-                    >کد را دریافت نکردید؟</BaseText
+                  <BaseText
+                    size="sm"
+                    class="text-muted-400"
                   >
+                    کد را دریافت نکردید؟
+                  </BaseText>
                 </div>
                 <BaseButton
-                  @click="verifyCodes()"
                   shape="curved"
-                  class="!h-12 mt-8"
+                  class="mt-8 !h-12"
                   :color="validatePin ? 'primary' : 'default'"
                   :disabled="!validatePin"
-                  >تایید و ورود به سامانه</BaseButton
+                  @click="verifyCodes()"
                 >
+                  تایید و ورود به سامانه
+                </BaseButton>
               </div>
             </div>
           </div>

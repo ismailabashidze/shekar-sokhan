@@ -19,14 +19,14 @@ export type LLMMessage = {
 function hasExactKeys(obj: any, keys: string[]): boolean {
   const objKeys = Object.keys(obj)
   return (
-    keys.length === objKeys.length && keys.every((key) => objKeys.includes(key))
+    keys.length === objKeys.length && keys.every(key => objKeys.includes(key))
   )
 }
 
 async function fetchLLM(body: any, retries: number = 3): Promise<string> {
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${RUNPOD_TOKEN}`,
+    'Authorizatimeon': `Bearer ${RUNPOD_TOKEN}`,
   }
 
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -47,7 +47,7 @@ async function fetchLLM(body: any, retries: number = 3): Promise<string> {
 
       const content = response.choices[0].message.content
       console.log(content)
-      let jsonResponse = JSON.parse(content)
+      const jsonResponse = JSON.parse(content)
       if (
         hasExactKeys(jsonResponse, [
           'thoughts',
@@ -57,10 +57,12 @@ async function fetchLLM(body: any, retries: number = 3): Promise<string> {
         ])
       ) {
         return JSON.stringify(jsonResponse)
-      } else {
+      }
+      else {
         addRetryMessage(body)
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error:', error)
       if (attempt === retries)
         throw new Error(
@@ -94,11 +96,13 @@ export default defineEventHandler(async (event) => {
 
   try {
     return await fetchLLM(body)
-  } catch (error: unknown) {
+  }
+  catch (error: unknown) {
     if (error instanceof Error) {
       console.error('Final error:', error.message)
       return { error: error.message }
-    } else {
+    }
+    else {
       console.error('Final error:', error)
       return { error: 'An unknown error occurred' }
     }

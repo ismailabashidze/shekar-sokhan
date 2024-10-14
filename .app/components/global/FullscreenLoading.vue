@@ -1,6 +1,9 @@
 <template>
-  <div id="loader-container">
-    <div id="loader" class="loader-container">
+  <div id="loader-container" class="bg-[#F6F4E8] dark:bg-[#e8db95]">
+    <div
+      id="loader"
+      class="loader-container bg-[#F6F4E8] dark:bg-[#e8db95]"
+    >
       <div class="emoji" :class="{ animateOut }">
         {{ currentLoader.emoji }}
       </div>
@@ -287,7 +290,6 @@ else {
   }
 }
 #loader-container {
-  background: #F6F4E8;
   position: absolute;
   width: 100vw;
   height: 100vh;
@@ -295,7 +297,6 @@ else {
   left: 0;
 }
 #loader {
-  background: #F6F4E8;
   width: 400px;
   position: fixed;
   top: 50%;
