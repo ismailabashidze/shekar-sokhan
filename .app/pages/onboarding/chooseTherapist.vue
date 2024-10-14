@@ -523,7 +523,7 @@ const refresh = ref()
                     shape="curved"
                     class="w-full"
                     :disabled="item.tasks.status === 1"
-                    to="/mana/chat"
+                    to="/mana/chat-therapist"
                   >
                     <Icon name="ph:chat-circle-duotone" class="ml-2 size-4" />
                     <span>گفت و گو</span>
