@@ -629,7 +629,7 @@ const closable = ref<boolean | undefined>()
       </div>
     </div>
     <div
-      class="flex min-h-screen bg-[url('../../img/back/back.png')] dark:bg-[url('../../img/back/back-dark.png')]"
+      class="flex min-h-screen bg-[url('../../img/back/pocket.png')] dark:bg-[url('../../img/back/back-dark.png')]"
     >
       <!-- Sidebar -->
       <div
@@ -756,7 +756,7 @@ const closable = ref<boolean | undefined>()
           >
             <!-- Loader-->
             <div
-              class="pointer-events-none absolute inset-0 z-10 size-full bg-[url('../../img/back/back.png')] p-8 transition-opacity  duration-300 dark:bg-[url('../../img/back/back-dark.png')]"
+              class="pointer-events-none absolute inset-0 z-10 size-full bg-[url('../../img/back/pocket.png')] p-8 transition-opacity  duration-300 dark:bg-[url('../../img/back/back-dark.png')]"
               :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
             >
               <div class="mt-12 space-y-12">

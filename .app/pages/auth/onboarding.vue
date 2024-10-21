@@ -216,7 +216,7 @@ const verifyCodes = async () => {
       icon: 'ph:check',
       closable: true,
     })
-    router.push('/mana/chat-therapist')
+    router.push('/onboarding/choosePatient')
   }
 }
 watch(tel, (newValue) => {
@@ -600,13 +600,13 @@ watch(tel, (newValue) => {
                 <input
                   v-for="i in codeLength"
                   :key="'pin' + i"
-                  type="text"
-                  :name="'pin' + i"
                   :ref="
                     (el) => {
                       inputElements[i] = el
                     }
                   "
+                  type="text"
+                  :name="'pin' + i"
                   maxlength="1"
                   class="dark:bg-muted-800 unselectable nui-focus inline w-16 select-none rounded-lg bg-white py-5 text-center text-4xl font-bold transition-all"
                   :value="input[i - 1] != null ? input[i - 1] : 0"

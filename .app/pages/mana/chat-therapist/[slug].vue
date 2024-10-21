@@ -12,6 +12,11 @@ definePageMeta({
     order: 26,
   },
 })
+const route = useRoute()
+const pId = (route.params.slug)
+if (!pId) {
+  navigateTo('/onboarding/choosePatient')
+}
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const getVoice = async (item) => {
@@ -36,7 +41,7 @@ const userDetails = ref()
 const seamless = useSeamless()
 
 const { translate } = seamless
-const { getMessages, saveMessage, deleteAllMessages, deleteMessage, addEditToMessage }
+const { getMessagesByPId, saveMessage, deleteAllMessages, deleteMessage, addEditToMessage }
   = useMessage()
 
 const { saveSuggest, getLastSuggestion }
@@ -54,6 +59,8 @@ const newMessagesIndex = ref(0)
 const showDoneModal = ref(false)
 const startChargeTime = ref()
 const suggestionLoading = ref(true)
+const avatar = ref('/img/avatars/user.png')
+
 const askForPatient = async () => {
   suggestionLoading.value = true
   if (isNewMessagesDone.value) {
@@ -78,10 +85,11 @@ const askForPatient = async () => {
           userId: user.value.record.id,
           currentDivision: user.value.record.currentDeletionDivider,
           userDetails: userDetails.value[0],
+          pId,
         },
       })
       const res = await processResponse(JSON.parse(answer))
-      let informalTranslatedMsg = convertToInformal(res.message)
+      avatar.value = `https://pocket.zehna.ir/api/files/patients/${pId}/${JSON.parse(answer).img}`
 
       const newMsg = await saveMessage({
         role: 'user',
@@ -90,6 +98,7 @@ const askForPatient = async () => {
         content: JSON.parse(answer),
         contentFa: res,
         deletionDivider: user.value.record.currentDeletionDivider,
+        patient: pId,
       })
 
       conversation.value.messages.push({
@@ -583,7 +592,7 @@ onMounted(async () => {
   else {
     expanded.value = localStorage.getItem('expanded') == 'true'
   }
-  const msg = await getMessages()
+  const msg = await getMessagesByPId(pId)
   msg.map(m => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
   msg.map(m => (m.isVoiceDone = true))
   conversation.value.messages.push(...msg)
@@ -599,7 +608,7 @@ onMounted(async () => {
         behavior: 'smooth',
       })
     }
-  }, 300)
+  }, 1000)
   const u = await nuxtApp.$pb
     .collection('users')
     .getOne(nuxtApp.$pb.authStore.model.id, {})
@@ -744,6 +753,7 @@ async function submitMessage() {
     contentFa: { message: m },
     user: user.value.record.id,
     deletionDivider: user.value.record.currentDeletionDivider,
+    patient: pId,
   })
   isNewMessagesDone.value = true
   newMessagesIndex.value++
@@ -821,6 +831,7 @@ const submitTherapist = async () => {
     contentFa: conversation.value.messages.at(-1)?.contentFa,
     correctedContentFa: conversation.value.messages.at(-1)?.correctedContentFa,
     deletionDivider: user.value.record.currentDeletionDivider,
+    patient: pId,
   })
   conversation.value.messages.at(-1).id = newMsg.id
   conversation.value.messages.at(-1).role = 'assistant'
@@ -843,7 +854,7 @@ const submitEdit = ref(false)
 const showEditModal = ref(false)
 const selectedForEdit = ref()
 const selectionType = ref('sentences')
-const openEditModal = async (text, index) => {
+const openEditModal = async (text, index, type) => {
   if (text.contentFa.message === 'از پنل پایین انتخاب نمایید') {
     toaster.show({
       title: 'ویرایش',
@@ -854,7 +865,7 @@ const openEditModal = async (text, index) => {
     })
     return
   }
-
+  selectedType.value = type
   showEditModal.value = true
   selectedForEdit.value = text
   selectedForEdit.value.index = index
@@ -864,9 +875,17 @@ const openEditModal = async (text, index) => {
   else {
     const segmenter = new Intl.Segmenter('fa', { granularity: 'sentence' })
     const sentences = []
+    console.log(selectedForEdit.value.correcte)
 
-    for (const { segment } of segmenter.segment(selectedForEdit.value.contentFa.message)) {
-      sentences.push(segment.trim())
+    if (selectedForEdit.value.correctedContentFa) {
+      for (const { segment } of segmenter.segment(selectedForEdit.value.correctedContentFa)) {
+        sentences.push(segment.trim())
+      }
+    }
+    else {
+      for (const { segment } of segmenter.segment(selectedForEdit.value.contentFa.message)) {
+        sentences.push(segment.trim())
+      }
     }
 
     selectedForEdit.value.sliced = sentences
@@ -879,6 +898,7 @@ const openEditModal = async (text, index) => {
     selectedForEdit.value.slicedEn = sentencesEn
   }
 }
+const selectedType = ref('')
 const submitEditFinal = async () => {
   if (editedText.value != '') {
     alert('لطفا تغییرات را ثبت و سپس ثبت نهایی کنید')
@@ -888,7 +908,7 @@ const submitEditFinal = async () => {
   await sleep(2000)
   submitEdit.value = false
   showEditModal.value = false
-  if (conversation.value.messages.at(-1)?.role == 'user') {
+  if (selectedType.value === 'user') {
     await addEditToMessage(selectedForEdit.value)
   }
   conversation.value.messages.at(selectedForEdit.value.index).correctedContentFa = selectedForEdit.value.sliced.join('\n')
@@ -963,6 +983,10 @@ const expandFormFn = async () => {
       behavior: 'smooth',
     })
   }
+}
+const closeEdit = () => {
+  editedText.value = ''
+  showEditModal.value = false
 }
 </script>
 
@@ -1043,7 +1067,7 @@ const expandFormFn = async () => {
       </div>
     </div>
     <div
-      class="flex min-h-screen bg-[url('../../img/back/back.png')] dark:bg-[url('../../img/back/back-dark.png')]"
+      class="flex min-h-screen bg-[url('../../img/back/pocket.png')] dark:bg-[url('../../img/back/back-dark.png')]"
     >
       <!-- Sidebar -->
       <div
@@ -1217,7 +1241,7 @@ const expandFormFn = async () => {
           >
             <!-- Loader-->
             <div
-              class="pointer-events-none absolute inset-0 z-10 size-full bg-[url('../../img/back/back.png')] p-8 transition-opacity  duration-300 dark:bg-[url('../../img/back/back-dark.png')]"
+              class="pointer-events-none absolute inset-0 z-10 size-full bg-[url('../../img/back/pocket.png')] p-8 transition-opacity  duration-300 dark:bg-[url('../../img/back/back-dark.png')]"
               :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
             >
               <div class="mt-12 space-y-12">
@@ -1332,7 +1356,7 @@ const expandFormFn = async () => {
                     />
                     <BaseAvatar
                       v-else-if="item.role === 'user'"
-                      src="/img/avatars/tara.webp"
+                      :src="avatar"
                       size="md"
                     />
                   </div>
@@ -1361,7 +1385,7 @@ const expandFormFn = async () => {
                           </button>
                           <button
                             class="bg-warning-500 hover:bg-warning-700 flex size-9 items-center justify-center rounded-full text-white transition-colors duration-300"
-                            @click="openEditModal(item, index)"
+                            @click="openEditModal(item, index, 'user')"
                           >
                             <Icon name="ph:pencil" class="size-5" />
                           </button>
@@ -1378,7 +1402,7 @@ const expandFormFn = async () => {
                             rounded="full"
                             color="warning"
                             :loading="submitLoading || suggestionLoading"
-                            @click="openEditModal(item, index)"
+                            @click="openEditModal(item, index, 'assistant')"
                           >
                             <Icon name="ph:pencil" class="size-5" />
                           </BaseButtonIcon>
@@ -1859,7 +1883,7 @@ const expandFormFn = async () => {
       <!-- Footer -->
       <div class="p-4 md:p-6">
         <div class="flex gap-x-2">
-          <BaseButton @click="showEditModal = false">
+          <BaseButton @click="closeEdit()">
             بازگشت
           </BaseButton>
 

@@ -589,7 +589,7 @@ const closable = ref<boolean | undefined>()
       class="bg-muted-100 dark:bg-muted-900 flex min-h-screen"
       :style="
         currentStat === 'light'
-          ? `background-image: url('../../img/back/back.png')`
+          ? `background-image: url('../../img/back/pocket.png')`
           : `background-image: url('../../img/back/back-dark.png')`
       "
     >
@@ -720,7 +720,7 @@ const closable = ref<boolean | undefined>()
               class="bg-muted-100 dark:bg-muted-900 pointer-events-none absolute inset-0 z-10 size-full p-8 transition-opacity duration-300"
               :style="
                 currentStat === 'light'
-                  ? `background-image: url('../../img/back/back.png')`
+                  ? `background-image: url('../../img/back/pocket.png')`
                   : `background-image: url('../../img/back/back-dark.png')`
               "
               :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"

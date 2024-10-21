@@ -71,7 +71,7 @@ async function fetchLLM(body: any) {
     //   action: JSON.parse(sysPrompt.final_response).action,
     //   message: JSON.parse(sysPrompt.final_response).message,
     // }
-    // const saveAnalysis = await $fetch('https://back.zehna.ir/api/collections/analysis/records', {
+    // const saveAnalysis = await $fetch('https://pocket.zehna.ir/api/collections/analysis/records', {
     //   method: 'POST',
     //   body: data,
     // })

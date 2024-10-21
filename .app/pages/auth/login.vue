@@ -115,12 +115,12 @@ const loginWithGoogle = async () => {
     closable: true,
   })
   setTimeout(() => {
-    router.push('/mana/chat-therapist')
+    router.push('/dashboard')
   }, 2000)
 }
 
 if (nuxtApp.$pb.authStore.isValid) {
-  navigateTo('/mana/chat-therapist')
+  navigateTo('/dashboard')
 }
 </script>
 

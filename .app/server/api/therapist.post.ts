@@ -25,7 +25,7 @@ async function fetchLLM(body: any) {
       headers,
       body: {
         // TODO: ADD THE DETAILS PROVIDED BY THE USER, IN INITIATION LAST STEP. ALSO TRANSLATE THESE TO ENGLISH.
-        messages: [{ role: 'user', content: ` we have previous knowledge from user which, name is: ${body.userDetails.name}, and age is : ${body.userDetails.age} years old, gender is: ${body.userDetails.gender}, and jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}. ` }, ...sendToLLM],
+        messages: [{ role: 'user', content: `` }, ...sendToLLM],
         config: {
           main_model: 'llama3-70b-8192',
           main_model_temperature: 0.8,

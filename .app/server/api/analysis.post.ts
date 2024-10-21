@@ -126,7 +126,7 @@ final answer should be a valid JSON. Never say "Here is the JSON response," just
     // }
     // console.log('=== data ===')
     // console.log(data)
-    // const saveAnalysis = await $fetch('https://back.zehna.ir/api/collections/analysis/records', {
+    // const saveAnalysis = await $fetch('https://pocket.zehna.ir/api/collections/analysis/records', {
     // method: 'POST',
     // body: data,
     // })

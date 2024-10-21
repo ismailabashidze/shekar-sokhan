@@ -86,7 +86,7 @@ export function useMessage() {
     return items
   }
   const deleteAllMessages = async (userId: string) => {
-    return await $fetch('https://back.zehna.ir/deleteAllMessages', {
+    return await $fetch('https://pocket.zehna.ir/deleteAllMessages', {
       method: 'POST',
       body: { userId },
     })
@@ -107,7 +107,19 @@ export function useMessage() {
 
     return await nuxtApp.$pb.collection('messages').update(messageId, data)
   }
+  const getMessagesByPId = async (pId) => {
+    if (typeof user.value.record == 'undefined') {
+      user.value.record = {}
+      user.value.record.currentDeletionDivider = 0
+    }
 
+    const { items } = await nuxtApp.$pb.collection('messages').getList(1, 500, {
+      filter: `deletionDivider = ${user.value.record?.currentDeletionDivider} && patient.id = "${pId}"`,
+      sort: '+created',
+    })
+    messages.value = items
+    return items
+  }
   return {
     messages,
     filteredMessages,
@@ -120,5 +132,6 @@ export function useMessage() {
     deleteAllMessages,
     deleteMessage,
     addEditToMessage,
+    getMessagesByPId,
   }
 }

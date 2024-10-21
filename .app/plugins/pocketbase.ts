@@ -1,7 +1,7 @@
 import PocketBase from 'pocketbase'
 
 export default defineNuxtPlugin(async () => {
-  const POCKETBASE_URL = 'https://back.zehna.ir'
+  const POCKETBASE_URL = 'https://pocket.zehna.ir'
   // const POCKETBASE_URL = 'http://127.0.0.1:8090'
   // const POCKETBASE_URL = 'https://8ff7-2-190-129-92.ngrok-free.app'
   const pb = new PocketBase(POCKETBASE_URL)
@@ -28,7 +28,8 @@ export default defineNuxtPlugin(async () => {
   try {
     // get an up-to-date auth store state by verifying and refreshing the loaded auth model (if any)
     pb.authStore.isValid && (await pb.collection('users').authRefresh())
-  } catch (_) {
+  }
+  catch (_) {
     // clear the auth store on failed refresh
     pb.authStore.clear()
   }
