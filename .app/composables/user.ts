@@ -78,6 +78,7 @@ export function useUser() {
 
   return {
     user,
+    role,
     generateAndSetCode,
     getAllUsers,
     getAllUsersDetailsWithUsers,

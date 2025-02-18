@@ -20,6 +20,7 @@ export type Patient = {
   moodAndCurrentEmotions?: string
   moodAndCurrentEmotionsFa?: string
   avatar?: File
+  isActive?: boolean
 }
 
 export function usePatient() {
@@ -35,8 +36,13 @@ export function usePatient() {
     return await nuxtApp.$pb.collection('patients').create(p)
   }
 
+  const updatePatient = async (id: string, p: Patient | FormData) => {
+    return await nuxtApp.$pb.collection('patients').update(id, p)
+  }
+
   return {
     getPatients,
     createNewPatient,
+    updatePatient,
   }
 }

@@ -20,6 +20,8 @@ const filter = ref('')
 const perPage = ref(18)
 
 const { getPatients } = usePatient()
+const { role } = useUser()
+console.log(role.value)
 
 watch([filter, perPage], () => {
   router.push({
@@ -60,10 +62,7 @@ const refresh = ref()
       </template>
       <template #right>
         <BaseThemeToggle />
-        <BaseButton class="w-full gap-1 sm:w-32" shape="curved">
-          <Icon name="lucide:pencil" class="size-4" />
-          <span>ویرایش</span>
-        </BaseButton>
+
         <BaseButton
           color="primary"
           class="w-full gap-1 sm:w-32"
@@ -122,26 +121,27 @@ const refresh = ref()
                       weight="medium"
                       lead="none"
                     >
-                      در دسترس
+                      {{ item.isActive ? 'فعال' : 'غیر فعال' }}
                     </BaseHeading>
-                    <BaseParagraph size="xs" class="text-muted-400 mt-3">
-                      ۵۰ مشاوره در حال انجام
-                    </BaseParagraph>
+                    <!-- <BaseParagraph size="xs" class="text-muted-400 mt-3">
+                      {{ item.shortDescription }}
+                    </BaseParagraph> -->
                   </div>
                   <div>
                     <Icon
-                      :name="item.name === 'Tara'? 'ph:check-circle-duotone' : 'ph:warning'"
-                      :class="item.name === 'Tara'? 'text-success-500 size-7' : 'text-warning-500 size-7'"
+                      :name="item.isActive ? 'ph:check-circle-duotone' : 'ph:x-circle-duotone'"
+                      :class="item.isActive ? 'text-success-500 size-7' : 'text-danger-500 size-7'"
                     />
                   </div>
                 </div>
               </div>
               <div class="p-6">
                 <div class="mb-3 flex w-full items-center justify-center">
+                  <!-- :src="`https://pocket.zehna.ir/api/files/patients/${item.id}/${item.avatar}`" -->
                   <BaseAvatar
                     size="xl"
                     rounded="full"
-                    :src="`https://pocket.zehna.ir/api/files/patients/${item.id}/${item.avatar}`"
+                    :src="item.avatar ? `http://localhost:8090/api/files/patients/${item.id}/${item.avatar}` : '/img/avatars/1.svg'"
                     :badge-src="item.badge"
                     :text="item.initials"
                     :class="getRandomColor()"
@@ -154,7 +154,7 @@ const refresh = ref()
                     weight="medium"
                     lead="none"
                   >
-                    {{ item.nameFa }}
+                    {{ item.name }}
                   </BaseHeading>
                   <BaseParagraph size="sm" class="text-muted-400 mt-1">
                     {{ item.position }}
@@ -163,21 +163,32 @@ const refresh = ref()
                 <div
                   class="mb-6 mt-4 flex items-center justify-center gap-3 text-center"
                 >
-                  {{ item.shortDescriptionFa }}
+                  {{ item.shortDescription }}
                 </div>
                 <div class="flex items-center gap-2">
                   <BaseButton
+                    v-if="role == 'admin'"
+                    shape="curved"
+                    color="primary"
+                    @click="navigateTo(`/onboarding/editPatient?userId=${item.id}`)"
+                  >
+                    <Icon name="lucide:edit-3" class="size-4" />
+                    <span>ویرایش</span>
+                  </BaseButton>
+                  <BaseButton
+                    v-if="role != 'admin'"
                     shape="curved"
                     class="w-full"
+                    @click="navigateTo(`/onboarding/editPatient?userId=${item.id}`)"
                   >
                     <Icon name="ph:user-duotone" class="ml-2 size-4" />
                     <span>نمایه</span>
                   </BaseButton>
+
                   <BaseButton
                     shape="curved"
                     class="w-full"
                     :to="`/mana/chat-therapist/${item.id}`"
-                    :disabled="item.name !== 'Tara'"
                   >
                     <Icon name="ph:chat-circle-duotone" class="ml-2 size-4" />
                     <span>گفت و گو</span>

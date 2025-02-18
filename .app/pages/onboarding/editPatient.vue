@@ -6,9 +6,14 @@ import { z } from 'zod'
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 definePageMeta({
-  title: 'فرم بیمار جدید',
+  title: 'ویرایش بیمار',
   layout: 'sidebar',
 })
+
+const route = useRoute()
+const patientId = route.query.userId as string
+const role = useLocalStorage('role', '')
+const isAdmin = computed(() => role.value === 'admin')
 
 const VALIDATION_TEXT = {
   NAME_REQUIRED: 'نام بیمار نمی‌تواند خالی باشد',
@@ -76,7 +81,63 @@ const initialValues: FormInput = {
   },
 }
 
-const currentAvatar = computed(() => '/img/avatars/default-male.jpg')
+const nuxtApp = useNuxtApp()
+const { updatePatient } = usePatient()
+
+// Fetch patient data
+const fetchPatientData = async () => {
+  try {
+    const record = await nuxtApp.$pb.collection('patients').getOne(patientId)
+    if (record) {
+      // Then set other fields
+      setFieldValue('patient', {
+        name: record.name,
+        age: record.age,
+        shortDescription: record.shortDescription,
+        longDescription: record.longDescription,
+        definingTraits: record.definingTraits,
+        backStory: record.backStory,
+        personality: record.personality,
+        appearance: record.appearance,
+        motivation: record.motivation,
+        moodAndCurrentEmotions: record.moodAndCurrentEmotions,
+        isActive: record.isActive ?? true,
+      })
+
+      // If avatar exists, create a File object from the URL
+      if (record.avatar) {
+        const avatarUrl = `http://localhost:8090/api/files/patients/${patientId}/${record.avatar}`
+        const response = await fetch(avatarUrl)
+        const blob = await response.blob()
+        const file = new File([blob], record.avatar, { type: blob.type })
+        setFieldValue('avatar', file)
+      }
+    }
+  }
+  catch (error) {
+    console.error('Error fetching patient:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'مشکلی در دریافت اطلاعات بیمار پیش آمد.',
+      color: 'danger',
+      icon: 'lucide:alert-triangle',
+      closable: true,
+    })
+  }
+}
+
+const currentAvatar = computed(() => {
+  if (!patientId)
+    return '/img/avatars/default-male.jpg'
+
+  if (values.value?.avatar instanceof File)
+    return URL.createObjectURL(values.value.avatar)
+
+  if (values.value?.avatar)
+    return `http://localhost:8090/api/files/patients/${patientId}/${values.value.avatar}`
+
+  return '/img/avatars/default-male.jpg'
+})
 
 const {
   handleSubmit,
@@ -108,13 +169,16 @@ onBeforeRouteLeave(() => {
 })
 
 const toaster = useToaster()
-const { createNewPatient } = usePatient()
 
 const onSubmit = handleSubmit(
   async (values) => {
     success.value = false
 
     try {
+      const formData = new FormData()
+      if (values.avatar instanceof File)
+        formData.append('avatar', values.avatar)
+
       const patientData = {
         name: values.patient.name,
         age: values.patient.age,
@@ -129,31 +193,27 @@ const onSubmit = handleSubmit(
         isActive: values.patient.isActive,
       }
 
-      let record
-      if (values.avatar) {
-        const formData = new FormData()
-        formData.append('avatar', values.avatar)
-
-        for (const key in patientData) {
-          formData.append(key, patientData[key as keyof typeof patientData] || '')
+      // Add all patient data fields to FormData
+      Object.entries(patientData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          // Convert boolean to string 'true'/'false' for FormData
+          const formValue = typeof value === 'boolean' ? value.toString() : value
+          formData.append(key, formValue)
         }
+      })
 
-        record = await createNewPatient(formData)
-      }
-      else {
-        record = await createNewPatient(patientData)
-      }
+      const { updatePatient } = usePatient()
+      const record = await updatePatient(patientId, formData)
 
       toaster.clearAll()
       toaster.show({
         title: 'موفقیت',
-        message: 'بیمار جدید با موفقیت ایجاد شد!',
+        message: 'اطلاعات بیمار با موفقیت به‌روزرسانی شد!',
         color: 'success',
         icon: 'ph:check',
         closable: true,
       })
 
-      resetForm()
       document.documentElement.scrollTo({
         top: 0,
         behavior: 'smooth',
@@ -165,7 +225,7 @@ const onSubmit = handleSubmit(
       }, 3000)
     }
     catch (error: any) {
-      console.error('patient-create-error', error)
+      console.error('patient-update-error', error)
 
       if (error.data && error.data.data) {
         const backendErrors = error.data.data
@@ -177,7 +237,7 @@ const onSubmit = handleSubmit(
       toaster.clearAll()
       toaster.show({
         title: 'خطا',
-        message: 'مشکلی در ایجاد بیمار پیش آمد. لطفاً دوباره تلاش کنید.',
+        message: 'مشکلی در به‌روزرسانی بیمار پیش آمد. لطفاً دوباره تلاش کنید.',
         color: 'danger',
         icon: 'lucide:alert-triangle',
         closable: true,
@@ -198,6 +258,13 @@ const onSubmit = handleSubmit(
     })
   },
 )
+
+// Fetch patient data when component is mounted
+onMounted(() => {
+  if (patientId) {
+    fetchPatientData()
+  }
+})
 </script>
 
 <template>
@@ -212,6 +279,7 @@ const onSubmit = handleSubmit(
         </BaseButtonAction>
       </div>
     </div>
+
     <BaseCard>
       <form
         method="POST"
@@ -229,67 +297,12 @@ const onSubmit = handleSubmit(
                 class="relative mb-5 flex flex-col items-center justify-center gap-4"
               >
                 <BaseFullscreenDropfile
-                  icon="ph:image-duotone"
-                  :filter-file-dropped="
-                    (file) => file.type.startsWith('image')
-                  "
-                  @drop="
-                    (value) => {
-                      inputFile = value
-                    }
-                  "
-                />
-                <BaseInputFileHeadless
-                  v-slot="{ open, remove, preview, files }"
                   v-model="inputFile"
-                  accept="image/*"
-                >
-                  <div class="relative size-20">
-                    <img
-                      v-if="files?.length && files.item(0)"
-                      :src="preview(files.item(0)!).value"
-                      alt="Upload preview"
-                      class="bg-muted-200 dark:bg-muted-700/60 size-20 rounded-full object-cover object-center"
-                    >
-                    <img
-                      v-else
-                      :src="currentAvatar"
-                      alt="Upload preview"
-                      class="bg-muted-200 dark:bg-muted-700/60 size-20 rounded-full object-cover object-center dark:invert"
-                    >
-                    <div
-                      v-if="files?.length && files.item(0)"
-                      class="absolute bottom-0 end-0 z-20"
-                    >
-                      <BaseButtonIcon
-                        size="sm"
-                        rounded="full"
-                        data-nui-tooltip="حذف تصویر"
-                        class="scale-90"
-                        @click="remove(files.item(0)!)"
-                      >
-                        <Icon name="lucide:x" class="size-4" />
-                      </BaseButtonIcon>
-                    </div>
-                    <div v-else class="absolute bottom-0 end-0 z-20">
-                      <div class="relative" data-nui-tooltip="آپلود تصویر">
-                        <BaseButtonIcon
-                          size="sm"
-                          rounded="full"
-                          @click="open"
-                        >
-                          <Icon name="lucide:plus" class="size-4" />
-                        </BaseButtonIcon>
-                      </div>
-                    </div>
-                  </div>
-                </BaseInputFileHeadless>
-                <div
-                  v-if="fileError"
-                  class="text-danger-600 inline-block font-sans text-[.8rem]"
-                >
-                  {{ fileError }}
-                </div>
+                  :error="fileError"
+                  :preview-url="currentAvatar"
+                  :disabled="!isAdmin"
+                  class="mx-auto size-20"
+                />
               </div>
               <div class="grid grid-cols-12 gap-4">
                 <!-- Name -->
@@ -299,17 +312,17 @@ const onSubmit = handleSubmit(
                     name="patient.name"
                   >
                     <BaseInput
-                      label="نام"
-                      placeholder="نام کامل بیمار را وارد کنید (مثال: علی احمدی)"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
-                      type="text"
+                      :disabled="!isAdmin"
+                      label="نام"
+                      placeholder="نام بیمار را وارد کنید"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
+
                 <!-- Age -->
                 <div class="ltablet:col-span-6 col-span-12 lg:col-span-6">
                   <Field
@@ -317,37 +330,36 @@ const onSubmit = handleSubmit(
                     name="patient.age"
                   >
                     <BaseInput
-                      label="سن"
-                      placeholder="سن بیمار را به سال وارد کنید (مثال: ۳۰)"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
+                      :disabled="!isAdmin"
+                      label="سن"
                       type="number"
-                      min="0"
-                      max="150"
+                      placeholder="سن بیمار را وارد کنید"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
+
                 <!-- Short Description -->
                 <div class="col-span-12">
                   <Field
                     v-slot="{ field, errorMessage, handleChange, handleBlur }"
                     name="patient.shortDescription"
                   >
-                    <BaseInput
-                      label="توضیح کوتاه"
-                      placeholder="توضیح مختصری درباره بیمار (مثال: مردی ۳۰ ساله با سابقه بیماری قلبی)"
-                      :model-value="field.value"
+                    <BaseTextarea
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
-                      type="text"
+                      :disabled="!isAdmin"
+                      label="توضیح کوتاه"
+                      placeholder="یک توضیح کوتاه در مورد بیمار وارد کنید"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
+
                 <!-- Long Description -->
                 <div class="col-span-12">
                   <Field
@@ -355,17 +367,18 @@ const onSubmit = handleSubmit(
                     name="patient.longDescription"
                   >
                     <BaseTextarea
-                      label="توضیح بلند"
-                      placeholder="توضیحات کامل درباره وضعیت بیمار، علائم و نشانه‌ها"
-                      rows="5"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
+                      :disabled="!isAdmin"
+                      label="توضیح بلند"
+                      placeholder="یک توضیح کامل در مورد بیمار وارد کنید"
+                      rows="4"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
+
                 <!-- Defining Traits -->
                 <div class="col-span-12">
                   <Field
@@ -373,30 +386,31 @@ const onSubmit = handleSubmit(
                     name="patient.definingTraits"
                   >
                     <BaseTextarea
-                      label="ویژگی‌های تعریف‌کننده"
-                      placeholder="ویژگی‌ها و خصوصیات بارز بیمار (مثال: بسیار صبور، علاقه‌مند به مطالعه، توانایی حل مسائل پیچیده)"
-                      rows="5"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
+                      :disabled="!isAdmin"
+                      label="ویژگی‌های تعریف‌کننده"
+                      placeholder="ویژگی‌های تعریف‌کننده بیمار را وارد کنید"
+                      rows="4"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
-                <!-- Backstory -->
+
+                <!-- Back Story -->
                 <div class="col-span-12">
                   <Field
                     v-slot="{ field, errorMessage, handleChange, handleBlur }"
                     name="patient.backStory"
                   >
                     <BaseTextarea
-                      label="پیشینه"
-                      placeholder="پیشینه و سوابق بیمار را بنویسید (مثال: در کودکی علاقه زیادی به ریاضیات داشت، در دانشگاه فیزیک خواند و اکنون مهندس است)"
-                      rows="5"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
+                      :disabled="!isAdmin"
+                      label="پیشینه"
+                      placeholder="پیشینه بیمار را وارد کنید"
+                      rows="4"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
@@ -416,17 +430,18 @@ const onSubmit = handleSubmit(
                   name="patient.personality"
                 >
                   <BaseTextarea
-                    label="شخصیت"
-                    placeholder="خصوصیات شخصیتی بیمار (مثال: مهربان، خوش‌برخورد، اجتماعی)"
-                    rows="5"
-                    :model-value="field.value"
+                    v-model="field.value"
                     :error="errorMessage"
-                    :disabled="isSubmitting"
+                    :disabled="!isAdmin"
+                    label="شخصیت"
+                    placeholder="شخصیت بیمار را وارد کنید"
+                    rows="4"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
                 </Field>
               </div>
+
               <!-- Appearance -->
               <div class="col-span-12">
                 <Field
@@ -434,17 +449,18 @@ const onSubmit = handleSubmit(
                   name="patient.appearance"
                 >
                   <BaseTextarea
-                    label="ظاهر"
-                    placeholder="توصیف ظاهری بیمار (مثال: قد بلند، موهای مشکی، چشمان قهوه‌ای)"
-                    rows="5"
-                    :model-value="field.value"
+                    v-model="field.value"
                     :error="errorMessage"
-                    :disabled="isSubmitting"
+                    :disabled="!isAdmin"
+                    label="ظاهر"
+                    placeholder="ظاهر بیمار را وارد کنید"
+                    rows="4"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
                 </Field>
               </div>
+
               <!-- Motivation -->
               <div class="col-span-12">
                 <Field
@@ -452,17 +468,18 @@ const onSubmit = handleSubmit(
                   name="patient.motivation"
                 >
                   <BaseTextarea
-                    label="انگیزه"
-                    placeholder="انگیزه‌ها و اهداف بیمار (مثال: بهبود سلامتی برای مراقبت از خانواده)"
-                    rows="5"
-                    :model-value="field.value"
+                    v-model="field.value"
                     :error="errorMessage"
-                    :disabled="isSubmitting"
+                    :disabled="!isAdmin"
+                    label="انگیزه"
+                    placeholder="انگیزه بیمار را وارد کنید"
+                    rows="4"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
                 </Field>
               </div>
+
               <!-- Mood and Current Emotions -->
               <div class="col-span-12">
                 <Field
@@ -470,38 +487,39 @@ const onSubmit = handleSubmit(
                   name="patient.moodAndCurrentEmotions"
                 >
                   <BaseTextarea
-                    label="حالت روحی و احساسات فعلی"
-                    placeholder="حالت روحی و احساسات فعلی بیمار را توصیف کنید (مثال: اضطراب، نگرانی درباره آینده، امیدواری)"
-                    rows="5"
-                    :model-value="field.value"
+                    v-model="field.value"
                     :error="errorMessage"
-                    :disabled="isSubmitting"
+                    :disabled="!isAdmin"
+                    label="حالت روحی و احساسات فعلی"
+                    placeholder="حالت روحی و احساسات فعلی بیمار را وارد کنید"
+                    rows="4"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
                 </Field>
               </div>
             </div>
-            <div
-              class="mt-5 flex flex-row justify-between gap-4 md:space-x-3"
-            >
+
+            <div v-if="isAdmin" class="mt-6 flex justify-between gap-2">
               <div class="flex items-center justify-between">
                 <BaseSwitchThin
-                  v-model="values.patient.isActive"
+                  :model-value="values?.patient?.isActive ?? false"
+                  :disabled="!isAdmin"
                   label="وضعیت بیمار"
                   help="بیمار فعال است یا غیر فعال"
+                  @update:model-value="(val) => setFieldValue('patient.isActive', val)"
                 >
                   <span class="text-muted-400 dark:text-muted-400 text-sm">
-                    {{ values.patient.isActive ? 'فعال' : 'غیر فعال' }}
+                    {{ values?.patient?.isActive ? 'فعال' : 'غیر فعال' }}
                   </span>
                 </BaseSwitchThin>
               </div>
               <BaseButton
                 type="submit"
                 color="primary"
-                class="!ml-0 !h-12 w-full sm:w-40"
+                :loading="isSubmitting"
               >
-                ایجاد بیمار
+                به‌روزرسانی
               </BaseButton>
             </div>
           </div>

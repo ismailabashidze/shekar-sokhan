@@ -16,6 +16,7 @@
     "clean": "rimraf .nuxt .output node_modules"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@gradio/client": "^0.18.0",
     "chromadb": "^1.8.1",
     "pocketbase": "^0.21.2",
