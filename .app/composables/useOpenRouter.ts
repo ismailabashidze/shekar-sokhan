@@ -3,20 +3,76 @@ interface ChatMessage {
   content: string
 }
 
+interface OpenRouterModel {
+  id: string
+  name: string
+  description: string
+  context_length: number
+  pricing: {
+    prompt: string
+    completion: string
+  }
+}
+
 interface OpenRouterOptions {
   model?: string
   temperature?: number
   max_tokens?: number
-  response_format?: {
-    type: 'json_object'
-    schema: object
-  }
 }
 
 export function useOpenRouter() {
+  const config = useRuntimeConfig()
+  
+  // Chat state
   const processing = ref(false)
   const error = ref<string | null>(null)
-  const config = useRuntimeConfig()
+
+  // Models state
+  const models = ref<OpenRouterModel[]>([])
+  const allModels = ref<OpenRouterModel[]>([])
+  const selectedModel = ref<string>('anthropic/claude-2')
+  const loading = ref(false)
+  const searchQuery = ref('')
+
+  const filteredModels = computed(() => {
+    if (!searchQuery.value) return allModels.value
+    const query = searchQuery.value.toLowerCase()
+    return allModels.value.filter(model => 
+      model.name.toLowerCase().includes(query) || 
+      model.id.toLowerCase().includes(query) ||
+      model.description.toLowerCase().includes(query)
+    )
+  })
+
+  const fetchModels = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/models', {
+        headers: {
+          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
+        throw new Error('No models available')
+      }
+
+      allModels.value = data.data
+    } catch (e: any) {
+      error.value = e.message
+      console.error('Error fetching models:', e)
+    } finally {
+      loading.value = false
+    }
+  }
 
   const streamChat = async (
     messages: ChatMessage[],
@@ -36,7 +92,7 @@ export function useOpenRouter() {
           'X-Title': 'Therapist Chat',
         },
         body: JSON.stringify({
-          model: options.model || 'mistralai/mistral-7b-instruct',
+          model: options.model || selectedModel.value,
           messages,
           stream: true,
           temperature: options.temperature || 0.7,
@@ -73,7 +129,7 @@ export function useOpenRouter() {
 
         buffer += decoder.decode(value, { stream: true })
         const lines = buffer.split('\n')
-        buffer = lines.pop() || '' // Keep the incomplete line in the buffer
+        buffer = lines.pop() || ''
 
         for (const line of lines) {
           const trimmedLine = line.trim()
@@ -81,7 +137,6 @@ export function useOpenRouter() {
             continue
           }
 
-          // Handle SSE format
           const data = trimmedLine.startsWith('data: ') ? trimmedLine.slice(6) : trimmedLine
 
           if (data === '[DONE]') {
@@ -104,9 +159,23 @@ export function useOpenRouter() {
     }
   }
 
+  // Initialize models on composable creation
+  onMounted(() => {
+    fetchModels()
+  })
+
   return {
+    // Chat functionality
     streamChat,
     processing,
+    
+    // Models functionality
+    models: allModels,
+    selectedModel,
+    loading,
     error,
+    searchQuery,
+    filteredModels,
+    retryFetch: fetchModels,
   }
 }

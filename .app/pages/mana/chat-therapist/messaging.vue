@@ -214,22 +214,26 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
-const { streamChat, processing: aiProcessing } = useOpenRouter()
-const { models, selectedModel, loading: modelsLoading, error: modelsError, searchQuery, retryFetch } = useOpenRouterModels()
+const { 
+  streamChat, 
+  processing: aiProcessing,
+  models,
+  selectedModel,
+  loading: modelsLoading,
+  error: modelsError,
+  searchQuery,
+  retryFetch,
+  filteredModels,
+} = useOpenRouter()
 
 const streamingResponse = ref('')
 const showModelError = ref(false)
 const modelSearchInput = ref('')
 const showModelDropdown = ref(false)
 
-const filteredModels = computed(() => {
-  if (!modelSearchInput.value) return models.value
-  const query = modelSearchInput.value.toLowerCase()
-  return models.value.filter(model =>
-    model.name.toLowerCase().includes(query)
-    || model.id.toLowerCase().includes(query)
-    || (model.description || '').toLowerCase().includes(query),
-  )
+// Sync model search input with composable's searchQuery
+watch(modelSearchInput, (newValue) => {
+  searchQuery.value = newValue
 })
 
 // Reset streaming response when selecting a new conversation
