@@ -48,7 +48,13 @@ const emojis = [
 
 const insertEmoji = (emoji: string) => {
   newMessage.value += emoji
-  showEmojiPicker.value = false
+}
+
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Enter' && e.ctrlKey) {
+    e.preventDefault()
+    submitMessage()
+  }
 }
 
 const emojiPickerRef = ref<HTMLElement>()
@@ -91,10 +97,10 @@ const scrollToBottom = () => {
 
 const loadMessages = async (patientId: string) => {
   if (currentLoadingPatientId.value === patientId) return
-  
+
   loading.value = true
   currentLoadingPatientId.value = patientId
-  
+
   try {
     const nuxtApp = useNuxtApp()
     if (!nuxtApp.$pb.authStore.isValid) {
@@ -108,10 +114,12 @@ const loadMessages = async (patientId: string) => {
       timestamp: msg.created,
     }))
     scrollToBottom()
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error loading messages:', error)
     messages.value = []
-  } finally {
+  }
+  finally {
     loading.value = false
     currentLoadingPatientId.value = null
   }
@@ -214,8 +222,8 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
-const { 
-  streamChat, 
+const {
+  streamChat,
   processing: aiProcessing,
   models,
   selectedModel,
@@ -271,7 +279,7 @@ async function submitMessage() {
       text: '',
       timestamp: now,
     }
-    
+
     let currentAssistantMessage = ''
 
     // Convert messages to OpenRouter format
@@ -287,9 +295,27 @@ async function submitMessage() {
     })
     scrollToBottom()
 
+    // Get current patient details
+    const currentPatient = conversations.value.find(c => c.user.id === activePatientId.value)?.user
+
     await streamChat(
       openRouterMessages,
-      {},
+      {
+        patientDetails: currentPatient
+          ? {
+              name: currentPatient.name,
+              age: currentPatient.age,
+              shortDescription: currentPatient.shortDescription,
+              longDescription: currentPatient.longDescription,
+              definingTraits: currentPatient.definingTraits,
+              backStory: currentPatient.backStory,
+              personality: currentPatient.personality,
+              appearance: currentPatient.appearance,
+              motivation: currentPatient.motivation,
+              moodAndCurrentEmotions: currentPatient.moodAndCurrentEmotions,
+            }
+          : undefined,
+      },
       async (chunk) => {
         const content = chunk.choices[0]?.delta?.content || ''
         if (content) {
@@ -307,8 +333,8 @@ async function submitMessage() {
     lastMessage.id = savedAssistantMessage.id
     lastMessage.timestamp = savedAssistantMessage.created
     scrollToBottom()
-
-  } catch (e) {
+  }
+  catch (e) {
     console.error('Error in chat:', e)
     messages.value.push({
       type: 'received',
@@ -348,31 +374,34 @@ const logout = () => {
   navigateTo('/auth/login')
 }
 
-const clearChat = async () => {
-  if (!activePatientId.value) return
+const isDeleteModalOpen = ref(false)
 
+const openDeleteModal = () => {
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
+}
+
+const confirmClearChat = async () => {
   try {
-    await clearMessages(activePatientId.value)
+    await clearMessages(activePatientId.value!)
     messages.value = []
-    streamingResponse.value = ''
-    toaster.show({
-      title: 'چت پاک شد',
-      message: `چت با موفقیت پاک شد`,
-      color: 'success',
-      icon: 'ph:check',
-      closable: true,
-    })
+    closeDeleteModal()
   }
   catch (error) {
-    console.error('Error clearing chat:', error)
-    toaster.show({
-      title: 'خطایی رخ داد',
-      message: `خطایی در پاک کردن چت رخ داد`,
-      color: 'danger',
-      icon: 'ph:x',
-      closable: true,
-    })
+    console.error('Error clearing messages:', error)
   }
+}
+
+const clearChat = () => {
+  if (!activePatientId.value) return
+  openDeleteModal()
+}
+
+const gotoList = () => {
+  navigateTo('/onboarding/choosePatient')
 }
 </script>
 
@@ -399,9 +428,9 @@ const clearChat = async () => {
                 href="#"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                 title="Back"
-                @click.prevent="$router.back()"
+                @click.prevent="gotoList()"
               >
-                <Icon name="lucide:arrow-left" class="size-5" />
+                <Icon name="lucide:arrow-right" class="size-5" />
               </a>
             </div>
           </div>
@@ -531,7 +560,7 @@ const clearChat = async () => {
           <!-- Body -->
           <div
             ref="chatEl"
-            class="relative h-[calc(100vh_-_128px)] w-full p-4 sm:p-8"
+            class="relative flex h-[calc(100vh-4rem)] flex-col overflow-y-auto p-4 !pb-60 sm:p-8"
             :class="
               loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'
             "
@@ -696,7 +725,7 @@ const clearChat = async () => {
                             {{ item.text }}
                           </span>
                         </div>
-                        <span class="font-sans text-xs text-muted-400">
+                        <span class="text-muted-400 font-sans text-xs">
                           {{ formatTime(item.timestamp) }}
                         </span>
                       </div>
@@ -706,63 +735,95 @@ const clearChat = async () => {
               </div>
             </div>
           </div>
-          <!-- Compose -->
+          <!-- Compose form - Fixed at bottom -->
           <form
             method="POST"
             action=""
-            class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center px-4 sm:px-8"
+            class="bg-muted-100 dark:bg-muted-900 absolute inset-x-0 bottom-0 w-full p-4"
             @submit.prevent="submitMessage"
           >
             <div class="relative w-full">
-              <BaseInput
-                v-model.trim="newMessage"
+              <BaseTextarea
+                v-model="newMessage"
                 :disabled="messageLoading"
-                rounded="full"
-                :classes="{
-                  input: 'h-12 ps-6 pe-24',
-                }"
-                placeholder="پیام را بنویسید . . . "
-              />
-              <div class="absolute -top-1 end-2 flex h-12 items-center gap-1">
-                <!-- Emoji Button -->
-                <div class="relative">
-                  <button
-                    type="button"
-                    class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                    @click.prevent="showEmojiPicker = !showEmojiPicker"
-                  >
-                    <Icon name="lucide:smile" class="size-5" />
-                  </button>
+                size="sm"
+                label="پیام شما"
+                rounded="md"
+                placeholder="برای ارسال از ↵ + crtl  استفاده کنید."
+                :rows="6"
+                addon
+                class="dark:bg-muted-800 bg-white"
+                @keydown="handleKeydown"
+              >
+                <template #addon>
+                  <div class="flex items-center gap-2">
+                    <BaseAvatar
+                      src="/img/icons/animated/lightbulb.gif"
+                      class="me-1"
+                      size="xs"
+                    />
 
-                  <!-- Emoji Picker -->
-                  <div
-                    v-if="showEmojiPicker"
-                    ref="emojiPickerRef"
-                    class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute bottom-full end-0 mb-2 w-64 rounded-lg border bg-white shadow-lg"
-                  >
-                    <div class="grid grid-cols-8 gap-1">
-                      <button
-                        v-for="emoji in emojis"
-                        :key="emoji"
-                        type="button"
-                        class="hover:bg-muted-100 dark:hover:bg-muted-700 flex size-8 items-center justify-center rounded-lg transition-colors duration-300"
-                        @click="insertEmoji(emoji)"
-                      >
-                        {{ emoji }}
-                      </button>
-                    </div>
+                    <BaseHeading
+                      as="h4"
+                      size="sm"
+                      weight="semibold"
+                      class="text-muted-800 dark:text-white"
+                    >
+                      درمانا
+                    </BaseHeading>
                   </div>
-                </div>
 
-                <!-- Send Button -->
-                <button
-                  type="submit"
-                  :disabled="!newMessage || messageLoading"
-                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300 disabled:opacity-50"
-                >
-                  <Icon name="lucide:send" class="size-5" />
-                </button>
-              </div>
+                  <div class="flex items-center gap-2">
+                    <!-- Emoji Button -->
+                    <div class="relative">
+                      <button
+                        type="button"
+                        class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
+                        @click.prevent="showEmojiPicker = !showEmojiPicker"
+                      >
+                        <Icon name="lucide:smile" class="size-5" />
+                      </button>
+
+                      <!-- Emoji Picker -->
+                      <div
+                        v-if="showEmojiPicker"
+                        ref="emojiPickerRef"
+                        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute bottom-full end-0 mb-2 w-64 rounded-lg border bg-white shadow-lg"
+                      >
+                        <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-2">
+                          <span class="text-sm font-medium">انتخاب ایموجی</span>
+                          <BaseButtonIcon
+                            size="xs"
+                            @click="showEmojiPicker = false"
+                          >
+                            <Icon name="lucide:x" class="size-4" />
+                          </BaseButtonIcon>
+                        </div>
+                        <div class="grid grid-cols-8 gap-1 p-2">
+                          <button
+                            v-for="emoji in emojis"
+                            :key="emoji"
+                            type="button"
+                            class="hover:bg-muted-100 dark:hover:bg-muted-700 flex size-8 items-center justify-center rounded-lg transition-colors duration-300"
+                            @click="insertEmoji(emoji)"
+                          >
+                            {{ emoji }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Send Button -->
+                    <button
+                      type="submit"
+                      :disabled="!newMessage || messageLoading"
+                      class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300 disabled:opacity-50"
+                    >
+                      <Icon name="lucide:send" class="size-5" />
+                    </button>
+                  </div>
+                </template>
+              </BaseTextarea>
             </div>
           </form>
         </div>
@@ -770,7 +831,7 @@ const clearChat = async () => {
       <!-- Current user -->
       <div
         class="ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
-        :class="expanded ? 'translate-x-full' : 'translate-x-0'"
+        :class="expanded ? '-translate-x-full' : 'translate-x-0'"
       >
         <div class="flex h-16 w-full items-center justify-between px-8">
           <BaseHeading
@@ -782,7 +843,7 @@ const clearChat = async () => {
           </BaseHeading>
           <BaseButtonIcon small @click="expanded = true">
             <Icon
-              name="lucide:arrow-right"
+              name="lucide:arrow-left"
               class="pointer-events-none size-4"
             />
           </BaseButtonIcon>
@@ -833,7 +894,7 @@ const clearChat = async () => {
                 :class="getRandomColor()"
               />
             </div>
-            <div class="text-center">
+            <div class="mt-2 space-y-3 text-center">
               <BaseHeading
                 as="h3"
                 size="md"
@@ -970,4 +1031,56 @@ const clearChat = async () => {
       </div>
     </div>
   </div>
+
+  <TairoModal
+    :open="isDeleteModalOpen"
+    size="sm"
+    @close="closeDeleteModal"
+  >
+    <template #header>
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+          حذف پیام‌ها
+        </h3>
+        <BaseButtonClose @click="closeDeleteModal" />
+      </div>
+    </template>
+
+    <div class="p-4 md:p-6">
+      <div class="mx-auto w-full max-w-xs text-center">
+        <div class="relative mx-auto mb-4 flex size-24 justify-center">
+          <Icon
+            name="ph:trash-duotone"
+            class="text-danger size-24"
+          />
+        </div>
+
+        <h3 class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white">
+          حذف تمام پیام‌ها
+        </h3>
+
+        <p class="font-alt text-muted-500 dark:text-muted-400 text-sm leading-5">
+          آیا مطمئن هستید که می‌خواهید تمام پیام‌های این گفتگو را حذف کنید؟ این عمل قابل بازگشت نیست.
+        </p>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="p-4 md:p-6">
+        <div class="flex gap-x-2">
+          <BaseButton @click="closeDeleteModal">
+            انصراف
+          </BaseButton>
+
+          <BaseButton
+            color="danger"
+            variant="solid"
+            @click="confirmClearChat"
+          >
+            حذف
+          </BaseButton>
+        </div>
+      </div>
+    </template>
+  </TairoModal>
 </template>

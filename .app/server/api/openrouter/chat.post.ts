@@ -30,11 +30,14 @@ export default defineEventHandler(async (event: H3Event) => {
         'X-Title': 'Therapist Chat',
       },
       body: JSON.stringify({
+        include_reasoning: true,
         model: body.model || 'mistralai/mistral-7b-instruct',
         messages: body.messages,
         stream: true,
+        transforms: ['middle-out'],
+        plugins: [],
         temperature: body.temperature || 0.7,
-        max_tokens: body.max_tokens || 1000,
+        max_tokens: body.max_tokens || 0,
       }),
     })
 

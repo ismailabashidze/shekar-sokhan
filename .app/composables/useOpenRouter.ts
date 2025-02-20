@@ -18,11 +18,39 @@ interface OpenRouterOptions {
   model?: string
   temperature?: number
   max_tokens?: number
+  patientDetails?: {
+    name: string
+    age: string
+    shortDescription: string
+    longDescription: string
+    definingTraits: string
+    backStory: string
+    personality: string
+    appearance: string
+    motivation: string
+    moodAndCurrentEmotions: string
+  }
+}
+
+export interface PatientGenerateInput {
+  name: string
+  age: number
+  shortDescription: string
+}
+
+export interface PatientGenerateOutput {
+  longDescription: string
+  definingTraits: string
+  backStory: string
+  personality: string
+  appearance: string
+  motivation: string
+  moodAndCurrentEmotions: string
 }
 
 export function useOpenRouter() {
   const config = useRuntimeConfig()
-  
+
   // Chat state
   const processing = ref(false)
   const error = ref<string | null>(null)
@@ -30,17 +58,17 @@ export function useOpenRouter() {
   // Models state
   const models = ref<OpenRouterModel[]>([])
   const allModels = ref<OpenRouterModel[]>([])
-  const selectedModel = ref<string>('anthropic/claude-2')
+  const selectedModel = ref<string>('mistralai/mistral-saba')
   const loading = ref(false)
   const searchQuery = ref('')
 
   const filteredModels = computed(() => {
     if (!searchQuery.value) return allModels.value
     const query = searchQuery.value.toLowerCase()
-    return allModels.value.filter(model => 
-      model.name.toLowerCase().includes(query) || 
-      model.id.toLowerCase().includes(query) ||
-      model.description.toLowerCase().includes(query)
+    return allModels.value.filter(model =>
+      model.name.toLowerCase().includes(query)
+      || model.id.toLowerCase().includes(query)
+      || model.description.toLowerCase().includes(query),
     )
   })
 
@@ -66,10 +94,12 @@ export function useOpenRouter() {
       }
 
       allModels.value = data.data
-    } catch (e: any) {
+    }
+    catch (e: any) {
       error.value = e.message
       console.error('Error fetching models:', e)
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }
@@ -83,6 +113,31 @@ export function useOpenRouter() {
     error.value = null
 
     try {
+      // Add system message with patient details at the beginning
+      const systemMessage = messages[0]?.role === 'system' ? messages[0] : null
+      const patientDetails = options.patientDetails
+      const systemPrompt = patientDetails
+        ? `اطلاعات هویتی تو در پایین آمده است. 
+نام: ${patientDetails.name}
+سن: ${patientDetails.age}
+توضیح کوتاه: ${patientDetails.shortDescription}
+توضیح بلند: ${patientDetails.longDescription}
+صفات تعریف کننده: ${patientDetails.definingTraits}
+داستان زندگی: ${patientDetails.backStory}
+شخصیت: ${patientDetails.personality}
+ظاهر: ${patientDetails.appearance}
+انگیزه: ${patientDetails.motivation}
+وضعیت هیجانی حال حاضر: ${patientDetails.moodAndCurrentEmotions}
+تو در حال حاضر به دنبال حمایت عاطفی هستی و در یک سیستم درخواست مشاوره متنی در حال گفت و گو با یک روانشناس هستی. دقت کن که نقش تو روانشناس نیست و نقش مقابل را باید بازی کنی.
+همچنین در چت اگر متوجه شدی که بحث از موضوع جلسه ات خارج شده، مقاومت کن و برگرد به مسیر قبلی.
+نیازی نیست خیلی مودب باشی اگر لازم بود پرخاش کن.
+`
+        : ''
+
+      const messagesWithSystem = systemMessage
+        ? messages
+        : [{ role: 'system', content: systemPrompt }, ...messages]
+
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -93,10 +148,13 @@ export function useOpenRouter() {
         },
         body: JSON.stringify({
           model: options.model || selectedModel.value,
-          messages,
+          messages: messagesWithSystem,
           stream: true,
           temperature: options.temperature || 0.7,
-          max_tokens: options.max_tokens || 1000,
+          max_tokens: options.max_tokens || 0,
+          include_reasoning: true,
+          plugins: [],
+          transforms: ['middle-out'],
         }),
       })
 
@@ -106,7 +164,8 @@ export function useOpenRouter() {
         try {
           const errorData = JSON.parse(errorText)
           errorMessage = errorData?.error?.message || errorData?.message || errorText
-        } catch {
+        }
+        catch {
           errorMessage = errorText
         }
         throw new Error(`Chat error: ${errorMessage}`)
@@ -146,15 +205,138 @@ export function useOpenRouter() {
           try {
             const parsed = JSON.parse(data)
             onChunk(parsed)
-          } catch (e) {
+          }
+          catch (e) {
             console.error('Error parsing SSE message:', e)
           }
         }
       }
-    } catch (e: any) {
+    }
+    catch (e: any) {
       error.value = e.message
       throw e
-    } finally {
+    }
+    finally {
+      processing.value = false
+    }
+  }
+
+  const generate = async (input: PatientGenerateInput): Promise<PatientGenerateOutput> => {
+    processing.value = true
+    error.value = null
+
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+          'X-Title': 'Patient Details Generator',
+        },
+        body: JSON.stringify({
+          model: selectedModel.value,
+          messages: [
+            {
+              role: 'system',
+              content: 'شما یک دستیار روانشناس هستید که در تولید اطلاعات بیمار کمک می‌کند. لطفا با توجه به اطلاعات اولیه بیمار، سایر جزئیات را به صورت منطقی و به زبان فارسی تولید کنید.',
+            },
+            {
+              role: 'user',
+              content: `لطفا با توجه به اطلاعات زیر، جزئیات بیمار را تولید کنید:
+نام: ${input.name}
+سن: ${input.age}
+توضیح کوتاه: ${input.shortDescription}`,
+            },
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'patient_details',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  longDescription: {
+                    type: 'string',
+                    description: 'توضیح بلند و کامل در مورد بیمار و وضعیت او',
+                  },
+                  definingTraits: {
+                    type: 'string',
+                    description: 'صفات و ویژگی‌های تعریف‌کننده شخصیت و رفتار بیمار',
+                  },
+                  backStory: {
+                    type: 'string',
+                    description: 'داستان زندگی، پیشینه و تجربیات مهم بیمار',
+                  },
+                  personality: {
+                    type: 'string',
+                    description: 'شخصیت، رفتارها و خصوصیات روانشناختی بیمار',
+                  },
+                  appearance: {
+                    type: 'string',
+                    description: 'توصیف ظاهری و ویژگی‌های فیزیکی بیمار',
+                  },
+                  motivation: {
+                    type: 'string',
+                    description: 'انگیزه‌ها، اهداف و خواسته‌های اصلی بیمار',
+                  },
+                  moodAndCurrentEmotions: {
+                    type: 'string',
+                    description: 'حالت روحی، احساسات و وضعیت عاطفی فعلی بیمار',
+                  },
+                },
+                required: [
+                  'longDescription',
+                  'definingTraits',
+                  'backStory',
+                  'personality',
+                  'appearance',
+                  'motivation',
+                  'moodAndCurrentEmotions',
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+          temperature: 0.7,
+          max_tokens: 0,
+          include_reasoning: true,
+          plugins: [],
+          transforms: ['middle-out'],
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage: string
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData?.error?.message || errorData?.message || errorText
+        }
+        catch {
+          errorMessage = errorText
+        }
+        throw new Error(`Generate error: ${errorMessage}`)
+      }
+
+      const data = await response.json()
+      const content = data.choices[0].message.content
+
+      let result: PatientGenerateOutput
+      try {
+        result = typeof content === 'string' ? JSON.parse(content) : content
+        return result
+      }
+      catch (e) {
+        throw new Error(`Invalid response format: ${e.message}`)
+      }
+    }
+    catch (e: any) {
+      error.value = e.message
+      throw e
+    }
+    finally {
       processing.value = false
     }
   }
@@ -168,7 +350,7 @@ export function useOpenRouter() {
     // Chat functionality
     streamChat,
     processing,
-    
+
     // Models functionality
     models: allModels,
     selectedModel,
@@ -177,5 +359,8 @@ export function useOpenRouter() {
     searchQuery,
     filteredModels,
     retryFetch: fetchModels,
+
+    // Patient generation
+    generate,
   }
 }

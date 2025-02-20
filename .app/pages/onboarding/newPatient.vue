@@ -2,6 +2,7 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { Field, useFieldError, useForm } from 'vee-validate'
 import { z } from 'zod'
+import { useOpenRouter } from '~/composables/useOpenRouter'
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
@@ -93,6 +94,8 @@ const {
 })
 
 const success = ref(false)
+const generating = ref(false)
+const loadingFields = ref<string[]>([])
 
 const inputFile = ref<FileList | null>(null)
 const fileError = useFieldError('avatar')
@@ -100,6 +103,96 @@ watch(inputFile, (value) => {
   const file = value?.item(0) || null
   setFieldValue('avatar', file)
 })
+
+const { generate } = useOpenRouter()
+
+const canGenerate = computed(() => {
+  return Boolean(
+    values.patient.name?.trim()
+    && values.patient.age
+    && values.patient.shortDescription?.trim()
+    && !generating.value,
+  )
+})
+
+const generateDetails = async () => {
+  // Prevent multiple simultaneous generations
+  if (generating.value) {
+    return
+  }
+
+  // Check if required fields are filled
+  if (!values.patient.name || !values.patient.age || !values.patient.shortDescription) {
+    toaster.error('لطفا نام، سن و توضیح کوتاه را وارد کنید')
+    return
+  }
+
+  generating.value = true
+  // Set loading state for fields that will be generated
+  loadingFields.value = ['longDescription', 'definingTraits', 'backStory', 'personality', 'appearance', 'motivation', 'moodAndCurrentEmotions']
+
+  try {
+    const response = await generate({
+      name: values.patient.name,
+      age: values.patient.age,
+      shortDescription: values.patient.shortDescription,
+    })
+
+    // Parse the response if it's in JSON format
+    let parsedResponse
+    if (typeof response === 'string') {
+      try {
+        const parsed = JSON.parse(response)
+        if (parsed.choices?.[0]?.message?.content) {
+          parsedResponse = JSON.parse(parsed.choices[0].message.content)
+        }
+      } catch (e) {
+        console.error('Error parsing response:', e)
+        throw new Error('خطا در پردازش پاسخ')
+      }
+    } else {
+      parsedResponse = response
+    }
+
+    // Update form fields with generated content
+    if (parsedResponse) {
+      Object.entries(parsedResponse).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+          setFieldValue(`patient.${key}`, value.trim())
+        }
+      })
+
+      toaster.clearAll()
+      toaster.show({
+        title: 'تولید موفق',
+        message: 'اطلاعات بیمار با موفقیت تولید شد',
+        color: 'success',
+        icon: 'ph:user-circle-fill',
+        closable: true,
+      })
+    }
+  }
+  catch (error: any) {
+    console.error('Error generating details:', error)
+    // Clear any partially generated content
+    loadingFields.value.forEach((field) => {
+      setFieldValue(`patient.${field}`, '')
+    })
+
+    toaster.clearAll()
+    toaster.show({
+      title: 'خطا',
+      message: error?.message || error?.data?.message || 'خطا در تولید اطلاعات',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  }
+  finally {
+    generating.value = false
+    loadingFields.value = []
+  }
+}
 
 onBeforeRouteLeave(() => {
   if (meta.value.dirty) {
@@ -198,6 +291,12 @@ const onSubmit = handleSubmit(
     })
   },
 )
+
+const patientStatus = computed(() => values.patient.isActive ? 'بیمار فعال است' : 'بیمار غیرفعال است')
+
+watch(() => values.patient.isActive, (newValue) => {
+  // Removed this line as it's no longer needed
+}, { immediate: true })
 </script>
 
 <template>
@@ -299,17 +398,16 @@ const onSubmit = handleSubmit(
                     name="patient.name"
                   >
                     <BaseInput
-                      label="نام"
-                      placeholder="نام کامل بیمار را وارد کنید (مثال: علی احمدی)"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
-                      type="text"
+                      label="نام"
+                      placeholder="نام بیمار را وارد کنید"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
+
                 <!-- Age -->
                 <div class="ltablet:col-span-6 col-span-12 lg:col-span-6">
                   <Field
@@ -317,37 +415,48 @@ const onSubmit = handleSubmit(
                     name="patient.age"
                   >
                     <BaseInput
-                      label="سن"
-                      placeholder="سن بیمار را به سال وارد کنید (مثال: ۳۰)"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
+                      label="سن"
                       type="number"
-                      min="0"
-                      max="150"
+                      placeholder="سن بیمار را وارد کنید"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
+
                 <!-- Short Description -->
                 <div class="col-span-12">
                   <Field
                     v-slot="{ field, errorMessage, handleChange, handleBlur }"
                     name="patient.shortDescription"
                   >
-                    <BaseInput
-                      label="توضیح کوتاه"
-                      placeholder="توضیح مختصری درباره بیمار (مثال: مردی ۳۰ ساله با سابقه بیماری قلبی)"
-                      :model-value="field.value"
+                    <BaseTextarea
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
-                      type="text"
+                      label="توضیح کوتاه"
+                      placeholder="یک توضیح کوتاه در مورد بیمار وارد کنید"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
+
+                <!-- Generate Button -->
+                <div class="col-span-12 flex justify-end">
+                  <BaseButton
+                    type="button"
+                    color="primary"
+                    :loading="generating"
+                    :disabled="!canGenerate"
+                    @click="generateDetails"
+                  >
+                    <Icon name="ph:magic-wand" class="ml-2 size-4" />
+                    <span>تولید خودکار سایر اطلاعات</span>
+                  </BaseButton>
+                </div>
+
                 <!-- Long Description -->
                 <div class="col-span-12">
                   <Field
@@ -355,17 +464,18 @@ const onSubmit = handleSubmit(
                     name="patient.longDescription"
                   >
                     <BaseTextarea
-                      label="توضیح بلند"
-                      placeholder="توضیحات کامل درباره وضعیت بیمار، علائم و نشانه‌ها"
-                      rows="5"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
+                      label="توضیح بلند"
+                      placeholder="یک توضیح کامل در مورد بیمار وارد کنید"
+                      rows="4"
+                      :loading="loadingFields.includes('longDescription')"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
+
                 <!-- Defining Traits -->
                 <div class="col-span-12">
                   <Field
@@ -373,30 +483,31 @@ const onSubmit = handleSubmit(
                     name="patient.definingTraits"
                   >
                     <BaseTextarea
-                      label="ویژگی‌های تعریف‌کننده"
-                      placeholder="ویژگی‌ها و خصوصیات بارز بیمار (مثال: بسیار صبور، علاقه‌مند به مطالعه، توانایی حل مسائل پیچیده)"
-                      rows="5"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
+                      label="ویژگی‌های تعریف‌کننده"
+                      placeholder="ویژگی‌های تعریف‌کننده بیمار را وارد کنید"
+                      rows="4"
+                      :loading="loadingFields.includes('definingTraits')"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
                   </Field>
                 </div>
-                <!-- Backstory -->
+
+                <!-- Back Story -->
                 <div class="col-span-12">
                   <Field
                     v-slot="{ field, errorMessage, handleChange, handleBlur }"
                     name="patient.backStory"
                   >
                     <BaseTextarea
-                      label="پیشینه"
-                      placeholder="پیشینه و سوابق بیمار را بنویسید (مثال: در کودکی علاقه زیادی به ریاضیات داشت، در دانشگاه فیزیک خواند و اکنون مهندس است)"
-                      rows="5"
-                      :model-value="field.value"
+                      v-model="field.value"
                       :error="errorMessage"
-                      :disabled="isSubmitting"
+                      label="پیشینه"
+                      placeholder="پیشینه بیمار را وارد کنید"
+                      rows="4"
+                      :loading="loadingFields.includes('backStory')"
                       @update:model-value="handleChange"
                       @blur="handleBlur"
                     />
@@ -416,12 +527,12 @@ const onSubmit = handleSubmit(
                   name="patient.personality"
                 >
                   <BaseTextarea
-                    label="شخصیت"
-                    placeholder="خصوصیات شخصیتی بیمار (مثال: مهربان، خوش‌برخورد، اجتماعی)"
-                    rows="5"
-                    :model-value="field.value"
+                    v-model="field.value"
                     :error="errorMessage"
-                    :disabled="isSubmitting"
+                    label="شخصیت"
+                    placeholder="خصوصیات شخصیتی بیمار را وارد کنید"
+                    rows="5"
+                    :loading="loadingFields.includes('personality')"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
@@ -434,12 +545,12 @@ const onSubmit = handleSubmit(
                   name="patient.appearance"
                 >
                   <BaseTextarea
-                    label="ظاهر"
-                    placeholder="توصیف ظاهری بیمار (مثال: قد بلند، موهای مشکی، چشمان قهوه‌ای)"
-                    rows="5"
-                    :model-value="field.value"
+                    v-model="field.value"
                     :error="errorMessage"
-                    :disabled="isSubmitting"
+                    label="ظاهر"
+                    placeholder="توصیف ظاهری بیمار را وارد کنید"
+                    rows="5"
+                    :loading="loadingFields.includes('appearance')"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
@@ -452,12 +563,12 @@ const onSubmit = handleSubmit(
                   name="patient.motivation"
                 >
                   <BaseTextarea
-                    label="انگیزه"
-                    placeholder="انگیزه‌ها و اهداف بیمار (مثال: بهبود سلامتی برای مراقبت از خانواده)"
-                    rows="5"
-                    :model-value="field.value"
+                    v-model="field.value"
                     :error="errorMessage"
-                    :disabled="isSubmitting"
+                    label="انگیزه"
+                    placeholder="انگیزه‌ها و اهداف بیمار را وارد کنید"
+                    rows="5"
+                    :loading="loadingFields.includes('motivation')"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
@@ -470,12 +581,12 @@ const onSubmit = handleSubmit(
                   name="patient.moodAndCurrentEmotions"
                 >
                   <BaseTextarea
-                    label="حالت روحی و احساسات فعلی"
-                    placeholder="حالت روحی و احساسات فعلی بیمار را توصیف کنید (مثال: اضطراب، نگرانی درباره آینده، امیدواری)"
-                    rows="5"
-                    :model-value="field.value"
+                    v-model="field.value"
                     :error="errorMessage"
-                    :disabled="isSubmitting"
+                    label="حالت روحی و احساسات فعلی"
+                    placeholder="حالت روحی و احساسات فعلی بیمار را توصیف کنید"
+                    rows="5"
+                    :loading="loadingFields.includes('moodAndCurrentEmotions')"
                     @update:model-value="handleChange"
                     @blur="handleBlur"
                   />
@@ -487,14 +598,11 @@ const onSubmit = handleSubmit(
             >
               <div class="flex items-center justify-between">
                 <BaseSwitchThin
-                  v-model="values.patient.isActive"
+                  :model-value="values.patient.isActive"
                   label="وضعیت بیمار"
-                  help="بیمار فعال است یا غیر فعال"
-                >
-                  <span class="text-muted-400 dark:text-muted-400 text-sm">
-                    {{ values.patient.isActive ? 'فعال' : 'غیر فعال' }}
-                  </span>
-                </BaseSwitchThin>
+                  :sublabel="values.patient.isActive ? 'بیمار فعال است' : 'بیمار غیرفعال است'"
+                  @update:model-value="(val) => setFieldValue('patient.isActive', val)"
+                />
               </div>
               <BaseButton
                 type="submit"

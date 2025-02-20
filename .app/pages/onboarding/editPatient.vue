@@ -130,11 +130,11 @@ const currentAvatar = computed(() => {
   if (!patientId)
     return '/img/avatars/default-male.jpg'
 
-  if (values.value?.avatar instanceof File)
-    return URL.createObjectURL(values.value.avatar)
+  if (values.avatar instanceof File)
+    return URL.createObjectURL(values.avatar)
 
-  if (values.value?.avatar)
-    return `http://localhost:8090/api/files/patients/${patientId}/${values.value.avatar}`
+  if (values.avatar)
+    return `http://localhost:8090/api/files/patients/${patientId}/${values.avatar}`
 
   return '/img/avatars/default-male.jpg'
 })
@@ -162,11 +162,16 @@ watch(inputFile, (value) => {
   setFieldValue('avatar', file)
 })
 
-onBeforeRouteLeave(() => {
-  if (meta.value.dirty) {
-    return confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟')
+const beforeRouteLeave = (to: any, from: any) => {
+  // Only show warning for admin users and if there are unsaved changes
+  if (isAdmin.value && meta.value.dirty) {
+    const answer = window.confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟')
+    if (!answer) {
+      return false
+    }
   }
-})
+  return true
+}
 
 const toaster = useToaster()
 
@@ -259,29 +264,180 @@ const onSubmit = handleSubmit(
   },
 )
 
-// Fetch patient data when component is mounted
+// Add loading state
+const isLoading = ref(true)
+
 onMounted(() => {
+  // Add 2 second delay for skeleton loading
+  setTimeout(() => {
+    isLoading.value = false
+  }, 2000)
+
   if (patientId) {
     fetchPatientData()
   }
 })
+
+const isDeleteModalOpen = ref(false)
+
+const openDeleteModal = () => {
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
+}
+
+const confirmDelete = async () => {
+  try {
+    await nuxtApp.$pb.collection('patients').delete(patientId)
+    toaster.show({
+      title: 'موفقیت',
+      message: 'بیمار با موفقیت حذف شد.',
+      color: 'success',
+      icon: 'ph:check',
+      closable: true,
+    })
+    navigateTo('/onboarding/choosePatient')
+  }
+  catch (error) {
+    console.error('Error deleting patient:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'مشکلی در حذف بیمار پیش آمد.',
+      color: 'danger',
+      icon: 'lucide:alert-triangle',
+      closable: true,
+    })
+  }
+  finally {
+    closeDeleteModal()
+  }
+}
 </script>
 
 <template>
   <div>
     <div class="mb-4 flex flex-col justify-end md:flex-row md:items-center">
-      <div
-        class="mt-4 flex items-center justify-center gap-2 md:mt-0 md:justify-start"
-      >
-        <BaseButtonAction class="gap-2" @click.prevent="$router.back()">
-          <Icon name="lucide:arrow-right" class="size-3" />
-          <span>بازگشت</span>
-        </BaseButtonAction>
+      <div class="flex w-full items-center justify-between">
+        <div class="flex items-center gap-2">
+          <BaseButtonAction class="gap-2" @click.prevent="$router.back()">
+            <Icon name="lucide:arrow-right" class="size-3" />
+            <span>بازگشت</span>
+          </BaseButtonAction>
+        </div>
+        <div class="flex items-center gap-2">
+          <BaseButton
+            v-if="isAdmin"
+            color="danger"
+            variant="solid"
+            @click="openDeleteModal"
+          >
+            <div class="flex items-center gap-2">
+              <Icon name="ph:trash" class="size-4" />
+              <span>حذف بیمار</span>
+            </div>
+          </BaseButton>
+          <BaseButton
+            type="submit"
+            color="primary"
+            :loading="isSubmitting"
+            @click="onSubmit"
+          >
+            به‌روزرسانی
+          </BaseButton>
+        </div>
       </div>
     </div>
 
     <BaseCard>
+      <!-- Loading state -->
+      <div v-if="isLoading" class="divide-muted-200 dark:divide-muted-700 grid divide-x sm:grid-cols-2">
+        <!-- Left column -->
+        <div class="bg-muted-50 dark:bg-muted-800/60 space-y-8 p-10">
+          <div class="mx-auto w-full max-w-[410px]">
+            <!-- Avatar skeleton -->
+            <div class="mb-6 flex justify-center">
+              <BasePlaceload class="size-20 rounded-full" />
+            </div>
+
+            <!-- Name and age skeleton -->
+            <div class="mb-6 grid grid-cols-12 gap-4">
+              <div class="ltablet:col-span-6 col-span-12 lg:col-span-6">
+                <BasePlaceload class="mb-2 h-4 w-16" />
+                <BasePlaceload class="h-10 w-full rounded-lg" />
+              </div>
+              <div class="ltablet:col-span-6 col-span-12 lg:col-span-6">
+                <BasePlaceload class="mb-2 h-4 w-16" />
+                <BasePlaceload class="h-10 w-full rounded-lg" />
+              </div>
+            </div>
+
+            <!-- Short description skeleton -->
+            <div class="mb-6">
+              <BasePlaceload class="mb-2 h-4 w-24" />
+              <BasePlaceload class="h-[100px] w-full rounded-lg" />
+            </div>
+
+            <!-- Long description skeleton -->
+            <div class="mb-6">
+              <BasePlaceload class="mb-2 h-4 w-24" />
+              <BasePlaceload class="h-[150px] w-full rounded-lg" />
+            </div>
+
+            <!-- Defining traits skeleton -->
+            <div class="mb-6">
+              <BasePlaceload class="mb-2 h-4 w-32" />
+              <BasePlaceload class="h-[120px] w-full rounded-lg" />
+            </div>
+
+            <!-- Back story skeleton -->
+            <div class="mb-6">
+              <BasePlaceload class="mb-2 h-4 w-24" />
+              <BasePlaceload class="h-[150px] w-full rounded-lg" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="w-full space-y-8 p-10">
+          <div class="mx-auto w-full max-w-[410px] sm:pt-28">
+            <!-- Personality skeleton -->
+            <div class="mb-6">
+              <BasePlaceload class="mb-2 h-4 w-24" />
+              <BasePlaceload class="h-[120px] w-full rounded-lg" />
+            </div>
+
+            <!-- Appearance skeleton -->
+            <div class="mb-6">
+              <BasePlaceload class="mb-2 h-4 w-24" />
+              <BasePlaceload class="h-[120px] w-full rounded-lg" />
+            </div>
+
+            <!-- Motivation skeleton -->
+            <div class="mb-6">
+              <BasePlaceload class="mb-2 h-4 w-24" />
+              <BasePlaceload class="h-[120px] w-full rounded-lg" />
+            </div>
+
+            <!-- Current emotions skeleton -->
+            <div class="mb-6">
+              <BasePlaceload class="mb-2 h-4 w-40" />
+              <BasePlaceload class="h-[120px] w-full rounded-lg" />
+            </div>
+
+            <!-- Switch and button skeleton -->
+            <div class="mt-6 flex justify-between gap-2">
+              <BasePlaceload class="h-8 w-32 rounded-lg" />
+              <BasePlaceload class="h-10 w-24 rounded-lg" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actual content -->
       <form
+        v-else
         method="POST"
         action=""
         class="divide-muted-200 dark:divide-muted-700 grid divide-x sm:grid-cols-2"
@@ -296,13 +452,60 @@ onMounted(() => {
               <div
                 class="relative mb-5 flex flex-col items-center justify-center gap-4"
               >
-                <BaseFullscreenDropfile
+                <BaseInputFileHeadless
+                  v-slot="{ open, remove, preview, files }"
                   v-model="inputFile"
-                  :error="fileError"
-                  :preview-url="currentAvatar"
-                  :disabled="!isAdmin"
-                  class="mx-auto size-20"
-                />
+                  accept="image/*"
+                >
+                  <div class="relative size-24">
+                    <img
+                      v-if="files?.length && files.item(0)"
+                      :src="preview(files.item(0)!).value"
+                      alt="Upload preview"
+                      class="bg-muted-200 dark:bg-muted-700/60 size-24 rounded-full object-cover object-center"
+                    >
+                    <img
+                      v-else
+                      :src="currentAvatar"
+                      alt="Upload preview"
+                      class="bg-muted-200 dark:bg-muted-700/60 size-24 rounded-full object-cover object-center"
+                    >
+                    <div
+                      v-if="(files?.length && files.item(0)) || values.avatar"
+                      class="absolute bottom-0 end-0 z-20"
+                    >
+                      <BaseButtonIcon
+                        v-if="isAdmin"
+                        size="sm"
+                        rounded="full"
+                        data-nui-tooltip="Remove image"
+                        @click="() => {
+                          if (files?.length && files.item(0)) {
+                            remove(files.item(0)!)
+                          }
+                          setFieldValue('avatar', null)
+                        }"
+                      >
+                        <Icon name="lucide:x" class="size-4" />
+                      </BaseButtonIcon>
+                    </div>
+                    <div v-else class="absolute bottom-0 end-0 z-20">
+                      <div
+                        v-if="isAdmin"
+                        class="relative"
+                        data-nui-tooltip="Upload image"
+                      >
+                        <BaseButtonIcon
+                          size="sm"
+                          rounded="full"
+                          @click="open"
+                        >
+                          <Icon name="lucide:plus" class="size-4" />
+                        </BaseButtonIcon>
+                      </div>
+                    </div>
+                  </div>
+                </BaseInputFileHeadless>
               </div>
               <div class="grid grid-cols-12 gap-4">
                 <!-- Name -->
@@ -351,7 +554,6 @@ onMounted(() => {
                     <BaseTextarea
                       v-model="field.value"
                       :error="errorMessage"
-                      :disabled="!isAdmin"
                       label="توضیح کوتاه"
                       placeholder="یک توضیح کوتاه در مورد بیمار وارد کنید"
                       @update:model-value="handleChange"
@@ -369,7 +571,6 @@ onMounted(() => {
                     <BaseTextarea
                       v-model="field.value"
                       :error="errorMessage"
-                      :disabled="!isAdmin"
                       label="توضیح بلند"
                       placeholder="یک توضیح کامل در مورد بیمار وارد کنید"
                       rows="4"
@@ -388,7 +589,6 @@ onMounted(() => {
                     <BaseTextarea
                       v-model="field.value"
                       :error="errorMessage"
-                      :disabled="!isAdmin"
                       label="ویژگی‌های تعریف‌کننده"
                       placeholder="ویژگی‌های تعریف‌کننده بیمار را وارد کنید"
                       rows="4"
@@ -407,7 +607,6 @@ onMounted(() => {
                     <BaseTextarea
                       v-model="field.value"
                       :error="errorMessage"
-                      :disabled="!isAdmin"
                       label="پیشینه"
                       placeholder="پیشینه بیمار را وارد کنید"
                       rows="4"
@@ -432,7 +631,6 @@ onMounted(() => {
                   <BaseTextarea
                     v-model="field.value"
                     :error="errorMessage"
-                    :disabled="!isAdmin"
                     label="شخصیت"
                     placeholder="شخصیت بیمار را وارد کنید"
                     rows="4"
@@ -451,7 +649,6 @@ onMounted(() => {
                   <BaseTextarea
                     v-model="field.value"
                     :error="errorMessage"
-                    :disabled="!isAdmin"
                     label="ظاهر"
                     placeholder="ظاهر بیمار را وارد کنید"
                     rows="4"
@@ -470,7 +667,6 @@ onMounted(() => {
                   <BaseTextarea
                     v-model="field.value"
                     :error="errorMessage"
-                    :disabled="!isAdmin"
                     label="انگیزه"
                     placeholder="انگیزه بیمار را وارد کنید"
                     rows="4"
@@ -489,7 +685,6 @@ onMounted(() => {
                   <BaseTextarea
                     v-model="field.value"
                     :error="errorMessage"
-                    :disabled="!isAdmin"
                     label="حالت روحی و احساسات فعلی"
                     placeholder="حالت روحی و احساسات فعلی بیمار را وارد کنید"
                     rows="4"
@@ -500,31 +695,73 @@ onMounted(() => {
               </div>
             </div>
 
-            <div v-if="isAdmin" class="mt-6 flex justify-between gap-2">
+            <div class="mt-6 flex justify-between gap-2">
               <div class="flex items-center justify-between">
                 <BaseSwitchThin
                   :model-value="values?.patient?.isActive ?? false"
                   :disabled="!isAdmin"
                   label="وضعیت بیمار"
                   help="بیمار فعال است یا غیر فعال"
+                  :sublabel="values.patient.isActive ? 'بیمار فعال است' : 'بیمار غیرفعال است'"
                   @update:model-value="(val) => setFieldValue('patient.isActive', val)"
-                >
-                  <span class="text-muted-400 dark:text-muted-400 text-sm">
-                    {{ values?.patient?.isActive ? 'فعال' : 'غیر فعال' }}
-                  </span>
-                </BaseSwitchThin>
+                />
               </div>
-              <BaseButton
-                type="submit"
-                color="primary"
-                :loading="isSubmitting"
-              >
-                به‌روزرسانی
-              </BaseButton>
             </div>
           </div>
         </div>
       </form>
     </BaseCard>
   </div>
+
+  <TairoModal
+    :open="isDeleteModalOpen"
+    size="sm"
+    @close="closeDeleteModal"
+  >
+    <template #header>
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+          حذف بیمار
+        </h3>
+        <BaseButtonClose @click="closeDeleteModal" />
+      </div>
+    </template>
+
+    <div class="p-4 md:p-6">
+      <div class="mx-auto w-full max-w-xs text-center">
+        <div class="relative mx-auto mb-4 flex size-24 justify-center">
+          <Icon
+            name="ph:trash-duotone"
+            class="text-danger size-24"
+          />
+        </div>
+
+        <h3 class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white">
+          حذف بیمار
+        </h3>
+
+        <p class="font-alt text-muted-500 dark:text-muted-400 text-sm leading-5">
+          آیا مطمئن هستید که می‌خواهید این بیمار را حذف کنید؟ این عمل قابل بازگشت نیست.
+        </p>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="p-4 md:p-6">
+        <div class="flex gap-x-2">
+          <BaseButton @click="closeDeleteModal">
+            انصراف
+          </BaseButton>
+
+          <BaseButton
+            color="danger"
+            variant="solid"
+            @click="confirmDelete"
+          >
+            حذف
+          </BaseButton>
+        </div>
+      </div>
+    </template>
+  </TairoModal>
 </template>
