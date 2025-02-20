@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+import { watch, ref, onMounted, onUnmounted, nextTick } from 'vue'
+
 definePageMeta({
   title: 'Messaging',
   layout: 'empty',
@@ -11,426 +14,311 @@ definePageMeta({
     order: 26,
   },
 })
-
+useHead({ htmlAttrs: { dir: 'rtl' } })
 const { open } = usePanels()
+const { getPatients } = usePatient()
+const { getMessages, sendMessage, createSeparator, clearMessages, updateMessage } = usePatientMessages()
+const route = useRoute()
 
-const conversations = ref([
-  {
-    id: 1,
-    user: {
-      name: 'Clark Smith',
-      photo: '/img/avatars/3.svg',
-      role: 'UI/UX Designer',
-      bio: 'Clark is a UI/UX Designer based in New York. He has 10+ years of experience in the field.',
-      age: 32,
-      location: 'New York',
-    },
-    messages: [
-      {
-        type: 'separator',
-        text: '',
-        time: 'Yesterday',
-      },
-      {
-        type: 'received',
-        text: 'Hey Maya, I was wondering if you still had that design that you sent me a few days ago. I was thinking about using it for a project I’m working on.',
-        time: '10:04 am',
-      },
-      {
-        type: 'sent',
-        text: 'Hey Clark, sure thing. I’ll send it to you right now. I can also send you the Figma file if you need it.',
-        time: '10:09 am',
-      },
-      {
-        type: 'separator',
-        text: '',
-        time: 'Today',
-      },
-      {
-        type: 'received',
-        text: 'Thanks for that. This looks completely amazing. I’ll let you know if I need anything else.',
-        time: '1:39 pm',
-      },
-      {
-        type: 'received',
-        text: 'Almost forgot, what was that accounting company you mentioned the other day? I kinda fell in love with their design.',
-        time: '1:48 pm',
-      },
-      {
-        type: 'sent',
-        text: 'Oh yeah, that was Titan Accounting. They\'re a great company. I\'ve been working with them for a while now.',
-        time: '2:06 pm',
-      },
-      {
-        type: 'received',
-        text: 'Yeah, that\'s them. they really have a gorgeous branding. I\'ll check them out. Thanks for the tip!',
-        time: '2:16 pm',
-      },
-      {
-        type: 'sent',
-        text: 'Always happy to help! Let me know if you need anything else.',
-        time: '2:26 pm',
-      },
-    ],
-  },
-  {
-    id: 2,
-    user: {
-      name: 'Hermann Mayer',
-      photo: '/img/avatars/16.svg',
-      role: 'Project Manager',
-      bio: 'Hermann is a Project Manager based in Berlin. He has 10+ years of experience in the field.',
-      age: 28,
-      location: 'Berlin',
-    },
-    messages: [
-      {
-        type: 'separator',
-        text: '',
-        time: 'Yesterday',
-      },
-      {
-        type: 'received',
-        text: 'Hey Maya, did you receive that report that John wrote? I just approved it but I wanted to show it to you, just in case you have some insights to share.',
-        time: '11:04 am',
-      },
-      {
-        type: 'sent',
-        text: 'Yeah, I\'ve got a copy on my inbox but I still didn\'t get a chance to read it and to take some notes.',
-        time: '11:09 am',
-      },
-      {
-        type: 'separator',
-        text: '',
-        time: 'Today',
-      },
-      {
-        type: 'received',
-        text: 'Did you habe time to read it? The boss is asking for it and Iam not sure if I should send it.',
-        time: '3:39 pm',
-      },
-      {
-        type: 'received',
-        text: 'Sorry if Iam annoying you btw. 🫡',
-        time: '3:48 pm',
-      },
-      {
-        type: 'sent',
-        text: 'Nah, don\'t be like that! You\'re not annoying me at all. I\'m just a bit busy right now. I\'ll send you my notes but yeah, I don\'t see anything preventing you from showing it to the boss.',
-        time: '4:06 pm',
-      },
-      {
-        type: 'received',
-        text: 'Amazing! Thank you so much Maya! I really appreciate it. 🙏',
-        time: '4:16 pm',
-      },
-      {
-        type: 'sent',
-        text: 'You\'re very welcome Hermann! Let me know if you need anything else.',
-        time: '4:26 pm',
-      },
-    ],
-  },
-  {
-    id: 3,
-    user: {
-      name: 'Clarissa Miller',
-      photo: '/img/avatars/5.svg',
-      role: 'Product Manager',
-      bio: 'Clarissa is a Product Manager based in Seattle. She has 10+ years of experience in the field.',
-      age: 31,
-      location: 'Seattle',
-    },
-    messages: [
-      {
-        type: 'separator',
-        text: '',
-        time: 'Yesterday',
-      },
-      {
-        type: 'received',
-        text: 'Hey Maya, the boss is putting me under pressure again. He wants me to send him the report that you wrote a few days ago. I was wondering if you still had that design that you sent me a few days ago. I was thinking about using it for a project I’m working on.',
-        time: '11:04 am',
-      },
-      {
-        type: 'sent',
-        text: 'Clarissa! sure thing. I\'ll send it to you right now. weren\'t we supposed to have lunch together? I\'m free today if you want to grab a bite.',
-        time: '11:09 am',
-      },
-      {
-        type: 'separator',
-        text: '',
-        time: 'Today',
-      },
-      {
-        type: 'received',
-        text: 'Sorry about yesterday, I was completely underwater. I’m free today as well. Let’s grab a bite at 2pm. I’ll send you the address.',
-        time: '1:09 pm',
-      },
-      {
-        type: 'received',
-        text: 'I want to try that little sushi place that I told you about. I’m starving!',
-        time: '1:09 pm',
-      },
-      {
-        type: 'sent',
-        text: 'Oh yeah! Let\'s do suchi! I\'m starving too. I\'ll see you at 2pm.\'',
-        time: '1:12 pm',
-      },
-      {
-        type: 'received',
-        text: 'Thank you so much and sorry again about yesterday. 🙏',
-        time: '1:16 pm',
-      },
-      {
-        type: 'sent',
-        text: 'Don\'t worry about it 😉 ',
-        time: '4:26 pm',
-      },
-    ],
-  },
-  {
-    id: 4,
-    user: {
-      name: 'Joshua Stevens',
-      photo: '/img/avatars/11.svg',
-      role: 'Frontend Developer',
-      bio: 'Joshua is a Frontend Developer based in London. He has 10+ years of experience in the field',
-      age: 43,
-      location: 'London',
-    },
-    messages: [
-      {
-        type: 'separator',
-        text: '',
-        time: 'Yesterday',
-      },
-      {
-        type: 'received',
-        text: 'Hey Maya, the client is giving me a hard time again. He wants me to present the proposal that you worked on last week. Do you still have that presentation? I was thinking about using it for this new project.',
-        time: '9:04 am',
-      },
-      {
-        type: 'sent',
-        text: 'Hey, no problem. I still have it. I\'ll send it to you right now. How about we grab lunch today? I\'m free around noon.',
-        time: '9:09 am',
-      },
-      {
-        type: 'separator',
-        text: '',
-        time: 'Today',
-      },
-      {
-        type: 'received',
-        text: 'Sorry about yesterday, I was swamped with work. I’m free today as well. Let’s grab lunch at 12pm. Meet you at the food court?',
-        time: '11:09 am',
-      },
-      {
-        type: 'sent',
-        text: 'Sounds good. See you at 12pm at the food court.',
-        time: '11:12 am',
-      },
-      {
-        type: 'received',
-        text: 'Thanks for understanding. And thank you for sending me the proposal. 🙏',
-        time: '11:16 am',
-      },
-      {
-        type: 'sent',
-        text: 'No problem. Let\'s chat more at lunch. 😉 ',
-        time: '12:01 pm',
-      },
-    ],
-  },
-  {
-    id: 5,
-    user: {
-      name: 'Kendra Wilson',
-      photo: '/img/avatars/10.svg',
-      role: 'Backend Developer',
-      bio: 'Kendra is a Backend Developer based in Toronto. She has 10+ years of experience in the field',
-      age: 26,
-      location: 'Toronto',
-    },
-    messages: [
-      {
-        type: 'separator',
-        text: '',
-        time: 'Yesterday',
-      },
-      {
-        type: 'received',
-        text: 'Hey, I wanted to get your feedback on the new UI design for the login page. I\'ve made some updates based on the user testing data we collected last week.',
-        time: '4:04 pm',
-      },
-      {
-        type: 'sent',
-        text: 'Sure thing, I\'ll take a look at it now. Can you send me the updated version?',
-        time: '4:09 pm',
-      },
-      {
-        type: 'separator',
-        text: '',
-        time: 'Today',
-      },
-      {
-        type: 'received',
-        text: 'I\'ve sent the updated version to you. I also included some notes on the changes I made.',
-        time: '9:00 am',
-      },
-      {
-        type: 'sent',
-        text: 'Thanks, I\'ll take a look now.',
-        time: '9:01 am',
-      },
-      {
-        type: 'sent',
-        text: 'I think the updates look great. I especially like the new color scheme. But I think we should also add some hover effects to the buttons to make it more interactive.',
-        time: '9:15 am',
-      },
-      {
-        type: 'received',
-        text: 'Thanks for the feedback, I\'ll add the hover effects to the buttons. Do you have time to meet later to discuss any other changes?',
-        time: '9:20 am',
-      },
-      {
-        type: 'sent',
-        text: 'Sure, let\'s schedule a meeting for 1pm today.',
-        time: '9:22 am',
-      },
-    ],
-  },
-  {
-    id: 6,
-    user: {
-      name: 'Carolin Kottmann',
-      photo: '/img/avatars/9.svg',
-      role: 'Product Manager',
-      bio: 'Carolin is a Product manager based in Paris. She has 10+ years of experience in the field',
-      age: 25,
-      location: 'Paris',
-    },
-    messages: [
-      {
-        type: 'separator',
-        text: '',
-        time: 'Yesterday',
-      },
-      {
-        type: 'received',
-        text: 'Hey, have you had a chance to review the market research report for the new product launch?',
-        time: '4:04 pm',
-      },
-      {
-        type: 'sent',
-        text: 'Yes, I\'ve gone through it. The data looks promising. We should schedule a meeting to discuss next steps.',
-        time: '4:09 pm',
-      },
-      {
-        type: 'separator',
-        text: '',
-        time: 'Today',
-      },
-      {
-        type: 'sent',
-        text: 'I\'ve scheduled a meeting for tomorrow at 10am to discuss the launch strategy for the new product. Can you send me the latest version of the product roadmap before the meeting?',
-        time: '9:00 am',
-      },
-      {
-        type: 'received',
-        text: 'Sure, I\'ll send it to you now.',
-        time: '9:01 am',
-      },
-      {
-        type: 'received',
-        text: 'I\'ve sent you the updated product roadmap. I\'ve also included some notes on the changes I made based on the market research.',
-        time: '9:05 am',
-      },
-      {
-        type: 'sent',
-        text: 'Thanks, I\'ll review it before tomorrow\'s meeting.',
-        time: '9:06 am',
-      },
-      {
-        type: 'sent',
-        text: 'Just a reminder, the meeting is tomorrow at 10am in the conference room.',
-        time: '4:22 pm',
-      },
-    ],
-  },
-  {
-    id: 7,
-    user: {
-      name: 'Jonathan Keppler',
-      photo: '/img/avatars/8.svg',
-      role: 'System Administrator',
-      bio: 'Jonathan is a System Administrator based in Miami. He has 10+ years of experience in the field.',
-      age: 41,
-      location: 'Miami',
-    },
-    messages: [
-      {
-        type: 'separator',
-        text: '',
-        time: 'Yesterday',
-      },
-      {
-        type: 'received',
-        text: 'Hey, have you noticed any strange behavior with the server lately?',
-        time: '2:04 pm',
-      },
-      {
-        type: 'sent',
-        text: 'Yes, I\'ve been getting reports of slow response times. I\'ve started investigating but haven\'t found the root cause yet.',
-        time: '2:09 pm',
-      },
-      {
-        type: 'separator',
-        text: '',
-        time: 'Today',
-      },
-      {
-        type: 'sent',
-        text: 'I\'ve discovered that the server\'s disk space is almost full. I\'m going to schedule a maintenance window tonight to add more storage.',
-        time: '9:00 am',
-      },
-      {
-        type: 'received',
-        text: 'Okay, I\'ll make sure to inform the team and schedule any necessary downtime.',
-        time: '9:01 am',
-      },
-      {
-        type: 'received',
-        text: 'I\'ve sent an email to the team and scheduled a two-hour maintenance window starting at 11pm tonight. Will that work for you?',
-        time: '9:05 am',
-      },
-      {
-        type: 'sent',
-        text: 'Yes, that works for me. I\'ll make sure to have everything set up before the maintenance window.',
-        time: '9:06 am',
-      },
-      {
-        type: 'sent',
-        text: 'I\'ve added the storage and the server is running smoothly again. I\'ll keep an eye on it and let you know if there are any further issues.',
-        time: '2:22 pm',
-      },
-    ],
-  },
-])
-
+const conversations = ref<{ id: string, user: Patient }[]>([])
+const messages = ref<Message[]>([])
+const loading = ref(false)
+const messageLoading = ref(false)
 const chatEl = ref<HTMLElement>()
 const expanded = ref(false)
-const loading = ref(false)
 const search = ref('')
-const message = ref('')
-const messageLoading = ref(false)
-const activeConversation = ref(1)
+const newMessage = ref('')
+const activePatientId = ref<string | null>(null)
+const showEmojiPicker = ref(false)
 
-const selectedConversation = computed(() => {
+const emojis = [
+  '😀', '😃', '😄', '😁', '😆', '😂', '🤣', '😊',
+  '😇', '🙃', '😉', '😊', '😋', '😎', '😍',
+  '😘', '😗', '😙', '😚', '😛', '😝', '😞',
+  '😟', '😠', '😡', '😢', '😣', '😤', '😥',
+  '😦', '😧', '😨', '😩', '😪', '😫', '😬',
+  '😭', '😮', '😯', '😰', '😱', '😲', '😳',
+  '😴', '😵', '😶', '😷', '😸', '😹', '😺',
+  '😻', '😼', '😽', '😾', '😿', '🙀', '🙁',
+  '🙂', '🙃', '🙄', '🙅', '🙆', '🙇', '🙈',
+  '🙉', '🙊', '🙋', '🙌', '🙍', '🙎', '🙏',
+  '💪', '🤝', '❤️', '💔', '⭐', '🌟', '🎉',
+  '🎊', '🎈', '🎁', '👨‍⚕️', '🏥',
+]
+
+const insertEmoji = (emoji: string) => {
+  newMessage.value += emoji
+  showEmojiPicker.value = false
+}
+
+const emojiPickerRef = ref<HTMLElement>()
+onClickOutside(emojiPickerRef, () => {
+  showEmojiPicker.value = false
+})
+
+const initializeFromRoute = async () => {
+  const patientId = route.query.patientId as string
+  if (patientId && conversations.value.length > 0) {
+    const conversation = conversations.value.find(c => c.user.id === patientId)
+    if (conversation) {
+      activePatientId.value = patientId
+      await loadMessages(patientId)
+    }
+  }
+  else if (conversations.value.length > 0 && !activePatientId.value) {
+    activePatientId.value = conversations.value[0].user.id
+    await loadMessages(conversations.value[0].user.id)
+  }
+}
+
+const currentLoadingPatientId = ref<string | null>(null)
+
+const formatTime = (timestamp: string | Date) => {
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp
+  return date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
+}
+
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (chatEl.value) {
+      chatEl.value.scrollTo({
+        top: chatEl.value.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
+  })
+}
+
+const loadMessages = async (patientId: string) => {
+  if (currentLoadingPatientId.value === patientId) return
+  
+  loading.value = true
+  currentLoadingPatientId.value = patientId
+  
+  try {
+    const nuxtApp = useNuxtApp()
+    if (!nuxtApp.$pb.authStore.isValid) {
+      await navigateTo('/auth/login')
+      return
+    }
+
+    const loadedMessages = await getMessages(patientId)
+    messages.value = loadedMessages.map(msg => ({
+      ...msg,
+      timestamp: msg.created,
+    }))
+    scrollToBottom()
+  } catch (error) {
+    console.error('Error loading messages:', error)
+    messages.value = []
+  } finally {
+    loading.value = false
+    currentLoadingPatientId.value = null
+  }
+}
+
+const selectConversation = async (patientId: string) => {
+  activePatientId.value = patientId
+  await loadMessages(patientId)
+  navigateTo({
+    query: {
+      ...route.query,
+      patientId,
+    },
+  })
+}
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    const nuxtApp = useNuxtApp()
+    if (!nuxtApp.$pb.authStore.isValid) {
+      return
+    }
+    const patients = await getPatients()
+    conversations.value = patients.map((patient: any) => ({
+      user: patient,
+      unread: 0,
+      lastMessage: '',
+      lastMessageTime: '',
+    }))
+
+    if (route.query.patientId) {
+      const patientId = route.query.patientId as string
+      activePatientId.value = patientId
+      await loadMessages(patientId)
+    }
+    else if (conversations.value.length > 0) {
+      activePatientId.value = conversations.value[0].user.id
+      await loadMessages(conversations.value[0].user.id)
+    }
+  }
+  catch (error: any) {
+    console.error('Error initializing chat:', error)
+    if (error?.isAbort) {
+      // Request was cancelled, likely due to component unmount
+      return
+    }
+  }
+  finally {
+    loading.value = false
+  }
+})
+
+watch(
+  () => route.query.patientId,
+  async (newPatientId) => {
+    if (newPatientId) {
+      await initializeFromRoute()
+    }
+  },
+)
+
+watch(
+  () => conversations.value,
+  async (newConversations) => {
+    if (newConversations.length > 0 && !activePatientId.value) {
+      await initializeFromRoute()
+    }
+  },
+)
+
+watch(activePatientId, async (newId) => {
+  if (newId) {
+    await loadMessages(newId)
+  }
+})
+
+onUnmounted(() => {
+  currentLoadingPatientId.value = null
+})
+
+const selectedConversationComputed = computed(() => {
   return conversations.value.find(
-    conversation => conversation.id === activeConversation.value,
+    conversation => conversation.user.id === activePatientId.value,
   )
 })
+
+const getRandomColor = () => {
+  const colors = [
+    'bg-primary-500',
+    'bg-info-500',
+    'bg-success-500',
+    'bg-warning-500',
+    'bg-danger-500',
+    'bg-purple-500',
+    'bg-yellow-500',
+    'bg-pink-500',
+    'bg-indigo-500',
+  ]
+  return colors[Math.floor(Math.random() * colors.length)]
+}
+
+const { streamChat, processing: aiProcessing } = useOpenRouter()
+const { models, selectedModel, loading: modelsLoading, error: modelsError, searchQuery, retryFetch } = useOpenRouterModels()
+
+const streamingResponse = ref('')
+const showModelError = ref(false)
+const modelSearchInput = ref('')
+const showModelDropdown = ref(false)
+
+const filteredModels = computed(() => {
+  if (!modelSearchInput.value) return models.value
+  const query = modelSearchInput.value.toLowerCase()
+  return models.value.filter(model =>
+    model.name.toLowerCase().includes(query)
+    || model.id.toLowerCase().includes(query)
+    || (model.description || '').toLowerCase().includes(query),
+  )
+})
+
+// Reset streaming response when selecting a new conversation
+watch(activePatientId, async (newId) => {
+  streamingResponse.value = ''
+  if (newId) {
+    await loadMessages(newId)
+  }
+})
+
+async function submitMessage() {
+  if (!newMessage.value.trim() || !activePatientId.value) return
+
+  const now = new Date().toISOString()
+  const userMessage = {
+    type: 'sent',
+    text: newMessage.value,
+    timestamp: now,
+  }
+
+  try {
+    // First save and show the user message
+    const savedUserMessage = await sendMessage(activePatientId.value, userMessage.text, 'sent')
+    messages.value.push({
+      ...userMessage,
+      id: savedUserMessage.id,
+      timestamp: savedUserMessage.created,
+    })
+    newMessage.value = ''
+    scrollToBottom()
+
+    // Create an empty assistant message that will be filled with the stream
+    const assistantMessage = {
+      type: 'received',
+      text: '',
+      timestamp: now,
+    }
+    
+    let currentAssistantMessage = ''
+
+    // Convert messages to OpenRouter format
+    const openRouterMessages = messages.value.map(msg => ({
+      role: msg.type === 'sent' ? 'user' : 'assistant',
+      content: msg.text,
+    }))
+
+    // Add the empty message to UI
+    messages.value.push({
+      ...assistantMessage,
+      id: 'temp-' + Date.now(),
+    })
+    scrollToBottom()
+
+    await streamChat(
+      openRouterMessages,
+      {},
+      async (chunk) => {
+        const content = chunk.choices[0]?.delta?.content || ''
+        if (content) {
+          currentAssistantMessage += content
+          messages.value[messages.value.length - 1].text = currentAssistantMessage
+          scrollToBottom()
+        }
+      },
+    )
+
+    // After stream is complete, save the full message
+    const savedAssistantMessage = await sendMessage(activePatientId.value, currentAssistantMessage, 'received')
+    // Update the message ID and timestamp in the UI
+    const lastMessage = messages.value[messages.value.length - 1]
+    lastMessage.id = savedAssistantMessage.id
+    lastMessage.timestamp = savedAssistantMessage.created
+    scrollToBottom()
+
+  } catch (e) {
+    console.error('Error in chat:', e)
+    messages.value.push({
+      type: 'received',
+      text: 'متاسفانه خطایی رخ داد. لطفا دوباره تلاش کنید.',
+      timestamp: new Date().toISOString(),
+      id: 'error-' + Date.now(),
+    })
+    scrollToBottom()
+  }
+}
+
+watch(messages, () => {
+  scrollToBottom()
+}, { deep: true })
 
 onMounted(() => {
   setTimeout(() => {
@@ -442,57 +330,43 @@ onMounted(() => {
     }
   }, 300)
 })
-
-function selectConversation(id: number) {
-  if (messageLoading.value) return
-
-  loading.value = true
-  message.value = ''
-
-  setTimeout(() => {
-    activeConversation.value = id
-    loading.value = false
-    setTimeout(() => {
-      expanded.value = false
-
-      if (chatEl.value) {
-        chatEl.value.scrollTo({
-          top: chatEl.value.scrollHeight,
-          behavior: 'smooth',
-        })
-      }
-    }, 300)
-  }, 1000)
+const nuxtApp = useNuxtApp()
+const toaster = useToaster()
+const logout = () => {
+  nuxtApp.$pb.authStore.clear()
+  toaster.show({
+    title: 'خروج از سیستم',
+    message: `خروج موفقیت آمیز بود`,
+    color: 'success',
+    icon: 'ph:check',
+    closable: true,
+  })
+  navigateTo('/auth/login')
 }
 
-async function submitMessage() {
-  if (!message.value) return
-  if (messageLoading.value) return
+const clearChat = async () => {
+  if (!activePatientId.value) return
 
-  messageLoading.value = true
-
-  const newMessage = {
-    type: 'sent',
-    text: message.value,
-    time: 'Just now',
+  try {
+    await clearMessages(activePatientId.value)
+    messages.value = []
+    streamingResponse.value = ''
+    toaster.show({
+      title: 'چت پاک شد',
+      message: `چت با موفقیت پاک شد`,
+      color: 'success',
+      icon: 'ph:check',
+      closable: true,
+    })
   }
-
-  const index = conversations.value.findIndex(
-    conversation => conversation.id === activeConversation.value,
-  )
-
-  await new Promise(resolve => setTimeout(resolve, 200))
-
-  conversations.value[index].messages.push(newMessage)
-  message.value = ''
-  messageLoading.value = false
-
-  await nextTick()
-
-  if (chatEl.value) {
-    chatEl.value.scrollTo({
-      top: chatEl.value.scrollHeight,
-      behavior: 'smooth',
+  catch (error) {
+    console.error('Error clearing chat:', error)
+    toaster.show({
+      title: 'خطایی رخ داد',
+      message: `خطایی در پاک کردن چت رخ داد`,
+      color: 'danger',
+      icon: 'ph:x',
+      closable: true,
     })
   }
 }
@@ -531,20 +405,43 @@ async function submitMessage() {
             <div class="flex h-16 w-full items-center justify-center">
               <button
                 type="button"
+                class="text-danger-400 hover:text-danger-500 hover:bg-danger-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                title="پاک کردن چت"
+                @click="clearChat"
+              >
+                <Icon name="ph:trash-duotone" class="size-5" />
+              </button>
+            </div>
+            <div class="flex h-16 w-full items-center justify-center">
+              <button
+                type="button"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="Search"
+                title="جستجو"
                 @click="open('search')"
               >
                 <Icon name="ph:magnifying-glass-duotone" class="size-5" />
               </button>
             </div>
+
             <div class="flex h-16 w-full items-center justify-center">
               <NuxtLink
                 to="#"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="Settings"
+                title="تنظیمات"
               >
                 <Icon name="ph:gear-six-duotone" class="size-5" />
+              </NuxtLink>
+            </div>
+            <div class="flex h-16 w-full items-center justify-center">
+              <NuxtLink
+                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                title="خروج"
+                @click="logout()"
+              >
+                <Icon
+                  name="ph:sign-out"
+                  class="pointer-events-none size-5"
+                />
               </NuxtLink>
             </div>
             <div class="flex h-16 w-full items-center justify-center">
@@ -557,16 +454,7 @@ async function submitMessage() {
       <div
         class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-[9] h-screen w-16 bg-white sm:w-20 lg:border-r"
       >
-        <div class="flex h-full flex-col">
-          <button
-            class="flex size-16 shrink-0 items-center justify-center sm:w-20"
-          >
-            <span
-              class="bg-primary-500 flex size-10 items-center justify-center rounded-full text-white"
-            >
-              <Icon name="lucide:plus" class="size-4" />
-            </span>
-          </button>
+        <div class="mt-3 flex h-full flex-col">
           <!-- List -->
           <a
             v-for="conversation in conversations"
@@ -574,13 +462,38 @@ async function submitMessage() {
             href="#"
             class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
             :class="
-              activeConversation === conversation.id
+              activePatientId === conversation.user.id
                 ? 'border-primary-500'
                 : 'border-transparent'
             "
-            @click.prevent="selectConversation(conversation.id)"
+            @click.prevent="selectConversation(conversation.user.id)"
           >
-            <BaseAvatar :src="conversation.user.photo" size="sm" />
+            <div class="relative flex w-full justify-center gap-2">
+              <div class="relative flex w-14 shrink-0 items-center justify-center">
+                <a
+                  href="#"
+                  class="relative block"
+                  :class="[
+                    selectedConversationComputed?.user.id === conversation.user.id
+                      ? 'z-10'
+                      : '',
+                  ]"
+                  @click.prevent="selectConversation(conversation.user.id)"
+                >
+                  <BaseAvatar
+                    size="sm"
+                    rounded="full"
+                    :src="
+                      conversation.user.avatar
+                        ? `http://localhost:8090/api/files/patients/${conversation.user.id}/${conversation.user.avatar}`
+                        : '/img/avatars/1.svg'
+                    "
+                    :text="conversation.user.name?.charAt(0)"
+                    :class="getRandomColor()"
+                  />
+                </a>
+              </div>
+            </div>
           </a>
         </div>
       </div>
@@ -603,7 +516,7 @@ async function submitMessage() {
                 v-model="search"
                 rounded="lg"
                 icon="lucide:search"
-                placeholder="Search"
+                placeholder="جست و جو"
               />
             </div>
 
@@ -707,35 +620,53 @@ async function submitMessage() {
             </div>
             <!-- Messages loop -->
             <div v-if="!loading" class="space-y-12">
-              <div
-                v-for="(item, index) in selectedConversation?.messages"
-                :key="index"
-                class="relative flex w-full gap-4"
-              >
-                <template v-if="item.type === 'separator'">
-                  <div class="mx-auto my-6 flex items-center justify-center gap-2">
-                    <span class="text-muted-400 font-sans text-xs">{{ item.time }}</span>
+              <div v-if="messages.length === 0" class="flex h-[60vh] flex-col items-center justify-center text-center">
+                <div class="mb-6">
+                  <Icon name="ph:chat-circle-dots-duotone" class="text-primary-500 size-16" />
+                </div>
+                <div class="max-w-sm">
+                  <h3 class="font-heading text-muted-800 text-xl font-medium leading-normal dark:text-white">
+                    شروع گفت و گو
+                  </h3>
+                  <p class="text-muted-400 mt-2">
+                    به چت درمانی خوش آمدید. اینجا می‌توانید با بیمار خود گفت و گو کنید.
+                  </p>
+                  <div class="mt-4">
+                    <BaseButton @click="newMessage = 'سلام، چطور می‌توانم کمکتان کنم؟'">
+                      شروع گفت و گو
+                    </BaseButton>
                   </div>
-                </template>
-                <template v-else>
+                </div>
+              </div>
+              <div
+                v-for="item in messages"
+                :key="item.id"
+                class="mb-4"
+              >
+                <div
+                  class="flex"
+                  :class="[
+                    item.type === 'sent' ? 'justify-end' : 'justify-start',
+                  ]"
+                >
                   <div
-                    class="relative flex w-full max-w-[85%] flex-col gap-2"
+                    class="flex max-w-[85%] flex-col"
                     :class="[
                       item.type === 'sent'
-                        ? 'ms-auto items-end'
-                        : 'me-auto items-start',
+                        ? 'items-end'
+                        : 'items-start',
                     ]"
                   >
                     <div
-                      class="relative flex flex-col gap-4"
+                      class="relative mb-2 flex items-center gap-3"
                       :class="[
                         item.type === 'sent'
-                          ? 'items-end'
-                          : 'items-start',
+                          ? 'flex-row-reverse'
+                          : 'flex-row',
                       ]"
                     >
                       <div
-                        class="relative flex flex-col gap-1"
+                        class="flex flex-col gap-1"
                         :class="[
                           item.type === 'sent'
                             ? 'items-end'
@@ -743,15 +674,15 @@ async function submitMessage() {
                         ]"
                       >
                         <div
-                          class="relative w-auto"
+                          class="rounded-xl px-4 py-2"
                           :class="[
                             item.type === 'sent'
-                              ? 'bg-primary-500 rounded-lg rounded-tr-sm text-white'
-                              : 'bg-muted-100 dark:bg-muted-700 rounded-lg rounded-tl-sm',
+                              ? 'bg-primary-500 text-white'
+                              : 'bg-muted-100 dark:bg-muted-700',
                           ]"
                         >
                           <span
-                            class="relative block w-full px-4 py-2"
+                            class="block font-sans"
                             :class="[
                               item.type === 'sent'
                                 ? 'text-white'
@@ -761,15 +692,13 @@ async function submitMessage() {
                             {{ item.text }}
                           </span>
                         </div>
-                        <div
-                          class="text-muted-400 flex items-center gap-2 font-sans text-xs"
-                        >
-                          <span>{{ item.time }}</span>
-                        </div>
+                        <span class="font-sans text-xs text-muted-400">
+                          {{ formatTime(item.timestamp) }}
+                        </span>
                       </div>
                     </div>
                   </div>
-                </template>
+                </div>
               </div>
             </div>
           </div>
@@ -782,26 +711,52 @@ async function submitMessage() {
           >
             <div class="relative w-full">
               <BaseInput
-                v-model.trim="message"
+                v-model.trim="newMessage"
                 :disabled="messageLoading"
                 rounded="full"
                 :classes="{
                   input: 'h-12 ps-6 pe-24',
                 }"
-                placeholder="Write a message..."
+                placeholder="پیام را بنویسید . . . "
               />
-              <div class="absolute end-2 top-0 flex h-12 items-center gap-1">
+              <div class="absolute -top-1 end-2 flex h-12 items-center gap-1">
+                <!-- Emoji Button -->
+                <div class="relative">
+                  <button
+                    type="button"
+                    class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
+                    @click.prevent="showEmojiPicker = !showEmojiPicker"
+                  >
+                    <Icon name="lucide:smile" class="size-5" />
+                  </button>
+
+                  <!-- Emoji Picker -->
+                  <div
+                    v-if="showEmojiPicker"
+                    ref="emojiPickerRef"
+                    class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute bottom-full end-0 mb-2 w-64 rounded-lg border bg-white shadow-lg"
+                  >
+                    <div class="grid grid-cols-8 gap-1">
+                      <button
+                        v-for="emoji in emojis"
+                        :key="emoji"
+                        type="button"
+                        class="hover:bg-muted-100 dark:hover:bg-muted-700 flex size-8 items-center justify-center rounded-lg transition-colors duration-300"
+                        @click="insertEmoji(emoji)"
+                      >
+                        {{ emoji }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Send Button -->
                 <button
-                  type="button"
-                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
+                  type="submit"
+                  :disabled="!newMessage || messageLoading"
+                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300 disabled:opacity-50"
                 >
-                  <Icon name="lucide:smile" class="size-5" />
-                </button>
-                <button
-                  type="button"
-                  class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                >
-                  <Icon name="lucide:paperclip" class="size-5" />
+                  <Icon name="lucide:send" class="size-5" />
                 </button>
               </div>
             </div>
@@ -819,7 +774,7 @@ async function submitMessage() {
             size="lg"
             class="text-muted-800 dark:text-white"
           >
-            <span>User details</span>
+            <span>اطلاعات مراجع</span>
           </BaseHeading>
           <BaseButtonIcon small @click="expanded = true">
             <Icon
@@ -862,62 +817,149 @@ async function submitMessage() {
           <!-- User details -->
           <div v-else class="mt-8">
             <div class="flex items-center justify-center">
-              <BaseAvatar :src="selectedConversation?.user.photo" size="2xl" />
+              <BaseAvatar
+                size="2xl"
+                rounded="full"
+                :src="
+                  selectedConversationComputed?.user.avatar
+                    ? `http://localhost:8090/api/files/patients/${selectedConversationComputed.user.id}/${selectedConversationComputed.user.avatar}`
+                    : '/img/avatars/1.svg'
+                "
+                :text="selectedConversationComputed?.user.name?.charAt(0)"
+                :class="getRandomColor()"
+              />
             </div>
             <div class="text-center">
               <BaseHeading
-                tag="h3"
-                size="lg"
-                class="mt-4"
+                as="h3"
+                size="md"
+                weight="medium"
+                class="text-muted-800 dark:text-white"
               >
-                <span>{{ selectedConversation?.user.name }}</span>
+                <span>{{ selectedConversationComputed?.user.name }}</span>
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-400">
-                <span>{{ selectedConversation?.user.role }}</span>
+                <span>{{ selectedConversationComputed?.user.definingTraits }}</span>
               </BaseParagraph>
               <div class="my-4">
                 <BaseParagraph
-                  size="sm"
+                  size="xs"
                   class="text-muted-500 dark:text-muted-400"
                 >
-                  <span>{{ selectedConversation?.user.bio }}</span>
+                  <span>{{ selectedConversationComputed?.user.shortDescription }}</span>
                 </BaseParagraph>
               </div>
               <div
-                class="divide-muted-200 dark:divide-muted-700 flex items-center justify-center divide-x"
+                class="border-muted-200 dark:border-muted-700 flex w-full justify-center border-t pt-4"
               >
                 <div class="flex items-center justify-center gap-2 px-4">
                   <Icon
-                    name="ph:timer-duotone"
+                    name="ph:user-duotone"
                     class="text-muted-400 size-4"
                   />
                   <span class="text-muted-400 font-sans text-xs">
-                    Age: {{ selectedConversation?.user.age }}
-                  </span>
-                </div>
-                <div class="flex items-center justify-center gap-2 px-4">
-                  <Icon
-                    name="ph:map-pin-duotone"
-                    class="text-muted-400 size-4"
-                  />
-                  <span class="text-muted-400 font-sans text-xs">
-                    {{ selectedConversation?.user.location }}
+                    سن: {{ selectedConversationComputed?.user.age }} سال
                   </span>
                 </div>
               </div>
-              <div class="mt-6">
-                <BaseButton rounded="lg" class="w-full">
-                  <span>
-                    View {{ selectedConversation?.user.name }}'s profile
-                  </span>
-                </BaseButton>
-                <button
-                  type="button"
-                  class="text-primary-500 mt-3 font-sans text-sm underline-offset-4 hover:underline"
+              <div class="my-4 space-y-2">
+                <!-- Model search and selector -->
+                <div v-if="!modelsError" class="relative">
+                  <BaseInput
+                    v-model="modelSearchInput"
+                    icon="ph:magnifying-glass"
+                    placeholder="جست و جوی مدل های زبانی . . . "
+                    class="w-full"
+                    @focus="showModelDropdown = true"
+                  />
+
+                  <!-- Model dropdown -->
+                  <div
+                    v-if="showModelDropdown"
+                    class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 absolute z-50 mt-1 w-full rounded-lg border bg-white shadow-lg"
+                  >
+                    <div class="max-h-60 overflow-y-auto p-2">
+                      <button
+                        v-for="model in filteredModels"
+                        :key="model.id"
+                        type="button"
+                        class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer rounded p-2 text-left"
+                        :class="{ 'bg-muted-100 dark:bg-muted-700': model.id === selectedModel }"
+                        @click="selectedModel = model.id; showModelDropdown = false"
+                      >
+                        <div class="flex items-center justify-between">
+                          <span class="font-medium">{{ model.name }}</span>
+                          <span class="text-muted-400 text-xs">
+                            {{ model.pricing.prompt }}
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Selected model display -->
+                <div
+                  v-if="selectedModel && !modelsLoading"
+                  class="bg-muted-100 dark:bg-muted-800 flex items-center gap-2 rounded p-2"
                 >
-                  Send a friend request
-                </button>
+                  <Icon name="ph:robot" class="text-primary-500 size-5" />
+                  <span class="text-sm">
+                    مدل انتخاب شده : {{ models.find(m => m.id === selectedModel)?.name }}
+                  </span>
+                </div>
+
+                <!-- Error state -->
+                <div v-if="modelsError" class="text-center">
+                  <p class="text-danger-500 mb-2">
+                    {{ modelsError }}
+                  </p>
+                  <BaseButton
+                    color="danger"
+                    :loading="modelsLoading"
+                    @click="retryFetch"
+                  >
+                    تلاش برای دریافت مدل ها
+                  </BaseButton>
+                </div>
+
+                <!-- Model error toast -->
+                <div
+                  v-if="showModelError"
+                  class="bg-danger-500 fixed right-4 top-4 z-50 rounded px-4 py-2 text-white shadow-lg"
+                >
+                  خطایی در پاسخ مدل رخ داد. لطفا دوباره تلاش کنید.
+                </div>
               </div>
+
+              <!-- Click outside directive for model dropdown -->
+              <div
+                v-if="showModelDropdown"
+                class="fixed inset-0 z-40"
+                @click="showModelDropdown = false"
+              />
+
+              <!-- Streaming response -->
+              <div
+                v-if="streamingResponse"
+                class="bg-muted-100 dark:bg-muted-900 mb-4 rounded-lg p-4"
+              >
+                <div class="mb-2 flex items-center gap-2">
+                  <Icon name="ph:robot" class="text-primary-500 size-5" />
+                  <span class="text-sm font-medium">AI is typing...</span>
+                </div>
+                <p class="whitespace-pre-wrap text-sm">
+                  {{ streamingResponse }}
+                </p>
+              </div>
+
+              <BaseButton
+                rounded="lg"
+                class="w-full"
+                @click="navigateTo(`/onboarding/editPatient?userId=${route.query.patientId}`)"
+              >
+                نمایش نمایه
+              </BaseButton>
             </div>
           </div>
         </div>

@@ -179,6 +179,7 @@ const refresh = ref()
                     v-if="role != 'admin'"
                     shape="curved"
                     class="w-full"
+                    color="light"
                     @click="navigateTo(`/onboarding/editPatient?userId=${item.id}`)"
                   >
                     <Icon name="ph:user-duotone" class="ml-2 size-4" />
@@ -188,7 +189,9 @@ const refresh = ref()
                   <BaseButton
                     shape="curved"
                     class="w-full"
-                    :to="`/mana/chat-therapist/${item.id}`"
+                    :to="`/mana/chat-therapist/messaging?patientId=${item.id}`"
+                    :color="item.isActive ? 'success' : 'muted'"
+                    :disabled="!item.isActive"
                   >
                     <Icon name="ph:chat-circle-duotone" class="ml-2 size-4" />
                     <span>گفت و گو</span>

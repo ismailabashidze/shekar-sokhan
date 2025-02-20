@@ -30,4 +30,21 @@ export default defineNuxtConfig({
     '@fontsource-variable/inter/index.css',
     '@fontsource-variable/karla/index.css',
   ],
+  
+  nitro: {
+    devProxy: {
+      '/api/openrouter': {
+        target: 'https://openrouter.ai/api/v1',
+        changeOrigin: true,
+        prependPath: false,
+      },
+    },
+  },
+
+  runtimeConfig: {
+    public: {
+      appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:3000',
+      openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
+    }
+  },
 })
