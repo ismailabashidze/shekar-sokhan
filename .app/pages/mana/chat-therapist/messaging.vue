@@ -406,7 +406,7 @@ const gotoList = () => {
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative max-h-screen overflow-hidden">
     <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen">
       <!-- Sidebar -->
       <div
@@ -418,9 +418,25 @@ const gotoList = () => {
               class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
             >
               <NuxtLink to="#" class="flex items-center justify-center">
-                <TairoLogo class="text-primary-600 h-10" />
+                <div class="rounded-full bg-white p-[5px]">
+                  <img
+                    src="/img/logo-no-bg.png"
+                    width="40"
+                    height="40"
+                    alt=""
+                    srcset=""
+                  >
+                </div>
+              <!-- <TairoLogo class="text-primary-600 h-10" /> -->
               </NuxtLink>
             </div>
+            <div
+              class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
+            >
+              <BaseThemeToggle />
+            </div>
+          </div>
+          <div class="flex flex-col">
             <div
               class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
             >
@@ -432,18 +448,6 @@ const gotoList = () => {
               >
                 <Icon name="lucide:arrow-right" class="size-5" />
               </a>
-            </div>
-          </div>
-          <div class="flex flex-col">
-            <div class="flex h-16 w-full items-center justify-center">
-              <button
-                type="button"
-                class="text-danger-400 hover:text-danger-500 hover:bg-danger-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="پاک کردن چت"
-                @click="clearChat"
-              >
-                <Icon name="ph:trash-duotone" class="size-5" />
-              </button>
             </div>
             <div class="flex h-16 w-full items-center justify-center">
               <button
@@ -464,6 +468,16 @@ const gotoList = () => {
               >
                 <Icon name="ph:gear-six-duotone" class="size-5" />
               </NuxtLink>
+            </div>
+            <div class="flex h-16 w-full items-center justify-center">
+              <button
+                type="button"
+                class="text-danger-400 hover:text-danger-500 hover:bg-danger-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                title="پاک کردن چت"
+                @click="clearChat"
+              >
+                <Icon name="ph:trash-duotone" class="size-5" />
+              </button>
             </div>
             <div class="flex h-16 w-full items-center justify-center">
               <NuxtLink
@@ -532,12 +546,12 @@ const gotoList = () => {
       </div>
       <!-- Current conversation -->
       <div
-        class="relative w-full transition-all duration-300"
-        :class="
+        :class="[
+          'ltablet:ps-20 relative flex grow flex-col transition-all duration-300 sm:ps-20',
           expanded
             ? 'ltablet:max-w-[calc(100%_-_160px)] lg:max-w-[calc(100%_-_160px)]'
             : 'ltablet:max-w-[calc(100%_-_470px)] lg:max-w-[calc(100%_-_550px)]'
-        "
+        ]"
       >
         <div class="flex w-full flex-col">
           <!-- Header -->
@@ -560,94 +574,17 @@ const gotoList = () => {
           <!-- Body -->
           <div
             ref="chatEl"
-            class="relative flex h-[calc(100vh-4rem)] flex-col overflow-y-auto p-4 !pb-60 sm:p-8"
-            :class="
-              loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'
-            "
+            class="relative h-[calc(100vh_-_193px)] w-full p-4 sm:h-[calc(100vh_-_125px)] sm:p-8"
+            :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
           >
             <!-- Loader-->
             <div
-              class="bg-muted-100 dark:bg-muted-900 pointer-events-none absolute inset-0 z-10 size-full p-8 transition-opacity duration-300"
+              class="pointer-events-none absolute inset-0 z-10 size-full bg-[url('../../img/back/pocket.png')] p-8 transition-opacity duration-300 dark:bg-[url('../../img/back/back-dark.png')]"
               :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
             >
-              <div class="mt-12 space-y-12">
-                <div class="flex w-full max-w-md gap-4">
-                  <BasePlaceload
-                    class="size-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload class="h-3 w-full max-w-56 rounded" />
-                    <BasePlaceload class="h-3 w-full max-w-32 rounded" />
-                  </div>
-                </div>
-                <div class="flex w-full max-w-md gap-4">
-                  <BasePlaceload
-                    class="size-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload class="h-3 w-full max-w-64 rounded" />
-                    <BasePlaceload class="h-3 w-full max-w-48 rounded" />
-                  </div>
-                </div>
-                <div
-                  class="ms-auto flex w-full max-w-md flex-row-reverse justify-end gap-4"
-                >
-                  <BasePlaceload
-                    class="size-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload
-                      class="ms-auto h-3 w-full max-w-64 rounded"
-                    />
-                    <BasePlaceload
-                      class="ms-auto h-3 w-full max-w-48 rounded"
-                    />
-                  </div>
-                </div>
-                <div
-                  class="ms-auto flex w-full max-w-md flex-row-reverse justify-end gap-4"
-                >
-                  <BasePlaceload
-                    class="size-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload
-                      class="ms-auto h-3 w-full max-w-56 rounded"
-                    />
-                    <BasePlaceload
-                      class="ms-auto h-3 w-full max-w-32 rounded"
-                    />
-                  </div>
-                </div>
-                <div class="flex w-full max-w-md gap-4">
-                  <BasePlaceload
-                    class="size-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload class="h-3 w-full max-w-56 rounded" />
-                    <BasePlaceload class="h-3 w-full max-w-32 rounded" />
-                  </div>
-                </div>
-                <div class="flex w-full max-w-md gap-4">
-                  <BasePlaceload
-                    class="size-8 shrink-0 rounded-full"
-                    :width="32"
-                    :height="32"
-                  />
-                  <div class="grow space-y-2">
-                    <BasePlaceload class="h-3 w-full max-w-64 rounded" />
-                    <BasePlaceload class="h-3 w-full max-w-48 rounded" />
-                  </div>
+              <div class="flex h-full flex-col items-center justify-center">
+                <div class="flex items-center gap-2">
+                  <BaseButtonIcon loading="default" />
                 </div>
               </div>
             </div>
