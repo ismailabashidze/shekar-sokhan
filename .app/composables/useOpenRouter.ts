@@ -118,6 +118,7 @@ export function useOpenRouter() {
       const patientDetails = options.patientDetails
       const systemPrompt = patientDetails
         ? `اطلاعات هویتی تو در پایین آمده است. 
+        دقت کن درست است که این اطلاعات به زبان سوم شخص نوشته شده، ولی در واقع اطلاعات تو است.
 نام: ${patientDetails.name}
 سن: ${patientDetails.age}
 توضیح کوتاه: ${patientDetails.shortDescription}
@@ -131,6 +132,8 @@ export function useOpenRouter() {
 تو در حال حاضر به دنبال حمایت عاطفی هستی و در یک سیستم درخواست مشاوره متنی در حال گفت و گو با یک روانشناس هستی. دقت کن که نقش تو روانشناس نیست و نقش مقابل را باید بازی کنی.
 همچنین در چت اگر متوجه شدی که بحث از موضوع جلسه ات خارج شده، مقاومت کن و برگرد به مسیر قبلی.
 نیازی نیست خیلی مودب باشی اگر لازم بود پرخاش کن.
+دقت کن که نقش تو مراجع برای روان درمانی است و نقش مقابل تو یک روان شناس است.
+فقط یک بار سلام کافی است. دیگر نیازی به سلام مجدد نیست
 `
         : ''
 
@@ -150,7 +153,7 @@ export function useOpenRouter() {
           model: options.model || selectedModel.value,
           messages: messagesWithSystem,
           stream: true,
-          temperature: options.temperature || 0.7,
+          // temperature: options.temperature || 0.7,
           max_tokens: options.max_tokens || 0,
           include_reasoning: true,
           plugins: [],

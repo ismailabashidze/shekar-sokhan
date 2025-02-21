@@ -253,16 +253,29 @@ watch(activePatientId, async (newId) => {
 })
 
 async function submitMessage() {
-  if (!newMessage.value.trim() || !activePatientId.value) return
-
-  const now = new Date().toISOString()
-  const userMessage = {
-    type: 'sent',
-    text: newMessage.value,
-    timestamp: now,
+  if (showNoCharge.value) {
+    toaster.show({
+      title: 'خطا',
+      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+    return
   }
 
+  if (!newMessage.value || messageLoading.value) return
+
   try {
+    messageLoading.value = true
+    const now = new Date().toISOString()
+    streamingResponse.value = '' // Reset streaming response for new message
+    const userMessage = {
+      type: 'sent',
+      text: newMessage.value,
+      timestamp: now,
+    }
+
     // First save and show the user message
     const savedUserMessage = await sendMessage(activePatientId.value, userMessage.text, 'sent')
     messages.value.push({
@@ -273,66 +286,67 @@ async function submitMessage() {
     newMessage.value = ''
     scrollToBottom()
 
-    // Create an empty assistant message that will be filled with the stream
-    const assistantMessage = {
-      type: 'received',
-      text: '',
-      timestamp: now,
+    // Only proceed with AI response if user has charge
+    if (!showNoCharge.value) {
+      // Create an empty assistant message that will be filled with the stream
+      const assistantMessage = {
+        type: 'received',
+        text: '',
+        timestamp: now,
+      }
+
+      // Add the empty message to UI
+      messages.value.push({
+        ...assistantMessage,
+        id: 'temp-' + Date.now(),
+      })
+      scrollToBottom()
+
+      // Get current patient details and proceed with chat
+      const currentPatient = conversations.value.find(c => c.user.id === activePatientId.value)?.user
+
+      // Create message history excluding the empty message we just added
+      const messageHistory = messages.value.slice(0, -1).map(msg => ({
+        role: msg.type === 'sent' ? 'user' : 'assistant',
+        content: msg.text,
+      }))
+
+      await streamChat(
+        messageHistory,
+        {
+          patientDetails: currentPatient
+            ? {
+                name: currentPatient.name,
+                age: currentPatient.age,
+                shortDescription: currentPatient.shortDescription,
+                longDescription: currentPatient.longDescription,
+                definingTraits: currentPatient.definingTraits,
+                backStory: currentPatient.backStory,
+                personality: currentPatient.personality,
+                appearance: currentPatient.appearance,
+                motivation: currentPatient.motivation,
+                moodAndCurrentEmotions: currentPatient.moodAndCurrentEmotions,
+              }
+            : undefined,
+        },
+        async (chunk) => {
+          const content = chunk.choices[0]?.delta?.content || ''
+          if (content) {
+            streamingResponse.value += content
+            messages.value[messages.value.length - 1].text = streamingResponse.value
+            scrollToBottom()
+          }
+        },
+      )
+
+      // After stream is complete, save the full message
+      const savedAssistantMessage = await sendMessage(activePatientId.value, streamingResponse.value, 'received')
+      // Update the message ID and timestamp in the UI
+      const lastMessage = messages.value[messages.value.length - 1]
+      lastMessage.id = savedAssistantMessage.id
+      lastMessage.timestamp = savedAssistantMessage.created
+      scrollToBottom()
     }
-
-    let currentAssistantMessage = ''
-
-    // Convert messages to OpenRouter format
-    const openRouterMessages = messages.value.map(msg => ({
-      role: msg.type === 'sent' ? 'user' : 'assistant',
-      content: msg.text,
-    }))
-
-    // Add the empty message to UI
-    messages.value.push({
-      ...assistantMessage,
-      id: 'temp-' + Date.now(),
-    })
-    scrollToBottom()
-
-    // Get current patient details
-    const currentPatient = conversations.value.find(c => c.user.id === activePatientId.value)?.user
-
-    await streamChat(
-      openRouterMessages,
-      {
-        patientDetails: currentPatient
-          ? {
-              name: currentPatient.name,
-              age: currentPatient.age,
-              shortDescription: currentPatient.shortDescription,
-              longDescription: currentPatient.longDescription,
-              definingTraits: currentPatient.definingTraits,
-              backStory: currentPatient.backStory,
-              personality: currentPatient.personality,
-              appearance: currentPatient.appearance,
-              motivation: currentPatient.motivation,
-              moodAndCurrentEmotions: currentPatient.moodAndCurrentEmotions,
-            }
-          : undefined,
-      },
-      async (chunk) => {
-        const content = chunk.choices[0]?.delta?.content || ''
-        if (content) {
-          currentAssistantMessage += content
-          messages.value[messages.value.length - 1].text = currentAssistantMessage
-          scrollToBottom()
-        }
-      },
-    )
-
-    // After stream is complete, save the full message
-    const savedAssistantMessage = await sendMessage(activePatientId.value, currentAssistantMessage, 'received')
-    // Update the message ID and timestamp in the UI
-    const lastMessage = messages.value[messages.value.length - 1]
-    lastMessage.id = savedAssistantMessage.id
-    lastMessage.timestamp = savedAssistantMessage.created
-    scrollToBottom()
   }
   catch (e) {
     console.error('Error in chat:', e)
@@ -343,6 +357,9 @@ async function submitMessage() {
       id: 'error-' + Date.now(),
     })
     scrollToBottom()
+  }
+  finally {
+    messageLoading.value = false
   }
 }
 
@@ -360,6 +377,93 @@ onMounted(() => {
     }
   }, 300)
 })
+
+const { user } = useUser()
+const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
+const showNoCharge = ref(false)
+const remainingTime = ref()
+const timeToShow = ref()
+const startChargeTime = ref()
+const showTenMin = ref(false)
+const isGoingToDone = ref(false)
+const type = ref('briefing')
+
+// Time and charge monitoring
+const checkForHalfTime = () => {
+  const start = new Date(startChargeTime.value)
+  const now = new Date()
+  const temp = Math.floor((now.getTime() - start.getTime()) / 60000)
+  return (temp / timeToShow.value > 1)
+}
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    const nuxtApp = useNuxtApp()
+    const patients = await getPatients()
+    conversations.value = patients.map(p => ({ id: p.id, user: p }))
+    await initializeFromRoute()
+
+    // Initialize charge and time data
+    const u = await nuxtApp.$pb
+      .collection('users')
+      .getOne(nuxtApp.$pb.authStore.model.id, {})
+    showNoCharge.value = !u.hasCharge
+    remainingTime.value = new Date(u.expireChargeTime)
+    startChargeTime.value = new Date(u.startChargeTime)
+    timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
+
+    if (timeToShow.value <= 0) {
+      showNoCharge.value = true
+      pause()
+    }
+
+    // Update time every minute
+    setInterval(() => {
+      timeToShow.value = timeToShow.value - 1
+    }, 60000)
+
+    // Subscribe to user changes for real-time charge updates
+    if (nuxtApp.$pb.authStore.isValid) {
+      nuxtApp.$pb.collection('users').subscribe(
+        nuxtApp.$pb.authStore.model.id,
+        (e) => {
+          timeToShow.value = Math.floor((new Date(e.record.expireChangeTime).getTime() - new Date().getTime()) / (1000 * 60))
+          if (!e.record.hasCharge) {
+            showNoCharge.value = true
+            setTimeout(() => {
+              if (chatEl.value) {
+                chatEl.value.scrollTo({
+                  top: chatEl.value.scrollHeight,
+                  behavior: 'smooth',
+                })
+              }
+            }, 600)
+            pause()
+          }
+        },
+        {},
+      )
+    }
+  }
+  catch (error) {
+    console.error('Error initializing:', error)
+  }
+  finally {
+    loading.value = false
+  }
+})
+
+// Start the counter when component is mounted
+onMounted(() => {
+  resume()
+})
+
+// Pause the counter when component is unmounted
+onUnmounted(() => {
+  pause()
+})
+
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
 const logout = () => {
@@ -373,6 +477,10 @@ const logout = () => {
   })
   navigateTo('/auth/login')
 }
+const changeExpanded = () => {
+  expanded.value = !expanded.value
+  localStorage.setItem('expanded', expanded.value + '')
+}
 
 const isDeleteModalOpen = ref(false)
 
@@ -385,6 +493,17 @@ const closeDeleteModal = () => {
 }
 
 const confirmClearChat = async () => {
+  if (showNoCharge.value) {
+    toaster.show({
+      title: 'خطا',
+      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+    return
+  }
+
   try {
     await clearMessages(activePatientId.value!)
     messages.value = []
@@ -392,21 +511,71 @@ const confirmClearChat = async () => {
   }
   catch (error) {
     console.error('Error clearing messages:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در پاک کردن پیام‌ها',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
   }
 }
 
 const clearChat = () => {
-  if (!activePatientId.value) return
+  if (showNoCharge.value) {
+    toaster.show({
+      title: 'خطا',
+      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+    return
+  }
   openDeleteModal()
 }
 
 const gotoList = () => {
   navigateTo('/onboarding/choosePatient')
 }
+
+const isReportModalOpen = ref(false)
+
+const openReportModal = () => {
+  isReportModalOpen.value = true
+}
+
+const closeReportModal = () => {
+  isReportModalOpen.value = false
+}
+
+const submitReport = async () => {
+  try {
+    // Add your report generation logic here
+    toaster.show({
+      title: 'موفق',
+      message: 'گزارش با موفقیت ساخته شد.',
+      color: 'success',
+      icon: 'ph:check-circle-fill',
+      closable: true,
+    })
+    closeReportModal()
+  }
+  catch (error) {
+    console.error('Error generating report:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در ساخت گزارش',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  }
+}
 </script>
 
 <template>
-  <div class="relative max-h-screen overflow-hidden">
+  <div class="relative">
     <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen">
       <!-- Sidebar -->
       <div
@@ -472,7 +641,7 @@ const gotoList = () => {
             <div class="flex h-16 w-full items-center justify-center">
               <button
                 type="button"
-                class="text-danger-400 hover:text-danger-500 hover:bg-danger-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                class="text-danger-400 hover:text-danger-500 hover:bg-danger-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300 disabled:opacity-50"
                 title="پاک کردن چت"
                 @click="clearChat"
               >
@@ -546,12 +715,12 @@ const gotoList = () => {
       </div>
       <!-- Current conversation -->
       <div
-        :class="[
-          'ltablet:ps-20 relative flex grow flex-col transition-all duration-300 sm:ps-20',
+        class="relative w-full transition-all duration-300"
+        :class="
           expanded
             ? 'ltablet:max-w-[calc(100%_-_160px)] lg:max-w-[calc(100%_-_160px)]'
             : 'ltablet:max-w-[calc(100%_-_470px)] lg:max-w-[calc(100%_-_550px)]'
-        ]"
+        "
       >
         <div class="flex w-full flex-col">
           <!-- Header -->
@@ -570,16 +739,56 @@ const gotoList = () => {
             <TairoSidebarTools
               class="relative -end-4 z-20 flex h-16 w-full scale-90 items-center justify-end gap-2 sm:end-0 sm:scale-100"
             />
+            <div class="flex">
+              <BaseMessage
+                v-if="!showNoCharge"
+                class="w-[180px]"
+                :color="timeToShow > 10 ? 'success' : 'warning'"
+              >
+                <span v-if="timeToShow > 0">⏱ {{ timeToShow ?? '--' }} دقیقه</span>
+                <span v-else>وقت تقریبا تمام است</span>
+              </BaseMessage>
+              <BaseMessage
+                v-else
+                class="w-[280px] justify-center !pl-2"
+                color="warning"
+              >
+                لطفا اشتراک تهیه فرمایید.
+                <BaseButtonIcon
+                  rounded="full"
+                  size="sm"
+                  color="success"
+                  class="mr-3"
+                  to="/onboarding/psychologist"
+                >
+                  <Icon name="ph:shopping-cart" class="size-5" />
+                </BaseButtonIcon>
+              </BaseMessage>
+              <div class="flex">
+                <button
+                  class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                  title="نمایش اطلاعات"
+                  @click="changeExpanded()"
+                >
+                  <Icon
+                    name="ph:robot"
+                    class="size-5"
+                  />
+                </button>
+              </div>
+            </div>
           </div>
           <!-- Body -->
           <div
             ref="chatEl"
-            class="relative h-[calc(100vh_-_193px)] w-full p-4 sm:h-[calc(100vh_-_125px)] sm:p-8"
-            :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
+            class="relative flex h-[calc(100vh-4rem)] flex-col overflow-y-auto p-4 !pb-60 sm:p-8"
+            :class="
+              loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'
+            "
           >
             <!-- Loader-->
             <div
-              class="pointer-events-none absolute inset-0 z-10 size-full bg-[url('../../img/back/pocket.png')] p-8 transition-opacity duration-300 dark:bg-[url('../../img/back/back-dark.png')]"
+              class="pointer-events-none absolute inset-0 z-10 size-full bg-[url('../../img/back/back.png')] p-8 transition-opacity duration-300 dark:bg-[url('../../img/back/back-dark.png')]"
               :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
             >
               <div class="flex h-full flex-col items-center justify-center">
@@ -609,69 +818,93 @@ const gotoList = () => {
                 </div>
               </div>
               <div
-                v-for="item in messages"
-                :key="item.id"
-                class="mb-4"
+                v-else
+                class="space-y-8"
               >
+                <!-- Messages -->
                 <div
-                  class="flex"
-                  :class="[
-                    item.type === 'sent' ? 'justify-end' : 'justify-start',
-                  ]"
+                  v-for="item in messages"
+                  :key="item.id"
+                  class="mb-4"
                 >
                   <div
-                    class="flex max-w-[85%] flex-col"
+                    class="flex"
                     :class="[
-                      item.type === 'sent'
-                        ? 'items-end'
-                        : 'items-start',
+                      item.type === 'sent' ? 'justify-end' : 'justify-start',
                     ]"
                   >
                     <div
-                      class="relative mb-2 flex items-center gap-3"
+                      class="flex max-w-[85%] flex-col"
                       :class="[
                         item.type === 'sent'
-                          ? 'flex-row-reverse'
-                          : 'flex-row',
+                          ? 'items-end'
+                          : 'items-start',
                       ]"
                     >
                       <div
-                        class="flex flex-col gap-1"
+                        class="relative mb-2 flex items-center gap-3"
                         :class="[
                           item.type === 'sent'
-                            ? 'items-end'
-                            : 'items-start',
+                            ? 'flex-row-reverse'
+                            : 'flex-row',
                         ]"
                       >
                         <div
-                          class="rounded-xl px-4 py-2"
+                          class="flex flex-col gap-1"
                           :class="[
                             item.type === 'sent'
-                              ? 'bg-primary-500 text-white'
-                              : 'bg-muted-100 dark:bg-muted-700',
+                              ? 'items-end'
+                              : 'items-start',
                           ]"
                         >
-                          <span
-                            class="block font-sans"
+                          <div
+                            class="rounded-xl px-4 py-2"
                             :class="[
                               item.type === 'sent'
-                                ? 'text-white'
-                                : 'text-muted-800 dark:text-muted-100',
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-muted-200 dark:bg-muted-700',
                             ]"
                           >
-                            {{ item.text }}
+                            <span
+                              class="block font-sans"
+                              :class="[
+                                item.type === 'sent'
+                                  ? 'text-white'
+                                  : 'text-muted-800 dark:text-muted-100',
+                              ]"
+                            >
+                              {{ item.text }}
+                            </span>
+                          </div>
+                          <span class="text-muted-400 font-sans text-xs">
+                            {{ formatTime(item.timestamp) }}
                           </span>
                         </div>
-                        <span class="text-muted-400 font-sans text-xs">
-                          {{ formatTime(item.timestamp) }}
-                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
+                <!-- No Charge Message -->
+                <BaseMessage
+                  v-if="showNoCharge"
+                  color="danger"
+                >
+                  <div class="flex flex-col gap-4">
+                    <div>
+                      بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.
+                    </div>
+                    <BaseButton
+                      color="primary"
+                      @click="$router.push('/subscription')"
+                    >
+                      خرید اشتراک
+                    </BaseButton>
+                  </div>
+                </BaseMessage>
               </div>
             </div>
           </div>
+
           <!-- Compose form - Fixed at bottom -->
           <form
             method="POST"
@@ -741,7 +974,7 @@ const gotoList = () => {
                             v-for="emoji in emojis"
                             :key="emoji"
                             type="button"
-                            class="hover:bg-muted-100 dark:hover:bg-muted-700 flex size-8 items-center justify-center rounded-lg transition-colors duration-300"
+                            class="hover:bg-muted-100 dark:hover:bg-muted-700 flex size-8 items-center justify-center rounded-lg text-xl transition-colors duration-300"
                             @click="insertEmoji(emoji)"
                           >
                             {{ emoji }}
@@ -754,7 +987,7 @@ const gotoList = () => {
                     <button
                       type="submit"
                       :disabled="!newMessage || messageLoading"
-                      class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300 disabled:opacity-50"
+                      class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-10 items-center justify-center transition-colors duration-300 disabled:opacity-50"
                     >
                       <Icon name="lucide:send" class="size-5" />
                     </button>
@@ -941,20 +1174,6 @@ const gotoList = () => {
                 @click="showModelDropdown = false"
               />
 
-              <!-- Streaming response -->
-              <div
-                v-if="streamingResponse"
-                class="bg-muted-100 dark:bg-muted-900 mb-4 rounded-lg p-4"
-              >
-                <div class="mb-2 flex items-center gap-2">
-                  <Icon name="ph:robot" class="text-primary-500 size-5" />
-                  <span class="text-sm font-medium">AI is typing...</span>
-                </div>
-                <p class="whitespace-pre-wrap text-sm">
-                  {{ streamingResponse }}
-                </p>
-              </div>
-
               <BaseButton
                 rounded="lg"
                 class="w-full"
@@ -1017,6 +1236,34 @@ const gotoList = () => {
             حذف
           </BaseButton>
         </div>
+      </div>
+    </template>
+  </TairoModal>
+
+  <!-- Report Modal -->
+  <TairoModal
+    :open="isReportModalOpen"
+    size="sm"
+    @close="closeReportModal"
+  >
+    <template #header>
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+          ساخت گزارش
+        </h3>
+      </div>
+    </template>
+    <div class="p-4 md:p-6">
+      <p>آیا مایل به ساخت گزارش از این گفتگو هستید؟</p>
+    </div>
+    <template #footer>
+      <div class="flex w-full items-center justify-end gap-2 p-4 md:p-6">
+        <BaseButton @click="closeReportModal">
+          انصراف
+        </BaseButton>
+        <BaseButton color="primary" @click="submitReport">
+          تایید
+        </BaseButton>
       </div>
     </template>
   </TairoModal>
