@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { watch, ref, onMounted, onUnmounted, nextTick } from 'vue'
+import AudioUser from '@/components/global/AudioUser.vue'
+import { useUser } from '@/composables/user'
 
 definePageMeta({
   title: 'Messaging',
@@ -30,6 +32,12 @@ const search = ref('')
 const newMessage = ref('')
 const activePatientId = ref<string | null>(null)
 const showEmojiPicker = ref(false)
+const showAudioUser = ref(false)
+const { role } = useUser()
+
+const toggleAudioUser = () => {
+  showAudioUser.value = !showAudioUser.value
+}
 
 const emojis = [
   '😀', '😃', '😄', '😁', '😆', '😂', '🤣', '😊',
@@ -378,7 +386,6 @@ onMounted(() => {
   }, 300)
 })
 
-const { user } = useUser()
 const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
 const showNoCharge = ref(false)
 const remainingTime = ref()
@@ -576,7 +583,7 @@ const submitReport = async () => {
 
 <template>
   <div class="relative">
-    <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen">
+    <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen overflow-hidden">
       <!-- Sidebar -->
       <div
         class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 hidden h-screen w-20 border-r bg-white sm:block"
@@ -781,10 +788,8 @@ const submitReport = async () => {
           <!-- Body -->
           <div
             ref="chatEl"
-            class="relative flex h-[calc(100vh-4rem)] flex-col overflow-y-auto p-4 !pb-60 sm:p-8"
-            :class="
-              loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'
-            "
+            class="relative flex h-[calc(100vh-4rem)] flex-col p-4 !pb-60 sm:p-8"
+            :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
           >
             <!-- Loader-->
             <div
@@ -887,18 +892,21 @@ const submitReport = async () => {
                 <!-- No Charge Message -->
                 <BaseMessage
                   v-if="showNoCharge"
+                  id="no-money-message"
                   color="danger"
                 >
-                  <div class="flex flex-col gap-4">
-                    <div>
+                  <div class="flex items-center justify-between gap-4">
+                    <div class="order-2">
+                      <BaseButton
+                        color="primary"
+                        @click="$router.push('/subscription')"
+                      >
+                        خرید اشتراک
+                      </BaseButton>
+                    </div>
+                    <div class="order-1">
                       بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.
                     </div>
-                    <BaseButton
-                      color="primary"
-                      @click="$router.push('/subscription')"
-                    >
-                      خرید اشتراک
-                    </BaseButton>
                   </div>
                 </BaseMessage>
               </div>
@@ -981,6 +989,17 @@ const submitReport = async () => {
                           </button>
                         </div>
                       </div>
+                    </div>
+
+                    <!-- Audio User Component -->
+                    <div class="relative">
+                      <button
+                        type="button"
+                        class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
+                        @click.prevent="toggleAudioUser"
+                      >
+                        <Icon name="ph:microphone" class="size-5" />
+                      </button>
                     </div>
 
                     <!-- Send Button -->
@@ -1099,7 +1118,7 @@ const submitReport = async () => {
               </div>
               <div class="my-4 space-y-2">
                 <!-- Model search and selector -->
-                <div v-if="!modelsError" class="relative">
+                <div v-if="!modelsError && role === 'admin'" class="relative">
                   <BaseInput
                     v-model="modelSearchInput"
                     icon="ph:magnifying-glass"
@@ -1135,7 +1154,7 @@ const submitReport = async () => {
 
                 <!-- Selected model display -->
                 <div
-                  v-if="selectedModel && !modelsLoading"
+                  v-if="selectedModel && !modelsLoading && role === 'admin'"
                   class="bg-muted-100 dark:bg-muted-800 flex items-center gap-2 rounded p-2"
                 >
                   <Icon name="ph:robot" class="text-primary-500 size-5" />
@@ -1145,7 +1164,7 @@ const submitReport = async () => {
                 </div>
 
                 <!-- Error state -->
-                <div v-if="modelsError" class="text-center">
+                <div v-if="modelsError && role === 'admin'" class="text-center">
                   <p class="text-danger-500 mb-2">
                     {{ modelsError }}
                   </p>
@@ -1160,7 +1179,7 @@ const submitReport = async () => {
 
                 <!-- Model error toast -->
                 <div
-                  v-if="showModelError"
+                  v-if="showModelError && role === 'admin'"
                   class="bg-danger-500 fixed right-4 top-4 z-50 rounded px-4 py-2 text-white shadow-lg"
                 >
                   خطایی در پاسخ مدل رخ داد. لطفا دوباره تلاش کنید.
@@ -1186,6 +1205,28 @@ const submitReport = async () => {
         </div>
       </div>
     </div>
+
+    <!-- Audio User Modal -->
+    <TairoModal
+      :open="showAudioUser"
+      size="md"
+      @close="showAudioUser = false"
+    >
+      <template #header>
+        <div class="flex w-full items-center justify-between p-4 sm:p-5">
+          <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+            تبدیل صوت به متن
+          </h3>
+          <BaseButtonClose @click="showAudioUser = false" />
+        </div>
+      </template>
+      <div class="p-4 sm:p-5">
+        <AudioUser
+          @close="showAudioUser = false"
+          @text-ready="(text) => { newMessage = newMessage ? newMessage + ' ' + text : text; showAudioUser = false; }"
+        />
+      </div>
+    </TairoModal>
   </div>
 
   <TairoModal
@@ -1268,3 +1309,8 @@ const submitReport = async () => {
     </template>
   </TairoModal>
 </template>
+<style scoped>
+#no-money-message {
+  justify-content: space-evenly;
+}
+</style>

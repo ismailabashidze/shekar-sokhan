@@ -56,7 +56,6 @@ export function useOpenRouter() {
   const error = ref<string | null>(null)
 
   // Models state
-  const models = ref<OpenRouterModel[]>([])
   const allModels = ref<OpenRouterModel[]>([])
   const selectedModel = ref<string>('mistralai/mistral-saba')
   const loading = ref(false)

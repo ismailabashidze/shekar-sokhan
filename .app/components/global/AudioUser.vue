@@ -2,6 +2,9 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useHead } from '@vueuse/head'
 
+// Define emits
+const emit = defineEmits(['close', 'textReady'])
+
 // Inject the external script for dat.GUI using the CDN
 useHead({
   script: [
@@ -13,7 +16,7 @@ useHead({
 })
 
 const canvas = ref(null)
-const isStarted = ref(false) // Unified variable for both starting and recognizing
+const isStarted = ref(false) // Changed to a toggle state instead of press state
 
 let context, analyser, freqs
 let recognition
@@ -58,6 +61,8 @@ const scale = (i) => {
 
 // Function to draw the visualization path
 const path = (channel) => {
+  if (!canvas.value) return
+
   const ctx = canvas.value.getContext('2d')
   const color = opts[`color${channel + 1}`].map(Math.floor)
   ctx.fillStyle = `rgba(${color}, ${opts.fillOpacity})`
@@ -70,8 +75,14 @@ const path = (channel) => {
   const HEIGHT = canvas.value.height
   const WIDTH = canvas.value.width
   const m = HEIGHT / 2
-  const offset = (WIDTH - 15 * opts.width) / 2
-  const x = range(15).map(i => offset + channel * opts.shift + i * opts.width)
+
+  // Adjust width parameters based on canvas size
+  const scaleFactor = WIDTH / 500 // Scale based on reference width of 500px
+  const adjustedWidth = opts.width * scaleFactor
+  const adjustedShift = opts.shift * scaleFactor
+
+  const offset = (WIDTH - 15 * adjustedWidth) / 2
+  const x = range(15).map(i => offset + channel * adjustedShift + i * adjustedWidth)
   const y = range(5).map(i => Math.max(0, m - scale(i) * freq(channel, i)))
   const h = 2 * m
 
@@ -101,13 +112,18 @@ const path = (channel) => {
 
 // Visualize frequencies
 const visualize = () => {
+  if (!canvas.value) return
+
   const ctx = canvas.value.getContext('2d')
-  const WIDTH = canvas.value.width = 500 // Reduced canvas width
-  const HEIGHT = canvas.value.height = 200 // Reduced canvas height
-
+  const containerWidth = canvas.value.parentElement.clientWidth || 500
+  const WIDTH = canvas.value.width = containerWidth
+  const HEIGHT = canvas.value.height = 150
+  
+  // Center the visualization in the canvas
   ctx.clearRect(0, 0, WIDTH, HEIGHT)
+  ctx.translate(0, 0)
 
-  if (isStarted.value) {
+  if (isStarted.value && analyser && freqs) {
     analyser.smoothingTimeConstant = opts.smoothing
     analyser.fftSize = Math.pow(2, opts.fft)
     analyser.minDecibels = opts.minDecibels
@@ -123,12 +139,14 @@ const visualize = () => {
     ctx.beginPath()
     ctx.moveTo(0, HEIGHT / 2)
     ctx.lineTo(WIDTH, HEIGHT / 2)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
+    ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)'
     ctx.lineWidth = 1
     ctx.stroke()
   }
 
-  requestAnimationFrame(visualize)
+  if (isStarted.value) {
+    requestAnimationFrame(visualize)
+  }
 }
 
 // Initialize speech recognition
@@ -167,36 +185,55 @@ const initSpeechRecognition = () => {
   }
 }
 
-// Start speech recognition and audio visualization
+// Modified to toggle recording on/off with a single click
+const toggleRecognition = () => {
+  if (isStarted.value) {
+    endRecognition()
+  }
+  else {
+    startRecognition()
+  }
+}
+
 const startRecognition = () => {
-  if (!isStarted.value) {
+  if (recognition && !isStarted.value) {
     finalText.value = ''
     interimText.value = ''
+    recognition.start()
     isStarted.value = true
 
-    recognition.start()
-
+    // Create audio context for visualization
     context = new AudioContext()
     analyser = context.createAnalyser()
     freqs = new Uint8Array(analyser.frequencyBinCount)
 
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(onStream).catch(onStreamError)
+    // Get audio stream for visualization
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(onStream)
+      .catch(onStreamError)
   }
 }
 
-// End speech recognition and audio visualization
 const endRecognition = () => {
-  if (isStarted.value) {
+  if (recognition && isStarted.value) {
     recognition.stop()
     isStarted.value = false
-    if (context) context.close()
+
+    // Stop the audio context
+    if (context) {
+      context.close()
+      context = null
+    }
   }
 }
 
 const onStream = (stream) => {
-  const input = context.createMediaStreamSource(stream)
-  input.connect(analyser)
-  visualize()
+  if (context && analyser) {
+    const input = context.createMediaStreamSource(stream)
+    input.connect(analyser)
+    visualize()
+  }
 }
 
 const onStreamError = (e) => {
@@ -211,95 +248,153 @@ const showTipMessage = () => {
   }, 3000)
 }
 
+const closeModal = () => {
+  // Make sure recognition is stopped when modal is closed
+  if (isStarted.value) {
+    endRecognition()
+  }
+
+  // Reset state
+  finalText.value = ''
+  interimText.value = ''
+
+  // Emit event to parent to close modal
+  emit('close')
+}
+
+// Add a method to submit the final text
+const submitText = () => {
+  emit('textReady', finalText.value)
+  closeModal()
+}
+
 onMounted(() => {
   initSpeechRecognition()
 
-  // Initialize dat.GUI (optional, can be removed if not needed)
-  const gui = new dat.GUI()
-  gui.addColor(opts, 'color1')
-  gui.addColor(opts, 'color2')
-  gui.addColor(opts, 'color3')
-  gui.add(opts, 'fillOpacity', 0, 1)
-  gui.add(opts, 'lineWidth', 0, 10).step(0.1)
-  gui.add(opts, 'glow', 0, 100)
-  gui.add(opts, 'blend', ['normal', 'multiply', 'screen', 'overlay', 'lighten', 'difference'])
-  gui.add(opts, 'smoothing', 0, 1)
-  gui.add(opts, 'minDecibels', -100, 0)
-  gui.add(opts, 'amp', 0, 5)
-  gui.add(opts, 'width', 0, 60)
-  gui.add(opts, 'shift', 0, 200)
-  gui.close() // Hide controls initially
+  // Initialize visualizer with a flat line
+  if (canvas.value) {
+    const ctx = canvas.value.getContext('2d')
+    const WIDTH = canvas.value.width = canvas.value.parentElement?.clientWidth || 500
+    const HEIGHT = canvas.value.height = 150
+
+    ctx.clearRect(0, 0, WIDTH, HEIGHT)
+    ctx.beginPath()
+    ctx.moveTo(0, HEIGHT / 2)
+    ctx.lineTo(WIDTH, HEIGHT / 2)
+    ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)'
+    ctx.lineWidth = 1
+    ctx.stroke()
+  }
 })
 
 onBeforeUnmount(() => {
-  if (recognition) recognition.abort()
-  if (context) context.close()
-})
-const closeModal = () => {
+  // Clean up resources
+  if (recognition) {
+    try {
+      recognition.stop()
+    }
+    catch (e) {
+      console.error('Error stopping recognition:', e)
+    }
+  }
 
-}
+  if (context) {
+    try {
+      context.close()
+    }
+    catch (e) {
+      console.error('Error closing audio context:', e)
+    }
+  }
+
+  if (tipTimeout) {
+    clearTimeout(tipTimeout)
+  }
+})
 </script>
 
 <template>
   <div>
     <div>
       <BaseCard
-        rounded="md"
-        shadow="flat"
-        class="p-6"
+        rounded="lg"
+        shadow="md"
+        class="dark:bg-muted-800 bg-white p-6"
       >
-        <BaseHeading
-          weight="semibold"
-          lead="tight"
-        >
-          تبدیل صوت به متن:
-        </BaseHeading>
-        <BaseParagraph class="mt-5" size="lg">
-          متن وارد شده:
+        <!-- Text display area -->
+        <div class="bg-muted-100 dark:bg-muted-700/50 mb-4 min-h-[100px] rounded-lg p-4 text-right">
+          <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
+            متن وارد شده:
+          </div>
           <!-- Show interim text during recognition, final text after release -->
-          <span
-            v-if="isStarted"
-            id="interim_span"
-            class="interim"
-          >{{ interimText }}</span>
-          <span
-            v-else
-            id="final_span"
-            class="final"
-          >{{ finalText }}</span>
-        </BaseParagraph>
-        <BaseMessage color="primary" class="m-3 flex items-center justify-center">
-          <canvas ref="canvas" class="visualizer-canvas" />
-        </BaseMessage>
+          <div class="text-muted-800 dark:text-white text-lg">
+            <span
+              v-if="isStarted"
+              id="interim_span"
+              class="bg-primary-500/20 text-primary-600 dark:text-primary-400 px-1 rounded interim"
+            >{{ interimText }}</span>
+            <span
+              v-else
+              id="final_span"
+            >{{ finalText || 'برای شروع ضبط، روی دکمه میکروفون کلیک کنید' }}</span>
+          </div>
+        </div>
 
-        <div
-          class="flex items-center justify-center gap-4"
-        >
-          <BaseButtonIcon
+        <!-- Visualizer -->
+        <div class="bg-primary-500/10 dark:bg-primary-500/5 mb-4 overflow-hidden rounded-lg flex items-center justify-center" style="height: 150px;">
+          <canvas ref="canvas" class="visualizer-canvas" />
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center justify-center gap-4">
+          <!-- Record button -->
+          <BaseButton
             id="button"
             rounded="full"
-            color="default"
-            role="button"
-            tabindex="0"
-            :class="{ cancel: isStarted }"
-            @mousedown="startRecognition"
-            @mouseup="endRecognition"
-            @touchstart="startRecognition"
-            @touchend="endRecognition"
+            color="primary"
+            :class="{ 'bg-danger-500 hover:bg-danger-600': isStarted }"
+            @click="toggleRecognition"
           >
-            <Icon :name="isStarted ? '' : 'ph:microphone'" class="size-5" />
-          </BaseButtonIcon>
-          <BaseButtonIcon
+            <div class="flex items-center gap-2">
+              <Icon
+                :name="isStarted ? 'ph:stop-circle-fill' : 'ph:microphone-fill'"
+                class="size-5"
+              />
+              <span>{{ isStarted ? 'پایان ضبط' : 'شروع ضبط' }}</span>
+            </div>
+          </BaseButton>
+
+          <!-- Submit button -->
+          <BaseButton
             rounded="full"
             color="success"
-            role="button"
-            tabindex="0"
-            @click="closeModal()"
+            :disabled="!finalText"
+            @click="submitText"
           >
-            <Icon name="ph:check" class="size-5" />
-          </BaseButtonIcon>
-          <div id="tip" :class="{ show: showTip }">
-            نگه دارید و صحبت کنید
+            <div class="flex items-center gap-2">
+              <Icon name="ph:check-circle-fill" class="size-5" />
+              <span>تایید</span>
+            </div>
+          </BaseButton>
+
+          <!-- Cancel button -->
+          <BaseButton
+            rounded="full"
+            color="muted"
+            @click="closeModal"
+          >
+            <div class="flex items-center gap-2">
+              <Icon name="ph:x-circle-fill" class="size-5" />
+              <span>انصراف</span>
+            </div>
+          </BaseButton>
+        </div>
+
+        <!-- Recording status indicator -->
+        <div v-if="isStarted" class="mt-4 text-center">
+          <div class="bg-danger-500/20 text-danger-600 dark:text-danger-400 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm">
+            <span class="bg-danger-500 size-2 animate-pulse rounded-full recording-pulse" />
+            در حال ضبط...
           </div>
         </div>
       </BaseCard>
@@ -309,67 +404,76 @@ const closeModal = () => {
 
 <style scoped>
 .visualizer-canvas {
-  position: relative; /* Changed from absolute to relative */
-  margin: 20px auto;  /* Center the canvas */
+  position: relative;
+  margin: 0 auto;
   display: block;
-  width: 500px;       /* Match the reduced canvas width */
-  height: 200px;      /* Match the reduced canvas height */
+  width: 100%;
+  height: 150px;
   background-color: transparent;
 }
 
+.interim {
+  background-color: rgba(79, 70, 229, 0.2);
+  color: #4338ca;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
 #interim_span {
-  opacity: 0.6;
+  opacity: 0.7;
+  font-style: italic;
 }
 
-#tip {
-  position: absolute;
-  bottom: 100px;
-  left: 50%;
-  width: 250px;
-  color: rgba(255, 255, 255, 0.75);
-  margin-left: -125px;
-  text-align: center;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: bold;
-  transform: translateY(20px);
-  opacity: 0;
-  transition: all 0.4s ease-in;
-}
-#tip.show {
-  opacity: 0.8;
-  transform: translateY(0);
-  transition: all 0.3s ease-out;
+.final {
+  color: var(--color-muted-800);
 }
 
-#button:active {
-  background-color: #dd0022;
-}
-#button:active #microphone {
-  display: none;
+@media (prefers-color-scheme: dark) {
+  .final {
+    color: var(--color-white);
+  }
 }
 
-#button.cancel #microphone {
-  fill: transparent;
+/* Pulse animation for recording indicator */
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
 }
-#button.cancel:before,
-#button.cancel:after {
-  position: absolute;
-  background-color: #fff;
-  width: 2px;
-  height: 16px;
-  display: block;
-  content: '';
-  transform: rotate(45deg);
-  left: 50%;
-  top: 50%;
-  margin-left: -1px;
-  margin-top: -8px;
-  opacity: 0.8;
-  z-index: 15;
+
+.animate-pulse {
+  animation: pulse 2s infinite;
 }
-#button.cancel:after {
-  transform: rotate(-45deg);
+
+.recording-pulse {
+  animation: recording-pulse 2s infinite;
+}
+
+@keyframes recording-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
 }
 </style>

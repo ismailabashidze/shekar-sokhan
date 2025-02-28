@@ -30,36 +30,60 @@ const redeem = async () => {
   isModalOpen.value = false
   isSubmitting.value = true
 
-  const { data, error } = await useAsyncData(async () => {
-    const record = await nuxtApp.$pb.send(`/redeemDiscount`, {
-      body: {
-        userId: nuxtApp.$pb.authStore.model.id,
-        code: couponCode.value,
+  try {
+    const { data, error } = await useAsyncData(
+      'redeemDiscount',
+      async () => {
+        const record = await nuxtApp.$pb.send(`/redeemDiscount`, {
+          body: {
+            userId: nuxtApp.$pb.authStore.model.id,
+            code: couponCode.value,
+          },
+          method: 'POST',
+          timeout: 10000, // Add 10 second timeout
+        })
+        return structuredClone(record)
       },
-      method: 'POST',
-    })
-    return structuredClone(record)
-  })
-  if (!error.value) {
+      {
+        server: false,
+        lazy: false,
+        immediate: true,
+        watch: false,
+        retry: 0
+      }
+    )
+    
+    if (!error.value) {
+      toaster.show({
+        title: 'ثبت کد',
+        message: `کد با موفقیت فعال شد.`,
+        color: 'success',
+        icon: 'ph:check',
+        closable: true,
+      })
+      navigateTo('/onboarding/choosePatient')
+    }
+    else {
+      toaster.show({
+        title: 'عدم ثبت',
+        message: `کد نامعتبر است یا قبلا استفاده شده است`,
+        color: 'danger',
+        icon: 'ph:warning',
+        closable: true,
+      })
+    }
+  } catch (e) {
+    console.error('Error redeeming discount:', e)
     toaster.show({
-      title: 'ثبت کد',
-      message: `کد با موفقیت فعال شد.`,
-      color: 'success',
-      icon: 'ph:check',
-      closable: true,
-    })
-    navigateTo('/onboarding/choosePatient')
-  }
-  else {
-    toaster.show({
-      title: 'عدم ثبت',
-      message: `کد نامعتبر است یا قبلا استفاده شده است`,
+      title: 'خطا',
+      message: 'خطا در ارتباط با سرور. لطفا مجددا تلاش کنید.',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
     })
+  } finally {
+    isSubmitting.value = false
   }
-  isSubmitting.value = false
 }
 </script>
 

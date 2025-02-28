@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { z } from 'zod'
-import { debounce } from 'lodash-es'
 
 definePageMeta({
   title: 'ورود به ذهنا',
