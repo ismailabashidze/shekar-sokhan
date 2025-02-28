@@ -16,8 +16,8 @@
   ],
   "scripts": {
     "dev": "pnpm --filter=app dev",
-    "build": "pnpm --filter=app build",
-    "generate": "pnpm --filter=app generate",
+    "build": "cross-env NODE_OPTIONS=\"--no-deprecation\" pnpm --filter=app build",
+    "generate": "cross-env NODE_OPTIONS=\"--no-deprecation\" pnpm --filter=app generate",
     "demo:dev": "pnpm --filter=demo dev",
     "demo:build": "pnpm --filter=demo build",
     "clean:all": "pnpm -r clean && rimraf .nuxt .output node_modules",
