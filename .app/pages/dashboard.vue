@@ -14,6 +14,9 @@ definePageMeta({
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
+// Import user composable
+const { user } = useUser()
+
 const activePosts = ref('recent')
 const showFeatures = ref(true)
 const featuredVideos = [
@@ -168,7 +171,7 @@ function useDemoAreaMulti() {
               <div class="mt-6 grow sm:mt-0">
                 <div class="pb-4 text-center sm:pb-0 sm:text-right">
                   <BaseHeading tag="h1" class="text-white opacity-90">
-                    <span>سلام، علی ! 👋</span>
+                    <span>سلام، {{ user?.phoneNumber || 'کاربر عزیز' }} ! 👋</span>
                   </BaseHeading>
                   <BaseParagraph size="sm" class="max-w-xs text-white opacity-70">
                     <span>
@@ -176,7 +179,7 @@ function useDemoAreaMulti() {
                       را مدیریت و نظارت کنید.
                     </span>
                   </BaseParagraph>
-                  <div class="mt-2">
+                  <div class="mt-2 flex flex-col gap-2 sm:flex-row">
                     <BaseButton
                       size="sm"
                       color="light"
@@ -184,8 +187,18 @@ function useDemoAreaMulti() {
                       class="w-full sm:w-auto"
                       to="/onboarding/choosePatient"
                     >
-                      <Icon name="lucide:message-circle-plus" class="ml-2 size-4" />
-                      <span>رفتن به گفت و گو</span>
+                      <Icon name="lucide:users" class="ml-2 size-4" />
+                      <span>مراجعین</span>
+                    </BaseButton>
+                    <BaseButton
+                      size="sm"
+                      color="light"
+                      variant="outline"
+                      class="w-full sm:w-auto"
+                      to="/onboarding/chooseTherapist"
+                    >
+                      <Icon name="ph:robot-duotone" class="ml-2 size-4" />
+                      <span>روانشناسان هوش مصنوعی</span>
                     </BaseButton>
                   </div>
                 </div>

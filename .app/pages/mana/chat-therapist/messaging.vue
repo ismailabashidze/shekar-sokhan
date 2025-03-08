@@ -19,10 +19,13 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const { open } = usePanels()
 const { getPatients } = usePatient()
+const { getTherapists } = useTherapist()
 const { getMessages, sendMessage, createSeparator, clearMessages, updateMessage } = usePatientMessages()
 const route = useRoute()
 
 const conversations = ref<{ id: string, user: Patient }[]>([])
+const therapistConversations = ref<{ id: string, user: any }[]>([])
+const activeConversationType = ref<'patients' | 'therapists'>('patients')
 const messages = ref<Message[]>([])
 const loading = ref(false)
 const messageLoading = ref(false)
@@ -31,6 +34,7 @@ const expanded = ref(false)
 const search = ref('')
 const newMessage = ref('')
 const activePatientId = ref<string | null>(null)
+const activeTherapistId = ref<string | null>(null)
 const showEmojiPicker = ref(false)
 const showAudioUser = ref(false)
 const { role } = useUser()
@@ -72,15 +76,29 @@ onClickOutside(emojiPickerRef, () => {
 
 const initializeFromRoute = async () => {
   const patientId = route.query.patientId as string
-  if (patientId && conversations.value.length > 0) {
+  const therapistId = route.query.therapistId as string
+
+  if (therapistId && therapistConversations.value.length > 0) {
+    const conversation = therapistConversations.value.find(c => c.user.id === therapistId)
+    if (conversation) {
+      activeTherapistId.value = therapistId
+      activePatientId.value = null
+      activeConversationType.value = 'therapists'
+      await loadMessages(therapistId)
+    }
+  }
+  else if (patientId && conversations.value.length > 0) {
     const conversation = conversations.value.find(c => c.user.id === patientId)
     if (conversation) {
       activePatientId.value = patientId
+      activeTherapistId.value = null
+      activeConversationType.value = 'patients'
       await loadMessages(patientId)
     }
   }
-  else if (conversations.value.length > 0 && !activePatientId.value) {
+  else if (conversations.value.length > 0 && !activePatientId.value && !activeTherapistId.value) {
     activePatientId.value = conversations.value[0].user.id
+    activeConversationType.value = 'patients'
     await loadMessages(conversations.value[0].user.id)
   }
 }
@@ -103,11 +121,11 @@ const scrollToBottom = () => {
   })
 }
 
-const loadMessages = async (patientId: string) => {
-  if (currentLoadingPatientId.value === patientId) return
+const loadMessages = async (userId: string) => {
+  if (currentLoadingPatientId.value === userId) return
 
   loading.value = true
-  currentLoadingPatientId.value = patientId
+  currentLoadingPatientId.value = userId
 
   try {
     const nuxtApp = useNuxtApp()
@@ -116,7 +134,8 @@ const loadMessages = async (patientId: string) => {
       return
     }
 
-    const loadedMessages = await getMessages(patientId)
+    // Use the appropriate message service based on the active conversation type
+    const loadedMessages = await getMessages(userId)
     messages.value = loadedMessages.map(msg => ({
       ...msg,
       timestamp: msg.created,
@@ -134,14 +153,47 @@ const loadMessages = async (patientId: string) => {
 }
 
 const selectConversation = async (patientId: string) => {
-  activePatientId.value = patientId
+  if (activeConversationType.value === 'patients') {
+    activePatientId.value = patientId
+    activeTherapistId.value = null
+  }
+  else {
+    activeTherapistId.value = patientId
+    activePatientId.value = null
+  }
+
   await loadMessages(patientId)
   navigateTo({
     query: {
       ...route.query,
-      patientId,
+      patientId: activeConversationType.value === 'patients' ? patientId : undefined,
+      therapistId: activeConversationType.value === 'therapists' ? patientId : undefined,
     },
   })
+}
+
+const toggleConversationType = () => {
+  activeConversationType.value = activeConversationType.value === 'patients' ? 'therapists' : 'patients'
+
+  // Reset active IDs when switching
+  if (activeConversationType.value === 'patients') {
+    if (conversations.value.length > 0) {
+      activePatientId.value = conversations.value[0].user.id
+      activeTherapistId.value = null
+      loadMessages(activePatientId.value)
+    }
+  }
+  else {
+    if (therapistConversations.value.length > 0) {
+      activeTherapistId.value = therapistConversations.value[0].user.id
+      activePatientId.value = null
+      loadMessages(activeTherapistId.value)
+    }
+  }
+}
+
+const getActiveId = () => {
+  return activeConversationType.value === 'patients' ? activePatientId.value : activeTherapistId.value
 }
 
 onMounted(async () => {
@@ -151,21 +203,47 @@ onMounted(async () => {
     if (!nuxtApp.$pb.authStore.isValid) {
       return
     }
+
+    // Load patients
     const patients = await getPatients()
     conversations.value = patients.map((patient: any) => ({
+      id: patient.id,
       user: patient,
       unread: 0,
       lastMessage: '',
       lastMessageTime: '',
     }))
 
-    if (route.query.patientId) {
+    // Load therapists
+    const therapists = await getTherapists()
+    therapistConversations.value = therapists.map((therapist: any) => ({
+      id: therapist.id,
+      user: therapist,
+      unread: 0,
+      lastMessage: '',
+      lastMessageTime: '',
+    }))
+
+    // Check for therapistId in URL first
+    if (route.query.therapistId) {
+      const therapistId = route.query.therapistId as string
+      activeTherapistId.value = therapistId
+      activePatientId.value = null
+      activeConversationType.value = 'therapists'
+      await loadMessages(therapistId)
+    }
+    // Then check for patientId
+    else if (route.query.patientId) {
       const patientId = route.query.patientId as string
       activePatientId.value = patientId
+      activeTherapistId.value = null
+      activeConversationType.value = 'patients'
       await loadMessages(patientId)
     }
+    // Default to first patient if nothing specified
     else if (conversations.value.length > 0) {
       activePatientId.value = conversations.value[0].user.id
+      activeConversationType.value = 'patients'
       await loadMessages(conversations.value[0].user.id)
     }
   }
@@ -182,9 +260,21 @@ onMounted(async () => {
 })
 
 watch(
-  () => route.query.patientId,
-  async (newPatientId) => {
-    if (newPatientId) {
+  () => [route.query.patientId, route.query.therapistId],
+  async ([newPatientId, newTherapistId]) => {
+    if (newTherapistId) {
+      activeConversationType.value = 'therapists'
+      activeTherapistId.value = newTherapistId as string
+      activePatientId.value = null
+      await loadMessages(newTherapistId as string)
+    }
+    else if (newPatientId) {
+      activeConversationType.value = 'patients'
+      activePatientId.value = newPatientId as string
+      activeTherapistId.value = null
+      await loadMessages(newPatientId as string)
+    }
+    else {
       await initializeFromRoute()
     }
   },
@@ -210,9 +300,16 @@ onUnmounted(() => {
 })
 
 const selectedConversationComputed = computed(() => {
-  return conversations.value.find(
-    conversation => conversation.user.id === activePatientId.value,
-  )
+  if (activeConversationType.value === 'patients') {
+    return conversations.value.find(
+      conversation => conversation.user.id === activePatientId.value,
+    )
+  }
+  else {
+    return therapistConversations.value.find(
+      conversation => conversation.user.id === activeTherapistId.value,
+    )
+  }
 })
 
 const getRandomColor = () => {
@@ -285,7 +382,7 @@ async function submitMessage() {
     }
 
     // First save and show the user message
-    const savedUserMessage = await sendMessage(activePatientId.value, userMessage.text, 'sent')
+    const savedUserMessage = await sendMessage(getActiveId(), userMessage.text, 'sent')
     messages.value.push({
       ...userMessage,
       id: savedUserMessage.id,
@@ -311,7 +408,7 @@ async function submitMessage() {
       scrollToBottom()
 
       // Get current patient details and proceed with chat
-      const currentPatient = conversations.value.find(c => c.user.id === activePatientId.value)?.user
+      const currentPatient = selectedConversationComputed?.user
 
       // Create message history excluding the empty message we just added
       const messageHistory = messages.value.slice(0, -1).map(msg => ({
@@ -348,7 +445,7 @@ async function submitMessage() {
       )
 
       // After stream is complete, save the full message
-      const savedAssistantMessage = await sendMessage(activePatientId.value, streamingResponse.value, 'received')
+      const savedAssistantMessage = await sendMessage(getActiveId(), streamingResponse.value, 'received')
       // Update the message ID and timestamp in the UI
       const lastMessage = messages.value[messages.value.length - 1]
       lastMessage.id = savedAssistantMessage.id
@@ -512,7 +609,7 @@ const confirmClearChat = async () => {
   }
 
   try {
-    await clearMessages(activePatientId.value!)
+    await clearMessages(getActiveId())
     messages.value = []
     closeDeleteModal()
   }
@@ -677,47 +774,123 @@ const submitReport = async () => {
       <div
         class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-[9] h-screen w-16 bg-white sm:w-20 lg:border-r"
       >
+        <!-- Toggle between patients and therapists -->
+        <div class="mt-3 flex justify-center">
+          <div class="flex flex-col items-center space-y-3">
+            <button
+              class="flex size-14 items-center justify-center rounded-full transition-all duration-300"
+              :class="activeConversationType === 'patients' ? 'bg-primary-500 text-white shadow-lg' : 'bg-muted-100 dark:bg-muted-700 text-muted-400 hover:bg-muted-200 dark:hover:bg-muted-600'"
+              title="نمایش بیماران"
+              @click="activeConversationType = 'patients'"
+            >
+              <Icon name="ph:user-duotone" class="size-6" />
+            </button>
+            <div class="bg-muted-200 dark:bg-muted-700 h-px w-10" />
+            <button
+              class="flex size-14 items-center justify-center rounded-full transition-all duration-300"
+              :class="activeConversationType === 'therapists' ? 'bg-primary-500 text-white shadow-lg' : 'bg-muted-100 dark:bg-muted-700 text-muted-400 hover:bg-muted-200 dark:hover:bg-muted-600'"
+              title="نمایش درمانگران"
+              @click="activeConversationType = 'therapists'"
+            >
+              <Icon name="ph:heartbeat-duotone" class="size-6" />
+            </button>
+          </div>
+        </div>
+
         <div class="mt-3 flex h-full flex-col">
-          <!-- List -->
-          <a
-            v-for="conversation in conversations"
-            :key="conversation.id"
-            href="#"
-            class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
-            :class="
-              activePatientId === conversation.user.id
-                ? 'border-primary-500'
-                : 'border-transparent'
-            "
-            @click.prevent="selectConversation(conversation.user.id)"
-          >
-            <div class="relative flex w-full justify-center gap-2">
-              <div class="relative flex w-14 shrink-0 items-center justify-center">
-                <a
-                  href="#"
-                  class="relative block"
-                  :class="[
-                    selectedConversationComputed?.user.id === conversation.user.id
-                      ? 'z-10'
-                      : '',
-                  ]"
-                  @click.prevent="selectConversation(conversation.user.id)"
-                >
-                  <BaseAvatar
-                    size="sm"
-                    rounded="full"
-                    :src="
-                      conversation.user.avatar
-                        ? `http://localhost:8090/api/files/patients/${conversation.user.id}/${conversation.user.avatar}`
-                        : '/img/avatars/1.svg'
-                    "
-                    :text="conversation.user.name?.charAt(0)"
-                    :class="getRandomColor()"
-                  />
-                </a>
+          <!-- List of patients -->
+          <template v-if="activeConversationType === 'patients'">
+            <a
+              v-for="conversation in conversations"
+              :key="conversation.id"
+              href="#"
+              class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
+              :class="
+                activePatientId === conversation.user.id
+                  ? 'border-primary-500'
+                  : 'border-transparent'
+              "
+              @click.prevent="selectConversation(conversation.user.id)"
+            >
+              <div class="relative flex w-full justify-center gap-2">
+                <div class="relative flex w-14 shrink-0 items-center justify-center">
+                  <a
+                    href="#"
+                    class="relative block"
+                    :class="[
+                      selectedConversationComputed?.user.id === conversation.user.id
+                        ? 'z-10'
+                        : '',
+                    ]"
+                    @click.prevent="selectConversation(conversation.user.id)"
+                  >
+                    <BaseAvatar
+                      size="sm"
+                      rounded="full"
+                      :src="
+                        conversation.user.avatar
+                          ? `https://pocket.zehna.ir/api/files/patients/${conversation.user.id}/${conversation.user.avatar}`
+                          : '/img/avatars/1.svg'
+                      "
+                      :text="conversation.user.name?.charAt(0)"
+                      :class="getRandomColor()"
+                    />
+                  </a>
+                </div>
               </div>
+            </a>
+          </template>
+
+          <!-- List of therapists -->
+          <template v-else>
+            <div v-if="therapistConversations.length === 0" class="flex flex-col items-center justify-center p-4 text-center">
+              <Icon name="ph:heartbeat-duotone" class="text-muted-400 mb-2 size-10" />
+              <p class="text-muted-400 text-xs">
+                هیچ درمانگری یافت نشد
+              </p>
             </div>
-          </a>
+            <a
+              v-for="conversation in therapistConversations"
+              v-else
+              :key="conversation.id"
+              href="#"
+              class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
+              :class="
+                activeTherapistId === conversation.user.id
+                  ? 'border-primary-500'
+                  : 'border-transparent'
+              "
+              @click.prevent="selectConversation(conversation.user.id)"
+            >
+              <div class="relative flex w-full justify-center gap-2">
+                <div class="relative flex w-14 shrink-0 items-center justify-center">
+                  <a
+                    href="#"
+                    class="relative block"
+                    :class="[
+                      selectedConversationComputed?.user.id === conversation.user.id
+                        ? 'z-10'
+                        : '',
+                    ]"
+                    @click.prevent="selectConversation(conversation.user.id)"
+                  >
+                    <BaseAvatar
+                      size="sm"
+                      rounded="full"
+                      :src="
+                        conversation.user.avatar
+                          ? `https://pocket.zehna.ir/api/files/therapists/${conversation.user.id}/${conversation.user.avatar}`
+                          : '/img/avatars/2.svg'
+                      "
+                      :text="conversation.user.name?.charAt(0)"
+                      :class="getRandomColor()"
+                    />
+                    <div class="bg-success-500 dark:border-muted-900 absolute -bottom-1 -right-1 flex size-3 items-center justify-center rounded-full border border-white" />
+                  </a>
+                </div>
+              </div>
+            </a>
+          </template>
         </div>
       </div>
       <!-- Current conversation -->
@@ -966,7 +1139,7 @@ const submitReport = async () => {
                       <div
                         v-if="showEmojiPicker"
                         ref="emojiPickerRef"
-                        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute bottom-full end-0 mb-2 w-64 rounded-lg border bg-white shadow-lg"
+                        class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 absolute bottom-full mb-2 w-64 rounded-lg border bg-white shadow-lg"
                       >
                         <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-2">
                           <span class="text-sm font-medium">انتخاب ایموجی</span>
@@ -977,7 +1150,7 @@ const submitReport = async () => {
                             <Icon name="lucide:x" class="size-4" />
                           </BaseButtonIcon>
                         </div>
-                        <div class="grid grid-cols-8 gap-1 p-2">
+                        <div class="z-100 grid grid-cols-12 gap-1 p-2">
                           <button
                             v-for="emoji in emojis"
                             :key="emoji"
@@ -1076,7 +1249,7 @@ const submitReport = async () => {
                 rounded="full"
                 :src="
                   selectedConversationComputed?.user.avatar
-                    ? `http://localhost:8090/api/files/patients/${selectedConversationComputed.user.id}/${selectedConversationComputed.user.avatar}`
+                    ? `https://pocket.zehna.ir/api/files/patients/${selectedConversationComputed.user.id}/${selectedConversationComputed.user.avatar}`
                     : '/img/avatars/1.svg'
                 "
                 :text="selectedConversationComputed?.user.name?.charAt(0)"
@@ -1114,75 +1287,6 @@ const submitReport = async () => {
                   <span class="text-muted-400 font-sans text-xs">
                     سن: {{ selectedConversationComputed?.user.age }} سال
                   </span>
-                </div>
-              </div>
-              <div class="my-4 space-y-2">
-                <!-- Model search and selector -->
-                <div v-if="!modelsError && role === 'admin'" class="relative">
-                  <BaseInput
-                    v-model="modelSearchInput"
-                    icon="ph:magnifying-glass"
-                    placeholder="جست و جوی مدل های زبانی . . . "
-                    class="w-full"
-                    @focus="showModelDropdown = true"
-                  />
-
-                  <!-- Model dropdown -->
-                  <div
-                    v-if="showModelDropdown"
-                    class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 absolute z-50 mt-1 w-full rounded-lg border bg-white shadow-lg"
-                  >
-                    <div class="max-h-60 overflow-y-auto p-2">
-                      <button
-                        v-for="model in filteredModels"
-                        :key="model.id"
-                        type="button"
-                        class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer rounded p-2 text-left"
-                        :class="{ 'bg-muted-100 dark:bg-muted-700': model.id === selectedModel }"
-                        @click="selectedModel = model.id; showModelDropdown = false"
-                      >
-                        <div class="flex items-center justify-between">
-                          <span class="font-medium">{{ model.name }}</span>
-                          <span class="text-muted-400 text-xs">
-                            {{ model.pricing.prompt }}
-                          </span>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Selected model display -->
-                <div
-                  v-if="selectedModel && !modelsLoading && role === 'admin'"
-                  class="bg-muted-100 dark:bg-muted-800 flex items-center gap-2 rounded p-2"
-                >
-                  <Icon name="ph:robot" class="text-primary-500 size-5" />
-                  <span class="text-sm">
-                    مدل انتخاب شده : {{ models.find(m => m.id === selectedModel)?.name }}
-                  </span>
-                </div>
-
-                <!-- Error state -->
-                <div v-if="modelsError && role === 'admin'" class="text-center">
-                  <p class="text-danger-500 mb-2">
-                    {{ modelsError }}
-                  </p>
-                  <BaseButton
-                    color="danger"
-                    :loading="modelsLoading"
-                    @click="retryFetch"
-                  >
-                    تلاش برای دریافت مدل ها
-                  </BaseButton>
-                </div>
-
-                <!-- Model error toast -->
-                <div
-                  v-if="showModelError && role === 'admin'"
-                  class="bg-danger-500 fixed right-4 top-4 z-50 rounded px-4 py-2 text-white shadow-lg"
-                >
-                  خطایی در پاسخ مدل رخ داد. لطفا دوباره تلاش کنید.
                 </div>
               </div>
 

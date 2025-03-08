@@ -64,6 +64,9 @@ importers:
       '@gradio/client':
         specifier: ^0.18.0
         version: 0.18.0
+      '@iconify/vue':
+        specifier: ^4.1.1
+        version: 4.1.1(vue@3.4.21(typescript@5.4.5))
       chromadb:
         specifier: ^1.8.1
         version: 1.8.1(encoding@0.1.13)
@@ -80,6 +83,9 @@ importers:
       '@fontsource-variable/karla':
         specifier: ^5.0.19
         version: 5.0.20
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
       nuxt:
         specifier: 3.11.2
         version: 3.11.2(@parcel/watcher@2.4.1)(@types/node@20.12.7)(@unocss/reset@0.59.1)(bufferutil@4.0.8)(encoding@0.1.13)(eslint@8.57.0)(floating-vue@5.2.2(@nuxt/kit@3.11.2(rollup@4.14.1))(vue@3.4.21(typescript@5.4.5)))(ioredis@5.3.2)(meow@9.0.0)(optionator@0.9.3)(rollup@4.14.1)(terser@5.30.3)(typescript@5.4.5)(unocss@0.59.1(postcss@8.4.38)(rollup@4.14.1)(vite@5.2.8(@types/node@20.12.7)(terser@5.30.3)))(vite@5.2.8(@types/node@20.12.7)(terser@5.30.3))(vue-tsc@2.0.12(typescript@5.4.5))
@@ -2641,6 +2647,11 @@ packages:
 
   cronstrue@2.49.0:
     resolution: {integrity: sha512-FWZBqdStQaPR8ZTBQGALh1EK9Hl1HcG70dyGvD1rKLPafFO3H73o38dz/e8YkIlbLn3JxmBI/f6Doe3Nh+DcEQ==}
+    hasBin: true
+
+  cross-env@7.0.3:
+    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
+    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
     hasBin: true
 
   cross-spawn@6.0.5:
@@ -9865,6 +9876,10 @@ snapshots:
   croner@8.0.2: {}
 
   cronstrue@2.49.0: {}
+
+  cross-env@7.0.3:
+    dependencies:
+      cross-spawn: 7.0.3
 
   cross-spawn@6.0.5:
     dependencies:

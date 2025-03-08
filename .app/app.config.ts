@@ -23,16 +23,33 @@ export default defineAppConfig({
       //   ],
       // },
       navigation: {
+        logo: {
+          component: 'img',
+          props: {
+            src: '/img/logo.png',
+            alt: 'Logo',
+            class: 'h-10',
+          },
+        },
         items: [
           {
             // Title displayed in the sidebar
-            title: 'صفحه گفت و گو',
-            icon: { name: 'ph:chat-circle', class: 'w-5 h-5' },
-            activePath: '/mana/chat',
-            to: '/mana/chat',
+            title: 'مراجعان',
+            icon: { name: 'ph:chalkboard-teacher', class: 'w-7 h-7' },
+            activePath: '/onboarding/choosePatient',
+            to: '/onboarding/choosePatient',
             class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
             click: () => {
-              alert('clicked on layouts')
+            },
+          },
+          {
+            // Title displayed in the sidebar
+            title: 'مشاوران',
+            icon: { name: 'ph:robot', class: 'w-7 h-7' },
+            activePath: '/onboarding/chooseTherapist',
+            to: '/onboarding/chooseTherapist',
+            class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
+            click: () => {
             },
           },
         ],

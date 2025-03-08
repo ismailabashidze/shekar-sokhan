@@ -106,7 +106,7 @@ const fetchPatientData = async () => {
 
       // If avatar exists, create a File object from the URL
       if (record.avatar) {
-        const avatarUrl = `http://localhost:8090/api/files/patients/${patientId}/${record.avatar}`
+        const avatarUrl = `https://pocket.zehna.ir/api/files/patients/${patientId}/${record.avatar}`
         const response = await fetch(avatarUrl)
         const blob = await response.blob()
         const file = new File([blob], record.avatar, { type: blob.type })
@@ -134,7 +134,7 @@ const currentAvatar = computed(() => {
     return URL.createObjectURL(values.avatar)
 
   if (values.avatar)
-    return `http://localhost:8090/api/files/patients/${patientId}/${values.avatar}`
+    return `https://pocket.zehna.ir/api/files/patients/${patientId}/${values.avatar}`
 
   return '/img/avatars/default-male.jpg'
 })

@@ -37,97 +37,58 @@ const query = computed(() => {
 })
 
 const data = ref({
-  data: [
-    {
-      id: 0,
-      username: 'مانا',
-      position: 'عامل هوشمند ارزیابی سلامت روان',
-      src: '/img/avatars/mana.jpg',
-      badge: '/img/logo.png',
-      location: 'ایران، تهران',
-      industry: 'روان درمانا',
-      status: 'online',
-      tasks: {
-        pending: 37,
-        done: 164,
-        status: 0,
-      },
-      description:
-        'مانا اولین عامل هوشمند ارزیابی سلامت روان با سیستم تصمیم گیری و هدف گذاری برای تشخیص موضوعات مرتبط با سلامت روان است.',
-    },
-    {
-      id: 2,
-      username: 'یارا',
-      position: 'عامل هوشمند همدلی',
-      src: '/img/avatars/3.svg',
-      badge: '/img/logo.png',
-      location: 'ایران، تهران',
-      industry: 'Business',
-      status: 'working',
-      tasks: {
-        pending: 21,
-        done: 598,
-        status: 1,
-      },
-      description:
-        'یارا، اولین عامل هوشمند همدلی است که با توجه به وضعیت روانی و موضوعات فرد، از کاربران سیستم حمایت عاطفی و روانی انجام می دهد.',
-    },
-    {
-      id: 3,
-      username: 'صبا',
-      position: 'عامل هوشمند مداخله در بحران',
-      src: '/img/avatars/saba.webp',
-      badge: '/img/logo.png',
-      location: 'ایران، تهران',
-      industry: 'Business',
-      status: 'working',
-      tasks: {
-        pending: 21,
-        done: 598,
-        status: 1,
-      },
-      description:
-        'صبا، اولین عامل هوشمند در مداخله های بحران، مناسب برای خطوط داغ مشاوره های بحران هایی مانند آسیب به خود و خودکشی است.',
-    },
-    {
-      id: 4,
-      username: 'زیگا',
-      position: 'عامل هوشمند مشاوره پویشی',
-      src: '/img/avatars/3.svg',
-      badge: '/img/logo.png',
-      location: 'ایران، تهران',
-      industry: 'Business',
-      status: 'working',
-      tasks: {
-        pending: 21,
-        done: 598,
-        status: 1,
-      },
-      description:
-        'زیگا، اولین عامل هوشمند در جهان است که توانایی برنامه ریزی و مداخله با استفاده از تکنیک های روانپویشی و تکنیک های ISTPD را دارد.',
-    },
-    {
-      id: 5,
-      username: 'کیا',
-      position: 'دستیار هوشمند مشاوره',
-      src: '/img/avatars/kia.webp',
-      badge: '/img/logo.png',
-      location: 'ایران، تهران',
-      industry: 'Business',
-      status: 'working',
-      tasks: {
-        pending: 21,
-        done: 598,
-        status: 1,
-      },
-      description:
-        'کیا، اولین دستیار هوشمند روان درمانگران با ارائه ی امکانات ویژه برای کمک به درمان',
-    },
-  ],
+  data: []
 })
+
 const pending = ref()
 const error = ref()
 const refresh = ref()
+
+// Import therapist composable
+const { getTherapists } = useTherapist()
+
+// Fetch therapists from the composable
+const fetchTherapists = async () => {
+  pending.value = true
+  try {
+    const therapists = await getTherapists()
+
+    // Map therapists to the format expected by the template
+    const mappedTherapists = therapists.map(therapist => ({
+      id: therapist.id,
+      username: therapist.name,
+      position: therapist.specialty,
+      src: therapist.avatar ? `/api/files/therapists/${therapist.id}/${therapist.avatar}` : '/img/avatars/default-male.jpg',
+      badge: '/img/logo.png',
+      location: 'ایران، تهران',
+      industry: 'روان درمانا',
+      status: therapist.isActive ? 'online' : 'working',
+      tasks: {
+        pending: 0,
+        done: 0,
+        status: therapist.isActive ? 0 : 1,
+      },
+      description: therapist.shortDescription || therapist.longDescription || '',
+    }))
+
+    data.value = { data: mappedTherapists }
+  }
+  catch (err) {
+    console.error('Error fetching therapists:', err)
+    error.value = 'خطا در دریافت اطلاعات روانشناسان'
+  }
+  finally {
+    pending.value = false
+  }
+}
+
+// Fetch therapists on component mount
+onMounted(() => {
+  fetchTherapists()
+})
+
+// Refresh function for manual refresh
+refresh.value = fetchTherapists
 
 // Function to get random color for avatars
 function getRandomColor() {
@@ -160,7 +121,7 @@ function getRandomColor() {
             انتخاب عامل هوش مصنوعی
           </BaseHeading>
         </div>
-        
+
         <div class="flex items-center gap-2">
           <BaseInput
             v-model="filter"
@@ -300,7 +261,11 @@ function getRandomColor() {
                     name="ph:check-circle-duotone"
                     class="text-success-500 size-7"
                   />
-                  <Icon v-else name="ph:x-circle-duotone" class="text-danger-500 size-7" />
+                  <Icon
+                    v-else
+                    name="ph:x-circle-duotone"
+                    class="text-danger-500 size-7"
+                  />
                 </div>
               </div>
             </div>

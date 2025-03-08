@@ -48,6 +48,22 @@ export interface PatientGenerateOutput {
   moodAndCurrentEmotions: string
 }
 
+export interface TherapistGenerateInput {
+  name: string
+  specialty: string
+  shortDescription: string
+}
+
+export interface TherapistGenerateOutput {
+  longDescription: string
+  definingTraits: string
+  backStory: string
+  personality: string
+  appearance: string
+  approach: string
+  expertise: string
+}
+
 export function useOpenRouter() {
   const config = useRuntimeConfig()
 
@@ -343,6 +359,126 @@ export function useOpenRouter() {
     }
   }
 
+  const generateTherapist = async (input: TherapistGenerateInput): Promise<TherapistGenerateOutput> => {
+    processing.value = true
+    error.value = null
+
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+          'X-Title': 'Therapist Details Generator',
+        },
+        body: JSON.stringify({
+          model: selectedModel.value,
+          messages: [
+            {
+              role: 'system',
+              content: 'شما یک دستیار روانشناس هستید که در تولید اطلاعات روانشناس کمک می‌کند. لطفا با توجه به اطلاعات اولیه روانشناس، سایر جزئیات را به صورت منطقی و به زبان فارسی تولید کنید.',
+            },
+            {
+              role: 'user',
+              content: `لطفا با توجه به اطلاعات زیر، جزئیات روانشناس را تولید کنید:
+نام: ${input.name}
+تخصص: ${input.specialty}
+توضیح کوتاه: ${input.shortDescription}`,
+            },
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'therapist_details',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  longDescription: {
+                    type: 'string',
+                    description: 'توضیح بلند و کامل در مورد روانشناس و تخصص او',
+                  },
+                  definingTraits: {
+                    type: 'string',
+                    description: 'صفات و ویژگی‌های تعریف‌کننده شخصیت و رفتار روانشناس',
+                  },
+                  backStory: {
+                    type: 'string',
+                    description: 'داستان زندگی، پیشینه و تجربیات مهم روانشناس',
+                  },
+                  personality: {
+                    type: 'string',
+                    description: 'شخصیت، رفتارها و خصوصیات روانشناختی روانشناس',
+                  },
+                  appearance: {
+                    type: 'string',
+                    description: 'توصیف ظاهری و ویژگی‌های فیزیکی روانشناس',
+                  },
+                  approach: {
+                    type: 'string',
+                    description: 'روش و رویکرد درمانی روانشناس',
+                  },
+                  expertise: {
+                    type: 'string',
+                    description: 'تخصص و مهارت‌های روانشناس',
+                  },
+                },
+                required: [
+                  'longDescription',
+                  'definingTraits',
+                  'backStory',
+                  'personality',
+                  'appearance',
+                  'approach',
+                  'expertise',
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+          temperature: 0.7,
+          max_tokens: 0,
+          include_reasoning: true,
+          plugins: [],
+          transforms: ['middle-out'],
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage: string
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData?.error?.message || errorData?.message || errorText
+        }
+        catch {
+          errorMessage = errorText
+        }
+        throw new Error(`Generate error: ${errorMessage}`)
+      }
+
+      const data = await response.json()
+      const content = data.choices[0].message.content
+
+      let result: TherapistGenerateOutput
+      try {
+        result = typeof content === 'string' ? JSON.parse(content) : content
+        return result
+      }
+      catch (e) {
+        throw new Error(`Invalid response format: ${e.message}`)
+      }
+    }
+    catch (e: any) {
+      error.value = e.message
+      throw e
+    }
+    finally {
+      processing.value = false
+    }
+  }
+
   // Initialize models on composable creation
   onMounted(() => {
     fetchModels()
@@ -364,5 +500,6 @@ export function useOpenRouter() {
 
     // Patient generation
     generate,
+    generateTherapist,
   }
 }

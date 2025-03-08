@@ -257,7 +257,7 @@ watch(filter, () => {
                 <BaseAvatar
                   size="xl"
                   rounded="full"
-                  :src="item.avatar ? `http://localhost:8090/api/files/patients/${item.id}/${item.avatar}` : '/img/avatars/1.svg'"
+                  :src="item.avatar ? `https://pocket.zehna.ir/api/files/patients/${item.id}/${item.avatar}` : '/img/avatars/1.svg'"
                   :badge-src="item.badge"
                   :text="item.name ? item.name.charAt(0).toUpperCase() : 'A'"
                   :class="getRandomColor()"
