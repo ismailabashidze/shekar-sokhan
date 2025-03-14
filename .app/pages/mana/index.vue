@@ -182,7 +182,7 @@ function useDemoAreaMulti() {
                       color="light"
                       variant="outline"
                       class="w-full sm:w-auto"
-                      to="/onboarding/choosePatient"
+                      to="/darmana/patients/choosePatient"
                     >
                       <Icon name="lucide:message-circle-plus" class="ml-2 size-4" />
                       <span>رفتن به گفت و گو</span>

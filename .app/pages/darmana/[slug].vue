@@ -15,7 +15,7 @@ definePageMeta({
 const route = useRoute()
 const pId = (route.params.slug)
 if (!pId) {
-  navigateTo('/onboarding/choosePatient')
+  navigateTo('/darmana/patients/choosePatient')
 }
 
 useHead({ htmlAttrs: { dir: 'rtl' } })

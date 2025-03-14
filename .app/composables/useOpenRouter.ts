@@ -30,6 +30,18 @@ interface OpenRouterOptions {
     motivation: string
     moodAndCurrentEmotions: string
   }
+  therapistDetails?: {
+    name: string
+    specialty: string
+    shortDescription: string
+    longDescription: string
+    definingTraits: string
+    backStory: string
+    personality: string
+    appearance: string
+    approach: string
+    expertise: string
+  }
 }
 
 export interface PatientGenerateInput {
@@ -128,11 +140,15 @@ export function useOpenRouter() {
     error.value = null
 
     try {
-      // Add system message with patient details at the beginning
+      // Add system message with patient/therapist details at the beginning
       const systemMessage = messages[0]?.role === 'system' ? messages[0] : null
       const patientDetails = options.patientDetails
-      const systemPrompt = patientDetails
-        ? `اطلاعات هویتی تو در پایین آمده است. 
+      const therapistDetails = options.therapistDetails
+
+      let systemPrompt = ''
+
+      if (patientDetails) {
+        systemPrompt = `اطلاعات هویتی تو در پایین آمده است. 
         دقت کن درست است که این اطلاعات به زبان سوم شخص نوشته شده، ولی در واقع اطلاعات تو است.
 نام: ${patientDetails.name}
 سن: ${patientDetails.age}
@@ -150,7 +166,27 @@ export function useOpenRouter() {
 دقت کن که نقش تو مراجع برای روان درمانی است و نقش مقابل تو یک روان شناس است.
 فقط یک بار سلام کافی است. دیگر نیازی به سلام مجدد نیست
 `
-        : ''
+      }
+
+      if (therapistDetails) {
+        systemPrompt = `اطلاعات هویتی تو در پایین آمده است:
+نام: ${therapistDetails.name}
+تخصص: ${therapistDetails.specialty}
+توضیح کوتاه: ${therapistDetails.shortDescription}
+توضیح بلند: ${therapistDetails.longDescription}
+صفات تعریف کننده: ${therapistDetails.definingTraits}
+داستان زندگی: ${therapistDetails.backStory}
+شخصیت: ${therapistDetails.personality}
+ظاهر: ${therapistDetails.appearance}
+رویکرد: ${therapistDetails.approach}
+تخصص: ${therapistDetails.expertise}
+
+تو یک روانشناس هستی که در یک سیستم مشاوره متنی با مراجعین در حال گفتگو هستی.
+همیشه در نقش یک روانشناس حرفه‌ای باش و از اصول اخلاقی و حرفه‌ای پیروی کن.
+فقط یک بار سلام کافی است. دیگر نیازی به سلام مجدد نیست.
+در مکالمات خود از رویکرد و تخصص‌هایی که در بالا ذکر شده استفاده کن.
+به یاد داشته باش که هدف اصلی کمک به مراجع و ایجاد یک فضای امن و حمایتی است.`
+      }
 
       const messagesWithSystem = systemMessage
         ? messages

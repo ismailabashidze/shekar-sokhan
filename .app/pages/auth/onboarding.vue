@@ -215,7 +215,7 @@ const verifyCodes = async () => {
       icon: 'ph:check',
       closable: true,
     })
-    router.push('/onboarding/choosePatient')
+    router.push('/darmana/patients/choosePatient')
   }
 }
 watch(tel, (newValue) => {

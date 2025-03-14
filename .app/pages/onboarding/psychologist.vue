@@ -61,7 +61,7 @@ const redeem = async () => {
         icon: 'ph:check',
         closable: true,
       })
-      navigateTo('/onboarding/choosePatient')
+      navigateTo('/darmana/patients/choosePatient')
     }
     else {
       toaster.show({

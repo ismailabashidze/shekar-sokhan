@@ -10,7 +10,7 @@
 
 export default defineAppConfig({
   tairo: {
-    title: 'پنل جامع هوش مصنوعی',
+    title: 'ذهنا',
     sidebar: {
       // toolbar: {
       //   tools: [
@@ -36,8 +36,8 @@ export default defineAppConfig({
             // Title displayed in the sidebar
             title: 'مراجعان',
             icon: { name: 'ph:chalkboard-teacher', class: 'w-7 h-7' },
-            activePath: '/onboarding/choosePatient',
-            to: '/onboarding/choosePatient',
+            activePath: '/darmana/patients/choosePatient',
+            to: '/darmana/patients/choosePatient',
             class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
             click: () => {
             },
@@ -46,8 +46,8 @@ export default defineAppConfig({
             // Title displayed in the sidebar
             title: 'مشاوران',
             icon: { name: 'ph:robot', class: 'w-7 h-7' },
-            activePath: '/onboarding/chooseTherapist',
-            to: '/onboarding/chooseTherapist',
+            activePath: '/darmana/therapists/chooseTherapist',
+            to: '/darmana/therapists/chooseTherapist',
             class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
             click: () => {
             },

@@ -5,7 +5,7 @@ import AudioUser from '@/components/global/AudioUser.vue'
 import { useUser } from '@/composables/user'
 
 definePageMeta({
-  title: 'Messaging',
+  title: 'گفتگو با روانشناس',
   layout: 'empty',
   preview: {
     title: 'Messaging app',
@@ -18,14 +18,11 @@ definePageMeta({
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const { open } = usePanels()
-const { getPatients } = usePatient()
-const { getTherapists } = useTherapist()
-const { getMessages, sendMessage, createSeparator, clearMessages, updateMessage } = usePatientMessages()
+const { getTherapists, getTherapist } = useTherapist()
+const { getMessages, sendMessage, createSeparator, clearMessages, updateMessage } = useTherapistsMessages()
 const route = useRoute()
 
-const conversations = ref<{ id: string, user: Patient }[]>([])
-const therapistConversations = ref<{ id: string, user: any }[]>([])
-const activeConversationType = ref<'patients' | 'therapists'>('patients')
+const conversations = ref<{ id: string, user: Therapist }[]>([])
 const messages = ref<Message[]>([])
 const loading = ref(false)
 const messageLoading = ref(false)
@@ -33,7 +30,6 @@ const chatEl = ref<HTMLElement>()
 const expanded = ref(false)
 const search = ref('')
 const newMessage = ref('')
-const activePatientId = ref<string | null>(null)
 const activeTherapistId = ref<string | null>(null)
 const showEmojiPicker = ref(false)
 const showAudioUser = ref(false)
@@ -75,35 +71,21 @@ onClickOutside(emojiPickerRef, () => {
 })
 
 const initializeFromRoute = async () => {
-  const patientId = route.query.patientId as string
   const therapistId = route.query.therapistId as string
-
-  if (therapistId && therapistConversations.value.length > 0) {
-    const conversation = therapistConversations.value.find(c => c.user.id === therapistId)
+  if (therapistId && conversations.value.length > 0) {
+    const conversation = conversations.value.find(c => c.user.id === therapistId)
     if (conversation) {
       activeTherapistId.value = therapistId
-      activePatientId.value = null
-      activeConversationType.value = 'therapists'
       await loadMessages(therapistId)
     }
   }
-  else if (patientId && conversations.value.length > 0) {
-    const conversation = conversations.value.find(c => c.user.id === patientId)
-    if (conversation) {
-      activePatientId.value = patientId
-      activeTherapistId.value = null
-      activeConversationType.value = 'patients'
-      await loadMessages(patientId)
-    }
-  }
-  else if (conversations.value.length > 0 && !activePatientId.value && !activeTherapistId.value) {
-    activePatientId.value = conversations.value[0].user.id
-    activeConversationType.value = 'patients'
+  else if (conversations.value.length > 0 && !activeTherapistId.value) {
+    activeTherapistId.value = conversations.value[0].user.id
     await loadMessages(conversations.value[0].user.id)
   }
 }
 
-const currentLoadingPatientId = ref<string | null>(null)
+const currentLoadingTherapistId = ref<string | null>(null)
 
 const formatTime = (timestamp: string | Date) => {
   const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp
@@ -121,11 +103,11 @@ const scrollToBottom = () => {
   })
 }
 
-const loadMessages = async (userId: string) => {
-  if (currentLoadingPatientId.value === userId) return
+const loadMessages = async (therapistId: string) => {
+  if (currentLoadingTherapistId.value === therapistId) return
 
   loading.value = true
-  currentLoadingPatientId.value = userId
+  currentLoadingTherapistId.value = therapistId
 
   try {
     const nuxtApp = useNuxtApp()
@@ -134,8 +116,7 @@ const loadMessages = async (userId: string) => {
       return
     }
 
-    // Use the appropriate message service based on the active conversation type
-    const loadedMessages = await getMessages(userId)
+    const loadedMessages = await getMessages(therapistId)
     messages.value = loadedMessages.map(msg => ({
       ...msg,
       timestamp: msg.created,
@@ -148,52 +129,19 @@ const loadMessages = async (userId: string) => {
   }
   finally {
     loading.value = false
-    currentLoadingPatientId.value = null
+    currentLoadingTherapistId.value = null
   }
 }
 
-const selectConversation = async (patientId: string) => {
-  if (activeConversationType.value === 'patients') {
-    activePatientId.value = patientId
-    activeTherapistId.value = null
-  }
-  else {
-    activeTherapistId.value = patientId
-    activePatientId.value = null
-  }
-
-  await loadMessages(patientId)
+const selectConversation = async (therapistId: string) => {
+  activeTherapistId.value = therapistId
+  await loadMessages(therapistId)
   navigateTo({
     query: {
       ...route.query,
-      patientId: activeConversationType.value === 'patients' ? patientId : undefined,
-      therapistId: activeConversationType.value === 'therapists' ? patientId : undefined,
+      therapistId,
     },
   })
-}
-
-const toggleConversationType = () => {
-  activeConversationType.value = activeConversationType.value === 'patients' ? 'therapists' : 'patients'
-
-  // Reset active IDs when switching
-  if (activeConversationType.value === 'patients') {
-    if (conversations.value.length > 0) {
-      activePatientId.value = conversations.value[0].user.id
-      activeTherapistId.value = null
-      loadMessages(activePatientId.value)
-    }
-  }
-  else {
-    if (therapistConversations.value.length > 0) {
-      activeTherapistId.value = therapistConversations.value[0].user.id
-      activePatientId.value = null
-      loadMessages(activeTherapistId.value)
-    }
-  }
-}
-
-const getActiveId = () => {
-  return activeConversationType.value === 'patients' ? activePatientId.value : activeTherapistId.value
 }
 
 onMounted(async () => {
@@ -203,47 +151,21 @@ onMounted(async () => {
     if (!nuxtApp.$pb.authStore.isValid) {
       return
     }
-
-    // Load patients
-    const patients = await getPatients()
-    conversations.value = patients.map((patient: any) => ({
-      id: patient.id,
-      user: patient,
-      unread: 0,
-      lastMessage: '',
-      lastMessageTime: '',
-    }))
-
-    // Load therapists
     const therapists = await getTherapists()
-    therapistConversations.value = therapists.map((therapist: any) => ({
-      id: therapist.id,
+    conversations.value = therapists.map((therapist: any) => ({
       user: therapist,
       unread: 0,
       lastMessage: '',
       lastMessageTime: '',
     }))
 
-    // Check for therapistId in URL first
     if (route.query.therapistId) {
       const therapistId = route.query.therapistId as string
       activeTherapistId.value = therapistId
-      activePatientId.value = null
-      activeConversationType.value = 'therapists'
       await loadMessages(therapistId)
     }
-    // Then check for patientId
-    else if (route.query.patientId) {
-      const patientId = route.query.patientId as string
-      activePatientId.value = patientId
-      activeTherapistId.value = null
-      activeConversationType.value = 'patients'
-      await loadMessages(patientId)
-    }
-    // Default to first patient if nothing specified
     else if (conversations.value.length > 0) {
-      activePatientId.value = conversations.value[0].user.id
-      activeConversationType.value = 'patients'
+      activeTherapistId.value = conversations.value[0].user.id
       await loadMessages(conversations.value[0].user.id)
     }
   }
@@ -260,21 +182,9 @@ onMounted(async () => {
 })
 
 watch(
-  () => [route.query.patientId, route.query.therapistId],
-  async ([newPatientId, newTherapistId]) => {
+  () => route.query.therapistId,
+  async (newTherapistId) => {
     if (newTherapistId) {
-      activeConversationType.value = 'therapists'
-      activeTherapistId.value = newTherapistId as string
-      activePatientId.value = null
-      await loadMessages(newTherapistId as string)
-    }
-    else if (newPatientId) {
-      activeConversationType.value = 'patients'
-      activePatientId.value = newPatientId as string
-      activeTherapistId.value = null
-      await loadMessages(newPatientId as string)
-    }
-    else {
       await initializeFromRoute()
     }
   },
@@ -283,33 +193,26 @@ watch(
 watch(
   () => conversations.value,
   async (newConversations) => {
-    if (newConversations.length > 0 && !activePatientId.value) {
+    if (newConversations.length > 0 && !activeTherapistId.value) {
       await initializeFromRoute()
     }
   },
 )
 
-watch(activePatientId, async (newId) => {
+watch(activeTherapistId, async (newId) => {
   if (newId) {
     await loadMessages(newId)
   }
 })
 
 onUnmounted(() => {
-  currentLoadingPatientId.value = null
+  currentLoadingTherapistId.value = null
 })
 
 const selectedConversationComputed = computed(() => {
-  if (activeConversationType.value === 'patients') {
-    return conversations.value.find(
-      conversation => conversation.user.id === activePatientId.value,
-    )
-  }
-  else {
-    return therapistConversations.value.find(
-      conversation => conversation.user.id === activeTherapistId.value,
-    )
-  }
+  return conversations.value.find(
+    conversation => conversation.user.id === activeTherapistId.value,
+  )
 })
 
 const getRandomColor = () => {
@@ -350,7 +253,7 @@ watch(modelSearchInput, (newValue) => {
 })
 
 // Reset streaming response when selecting a new conversation
-watch(activePatientId, async (newId) => {
+watch(activeTherapistId, async (newId) => {
   streamingResponse.value = ''
   if (newId) {
     await loadMessages(newId)
@@ -382,7 +285,7 @@ async function submitMessage() {
     }
 
     // First save and show the user message
-    const savedUserMessage = await sendMessage(getActiveId(), userMessage.text, 'sent')
+    const savedUserMessage = await sendMessage(activeTherapistId.value, userMessage.text, 'sent')
     messages.value.push({
       ...userMessage,
       id: savedUserMessage.id,
@@ -408,9 +311,14 @@ async function submitMessage() {
       scrollToBottom()
 
       // Get current patient details and proceed with chat
-      const currentPatient = selectedConversationComputed?.user
+      const currentTherapist = conversations.value.find(c => c.user?.id === activeTherapistId.value)?.user as (Therapist & { id: string, avatar?: string }) | undefined
 
-      // Create message history excluding the empty message we just added
+      if (!currentTherapist?.id) {
+        console.error('No active therapist found')
+        return
+      }
+
+      // Create message history with system prompt and messages
       const messageHistory = messages.value.slice(0, -1).map(msg => ({
         role: msg.type === 'sent' ? 'user' : 'assistant',
         content: msg.text,
@@ -419,20 +327,18 @@ async function submitMessage() {
       await streamChat(
         messageHistory,
         {
-          patientDetails: currentPatient
-            ? {
-                name: currentPatient.name,
-                age: currentPatient.age,
-                shortDescription: currentPatient.shortDescription,
-                longDescription: currentPatient.longDescription,
-                definingTraits: currentPatient.definingTraits,
-                backStory: currentPatient.backStory,
-                personality: currentPatient.personality,
-                appearance: currentPatient.appearance,
-                motivation: currentPatient.motivation,
-                moodAndCurrentEmotions: currentPatient.moodAndCurrentEmotions,
-              }
-            : undefined,
+          therapistDetails: {
+            name: currentTherapist.name,
+            specialty: currentTherapist.specialty,
+            shortDescription: currentTherapist.shortDescription,
+            longDescription: currentTherapist.longDescription,
+            definingTraits: currentTherapist.definingTraits,
+            backStory: currentTherapist.backStory,
+            personality: currentTherapist.personality,
+            appearance: currentTherapist.appearance,
+            approach: currentTherapist.approach,
+            expertise: currentTherapist.expertise,
+          },
         },
         async (chunk) => {
           const content = chunk.choices[0]?.delta?.content || ''
@@ -445,12 +351,14 @@ async function submitMessage() {
       )
 
       // After stream is complete, save the full message
-      const savedAssistantMessage = await sendMessage(getActiveId(), streamingResponse.value, 'received')
-      // Update the message ID and timestamp in the UI
-      const lastMessage = messages.value[messages.value.length - 1]
-      lastMessage.id = savedAssistantMessage.id
-      lastMessage.timestamp = savedAssistantMessage.created
-      scrollToBottom()
+      if (currentTherapist.id) {
+        const savedAssistantMessage = await sendMessage(currentTherapist.id, streamingResponse.value, 'received')
+        // Update the message ID and timestamp in the UI
+        const lastMessage = messages.value[messages.value.length - 1]
+        lastMessage.id = savedAssistantMessage.id
+        lastMessage.timestamp = savedAssistantMessage.created
+        scrollToBottom()
+      }
     }
   }
   catch (e) {
@@ -504,8 +412,8 @@ onMounted(async () => {
   loading.value = true
   try {
     const nuxtApp = useNuxtApp()
-    const patients = await getPatients()
-    conversations.value = patients.map(p => ({ id: p.id, user: p }))
+    const therapists = await getTherapists()
+    conversations.value = therapists.map(p => ({ id: p.id, user: p }))
     await initializeFromRoute()
 
     // Initialize charge and time data
@@ -609,7 +517,7 @@ const confirmClearChat = async () => {
   }
 
   try {
-    await clearMessages(getActiveId())
+    await clearMessages(activeTherapistId.value!)
     messages.value = []
     closeDeleteModal()
   }
@@ -640,7 +548,7 @@ const clearChat = () => {
 }
 
 const gotoList = () => {
-  navigateTo('/onboarding/choosePatient')
+  navigateTo('/darmana/therapists/chooseTherapist')
 }
 
 const isReportModalOpen = ref(false)
@@ -670,6 +578,18 @@ const submitReport = async () => {
     toaster.show({
       title: 'خطا',
       message: 'خطا در ساخت گزارش',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  }
+}
+
+const handleTextareaClick = () => {
+  if (showNoCharge.value) {
+    toaster.show({
+      title: 'خطا',
+      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
@@ -774,125 +694,50 @@ const submitReport = async () => {
       <div
         class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-[9] h-screen w-16 bg-white sm:w-20 lg:border-r"
       >
-        <!-- Toggle between patients and therapists -->
-        <div class="mt-3 flex justify-center">
-          <div class="flex flex-col items-center space-y-3">
-            <button
-              class="flex size-14 items-center justify-center rounded-full transition-all duration-300"
-              :class="activeConversationType === 'patients' ? 'bg-primary-500 text-white shadow-lg' : 'bg-muted-100 dark:bg-muted-700 text-muted-400 hover:bg-muted-200 dark:hover:bg-muted-600'"
-              title="نمایش بیماران"
-              @click="activeConversationType = 'patients'"
-            >
-              <Icon name="ph:user-duotone" class="size-6" />
-            </button>
-            <div class="bg-muted-200 dark:bg-muted-700 h-px w-10" />
-            <button
-              class="flex size-14 items-center justify-center rounded-full transition-all duration-300"
-              :class="activeConversationType === 'therapists' ? 'bg-primary-500 text-white shadow-lg' : 'bg-muted-100 dark:bg-muted-700 text-muted-400 hover:bg-muted-200 dark:hover:bg-muted-600'"
-              title="نمایش درمانگران"
-              @click="activeConversationType = 'therapists'"
-            >
-              <Icon name="ph:heartbeat-duotone" class="size-6" />
-            </button>
-          </div>
-        </div>
-
         <div class="mt-3 flex h-full flex-col">
-          <!-- List of patients -->
-          <template v-if="activeConversationType === 'patients'">
-            <a
-              v-for="conversation in conversations"
-              :key="conversation.id"
-              href="#"
-              class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
-              :class="
-                activePatientId === conversation.user.id
-                  ? 'border-primary-500'
-                  : 'border-transparent'
-              "
-              @click.prevent="selectConversation(conversation.user.id)"
-            >
-              <div class="relative flex w-full justify-center gap-2">
-                <div class="relative flex w-14 shrink-0 items-center justify-center">
-                  <a
-                    href="#"
-                    class="relative block"
-                    :class="[
-                      selectedConversationComputed?.user.id === conversation.user.id
-                        ? 'z-10'
-                        : '',
-                    ]"
-                    @click.prevent="selectConversation(conversation.user.id)"
-                  >
-                    <BaseAvatar
-                      size="sm"
-                      rounded="full"
-                      :src="
-                        conversation.user.avatar
-                          ? `https://pocket.zehna.ir/api/files/patients/${conversation.user.id}/${conversation.user.avatar}`
-                          : '/img/avatars/1.svg'
-                      "
-                      :text="conversation.user.name?.charAt(0)"
-                      :class="getRandomColor()"
-                    />
-                  </a>
-                </div>
+          <!-- List -->
+          <a
+            v-for="conversation in conversations"
+            :key="conversation.id"
+            href="#"
+            class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
+            :class="
+              activeTherapistId === conversation.user.id
+                ? 'border-primary-500'
+                : 'border-transparent'
+            "
+            @click.prevent="selectConversation(conversation.user.id)"
+          >
+            <div class="relative flex w-full justify-center gap-2">
+              <div class="relative flex w-14 shrink-0 items-center justify-center">
+                <a
+                  href="#"
+                  class="relative block"
+                  :class="[
+                    selectedConversationComputed?.user.id === conversation.user.id
+                      ? 'z-10'
+                      : '',
+                  ]"
+                  @click.prevent="selectConversation(conversation.user.id)"
+                >
+                  <BaseAvatar
+                    size="sm"
+                    rounded="full"
+                    :src="
+                      conversation.user.avatar
+                        ? `https://pocket.zehna.ir/api/files/therapists/${conversation.user.id}/${conversation.user.avatar}`
+                        : '/img/avatars/1.svg'
+                    "
+                    :text="conversation.user.name?.charAt(0)"
+                    :class="getRandomColor()"
+                  />
+                </a>
               </div>
-            </a>
-          </template>
-
-          <!-- List of therapists -->
-          <template v-else>
-            <div v-if="therapistConversations.length === 0" class="flex flex-col items-center justify-center p-4 text-center">
-              <Icon name="ph:heartbeat-duotone" class="text-muted-400 mb-2 size-10" />
-              <p class="text-muted-400 text-xs">
-                هیچ درمانگری یافت نشد
-              </p>
             </div>
-            <a
-              v-for="conversation in therapistConversations"
-              v-else
-              :key="conversation.id"
-              href="#"
-              class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
-              :class="
-                activeTherapistId === conversation.user.id
-                  ? 'border-primary-500'
-                  : 'border-transparent'
-              "
-              @click.prevent="selectConversation(conversation.user.id)"
-            >
-              <div class="relative flex w-full justify-center gap-2">
-                <div class="relative flex w-14 shrink-0 items-center justify-center">
-                  <a
-                    href="#"
-                    class="relative block"
-                    :class="[
-                      selectedConversationComputed?.user.id === conversation.user.id
-                        ? 'z-10'
-                        : '',
-                    ]"
-                    @click.prevent="selectConversation(conversation.user.id)"
-                  >
-                    <BaseAvatar
-                      size="sm"
-                      rounded="full"
-                      :src="
-                        conversation.user.avatar
-                          ? `https://pocket.zehna.ir/api/files/therapists/${conversation.user.id}/${conversation.user.avatar}`
-                          : '/img/avatars/2.svg'
-                      "
-                      :text="conversation.user.name?.charAt(0)"
-                      :class="getRandomColor()"
-                    />
-                    <div class="bg-success-500 dark:border-muted-900 absolute -bottom-1 -right-1 flex size-3 items-center justify-center rounded-full border border-white" />
-                  </a>
-                </div>
-              </div>
-            </a>
-          </template>
+          </a>
         </div>
       </div>
+
       <!-- Current conversation -->
       <div
         class="relative w-full transition-all duration-300"
@@ -939,7 +784,7 @@ const submitReport = async () => {
                   size="sm"
                   color="success"
                   class="mr-3"
-                  to="/onboarding/psychologist"
+                  to="/onboarding"
                 >
                   <Icon name="ph:shopping-cart" class="size-5" />
                 </BaseButtonIcon>
@@ -986,10 +831,10 @@ const submitReport = async () => {
                     شروع گفت و گو
                   </h3>
                   <p class="text-muted-400 mt-2">
-                    به چت درمانی خوش آمدید. اینجا می‌توانید با بیمار خود گفت و گو کنید.
+                    به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.
                   </p>
                   <div class="mt-4">
-                    <BaseButton @click="newMessage = 'سلام، چطور می‌توانم کمکتان کنم؟'">
+                    <BaseButton @click="newMessage = 'سلام، من نیاز به کمک دارم.'">
                       شروع گفت و گو
                     </BaseButton>
                   </div>
@@ -1072,7 +917,7 @@ const submitReport = async () => {
                     <div class="order-2">
                       <BaseButton
                         color="primary"
-                        @click="$router.push('/subscription')"
+                        @click="$router.push('/onboarding')"
                       >
                         خرید اشتراک
                       </BaseButton>
@@ -1096,14 +941,15 @@ const submitReport = async () => {
             <div class="relative w-full">
               <BaseTextarea
                 v-model="newMessage"
-                :disabled="messageLoading"
+                :disabled="showNoCharge"
                 size="sm"
                 label="پیام شما"
                 rounded="md"
-                placeholder="برای ارسال از ↵ + crtl  استفاده کنید."
+                :placeholder="showNoCharge ? 'بسته مصرفی شما به اتمام رسیده است' : 'برای ارسال از ↵ + crtl  استفاده کنید.'"
                 :rows="6"
                 addon
                 class="dark:bg-muted-800 bg-white"
+                @click="handleTextareaClick"
                 @keydown="handleKeydown"
               >
                 <template #addon>
@@ -1139,7 +985,7 @@ const submitReport = async () => {
                       <div
                         v-if="showEmojiPicker"
                         ref="emojiPickerRef"
-                        class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 absolute bottom-full mb-2 w-64 rounded-lg border bg-white shadow-lg"
+                        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute bottom-full end-0 mb-2 w-64 rounded-lg border bg-white shadow-lg"
                       >
                         <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-2">
                           <span class="text-sm font-medium">انتخاب ایموجی</span>
@@ -1150,7 +996,7 @@ const submitReport = async () => {
                             <Icon name="lucide:x" class="size-4" />
                           </BaseButtonIcon>
                         </div>
-                        <div class="z-100 grid grid-cols-12 gap-1 p-2">
+                        <div class="grid grid-cols-8 gap-1 p-2">
                           <button
                             v-for="emoji in emojis"
                             :key="emoji"
@@ -1190,121 +1036,192 @@ const submitReport = async () => {
           </form>
         </div>
       </div>
-      <!-- Current user -->
-      <div
-        class="ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
-        :class="expanded ? '-translate-x-full' : 'translate-x-0'"
-      >
-        <div class="flex h-16 w-full items-center justify-between px-8">
-          <BaseHeading
-            tag="h3"
-            size="lg"
-            class="text-muted-800 dark:text-white"
-          >
-            <span>اطلاعات مراجع</span>
-          </BaseHeading>
-          <BaseButtonIcon small @click="expanded = true">
-            <Icon
-              name="lucide:arrow-left"
-              class="pointer-events-none size-4"
+    </div>
+
+    <!-- Therapist details sidebar -->
+    <div
+      class="ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
+      :class="expanded ? '-translate-x-full' : 'translate-x-0'"
+    >
+      <div class="flex h-16 w-full items-center justify-between px-8">
+        <BaseHeading
+          tag="h3"
+          size="lg"
+          class="text-muted-800 dark:text-white"
+        >
+          <span>اطلاعات روانشناس</span>
+        </BaseHeading>
+        <BaseButtonIcon small @click="expanded = true">
+          <Icon
+            name="lucide:arrow-left"
+            class="pointer-events-none size-4"
+          />
+        </BaseButtonIcon>
+      </div>
+      <div class="relative flex w-full flex-col px-8">
+        <!-- Loader -->
+        <div v-if="loading" class="mt-8">
+          <div class="mb-3 flex items-center justify-center">
+            <BasePlaceload
+              class="size-24 shrink-0 rounded-full"
+              :width="96"
+              :height="96"
             />
-          </BaseButtonIcon>
-        </div>
-        <div class="relative flex w-full flex-col px-8">
-          <!-- Loader -->
-          <div v-if="loading" class="mt-8">
-            <div class="mb-3 flex items-center justify-center">
-              <BasePlaceload
-                class="size-24 shrink-0 rounded-full"
-                :width="96"
-                :height="96"
-              />
+          </div>
+          <div class="flex flex-col items-center">
+            <BasePlaceload class="mb-2 h-3 w-full max-w-40 rounded" />
+            <BasePlaceload class="mb-2 h-3 w-full max-w-24 rounded" />
+            <div class="my-4 flex w-full flex-col items-center">
+              <BasePlaceload class="mb-2 h-2 w-full max-w-60 rounded" />
+              <BasePlaceload class="mb-2 h-2 w-full max-w-52 rounded" />
             </div>
-            <div class="flex flex-col items-center">
-              <BasePlaceload class="mb-2 h-3 w-full max-w-40 rounded" />
-              <BasePlaceload class="mb-2 h-3 w-full max-w-24 rounded" />
-              <div class="my-4 flex w-full flex-col items-center">
-                <BasePlaceload class="mb-2 h-2 w-full max-w-60 rounded" />
-                <BasePlaceload class="mb-2 h-2 w-full max-w-52 rounded" />
+            <div class="mb-6 flex w-full items-center justify-center">
+              <div class="px-4">
+                <BasePlaceload class="h-3 w-14 rounded" />
               </div>
-              <div class="mb-6 flex w-full items-center justify-center">
-                <div class="px-4">
-                  <BasePlaceload class="h-3 w-14 rounded" />
-                </div>
-                <div class="px-4">
-                  <BasePlaceload class="h-3 w-14 rounded" />
-                </div>
+              <div class="px-4">
+                <BasePlaceload class="h-3 w-14 rounded" />
               </div>
-              <div class="w-full">
-                <BasePlaceload class="h-10 w-full rounded-xl" />
-                <BasePlaceload class="mx-auto mt-3 h-3 w-[7.5rem] rounded" />
-              </div>
+            </div>
+            <div class="w-full">
+              <BasePlaceload class="h-10 w-full rounded-xl" />
+              <BasePlaceload class="mx-auto mt-3 h-3 w-[7.5rem] rounded" />
             </div>
           </div>
-          <!-- User details -->
-          <div v-else class="mt-8">
-            <div class="flex items-center justify-center">
-              <BaseAvatar
-                size="2xl"
-                rounded="full"
-                :src="
-                  selectedConversationComputed?.user.avatar
-                    ? `https://pocket.zehna.ir/api/files/patients/${selectedConversationComputed.user.id}/${selectedConversationComputed.user.avatar}`
-                    : '/img/avatars/1.svg'
-                "
-                :text="selectedConversationComputed?.user.name?.charAt(0)"
-                :class="getRandomColor()"
-              />
-            </div>
-            <div class="mt-2 space-y-3 text-center">
-              <BaseHeading
-                as="h3"
-                size="md"
-                weight="medium"
-                class="text-muted-800 dark:text-white"
+        </div>
+        <!-- User details -->
+        <div v-else class="mt-8">
+          <div class="flex items-center justify-center">
+            <BaseAvatar
+              size="2xl"
+              rounded="full"
+              :src="
+                selectedConversationComputed?.user.avatar
+                  ? `https://pocket.zehna.ir/api/files/therapists/${selectedConversationComputed.user.id}/${selectedConversationComputed.user.avatar}`
+                  : '/img/avatars/1.svg'
+              "
+              :text="selectedConversationComputed?.user.name?.charAt(0)"
+              :class="getRandomColor()"
+            />
+          </div>
+          <div class="mt-2 space-y-3 text-center">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="medium"
+              class="text-muted-800 dark:text-white"
+            >
+              <span>{{ selectedConversationComputed?.user.name }}</span>
+            </BaseHeading>
+            <BaseParagraph size="sm" class="text-muted-400">
+              <span>{{ selectedConversationComputed?.user.definingTraits }}</span>
+            </BaseParagraph>
+            <div class="my-4">
+              <BaseParagraph
+                size="xs"
+                class="text-muted-500 dark:text-muted-400"
               >
-                <span>{{ selectedConversationComputed?.user.name }}</span>
-              </BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-400">
-                <span>{{ selectedConversationComputed?.user.definingTraits }}</span>
+                <span>{{ selectedConversationComputed?.user.shortDescription }}</span>
               </BaseParagraph>
-              <div class="my-4">
-                <BaseParagraph
-                  size="xs"
-                  class="text-muted-500 dark:text-muted-400"
-                >
-                  <span>{{ selectedConversationComputed?.user.shortDescription }}</span>
-                </BaseParagraph>
+            </div>
+            <div
+              class="border-muted-200 dark:border-muted-700 flex w-full justify-center border-t pt-4"
+            >
+              <div class="flex items-center justify-center gap-2 px-4">
+                <Icon
+                  name="ph:user-duotone"
+                  class="text-muted-400 size-4"
+                />
+                <span class="text-muted-400 font-sans text-xs">
+                  سن: {{ selectedConversationComputed?.user.age }} سال
+                </span>
               </div>
-              <div
-                class="border-muted-200 dark:border-muted-700 flex w-full justify-center border-t pt-4"
-              >
-                <div class="flex items-center justify-center gap-2 px-4">
-                  <Icon
-                    name="ph:user-duotone"
-                    class="text-muted-400 size-4"
-                  />
-                  <span class="text-muted-400 font-sans text-xs">
-                    سن: {{ selectedConversationComputed?.user.age }} سال
-                  </span>
+            </div>
+            <div class="my-4 space-y-2">
+              <!-- Model search and selector -->
+              <div v-if="!modelsError && role === 'admin'" class="relative">
+                <BaseInput
+                  v-model="modelSearchInput"
+                  icon="ph:magnifying-glass"
+                  placeholder="جست و جوی مدل های زبانی . . . "
+                  class="w-full"
+                  @focus="showModelDropdown = true"
+                />
+
+                <!-- Model dropdown -->
+                <div
+                  v-if="showModelDropdown"
+                  class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 absolute z-50 mt-1 w-full rounded-lg border bg-white shadow-lg"
+                >
+                  <div class="max-h-60 overflow-y-auto p-2">
+                    <button
+                      v-for="model in filteredModels"
+                      :key="model.id"
+                      type="button"
+                      class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer rounded p-2 text-left"
+                      :class="{ 'bg-muted-100 dark:bg-muted-700': model.id === selectedModel }"
+                      @click="selectedModel = model.id; showModelDropdown = false"
+                    >
+                      <div class="flex items-center justify-between">
+                        <span class="font-medium">{{ model.name }}</span>
+                        <span class="text-muted-400 text-xs">
+                          {{ model.pricing.prompt }}
+                        </span>
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <!-- Click outside directive for model dropdown -->
+              <!-- Selected model display -->
               <div
-                v-if="showModelDropdown"
-                class="fixed inset-0 z-40"
-                @click="showModelDropdown = false"
-              />
-
-              <BaseButton
-                rounded="lg"
-                class="w-full"
-                @click="navigateTo(`/onboarding/editPatient?userId=${route.query.patientId}`)"
+                v-if="selectedModel && !modelsLoading && role === 'admin'"
+                class="bg-muted-100 dark:bg-muted-800 flex items-center gap-2 rounded p-2"
               >
-                نمایش نمایه
-              </BaseButton>
+                <Icon name="ph:robot" class="text-primary-500 size-5" />
+                <span class="text-sm">
+                  مدل انتخاب شده : {{ models.find(m => m.id === selectedModel)?.name }}
+                </span>
+              </div>
+
+              <!-- Error state -->
+              <div v-if="modelsError && role === 'admin'" class="text-center">
+                <p class="text-danger-500 mb-2">
+                  {{ modelsError }}
+                </p>
+                <BaseButton
+                  color="danger"
+                  :loading="modelsLoading"
+                  @click="retryFetch"
+                >
+                  تلاش برای دریافت مدل ها
+                </BaseButton>
+              </div>
+
+              <!-- Model error toast -->
+              <div
+                v-if="showModelError && role === 'admin'"
+                class="bg-danger-500 fixed right-4 top-4 z-50 rounded px-4 py-2 text-white shadow-lg"
+              >
+                خطایی در پاسخ مدل رخ داد. لطفا دوباره تلاش کنید.
+              </div>
             </div>
+
+            <!-- Click outside directive for model dropdown -->
+            <button
+              v-if="showModelDropdown"
+              type="button"
+              class="fixed inset-0 z-40"
+              @click="showModelDropdown = false"
+            />
+
+            <BaseButton
+              rounded="lg"
+              class="w-full"
+              @click="navigateTo(`/darmana/therapists/editTherapist?userId=${route.query.therapistId}`)"
+            >
+              نمایش نمایه
+            </BaseButton>
           </div>
         </div>
       </div>

@@ -39,6 +39,10 @@ export function useTherapist() {
     })
   }
 
+  const getTherapist = async (id: string) => {
+    return await nuxtApp.$pb.collection('therapists').getOne(id)
+  }
+
   const createNewTherapist = async (t: Therapist | FormData) => {
     return await nuxtApp.$pb.collection('therapists').create(t)
   }
@@ -49,6 +53,7 @@ export function useTherapist() {
 
   return {
     getTherapists,
+    getTherapist,
     createNewTherapist,
     updateTherapist,
   }

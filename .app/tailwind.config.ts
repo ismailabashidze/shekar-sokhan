@@ -12,18 +12,19 @@ export default withShurikenUI({
   theme: {
     // Custom fonts (defaults values are commented out)
     fontFamily: {
-      sans: ['Inter  Variable', 'sans-serif'],
-      heading: ['Inter  Variable', 'sans-serif'],
-      alt: ['Karla  Variable', 'sans-serif'],
+      sans: ['IRANSans', 'sans-serif'],
+      heading: ['IRANSans', 'sans-serif'],
+      alt: ['IRANSans', 'sans-serif'],
       mono: [
-        'ui-monospace',
-        'SFMono-Regular',
-        'Menlo',
-        'Monaco',
-        'Consolas',
-        '"Liberation Mono"',
-        '"Courier New"',
-        'monospace',
+        'IRANSans',
+        // 'ui-monospace',
+        // 'SFMono-Regular',
+        // 'Menlo',
+        // 'Monaco',
+        // 'Consolas',
+        // '"Liberation Mono"',
+        // '"Courier New"',
+        // 'monospace',
       ],
     },
     extend: {
@@ -35,6 +36,14 @@ export default withShurikenUI({
         // success: colors.teal,
         // warning: colors.amber,
         // danger: colors.rose,
+      },
+      nui: {
+        tooltip: {
+          after: {
+            opacity: 1,
+            transform: 'translate(0px, -50%)',
+          },
+        },
       },
     },
   },

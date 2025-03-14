@@ -298,7 +298,7 @@ const confirmDelete = async () => {
       icon: 'ph:check',
       closable: true,
     })
-    navigateTo('/onboarding/choosePatient')
+    navigateTo('/darmana/patients/choosePatient')
   }
   catch (error) {
     console.error('Error deleting patient:', error)

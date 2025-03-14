@@ -74,16 +74,18 @@ const wrapperClass = computed(() => {
           class="flex h-16 w-full items-center justify-center"
         >
           <slot name="logo">
-            <NuxtLink to="/" class="flex items-center justify-center">
-              <component
-                :is="
-                  resolveComponentOrNative(
-                    app.tairo?.sidebar?.navigation.logo.component,
-                  )
-                "
-                v-bind="app.tairo?.sidebar?.navigation.logo.props"
-              />
-            </NuxtLink>
+            <div>
+              <NuxtLink to="/" class="flex items-center justify-center">
+                <component
+                  :is="
+                    resolveComponentOrNative(
+                      app.tairo?.sidebar?.navigation.logo.component,
+                    )
+                  "
+                  v-bind="app.tairo?.sidebar?.navigation.logo.props"
+                />
+              </NuxtLink>
+            </div>
           </slot>
         </div>
       </TairoSidebarNavigation>

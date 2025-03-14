@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  title: 'عامل ها',
+  title: 'انتخاب عامل',
   preview: {
     title: 'عامل های هوش مصنوعی',
     description: 'عامل های هوش مصنوعی برای رویکرد های مختلف درمانا',
@@ -18,7 +18,28 @@ const router = useRouter()
 const page = computed(() => parseInt((route.query.page as string) ?? '1'))
 
 const filter = ref('')
-const perPage = ref(18)
+const perPage = ref(12)
+const isLoading = ref(true)
+const noResults = ref(false)
+
+const { getPatients } = usePatient()
+const { role } = useUser()
+
+// Random colors for avatars
+const colors = [
+  'bg-primary-500',
+  'bg-info-500',
+  'bg-success-500',
+  'bg-warning-500',
+  'bg-danger-500',
+  'bg-purple-500',
+  'bg-yellow-500',
+  'bg-pink-500',
+]
+
+const getRandomColor = () => {
+  return colors[Math.floor(Math.random() * colors.length)]
+}
 
 watch([filter, perPage], () => {
   router.push({
@@ -36,74 +57,43 @@ const query = computed(() => {
   }
 })
 
-const data = ref({
-  data: []
-})
+// Fetch patients data
+const patients = ref([])
+const totalPatients = ref(0)
 
-const pending = ref()
-const error = ref()
-const refresh = ref()
-
-// Import therapist composable
-const { getTherapists } = useTherapist()
-
-// Fetch therapists from the composable
-const fetchTherapists = async () => {
-  pending.value = true
+const fetchPatients = async () => {
+  isLoading.value = true
   try {
-    const therapists = await getTherapists()
+    const data = await getPatients()
+    patients.value = data
+    patients.value.map(p => p.badge = '/img/logo.png')
+    totalPatients.value = data.length
 
-    // Map therapists to the format expected by the template
-    const mappedTherapists = therapists.map(therapist => ({
-      id: therapist.id,
-      username: therapist.name,
-      position: therapist.specialty,
-      src: therapist.avatar ? `/api/files/therapists/${therapist.id}/${therapist.avatar}` : '/img/avatars/default-male.jpg',
-      badge: '/img/logo.png',
-      location: 'ایران، تهران',
-      industry: 'روان درمانا',
-      status: therapist.isActive ? 'online' : 'working',
-      tasks: {
-        pending: 0,
-        done: 0,
-        status: therapist.isActive ? 0 : 1,
-      },
-      description: therapist.shortDescription || therapist.longDescription || '',
-    }))
+    // Filter patients if search filter is applied
+    if (filter.value) {
+      patients.value = patients.value.filter(patient =>
+        patient.name.toLowerCase().includes(filter.value.toLowerCase())
+        || (patient.shortDescription && patient.shortDescription.toLowerCase().includes(filter.value.toLowerCase())),
+      )
+    }
 
-    data.value = { data: mappedTherapists }
+    noResults.value = patients.value.length === 0
   }
-  catch (err) {
-    console.error('Error fetching therapists:', err)
-    error.value = 'خطا در دریافت اطلاعات روانشناسان'
+  catch (error) {
+    console.error('Error fetching patients:', error)
   }
   finally {
-    pending.value = false
+    isLoading.value = false
   }
 }
 
-// Fetch therapists on component mount
-onMounted(() => {
-  fetchTherapists()
+// Initial fetch
+fetchPatients()
+
+// Watch for filter changes to refetch
+watch(filter, () => {
+  fetchPatients()
 })
-
-// Refresh function for manual refresh
-refresh.value = fetchTherapists
-
-// Function to get random color for avatars
-function getRandomColor() {
-  const colors = [
-    'bg-primary-500',
-    'bg-info-500',
-    'bg-success-500',
-    'bg-warning-500',
-    'bg-danger-500',
-    'bg-purple-500',
-    'bg-yellow-500',
-    'bg-green-500',
-  ]
-  return colors[Math.floor(Math.random() * colors.length)]
-}
 </script>
 
 <template>
@@ -123,6 +113,16 @@ function getRandomColor() {
         </div>
 
         <div class="flex items-center gap-2">
+          <BaseButton
+            v-if="role === 'admin'"
+            color="primary"
+            class="w-full gap-1 sm:w-32"
+            shape="curved"
+            to="/onboarding/newPatient"
+          >
+            <Icon name="lucide:plus" class="size-4" />
+            <span>افزودن</span>
+          </BaseButton>
           <BaseInput
             v-model="filter"
             icon="lucide:search"
@@ -144,12 +144,12 @@ function getRandomColor() {
         </BaseParagraph>
       </div>
 
-      <!-- Loading state (if needed) -->
-      <div v-if="pending" class="py-10">
+      <!-- Loading state -->
+      <div v-if="isLoading" class="py-10">
         <div class="flex flex-col items-center justify-center">
-          <div class="mt-8 grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div class="mt-8 grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div
-              v-for="i in 8"
+              v-for="i in 6"
               :key="i"
               class="flex flex-col"
             >
@@ -182,7 +182,7 @@ function getRandomColor() {
       </div>
 
       <!-- No results -->
-      <div v-else-if="!pending && data?.data.length === 0">
+      <div v-else-if="noResults" class="py-10">
         <BasePlaceholderPage
           title="نتیجه‌ای یافت نشد"
           subtitle="هیچ عاملی با این مشخصات پیدا نشد. لطفا معیارهای جستجوی خود را تغییر دهید."
@@ -214,7 +214,7 @@ function getRandomColor() {
       <!-- Results grid -->
       <div
         v-else
-        class="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        class="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-3"
       >
         <TransitionGroup
           enter-active-class="transform-gpu"
@@ -225,8 +225,8 @@ function getRandomColor() {
           leave-to-class="opacity-0 -translate-y-4"
         >
           <BaseCard
-            v-for="(item, index) in data?.data"
-            :key="index"
+            v-for="(item, index) in patients"
+            :key="item.id || index"
             shape="curved"
             elevated-hover
             class="flex flex-col overflow-hidden"
@@ -235,36 +235,19 @@ function getRandomColor() {
               <div class="flex items-center justify-between">
                 <div>
                   <BaseHeading
-                    v-if="item.tasks.status === 0"
                     tag="h3"
-                    size="md"
+                    size="sm"
                     weight="medium"
                     lead="none"
                     class="text-muted-800 dark:text-muted-100"
                   >
-                    در دسترس
-                  </BaseHeading>
-                  <BaseHeading
-                    v-else
-                    tag="h3"
-                    size="md"
-                    weight="medium"
-                    lead="none"
-                    class="text-muted-800 dark:text-muted-100"
-                  >
-                    مشغول
+                    {{ item.isActive ? 'فعال' : 'غیر فعال' }}
                   </BaseHeading>
                 </div>
                 <div>
                   <Icon
-                    v-if="item.tasks.status === 0"
-                    name="ph:check-circle-duotone"
-                    class="text-success-500 size-7"
-                  />
-                  <Icon
-                    v-else
-                    name="ph:x-circle-duotone"
-                    class="text-danger-500 size-7"
+                    :name="item.isActive ? 'ph:check-circle-duotone' : 'ph:x-circle-duotone'"
+                    :class="item.isActive ? 'text-success-500 size-7' : 'text-danger-500 size-7'"
                   />
                 </div>
               </div>
@@ -274,9 +257,9 @@ function getRandomColor() {
                 <BaseAvatar
                   size="xl"
                   rounded="full"
-                  :src="item.src"
+                  :src="item.avatar ? `https://pocket.zehna.ir/api/files/patients/${item.id}/${item.avatar}` : '/img/avatars/1.svg'"
                   :badge-src="item.badge"
-                  :text="item.username.charAt(0).toUpperCase()"
+                  :text="item.name ? item.name.charAt(0).toUpperCase() : 'A'"
                   :class="getRandomColor()"
                 />
               </div>
@@ -288,23 +271,33 @@ function getRandomColor() {
                   lead="none"
                   class="text-muted-800 dark:text-white"
                 >
-                  {{ item.username }}
+                  {{ item.name }}
                 </BaseHeading>
                 <BaseParagraph size="sm" class="text-muted-400 mt-1">
-                  {{ item.position }}
+                  {{ item.position || 'عامل هوش مصنوعی' }}
                 </BaseParagraph>
               </div>
               <div
                 class="text-muted-500 dark:text-muted-400 mb-6 mt-4 flex items-center justify-center gap-3 text-center"
               >
-                {{ item.description }}
+                {{ item.shortDescription || 'توضیحات مختصر درباره این عامل در دسترس نیست.' }}
               </div>
               <div class="mt-auto flex items-center gap-2">
                 <BaseButton
+                  v-if="role === 'admin'"
+                  shape="curved"
+                  color="primary"
+                  @click="navigateTo(`/darmana/patients/editPatient?userId=${item.id}`)"
+                >
+                  <Icon name="lucide:edit-3" class="size-4" />
+                  <span>ویرایش</span>
+                </BaseButton>
+                <BaseButton
+                  v-if="role !== 'admin'"
                   shape="curved"
                   class="w-full"
                   color="light"
-                  @click="navigateTo(`/onboarding/therapist-profile?id=${item.id}`)"
+                  @click="navigateTo(`/darmana/patients/editPatient?userId=${item.id}`)"
                 >
                   <Icon name="ph:user-duotone" class="ml-2 size-4" />
                   <span>نمایه</span>
@@ -313,9 +306,9 @@ function getRandomColor() {
                 <BaseButton
                   shape="curved"
                   class="w-full"
-                  :to="`/mana/chat-therapist/messaging?therapistId=${item.id}`"
-                  :color="item.tasks.status === 0 ? 'success' : 'muted'"
-                  :disabled="item.tasks.status !== 0"
+                  :to="`/darmana/patients/messaging?patientId=${item.id}`"
+                  :color="item.isActive ? 'success' : 'muted'"
+                  :disabled="!item.isActive"
                 >
                   <Icon name="ph:chat-circle-duotone" class="ml-2 size-4" />
                   <span>گفت و گو</span>
@@ -324,6 +317,16 @@ function getRandomColor() {
             </div>
           </BaseCard>
         </TransitionGroup>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="!isLoading && patients.length > 0" class="mt-8 flex justify-center">
+        <BasePagination
+          :total-items="totalPatients"
+          :item-per-page="perPage"
+          :current-page="page"
+          shape="curved"
+        />
       </div>
     </TairoContentWrapper>
   </div>

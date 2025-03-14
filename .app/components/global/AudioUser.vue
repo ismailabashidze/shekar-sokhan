@@ -26,6 +26,38 @@ const finalText = ref('')
 const interimText = ref('')
 const showTip = ref(false)
 
+const silenceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const countDown = ref(5)
+const showCountdown = ref(false)
+
+const startSilenceTimer = () => {
+  if (silenceTimer.value) clearTimeout(silenceTimer.value)
+  showCountdown.value = true
+  countDown.value = 5
+
+  const countdown = () => {
+    if (countDown.value > 0) {
+      countDown.value--
+      silenceTimer.value = setTimeout(countdown, 1000)
+    }
+    else {
+      submitText()
+      closeModal()
+    }
+  }
+
+  silenceTimer.value = setTimeout(countdown, 1000)
+}
+
+const resetSilenceTimer = () => {
+  if (silenceTimer.value) {
+    clearTimeout(silenceTimer.value)
+    silenceTimer.value = null
+  }
+  showCountdown.value = false
+  countDown.value = 5
+}
+
 // Set the visualization options
 const opts = {
   smoothing: 0.6,
@@ -118,7 +150,7 @@ const visualize = () => {
   const containerWidth = canvas.value.parentElement.clientWidth || 500
   const WIDTH = canvas.value.width = containerWidth
   const HEIGHT = canvas.value.height = 150
-  
+
   // Center the visualization in the canvas
   ctx.clearRect(0, 0, WIDTH, HEIGHT)
   ctx.translate(0, 0)
@@ -152,32 +184,28 @@ const visualize = () => {
 // Initialize speech recognition
 const initSpeechRecognition = () => {
   if ('webkitSpeechRecognition' in window) {
-    recognition = new webkitSpeechRecognition()
-    recognition.interimResults = true
+    recognition = new (window as any).webkitSpeechRecognition()
     recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = 'fa-IR'
 
-    recognition.onresult = (event) => {
-      let interimTranscript = ''
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalText.value += event.results[i][0].transcript
-        }
-        else {
-          interimTranscript += event.results[i][0].transcript
-        }
+    recognition.onresult = (event: any) => {
+      const result = event.results[event.results.length - 1]
+      if (result.isFinal) {
+        finalText.value = result[0].transcript
       }
-
-      interimText.value = interimTranscript
+      else {
+        interimText.value = result[0].transcript
+      }
     }
 
     recognition.onend = () => {
       isStarted.value = false
-      if (finalText.value.trim() === '') {
-        showTipMessage()
-      }
-      // Stop the audio context when recognition ends
-      if (context) context.close()
+    }
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error)
+      isStarted.value = false
     }
   }
   else {
@@ -327,11 +355,11 @@ onBeforeUnmount(() => {
             متن وارد شده:
           </div>
           <!-- Show interim text during recognition, final text after release -->
-          <div class="text-muted-800 dark:text-white text-lg">
+          <div class="text-muted-800 text-lg dark:text-white">
             <span
               v-if="isStarted"
               id="interim_span"
-              class="bg-primary-500/20 text-primary-600 dark:text-primary-400 px-1 rounded interim"
+              class="bg-primary-500/20 text-primary-600 rounded px-1 dark:text-white"
             >{{ interimText }}</span>
             <span
               v-else
@@ -341,12 +369,23 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Visualizer -->
-        <div class="bg-primary-500/10 dark:bg-primary-500/5 mb-4 overflow-hidden rounded-lg flex items-center justify-center" style="height: 150px;">
+        <div class="bg-primary-500/10 dark:bg-primary-500/5 mb-4 flex items-center justify-center overflow-hidden rounded-lg" style="height: 150px;">
           <canvas ref="canvas" class="visualizer-canvas" />
         </div>
 
         <!-- Controls -->
         <div class="flex items-center justify-center gap-4">
+          <!-- Cancel button -->
+          <BaseButton
+            rounded="full"
+            color="muted"
+            @click="closeModal"
+          >
+            <div class="flex items-center gap-2">
+              <Icon name="ph:x-circle-fill" class="size-5" />
+              <span>انصراف</span>
+            </div>
+          </BaseButton>
           <!-- Record button -->
           <BaseButton
             id="button"
@@ -356,11 +395,14 @@ onBeforeUnmount(() => {
             @click="toggleRecognition"
           >
             <div class="flex items-center gap-2">
-              <Icon
-                :name="isStarted ? 'ph:stop-circle-fill' : 'ph:microphone-fill'"
-                class="size-5"
-              />
-              <span>{{ isStarted ? 'پایان ضبط' : 'شروع ضبط' }}</span>
+              <div class="relative">
+                <div class="bg-muted-100 dark:bg-muted-700 flex items-center justify-center rounded-full p-3" />
+                <Icon
+                  :name="isStarted ? 'ph:stop-circle-fill' : 'ph:microphone-fill'"
+                  class="absolute right-1/2 top-1/2 size-5 -translate-y-1/2 translate-x-1/2 text-slate-700 dark:text-white"
+                />
+              </div>
+              <span>{{ isStarted ? 'پایان' : 'شروع' }}</span>
             </div>
           </BaseButton>
 
@@ -376,25 +418,26 @@ onBeforeUnmount(() => {
               <span>تایید</span>
             </div>
           </BaseButton>
-
-          <!-- Cancel button -->
-          <BaseButton
-            rounded="full"
-            color="muted"
-            @click="closeModal"
-          >
-            <div class="flex items-center gap-2">
-              <Icon name="ph:x-circle-fill" class="size-5" />
-              <span>انصراف</span>
-            </div>
-          </BaseButton>
         </div>
 
         <!-- Recording status indicator -->
         <div v-if="isStarted" class="mt-4 text-center">
           <div class="bg-danger-500/20 text-danger-600 dark:text-danger-400 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm">
-            <span class="bg-danger-500 size-2 animate-pulse rounded-full recording-pulse" />
+            <span class="bg-danger-500 recording-pulse size-2 animate-pulse rounded-full" />
             در حال ضبط...
+          </div>
+        </div>
+
+        <!-- Countdown indicator -->
+        <div v-if="showCountdown" class="mt-4 flex flex-col items-center">
+          <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
+            ارسال خودکار در {{ countDown }} ثانیه
+          </div>
+          <div class="bg-muted-100 dark:bg-muted-700 h-1 w-full max-w-xs rounded-full">
+            <div
+              class="bg-primary-500 h-1 rounded-full transition-all duration-1000"
+              :style="{ width: `${(countDown / 5) * 100}%` }"
+            />
           </div>
         </div>
       </BaseCard>

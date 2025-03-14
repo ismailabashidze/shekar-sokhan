@@ -185,7 +185,7 @@ function useDemoAreaMulti() {
                       color="light"
                       variant="outline"
                       class="w-full sm:w-auto"
-                      to="/onboarding/choosePatient"
+                      to="darmana/patients/choosePatient"
                     >
                       <Icon name="lucide:users" class="ml-2 size-4" />
                       <span>مراجعین</span>
@@ -195,7 +195,7 @@ function useDemoAreaMulti() {
                       color="light"
                       variant="outline"
                       class="w-full sm:w-auto"
-                      to="/onboarding/chooseTherapist"
+                      to="/darmana/therapists/chooseTherapist"
                     >
                       <Icon name="ph:robot-duotone" class="ml-2 size-4" />
                       <span>روانشناسان هوش مصنوعی</span>

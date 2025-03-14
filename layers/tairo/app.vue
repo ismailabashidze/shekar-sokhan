@@ -11,7 +11,7 @@ useHead({
   title: route.meta.title,
   titleTemplate: (titleChunk) => {
     return titleChunk
-      ? `${titleChunk} - ${app.tairo.title}`
+      ? `${app.tairo.title} - ${titleChunk}`
       : `${app.tairo.title || 'Tairo'}`
   },
 })
@@ -36,7 +36,7 @@ useHead({
   font-family: IRANSans;
   font-style: normal;
   font-weight: bold;
-  src: format('truetype');
+  src: url('./fonts/IRANSansWeb_Bold.ttf') format('truetype');
 }
 @font-face {
   font-family: IRANSans;
@@ -57,6 +57,12 @@ useHead({
   src: url('./fonts/IRANSansWeb_UltraLight.ttf') format('truetype');
 }
 html * {
+  font-family: IRANSans !important;
+}
+
+.v-popper__popper *,
+.sidebar *,
+.subsidebar * {
   font-family: IRANSans !important;
 }
 </style>

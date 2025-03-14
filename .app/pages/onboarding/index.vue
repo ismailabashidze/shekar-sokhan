@@ -48,7 +48,7 @@ const redeem = async () => {
       icon: 'ph:check',
       closable: true,
     })
-    navigateTo('/mana/chat-therapist/uvc4jahllwf8wv2')
+    navigateTo('/darmana/therapists/chooseTherapist')
   }
   else {
     toaster.show({
