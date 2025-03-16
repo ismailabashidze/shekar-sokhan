@@ -31,7 +31,7 @@ onClickOutside(target, () => (open.value = false))
         </NuxtLink>
         <div class="hidden items-center gap-2 ps-6 font-sans sm:flex">
           <p class="text-muted-500 dark:text-muted-400">
-            Step {{ currentStep.id + 1 }}:
+            مرحله {{ currentStep.id + 1 }}:
           </p>
           <h2 class="text-muted-800 font-semibold dark:text-white">
             {{ currentStep.meta.name }}
@@ -71,7 +71,7 @@ onClickOutside(target, () => (open.value = false))
                 "
               >
                 <p class="text-muted-500 dark:text-muted-400 text-xs">
-                  Step {{ step.id + 1 }}:
+                  مرحله {{ step.id + 1 }}:
                 </p>
                 <h4 class="text-muted-800 text-xs font-medium dark:text-white">
                   {{ step.meta.name }}

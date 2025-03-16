@@ -32,7 +32,7 @@ const {
             rounded="lg"
             class="w-full"
           >
-            <span>Previous</span>
+            <span>قبلی</span>
           </BaseButton>
           <BaseButton
             v-if="currentStepId < totalSteps - 1"
@@ -41,7 +41,7 @@ const {
             color="primary"
             class="w-full"
           >
-            <span>Continue</span>
+            <span>ادامه</span>
           </BaseButton>
           <BaseButton
             v-else
@@ -52,7 +52,7 @@ const {
             :loading="loading"
             :disabled="loading"
           >
-            <span>Finish</span>
+            <span>پایان</span>
           </BaseButton>
         </BaseCard>
       </div>
