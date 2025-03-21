@@ -106,12 +106,12 @@ onMounted(() => {
             <span>مشاهده کارهای نیک</span>
           </BaseButton>
           <BaseButton
-            to="/deeds/suggest/step-1"
+            to="/deeds/suggest"
             color="muted"
             rounded="lg"
           >
             <Icon name="lucide:plus" class="ml-2 size-5" />
-            <span>پیشنهاد کار نیک</span>
+            <span>شما پیشنهاد کنید !</span>
           </BaseButton>
         </div>
       </div>

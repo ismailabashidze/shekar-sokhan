@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
         'X-Title': 'Patient Details Generator',
       },
       body: {
-        model: 'mistralai/mistral-7b-instruct',
+        model: 'mistralai/mistral-saba',
         messages: [
           {
             role: 'system',

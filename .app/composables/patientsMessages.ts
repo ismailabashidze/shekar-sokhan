@@ -1,7 +1,6 @@
 // patientsMessages.ts
-import { useUser } from './user'
 
-export type MessageType = 'sent' | 'received' | 'separator'
+export type MessageType = 'sent' | 'received'
 
 export type Message = {
   id: string
@@ -10,27 +9,28 @@ export type Message = {
   type: MessageType
   text: string
   time: string // ISO date string
+  conversation: string // Relation to conversation record
   created?: string
   updated?: string
 }
 
 export function usePatientMessages() {
   const nuxtApp = useNuxtApp()
-  const selectedPatientId = ref<string | null>(null)
 
-  const getMessages = async (patientId: string) => {
+  const getMessages = async (conversationId: string) => {
     if (!nuxtApp.$pb.authStore.isValid) {
       throw new Error('User not authenticated')
     }
-    selectedPatientId.value = patientId
+
     try {
       return await nuxtApp.$pb.collection('patients_messages').getFullList({
         sort: 'created',
-        filter: `patient = "${patientId}" && user = "${nuxtApp.$pb.authStore.model.id}"`,
+        filter: `conversation = "${conversationId}" && user = "${nuxtApp.$pb.authStore.model.id}"`,
         expand: 'patient,user',
-        batch: 100, // Process in smaller batches
+        batch: 100,
       })
-    } catch (error: any) {
+    }
+    catch (error: any) {
       if (error?.isAbort) {
         console.log('Request was cancelled')
         return []
@@ -39,13 +39,14 @@ export function usePatientMessages() {
     }
   }
 
-  const sendMessage = async (patientId: string, text: string, type: MessageType = 'sent') => {
+  const sendMessage = async (patientId: string, conversationId: string, text: string, type: MessageType = 'sent') => {
     if (!nuxtApp.$pb.authStore.isValid) {
       throw new Error('User not authenticated')
     }
     const messageData = {
       patient: patientId,
       user: nuxtApp.$pb.authStore.model.id,
+      conversation: conversationId,
       type,
       text,
       time: new Date().toISOString(),
@@ -53,20 +54,14 @@ export function usePatientMessages() {
 
     try {
       return await nuxtApp.$pb.collection('patients_messages').create(messageData)
-    } catch (error: any) {
+    }
+    catch (error: any) {
       if (error?.isAbort) {
         console.log('Request was cancelled')
         return null
       }
       throw error
     }
-  }
-
-  const createSeparator = async (patientId: string, text: string = '') => {
-    if (!nuxtApp.$pb.authStore.isValid) {
-      throw new Error('User not authenticated')
-    }
-    return await sendMessage(patientId, text, 'separator')
   }
 
   const deleteMessage = async (messageId: string) => {
@@ -76,7 +71,8 @@ export function usePatientMessages() {
     try {
       await nuxtApp.$pb.collection('patients_messages').delete(messageId)
       return true
-    } catch (error: any) {
+    }
+    catch (error: any) {
       if (error?.isAbort) {
         console.log('Request was cancelled')
         return false
@@ -91,7 +87,8 @@ export function usePatientMessages() {
     }
     try {
       return await nuxtApp.$pb.collection('patients_messages').update(messageId, data)
-    } catch (error: any) {
+    }
+    catch (error: any) {
       if (error?.isAbort) {
         console.log('Request was cancelled')
         return null
@@ -100,34 +97,10 @@ export function usePatientMessages() {
     }
   }
 
-  const clearMessages = async (patientId: string) => {
-    try {
-      // Get all messages for this patient
-      const records = await nuxtApp.$pb.collection('patients_messages').getFullList({
-        filter: `patient = "${patientId}" && user = "${nuxtApp.$pb.authStore.model.id}"`,
-      })
-      
-      // Delete all messages in parallel
-      await Promise.all(
-        records.map(record => 
-          nuxtApp.$pb.collection('patients_messages').delete(record.id)
-        )
-      )
-      
-      return true
-    } catch (error) {
-      console.error('Error clearing messages:', error)
-      throw error
-    }
-  }
-
   return {
-    selectedPatientId,
     getMessages,
     sendMessage,
-    createSeparator,
     deleteMessage,
     updateMessage,
-    clearMessages,
   }
 }

@@ -19,11 +19,13 @@ const canvas = ref(null)
 const isStarted = ref(false) // Changed to a toggle state instead of press state
 
 let context, analyser, freqs
-let recognition
+let recognition: any // Explicitly type recognition
 let tipTimeout
 
 const finalText = ref('')
 const interimText = ref('')
+const allText = ref('') // Store all completed sentences
+const lastProcessedIndex = ref(-1) // Track last processed result index
 const showTip = ref(false)
 
 const silenceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
@@ -190,25 +192,46 @@ const initSpeechRecognition = () => {
     recognition.lang = 'fa-IR'
 
     recognition.onresult = (event: any) => {
-      const result = event.results[event.results.length - 1]
-      if (result.isFinal) {
-        finalText.value = result[0].transcript
+      let finalTranscript = ''
+      let interimTranscript = ''
+
+      // Only process new results
+      for (let i = Math.max(lastProcessedIndex.value + 1, 0); i < event.results.length; i++) {
+        const result = event.results[i]
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript + ' '
+          lastProcessedIndex.value = i
+        } else {
+          interimTranscript += result[0].transcript + ' '
+        }
       }
-      else {
-        interimText.value = result[0].transcript
+
+      // Update the display text
+      if (finalTranscript) {
+        finalText.value = finalTranscript.trim()
+        allText.value = (allText.value + ' ' + finalTranscript).trim()
+        interimText.value = interimTranscript.trim()
+        startSilenceTimer()
+      } else if (interimTranscript) {
+        interimText.value = interimTranscript.trim()
+        resetSilenceTimer()
       }
     }
 
     recognition.onend = () => {
-      isStarted.value = false
+      if (isStarted.value) {
+        // Restart recognition if it was still supposed to be running
+        recognition.start()
+      }
     }
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error)
-      isStarted.value = false
+      if (event.error !== 'no-speech') {
+        isStarted.value = false
+      }
     }
-  }
-  else {
+  } else {
     console.warn('Speech recognition not supported in this browser.')
   }
 }
@@ -227,6 +250,8 @@ const startRecognition = () => {
   if (recognition && !isStarted.value) {
     finalText.value = ''
     interimText.value = ''
+    allText.value = ''
+    lastProcessedIndex.value = -1
     recognition.start()
     isStarted.value = true
 
@@ -276,24 +301,29 @@ const showTipMessage = () => {
   }, 3000)
 }
 
+const submitText = () => {
+  const textToSubmit = allText.value.trim()
+  if (textToSubmit) {
+    emit('textReady', textToSubmit)
+  }
+  closeModal()
+}
+
 const closeModal = () => {
   // Make sure recognition is stopped when modal is closed
   if (isStarted.value) {
     endRecognition()
   }
 
-  // Reset state
+  // Reset all state
   finalText.value = ''
   interimText.value = ''
+  allText.value = ''
+  lastProcessedIndex.value = -1
+  resetSilenceTimer()
 
   // Emit event to parent to close modal
   emit('close')
-}
-
-// Add a method to submit the final text
-const submitText = () => {
-  emit('textReady', finalText.value)
-  closeModal()
 }
 
 onMounted(() => {

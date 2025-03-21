@@ -1,16 +1,25 @@
 <template>
-  <div id="loader-container" class="bg-[#F6F4E8] dark:bg-[#e8db95]">
+  <div id="loader-container" class="bg-slate-100 dark:bg-slate-300">
     <div
       id="loader"
-      class="loader-container bg-[#F6F4E8] dark:bg-[#e8db95]"
+      class="loader-container bg-slate-100 dark:bg-slate-300"
     >
-      <div class="emoji" :class="{ animateOut }">
-        {{ currentLoader.emoji }}
+      <div class="relative flex flex-col items-center justify-center rounded-full bg-white bg-opacity-50 p-12 shadow-lg backdrop-blur-sm dark:bg-slate-200">
+        <div class="from-primary-300/30 to-primary-500/30 absolute inset-0 animate-pulse rounded-full bg-gradient-to-br" />
+        <div class="emoji relative z-10" :class="{ animateOut }">
+          {{ currentLoader.emoji }}
+        </div>
+        <div class="text relative z-10" :class="{ animateOut }">
+          {{ currentLoader.text }}
+        </div>
       </div>
-      <div class="text" :class="{ animateOut }">
-        {{ currentLoader.text }}
-      </div>
-    </div>
+    </div><NuxtLink
+      to="/dashboard"
+      class="bg-primary-500 hover:bg-primary-600 fixed bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-xl px-6 py-3 font-medium text-white shadow-lg transition-colors duration-300 hover:shadow-xl"
+    >
+      <Icon name="ph:arrow-right" class="size-5" />
+      <span>بازگشت به داشبورد</span>
+    </NuxtLink>
   </div>
 </template>
 
@@ -102,7 +111,7 @@ const USER_LOADERS = [
   ['📅', 'برنامه‌ریزی برای پیشرفت'],
   ['💬', 'گفت‌وگو با مشاور'],
   ['❤️', 'توجه به احساسات خود'],
-  ['🛠', 'ابزارهای مقابله با استرس'],
+  ['🔨', 'ابزارهای مقابله با استرس'],
   ['🧘‍♀️', 'تمرین آرامش'],
   ['🌞', 'شروع روز با انگیزه'],
   ['🌧', 'مقابله با احساسات منفی'],
@@ -117,7 +126,7 @@ const USER_LOADERS = [
   ['📚', 'مطالعه برای خودشناسی'],
   ['🔒', 'محافظت از مرزهای شخصی'],
   ['💪', 'تقویت اعتماد به نفس'],
-  ['🕰', 'مدیریت زمان'],
+  ['⏰', 'مدیریت زمان'],
   ['🌱', 'کاشت بذرهای خودآگاهی'],
   ['🌸', 'پذیرش خود و دیگران'],
   ['🔗', 'ارتباطات سالم'],
@@ -130,14 +139,14 @@ const USER_LOADERS = [
   ['🎈', 'رها کردن استرس'],
   ['👥', 'مشارکت در گروه‌های حمایتی'],
   ['💭', 'تصورات سازنده'],
-  ['🏞', 'ارتباط با طبیعت'],
+  ['🌳', 'ارتباط با طبیعت'],
   ['🧳', 'سفر به درون خود'],
-  ['🕊', 'رسیدن به آرامش'],
+  ['🕊️', 'رسیدن به آرامش'],
   ['🎶', 'گوش دادن به موسیقی آرام‌بخش'],
   ['🔔', 'هشدار به نشانه‌های استرس'],
   ['🌍', 'درک دیدگاه‌های جدید'],
   ['💡', 'یادگیری مهارت‌های جدید'],
-  ['🖼', 'تجسم زندگی بهتر'],
+  ['🖼️', 'تجسم زندگی بهتر'],
   ['🧩', 'حل مسائل پیچیده'],
   ['🎯', 'تمرکز بر هدف‌های روانی'],
   ['📸', 'مشاهده و تحلیل رفتارها'],
@@ -181,16 +190,16 @@ else {
 }
 </script>
 
-  <style scoped>
-  /* Example CSS for the transition */
-  .emoji, .text {
-    transition: opacity 0.3s;
-  }
+<style scoped>
+/* Example CSS for the transition */
+.emoji, .text {
+  transition: opacity 0.3s;
+}
 
-  .animateOut {
-    opacity: 0;
-  }
-  @-webkit-keyframes blurIn {
+.animateOut {
+  opacity: 0;
+}
+@-webkit-keyframes blurIn {
   0% {
     transform: translate3d(0, -60px, 0) scale(0.9, 2);
     filter: blur(3px);
@@ -241,30 +250,30 @@ else {
 }
 @-webkit-keyframes pulseEllipsis {
   0% {
-    box-shadow: -3px 0 0 rgba(127, 101, 68, 0.6), -9px 0 0 rgba(127, 101, 68, 0.6), -15px 0 0 rgba(127, 101, 68, 0.6);
+    box-shadow: -3px 0 0 rgba(71, 85, 105, 0.6), -9px 0 0 rgba(71, 85, 105, 0.6), -15px 0 0 rgba(71, 85, 105, 0.6);
   }
   20% {
-    box-shadow: -3px 0 rgba(127, 101, 68, 0.6), -9px 0 0 rgba(127, 101, 68, 0.6), -15px 0 0 #7f6544;
+    box-shadow: -3px 0 rgba(71, 85, 105, 0.6), -9px 0 0 rgba(71, 85, 105, 0.6), -15px 0 0 #475569;
   }
   40% {
-    box-shadow: -3px 0 0 rgba(127, 101, 68, 0.6), -9px 0 0 #7f6544, -15px 0 0 rgba(127, 101, 68, 0.6);
+    box-shadow: -3px 0 0 rgba(71, 85, 105, 0.6), -9px 0 0 #475569, -15px 0 0 rgba(71, 85, 105, 0.6);
   }
   60% {
-    box-shadow: -3px 0 0 #7f6544, -9px 0 0 rgba(127, 101, 68, 0.6), -15px 0 0 rgba(127, 101, 68, 0.6);
+    box-shadow: -3px 0 0 #475569, -9px 0 0 rgba(71, 85, 105, 0.6), -15px 0 0 rgba(71, 85, 105, 0.6);
   }
 }
 @keyframes pulseEllipsis {
   0% {
-    box-shadow: -3px 0 0 rgba(127, 101, 68, 0.6), -9px 0 0 rgba(127, 101, 68, 0.6), -15px 0 0 rgba(127, 101, 68, 0.6);
+    box-shadow: -3px 0 0 rgba(71, 85, 105, 0.6), -9px 0 0 rgba(71, 85, 105, 0.6), -15px 0 0 rgba(71, 85, 105, 0.6);
   }
   20% {
-    box-shadow: -3px 0 rgba(127, 101, 68, 0.6), -9px 0 0 rgba(127, 101, 68, 0.6), -15px 0 0 #7f6544;
+    box-shadow: -3px 0 rgba(71, 85, 105, 0.6), -9px 0 0 rgba(71, 85, 105, 0.6), -15px 0 0 #475569;
   }
   40% {
-    box-shadow: -3px 0 0 rgba(127, 101, 68, 0.6), -9px 0 0 #7f6544, -15px 0 0 rgba(127, 101, 68, 0.6);
+    box-shadow: -3px 0 0 rgba(71, 85, 105, 0.6), -9px 0 0 #475569, -15px 0 0 rgba(71, 85, 105, 0.6);
   }
   60% {
-    box-shadow: -3px 0 0 #7f6544, -9px 0 0 rgba(127, 101, 68, 0.6), -15px 0 0 rgba(127, 101, 68, 0.6);
+    box-shadow: -3px 0 0 #475569, -9px 0 0 rgba(71, 85, 105, 0.6), -15px 0 0 rgba(71, 85, 105, 0.6);
   }
 }
 @-webkit-keyframes fadeInOutLong {
@@ -323,7 +332,7 @@ else {
 }
 #loader .text {
   line-height: 1;
-  color: #7F6544;
+  color: #475569;
   font-size: 20px;
   margin-right: -14px;
 }
@@ -335,7 +344,7 @@ else {
   height: 3px;
   border-radius: 50%;
   margin-left: 18px;
-  box-shadow: -3px 0 0 rgba(127, 101, 68, 0.6), -9px 0 0 rgba(127, 101, 68, 0.6), -15px 0 0 rgba(127, 101, 68, 0.6);
+  box-shadow: -3px 0 0 rgba(71, 85, 105, 0.6), -9px 0 0 rgba(71, 85, 105, 0.6), -15px 0 0 rgba(71, 85, 105, 0.6);
   -webkit-animation: pulseEllipsis 0.8s infinite both ease-in-out;
           animation: pulseEllipsis 0.8s infinite both ease-in-out;
 }
@@ -349,4 +358,4 @@ else {
   -webkit-animation-fill-mode: both;
           animation-fill-mode: both;
 }
-  </style>
+</style>

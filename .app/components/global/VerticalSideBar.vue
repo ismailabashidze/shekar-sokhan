@@ -38,7 +38,7 @@
         </div> -->
         <div class="flex h-16 w-full items-center justify-center">
           <NuxtLink
-            to="/mana/"
+            to="/dashboard"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
             title="بازگشت به صفحه اصلی"
           >
@@ -56,9 +56,9 @@
         </div>
         <div class="flex h-16 w-full items-center justify-center">
           <NuxtLink
-            to=""
+            to="/login"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="Settings"
+            title="خروج"
             @click.prevent="signout"
           >
             <Icon name="ph:sign-out" class="size-5" />

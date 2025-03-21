@@ -3,6 +3,8 @@ import { useRoute } from 'vue-router'
 import { watch, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import AudioUser from '@/components/global/AudioUser.vue'
 import { useUser } from '@/composables/user'
+import { useTherapistsMessages } from '@/composables/therapistsMessages'
+import type { Therapist, Message } from '@/types'
 
 definePageMeta({
   title: 'گفتگو با روانشناس',
@@ -18,21 +20,28 @@ definePageMeta({
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const { open } = usePanels()
-const { getTherapists, getTherapist } = useTherapist()
-const { getMessages, sendMessage, createSeparator, clearMessages, updateMessage } = useTherapistsMessages()
+const { getTherapists } = useTherapist()
+const { getCurrentSession, createSession, endSession } = useTherapistSession()
+const { getMessages, sendMessage } = useTherapistsMessages()
 const route = useRoute()
 
+// Properly typed reactive references
 const conversations = ref<{ id: string, user: Therapist }[]>([])
 const messages = ref<Message[]>([])
 const loading = ref(false)
 const messageLoading = ref(false)
 const chatEl = ref<HTMLElement>()
 const expanded = ref(false)
-const search = ref('')
 const newMessage = ref('')
 const activeTherapistId = ref<string | null>(null)
+const activeSession = ref<any>(null)
 const showEmojiPicker = ref(false)
 const showAudioUser = ref(false)
+const showNoCharge = ref(true)
+const remainingTime = ref<Date>()
+const timeToShow = ref<number>()
+const startChargeTime = ref<Date>()
+const search = ref('')
 const { role } = useUser()
 
 const toggleAudioUser = () => {
@@ -72,16 +81,45 @@ onClickOutside(emojiPickerRef, () => {
 
 const initializeFromRoute = async () => {
   const therapistId = route.query.therapistId as string
-  if (therapistId && conversations.value.length > 0) {
-    const conversation = conversations.value.find(c => c.user.id === therapistId)
-    if (conversation) {
-      activeTherapistId.value = therapistId
-      await loadMessages(therapistId)
-    }
+  if (!therapistId || showNoCharge.value) return
+
+  // Wait for conversations to be loaded if they're not ready yet
+  if (conversations.value.length === 0) {
+    const therapists = await getTherapists()
+    conversations.value = therapists.map(p => ({ id: p.id, user: p }))
   }
-  else if (conversations.value.length > 0 && !activeTherapistId.value) {
-    activeTherapistId.value = conversations.value[0].user.id
-    await loadMessages(conversations.value[0].user.id)
+
+  // Find the therapist in conversations
+  const conversation = conversations.value.find(c => c.user.id === therapistId)
+  if (conversation) {
+    activeTherapistId.value = therapistId
+    try {
+      // Try to find an in-progress session first
+      const session = await getCurrentSession(therapistId)
+      if (session) {
+        // Found an in-progress session, use it
+        activeSession.value = session
+        // Load existing messages for this session
+        const loadedMessages = await getMessages(session.id)
+        messages.value = loadedMessages.map(msg => ({
+          ...msg,
+          timestamp: msg.time,
+        }))
+        scrollToBottom()
+      }
+      else if (!showNoCharge.value) {
+        // No in-progress session found and user has charge, create new one
+        const newSession = await createSession(therapistId)
+        if (newSession) {
+          activeSession.value = newSession
+          messages.value = [] // New session starts with empty messages
+        }
+      }
+    }
+    catch (error) {
+      console.error('Error initializing session:', error)
+      messages.value = []
+    }
   }
 }
 
@@ -104,7 +142,9 @@ const scrollToBottom = () => {
 }
 
 const loadMessages = async (therapistId: string) => {
-  if (currentLoadingTherapistId.value === therapistId) return
+  if (currentLoadingTherapistId.value === therapistId || showNoCharge.value) {
+    return
+  }
 
   loading.value = true
   currentLoadingTherapistId.value = therapistId
@@ -116,12 +156,27 @@ const loadMessages = async (therapistId: string) => {
       return
     }
 
-    const loadedMessages = await getMessages(therapistId)
-    messages.value = loadedMessages.map(msg => ({
-      ...msg,
-      timestamp: msg.created,
-    }))
-    scrollToBottom()
+    // Try to find an in-progress session first
+    const session = await getCurrentSession(therapistId)
+    if (session) {
+      // Found an in-progress session, use it
+      activeSession.value = session
+      // Load existing messages for this session
+      const loadedMessages = await getMessages(session.id)
+      messages.value = loadedMessages.map(msg => ({
+        ...msg,
+        timestamp: msg.time,
+      }))
+      scrollToBottom()
+    }
+    else if (!showNoCharge.value) {
+      // No in-progress session found and user has charge, create new one
+      const newSession = await createSession(therapistId)
+      if (newSession) {
+        activeSession.value = newSession
+        messages.value = [] // New session starts with empty messages
+      }
+    }
   }
   catch (error) {
     console.error('Error loading messages:', error)
@@ -144,43 +199,7 @@ const selectConversation = async (therapistId: string) => {
   })
 }
 
-onMounted(async () => {
-  loading.value = true
-  try {
-    const nuxtApp = useNuxtApp()
-    if (!nuxtApp.$pb.authStore.isValid) {
-      return
-    }
-    const therapists = await getTherapists()
-    conversations.value = therapists.map((therapist: any) => ({
-      user: therapist,
-      unread: 0,
-      lastMessage: '',
-      lastMessageTime: '',
-    }))
-
-    if (route.query.therapistId) {
-      const therapistId = route.query.therapistId as string
-      activeTherapistId.value = therapistId
-      await loadMessages(therapistId)
-    }
-    else if (conversations.value.length > 0) {
-      activeTherapistId.value = conversations.value[0].user.id
-      await loadMessages(conversations.value[0].user.id)
-    }
-  }
-  catch (error: any) {
-    console.error('Error initializing chat:', error)
-    if (error?.isAbort) {
-      // Request was cancelled, likely due to component unmount
-      return
-    }
-  }
-  finally {
-    loading.value = false
-  }
-})
-
+// Watch for route changes to handle therapist selection
 watch(
   () => route.query.therapistId,
   async (newTherapistId) => {
@@ -188,17 +207,24 @@ watch(
       await initializeFromRoute()
     }
   },
+  { immediate: true }, // This ensures it runs on initial page load
 )
 
+// Watch conversations for initial load
 watch(
   () => conversations.value,
   async (newConversations) => {
-    if (newConversations.length > 0 && !activeTherapistId.value) {
-      await initializeFromRoute()
+    if (newConversations.length > 0 && !activeTherapistId.value && !showNoCharge.value) {
+      const therapistId = route.query.therapistId as string
+      if (therapistId) {
+        activeTherapistId.value = therapistId
+        await loadMessages(therapistId)
+      }
     }
   },
 )
 
+// Watch active therapist changes
 watch(activeTherapistId, async (newId) => {
   if (newId) {
     await loadMessages(newId)
@@ -272,91 +298,94 @@ async function submitMessage() {
     return
   }
 
-  if (!newMessage.value || messageLoading.value) return
+  if (!newMessage.value || messageLoading.value || !activeSession.value?.id) return
 
   try {
     messageLoading.value = true
     const now = new Date().toISOString()
-    streamingResponse.value = '' // Reset streaming response for new message
+    streamingResponse.value = ''
+
     const userMessage = {
       type: 'sent',
       text: newMessage.value,
       timestamp: now,
     }
 
-    // First save and show the user message
-    const savedUserMessage = await sendMessage(activeTherapistId.value, userMessage.text, 'sent')
+    const currentTherapist = selectedConversationComputed.value?.user
+    if (!currentTherapist?.id) {
+      console.error('No active therapist found')
+      return
+    }
+
+    // Use existing session
+    const session = activeSession.value
+
+    const savedUserMessage = await sendMessage(currentTherapist.id, session.id, userMessage.text, 'sent')
     messages.value.push({
       ...userMessage,
       id: savedUserMessage.id,
-      timestamp: savedUserMessage.created,
+      timestamp: savedUserMessage.time,
     })
     newMessage.value = ''
     scrollToBottom()
 
-    // Only proceed with AI response if user has charge
     if (!showNoCharge.value) {
-      // Create an empty assistant message that will be filled with the stream
       const assistantMessage = {
         type: 'received',
         text: '',
         timestamp: now,
       }
 
-      // Add the empty message to UI
+      const messageId = 'temp-' + Date.now()
       messages.value.push({
         ...assistantMessage,
-        id: 'temp-' + Date.now(),
+        id: messageId,
       })
       scrollToBottom()
 
-      // Get current patient details and proceed with chat
-      const currentTherapist = conversations.value.find(c => c.user?.id === activeTherapistId.value)?.user as (Therapist & { id: string, avatar?: string }) | undefined
-
-      if (!currentTherapist?.id) {
-        console.error('No active therapist found')
-        return
+      const therapistDetails = {
+        name: currentTherapist.name || '',
+        specialty: currentTherapist.specialty || '',
+        shortDescription: currentTherapist.shortDescription || '',
+        longDescription: currentTherapist.longDescription || '',
+        definingTraits: currentTherapist.definingTraits || '',
+        backStory: currentTherapist.backStory || '',
+        personality: currentTherapist.personality || '',
+        appearance: currentTherapist.appearance || '',
+        approach: currentTherapist.approach || '',
+        expertise: currentTherapist.expertise || '',
       }
 
-      // Create message history with system prompt and messages
       const messageHistory = messages.value.slice(0, -1).map(msg => ({
         role: msg.type === 'sent' ? 'user' : 'assistant',
         content: msg.text,
       }))
 
+      let isMessageSaved = false
       await streamChat(
         messageHistory,
-        {
-          therapistDetails: {
-            name: currentTherapist.name,
-            specialty: currentTherapist.specialty,
-            shortDescription: currentTherapist.shortDescription,
-            longDescription: currentTherapist.longDescription,
-            definingTraits: currentTherapist.definingTraits,
-            backStory: currentTherapist.backStory,
-            personality: currentTherapist.personality,
-            appearance: currentTherapist.appearance,
-            approach: currentTherapist.approach,
-            expertise: currentTherapist.expertise,
-          },
-        },
+        { therapistDetails },
         async (chunk) => {
           const content = chunk.choices[0]?.delta?.content || ''
-          if (content) {
+          if (content && !isMessageSaved) {
             streamingResponse.value += content
-            messages.value[messages.value.length - 1].text = streamingResponse.value
+            const messageIndex = messages.value.findIndex(m => m.id === messageId)
+            if (messageIndex !== -1) {
+              messages.value[messageIndex].text = streamingResponse.value
+            }
             scrollToBottom()
           }
         },
       )
 
-      // After stream is complete, save the full message
-      if (currentTherapist.id) {
-        const savedAssistantMessage = await sendMessage(currentTherapist.id, streamingResponse.value, 'received')
-        // Update the message ID and timestamp in the UI
-        const lastMessage = messages.value[messages.value.length - 1]
-        lastMessage.id = savedAssistantMessage.id
-        lastMessage.timestamp = savedAssistantMessage.created
+      if (session.id && !isMessageSaved) {
+        isMessageSaved = true
+        const savedAssistantMessage = await sendMessage(currentTherapist.id, session.id, streamingResponse.value, 'received')
+        const messageIndex = messages.value.findIndex(m => m.id === messageId)
+        if (messageIndex !== -1) {
+          messages.value[messageIndex].id = savedAssistantMessage.id
+          messages.value[messageIndex].timestamp = savedAssistantMessage.time
+        }
         scrollToBottom()
       }
     }
@@ -380,43 +409,40 @@ watch(messages, () => {
   scrollToBottom()
 }, { deep: true })
 
-onMounted(() => {
-  setTimeout(() => {
-    if (chatEl.value) {
-      chatEl.value.scrollTo({
-        top: chatEl.value.scrollHeight,
-        behavior: 'smooth',
-      })
-    }
-  }, 300)
-})
-
 const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
-const showNoCharge = ref(false)
-const remainingTime = ref()
-const timeToShow = ref()
-const startChargeTime = ref()
 const showTenMin = ref(false)
 const isGoingToDone = ref(false)
 const type = ref('briefing')
 
 // Time and charge monitoring
 const checkForHalfTime = () => {
-  const start = new Date(startChargeTime.value)
+  if (!startChargeTime.value || !timeToShow.value) return false
+  const start = startChargeTime.value
   const now = new Date()
   const temp = Math.floor((now.getTime() - start.getTime()) / 60000)
   return (temp / timeToShow.value > 1)
 }
 
+watch(timeToShow, async (newValue) => {
+  if (newValue <= 0 && activeSession.value?.id) {
+    await endSession(activeSession.value.id)
+    showNoCharge.value = true
+    pause()
+  }
+})
+
+let timeUpdateInterval: NodeJS.Timeout
+let userSubscription: any
+
 onMounted(async () => {
   loading.value = true
   try {
     const nuxtApp = useNuxtApp()
+    // First load therapists
     const therapists = await getTherapists()
     conversations.value = therapists.map(p => ({ id: p.id, user: p }))
-    await initializeFromRoute()
 
-    // Initialize charge and time data
+    // Then get user info
     const u = await nuxtApp.$pb
       .collection('users')
       .getOne(nuxtApp.$pb.authStore.model.id, {})
@@ -425,22 +451,35 @@ onMounted(async () => {
     startChargeTime.value = new Date(u.startChargeTime)
     timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
 
+    // After conversations are loaded, initialize the route
+    const therapistId = route.query.therapistId as string
+    if (therapistId) {
+      activeTherapistId.value = therapistId
+      const conversation = conversations.value.find(c => c.user.id === therapistId)
+      if (conversation && !showNoCharge.value) {
+        await loadMessages(therapistId)
+      }
+    }
+
     if (timeToShow.value <= 0) {
       showNoCharge.value = true
       pause()
     }
 
-    // Update time every minute
-    setInterval(() => {
-      timeToShow.value = timeToShow.value - 1
+    // Update time every minute with stored reference
+    timeUpdateInterval = setInterval(() => {
+      if (timeToShow.value !== undefined) {
+        timeToShow.value = timeToShow.value - 1
+      }
     }, 60000)
 
-    // Subscribe to user changes for real-time charge updates
+    // Store subscription reference for cleanup using PocketBase's subscribe method
     if (nuxtApp.$pb.authStore.isValid) {
-      nuxtApp.$pb.collection('users').subscribe(
+      userSubscription = await nuxtApp.$pb.collection('users').subscribe(
         nuxtApp.$pb.authStore.model.id,
         (e) => {
-          timeToShow.value = Math.floor((new Date(e.record.expireChangeTime).getTime() - new Date().getTime()) / (1000 * 60))
+          const expireTime = new Date(e.record.expireChargeTime).getTime()
+          timeToShow.value = Math.floor((expireTime - new Date().getTime()) / (1000 * 60))
           if (!e.record.hasCharge) {
             showNoCharge.value = true
             setTimeout(() => {
@@ -454,7 +493,6 @@ onMounted(async () => {
             pause()
           }
         },
-        {},
       )
     }
   }
@@ -463,45 +501,47 @@ onMounted(async () => {
   }
   finally {
     loading.value = false
+    setTimeout(() => {
+      if (chatEl.value) {
+        chatEl.value.scrollTo({
+          top: chatEl.value.scrollHeight,
+          behavior: 'smooth',
+        })
+      }
+    }, 300)
+    resume()
   }
 })
 
-// Start the counter when component is mounted
-onMounted(() => {
-  resume()
-})
-
-// Pause the counter when component is unmounted
+// Clean up intervals and subscriptions
 onUnmounted(() => {
   pause()
+  if (timeUpdateInterval) {
+    clearInterval(timeUpdateInterval)
+  }
+  // PocketBase uses unsubscribe() method on the subscription object
+  try {
+    if (userSubscription) {
+      // Proper cleanup for PocketBase subscription
+      nuxtApp.$pb.collection('users').unsubscribe(userSubscription)
+    }
+  }
+  catch (error) {
+    console.error('Error unsubscribing:', error)
+  }
 })
 
-const nuxtApp = useNuxtApp()
-const toaster = useToaster()
-const logout = () => {
-  nuxtApp.$pb.authStore.clear()
-  toaster.show({
-    title: 'خروج از سیستم',
-    message: `خروج موفقیت آمیز بود`,
-    color: 'success',
-    icon: 'ph:check',
-    closable: true,
-  })
-  navigateTo('/auth/login')
-}
-const changeExpanded = () => {
-  expanded.value = !expanded.value
-  localStorage.setItem('expanded', expanded.value + '')
-}
-
-const isDeleteModalOpen = ref(false)
-
-const openDeleteModal = () => {
-  isDeleteModalOpen.value = true
-}
-
-const closeDeleteModal = () => {
-  isDeleteModalOpen.value = false
+const clearMessages = async (therapistId: string) => {
+  if (!therapistId) { throw new Error('Therapist ID is required') }
+  try {
+    const nuxtApp = useNuxtApp()
+    await nuxtApp.$pb.collection('therapists_messages').delete(`filter=therapist='${therapistId}'`)
+    messages.value = []
+  }
+  catch (error) {
+    console.error('Error clearing messages:', error)
+    throw error
+  }
 }
 
 const confirmClearChat = async () => {
@@ -516,9 +556,19 @@ const confirmClearChat = async () => {
     return
   }
 
+  if (!activeTherapistId.value) {
+    toaster.show({
+      title: 'خطا',
+      message: 'لطفاً ابتدا یک روانشناس را انتخاب کنید.',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+    return
+  }
+
   try {
-    await clearMessages(activeTherapistId.value!)
-    messages.value = []
+    await clearMessages(activeTherapistId.value)
     closeDeleteModal()
   }
   catch (error) {
@@ -531,20 +581,6 @@ const confirmClearChat = async () => {
       closable: true,
     })
   }
-}
-
-const clearChat = () => {
-  if (showNoCharge.value) {
-    toaster.show({
-      title: 'خطا',
-      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    })
-    return
-  }
-  openDeleteModal()
 }
 
 const gotoList = () => {
@@ -564,9 +600,10 @@ const closeReportModal = () => {
 const submitReport = async () => {
   try {
     // Add your report generation logic here
+    navigateTo('/darmana/therapists/waitForReport')
     toaster.show({
       title: 'موفق',
-      message: 'گزارش با موفقیت ساخته شد.',
+      message: 'درخواست ساخت گزارش با موفقیت ارسال شد.',
       color: 'success',
       icon: 'ph:check-circle-fill',
       closable: true,
@@ -595,6 +632,34 @@ const handleTextareaClick = () => {
       closable: true,
     })
   }
+}
+
+const nuxtApp = useNuxtApp()
+const toaster = useToaster()
+const logout = () => {
+  nuxtApp.$pb.authStore.clear()
+  toaster.show({
+    title: 'خروج از سیستم',
+    message: `خروج موفقیت آمیز بود`,
+    color: 'success',
+    icon: 'ph:check',
+    closable: true,
+  })
+  navigateTo('/auth/login')
+}
+const changeExpanded = () => {
+  expanded.value = !expanded.value
+  localStorage.setItem('expanded', expanded.value + '')
+}
+
+const isDeleteModalOpen = ref(false)
+
+const openDeleteModal = () => {
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
 }
 </script>
 
@@ -709,7 +774,9 @@ const handleTextareaClick = () => {
             @click.prevent="selectConversation(conversation.user.id)"
           >
             <div class="relative flex w-full justify-center gap-2">
-              <div class="relative flex w-14 shrink-0 items-center justify-center">
+              <div
+                class="relative flex w-14 shrink-0 items-center justify-center"
+              >
                 <a
                   href="#"
                   class="relative block"
@@ -800,6 +867,16 @@ const handleTextareaClick = () => {
                     class="size-5"
                   />
                 </button>
+                <button
+                  class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                  title="پایان جلسه"
+                  @click="isReportModalOpen = true"
+                >
+                  <Icon
+                    name="ph:check"
+                    class="size-5"
+                  />
+                </button>
               </div>
             </div>
           </div>
@@ -828,14 +905,24 @@ const handleTextareaClick = () => {
                 </div>
                 <div class="max-w-sm">
                   <h3 class="font-heading text-muted-800 text-xl font-medium leading-normal dark:text-white">
-                    شروع گفت و گو
+                    {{ showNoCharge ? 'نیاز به خرید اشتراک' : 'شروع گفت و گو' }}
                   </h3>
                   <p class="text-muted-400 mt-2">
-                    به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.
+                    {{ showNoCharge ? 'برای گفتگو با روانشناس نیاز به خرید اشتراک دارید.' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
                   </p>
                   <div class="mt-4">
-                    <BaseButton @click="newMessage = 'سلام، من نیاز به کمک دارم.'">
+                    <BaseButton
+                      v-if="!showNoCharge"
+                      @click="newMessage = 'سلام، من نیاز به کمک دارم.'"
+                    >
                       شروع گفت و گو
+                    </BaseButton>
+                    <BaseButton
+                      v-else
+                      color="primary"
+                      @click="navigateTo('/onboarding')"
+                    >
+                      خرید اشتراک
                     </BaseButton>
                   </div>
                 </div>
@@ -966,7 +1053,7 @@ const handleTextareaClick = () => {
                       weight="semibold"
                       class="text-muted-800 dark:text-white"
                     >
-                      درمانا
+                      <span>درمانا</span>
                     </BaseHeading>
                   </div>
 
@@ -1001,7 +1088,7 @@ const handleTextareaClick = () => {
                             v-for="emoji in emojis"
                             :key="emoji"
                             type="button"
-                            class="hover:bg-muted-100 dark:hover:bg-muted-700 flex size-8 items-center justify-center rounded-lg text-xl transition-colors duration-300"
+                            class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer rounded p-2 text-left"
                             @click="insertEmoji(emoji)"
                           >
                             {{ emoji }}
@@ -1151,6 +1238,7 @@ const handleTextareaClick = () => {
                 <!-- Model dropdown -->
                 <div
                   v-if="showModelDropdown"
+                  ref="emojiPickerRef"
                   class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 absolute z-50 mt-1 w-full rounded-lg border bg-white shadow-lg"
                 >
                   <div class="max-h-60 overflow-y-auto p-2">
@@ -1269,7 +1357,7 @@ const handleTextareaClick = () => {
         <div class="relative mx-auto mb-4 flex size-24 justify-center">
           <Icon
             name="ph:trash-duotone"
-            class="text-danger size-24"
+            class="text-danger-500 size-24"
           />
         </div>
 
@@ -1315,15 +1403,25 @@ const handleTextareaClick = () => {
         </h3>
       </div>
     </template>
-    <div class="p-4 md:p-6">
-      <p>آیا مایل به ساخت گزارش از این گفتگو هستید؟</p>
+    <div class="relative mx-auto mb-4 flex size-24 justify-center">
+      <Icon
+        name="ph:clipboard"
+        class="text-success-500 size-24"
+      />
+    </div>
+    <div class="p-4 text-center md:p-6">
+      <p>آیا مایل به پایان دادن این جلسه و ساخت گزارش از این گفتگو هستید؟</p>
     </div>
     <template #footer>
       <div class="flex w-full items-center justify-end gap-2 p-4 md:p-6">
         <BaseButton @click="closeReportModal">
           انصراف
         </BaseButton>
-        <BaseButton color="primary" @click="submitReport">
+        <BaseButton
+          color="success"
+          variant="solid"
+          @click="submitReport"
+        >
           تایید
         </BaseButton>
       </div>
