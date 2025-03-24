@@ -199,17 +199,6 @@ const selectConversation = async (therapistId: string) => {
   })
 }
 
-// Watch for route changes to handle therapist selection
-watch(
-  () => route.query.therapistId,
-  async (newTherapistId) => {
-    if (newTherapistId) {
-      await initializeFromRoute()
-    }
-  },
-  { immediate: true }, // This ensures it runs on initial page load
-)
-
 // Watch conversations for initial load
 watch(
   () => conversations.value,
@@ -599,6 +588,24 @@ const closeReportModal = () => {
 
 const submitReport = async () => {
   try {
+    // Calculate total time passed in minutes
+    const startTime = new Date(activeSession.value.created)
+    const endTime = new Date()
+    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
+
+    // Update session status to done with additional metrics
+    const session = await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
+      status: 'done',
+      end_time: endTime.toISOString(),
+      count_of_total_messages: messages.value.length,
+      total_time_passed: totalTimePassedMinutes,
+      updated: endTime.toISOString(),
+    })
+
+    if (!session) {
+      throw new Error('Failed to update session status')
+    }
+
     // Add your report generation logic here
     navigateTo('/darmana/therapists/waitForReport')
     toaster.show({
@@ -660,6 +667,30 @@ const openDeleteModal = () => {
 
 const closeDeleteModal = () => {
   isDeleteModalOpen.value = false
+}
+
+const handleEndSession = () => {
+  if (showNoCharge.value) {
+    toaster.show({
+      title: 'خطا',
+      message: 'شارژ شما به پایان رسیده است.',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+    return
+  }
+
+  if (messages.value.length < 10) {
+    toaster.show({
+      title: 'خطا',
+      message: 'برای ساخت گزارش، حداقل ۱۰ پیام باید رد و بدل شده باشد.',
+      color: 'danger',
+    })
+    return
+  }
+
+  isReportModalOpen.value = true
 }
 </script>
 
@@ -837,7 +868,9 @@ const closeDeleteModal = () => {
                 class="w-[180px]"
                 :color="timeToShow > 10 ? 'success' : 'warning'"
               >
-                <span v-if="timeToShow > 0">⏱ {{ timeToShow ?? '--' }} دقیقه</span>
+                <span v-if="timeToShow > 0">
+                  <span class="mx-2">⏰</span>
+                  {{ timeToShow ?? '--' }} دقیقه</span>
                 <span v-else>وقت تقریبا تمام است</span>
               </BaseMessage>
               <BaseMessage
@@ -870,7 +903,7 @@ const closeDeleteModal = () => {
                 <button
                   class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
                   title="پایان جلسه"
-                  @click="isReportModalOpen = true"
+                  @click="handleEndSession"
                 >
                   <Icon
                     name="ph:check"
@@ -1072,7 +1105,7 @@ const closeDeleteModal = () => {
                       <div
                         v-if="showEmojiPicker"
                         ref="emojiPickerRef"
-                        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute bottom-full end-0 mb-2 w-64 rounded-lg border bg-white shadow-lg"
+                        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute bottom-full end-0 mb-2 w-96 rounded-lg border bg-white shadow-lg"
                       >
                         <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-2">
                           <span class="text-sm font-medium">انتخاب ایموجی</span>
@@ -1083,12 +1116,12 @@ const closeDeleteModal = () => {
                             <Icon name="lucide:x" class="size-4" />
                           </BaseButtonIcon>
                         </div>
-                        <div class="grid grid-cols-8 gap-1 p-2">
+                        <div class="grid grid-cols-9 gap-x-3 p-2">
                           <button
                             v-for="emoji in emojis"
                             :key="emoji"
                             type="button"
-                            class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer rounded p-2 text-left"
+                            class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer items-center justify-center rounded p-1 text-2xl"
                             @click="insertEmoji(emoji)"
                           >
                             {{ emoji }}
@@ -1405,7 +1438,7 @@ const closeDeleteModal = () => {
     </template>
     <div class="relative mx-auto mb-4 flex size-24 justify-center">
       <Icon
-        name="ph:clipboard"
+        name="ph:clipboard-text"
         class="text-success-500 size-24"
       />
     </div>

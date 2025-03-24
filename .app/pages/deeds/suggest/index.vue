@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Deed, DeedStepData, DeedType } from '../types'
+import type { Deed } from '~/composables/useDeed'
 
 definePageMeta({
   title: 'پیشنهاد کار نیک - مرحله ۱',
@@ -16,16 +16,11 @@ useHead({
   title: 'نوع کار نیک',
 })
 
-const {
-  getNextStep,
-  data: deed,
-  handleSubmit,
-  goToStep,
-} = useMultiStepForm<Deed, DeedStepData>()
+const { deed } = useDeed()
 
-function onSelectType(type: DeedType) {
+function onSelectType(type: 'family' | 'society' | 'spiritual') {
   deed.value.type = type
-  handleSubmit()
+  navigateTo('/deeds/suggest/step-2')
 }
 </script>
 
@@ -65,7 +60,6 @@ function onSelectType(type: DeedType) {
           </div>
           <div class="mb-5 flex flex-col items-center">
             <BaseButton
-              :to="getNextStep()?.to"
               color="primary"
               rounded="lg"
               class="w-36"
@@ -116,7 +110,6 @@ function onSelectType(type: DeedType) {
           </div>
           <div class="mb-5 flex flex-col items-center">
             <BaseButton
-              :to="getNextStep()?.to"
               color="primary"
               rounded="lg"
               class="w-36"
@@ -167,7 +160,6 @@ function onSelectType(type: DeedType) {
           </div>
           <div class="mb-5 flex flex-col items-center">
             <BaseButton
-              :to="getNextStep()?.to"
               color="primary"
               rounded="lg"
               class="w-36"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Deed, DeedStepData } from '../types'
+import type { DeedCategory } from '~/composables/useDeedCategory'
+import type { Deed } from '~/composables/useDeed'
 
 definePageMeta({
   title: 'پیشنهاد کار نیک - مرحله ۲',
@@ -13,113 +14,99 @@ definePageMeta({
   },
 })
 useHead({
-  title: 'اطلاعات کار نیک',
+  title: 'انتخاب دسته‌بندی',
   htmlAttrs: { dir: 'rtl' },
 })
 
-const { data: deed, errors, checkPreviousSteps } = useMultiStepForm<Deed, DeedStepData>()
+const { deed } = useDeed()
+const { getCategories } = useDeedCategory()
 
-onBeforeMount(checkPreviousSteps)
+const categories = ref<DeedCategory[]>([])
+const selectedCategory = ref('')
 
-const avatarPreview = useNinjaFilePreview(() => deed.value.avatar)
-
-const inputFile = ref<FileList | null>(null)
-watch(inputFile, (value) => {
-  const file = value?.item(0) || null
-  deed.value.avatar = file
+onMounted(async () => {
+  categories.value = await getCategories()
 })
+
+function onSubmit() {
+  deed.value.category_deed = selectedCategory.value
+  navigateTo('/deeds/suggest/step-3')
+}
 </script>
 
 <template>
   <div>
     <DemoWizardStepTitle />
 
-    <div class="mx-auto flex w-full max-w-5xl flex-col px-4">
-      <div class="flex items-center justify-center">
-        <BaseFullscreenDropfile
-          icon="ph:image-duotone"
-          :filter-file-dropped="(file) => file.type.startsWith('image')"
-          @drop="
-            (value) => {
-              inputFile = value
-            }
-          "
-        />
-        <BaseInputFileHeadless
-          v-slot="{ open, remove, files }"
-          v-model="inputFile"
-          accept="image/*"
-        >
-          <div class="relative size-20">
-            <img
-              v-if="avatarPreview"
-              :src="avatarPreview"
-              alt="پیش‌نمایش تصویر"
-              class="bg-muted-200 dark:bg-muted-700/60 size-20 rounded-full object-cover object-center"
-            >
-            <img
-              v-else
-              src="/img/avatars/placeholder-file.png"
-              alt="پیش‌نمایش تصویر"
-              class="bg-muted-200 dark:bg-muted-700/60 size-20 rounded-full object-cover object-center"
-            >
-            <div
-              v-if="files?.length && files.item(0)"
-              class="absolute bottom-0 end-0 z-20"
-            >
-              <BaseButtonIcon
-                size="sm"
-                rounded="full"
-                tooltip="حذف تصویر"
-                @click="remove(files.item(0)!)"
-              >
-                <Icon name="lucide:x" class="size-4" />
-              </BaseButtonIcon>
-            </div>
-            <div v-else class="absolute bottom-0 end-0 z-20">
-              <div class="relative" tooltip="بارگذاری تصویر">
-                <BaseButtonIcon
-                  size="sm"
-                  rounded="full"
-                  @click="open"
-                >
-                  <Icon name="lucide:plus" class="size-4" />
-                </BaseButtonIcon>
-              </div>
-            </div>
-          </div>
-        </BaseInputFileHeadless>
-        <BaseInputHelpText v-if="errors.fields.avatar" color="danger">
-          {{ errors.fields.avatar }}
-        </BaseInputHelpText>
+    <div class="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4">
+      <div class="flex items-center justify-between">
+        <BaseHeading as="h3" size="sm" weight="medium" class="text-muted-800 dark:text-muted-100">
+          <span>انتخاب دسته‌بندی</span>
+        </BaseHeading>
+        <BaseButton to="/deeds/categories/new" color="primary" rounded="lg">
+          دسته‌بندی جدید
+        </BaseButton>
       </div>
 
-      <div class="my-4 text-center font-sans">
-        <p class="text-muted-500 text-sm">
-          بارگذاری تصویر نمادین برای کار نیک
-        </p>
-        <p class="text-muted-400 text-xs">
-          حجم فایل نباید از ۲ مگابایت بیشتر باشد
-        </p>
+      <div v-if="categories.length === 0" class="text-center">
+        <BaseParagraph size="sm" class="text-muted-400">
+          هنوز دسته‌بندی‌ای ایجاد نشده است. برای شروع یک دسته‌بندی جدید ایجاد کنید.
+        </BaseParagraph>
       </div>
-      <div class="mx-auto flex w-full max-w-sm flex-col gap-3">
-        <BaseInput
-          v-model="deed.title"
-          :error="errors.fields.title"
+
+      <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div v-for="category in categories" :key="category.title" class="relative">
+          <input
+            :id="category.title"
+            v-model="selectedCategory"
+            type="radio"
+            :value="category.title"
+            name="category"
+            class="peer absolute top-0 start-0 z-20 size-full cursor-pointer opacity-0"
+          >
+          <label
+            :for="category.title"
+            class="relative block w-full cursor-pointer rounded-xl border bg-white p-4 hover:bg-muted-50 peer-checked:border-2 peer-checked:border-primary-500 dark:border-muted-600 dark:bg-muted-700 dark:hover:bg-muted-600 dark:peer-checked:border-primary-500"
+          >
+            <div class="flex flex-col gap-2">
+              <span class="font-sans text-lg font-medium text-muted-800 dark:text-muted-100">
+                {{ category.title }}
+              </span>
+              <div class="flex flex-wrap gap-2">
+                <span class="rounded-full bg-primary-100 px-2 py-1 text-xs text-primary-500 dark:bg-primary-500/20">
+                  {{ category.difficulty === 'simple' ? 'ساده' : category.difficulty === 'medium' ? 'متوسط' : 'چالش‌برانگیز' }}
+                </span>
+                <span class="rounded-full bg-info-100 px-2 py-1 text-xs text-info-500 dark:bg-info-500/20">
+                  {{ category.timeRequired === 'below_15' ? 'کمتر از ۱۵ دقیقه' : category.timeRequired === '15_to_60' ? '۱۵ تا ۶۰ دقیقه' : 'بیش از ۱ ساعت' }}
+                </span>
+              </div>
+              <div v-if="category.tags.length > 0" class="flex flex-wrap gap-1">
+                <span
+                  v-for="tag in category.tags"
+                  :key="tag"
+                  class="rounded-full bg-muted-100 px-2 py-0.5 text-xs text-muted-500 dark:bg-muted-800 dark:text-muted-300"
+                >
+                  {{ tag }}
+                </span>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="flex justify-end gap-2">
+        <BaseButton to="/deeds/suggest" variant="outline" rounded="lg">
+          بازگشت
+        </BaseButton>
+        <BaseButton
+          color="primary"
           rounded="lg"
-          placeholder="عنوان کار نیک"
-          :classes="{
-            input: 'h-12 text-base text-center',
-          }"
-        />
-        <BaseTextarea
-          v-model="deed.description"
-          :error="errors.fields.description"
-          rounded="lg"
-          placeholder="توضیحات کار نیک را وارد کنید..."
-          autogrow
-          class="max-h-52"
-        />
+          :disabled="!selectedCategory"
+          @click="onSubmit"
+        >
+          ادامه
+        </BaseButton>
       </div>
     </div>
   </div>

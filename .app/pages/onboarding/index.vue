@@ -86,8 +86,8 @@ const redeem = async () => {
                 class="mt-4"
               >
                 ذهنا اولین
-                <span class="text-primary-500">عامل هوش مصنوعی</span>
-                به زبان فارسی (به نام مانا) را ساخته‌است که به شما حمایت‌های
+                <span class="text-primary-500">سکوی هوش مصنوعی</span>
+                به زبان فارسی را ساخته‌است که به شما حمایت‌های
                 روانشناختی ارائه می‌دهد.
               </BaseHeading>
             </div>
@@ -129,6 +129,15 @@ const redeem = async () => {
                   @click="openModal"
                 >
                   کد تخفیف دارم
+                </BaseButton>
+              </div>
+              <div class="mt-2 flex items-center justify-between gap-2">
+                <BaseButton
+                  to="/deeds/start"
+                  color="success"
+                  class="w-full"
+                >
+                  دریافت کد در قبال کار نیک
                 </BaseButton>
               </div>
             </div>
