@@ -3,7 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useHead } from '@vueuse/head'
 
 // Define emits
-const emit = defineEmits(['close', 'textReady'])
+const emit = defineEmits(['close', 'textReady', 'sendMessage'])
 
 // Inject the external script for dat.GUI using the CDN
 useHead({
@@ -19,7 +19,8 @@ const canvas = ref(null)
 const isStarted = ref(false) // Changed to a toggle state instead of press state
 
 let context, analyser, freqs
-let recognition: any // Explicitly type recognition
+let recognition = ref<any>(null) // Explicitly type recognition
+let recognitionTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
 let tipTimeout
 
 const finalText = ref('')
@@ -29,13 +30,13 @@ const lastProcessedIndex = ref(-1) // Track last processed result index
 const showTip = ref(false)
 
 const silenceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-const countDown = ref(5)
+const countDown = ref(3)
 const showCountdown = ref(false)
 
 const startSilenceTimer = () => {
   if (silenceTimer.value) clearTimeout(silenceTimer.value)
   showCountdown.value = true
-  countDown.value = 5
+  countDown.value = 3
 
   const countdown = () => {
     if (countDown.value > 0) {
@@ -43,8 +44,7 @@ const startSilenceTimer = () => {
       silenceTimer.value = setTimeout(countdown, 1000)
     }
     else {
-      submitText()
-      closeModal()
+      handleAutoClose()
     }
   }
 
@@ -57,7 +57,7 @@ const resetSilenceTimer = () => {
     silenceTimer.value = null
   }
   showCountdown.value = false
-  countDown.value = 5
+  countDown.value = 3
 }
 
 // Set the visualization options
@@ -186,12 +186,12 @@ const visualize = () => {
 // Initialize speech recognition
 const initSpeechRecognition = () => {
   if ('webkitSpeechRecognition' in window) {
-    recognition = new (window as any).webkitSpeechRecognition()
-    recognition.continuous = true
-    recognition.interimResults = true
-    recognition.lang = 'fa-IR'
+    recognition.value = new (window as any).webkitSpeechRecognition()
+    recognition.value.continuous = true
+    recognition.value.interimResults = true
+    recognition.value.lang = 'fa-IR'
 
-    recognition.onresult = (event: any) => {
+    recognition.value.onresult = (event: any) => {
       let finalTranscript = ''
       let interimTranscript = ''
 
@@ -201,7 +201,8 @@ const initSpeechRecognition = () => {
         if (result.isFinal) {
           finalTranscript += result[0].transcript + ' '
           lastProcessedIndex.value = i
-        } else {
+        }
+        else {
           interimTranscript += result[0].transcript + ' '
         }
       }
@@ -209,29 +210,39 @@ const initSpeechRecognition = () => {
       // Update the display text
       if (finalTranscript) {
         finalText.value = finalTranscript.trim()
-        allText.value = (allText.value + ' ' + finalTranscript).trim()
+        // Add a space only if allText is not empty
+        allText.value = allText.value ? `${allText.value} ${finalTranscript}`.trim() : finalTranscript.trim()
         interimText.value = interimTranscript.trim()
         startSilenceTimer()
-      } else if (interimTranscript) {
+      }
+      else if (interimTranscript) {
         interimText.value = interimTranscript.trim()
         resetSilenceTimer()
       }
     }
 
-    recognition.onend = () => {
+    recognition.value.onend = () => {
       if (isStarted.value) {
-        // Restart recognition if it was still supposed to be running
-        recognition.start()
+        // Add a small delay before restarting recognition
+        recognitionTimeout.value = setTimeout(() => {
+          try {
+            recognition.value.start()
+          }
+          catch (e) {
+            console.error('Error restarting recognition:', e)
+          }
+        }, 100)
       }
     }
 
-    recognition.onerror = (event: any) => {
+    recognition.value.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error)
       if (event.error !== 'no-speech') {
         isStarted.value = false
       }
     }
-  } else {
+  }
+  else {
     console.warn('Speech recognition not supported in this browser.')
   }
 }
@@ -247,30 +258,50 @@ const toggleRecognition = () => {
 }
 
 const startRecognition = () => {
-  if (recognition && !isStarted.value) {
+  if (recognition.value && !isStarted.value) {
     finalText.value = ''
     interimText.value = ''
     allText.value = ''
     lastProcessedIndex.value = -1
-    recognition.start()
-    isStarted.value = true
+    
+    // Add a small delay before starting recognition
+    setTimeout(() => {
+      try {
+        recognition.value.start()
+        isStarted.value = true
 
-    // Create audio context for visualization
-    context = new AudioContext()
-    analyser = context.createAnalyser()
-    freqs = new Uint8Array(analyser.frequencyBinCount)
+        // Create audio context for visualization
+        context = new AudioContext()
+        analyser = context.createAnalyser()
+        freqs = new Uint8Array(analyser.frequencyBinCount)
 
-    // Get audio stream for visualization
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then(onStream)
-      .catch(onStreamError)
+        // Get audio stream for visualization
+        navigator.mediaDevices
+          .getUserMedia({ audio: true })
+          .then(onStream)
+          .catch(onStreamError)
+      }
+      catch (e) {
+        console.error('Error starting recognition:', e)
+      }
+    }, 100)
   }
 }
 
 const endRecognition = () => {
-  if (recognition && isStarted.value) {
-    recognition.stop()
+  if (recognition.value && isStarted.value) {
+    if (recognitionTimeout.value) {
+      clearTimeout(recognitionTimeout.value)
+      recognitionTimeout.value = null
+    }
+    
+    try {
+      recognition.value.stop()
+    }
+    catch (e) {
+      console.error('Error stopping recognition:', e)
+    }
+    
     isStarted.value = false
 
     // Stop the audio context
@@ -305,25 +336,59 @@ const submitText = () => {
   const textToSubmit = allText.value.trim()
   if (textToSubmit) {
     emit('textReady', textToSubmit)
+    emit('sendMessage')
   }
   closeModal()
 }
 
 const closeModal = () => {
-  // Make sure recognition is stopped when modal is closed
-  if (isStarted.value) {
-    endRecognition()
+  const textToSubmit = allText.value.trim()
+  if (textToSubmit) {
+    emit('textReady', textToSubmit)
+    emit('sendMessage')
   }
-
-  // Reset all state
-  finalText.value = ''
-  interimText.value = ''
-  allText.value = ''
-  lastProcessedIndex.value = -1
-  resetSilenceTimer()
-
-  // Emit event to parent to close modal
   emit('close')
+  resetState()
+}
+
+const handleAutoClose = () => {
+  const textToSubmit = allText.value.trim()
+  if (textToSubmit) {
+    emit('textReady', textToSubmit)
+    emit('sendMessage')
+  }
+  emit('close')
+  resetState()
+}
+
+const resetState = () => {
+  allText.value = ''
+  interimText.value = ''
+  finalText.value = ''
+  isStarted.value = false
+  showCountdown.value = false
+  countDown.value = 3
+  if (recognition.value) {
+    try {
+      recognition.value.stop()
+    } catch (e) {
+      console.error('Error stopping recognition:', e)
+    }
+  }
+}
+
+// Update the autoCloseTimer to use handleAutoClose
+const startAutoCloseTimer = () => {
+  showCountdown.value = true
+  countDown.value = 3
+
+  const timer = setInterval(() => {
+    countDown.value--
+    if (countDown.value <= 0) {
+      clearInterval(timer)
+      handleAutoClose()
+    }
+  }, 1000)
 }
 
 onMounted(() => {
@@ -347,13 +412,17 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   // Clean up resources
-  if (recognition) {
+  if (recognition.value) {
     try {
-      recognition.stop()
+      recognition.value.stop()
     }
     catch (e) {
       console.error('Error stopping recognition:', e)
     }
+  }
+
+  if (recognitionTimeout.value) {
+    clearTimeout(recognitionTimeout.value)
   }
 
   if (context) {
@@ -379,10 +448,17 @@ onBeforeUnmount(() => {
         shadow="md"
         class="dark:bg-muted-800 bg-white p-6"
       >
+        <!-- Base message -->
+        <div class="mb-4 text-center">
+          <div class="text-muted-500 dark:text-muted-400 text-sm">
+            پس از ۳ ثانیه سکوت، پیام به صورت خودکار ارسال می‌شود
+          </div>
+        </div>
+
         <!-- Text display area -->
         <div class="bg-muted-100 dark:bg-muted-700/50 mb-4 min-h-[100px] rounded-lg p-4 text-right">
-          <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
-            متن وارد شده:
+          <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm flex items-center justify-between">
+            <div>متن وارد شده:</div>
           </div>
           <!-- Show interim text during recognition, final text after release -->
           <div class="text-muted-800 text-lg dark:text-white">
@@ -461,12 +537,12 @@ onBeforeUnmount(() => {
         <!-- Countdown indicator -->
         <div v-if="showCountdown" class="mt-4 flex flex-col items-center">
           <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
-            ارسال خودکار در {{ countDown }} ثانیه
+            پایان ضبط در {{ countDown }} ثانیه
           </div>
           <div class="bg-muted-100 dark:bg-muted-700 h-1 w-full max-w-xs rounded-full">
             <div
               class="bg-primary-500 h-1 rounded-full transition-all duration-1000"
-              :style="{ width: `${(countDown / 5) * 100}%` }"
+              :style="{ width: `${(countDown / 3) * 100}%` }"
             />
           </div>
         </div>

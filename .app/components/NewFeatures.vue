@@ -42,16 +42,16 @@
               size="md"
               class="text-muted-800 dark:text-muted-100 mb-2"
             >
-              پرداخت های موازی
+              دریافت کد در قبال کار نیک
             </BaseHeading>
             <BaseParagraph
               size="xs"
               class="text-muted-500 dark:text-muted-400 mb-4"
             >
-              امکان پرداخت مبالغ هنگفت و زیاد وجود داشته باشد. این مبالغ صرف امور خیریه شود.
+              امکان دریافت کد اشتراک در قبال انجام کارهای نیک به سامانه افزوده شده است.
             </BaseParagraph>
             <div class="mb-1 mt-auto">
-              <DemoLinkArrow to="#" label="بیشتر بدانید" />
+              <DemoLinkArrow to="/deeds/start" label="بیشتر بدانید" />
             </div>
           </div>
         </BaseCard>
@@ -77,13 +77,13 @@
               size="md"
               class="text-muted-800 dark:text-muted-100 mb-2"
             >
-              افزودن تمرین ها
+              افزودن گزارش
             </BaseHeading>
             <BaseParagraph
               size="xs"
               class="text-muted-500 dark:text-muted-400 mb-4"
             >
-              تمرین های روانشناختی به سامانه اضافه شده اند.
+              گزارش کاربردی جلسه بعد از اتمام جلسه قابل دریافت می باشد
             </BaseParagraph>
             <div class="mb-1 mt-auto">
               <DemoLinkArrow to="#" label="بیشتر بدانید" />

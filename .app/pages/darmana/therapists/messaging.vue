@@ -5,6 +5,7 @@ import AudioUser from '@/components/global/AudioUser.vue'
 import { useUser } from '@/composables/user'
 import { useTherapistsMessages } from '@/composables/therapistsMessages'
 import type { Therapist, Message } from '@/types'
+import { useSessionAnalysis } from '~/composables/useSessionAnalysis'
 
 definePageMeta({
   title: 'گفتگو با روانشناس',
@@ -21,7 +22,7 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const { open } = usePanels()
 const { getTherapists } = useTherapist()
-const { getCurrentSession, createSession, endSession } = useTherapistSession()
+const { getCurrentSession, createSession, endSession, updateSession } = useTherapistSession()
 const { getMessages, sendMessage } = useTherapistsMessages()
 const route = useRoute()
 
@@ -43,6 +44,37 @@ const timeToShow = ref<number>()
 const startChargeTime = ref<Date>()
 const search = ref('')
 const { role } = useUser()
+const sessionId = ref<string | null>(null)
+
+const { generateAnalysis, createAnalysis } = useSessionAnalysis()
+
+const handleSessionStatusChange = async (newStatus: string) => {
+  if (newStatus === 'done') {
+    try {
+      // Get all messages for this session
+      const allMessages = messages.value.map(msg => ({
+        role: msg.type === 'sent' ? 'patient' : 'therapist',
+        content: msg.text
+      }))
+
+      // Generate and save analysis
+      const generatedAnalysis = await generateAnalysis({
+        sessionId: activeSession.value?.id,
+        messages: allMessages
+      })
+      
+      await createAnalysis({
+        session: activeSession.value?.id,
+        ...generatedAnalysis
+      })
+
+      // Navigate to analysis page
+      navigateTo(`/darmana/therapists/analysis?sessionId=${activeSession.value?.id}`)
+    } catch (error) {
+      console.error('Error generating session analysis:', error)
+    }
+  }
+}
 
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
@@ -56,8 +88,8 @@ const emojis = [
   '😦', '😧', '😨', '😩', '😪', '😫', '😬',
   '😭', '😮', '😯', '😰', '😱', '😲', '😳',
   '😴', '😵', '😶', '😷', '😸', '😹', '😺',
-  '😻', '😼', '😽', '😾', '😿', '🙀', '🙁',
-  '🙂', '🙃', '🙄', '🙅', '🙆', '🙇', '🙈',
+  '😻', '😼', '😽', '😾', '😿', '🙀', '🙂',
+  '🙃', '🙄', '🙅', '🙆', '🙇', '🙈',
   '🙉', '🙊', '🙋', '🙌', '🙍', '🙎', '🙏',
   '💪', '🤝', '❤️', '💔', '⭐', '🌟', '🎉',
   '🎊', '🎈', '🎁', '👨‍⚕️', '🏥',
@@ -99,6 +131,7 @@ const initializeFromRoute = async () => {
       if (session) {
         // Found an in-progress session, use it
         activeSession.value = session
+        sessionId.value = session.id
         // Load existing messages for this session
         const loadedMessages = await getMessages(session.id)
         messages.value = loadedMessages.map(msg => ({
@@ -112,6 +145,7 @@ const initializeFromRoute = async () => {
         const newSession = await createSession(therapistId)
         if (newSession) {
           activeSession.value = newSession
+          sessionId.value = newSession.id
           messages.value = [] // New session starts with empty messages
         }
       }
@@ -161,6 +195,7 @@ const loadMessages = async (therapistId: string) => {
     if (session) {
       // Found an in-progress session, use it
       activeSession.value = session
+      sessionId.value = session.id
       // Load existing messages for this session
       const loadedMessages = await getMessages(session.id)
       messages.value = loadedMessages.map(msg => ({
@@ -174,6 +209,7 @@ const loadMessages = async (therapistId: string) => {
       const newSession = await createSession(therapistId)
       if (newSession) {
         activeSession.value = newSession
+        sessionId.value = newSession.id
         messages.value = [] // New session starts with empty messages
       }
     }
@@ -669,7 +705,9 @@ const closeDeleteModal = () => {
   isDeleteModalOpen.value = false
 }
 
-const handleEndSession = () => {
+const handleEndSession = async () => {
+  if (!activeSession.value) return
+
   if (showNoCharge.value) {
     toaster.show({
       title: 'خطا',
@@ -690,7 +728,67 @@ const handleEndSession = () => {
     return
   }
 
+  // Open the report modal first
   isReportModalOpen.value = true
+}
+
+const isGeneratingAnalysis = ref(false)
+
+const handleConfirmEndSession = async () => {
+  if (!activeSession.value) return
+  
+  isGeneratingAnalysis.value = true
+
+  try {
+    // Get all messages for this session
+    const allMessages = messages.value.map(msg => ({
+      role: msg.type === 'sent' ? 'patient' : 'therapist',
+      content: msg.text
+    }))
+
+    // End the session using the endSession function
+    await endSession(activeSession.value.id)
+    activeSession.value.status = 'done'
+
+    // Generate and save analysis
+    const generatedAnalysis = await generateAnalysis({
+      sessionId: activeSession.value.id,
+      messages: allMessages
+    })
+    
+    const savedAnalysis = await createAnalysis({
+      session: activeSession.value.id,
+      ...generatedAnalysis
+    })
+
+    // Close the modal
+    isReportModalOpen.value = false
+
+    // Navigate to analysis page with analysis ID
+    await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysis.id}`)
+  } catch (error) {
+    console.error('Error ending session:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در پایان جلسه. لطفا دوباره تلاش کنید.',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  } finally {
+    isGeneratingAnalysis.value = false
+  }
+}
+
+const handleAudioText = (text: string) => {
+  newMessage.value = text
+}
+
+const handleAudioSend = () => {
+  // Trigger the send button click
+  if (newMessage.value && !messageLoading.value) {
+    submitMessage()
+  }
 }
 </script>
 
@@ -1004,19 +1102,19 @@ const handleEndSession = () => {
                             class="rounded-xl px-4 py-2"
                             :class="[
                               item.type === 'sent'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-muted-200 dark:bg-muted-700',
+                                ? 'bg-primary-500 text-white prose-p:text-white'
+                                : 'bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
                             ]"
                           >
                             <span
                               class="block font-sans"
                               :class="[
                                 item.type === 'sent'
-                                  ? 'text-white'
-                                  : 'text-muted-800 dark:text-muted-100',
+                                  ? 'text-white prose-p:text-white'
+                                  : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
                               ]"
                             >
-                              {{ item.text }}
+                              <AddonMarkdownRemark :source="item.text" />
                             </span>
                           </div>
                           <span class="text-muted-400 font-sans text-xs">
@@ -1365,7 +1463,8 @@ const handleEndSession = () => {
       <div class="p-4 sm:p-5">
         <AudioUser
           @close="showAudioUser = false"
-          @text-ready="(text) => { newMessage = newMessage ? newMessage + ' ' + text : text; showAudioUser = false; }"
+          @text-ready="handleAudioText"
+          @send-message="handleAudioSend"
         />
       </div>
     </TairoModal>
@@ -1453,10 +1552,25 @@ const handleEndSession = () => {
         <BaseButton
           color="success"
           variant="solid"
-          @click="submitReport"
+          @click="handleConfirmEndSession"
+          :loading="isGeneratingAnalysis"
+          :disabled="isGeneratingAnalysis"
         >
-          تایید
+          {{ isGeneratingAnalysis ? 'در حال ساخت گزارش...' : 'تایید' }}
         </BaseButton>
+      </div>
+    </template>
+    <template #content>
+      <div class="relative">
+        <!-- Loading overlay -->
+        <div v-if="isGeneratingAnalysis" class="absolute inset-0 bg-white/80 dark:bg-muted-800/80 flex flex-col items-center justify-center z-50">
+          <BaseProgress />
+          <p class="mt-4 text-muted-500 dark:text-muted-400">در حال تحلیل جلسه و ساخت گزارش...</p>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <!-- Existing modal content -->
+        </div>
       </div>
     </template>
   </TairoModal>

@@ -2,12 +2,28 @@
 import Slider from '@vueform/slider'
 import '~/assets/css/slider.css'
 
+definePageMeta({
+  title: 'گزارش جلسه',
+  layout: 'sidebar',
+  preview: {
+    title: 'بررسی گزارش جلسه',
+    description: 'بررسی جزییات پیام ها',
+    categories: ['dashboards'],
+    src: '/img/screens/dashboards-health.png',
+    srcDark: '/img/screens/dashboards-health-dark.png',
+    order: 17,
+  },
+})
+useHead({ htmlAttrs: { dir: 'rtl' } })
+
 const trustLevel = ref(75)
 
-const { getUserDetailsWithUserId } = useUser()
 const route = useRoute()
-const sessionId = computed(() => route.query.sessionId as string)
-const analysisData = ref<any>(null)
+const toaster = useToaster()
+
+const analysisId = computed(() => route.query.analysis_id as string)
+const analysisData = ref<any>({ expireChargeTime: new Date() })
+const { getAnalysisById } = useSessionAnalysis()
 
 const formatEmoji = (trustLevel: number): string => {
   if (trustLevel >= 80) return '😍' // Heart eyes for 100
@@ -30,23 +46,6 @@ const trustLevelComputed = computed(() => {
 
 const headlinesComputed = computed(() => analysisData.value?.headlines || [])
 
-definePageMeta({
-  title: 'گزارش جلسه',
-  layout: 'sidebar',
-  preview: {
-    title: 'مصاحبه مانا',
-    description: 'بررسی جزییات پیام ها',
-    categories: ['dashboards'],
-    src: '/img/screens/dashboards-health.png',
-    srcDark: '/img/screens/dashboards-health-dark.png',
-    order: 17,
-  },
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
-
-const suicideRiskCondition = reactive(useSuicideRiskCondition())
-const userDetails = ref({ expand: { user: { currentDeletionDivider: 0 } } })
-const userSum = ref([])
 const headlines = ref([
   {
     nameFa: 'شکایت اصلی',
@@ -71,77 +70,21 @@ const headlines = ref([
 ])
 
 onMounted(async () => {
-  if (!sessionId.value) return
-  const data = localStorage.getItem(`analysis_${sessionId.value}`)
-  if (data) {
-    analysisData.value = JSON.parse(data)
-    localStorage.removeItem(`analysis_${sessionId.value}`)
+  if (!analysisId.value) {
+    toaster.clearAll()
+    toaster.show({
+      title: 'مشکل در بارگزاری داده',
+      message: `تحلیل با این شناسه یافت نشد`,
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+    navigateTo('/dashboard')
+    return
   }
-  userDetails.value = await getUserDetailsWithUserId(route.query.userDetailsId as string)
+  analysisData.value = await getAnalysisById(analysisId.value)
+  console.log(analysisData.value)
 })
-
-function useSuicideRiskCondition() {
-  const { primary } = useTailwindColors()
-  const type = 'area'
-  const height = 280
-
-  const options = {
-    chart: {
-      offsetX: -20,
-      zoom: {
-        enabled: false,
-      },
-      toolbar: {
-        show: false,
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    grid: {
-      show: false,
-    },
-    stroke: {
-      width: [2, 2, 2],
-      curve: 'smooth',
-    },
-    colors: [primary.value],
-    xaxis: {
-      categories: [],
-    },
-
-    yaxis: {
-      min: 0,
-      max: 5,
-      tickAmount: 5, // Since you have 4 categories (0-3), you need 3 ticks
-      labels: {
-        offsetX: -20,
-        offsetY: -10,
-        formatter: function (val) {
-          const categories = ['خیلی کم', 'کم', 'متوسط', 'زیاد', 'خیلی زیاد']
-          return categories[val] // Return the category based on the numerical index
-        },
-      },
-    },
-    legend: {
-      horizontalAlign: 'left',
-    },
-  }
-
-  const series = ref([
-    {
-      name: 'ریسک خودکشی',
-      data: [],
-    },
-  ])
-
-  return {
-    type,
-    height,
-    options,
-    series,
-  }
-}
 
 const isLoading = ref(false)
 // here from edit profile
@@ -330,52 +273,72 @@ const {
               <BaseHeading tag="h1" class="text-white opacity-90">
                 <span>بررسی کیفی و کمی اطلاعات</span>
               </BaseHeading>
-              <BaseParagraph size="sm" class="text-white opacity-70">
-                <span>
-                  گزارش کمی و کیفی تحلیلی اقدامات و تعاملات هوش مصنوعی با کاربر
+              <BaseParagraph size="lg" class="text-white opacity-80">
+                <span class="mt-2 flex items-center justify-center gap-2 sm:justify-start">
+                  <span class="text-white/80">گزارش تحلیلی جلسه درمانی</span>
+                  <span class="font-bold text-white">
+                    {{ analysisData?.expand?.session?.expand?.user?.name }}
+                  </span>
+                  <span class="rounded-full bg-white/10 px-2 py-0.5 text-sm text-white/80">با</span>
+                  <span class="font-bold text-white">
+                    {{ analysisData?.expand?.session?.expand?.therapist?.name }}
+                  </span>
                 </span>
               </BaseParagraph>
               <div
-                class="mt-6 flex flex-wrap gap-y-6 pb-4 text-center sm:mt-4 sm:gap-x-8 sm:pb-0 sm:text-left"
+                class="mt-6 flex flex-wrap gap-4 pb-4 text-center sm:mt-4 sm:pb-0 sm:text-right"
               >
-                <div class="min-w-[33.3%] sm:min-w-0">
-                  <BaseTag
-                    rounded="md"
-                    variant="pastel"
-                    color="default"
-                  >
-                    {{ userDetails.expand.user.currentDeletionDivider == 0 ? 'جلسه مصاحبه' : `جلسه شماره ${userDetails.expand.user.currentDeletionDivider}` }}
-                  </BaseTag>
-                </div>
-                <div class="min-w-[33.3%] sm:min-w-0">
-                  <div>
-                    <BaseTag
-                      rounded="md"
-                      variant="pastel"
-                      color="default"
-                    >
-                      پایان زمان در
-                      {{ new Date( userDetails.expand.user.expireChargeTime ).toLocaleTimeString('fa') }} - {{ new Date( userDetails.expand.user.expireChargeTime ).toLocaleDateString('fa') }}
-                    </BaseTag>
+                <div class="flex-1">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-white/50">شروع جلسه</span>
+                    <div class="rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm">
+                      <span class="text-sm font-bold text-white">
+                        {{ new Date(analysisData?.expand?.session?.start_time).toLocaleString('fa') }}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div v-if="userDetails?.expand?.user?.hasCharge" class="min-w-[33.3%] sm:min-w-0">
-                  <BaseTag
-                    rounded="md"
-                    variant="outline"
-                    color="info"
-                  >
-                    جلسه در حال برگزاری
-                  </BaseTag>
+                <div class="flex-1">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-white/50">پایان جلسه</span>
+                    <div class="rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm">
+                      <span class="text-sm font-bold text-white">
+                        {{ new Date(analysisData?.expand?.session?.end_time).toLocaleString('fa') }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div v-else class="min-w-[33.3%] sm:min-w-0">
-                  <BaseTag
-                    rounded="md"
-                    variant="outline"
-                    color="success"
-                  >
-                    جلسه پایان یافته
-                  </BaseTag>
+                <div class="flex-1">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-white/50">وضعیت</span>
+                    <div
+                      class="rounded-xl px-4 py-2"
+                      :class="{
+                        'bg-success-500/20 backdrop-blur-sm': analysisData?.expand?.session?.status === 'done',
+                        'bg-info-500/20 backdrop-blur-sm': analysisData?.expand?.session?.status !== 'done'
+                      }"
+                    >
+                      <span
+                        class="text-sm font-bold"
+                        :class="{
+                          'text-success-400': analysisData?.expand?.session?.status === 'done',
+                          'text-info-400': analysisData?.expand?.session?.status !== 'done'
+                        }"
+                      >
+                        {{ analysisData?.expand?.session?.status === 'done' ? 'جلسه پایان یافته' : 'جلسه در حال برگزاری' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-xs font-medium text-white/50">تعداد پیام‌ها</span>
+                    <div class="bg-primary-500/20 rounded-xl px-4 py-2 backdrop-blur-sm">
+                      <span class="text-primary-400 text-sm font-bold">
+                        {{ analysisData?.expand?.session?.count_of_total_messages }} پیام
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -383,7 +346,7 @@ const {
         </div>
       </div>
       <!-- Icon box -->
-      <div v-for="headline in headlines" class="col-span-6 sm:col-span-3">
+      <div v-for="headline in headlinesComputed" class="col-span-6 sm:col-span-3">
         <div class="flex flex-col">
           <div class="mb-3 flex items-center gap-2">
             <BaseIconBox size="md" class="bg-primary-500/10">
@@ -391,11 +354,11 @@ const {
             </BaseIconBox>
             <div>
               <div class="flex items-center gap-1 font-sans">
-                <span>{{ headline.nameFa }} - {{ headline.valueFa }}</span>
+                <span>{{ headline.title }}</span>
               </div>
               <BaseParagraph size="xs" class="text-muted-400">
                 <span>
-                  {{ headline.descriptionFa }}
+                  {{ headline.description }}
                 </span>
               </BaseParagraph>
             </div>
@@ -405,7 +368,7 @@ const {
               tag="h3"
               size="sm"
               weight="medium"
-              class="text-muted-800 dark:text-muted-100"
+              class="text-muted-800 mb-3 dark:text-white"
             />
           </div>
         </div>
@@ -452,7 +415,7 @@ const {
                 <!-- <AddonApexcharts v-bind="scatterEnergy" /> -->
               </BaseCard>
             </div>
-            <div class="col-span-12 mt-5">
+            <!-- <div class="col-span-12 mt-5">
               <BaseCard shape="curved" class="p-6">
                 <div class="mb-2 flex items-center justify-between">
                   <BaseHeading
@@ -475,30 +438,111 @@ const {
                   </BaseParagraph>
                 </div>
               </BaseCard>
-            </div>
+            </div> -->
             <div class="col-span-12 mt-5">
               <BaseCard shape="curved" class="p-6">
                 <div class="mb-2 flex items-center justify-between">
                   <BaseHeading
-                    as="h3"
+                    as="h2"
                     size="md"
-                    weight="semibold"
-                    lead="tight"
-                    class="text-muted-800 dark:text-white"
+                    weight="medium"
+                    class="text-muted-800 mb-3 dark:text-white"
                   >
                     <span>بررسی درمانگر</span>
                   </BaseHeading>
                 </div>
-                <div class="flex justify-between">
-                  <BaseParagraph size="xs" class="text-muted-400 max-w-full">
-                    <Icon name="ph:question-duotone" class="size-4" />
-                    <span>
-                      تحلیلی از روانشناس و اقدامات، همراه با امتیاز و توضیحات امتیاز در بخش زیر آمده است.
-                    </span>
-                    psychotherapistEvaluation
-                    psychotherapistEvaluationScore
-                    psychotherapistEvaluationScoreDescription
-                  </BaseParagraph>
+
+                <!-- Score Card -->
+                <div class="grid gap-6 md:grid-cols-2">
+                  <!-- Score Card -->
+                  <div class="bg-muted-800 dark:bg-muted-900 relative overflow-hidden rounded-2xl p-6">
+                    <div class="bg-primary-500/10 pointer-events-none absolute right-0 top-0 size-32 rounded-bl-[6rem]" />
+                    <div class="bg-primary-500/5 pointer-events-none absolute bottom-0 left-0 size-24 rounded-tr-[4rem]" />
+                    <div class="relative z-10">
+                      <!-- Header -->
+                      <div class="mb-8 flex items-center justify-between">
+                        <h3 class="flex items-center gap-2 text-lg font-semibold text-white">
+                          <Icon name="ph:star-duotone" class="text-primary-500 size-6" />
+                          امتیاز درمانگر
+                        </h3>
+                        <div class="bg-primary-500/10 flex items-center gap-1 rounded-lg px-3 py-1">
+                          <Icon name="ph:trend-up-duotone" class="text-primary-400 size-4" />
+                          <span class="text-primary-400 text-sm">عملکرد مثبت</span>
+                        </div>
+                      </div>
+
+                      <!-- Main Score -->
+                      <div class="mb-8 flex items-center justify-center">
+                        <div class="text-center">
+                          <div class="flex items-baseline justify-center gap-1">
+                            <span class="text-primary-400 text-xl font-medium">100/</span>
+                            <span class="text-primary-500 text-7xl font-bold leading-none tracking-tight">{{ analysisData.psychotherapistEvaluationScore }}</span>
+                          </div>
+                          <div class="text-primary-400 mt-2 flex items-center justify-center gap-1">
+                            <Icon name="ph:chart-bar-duotone" class="size-5" />
+                            <span class="text-sm">امتیاز کلی</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Performance Metrics -->
+                      <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-muted-900/50 rounded-xl p-4">
+                          <div class="mb-3 flex items-center justify-center gap-2">
+                            <Icon name="ph:timer-duotone" class="text-primary-400 size-5" />
+                            <span class="text-muted-200 text-sm">زمان جلسه</span>
+                          </div>
+                          <div class="flex items-baseline justify-center gap-1">
+                            <span class="text-2xl font-semibold text-white">45</span>
+                            <span class="text-muted-400 text-sm">دقیقه</span>
+                          </div>
+                        </div>
+                        <div class="bg-muted-900/50 rounded-xl p-4">
+                          <div class="mb-3 flex items-center justify-center gap-2">
+                            <Icon name="ph:chats-circle-duotone" class="text-primary-400 size-5" />
+                            <span class="text-muted-200 text-sm">تعداد پیام‌ها</span>
+                          </div>
+                          <div class="flex items-baseline justify-center gap-1">
+                            <span class="text-2xl font-semibold text-white">24</span>
+                            <span class="text-muted-400 text-sm">پیام</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Evaluation Details -->
+                  <div class="grid gap-4">
+                    <!-- Description -->
+                    <div class="bg-muted-100 dark:bg-muted-800/50 rounded-xl p-4">
+                      <div class="mb-3 flex items-center gap-3">
+                        <div class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2">
+                          <Icon name="ph:user-circle-gear-duotone" class="text-primary-500 size-5" />
+                        </div>
+                        <h4 class="text-muted-800 dark:text-muted-100 font-semibold">
+                          بررسی عملکرد درمانگر
+                        </h4>
+                      </div>
+                      <p class="text-muted-500 dark:text-muted-400 leading-relaxed">
+                        {{ analysisData.psychotherapistEvaluation }}
+                      </p>
+                    </div>
+
+                    <!-- Additional Info -->
+                    <div class="bg-muted-100 dark:bg-muted-800/50 rounded-xl p-4">
+                      <div class="mb-3 flex items-center gap-3">
+                        <div class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2">
+                          <Icon name="ph:info-duotone" class="text-primary-500 size-5" />
+                        </div>
+                        <h4 class="text-muted-800 dark:text-muted-100 font-semibold">
+                          توضیحات امتیاز
+                        </h4>
+                      </div>
+                      <p class="text-muted-500 dark:text-muted-400 leading-relaxed">
+                        {{ analysisData.psychotherapistEvaluationScoreDescription }}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </BaseCard>
             </div>
@@ -532,358 +576,196 @@ const {
                       </NuxtLink>
                     </BaseParagraph>
                   </div>
-                  <div class="mt-5 grid grid-cols-12 gap-4">
-                    <div class="col-span-12 sm:col-span-6">
-                      DemographicData
-                      <Field
-                        v-slot="{
-                          field,
-                          errorMessage,
-                          handleChange,
-                          handleBlur,
-                        }"
-                        name="profile.firstName"
-                      >
-                        <BaseInput
-                          :model-value="field.value"
-                          :error="errorMessage"
-                          :disabled="isSubmitting"
-                          type="text"
-                          icon="ph:user-duotone"
-                          placeholder="First name"
-                          @update:model-value="handleChange"
-                          @blur="handleBlur"
-                        />
-                      </Field>
+                  <div class="relative mt-5">
+                    <div class="grid grid-cols-12 gap-4" :class="{ 'pointer-events-none opacity-40': !analysisData.demographicData }">
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="profile.firstName"
+                        >
+                          <BaseInput
+                            :model-value="analysisData.demographicData?.firstName || ''"
+                            :error="errorMessage"
+                            disabled
+                            type="text"
+                            icon="ph:user-duotone"
+                            placeholder="نام"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12 sm:col-span-6">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="profile.lastName"
+                        >
+                          <BaseInput
+                            :model-value="analysisData.demographicData?.lastName || ''"
+                            :error="errorMessage"
+                            disabled
+                            type="text"
+                            icon="ph:user-duotone"
+                            placeholder="نام خانوادگی"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="profile.role"
+                        >
+                          <BaseInput
+                            :model-value="analysisData.demographicData?.occupation || ''"
+                            :error="errorMessage"
+                            disabled
+                            type="text"
+                            icon="ph:suitcase-duotone"
+                            placeholder="شغل"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="profile.location"
+                        >
+                          <BaseInput
+                            :model-value="analysisData.demographicData?.location || ''"
+                            :error="errorMessage"
+                            disabled
+                            type="text"
+                            icon="ph:map-pin-duotone"
+                            placeholder="موقعیت"
+                          />
+                        </Field>
+                      </div>
+                      <div class="col-span-12">
+                        <Field
+                          v-slot="{
+                            field,
+                            errorMessage,
+                            handleChange,
+                            handleBlur,
+                          }"
+                          name="profile.bio"
+                        >
+                          <BaseTextarea
+                            :model-value="analysisData.demographicData?.bio || ''"
+                            :error="errorMessage"
+                            disabled
+                            rows="4"
+                            placeholder="درباره مراجع..."
+                          />
+                        </Field>
+                      </div>
                     </div>
-                    <div class="col-span-12 sm:col-span-6">
-                      <Field
-                        v-slot="{
-                          field,
-                          errorMessage,
-                          handleChange,
-                          handleBlur,
-                        }"
-                        name="profile.lastName"
-                      >
-                        <BaseInput
-                          :model-value="field.value"
-                          :error="errorMessage"
-                          :disabled="isSubmitting"
-                          type="text"
-                          icon="ph:user-duotone"
-                          placeholder="Last name"
-                          @update:model-value="handleChange"
-                          @blur="handleBlur"
+
+                    <!-- No Data Overlay -->
+                    <div
+                      v-if="!analysisData.demographicData"
+                      class="bg-muted-100/50 dark:bg-muted-900/50 absolute inset-0 flex items-center justify-center rounded-lg backdrop-blur-sm"
+                    >
+                      <div class="text-center">
+                        <Icon
+                          name="ph:user-circle-minus-duotone"
+                          class="text-muted-400 mb-2 size-12"
                         />
-                      </Field>
-                    </div>
-                    <div class="col-span-12">
-                      <Field
-                        v-slot="{
-                          field,
-                          errorMessage,
-                          handleChange,
-                          handleBlur,
-                        }"
-                        name="profile.role"
-                      >
-                        <BaseInput
-                          :model-value="field.value"
-                          :error="errorMessage"
-                          :disabled="isSubmitting"
-                          type="text"
-                          icon="ph:suitcase-duotone"
-                          placeholder="Job title"
-                          @update:model-value="handleChange"
-                          @blur="handleBlur"
-                        />
-                      </Field>
-                    </div>
-                    <div class="col-span-12">
-                      <Field
-                        v-slot="{
-                          field,
-                          errorMessage,
-                          handleChange,
-                          handleBlur,
-                        }"
-                        name="profile.location"
-                      >
-                        <BaseInput
-                          :model-value="field.value"
-                          :error="errorMessage"
-                          :disabled="isSubmitting"
-                          type="text"
-                          icon="ph:map-pin-duotone"
-                          placeholder="Location"
-                          @update:model-value="handleChange"
-                          @blur="handleBlur"
-                        />
-                      </Field>
-                    </div>
-                    <div class="col-span-12">
-                      <Field
-                        v-slot="{
-                          field,
-                          errorMessage,
-                          handleChange,
-                          handleBlur,
-                        }"
-                        name="profile.bio"
-                      >
-                        <BaseTextarea
-                          :model-value="field.value"
-                          :error="errorMessage"
-                          :disabled="isSubmitting"
-                          rows="4"
-                          placeholder="About you / Short bio..."
-                          @update:model-value="handleChange"
-                          @blur="handleBlur"
-                        />
-                      </Field>
+                        <p class="text-muted-500 dark:text-muted-400">
+                          اطلاعات جمعیت‌شناختی در دسترس نیست
+                        </p>
+                      </div>
                     </div>
                   </div>
                   <TairoFormGroup
                     class="mt-5"
-                    label="علاقه مندی ها و ارزش ها"
-                    sublabel="اطلاعات جمع آوری شده در مورد علاقه مندی ها، ارزش ها و باور های کاربر"
+                    label="تحلیل‌های روانشناختی"
+                    sublabel="خلاصه تحلیل‌های رفتاری، احساسی و نگرانی‌های مراجع"
                   >
-                    <div class="grid grid-cols-12 gap-4">
-                      <div class="col-span-12 sm:col-span-6">
-                        behavioralAnalysisSummary
-                        emotionalAnalysisSummary
-                        thoughtsAndConcernsSummary
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="info.experience"
-                        >
-                          <BaseListbox
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            :items="experience"
-                            placeholder="Experience"
-                            shape="rounded"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
-                      </div>
-                      <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="info.firstJob"
-                        >
-                          <BaseListbox
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            :items="answers"
-                            :properties="{ label: 'label', value: 'value' }"
-                            placeholder="Is this your first job?"
-                            shape="rounded"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
-                      </div>
-                      <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="info.flexible"
-                        >
-                          <BaseListbox
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            :items="answers"
-                            :properties="{ label: 'label', value: 'value' }"
-                            placeholder="Are you flexible?"
-                            shape="rounded"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
-                      </div>
-                      <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="info.remote"
-                        >
-                          <BaseListbox
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            :items="answers"
-                            :properties="{ label: 'label', value: 'value' }"
-                            placeholder="Do you work remotely?"
-                            shape="rounded"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
-                      </div>
+                    <div
+                      v-if="!analysisData.behavioralAnalysisSummary && !analysisData.emotionalAnalysisSummary && !analysisData.thoughtsAndConcernsSummary"
+                      class="bg-muted-100 dark:bg-muted-800/50 rounded-xl p-6 text-center"
+                    >
+                      <Icon
+                        name="ph:note-pencil-duotone"
+                        class="text-muted-400 mb-2 size-12"
+                      />
+                      <p class="text-muted-500 dark:text-muted-400">
+                        هنوز تحلیلی ثبت نشده است
+                      </p>
                     </div>
-                  </TairoFormGroup>
 
-                  <TairoFormGroup
-                    class="mt-5"
-                    label="پروفایل اجتماعی"
-                    sublabel="ارزش های اجتماعی و سیاسی کاربر"
-                  >
-                    <div class="grid grid-cols-12 gap-4">
-                      <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="social.facebook"
-                        >
-                          <BaseInput
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            type="text"
-                            icon="fa6-brands:facebook-f"
-                            placeholder="Facebook URL"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
+                    <div v-else class="grid gap-6">
+                      <!-- Behavioral Analysis -->
+                      <div
+                        v-if="analysisData.behavioralAnalysisSummary"
+                        class="bg-muted-100 dark:bg-muted-800/50 hover:bg-muted-200 dark:hover:bg-muted-800 rounded-xl p-4"
+                      >
+                        <div class="mb-3 flex items-center gap-3">
+                          <div class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2">
+                            <Icon name="ph:brain-duotone" class="text-primary-500 size-5" />
+                          </div>
+                          <h4 class="text-muted-800 dark:text-muted-100 font-semibold">
+                            تحلیل رفتاری
+                          </h4>
+                        </div>
+                        <p class="text-muted-500 dark:text-muted-400 leading-relaxed">
+                          {{ analysisData.behavioralAnalysisSummary }}
+                        </p>
                       </div>
-                      <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="social.twitter"
-                        >
-                          <BaseInput
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            type="text"
-                            icon="fa6-brands:twitter"
-                            placeholder="Twitter URL"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
+
+                      <!-- Emotional Analysis -->
+                      <div
+                        v-if="analysisData.emotionalAnalysisSummary"
+                        class="bg-muted-100 dark:bg-muted-800/50 hover:bg-muted-200 dark:hover:bg-muted-800 rounded-xl p-4"
+                      >
+                        <div class="mb-3 flex items-center gap-3">
+                          <div class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2">
+                            <Icon name="ph:heart-duotone" class="text-primary-500 size-5" />
+                          </div>
+                          <h4 class="text-muted-800 dark:text-muted-100 font-semibold">
+                            تحلیل احساسی
+                          </h4>
+                        </div>
+                        <p class="text-muted-500 dark:text-muted-400 leading-relaxed">
+                          {{ analysisData.emotionalAnalysisSummary }}
+                        </p>
                       </div>
-                      <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="social.dribbble"
-                        >
-                          <BaseInput
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            type="text"
-                            icon="fa6-brands:dribbble"
-                            placeholder="Dribbble URL"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
-                      </div>
-                      <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="social.instagram"
-                        >
-                          <BaseInput
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            type="text"
-                            icon="fa6-brands:instagram"
-                            placeholder="Instagram URL"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
-                      </div>
-                      <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="social.github"
-                        >
-                          <BaseInput
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            type="text"
-                            icon="fa6-brands:github"
-                            placeholder="Github URL"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
-                      </div>
-                      <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="social.gitlab"
-                        >
-                          <BaseInput
-                            :model-value="field.value"
-                            :error="errorMessage"
-                            :disabled="isSubmitting"
-                            type="text"
-                            icon="fa6-brands:gitlab"
-                            placeholder="Gitlab URL"
-                            @update:model-value="handleChange"
-                            @blur="handleBlur"
-                          />
-                        </Field>
+
+                      <!-- Thoughts and Concerns -->
+                      <div
+                        v-if="analysisData.thoughtsAndConcernsSummary"
+                        class="bg-muted-100 dark:bg-muted-800/50 hover:bg-muted-200 dark:hover:bg-muted-800 rounded-xl p-4"
+                      >
+                        <div class="mb-3 flex items-center gap-3">
+                          <div class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2">
+                            <Icon name="ph:lightbulb-duotone" class="text-primary-500 size-5" />
+                          </div>
+                          <h4 class="text-muted-800 dark:text-muted-100 font-semibold">
+                            افکار و نگرانی‌ها
+                          </h4>
+                        </div>
+                        <p class="text-muted-500 dark:text-muted-400 leading-relaxed">
+                          {{ analysisData.thoughtsAndConcernsSummary }}
+                        </p>
                       </div>
                     </div>
                   </TairoFormGroup>
@@ -908,8 +790,6 @@ const {
                       میزان مشارکت و اعتماد ارزیابی شده از پیام های کاربر
                     </span>
                   </BaseParagraph>
-                  finalTrustAndOppennessOfUser
-                  finalTrustAndOppennessOfUserEvaluationDescription
                   <div
                     class="mt-[80px] flex flex-col gap-6 md:flex-row md:items-end"
                   >
@@ -922,9 +802,11 @@ const {
                       />
                     </div>
                   </div>
+                  <p class="mt-5 text-justify">
+                    {{ analysisData.finalTrustAndOppennessOfUserEvaluationDescription }}
+                  </p>
                 </BaseCard>
-                <BaseCard class="mt-5 p-6">
-                  <!-- Title -->
+                <!-- <BaseCard class="mt-5 p-6">
                   <div class="mb-8 flex items-center justify-between">
                     <BaseHeading
                       as="h3"
@@ -942,10 +824,10 @@ const {
                       نمایش تمام موارد
                     </NuxtLink>
                   </div>
-                  <!-- <GoalsCompact /> -->
-                </BaseCard>
+                  <GoalsCompact />
+                </BaseCard> -->
               </div>
-              <div class="col-span-12">
+              <div class="col-span-12 mb-8">
                 <BaseCard shape="curved" class="p-6">
                   <div class="mb-2 flex items-center justify-between">
                     <BaseHeading
@@ -955,226 +837,216 @@ const {
                       lead="tight"
                       class="text-muted-800 dark:text-white"
                     >
-                      <span>وضعیت روانی اجتماعی</span>
+                      <span>وضعیت روانی</span>
                     </BaseHeading>
-                    psychoAnalysis
-                    defenceMechanisms
-                    schemas
                   </div>
                   <div class="flex justify-between">
                     <BaseParagraph size="xs" class="text-muted-400 max-w-full">
-                      <Icon name="ph:question-duotone" class="size-4" />
+                      <Icon name="ph:brain-duotone" class="size-4" />
                       <span>
                         تحلیل روانی پیام های کاربر نشان می دهد که وی در چه
                         وضعیتی از لحاظ ارتباط روانی با هوش مصنوعی است.
                       </span>
-                      <NuxtLink
-                        to="#"
-                        class="text-primary-500 underline-offset-4 hover:underline"
-                      >
-                        اطلاعات بیشتر
-                      </NuxtLink>
                     </BaseParagraph>
                   </div>
-                  <div class="mt-5 w-full">
-                    <form class="mx-auto w-full">
-                      <fieldset class="w-full space-y-6">
-                        <div class="grid gap-6 sm:grid-cols-4">
-                          <BaseCheckboxHeadless
-                            v-model="value"
-                            value="team_member_1"
-                          >
-                            <BaseCard
-                              shape="rounded"
-                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
-                            >
-                              <div class="flex w-full items-center gap-2">
-                                <BaseAvatar src="/img/avatars/10.svg" />
 
-                                <div>
-                                  <BaseHeading
-                                    as="h4"
-                                    size="sm"
-                                    weight="medium"
-                                    lead="none"
-                                  >
-                                    Kendra Wilson
-                                  </BaseHeading>
-
-                                  <BaseText
-                                    size="xs"
-                                    class="text-muted-400"
-                                  >
-                                    Software Engineer
-                                  </BaseText>
-                                </div>
-
-                                <div class="child text-muted-300 ms-auto">
-                                  <div
-                                    class="size-3 rounded-full bg-current"
-                                  />
-                                </div>
-                              </div>
-                            </BaseCard>
-                          </BaseCheckboxHeadless>
-
-                          <BaseCheckboxHeadless
-                            v-model="value"
-                            value="team_member_2"
-                          >
-                            <BaseCard
-                              shape="rounded"
-                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
-                            >
-                              <div class="flex w-full items-center gap-2">
-                                <BaseAvatar src="/img/avatars/16.svg" />
-
-                                <div>
-                                  <BaseHeading
-                                    as="h4"
-                                    size="sm"
-                                    weight="medium"
-                                    lead="none"
-                                  >
-                                    Hermann Mayer
-                                  </BaseHeading>
-
-                                  <BaseText
-                                    size="xs"
-                                    class="text-muted-400"
-                                  >
-                                    Sales Manager
-                                  </BaseText>
-                                </div>
-
-                                <div class="child text-muted-300 ms-auto">
-                                  <div
-                                    class="size-3 rounded-full bg-current"
-                                  />
-                                </div>
-                              </div>
-                            </BaseCard>
-                          </BaseCheckboxHeadless>
-
-                          <BaseCheckboxHeadless
-                            v-model="value"
-                            value="team_member_3"
-                          >
-                            <BaseCard
-                              shape="rounded"
-                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
-                            >
-                              <div class="flex w-full items-center gap-2">
-                                <BaseAvatar src="/img/avatars/25.svg" />
-
-                                <div>
-                                  <BaseHeading
-                                    as="h4"
-                                    size="sm"
-                                    weight="medium"
-                                    lead="none"
-                                  >
-                                    Melany Lawright
-                                  </BaseHeading>
-
-                                  <BaseText
-                                    size="xs"
-                                    class="text-muted-400"
-                                  >
-                                    HR Manager
-                                  </BaseText>
-                                </div>
-
-                                <div class="child text-muted-300 ms-auto">
-                                  <div
-                                    class="size-3 rounded-full bg-current"
-                                  />
-                                </div>
-                              </div>
-                            </BaseCard>
-                          </BaseCheckboxHeadless>
-                          <BaseCheckboxHeadless
-                            v-model="value"
-                            value="team_member_1"
-                          >
-                            <BaseCard
-                              shape="rounded"
-                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
-                            >
-                              <div class="flex w-full items-center gap-2">
-                                <BaseAvatar src="/img/avatars/10.svg" />
-
-                                <div>
-                                  <BaseHeading
-                                    as="h4"
-                                    size="sm"
-                                    weight="medium"
-                                    lead="none"
-                                  >
-                                    Kendra Wilson
-                                  </BaseHeading>
-
-                                  <BaseText
-                                    size="xs"
-                                    class="text-muted-400"
-                                  >
-                                    Software Engineer
-                                  </BaseText>
-                                </div>
-
-                                <div class="child text-muted-300 ms-auto">
-                                  <div
-                                    class="size-3 rounded-full bg-current"
-                                  />
-                                </div>
-                              </div>
-                            </BaseCard>
-                          </BaseCheckboxHeadless>
-
-                          <BaseCheckboxHeadless
-                            v-model="value"
-                            value="team_member_2"
-                          >
-                            <BaseCard
-                              shape="rounded"
-                              class="peer-checked:!border-primary-500 peer-checked:[&_.child]:!text-primary-500 border-2 p-4 opacity-50 peer-checked:opacity-100"
-                            >
-                              <div class="flex w-full items-center gap-2">
-                                <BaseAvatar src="/img/avatars/16.svg" />
-
-                                <div>
-                                  <BaseHeading
-                                    as="h4"
-                                    size="sm"
-                                    weight="medium"
-                                    lead="none"
-                                  >
-                                    Hermann Mayer
-                                  </BaseHeading>
-
-                                  <BaseText
-                                    size="xs"
-                                    class="text-muted-400"
-                                  >
-                                    Sales Manager
-                                  </BaseText>
-                                </div>
-
-                                <div class="child text-muted-300 ms-auto">
-                                  <div
-                                    class="size-3 rounded-full bg-current"
-                                  />
-                                </div>
-                              </div>
-                            </BaseCard>
-                          </BaseCheckboxHeadless>
+                  <!-- Main Analysis -->
+                  <div v-if="analysisData.psychoAnalysis" class="mt-5">
+                    <div class="bg-muted-100 dark:bg-muted-800/50 rounded-xl p-4">
+                      <div class="mb-3 flex items-center gap-3">
+                        <div class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2">
+                          <Icon name="ph:brain-duotone" class="text-primary-500 size-5" />
                         </div>
-                      </fieldset>
-                    </form>
+                        <h4 class="text-muted-800 dark:text-muted-100 font-semibold">
+                          تحلیل روانشناختی
+                        </h4>
+                      </div>
+                      <p class="text-muted-500 dark:text-muted-400 leading-relaxed">
+                        {{ analysisData.psychoAnalysis }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Defense Mechanisms -->
+                  <div v-if="analysisData.detectedDefenceMechanisms?.length > 0" class="mt-6">
+                    <h4 class="text-muted-800 dark:text-muted-100 mb-4 flex items-center gap-2 font-semibold">
+                      <Icon name="ph:shield-duotone" class="text-primary-500 size-5" />
+                      مکانیزم‌های دفاعی شناسایی شده
+                    </h4>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                      <div
+                        v-for="mechanism in analysisData.detectedDefenceMechanisms"
+                        :key="mechanism.name"
+                        class="group relative"
+                      >
+                        <BaseCard
+                          shape="rounded"
+                          class="border-2 p-4 transition-all duration-300 hover:shadow-lg"
+                          :class="{
+                            'border-success-500 dark:border-success-400 hover:bg-success-50 dark:hover:bg-success-500/10': mechanism.confidence === 'very_high',
+                            'border-info-500 dark:border-info-400 hover:bg-info-50 dark:hover:bg-info-500/10': mechanism.confidence === 'high',
+                            'border-warning-500 dark:border-warning-400 hover:bg-warning-50 dark:hover:bg-warning-500/10': mechanism.confidence === 'low',
+                            'border-muted-300 dark:border-muted-700 hover:bg-muted-50 dark:hover:bg-muted-800': mechanism.confidence === 'very_low'
+                          }"
+                        >
+                          <div class="flex w-full items-start gap-3">
+                            <div
+                              class="rounded-lg p-2"
+                              :class="{
+                                'bg-success-500/10 dark:bg-success-500/20': mechanism.confidence === 'very_high',
+                                'bg-info-500/10 dark:bg-info-500/20': mechanism.confidence === 'high',
+                                'bg-warning-500/10 dark:bg-warning-500/20': mechanism.confidence === 'low',
+                                'bg-muted-300/10 dark:bg-muted-700/20': mechanism.confidence === 'very_low'
+                              }"
+                            >
+                              <Icon
+                                :name="mechanism.name.toLowerCase().includes('انکار') ? 'ph:prohibit-duotone' :
+                                  mechanism.name.toLowerCase().includes('فرافکنی') ? 'ph:arrows-out-duotone' :
+                                  mechanism.name.toLowerCase().includes('درون‌فکنی') ? 'ph:arrow-fat-lines-down-duotone' :
+                                  mechanism.name.toLowerCase().includes('جابجایی') ? 'ph:arrows-left-right-duotone' :
+                                  mechanism.name.toLowerCase().includes('واکنش') ? 'ph:arrows-out-duotone' :
+                                  mechanism.name.toLowerCase().includes('دلیل') ? 'ph:brain-duotone' : 'ph:shield-duotone'"
+                                class="size-5"
+                                :class="{
+                                  'text-success-500': mechanism.confidence === 'very_high',
+                                  'text-info-500': mechanism.confidence === 'high',
+                                  'text-warning-500': mechanism.confidence === 'low',
+                                  'text-muted-300': mechanism.confidence === 'very_low'
+                                }"
+                              />
+                            </div>
+                            <div class="flex-1">
+                              <BaseHeading
+                                as="h4"
+                                size="sm"
+                                weight="medium"
+                                lead="none"
+                                class="mb-3 flex items-center justify-between gap-2"
+                              >
+                                {{ mechanism.name }}
+                                <div class="flex items-center gap-2">
+                                  <div class="text-xs">
+                                    <Icon name="ph:target" class="size-4" />
+                                  </div>
+                                  <div
+                                    v-for="i in 4"
+                                    :key="i"
+                                    class="size-1.5 rounded-full transition-all duration-300"
+                                    :class="{
+                                      'bg-success-500': mechanism.confidence === 'very_high' && i <= 4,
+                                      'bg-info-500': mechanism.confidence === 'high' && i <= 3,
+                                      'bg-warning-500': mechanism.confidence === 'low' && i <= 2,
+                                      'bg-muted-300': mechanism.confidence === 'very_low' && i <= 1,
+                                      'bg-muted-200 dark:bg-muted-700':
+                                        (mechanism.confidence === 'very_high' && i > 4) ||
+                                        (mechanism.confidence === 'high' && i > 3) ||
+                                        (mechanism.confidence === 'low' && i > 2) ||
+                                        (mechanism.confidence === 'very_low' && i > 1)
+                                    }"
+                                  />
+                                </div>
+                              </BaseHeading>
+                              <BaseText size="xs" class="text-muted-400 line-clamp-2 transition-all duration-300 group-hover:line-clamp-none">
+                                {{ mechanism.evidence }}
+                              </BaseText>
+                            </div>
+                          </div>
+                        </BaseCard>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Schemas -->
+                  <div v-if="analysisData.detectedSchemas?.length > 0" class="mt-6">
+                    <h4 class="text-muted-800 dark:text-muted-100 mb-4 flex items-center gap-2 font-semibold">
+                      <Icon name="ph:tree-structure-duotone" class="text-primary-500 size-5" />
+                      طرحواره‌های شناسایی شده
+                    </h4>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                      <div
+                        v-for="schema in analysisData.detectedSchemas"
+                        :key="schema.name"
+                        class="group relative"
+                      >
+                        <BaseCard
+                          shape="rounded"
+                          class="border-2 p-4 transition-all duration-300 hover:shadow-lg"
+                          :class="{
+                            'border-success-500 dark:border-success-400 hover:bg-success-50 dark:hover:bg-success-500/10': schema.confidence === 'very_high',
+                            'border-info-500 dark:border-info-400 hover:bg-info-50 dark:hover:bg-info-500/10': schema.confidence === 'high',
+                            'border-warning-500 dark:border-warning-400 hover:bg-warning-50 dark:hover:bg-warning-500/10': schema.confidence === 'low',
+                            'border-muted-300 dark:border-muted-700 hover:bg-muted-50 dark:hover:bg-muted-800': schema.confidence === 'very_low'
+                          }"
+                        >
+                          <div class="flex w-full items-start gap-3">
+                            <div
+                              class="rounded-lg p-2"
+                              :class="{
+                                'bg-success-500/10 dark:bg-success-500/20': schema.confidence === 'very_high',
+                                'bg-info-500/10 dark:bg-info-500/20': schema.confidence === 'high',
+                                'bg-warning-500/10 dark:bg-warning-500/20': schema.confidence === 'low',
+                                'bg-muted-300/10 dark:bg-muted-700/20': schema.confidence === 'very_low'
+                              }"
+                            >
+                              <Icon
+                                :name="schema.name.toLowerCase().includes('رهاشدگی') ? 'ph:person-simple-walk-duotone' :
+                                  schema.name.toLowerCase().includes('بی‌اعتمادی') ? 'ph:warning-circle-duotone' :
+                                  schema.name.toLowerCase().includes('نقص') ? 'ph:puzzle-piece-duotone' :
+                                  schema.name.toLowerCase().includes('انزوا') ? 'ph:user-circle-minus-duotone' :
+                                  schema.name.toLowerCase().includes('شکست') ? 'ph:x-circle-duotone' :
+                                  schema.name.toLowerCase().includes('وابستگی') ? 'ph:link-duotone' : 'ph:tree-structure-duotone'"
+                                class="size-5"
+                                :class="{
+                                  'text-success-500': schema.confidence === 'very_high',
+                                  'text-info-500': schema.confidence === 'high',
+                                  'text-warning-500': schema.confidence === 'low',
+                                  'text-muted-300': schema.confidence === 'very_low'
+                                }"
+                              />
+                            </div>
+                            <div class="flex-1">
+                              <BaseHeading
+                                as="h4"
+                                size="sm"
+                                weight="medium"
+                                lead="none"
+                                class="mb-3 flex items-center justify-between gap-2"
+                              >
+                                {{ schema.name }}
+                                <div class="flex items-center gap-1">
+                                  <div class="text-xs">
+                                    <Icon name="ph:target" class="size-4" />
+                                  </div>
+                                  <div
+                                    v-for="i in 4"
+                                    :key="i"
+                                    class="size-1.5 rounded-full transition-all duration-300"
+                                    :class="{
+                                      'bg-success-500': schema.confidence === 'very_high' && i <= 4,
+                                      'bg-info-500': schema.confidence === 'high' && i <= 3,
+                                      'bg-warning-500': schema.confidence === 'low' && i <= 2,
+                                      'bg-muted-300': schema.confidence === 'very_low' && i <= 1,
+                                      'bg-muted-200 dark:bg-muted-700':
+                                        (schema.confidence === 'very_high' && i > 4) ||
+                                        (schema.confidence === 'high' && i > 3) ||
+                                        (schema.confidence === 'low' && i > 2) ||
+                                        (schema.confidence === 'very_low' && i > 1)
+                                    }"
+                                  />
+                                </div>
+                              </BaseHeading>
+                              <BaseText size="xs" class="text-muted-400 line-clamp-2 transition-all duration-300 group-hover:line-clamp-none">
+                                {{ schema.evidence }}
+                              </BaseText>
+                            </div>
+                          </div>
+                        </BaseCard>
+                      </div>
+                    </div>
                   </div>
                 </BaseCard>
               </div>
-              <div class="col-span-12">
+              <!-- <div class="col-span-12">
                 <BaseCard shape="curved" class="p-6">
                   <div class="mb-2 flex items-center justify-between">
                     <BaseHeading
@@ -1206,7 +1078,6 @@ const {
                       <DemoChartPie class="w-[350px]" />
                     </div>
                     <AddonApexcharts
-                      v-bind="suicideRiskCondition"
                       class="relative -start-5"
                     />
                   </div>
@@ -1247,12 +1118,8 @@ const {
                       بروز رسانی
                     </BaseButton>
                   </div>
-                  <AddonApexcharts
-                    v-bind="suicideRiskCondition"
-                    class="relative -start-5"
-                  />
                 </BaseCard>
-              </div>
+              </div> -->
               <!-- Chart -->
 
               <!-- Chart -->
@@ -1334,72 +1201,5 @@ const {
         </div>
       </div>
     </div>
-  </div>
-  <div v-if="analysisData">
-    <div class="mb-6">
-      <BaseHeading 
-        as="h2" 
-        size="2xl" 
-        weight="medium" 
-        lead="tight" 
-        class="text-muted-800 dark:text-white"
-      >
-        {{ analysisData.summaryOfSession || 'خلاصه جلسه' }}
-      </BaseHeading>
-    </div>
-
-    <div class="mb-6">
-      <div class="flex items-center gap-4">
-        <div class="flex-1">
-          <BaseHeading 
-            as="h3" 
-            size="sm" 
-            weight="medium" 
-            lead="tight" 
-            class="mb-2 text-muted-800 dark:text-white"
-          >
-            سطح اعتماد و صداقت مراجع
-          </BaseHeading>
-          <BaseProgress :value="trustLevelComputed" class="h-2" />
-        </div>
-        <div class="flex size-12 items-center justify-center text-2xl">
-          {{ formatEmoji(trustLevelComputed) }}
-        </div>
-      </div>
-    </div>
-
-    <div class="mb-6 grid gap-6 md:grid-cols-2">
-      <div 
-        v-for="(headline, index) in headlinesComputed" 
-        :key="index" 
-        class="flex items-start gap-4"
-      >
-        <div class="flex-1">
-          <BaseHeading 
-            as="h4" 
-            size="sm" 
-            weight="medium" 
-            lead="tight" 
-            class="mb-2 text-muted-800 dark:text-white"
-          >
-            {{ headline.title }}
-          </BaseHeading>
-          <BaseText size="sm" class="text-muted-500">
-            {{ headline.content }}
-          </BaseText>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div v-else class="flex h-96 items-center justify-center">
-    <BaseHeading 
-      as="h3" 
-      size="lg" 
-      weight="medium" 
-      lead="tight" 
-      class="text-muted-800 dark:text-white"
-    >
-      داده‌های تحلیل یافت نشد
-    </BaseHeading>
   </div>
 </template>

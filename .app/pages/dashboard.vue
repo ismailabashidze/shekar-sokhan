@@ -23,7 +23,7 @@ const featuredVideos = [
   {
     id: 1,
     title: 'مراقبه روان شناختی و نحوه ی انجام آن',
-    slug: '',
+    slug: '/videos/1',
     cover: '/img/illustrations/dashboards/video/1.png',
     uploaded: 'دو ساعت پیش',
     category: 'آموزشی',
@@ -35,7 +35,7 @@ const featuredVideos = [
   {
     id: 2,
     title: 'خودشفقتی و مهربانی با خود',
-    slug: '',
+    slug: '/videos/2',
     cover: '/img/illustrations/dashboards/video/2.jpg',
     uploaded: 'شش ساعت پیش',
     category: 'درمان',
@@ -47,7 +47,7 @@ const featuredVideos = [
   {
     id: 3,
     title: 'مکانیزم های دفاعی',
-    slug: '',
+    slug: '/videos/3',
     cover: '/img/illustrations/dashboards/video/3.png',
     uploaded: 'دیروز',
     category: 'آموزشی',
@@ -59,7 +59,7 @@ const featuredVideos = [
   {
     id: 4,
     title: 'رویکرد مبتنی بر تمرکز در درمان',
-    slug: '',
+    slug: '/videos/4',
     cover: '/img/illustrations/dashboards/video/4.png',
     uploaded: 'دو روز پیش',
     category: 'درمان',
@@ -71,7 +71,7 @@ const featuredVideos = [
   {
     id: 5,
     title: 'اصول مشاوره',
-    slug: '',
+    slug: '/videos/5',
     cover: '/img/illustrations/dashboards/video/5.png',
     uploaded: 'هفته پیش',
     category: 'درمان',
@@ -397,28 +397,7 @@ function useDemoAreaMulti() {
 
       <!-- Column -->
       <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
-        <BaseCard class="p-6">
-          <!-- Title -->
-          <div class="mb-8 flex items-center justify-between">
-            <BaseHeading
-              as="h3"
-              size="md"
-              weight="semibold"
-              lead="tight"
-              class="text-muted-800 dark:text-white"
-            >
-              <span>اهداف جلسه</span>
-            </BaseHeading>
-            <NuxtLink
-              to="#"
-              class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
-            >
-              نمایش تمام موارد
-            </NuxtLink>
-          </div>
-          <GoalsCompact />
-        </BaseCard>
-        <div class="bg-muted-200 dark:bg-muted-800/70 mt-5 rounded-2xl p-6">
+        <div class="bg-muted-200 dark:bg-muted-800/70  rounded-2xl p-6">
           <!-- Title -->
           <div class="mb-8 flex items-center justify-between">
             <BaseHeading
@@ -450,7 +429,7 @@ function useDemoAreaMulti() {
           <!-- Posts-->
           <div class="ptablet:grid ptablet:grid-cols-2 flex flex-col gap-6">
             <!-- Post -->
-            <NuxtLink to="#" class="flex flex-col">
+            <NuxtLink :to="`/posts/1`" class="flex flex-col">
               <img
                 src="/img/illustrations/dashboards/writer/post-1.svg"
                 alt="Post image"
@@ -498,7 +477,7 @@ function useDemoAreaMulti() {
               </BaseCard>
             </NuxtLink>
             <!-- Post -->
-            <NuxtLink to="#" class="flex flex-col">
+            <NuxtLink :to="`/posts/2`" class="flex flex-col">
               <img
                 src="/img/illustrations/dashboards/writer/post-2.svg"
                 alt="Post image"
@@ -587,14 +566,14 @@ function useDemoAreaMulti() {
               >
                 <div class="ptablet:p-10 p-6">
                   <NuxtLink
-                    to="#"
+                    :to="`/videos/${video.id}`"
                     class="group-hover:border-primary-500 text-muted-300 group-hover:text-primary-500 shadow-muted-300/30 dark:shadow-muted-900/20 flex size-14 items-center justify-center rounded-full border-2 border-transparent bg-white shadow-2xl transition-colors duration-300"
                   >
                     <Icon name="ic:round-play-arrow" class="size-7" />
                   </NuxtLink>
                 </div>
                 <div class="ptablet:p-10 p-6">
-                  <NuxtLink to="#">
+                  <NuxtLink :to="`/videos/${video.id}`">
                     <BaseHeading
                       as="h3"
                       size="3xl"
@@ -613,7 +592,7 @@ function useDemoAreaMulti() {
                       class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
                     />
                     <div>
-                      <NuxtLink to="#">
+                      <NuxtLink :to="`/videos/${video.id}`">
                         <BaseHeading
                           as="h4"
                           size="xs"
@@ -672,14 +651,14 @@ function useDemoAreaMulti() {
                     >
                       <div class="p-4">
                         <NuxtLink
-                          to="#"
+                          :to="`/videos/${video.id}`"
                           class="group-hover:border-primary-500 text-muted-300 group-hover:text-primary-500 shadow-muted-300/30 dark:shadow-muted-900/20 flex size-10 items-center justify-center rounded-full border-2 border-transparent bg-white shadow-2xl transition-colors duration-300"
                         >
                           <Icon name="ic:round-play-arrow" class="size-5" />
                         </NuxtLink>
                       </div>
                       <div class="p-4">
-                        <NuxtLink to="#">
+                        <NuxtLink :to="`/videos/${video.id}`">
                           <BaseHeading
                             as="h3"
                             size="md"
@@ -698,7 +677,7 @@ function useDemoAreaMulti() {
                             class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
                           />
                           <div>
-                            <NuxtLink to="#">
+                            <NuxtLink :to="`/videos/${video.id}`">
                               <BaseHeading
                                 as="h4"
                                 size="xs"

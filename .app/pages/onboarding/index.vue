@@ -61,6 +61,25 @@ const redeem = async () => {
   }
   isSubmitting.value = false
 }
+
+// Clipboard function
+const pasteCouponCode = () => {
+  try {
+    if (navigator && navigator.clipboard) {
+      navigator.clipboard.readText()
+        .then(text => {
+          couponCode.value = text;
+        })
+        .catch(err => {
+          console.error('Failed to read clipboard: ', err);
+        });
+    } else {
+      console.warn('Clipboard API not available');
+    }
+  } catch (error) {
+    console.error('Clipboard error: ', error);
+  }
+}
 </script>
 
 <template>
@@ -315,7 +334,18 @@ const redeem = async () => {
             shape="curved"
             placeholder="کد را وارد نمایید"
             type="text"
-          />
+          >
+            <template #action>
+              <button
+                type="button"
+                data-nui-tooltip="چسباندن"
+                class="text-muted-400 hover:text-primary-500 absolute end-1 top-1 z-[1] flex size-8 items-center justify-center transition-colors duration-300"
+                @click="pasteCouponCode"
+              >
+                <Icon name="ph:clipboard-text-duotone" class="text-primary-500 size-6" />
+              </button>
+            </template>
+          </BaseInput>
         </div>
       </div>
     </div>

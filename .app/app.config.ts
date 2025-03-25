@@ -52,6 +52,52 @@ export default defineAppConfig({
             click: () => {
             },
           },
+          {
+            // Title displayed in the sidebar
+            title: 'ویدیوهای معرفی شده',
+            icon: { name: 'ph:video', class: 'w-7 h-7' },
+            activePath: '/videos/list',
+            to: '/videos/list',
+            class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
+            click: () => {
+            },
+          },
+          {
+            // Title displayed in the sidebar
+            title: 'مقالات',
+            icon: { name: 'ph:book', class: 'w-7 h-7' },
+            activePath: '/posts/list',
+            to: '/posts/list',
+            class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
+            click: () => {
+            },
+          },
+          {
+            title: 'خانه',
+            icon: { name: 'ph:house-duotone', class: 'w-5 h-5' },
+            to: '/dashboard',
+            position: 'end',
+          },
+          {
+            title: 'Search',
+            icon: { name: 'ph:magnifying-glass-duotone', class: 'w-5 h-5' },
+            click: () => {
+              const isOpen = useState('search-open', () => false)
+              isOpen.value = true
+            },
+            position: 'end',
+          },
+          {
+            title: 'Settings',
+            icon: { name: 'ph:gear-six-duotone', class: 'w-5 h-5' },
+            to: '/layouts/settings',
+            position: 'end',
+          },
+          {
+            title: 'My Account',
+            component: 'DemoAccountMenu',
+            position: 'end',
+          },
         ],
       },
     },

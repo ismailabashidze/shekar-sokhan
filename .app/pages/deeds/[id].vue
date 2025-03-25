@@ -2,6 +2,9 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { definePageMeta } from '#imports'
+import { useDiscountCoupon } from '~/composables/useDiscountCoupon'
+import { useClipboard } from '@vueuse/core'
+import type { Deed } from '~/composables/useDeed'
 
 definePageMeta({
   title: 'جزئیات عمل نیک',
@@ -12,9 +15,32 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const route = useRoute()
 const id = route.params.id as string
-const { getDeed } = useDeed()
+const { getDeed, updateDeed } = useDeed()
+const { createCoupon } = useDiscountCoupon()
+const { copy } = useClipboard()
+const toaster = useToaster()
 
-const deed = ref<any>(null)
+// Initialize deed with default values
+const deed = ref<Deed>({
+  id: '',
+  emoji: '',
+  title: '',
+  description: '',
+  shortDescription: '',
+  longDescription: '',
+  type: 'family',
+  status: 'pending',
+  author: '',
+  approvedBy: '',
+  approvedAt: '',
+  views: 0,
+  completions: 0,
+  category_deed: '',
+  tags: [],
+  difficulty: 'simple',
+  timeRequired: 'below_15',
+})
+
 const loading = ref(true)
 const error = ref<Error | null>(null)
 const showDiscountModal = ref(false)
@@ -86,11 +112,27 @@ const timeMap = {
   more_60: 'بیش از ۶۰ دقیقه',
 }
 
+// Add duration map based on timeRequired
+const durationMap = {
+  below_15: 15,
+  between_15_60: 60,
+  more_60: 120,
+}
+
 onMounted(async () => {
   try {
     const data = await getDeed(id)
     if (data) {
-      deed.value = data
+      // Update all properties
+      deed.value = {
+        ...deed.value,
+        ...data,
+        // Ensure these are always numbers
+        views: Number(data.views) || 0,
+        completions: Number(data.completions) || 0,
+      }
+      // Increment views
+      updateDeed(id, { views: deed.value.views + 1 })
     }
     else {
       error.value = 'کار نیک مورد نظر یافت نشد'
@@ -123,15 +165,42 @@ const statusColor = computed(() => {
 
 const handleDiscountRequest = async () => {
   try {
-    // TODO: Replace with actual API call
-    discountCode.value = 'DEED-' + Math.random().toString(36).substring(2, 8).toUpperCase()
-    showDiscountModal.value = false
+    // Generate code
+    const code = 'DEED-' + Math.random().toString(36).substring(2, 8).toUpperCase()
+    discountCode.value = code
 
-    // Show success modal
+    // Create coupon
+    await createCoupon({
+      code,
+      amount: 100000,
+      isUsed: false,
+      duration: durationMap[deed.value.timeRequired] || 60,
+    })
+
+    // Update deed completions
+    await updateDeed(id, { completions: (deed.value.completions || 0) + 1 })
+    deed.value.completions++
+
+    showDiscountModal.value = false
     showSuccessModal.value = true
   }
   catch (e: any) {
     discountError.value = e.message || 'خطا در درخواست کد تخفیف'
+  }
+}
+
+const copyCode = async () => {
+  if (discountCode.value) {
+    await copy(discountCode.value)
+    toaster.clearAll()
+    toaster.show({
+      title: 'کپی شد',
+      message: 'کد تخفیف با موفقیت کپی شد',
+      color: 'success',
+      icon: 'ph:copy',
+      closable: true,
+      classes: 'z-[60]', // Higher than modal overlay which is usually z-50
+    })
   }
 }
 
@@ -294,7 +363,7 @@ const formatLongDescription = (html: string) => {
         <BaseCard rounded="lg" class="mb-6">
           <div class="relative">
             <!-- Status Badge -->
-            <div class="absolute left-4 top-4 flex flex-col justify-end">
+            <div v-if="deed" class="absolute left-4 top-4 flex flex-col justify-end">
               <div class="text-left">
                 <BaseTag
                   :color="statusColor"
@@ -305,7 +374,7 @@ const formatLongDescription = (html: string) => {
                 </BaseTag>
               </div>
               <!-- Tags -->
-              <div class="flex flex-wrap gap-2 pt-3">
+              <div v-if="deed.tags?.length" class="flex flex-wrap gap-2 pt-3">
                 <BaseTag
                   v-for="tag in deed.tags"
                   :key="tag"
@@ -319,7 +388,7 @@ const formatLongDescription = (html: string) => {
 
             <!-- Main Content -->
             <div class="p-6">
-              <div class="mb-8 flex items-start gap-6">
+              <div v-if="deed" class="mb-8 flex items-start gap-6">
                 <div class="bg-primary-100 dark:bg-primary-500/20 flex size-20 shrink-0 items-center justify-center rounded-xl text-4xl">
                   {{ deed.emoji }}
                 </div>
@@ -339,7 +408,7 @@ const formatLongDescription = (html: string) => {
               </div>
 
               <!-- Description -->
-              <div class="mb-6 space-y-8">
+              <div v-if="deed" class="mb-6 space-y-8">
                 <!-- Main Description -->
                 <div class="bg-muted-50 dark:bg-muted-800/50 rounded-xl p-6">
                   <div class="mb-4 flex items-center gap-2">
@@ -366,7 +435,7 @@ const formatLongDescription = (html: string) => {
                       v-if="deed.longDescription"
                       class="text-muted-500 dark:text-muted-400 leading-relaxed"
                     >
-                      <AddonMarkdownRemark :source="deed.longDescription" />
+                      <AddonMarkdownRemark :source="formatLongDescription(deed.longDescription)" />
                     </div>
                     <div v-else class="text-muted-500">
                       توضیحات تکمیلی موجود نیست
@@ -435,7 +504,7 @@ const formatLongDescription = (html: string) => {
       </div>
 
       <!-- Sidebar -->
-      <div class="lg:col-span-1">
+      <div v-if="deed" class="lg:col-span-1">
         <!-- Action Buttons -->
         <BaseCard rounded="lg" class="mb-6">
           <div class="space-y-3 p-6">
@@ -609,7 +678,16 @@ const formatLongDescription = (html: string) => {
         </div>
 
         <div class="bg-muted-100 dark:bg-muted-800 mb-4 rounded-lg p-4 text-center">
-          <span class="font-mono text-xl font-bold">{{ discountCode }}</span>
+          <div class="flex items-center justify-center gap-2">
+            <span class="font-mono text-xl font-bold">{{ discountCode }}</span>
+            <BaseButtonIcon
+              color="primary"
+              rounded="full"
+              @click="copyCode"
+            >
+              <Icon name="ph:copy" class="size-5" />
+            </BaseButtonIcon>
+          </div>
         </div>
 
         <p class="font-alt text-muted-500 dark:text-muted-400 text-sm leading-5">
@@ -627,6 +705,13 @@ const formatLongDescription = (html: string) => {
             @click="showSuccessModal = false"
           >
             متوجه شدم
+          </BaseButton>
+          <BaseButton
+            color="success"
+            variant="solid"
+            @click="navigateTo('/onboarding')"
+          >
+            رفتن به صفحه پرداخت
           </BaseButton>
         </div>
       </div>
