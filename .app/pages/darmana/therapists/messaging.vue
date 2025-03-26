@@ -54,23 +54,24 @@ const handleSessionStatusChange = async (newStatus: string) => {
       // Get all messages for this session
       const allMessages = messages.value.map(msg => ({
         role: msg.type === 'sent' ? 'patient' : 'therapist',
-        content: msg.text
+        content: msg.text,
       }))
 
       // Generate and save analysis
       const generatedAnalysis = await generateAnalysis({
         sessionId: activeSession.value?.id,
-        messages: allMessages
+        messages: allMessages,
       })
-      
+
       await createAnalysis({
         session: activeSession.value?.id,
-        ...generatedAnalysis
+        ...generatedAnalysis,
       })
 
       // Navigate to analysis page
       navigateTo(`/darmana/therapists/analysis?sessionId=${activeSession.value?.id}`)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error generating session analysis:', error)
     }
   }
@@ -556,11 +557,27 @@ onUnmounted(() => {
   }
 })
 
-const clearMessages = async (therapistId: string) => {
-  if (!therapistId) { throw new Error('Therapist ID is required') }
+const clearMessages = async (sessionId: string) => {
+  if (!sessionId) { throw new Error('Session ID is required') }
   try {
     const nuxtApp = useNuxtApp()
-    await nuxtApp.$pb.collection('therapists_messages').delete(`filter=therapist='${therapistId}'`)
+
+    // Get message IDs for the current session
+    const messageIds = messages.value
+      .filter(msg => msg.session === sessionId)
+      .map(msg => msg.id)
+
+    // Delete each message by ID
+    for (const messageId of messageIds) {
+      await nuxtApp.$pb.collection('therapists_messages').delete(messageId)
+    }
+    toaster.show({
+      title: 'پاک کردن پیامها ',
+      message: 'پیام ها با موفقیت پاک شدند.',
+      color: 'success',
+      icon: 'ph:eraser',
+      closable: true,
+    })
     messages.value = []
   }
   catch (error) {
@@ -593,7 +610,7 @@ const confirmClearChat = async () => {
   }
 
   try {
-    await clearMessages(activeTherapistId.value)
+    await clearMessages(activeSession.value.id)
     closeDeleteModal()
   }
   catch (error) {
@@ -736,14 +753,14 @@ const isGeneratingAnalysis = ref(false)
 
 const handleConfirmEndSession = async () => {
   if (!activeSession.value) return
-  
+
   isGeneratingAnalysis.value = true
 
   try {
     // Get all messages for this session
     const allMessages = messages.value.map(msg => ({
       role: msg.type === 'sent' ? 'patient' : 'therapist',
-      content: msg.text
+      content: msg.text,
     }))
 
     // End the session using the endSession function
@@ -753,12 +770,12 @@ const handleConfirmEndSession = async () => {
     // Generate and save analysis
     const generatedAnalysis = await generateAnalysis({
       sessionId: activeSession.value.id,
-      messages: allMessages
+      messages: allMessages,
     })
-    
+
     const savedAnalysis = await createAnalysis({
       session: activeSession.value.id,
-      ...generatedAnalysis
+      ...generatedAnalysis,
     })
 
     // Close the modal
@@ -766,7 +783,8 @@ const handleConfirmEndSession = async () => {
 
     // Navigate to analysis page with analysis ID
     await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysis.id}`)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error ending session:', error)
     toaster.show({
       title: 'خطا',
@@ -775,7 +793,8 @@ const handleConfirmEndSession = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     isGeneratingAnalysis.value = false
   }
 }
@@ -861,7 +880,7 @@ const handleAudioSend = () => {
                 type="button"
                 class="text-danger-400 hover:text-danger-500 hover:bg-danger-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300 disabled:opacity-50"
                 title="پاک کردن چت"
-                @click="clearChat"
+                @click="openDeleteModal()"
               >
                 <Icon name="ph:trash-duotone" class="size-5" />
               </button>
@@ -1102,7 +1121,7 @@ const handleAudioSend = () => {
                             class="rounded-xl px-4 py-2"
                             :class="[
                               item.type === 'sent'
-                                ? 'bg-primary-500 text-white prose-p:text-white'
+                                ? 'bg-primary-500 prose-p:text-white text-white'
                                 : 'bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
                             ]"
                           >
@@ -1110,7 +1129,7 @@ const handleAudioSend = () => {
                               class="block font-sans"
                               :class="[
                                 item.type === 'sent'
-                                  ? 'text-white prose-p:text-white'
+                                  ? 'prose-p:text-white text-white'
                                   : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
                               ]"
                             >
@@ -1552,9 +1571,9 @@ const handleAudioSend = () => {
         <BaseButton
           color="success"
           variant="solid"
-          @click="handleConfirmEndSession"
           :loading="isGeneratingAnalysis"
           :disabled="isGeneratingAnalysis"
+          @click="handleConfirmEndSession"
         >
           {{ isGeneratingAnalysis ? 'در حال ساخت گزارش...' : 'تایید' }}
         </BaseButton>
@@ -1563,9 +1582,11 @@ const handleAudioSend = () => {
     <template #content>
       <div class="relative">
         <!-- Loading overlay -->
-        <div v-if="isGeneratingAnalysis" class="absolute inset-0 bg-white/80 dark:bg-muted-800/80 flex flex-col items-center justify-center z-50">
+        <div v-if="isGeneratingAnalysis" class="dark:bg-muted-800/80 absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80">
           <BaseProgress />
-          <p class="mt-4 text-muted-500 dark:text-muted-400">در حال تحلیل جلسه و ساخت گزارش...</p>
+          <p class="text-muted-500 dark:text-muted-400 mt-4">
+            در حال تحلیل جلسه و ساخت گزارش...
+          </p>
         </div>
 
         <div class="flex flex-col gap-4">

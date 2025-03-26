@@ -135,7 +135,7 @@ if (nuxtApp.$pb.authStore.isValid) {
         <!--Media image-->
         <img
           class="mx-auto max-w-xl rounded-md"
-          src="/img/illustrations/login.webp"
+          src="/img/illustrations/login.jpeg"
           alt=""
           width="619"
           height="594"
