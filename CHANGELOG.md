@@ -1,11 +1,43 @@
-# Changelog
+# تغییرات نسخه
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+تمام تغییرات قابل توجه در این پروژه در این فایل ثبت خواهد شد.
+
+## [1.0.0] (۱۴۰۴-۰۱-۰۸)
+
+### 🚀 ویژگی‌های جدید
+
+* **تحلیل جلسه:** بهبود گردش کار تحلیل جلسه با تجربه کاربری بهتر
+  * انتقال خودکار به صفحه انتظار پس از پایان جلسه
+  * پردازش تحلیل جلسه در پس‌زمینه
+  * ایجاد صفحه انتظار با بررسی وضعیت آنی
+  * افزودن مودال اطلاع‌رسانی هنگام آماده شدن تحلیل
+
+### 🔄 تغییرات
+
+* **گردش کار پیام‌رسانی:** تغییر فرآیند پایان جلسه برای انتقال فوری کاربران
+  * تحلیل جلسه اکنون در پس‌زمینه تولید می‌شود بدون مسدود کردن تعامل کاربر
+  * افزودن یکپارچه‌سازی localStorage برای پیگیری جلسات تحلیل در انتظار
+
+### 🧰 بهبودهای فنی
+
+* **یکپارچه‌سازی API:** افزودن تابع جدید `getAnalysisForSession` برای بررسی وضعیت تحلیل
+* **اجزای رابط کاربری:** بهبود صفحه waitForReport با نشانگر بارگذاری و مودال موفقیت
+* **عملکرد:** بهبود تجربه کاربری با حذف زمان انتظار پس از پایان جلسه
+
+### 📄 فایل‌های تغییر یافته
+
+* **صفحات:**
+  * `pages/darmana/therapists/messaging.vue` - تغییر فرآیند پایان جلسه
+  * `pages/darmana/therapists/waitForReport.vue` - بهبود صفحه انتظار با افزودن بررسی وضعیت و مودال
+  * `pages/darmana/therapists/analysis.vue` - بهینه‌سازی نمایش تحلیل
+
+* **کامپوزابل‌ها:**
+  * `composables/useSessionAnalysis.ts` - افزودن تابع getAnalysisForSession
 
 ## [1.5.0](https://github.com/cssninjaStudio/tairo/compare/v1.4.0...v1.5.0) (2024-04-11)
 
 
-### 🩹 Bug Fixes
+### 🩹 باگ‌فیکس‌ها
 
 * **AddonCarousel:** allow to define vue3-carousel props and events ([36e0473](https://github.com/cssninjaStudio/tairo/commit/36e04735bbc25330d08303a8ca59001da67f2e74))
 * calendar z index ([fe43e9e](https://github.com/cssninjaStudio/tairo/commit/fe43e9e49f172e293ff4d9cee6d763edca669511))
@@ -22,7 +54,7 @@ All notable changes to this project will be documented in this file. See [standa
 * use NuxtPage instead of RouterView in page sublayouts ([6edb709](https://github.com/cssninjaStudio/tairo/commit/6edb7094b56518d377d70527621bfcb4a9931926))
 
 
-### 🚀 Features
+### 🚀 ویژگی‌های جدید
 
 * add account pages ([93b5fa7](https://github.com/cssninjaStudio/tairo/commit/93b5fa73c739c8fbd45550acce5e6261311fe7ed))
 * add badge to new content in demos page ([ab99def](https://github.com/cssninjaStudio/tairo/commit/ab99def60bc3fbd07d311c6d111a4fc46fb3461d))
@@ -54,7 +86,7 @@ All notable changes to this project will be documented in this file. See [standa
 * **useMultiStepForm:** add validation and documentation ([710e924](https://github.com/cssninjaStudio/tairo/commit/710e9243c123f0b3b32f6cdd2a220836a7f78daf))
 
 
-### 📖 Documentation
+### 📖 مستندات
 
 * add button to open customization modal ([07c5f31](https://github.com/cssninjaStudio/tairo/commit/07c5f31241cf5cac48a7116f646aef2370d88f32))
 * add spellchecker ([6954728](https://github.com/cssninjaStudio/tairo/commit/6954728b79b0ec2564cee44543a9e0067119e178))
@@ -64,7 +96,7 @@ All notable changes to this project will be documented in this file. See [standa
 ## [1.4.0](https://github.com/cssninjaStudio/tairo/compare/v1.3.0...v1.4.0) (2024-01-25)
 
 
-### Features
+### ویژگی‌های جدید
 
 * add autocomplete country example ([04f87ab](https://github.com/cssninjaStudio/tairo/commit/04f87ab1cee26c245e12f164a2383fbe968a3247))
 * add password input component and dependencies, replacement to TairoPasswordStrength ([96ef32b](https://github.com/cssninjaStudio/tairo/commit/96ef32befb6069a23e561cc0b0e743dc48f87138))
@@ -94,7 +126,7 @@ All notable changes to this project will be documented in this file. See [standa
 * upgrade to shuriken-ui v2 and nuxt v3.9 ([1a9bf7a](https://github.com/cssninjaStudio/tairo/commit/1a9bf7a67c4e8f5759ab2892ac04806fb9ba5405))
 
 
-### Bug Fixes
+### باگ‌فیکس‌ها
 
 * add panel emits demo ([a62b7e5](https://github.com/cssninjaStudio/tairo/commit/a62b7e5717262f21bb46ea762bfcc1d65ee1dcc7))
 * convert charts series to use shallowRef ([c1ae955](https://github.com/cssninjaStudio/tairo/commit/c1ae9554242feda3e3c5624e9dd6ada994abba94))
@@ -112,14 +144,14 @@ All notable changes to this project will be documented in this file. See [standa
 ## [1.3.0](https://github.com/cssninjaStudio/tairo/compare/v1.2.0...v1.3.0) (2023-09-19)
 
 
-### Features
+### ویژگی‌های جدید
 
 * **TairoFlexTableCell:** add clamp property ([3bb47e4](https://github.com/cssninjaStudio/tairo/commit/3bb47e4f6ea2155e3c918847c95b14f72bf6830d))
 * **TairoTable:** add scrollable property ([feabf4a](https://github.com/cssninjaStudio/tairo/commit/feabf4a56c61d14c35b8cbe13b3bb7b1739a4d48))
 * **Topnav:** add configuration for the footer ([062517c](https://github.com/cssninjaStudio/tairo/commit/062517c8bef9e622e61e77bec28be7591e3d9a70)), closes [#126](https://github.com/cssninjaStudio/tairo/issues/126)
 
 
-### Bug Fixes
+### باگ‌فیکس‌ها
 
 * disable custom assets names ([c2f3835](https://github.com/cssninjaStudio/tairo/commit/c2f3835436f4c3769215a27b544b99c8b7fe979c))
 * documentation component meta ([a8233f7](https://github.com/cssninjaStudio/tairo/commit/a8233f7068852df6a207fc1d7b7a88742577dc19))
@@ -137,7 +169,7 @@ All notable changes to this project will be documented in this file. See [standa
 ## [1.2.0](https://github.com/cssninjaStudio/tairo/compare/v1.1.1...v1.2.0) (2023-09-11)
 
 
-### Features
+### ویژگی‌های جدید
 
 * add calendar app ([125ff0c](https://github.com/cssninjaStudio/tairo/commit/125ff0ca3dcb32b721acd19439fc1f197f49dc85))
 * add overlay to sidebar and collapse layout on small screens, close [#98](https://github.com/cssninjaStudio/tairo/issues/98) ([5baed24](https://github.com/cssninjaStudio/tairo/commit/5baed24bec33eebd59eb5eb6d467be2060dcf92a))
@@ -149,7 +181,7 @@ All notable changes to this project will be documented in this file. See [standa
 * upgrade to nuxt 3.7.0 + shuriken-ui/nuxt to 1.0.0 ([e8c560c](https://github.com/cssninjaStudio/tairo/commit/e8c560cd37406fed36e4618be64673c8704b46af))
 
 
-### Bug Fixes
+### باگ‌فیکس‌ها
 
 * allow using panels with empty layout ([d36cb24](https://github.com/cssninjaStudio/tairo/commit/d36cb24939502b56a0d4952addf5d1c49f23c4d0))
 * **collapse-layer:** allow to position elements at the end of navigation ([dd839b1](https://github.com/cssninjaStudio/tairo/commit/dd839b1b9b054596d52ab8082bd53286f46c594b))
@@ -168,13 +200,13 @@ All notable changes to this project will be documented in this file. See [standa
 ## [1.1.0](https://github.com/cssninjaStudio/tairo/compare/v1.0.2...v1.1.0) (2023-05-16)
 
 
-### Features
+### ویژگی‌های جدید
 
 * add layout switcher, todo: implement colors change, fix messaging links and small bug ([45c82b4](https://github.com/cssninjaStudio/tairo/commit/45c82b48ef1142d129354558bafb4eaaa5786439))
 * add more preset colors in layout switcher ([04dba3d](https://github.com/cssninjaStudio/tairo/commit/04dba3dd7ab6524586a6090ba67678f11977695d))
 
 
-### Bug Fixes
+### باگ‌فیکس‌ها
 
 * auth pages illustrations ([f6f08ae](https://github.com/cssninjaStudio/tairo/commit/f6f08ae9438ddc4728f6c9aec3e59179d7c57a5f))
 * collapse navigation item click event ([9975840](https://github.com/cssninjaStudio/tairo/commit/99758406424e0d7c9dbfdb423754744b76d09620))
@@ -184,7 +216,7 @@ All notable changes to this project will be documented in this file. See [standa
 ### [1.0.2](https://github.com/cssninjaStudio/tairo/compare/v1.0.1...v1.0.2) (2023-05-04)
 
 
-### Bug Fixes
+### باگ‌فیکس‌ها
 
 * missing auth illustrations, fix login top section hidden on resize ([#84](https://github.com/cssninjaStudio/tairo/issues/84)) ([238abf0](https://github.com/cssninjaStudio/tairo/commit/238abf0db203f0891f577c58a65369839ae84da7))
 
@@ -193,6 +225,6 @@ All notable changes to this project will be documented in this file. See [standa
 ## 1.0.0 (2023-05-03)
 
 
-### Features
+### ویژگی‌های جدید
 
 * initial release ([bc6ac10](https://github.com/cssninjaStudio/tairo/commit/bc6ac1001a9c22edbaec91bd8c63299217a2496f))
