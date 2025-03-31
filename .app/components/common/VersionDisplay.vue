@@ -1,6 +1,6 @@
 <template>
-  <div 
-    class="fixed bottom-2 right-2 text-xs bg-muted-100 dark:bg-muted-900 text-muted-500 dark:text-muted-400 px-2 py-1 rounded-md shadow-sm z-50 hover:bg-muted-200 dark:hover:bg-muted-800 transition-colors"
+  <div
+    class="bg-muted-100 dark:bg-muted-900 text-muted-500 dark:text-muted-400 hover:bg-muted-200 dark:hover:bg-muted-800 fixed bottom-2 left-2 z-50 rounded-md px-2 py-1 text-xs shadow-sm transition-colors"
     @click="navigateToChangelog"
   >
     v{{ version }}
