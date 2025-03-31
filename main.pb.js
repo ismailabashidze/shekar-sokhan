@@ -160,7 +160,58 @@ onRecordBeforeCreateRequest((e) => {
             { user: discountCopoun[0].get('user') },
           )
         inProgressSessions.forEach((session) => {
+          // Create a placeholder analysis if needed
+          let analysisId = session.get('session_analysis_for_system')
+          if (!analysisId) {
+            try {
+              const analysisCollection = $app.dao().findCollectionByNameOrId('session_analysis')
+              const placeholderAnalysis = new Record(analysisCollection, {
+                session: session.id,
+                title: 'جلسه پایان یافته به دلیل اتمام شارژ',
+                summaryOfSession: 'این جلسه به دلیل اتمام شارژ کاربر به صورت خودکار پایان یافته است.',
+                headlines: [],
+                finalTrustAndOppennessOfUser: 'low',
+                finalTrustAndOppennessOfUserEvaluationDescription: '',
+                psychotherapistEvaluation: '',
+                negativeScoresList: [],
+                psychotherapistEvaluationScorePositiveBehavior: [],
+                psychotherapistEvaluationScoreSuggestionsToImprove: []
+              })
+              const savedAnalysis = $app.dao().saveRecord(placeholderAnalysis)
+              analysisId = savedAnalysis.id
+            } catch (analysisError) {
+              console.error('Error creating placeholder analysis:', analysisError)
+              // Continue even if analysis creation fails
+            }
+          }
+          
+          // Get message count
+          const messagesResult = $app
+            .dao()
+            .findRecordsByFilter(
+              'messages',
+              'session_id = {:sessionId}',
+              '+created',
+              1000,
+              0,
+              { sessionId: session.id },
+            )
+          const messageCount = messagesResult.length || 0
+          
+          // Calculate session duration
+          const startTime = new Date(session.get('start_time') || session.get('created'))
+          const endTime = new Date()
+          const totalTimePassedMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60))
+          
+          // Update all required fields
           session.set('status', 'done')
+          session.set('end_time', endTime.toISOString())
+          session.set('count_of_total_messages', messageCount)
+          session.set('total_time_passed', totalTimePassedMinutes)
+          if (analysisId) {
+            session.set('session_analysis_for_system', analysisId)
+          }
+          
           $app.dao().saveRecord(session)
         })
       }
@@ -263,7 +314,58 @@ cronAdd('removeCharges', '*/1 * * * *', () => {
           { user: record.get('user') },
         )
       inProgressSessions.forEach((session) => {
+        // Create a placeholder analysis if needed
+        let analysisId = session.get('session_analysis_for_system')
+        if (!analysisId) {
+          try {
+            const analysisCollection = $app.dao().findCollectionByNameOrId('session_analysis')
+            const placeholderAnalysis = new Record(analysisCollection, {
+              session: session.id,
+              title: 'جلسه پایان یافته به دلیل اتمام شارژ',
+              summaryOfSession: 'این جلسه به دلیل اتمام شارژ کاربر به صورت خودکار پایان یافته است.',
+              headlines: [],
+              finalTrustAndOppennessOfUser: 'low',
+              finalTrustAndOppennessOfUserEvaluationDescription: '',
+              psychotherapistEvaluation: '',
+              negativeScoresList: [],
+              psychotherapistEvaluationScorePositiveBehavior: [],
+              psychotherapistEvaluationScoreSuggestionsToImprove: []
+            })
+            const savedAnalysis = $app.dao().saveRecord(placeholderAnalysis)
+            analysisId = savedAnalysis.id
+          } catch (analysisError) {
+            console.error('Error creating placeholder analysis:', analysisError)
+            // Continue even if analysis creation fails
+          }
+        }
+        
+        // Get message count
+        const messagesResult = $app
+          .dao()
+          .findRecordsByFilter(
+            'messages',
+            'session_id = {:sessionId}',
+            '+created',
+            1000,
+            0,
+            { sessionId: session.id },
+          )
+        const messageCount = messagesResult.length || 0
+        
+        // Calculate session duration
+        const startTime = new Date(session.get('start_time') || session.get('created'))
+        const endTime = new Date()
+        const totalTimePassedMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60))
+        
+        // Update all required fields
         session.set('status', 'done')
+        session.set('end_time', endTime.toISOString())
+        session.set('count_of_total_messages', messageCount)
+        session.set('total_time_passed', totalTimePassedMinutes)
+        if (analysisId) {
+          session.set('session_analysis_for_system', analysisId)
+        }
+        
         $app.dao().saveRecord(session)
       })
     }
@@ -279,3 +381,6 @@ routerAdd('POST', '/deleteAllMessages', (c) => {
     message: 'success',
   })
 })
+
+// Import session statistics hooks
+import './hooks/session-stats.pb.js'

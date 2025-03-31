@@ -663,6 +663,7 @@ const handleConfirmEndSession = async () => {
   if (!activeSession.value) return
 
   isGeneratingAnalysis.value = true
+  let savedAnalysisId = null
 
   try {
     const allMessages = messages.value.map(msg => ({
@@ -684,23 +685,31 @@ const handleConfirmEndSession = async () => {
       session: activeSession.value.id,
       ...generatedAnalysis,
     })
+    
+    savedAnalysisId = savedAnalysis.id
 
-    // Update session with the analysis ID
-    await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
-      status: 'done',
-      end_time: endTime.toISOString(),
-      count_of_total_messages: messages.value.length,
-      total_time_passed: totalTimePassedMinutes,
-      updated: endTime.toISOString(),
-      session_analysis_for_system: savedAnalysis.id,
-    })
+    // Try to update session with the analysis ID
+    try {
+      await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
+        status: 'done',
+        end_time: endTime.toISOString(),
+        count_of_total_messages: messages.value.length,
+        total_time_passed: totalTimePassedMinutes,
+        updated: endTime.toISOString(),
+        session_analysis_for_system: savedAnalysisId,
+      })
 
-    activeSession.value.status = 'done'
-    activeSession.value.session_analysis_for_system = savedAnalysis.id
+      activeSession.value.status = 'done'
+      activeSession.value.session_analysis_for_system = savedAnalysisId
+    } catch (updateError) {
+      console.error('Error updating session:', updateError)
+      // Continue even if session update fails - we'll still navigate to analysis
+    }
 
     isReportModalOpen.value = false
-
-    await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysis.id}`)
+    
+    // Navigate to analysis page
+    await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
   }
   catch (error) {
     console.error('Error ending session:', error)
@@ -711,6 +720,12 @@ const handleConfirmEndSession = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
+    
+    // If we have an analysis ID, still navigate to the analysis page despite the error
+    if (savedAnalysisId) {
+      isReportModalOpen.value = false
+      await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
+    }
   }
   finally {
     isGeneratingAnalysis.value = false

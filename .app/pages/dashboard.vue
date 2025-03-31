@@ -230,378 +230,277 @@ const closeAlphaModal = () => {
       </div>
     </TairoModal>
 
-    <!-- Grid -->
-    <div class="grid grid-cols-12 gap-6">
-      <!-- Column -->
-      <div class="ltablet:col-span-8 col-span-12 lg:col-span-8">
-        <!-- Inner grid -->
-        <div class="grid grid-cols-12 gap-6">
-          <!-- Header -->
-          <div class="col-span-12">
-            <div class="bg-primary-800 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
-              <div class="relative h-[150px] w-[320px] shrink-0 sm:h-[175px]">
-                <img
-                  class="pointer-events-none absolute start-6 top-0 sm:-start-10"
-                  src="/img/illustrations/dashboards/writer/readers.svg"
-                  alt="Readers illustration"
-                >
-              </div>
-              <div class="mt-6 grow sm:mt-0">
-                <div class="pb-4 text-center sm:pb-0 sm:text-right">
-                  <BaseHeading tag="h1" class="text-white opacity-90">
-                    <span>سلام، {{ user?.phoneNumber || 'کاربر عزیز' }} ! 👋</span>
-                  </BaseHeading>
-                  <BaseParagraph size="sm" class="max-w-xs text-white opacity-70">
-                    <span>
-                      این جا پنل شماست. در این بخش می توانید جلسات و برنامه ها، اطلاعات جلسات، محتوای متنی و دیگر بخش ها
-                      را مدیریت و نظارت کنید.
-                    </span>
-                  </BaseParagraph>
-                  <div class="mt-2 flex flex-col gap-2 sm:flex-row">
-                    <!-- <BaseButton
-                      size="sm"
-                      color="light"
-                      variant="outline"
-                      class="w-full sm:w-auto"
-                      to="darmana/patients/choosePatient"
-                    >
-                      <Icon name="lucide:users" class="ml-2 size-4" />
-                      <span>مراجعین</span>
-                    </BaseButton> -->
-                    <BaseButton
-                      size="sm"
-                      color="light"
-                      variant="outline"
-                      class="w-full sm:w-auto"
-                      to="/darmana/therapists/sessions"
-                    >
-                      <Icon name="ph:robot-duotone" class="ml-2 size-4" />
-                      <span>روانشناسان هوش مصنوعی</span>
-                    </BaseButton>
+    <div>
+      <!-- Statistics Cards Section -->
+      <div class="mb-6">
+        <DashboardStatisticsCards />
+      </div>
+
+      <!-- Grid -->
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Column -->
+        <div class="ltablet:col-span-8 col-span-12 lg:col-span-8">
+          <!-- Inner grid -->
+          <div class="grid grid-cols-12 gap-6">
+            <!-- Header -->
+            <div class="col-span-12">
+              <div class="bg-primary-800 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
+                <div class="relative h-[150px] w-[320px] shrink-0 sm:h-[175px]">
+                  <img
+                    class="pointer-events-none absolute start-6 top-0 sm:-start-10"
+                    src="/img/illustrations/dashboards/writer/readers.svg"
+                    alt="Readers illustration"
+                  >
+                </div>
+                <div class="mt-6 grow sm:mt-0">
+                  <div class="pb-4 text-center sm:pb-0 sm:text-right">
+                    <BaseHeading tag="h1" class="text-white opacity-90">
+                      <span>سلام، {{ user?.phoneNumber || 'کاربر عزیز' }} ! 👋</span>
+                    </BaseHeading>
+                    <BaseParagraph size="sm" class="max-w-xs text-white opacity-70">
+                      <span>
+                        این جا پنل شماست. در این بخش می توانید جلسات و برنامه ها، اطلاعات جلسات، محتوای متنی و دیگر بخش ها
+                        را مدیریت و نظارت کنید.
+                      </span>
+                    </BaseParagraph>
+                    <div class="mt-2 flex flex-col gap-2 sm:flex-row">
+                      <!-- <BaseButton
+                        size="sm"
+                        color="light"
+                        variant="outline"
+                        class="w-full sm:w-auto"
+                        to="darmana/patients/choosePatient"
+                      >
+                        <Icon name="lucide:users" class="ml-2 size-4" />
+                        <span>مراجعین</span>
+                      </BaseButton> -->
+                      <BaseButton
+                        size="sm"
+                        color="light"
+                        variant="outline"
+                        class="w-full sm:w-auto"
+                        to="/darmana/therapists/sessions"
+                      >
+                        <Icon name="ph:robot-duotone" class="ml-2 size-4" />
+                        <span>روانشناسان هوش مصنوعی</span>
+                      </BaseButton>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <!-- Content -->
-          <div class="col-span-12">
-            <!-- Sub grid -->
-            <div class="grid grid-cols-12 gap-6">
-              <!-- Sub column -->
-              <div class="col-span-12">
-                <div class="flex flex-col gap-6">
-                  <!-- Tile grid -->
-                  <div class="grid grid-cols-4 gap-4">
-                    <!-- Inner item -->
-                    <BaseCard rounded="lg" class="flex items-center gap-2 p-3">
-                      <BaseIconBox
-                        size="sm"
-                        class="bg-info-100 text-info-500 dark:bg-info-500/20 dark:text-info-400 dark:border-info-500 dark:border-2"
-                        rounded="full"
-                        color="none"
-                      >
-                        <Icon name="ph:timer-duotone" class="size-5" />
-                      </BaseIconBox>
-                      <div>
-                        <BaseHeading
-                          as="h2"
-                          size="sm"
-                          weight="semibold"
-                          lead="tight"
-                          class="text-muted-800 dark:text-white"
-                        >
-                          <span>۶۳۰۰</span>
-                        </BaseHeading>
-                        <BaseParagraph size="xs">
-                          <span class="text-muted-500 dark:text-muted-400">دقیقه استفاده</span>
-                        </BaseParagraph>
-                      </div>
-                    </BaseCard>
-                    <!-- Inner item -->
-                    <BaseCard rounded="lg" class="flex items-center gap-2 p-3">
-                      <BaseIconBox
-                        size="sm"
-                        class="bg-primary-100 text-primary-500 dark:bg-primary-500/20 dark:text-primary-400 dark:border-primary-500 dark:border-2"
-                        rounded="full"
-                        color="none"
-                      >
-                        <Icon name="ph:broadcast-duotone" class="size-5" />
-                      </BaseIconBox>
-                      <div>
-                        <BaseHeading
-                          as="h2"
-                          size="sm"
-                          weight="semibold"
-                          lead="tight"
-                          class="text-muted-800 dark:text-white"
-                        >
-                          <span>۹۳۰۲</span>
-                        </BaseHeading>
-                        <BaseParagraph size="xs">
-                          <span class="text-muted-500 dark:text-muted-400">پیام رد و بدل شده</span>
-                        </BaseParagraph>
-                      </div>
-                    </BaseCard>
-                    <!-- Inner item -->
-                    <BaseCard rounded="lg" class="flex items-center gap-2 p-3">
-                      <BaseIconBox
-                        size="sm"
-                        class="bg-lime-100 text-lime-500 dark:border-2 dark:border-lime-500 dark:bg-lime-500/20 dark:text-lime-400"
-                        rounded="full"
-                        color="none"
-                      >
-                        <Icon name="ph:user-plus-duotone" class="size-5" />
-                      </BaseIconBox>
-                      <div>
-                        <BaseHeading
-                          as="h2"
-                          size="sm"
-                          weight="semibold"
-                          lead="tight"
-                          class="text-muted-800 dark:text-white"
-                        >
-                          <span>۱۳</span>
-                        </BaseHeading>
-                        <BaseParagraph size="xs">
-                          <span class="text-muted-500 dark:text-muted-400">تمرین انجام شده</span>
-                        </BaseParagraph>
-                      </div>
-                    </BaseCard>
-                    <!-- Inner item -->
-                    <BaseCard rounded="lg" class="flex items-center gap-2 p-3">
-                      <BaseIconBox
-                        size="sm"
-                        class="bg-amber-100 text-amber-500 dark:border-2 dark:border-amber-500 dark:bg-amber-500/20 dark:text-amber-400"
-                        rounded="full"
-                        color="none"
-                      >
-                        <Icon name="ph:door-duotone" class="size-5" />
-                      </BaseIconBox>
-                      <div>
-                        <BaseHeading
-                          as="h2"
-                          size="sm"
-                          weight="semibold"
-                          lead="tight"
-                          class="text-muted-800 dark:text-white"
-                        >
-                          <span>۱۲۹</span>
-                        </BaseHeading>
-                        <BaseParagraph size="xs">
-                          <span class="text-muted-500 dark:text-muted-400">هدف موفق</span>
-                        </BaseParagraph>
-                      </div>
-                    </BaseCard>
-                  </div>
+            <!-- Content -->
+            <div class="col-span-12">
+              <!-- Sub grid -->
+              <div class="grid grid-cols-12 gap-6">
+                <div class="col-span-12">
+                  <Transition
+                    leave-active-class="transition origin-top duration-75 ease-in"
+                    leave-from-class="transform scale-y-100 opacity-100"
+                    leave-to-class="transform scale-y-0 opacity-0"
+                  >
+                    <div v-if="showFeatures" class="w-full">
+                      <!--Features widget-->
+                      <NewFeatures>
+                        <template #actions>
+                          <BaseButtonClose
+                            size="sm"
+                            color="muted"
+                            data-nui-tooltip="بستن"
+                            @click="showFeatures = false"
+                          />
+                        </template>
+                      </NewFeatures>
+                    </div>
+                  </Transition>
                 </div>
-              </div>
-              <div class="col-span-12">
-                <Transition
-                  leave-active-class="transition origin-top duration-75 ease-in"
-                  leave-from-class="transform scale-y-100 opacity-100"
-                  leave-to-class="transform scale-y-0 opacity-0"
-                >
-                  <div v-if="showFeatures" class="w-full">
-                    <!--Features widget-->
-                    <NewFeatures>
-                      <template #actions>
-                        <BaseButtonClose
-                          size="sm"
-                          color="muted"
-                          data-nui-tooltip="بستن"
-                          @click="showFeatures = false"
-                        />
-                      </template>
-                    </NewFeatures>
-                  </div>
-                </Transition>
-              </div>
-              <div class="col-span-4">
-                <BaseCard rounded="lg" class="p-4">
-                  <InfoImage
-                    rounded="lg"
-                    image="/img/illustrations/widgets/5.svg"
-                    title="تبریک!"
-                    text="نشان نویسنده خلاق را دریافت کرده اید."
-                  />
-                </BaseCard>
-              </div>
-              <div class="col-span-4">
-                <BaseCard rounded="lg" class="p-4">
-                  <InfoImage
-                    rounded="lg"
-                    image="/img/illustrations/widgets/6.svg"
-                    title="مشاور روان"
-                    text="می توانید به آسانی با یک مشاور صحبت کنید"
-                  />
-                </BaseCard>
-              </div>
-              <div class="col-span-4">
-                <BaseCard rounded="lg" class="p-4">
-                  <InfoImage
-                    rounded="lg"
-                    image="/img/illustrations/widgets/1.svg"
-                    title="برنامه ریزی و اجرا"
-                    text="برای کارتان برنامه ریزی کنید"
-                  />
-                </BaseCard>
-              </div>
-              <div class="col-span-4">
-                <BaseCard rounded="lg" class="p-6">
-                  <IconsSquare rounded="lg" />
-                </BaseCard>
-              </div>
-              <div class="col-span-8">
-                <BaseCard rounded="lg" class="p-6">
-                  <!-- Title -->
-                  <div class="mb-6">
-                    <BaseHeading
-                      as="h3"
-                      size="md"
-                      weight="semibold"
-                      lead="tight"
-                      class="text-muted-800 dark:text-white"
-                    >
-                      <span>روند اقدامات</span>
-                    </BaseHeading>
-                  </div>
-                  <AddonApexcharts v-bind="demoAreaMulti" />
-                </BaseCard>
+                <div class="col-span-4">
+                  <BaseCard rounded="lg" class="p-4">
+                    <InfoImage
+                      rounded="lg"
+                      image="/img/illustrations/widgets/5.svg"
+                      title="تبریک!"
+                      text="نشان نویسنده خلاق را دریافت کرده اید."
+                    />
+                  </BaseCard>
+                </div>
+                <div class="col-span-4">
+                  <BaseCard rounded="lg" class="p-4">
+                    <InfoImage
+                      rounded="lg"
+                      image="/img/illustrations/widgets/6.svg"
+                      title="مشاور روان"
+                      text="می توانید به آسانی با یک مشاور صحبت کنید"
+                    />
+                  </BaseCard>
+                </div>
+                <div class="col-span-4">
+                  <BaseCard rounded="lg" class="p-4">
+                    <InfoImage
+                      rounded="lg"
+                      image="/img/illustrations/widgets/1.svg"
+                      title="برنامه ریزی و اجرا"
+                      text="برای کارتان برنامه ریزی کنید"
+                    />
+                  </BaseCard>
+                </div>
+                <div class="col-span-4">
+                  <BaseCard rounded="lg" class="p-6">
+                    <IconsSquare rounded="lg" />
+                  </BaseCard>
+                </div>
+                <div class="col-span-8">
+                  <BaseCard rounded="lg" class="p-6">
+                    <!-- Title -->
+                    <div class="mb-6">
+                      <BaseHeading
+                        as="h3"
+                        size="md"
+                        weight="semibold"
+                        lead="tight"
+                        class="text-muted-800 dark:text-white"
+                      >
+                        <span>روند اقدامات</span>
+                      </BaseHeading>
+                    </div>
+                    <AddonApexcharts v-bind="demoAreaMulti" />
+                  </BaseCard>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Column -->
-      <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
-        <div class="bg-muted-200 dark:bg-muted-800/70  rounded-2xl p-6">
-          <!-- Title -->
-          <div class="mb-8 flex items-center justify-between">
-            <BaseHeading
-              as="h3"
-              size="md"
-              weight="semibold"
-              lead="tight"
-              class="text-muted-800 dark:text-white"
-            >
-              <span>آخرین مطالب</span>
-            </BaseHeading>
-            <div class="flex scale-90 gap-2 sm:justify-end">
-              <BaseButtonAction
-                small
-                :color="activePosts === 'recent' ? 'primary' : 'default'"
-                @click="activePosts = 'recent'"
+        <!-- Column -->
+        <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
+          <div class="bg-muted-200 dark:bg-muted-800/70  rounded-2xl p-6">
+            <!-- Title -->
+            <div class="mb-8 flex items-center justify-between">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                lead="tight"
+                class="text-muted-800 dark:text-white"
               >
-                مقالات اخیر
-              </BaseButtonAction>
-              <BaseButtonAction
-                small
-                :color="activePosts === 'popular' ? 'primary' : 'default'"
-                @click="activePosts = 'popular'"
-              >
-                مقالات محبوب
-              </BaseButtonAction>
+                <span>آخرین مطالب</span>
+              </BaseHeading>
+              <div class="flex scale-90 gap-2 sm:justify-end">
+                <BaseButtonAction
+                  small
+                  :color="activePosts === 'recent' ? 'primary' : 'default'"
+                  @click="activePosts = 'recent'"
+                >
+                  مقالات اخیر
+                </BaseButtonAction>
+                <BaseButtonAction
+                  small
+                  :color="activePosts === 'popular' ? 'primary' : 'default'"
+                  @click="activePosts = 'popular'"
+                >
+                  مقالات محبوب
+                </BaseButtonAction>
+              </div>
             </div>
-          </div>
-          <!-- Posts-->
-          <div class="ptablet:grid ptablet:grid-cols-2 flex flex-col gap-6">
-            <!-- Post -->
-            <NuxtLink :to="`/posts/1`" class="flex flex-col">
-              <img
-                src="/img/illustrations/dashboards/writer/post-1.svg"
-                alt="Post image"
-                class="bg-muted-200 rounded-xl"
-              >
-              <BaseCard class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl">
-                <div class="mb-3">
-                  <BaseHeading
-                    as="h4"
-                    size="md"
-                    weight="light"
-                    lead="tight"
-                    class="text-muted-800 mb-1 dark:text-white"
-                  >
-                    <span>چگونه خودآگاهی می‌تواند زندگی‌تان را تغییر دهد</span>
-                  </BaseHeading>
-                  <BaseParagraph size="xs">
-                    <span class="text-muted-400">
-                      کشف قدرت خودآگاهی برای بهبود زندگی و راهکارهای کاربردی برای تقویت آن.
-                    </span>
-                  </BaseParagraph>
-                </div>
-                <div class="flex gap-3">
-                  <BaseAvatar
-                    src="/img/avatars/6.svg"
-                    text="BT"
-                    size="xs"
-                    class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
-                  />
-                  <div>
+            <!-- Posts-->
+            <div class="ptablet:grid ptablet:grid-cols-2 flex flex-col gap-6">
+              <!-- Post -->
+              <NuxtLink :to="`/posts/1`" class="flex flex-col">
+                <img
+                  src="/img/illustrations/dashboards/writer/post-1.svg"
+                  alt="Post image"
+                  class="bg-muted-200 rounded-xl"
+                >
+                <BaseCard class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl">
+                  <div class="mb-3">
                     <BaseHeading
                       as="h4"
-                      size="xs"
+                      size="md"
                       weight="light"
                       lead="tight"
-                      class="text-muted-800 dark:text-white"
+                      class="text-muted-800 mb-1 dark:text-white"
                     >
-                      <span>دکتر علی مرادی</span>
+                      <span>چگونه خودآگاهی می‌تواند زندگی‌تان را تغییر دهد</span>
                     </BaseHeading>
                     <BaseParagraph size="xs">
-                      <span class="text-muted-400">روانشناس بالینی</span>
+                      <span class="text-muted-400">
+                        کشف قدرت خودآگاهی برای بهبود زندگی و راهکارهای کاربردی برای تقویت آن.
+                      </span>
                     </BaseParagraph>
                   </div>
-                </div>
-              </BaseCard>
-            </NuxtLink>
-            <!-- Post -->
-            <NuxtLink :to="`/posts/2`" class="flex flex-col">
-              <img
-                src="/img/illustrations/dashboards/writer/post-2.svg"
-                alt="Post image"
-                class="bg-muted-200 rounded-xl"
-              >
-              <BaseCard class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl">
-                <div class="mb-3">
-                  <BaseHeading
-                    as="h4"
-                    size="md"
-                    weight="light"
-                    lead="tight"
-                    class="text-muted-800 mb-1 dark:text-white"
-                  >
-                    <span>استرس را بکش، قبل از اینکه تو را بکشد</span>
-                  </BaseHeading>
-                  <BaseParagraph size="xs">
-                    <span class="text-muted-400">
-                      چرا باید استرس داشته باشیم، وقتی می توانیم شاد باشیم؟
-                    </span>
-                  </BaseParagraph>
-                </div>
-                <div class="flex gap-3">
-                  <BaseAvatar
-                    src="/img/avatars/5.svg"
-                    text="BT"
-                    size="xs"
-                    class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
-                  />
-                  <div>
+                  <div class="flex gap-3">
+                    <BaseAvatar
+                      src="/img/avatars/6.svg"
+                      text="BT"
+                      size="xs"
+                      class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
+                    />
+                    <div>
+                      <BaseHeading
+                        as="h4"
+                        size="xs"
+                        weight="light"
+                        lead="tight"
+                        class="text-muted-800 dark:text-white"
+                      >
+                        <span>دکتر علی مرادی</span>
+                      </BaseHeading>
+                      <BaseParagraph size="xs">
+                        <span class="text-muted-400">روانشناس بالینی</span>
+                      </BaseParagraph>
+                    </div>
+                  </div>
+                </BaseCard>
+              </NuxtLink>
+              <!-- Post -->
+              <NuxtLink :to="`/posts/2`" class="flex flex-col">
+                <img
+                  src="/img/illustrations/dashboards/writer/post-2.svg"
+                  alt="Post image"
+                  class="bg-muted-200 rounded-xl"
+                >
+                <BaseCard class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl">
+                  <div class="mb-3">
                     <BaseHeading
                       as="h4"
-                      size="xs"
+                      size="md"
                       weight="light"
                       lead="tight"
-                      class="text-muted-800 dark:text-white"
+                      class="text-muted-800 mb-1 dark:text-white"
                     >
-                      <span>دکتر مریم عباسی</span>
+                      <span>استرس را بکش، قبل از اینکه تو را بکشد</span>
                     </BaseHeading>
                     <BaseParagraph size="xs">
-                      <span class="text-muted-400">روان درمانگر و عضو هیئت علمی دانشگاه</span>
+                      <span class="text-muted-400">
+                        چرا باید استرس داشته باشیم، وقتی می توانیم شاد باشیم؟
+                      </span>
                     </BaseParagraph>
                   </div>
-                </div>
-              </BaseCard>
-            </NuxtLink>
+                  <div class="flex gap-3">
+                    <BaseAvatar
+                      src="/img/avatars/5.svg"
+                      text="BT"
+                      size="xs"
+                      class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
+                    />
+                    <div>
+                      <BaseHeading
+                        as="h4"
+                        size="xs"
+                        weight="light"
+                        lead="tight"
+                        class="text-muted-800 dark:text-white"
+                      >
+                        <span>دکتر مریم عباسی</span>
+                      </BaseHeading>
+                      <BaseParagraph size="xs">
+                        <span class="text-muted-400">روان درمانگر و عضو هیئت علمی دانشگاه</span>
+                      </BaseParagraph>
+                    </div>
+                  </div>
+                </BaseCard>
+              </NuxtLink>
+            </div>
           </div>
         </div>
       </div>
