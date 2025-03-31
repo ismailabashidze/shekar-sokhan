@@ -445,4 +445,6 @@ const chooseService = () => {
       </BaseCard>
     </div>
   </div>
+  <!-- Version Display -->
+  <CommonVersionDisplay />
 </template>

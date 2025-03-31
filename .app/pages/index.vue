@@ -33,5 +33,8 @@ else {
 </script>
 
 <template>
-  <div />
+  <div>
+    <!-- Version Display -->
+    <CommonVersionDisplay />
+  </div>
 </template>

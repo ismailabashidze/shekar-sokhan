@@ -10,6 +10,10 @@ echo "Deploying to server at $SERVER_IP..."
 echo "Local path: $(pwd)/.app/.output"
 echo "Server path: $SERVER_PATH"
 
+# Build the application
+echo "Building the application..."
+cd .app && pnpm build && cd ..
+
 # Ensure the output directory exists on the server
 echo "Creating output directory on server..."
 ssh $SERVER_USER@$SERVER_IP "mkdir -p $SERVER_PATH/.output"
@@ -26,8 +30,19 @@ scp -r .app/.output/public/* $SERVER_USER@$SERVER_IP:$SERVER_PATH/.output/public
 echo "Copying nitro.json..."
 scp .app/.output/nitro.json $SERVER_USER@$SERVER_IP:$SERVER_PATH/.output/
 
-# Restart the PM2 process
+# Create a restart script on the server
+echo "Creating restart script on server..."
+ssh $SERVER_USER@$SERVER_IP "cat > /root/restart_app.sh << 'EOL'
+#!/bin/bash
+export NVM_DIR=\"\$HOME/.nvm\"
+[ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\"  # This loads nvm
+cd $SERVER_PATH
+pm2 restart front || echo \"Failed to restart PM2 process\"
+EOL
+chmod +x /root/restart_app.sh"
+
+# Execute the restart script
 echo "Restarting PM2 process..."
-ssh $SERVER_USER@$SERVER_IP "cd $SERVER_PATH && pm2 restart front"
+ssh $SERVER_USER@$SERVER_IP "/root/restart_app.sh"
 
 echo "Deployment completed!"

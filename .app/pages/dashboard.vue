@@ -693,4 +693,6 @@ const closeAlphaModal = () => {
       </div>
     </BaseCard>
   </div>
+  <!-- Version Display -->
+  <CommonVersionDisplay />
 </template>
