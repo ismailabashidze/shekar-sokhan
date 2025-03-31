@@ -341,13 +341,44 @@ const {
                   </div>
                 </div>
               </div>
+              <!-- Action Buttons -->
+              <div class="mt-4 flex justify-center gap-3 sm:justify-end">
+                <BaseButton
+                  color="warning"
+                  shape="curved"
+                  @click="navigateTo(`/darmana/therapists/history?sessionId=${analysisData?.expand?.session?.id}`)"
+                >
+                  <Icon name="ph:clock-counter-clockwise-duotone" class="ml-1 size-4" />
+                  پیام های جلسه
+                </BaseButton>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <!-- Session Title -->
+      <div class="col-span-12">
+        <BaseCard shape="curved" class="p-6">
+          <div class="mb-2 flex items-center justify-between">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              lead="tight"
+              class="text-muted-800 dark:text-white"
+            >
+              <span>موضوع جلسه</span>
+            </BaseHeading>
+          </div>
+          <div class="mt-2 text-center">
+            <span class="text-primary-500 text-xl font-bold">{{ analysisData?.title || 'بدون عنوان' }}</span>
+          </div>
+        </BaseCard>
+      </div>
+
       <!-- Icon box -->
       <div v-for="headline in headlinesComputed" class="col-span-6 sm:col-span-3">
-        <div class="flex flex-col">
+        <div class="flex h-full flex-col">
           <div class="mb-3 flex items-center gap-2">
             <BaseIconBox size="md" class="bg-primary-500/10">
               <Icon name="ph:clipboard" class="text-primary-500 size-5" />
@@ -363,7 +394,7 @@ const {
               </BaseParagraph>
             </div>
           </div>
-          <div>
+          <div class="mt-auto">
             <BaseHeading
               tag="h3"
               size="sm"
@@ -453,66 +484,70 @@ const {
                 </div>
 
                 <!-- Score Card -->
-                <div class="grid gap-6 md:grid-cols-2">
-                  <!-- Score Card -->
-                  <div class="bg-muted-800 dark:bg-muted-900 relative overflow-hidden rounded-2xl p-6">
-                    <div class="bg-primary-500/10 pointer-events-none absolute right-0 top-0 size-32 rounded-bl-[6rem]" />
-                    <div class="bg-primary-500/5 pointer-events-none absolute bottom-0 left-0 size-24 rounded-tr-[4rem]" />
-                    <div class="relative z-10">
-                      <!-- Header -->
-                      <div class="mb-8 flex items-center justify-between">
-                        <h3 class="flex items-center gap-2 text-lg font-semibold text-white">
-                          <Icon name="ph:star-duotone" class="text-primary-500 size-6" />
-                          امتیاز درمانگر
-                        </h3>
-                        <div class="bg-primary-500/10 flex items-center gap-1 rounded-lg px-3 py-1">
-                          <Icon name="ph:trend-up-duotone" class="text-primary-400 size-4" />
-                          <span class="text-primary-400 text-sm">عملکرد مثبت</span>
+                <div class="grid w-full gap-6">
+                  <!-- Score and Description Row -->
+                  <div class="grid gap-6 md:grid-cols-2">
+                    <!-- Score Card -->
+                    <div class="bg-muted-800 dark:bg-muted-900 relative h-[400px] overflow-hidden rounded-2xl p-6">
+                      <div class="bg-primary-500/10 pointer-events-none absolute right-0 top-0 size-32 rounded-bl-[6rem]" />
+                      <div class="bg-primary-500/5 pointer-events-none absolute bottom-0 left-0 size-24 rounded-tr-[4rem]" />
+                      <div class="relative z-10">
+                        <!-- Header -->
+                        <div class="mb-8 flex items-center justify-between">
+                          <h3 class="flex items-center gap-2 text-lg font-semibold text-white">
+                            <Icon name="ph:star-duotone" class="text-primary-500 size-6" />
+                            امتیاز درمانگر
+                          </h3>
+                          <div class="bg-primary-500/10 flex items-center gap-1 rounded-lg px-3 py-1">
+                            <Icon name="ph:trend-up-duotone" class="text-primary-400 size-4" />
+                            <span class="text-primary-400 text-sm">عملکرد مثبت</span>
+                          </div>
                         </div>
-                      </div>
 
-                      <!-- Main Score -->
-                      <div class="mb-8 flex items-center justify-center">
-                        <div class="text-center">
-                          <div class="flex items-baseline justify-center gap-1">
-                            <span class="text-primary-400 text-xl font-medium">100/</span>
-                            <span class="text-primary-500 text-7xl font-bold leading-none tracking-tight">{{ analysisData.psychotherapistEvaluationScore }}</span>
-                          </div>
-                          <div class="text-primary-400 mt-2 flex items-center justify-center gap-1">
-                            <Icon name="ph:chart-bar-duotone" class="size-5" />
-                            <span class="text-sm">امتیاز کلی</span>
+                        <!-- Main Score -->
+                        <div class="mb-8 flex items-center justify-center">
+                          <div class="text-center">
+                            <div class="flex items-baseline justify-center gap-1">
+                              <span class="text-primary-400 text-xl font-medium">100/</span>
+                              <span class="text-primary-500 text-7xl font-bold leading-none tracking-tight">
+                                {{
+                                  100 - (analysisData.negativeScoresList?.reduce((total, item) => total + item.points, 0) || 0)
+                                }}
+                              </span>
+                            </div>
+                            <div class="text-primary-400 mt-2 flex items-center justify-center gap-1">
+                              <Icon name="ph:chart-bar-duotone" class="size-5" />
+                              <span class="text-sm">امتیاز کلی</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <!-- Performance Metrics -->
-                      <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-muted-900/50 rounded-xl p-4">
-                          <div class="mb-3 flex items-center justify-center gap-2">
-                            <Icon name="ph:timer-duotone" class="text-primary-400 size-5" />
-                            <span class="text-muted-200 text-sm">زمان جلسه</span>
+                        <!-- Performance Metrics -->
+                        <div class="grid grid-cols-2 gap-4">
+                          <div class="bg-muted-900/50 rounded-xl p-4">
+                            <div class="mb-3 flex items-center justify-center gap-2">
+                              <Icon name="ph:timer-duotone" class="text-primary-400 size-5" />
+                              <span class="text-muted-200 text-sm">زمان جلسه</span>
+                            </div>
+                            <div class="flex items-baseline justify-center gap-1">
+                              <span class="text-2xl font-semibold text-white">{{ analysisData?.expand?.session?.total_time_passed }}</span>
+                              <span class="text-muted-400 text-sm">دقیقه</span>
+                            </div>
                           </div>
-                          <div class="flex items-baseline justify-center gap-1">
-                            <span class="text-2xl font-semibold text-white">45</span>
-                            <span class="text-muted-400 text-sm">دقیقه</span>
-                          </div>
-                        </div>
-                        <div class="bg-muted-900/50 rounded-xl p-4">
-                          <div class="mb-3 flex items-center justify-center gap-2">
-                            <Icon name="ph:chats-circle-duotone" class="text-primary-400 size-5" />
-                            <span class="text-muted-200 text-sm">تعداد پیام‌ها</span>
-                          </div>
-                          <div class="flex items-baseline justify-center gap-1">
-                            <span class="text-2xl font-semibold text-white">24</span>
-                            <span class="text-muted-400 text-sm">پیام</span>
+                          <div class="bg-muted-900/50 rounded-xl p-4">
+                            <div class="mb-3 flex items-center justify-center gap-2">
+                              <Icon name="ph:chats-circle-duotone" class="text-primary-400 size-5" />
+                              <span class="text-muted-200 text-sm">تعداد پیام‌ها</span>
+                            </div>
+                            <div class="flex items-baseline justify-center gap-1">
+                              <span class="text-2xl font-semibold text-white">{{ analysisData?.expand?.session?.count_of_total_messages }}</span>
+                              <span class="text-muted-400 text-sm">پیام</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <!-- Evaluation Details -->
-                  <div class="grid gap-4">
                     <!-- Description -->
                     <div class="bg-muted-100 dark:bg-muted-800/50 rounded-xl p-4">
                       <div class="mb-3 flex items-center gap-3">
@@ -527,20 +562,118 @@ const {
                         {{ analysisData.psychotherapistEvaluation }}
                       </p>
                     </div>
-
-                    <!-- Additional Info -->
-                    <div class="bg-muted-100 dark:bg-muted-800/50 rounded-xl p-4">
-                      <div class="mb-3 flex items-center gap-3">
-                        <div class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2">
-                          <Icon name="ph:info-duotone" class="text-primary-500 size-5" />
+                  </div>
+                  <!-- Therapist Evaluation Sections -->
+                  <div class="mt-6 grid grid-cols-1 gap-6">
+                    <!-- Negative Points and Positive Behaviors in one row -->
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <!-- Negative Points List -->
+                      <div class="bg-muted-100 dark:bg-muted-800/50 border-muted-200 dark:border-muted-700 h-full rounded-xl border p-5">
+                        <h3 class="text-muted-800 mb-4 flex items-center gap-2 text-lg font-semibold dark:text-white">
+                          <Icon name="ph:minus-circle-duotone" class="text-danger-500 size-6" />
+                          <span>نقاط منفی</span>
+                        </h3>
+                        <div class="grid gap-3">
+                          <div
+                            v-for="(item, index) in analysisData.negativeScoresList"
+                            :key="index"
+                            class="bg-danger-500/5 border-danger-500/20 dark:bg-danger-500/10 dark:border-danger-500/30 rounded-xl border p-4 transition-all hover:shadow-md"
+                          >
+                            <div class="flex items-start gap-3">
+                              <div class="bg-danger-500/10 dark:bg-danger-500/20 flex size-8 shrink-0 items-center justify-center rounded-lg">
+                                <span class="text-danger-500 font-bold">{{ item.points }}-</span>
+                              </div>
+                              <div class="flex-1">
+                                <p class="text-muted-800 dark:text-muted-100 leading-relaxed">
+                                  {{ item.cause }}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Empty state for negative points -->
+                          <div
+                            v-if="!analysisData.negativeScoresList || analysisData.negativeScoresList.length === 0"
+                            class="bg-muted-100 dark:bg-muted-700/30 border-muted-200 dark:border-muted-700 rounded-xl border p-4 text-center"
+                          >
+                            <Icon name="ph:smiley" class="text-muted-400 mx-auto mb-2 size-6" />
+                            <p class="text-muted-500 dark:text-muted-400 text-sm">
+                              هیچ نقطه منفی برای این جلسه ثبت نشده است.
+                            </p>
+                          </div>
                         </div>
-                        <h4 class="text-muted-800 dark:text-muted-100 font-semibold">
-                          توضیحات امتیاز
-                        </h4>
                       </div>
-                      <p class="text-muted-500 dark:text-muted-400 leading-relaxed">
-                        {{ analysisData.psychotherapistEvaluationScoreDescription }}
-                      </p>
+
+                      <!-- Positive Behaviors List -->
+                      <div class="bg-muted-100 dark:bg-muted-800/50 border-muted-200 dark:border-muted-700 h-full rounded-xl border p-5">
+                        <h3 class="text-muted-800 mb-4 flex items-center gap-2 text-lg font-semibold dark:text-white">
+                          <Icon name="ph:check-circle-duotone" class="text-success-500 size-6" />
+                          <span>رفتارهای مثبت</span>
+                        </h3>
+                        <div class="grid gap-3">
+                          <div
+                            v-for="(item, index) in analysisData.psychotherapistEvaluationScorePositiveBehavior"
+                            :key="index"
+                            class="bg-success-500/5 border-success-500/20 dark:bg-success-500/10 dark:border-success-500/30 rounded-xl border p-4 transition-all hover:shadow-md"
+                          >
+                            <div class="flex items-start gap-3">
+                              <div class="bg-success-500/10 dark:bg-success-500/20 flex size-8 shrink-0 items-center justify-center rounded-lg">
+                                <Icon name="ph:check-bold" class="text-success-500 size-4" />
+                              </div>
+                              <div class="flex-1">
+                                <p class="text-muted-800 dark:text-muted-100 leading-relaxed">
+                                  {{ item }}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Empty state for positive behaviors -->
+                          <div
+                            v-if="!analysisData.psychotherapistEvaluationScorePositiveBehavior || analysisData.psychotherapistEvaluationScorePositiveBehavior.length === 0"
+                            class="bg-muted-100 dark:bg-muted-700/30 border-muted-200 dark:border-muted-700 rounded-xl border p-4 text-center"
+                          >
+                            <Icon name="ph:note-pencil" class="text-muted-400 mx-auto mb-2 size-6" />
+                            <p class="text-muted-500 dark:text-muted-400 text-sm">
+                              هنوز هیچ رفتار مثبتی برای این جلسه ثبت نشده است.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Suggestions to Improve List -->
+                    <div class="bg-muted-100 dark:bg-muted-800/50 border-muted-200 dark:border-muted-700 h-full rounded-xl border p-5">
+                      <h3 class="text-muted-800 mb-4 flex items-center gap-2 text-lg font-semibold dark:text-white">
+                        <Icon name="ph:lightbulb-duotone" class="text-primary-500 size-6" />
+                        <span>پیشنهادات بهبود</span>
+                      </h3>
+                      <div class="grid gap-3">
+                        <div
+                          v-for="(item, index) in analysisData.psychotherapistEvaluationScoreSuggestionsToImprove"
+                          :key="index"
+                          class="bg-primary-500/5 border-primary-500/20 dark:bg-primary-500/10 dark:border-primary-500/30 rounded-xl border p-4 transition-all hover:shadow-md"
+                        >
+                          <div class="flex items-start gap-3">
+                            <div class="bg-primary-500/10 dark:bg-primary-500/20 flex size-8 shrink-0 items-center justify-center rounded-lg">
+                              <Icon name="ph:arrow-up-right" class="text-primary-500 size-4" />
+                            </div>
+                            <div class="flex-1">
+                              <p class="text-muted-800 dark:text-muted-100 leading-relaxed">
+                                {{ item }}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Empty state for suggestions -->
+                        <div
+                          v-if="!analysisData.psychotherapistEvaluationScoreSuggestionsToImprove || analysisData.psychotherapistEvaluationScoreSuggestionsToImprove.length === 0"
+                          class="bg-muted-100 dark:bg-muted-700/30 border-muted-200 dark:border-muted-700 rounded-xl border p-4 text-center"
+                        >
+                          <Icon name="ph:lightbulb" class="text-muted-400 mx-auto mb-2 size-6" />
+                          <p class="text-muted-500 dark:text-muted-400 text-sm">
+                            هیچ پیشنهادی برای بهبود در این جلسه ثبت نشده است.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -577,105 +710,192 @@ const {
                     </BaseParagraph>
                   </div>
                   <div class="relative mt-5">
-                    <div class="grid grid-cols-12 gap-4" :class="{ 'pointer-events-none opacity-40': !analysisData.demographicData }">
+                    <div class="grid grid-cols-12 gap-4">
+                      <!-- First Name -->
                       <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="profile.firstName"
-                        >
-                          <BaseInput
-                            :model-value="analysisData.demographicData?.firstName || ''"
-                            :error="errorMessage"
-                            disabled
-                            type="text"
-                            icon="ph:user-duotone"
-                            placeholder="نام"
-                          />
-                        </Field>
+                        <div class="mb-1 flex items-center justify-between">
+                          <label class="text-muted-400 text-xs font-medium">نام</label>
+                          <span v-if="analysisData.demographicData?.firstName" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
+                          <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                        </div>
+                        <BaseInput
+                          :model-value="analysisData.demographicData?.firstName || ''"
+                          disabled
+                          type="text"
+                          icon="ph:user-duotone"
+                          placeholder="نام"
+                          :class="{'opacity-50': !analysisData.demographicData?.firstName}"
+                        />
                       </div>
+
+                      <!-- Last Name -->
                       <div class="col-span-12 sm:col-span-6">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="profile.lastName"
-                        >
-                          <BaseInput
-                            :model-value="analysisData.demographicData?.lastName || ''"
-                            :error="errorMessage"
-                            disabled
-                            type="text"
-                            icon="ph:user-duotone"
-                            placeholder="نام خانوادگی"
-                          />
-                        </Field>
+                        <div class="mb-1 flex items-center justify-between">
+                          <label class="text-muted-400 text-xs font-medium">نام خانوادگی</label>
+                          <span v-if="analysisData.demographicData?.lastName" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
+                          <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                        </div>
+                        <BaseInput
+                          :model-value="analysisData.demographicData?.lastName || ''"
+                          disabled
+                          type="text"
+                          icon="ph:user-duotone"
+                          placeholder="نام خانوادگی"
+                          :class="{'opacity-50': !analysisData.demographicData?.lastName}"
+                        />
                       </div>
-                      <div class="col-span-12">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="profile.role"
-                        >
-                          <BaseInput
-                            :model-value="analysisData.demographicData?.occupation || ''"
-                            :error="errorMessage"
-                            disabled
-                            type="text"
-                            icon="ph:suitcase-duotone"
-                            placeholder="شغل"
-                          />
-                        </Field>
+
+                      <!-- Age -->
+                      <div class="col-span-12 sm:col-span-6">
+                        <div class="mb-1 flex items-center justify-between">
+                          <label class="text-muted-400 text-xs font-medium">سن</label>
+                          <span v-if="analysisData.demographicData?.age" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
+                          <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                        </div>
+                        <BaseInput
+                          :model-value="analysisData.demographicData?.age || ''"
+                          disabled
+                          type="number"
+                          icon="ph:calendar-duotone"
+                          placeholder="سن"
+                          :class="{'opacity-50': !analysisData.demographicData?.age}"
+                        />
                       </div>
-                      <div class="col-span-12">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="profile.location"
+
+                      <!-- Gender -->
+                      <div class="col-span-12 sm:col-span-6">
+                        <div class="mb-1 flex items-center justify-between">
+                          <label class="text-muted-400 text-xs font-medium">جنسیت</label>
+                          <span v-if="analysisData.demographicData?.gender" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
+                          <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                        </div>
+                        <BaseSelect
+                          :model-value="analysisData.demographicData?.gender || ''"
+                          disabled
+                          placeholder="جنسیت"
+                          :class="{'opacity-50': !analysisData.demographicData?.gender}"
                         >
-                          <BaseInput
-                            :model-value="analysisData.demographicData?.location || ''"
-                            :error="errorMessage"
-                            disabled
-                            type="text"
-                            icon="ph:map-pin-duotone"
-                            placeholder="موقعیت"
-                          />
-                        </Field>
+                          <option value="">
+                            جنسیت
+                          </option>
+                          <option value="male">
+                            مرد
+                          </option>
+                          <option value="female">
+                            زن
+                          </option>
+                          <option value="other">
+                            دیگر
+                          </option>
+                        </BaseSelect>
                       </div>
-                      <div class="col-span-12">
-                        <Field
-                          v-slot="{
-                            field,
-                            errorMessage,
-                            handleChange,
-                            handleBlur,
-                          }"
-                          name="profile.bio"
+
+                      <!-- Education -->
+                      <div class="col-span-12 sm:col-span-6">
+                        <div class="mb-1 flex items-center justify-between">
+                          <label class="text-muted-400 text-xs font-medium">تحصیلات</label>
+                          <span v-if="analysisData.demographicData?.education" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
+                          <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                        </div>
+                        <BaseSelect
+                          :model-value="analysisData.demographicData?.education || ''"
+                          disabled
+                          placeholder="تحصیلات"
+                          :class="{'opacity-50': !analysisData.demographicData?.education}"
                         >
-                          <BaseTextarea
-                            :model-value="analysisData.demographicData?.bio || ''"
-                            :error="errorMessage"
-                            disabled
-                            rows="4"
-                            placeholder="درباره مراجع..."
-                          />
-                        </Field>
+                          <option value="">
+                            تحصیلات
+                          </option>
+                          <option value="under diploma">
+                            زیر دیپلم
+                          </option>
+                          <option value="diploma">
+                            دیپلم
+                          </option>
+                          <option value="bachelor">
+                            کارشناسی
+                          </option>
+                          <option value="master">
+                            کارشناسی ارشد
+                          </option>
+                          <option value="phd">
+                            دکتری
+                          </option>
+                          <option value="other">
+                            سایر
+                          </option>
+                        </BaseSelect>
+                      </div>
+
+                      <!-- Occupation -->
+                      <div class="col-span-12 sm:col-span-6">
+                        <div class="mb-1 flex items-center justify-between">
+                          <label class="text-muted-400 text-xs font-medium">شغل</label>
+                          <span v-if="analysisData.demographicData?.occupation" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
+                          <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                        </div>
+                        <BaseSelect
+                          :model-value="analysisData.demographicData?.occupation || ''"
+                          disabled
+                          placeholder="شغل"
+                          :class="{'opacity-50': !analysisData.demographicData?.occupation}"
+                        >
+                          <option value="">
+                            شغل
+                          </option>
+                          <option value="student">
+                            دانشجو
+                          </option>
+                          <option value="employed">
+                            کارمند
+                          </option>
+                          <option value="self-employed">
+                            آزاد
+                          </option>
+                          <option value="unemployed">
+                            بیکار
+                          </option>
+                          <option value="retired">
+                            بازننشسته
+                          </option>
+                          <option value="householder">
+                            خانه‌دار
+                          </option>
+                          <option value="other">
+                            سایر
+                          </option>
+                        </BaseSelect>
+                      </div>
+
+                      <!-- Marital Status -->
+                      <div class="col-span-12">
+                        <div class="mb-1 flex items-center justify-between">
+                          <label class="text-muted-400 text-xs font-medium">وضعیت تأهل</label>
+                          <span v-if="analysisData.demographicData?.maritalStatus" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
+                          <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                        </div>
+                        <BaseSelect
+                          :model-value="analysisData.demographicData?.maritalStatus || ''"
+                          disabled
+                          placeholder="وضعیت تأهل"
+                          :class="{'opacity-50': !analysisData.demographicData?.maritalStatus}"
+                        >
+                          <option value="">
+                            وضعیت تأهل
+                          </option>
+                          <option value="single">
+                            مجرد
+                          </option>
+                          <option value="married">
+                            متأهل
+                          </option>
+                          <option value="divorced">
+                            مطلقه
+                          </option>
+                          <option value="widowed">
+                            بیوه
+                          </option>
+                        </BaseSelect>
                       </div>
                     </div>
 
@@ -806,26 +1026,78 @@ const {
                     {{ analysisData.finalTrustAndOppennessOfUserEvaluationDescription }}
                   </p>
                 </BaseCard>
-                <!-- <BaseCard class="mt-5 p-6">
-                  <div class="mb-8 flex items-center justify-between">
-                    <BaseHeading
-                      as="h3"
-                      size="md"
-                      weight="semibold"
-                      lead="tight"
-                      class="text-muted-800 dark:text-white"
-                    >
-                      <span>اهداف جلسه</span>
-                    </BaseHeading>
-                    <NuxtLink
-                      to="#"
-                      class="bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-900 text-primary-500 rounded-lg px-4 py-2 font-sans text-sm font-medium underline-offset-4 transition-colors duration-300 hover:underline"
-                    >
-                      نمایش تمام موارد
-                    </NuxtLink>
-                  </div>
-                  <GoalsCompact />
-                </BaseCard> -->
+                <!-- Possible Risk Factors -->
+                <div class="col-span-12 my-6">
+                  <BaseCard shape="curved" class="p-6">
+                    <div class="mb-2 flex items-center justify-between">
+                      <BaseHeading
+                        as="h3"
+                        size="md"
+                        weight="semibold"
+                        lead="tight"
+                        class="text-muted-800 dark:text-white"
+                      >
+                        <span>عوامل خطر احتمالی</span>
+                      </BaseHeading>
+                    </div>
+                    <div class="flex justify-between">
+                      <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+                        <Icon name="ph:warning-duotone" class="size-4" />
+                        <span>
+                          عوامل خطر شناسایی شده که نیاز به توجه ویژه دارند
+                        </span>
+                      </BaseParagraph>
+                    </div>
+
+                    <!-- Risk Factors List -->
+                    <div v-if="analysisData.possibleRiskFactorsExtracted?.length > 0" class="mt-6">
+                      <div class="grid gap-4">
+                        <div
+                          v-for="(risk, index) in analysisData.possibleRiskFactorsExtracted"
+                          :key="index"
+                          class="group relative"
+                        >
+                          <BaseCard
+                            shape="rounded"
+                            class="border-warning-100 dark:border-warning-500/20 border-2 p-4 transition-all hover:shadow-lg"
+                          >
+                            <div class="flex w-full items-start gap-3">
+                              <div class="bg-warning-500/10 dark:bg-warning-500/20 flex size-8 shrink-0 items-center justify-center rounded-lg">
+                                <Icon
+                                  name="ph:warning-circle-duotone"
+                                  class="text-warning-500 size-5"
+                                />
+                              </div>
+                              <div class="flex-1">
+                                <BaseHeading
+                                  as="h4"
+                                  size="sm"
+                                  weight="medium"
+                                  lead="none"
+                                  class="mb-3"
+                                >
+                                  {{ risk.title }}
+                                </BaseHeading>
+                                <BaseText size="xs" class="text-muted-400">
+                                  {{ risk.description }}
+                                </BaseText>
+                              </div>
+                            </div>
+                          </BaseCard>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-else class="mt-6 text-center">
+                      <Icon
+                        name="ph:shield-check-duotone"
+                        class="text-muted-400 mb-2 size-12"
+                      />
+                      <BaseText size="sm" class="text-muted-400">
+                        در حال حاضر عامل خطر قابل توجهی شناسایی نشده است.
+                      </BaseText>
+                    </div>
+                  </BaseCard>
+                </div>
               </div>
               <div class="col-span-12 mb-8">
                 <BaseCard shape="curved" class="p-6">
@@ -1046,7 +1318,8 @@ const {
                   </div>
                 </BaseCard>
               </div>
-              <!-- <div class="col-span-12">
+              <!-- Possible Deeper Goals of Patient -->
+              <div class="col-span-12 mb-8">
                 <BaseCard shape="curved" class="p-6">
                   <div class="mb-2 flex items-center justify-between">
                     <BaseHeading
@@ -1056,34 +1329,45 @@ const {
                       lead="tight"
                       class="text-muted-800 dark:text-white"
                     >
-                      <span>بررسی فاکتور: افسردگی</span>
+                      <span>اهداف عمیق‌تر احتمالی مراجع</span>
                     </BaseHeading>
                   </div>
                   <div class="flex justify-between">
                     <BaseParagraph size="xs" class="text-muted-400 max-w-full">
-                      <Icon name="ph:question-duotone" class="size-4" />
+                      <Icon name="ph:target-duotone" class="size-4" />
                       <span>
-                        نمودار زیر بررسی وضعیت اطمینان و مقدار افسردگی را در طول جلسه نشان می دهد.
+                        تحلیل اهداف و انگیزه‌های عمیق‌تر مراجع که ممکن است به صورت صریح بیان نشده باشند
                       </span>
-                      <NuxtLink
-                        to="#"
-                        class="text-primary-500 underline-offset-4 hover:underline"
-                      >
-                        اطلاعات بیشتر
-                      </NuxtLink>
                     </BaseParagraph>
                   </div>
-                  <div class="grid grid-cols-2 items-center justify-center gap-4">
-                    <div class="flex justify-center">
-                      <DemoChartPie class="w-[350px]" />
+                  <div v-if="analysisData.possibleDeeperGoalsOfPatient" class="mt-5">
+                    <div class="bg-muted-100 dark:bg-muted-800/50 border-primary-100 dark:border-primary-500/20 rounded-xl border p-4 transition-all hover:shadow-md">
+                      <div class="mb-3 flex items-center gap-3">
+                        <div class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2">
+                          <Icon name="ph:target-duotone" class="text-primary-500 size-5" />
+                        </div>
+                        <h4 class="text-muted-800 dark:text-muted-100 font-semibold">
+                          اهداف عمیق‌تر
+                        </h4>
+                      </div>
+                      <p class="text-muted-500 dark:text-muted-400 leading-relaxed">
+                        {{ analysisData.possibleDeeperGoalsOfPatient }}
+                      </p>
                     </div>
-                    <AddonApexcharts
-                      class="relative -start-5"
+                  </div>
+                  <div v-else class="mt-6 text-center">
+                    <Icon
+                      name="ph:target-duotone"
+                      class="text-muted-400 mb-2 size-12"
                     />
+                    <BaseText size="sm" class="text-muted-400">
+                      در حال حاضر تحلیلی از اهداف عمیق‌تر مراجع وجود ندارد.
+                    </BaseText>
                   </div>
                 </BaseCard>
               </div>
-              <div class="col-span-6">
+              <!-- Suggested Next Steps for Therapist -->
+              <div class="col-span-12 mb-8">
                 <BaseCard shape="curved" class="p-6">
                   <div class="mb-2 flex items-center justify-between">
                     <BaseHeading
@@ -1093,109 +1377,69 @@ const {
                       lead="tight"
                       class="text-muted-800 dark:text-white"
                     >
-                      <span>ریسک خودکشی</span>
+                      <span>پیشنهادات برای جلسه بعدی</span>
                     </BaseHeading>
                   </div>
                   <div class="flex justify-between">
                     <BaseParagraph size="xs" class="text-muted-400 max-w-full">
                       <Icon name="ph:question-duotone" class="size-4" />
                       <span>
-                        نمودار وضعیت ریسک خودکشی در واحد زمان را نشان می دهد.
+                        پیشنهادات و راهکارهای مفید برای درمانگر جهت استفاده در جلسه بعدی با مراجع
                       </span>
-                      <NuxtLink
-                        to="#"
-                        class="text-primary-500 underline-offset-4 hover:underline"
-                      >
-                        اطلاعات بیشتر
-                      </NuxtLink>
                     </BaseParagraph>
-                    <BaseButton
-                      color="primary"
-                      :loading="isLoading"
-                      :disabled="isLoading"
-                      @click="genereateRisks()"
-                    >
-                      بروز رسانی
-                    </BaseButton>
                   </div>
-                </BaseCard>
-              </div> -->
-              <!-- Chart -->
 
-              <!-- Chart -->
-              <!-- <div class="col-span-12 sm:col-span-6">
-                <BaseCard shape="curved" class="p-6">
-                  <div class="mb-2 flex items-center justify-between">
-                    <BaseHeading
-                      as="h3"
-                      size="md"
-                      weight="semibold"
-                      lead="tight"
-                      class="text-muted-800 dark:text-white"
-                    >
-                      <span>Oxygenation</span>
-                    </BaseHeading>
-                  </div>
-                  <div>
-                    <BaseParagraph
-                      size="xs"
-                      class="text-muted-400 max-w-[240px]"
-                    >
-                      <Icon name="ph:question-duotone" class="h-4 w-4" />
-                      <span>
-                        Your oxygen seems a bit unstable. You can improve it.
-                      </span>
-                      <NuxtLink
-                        to="#"
-                        class="text-primary-500 underline-offset-4 hover:underline"
+                  <!-- Next Steps List -->
+                  <div v-if="analysisData.suggestedNextStepsForTherapistForNextSession?.length > 0" class="mt-6">
+                    <div class="grid gap-4">
+                      <div
+                        v-for="(step, index) in analysisData.suggestedNextStepsForTherapistForNextSession"
+                        :key="index"
+                        class="group relative"
                       >
-                        Read how
-                      </NuxtLink>
-                    </BaseParagraph>
+                        <BaseCard
+                          shape="rounded"
+                          class="border-primary-100 dark:border-primary-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
+                        >
+                          <div class="flex w-full items-start gap-3">
+                            <div
+                              class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2"
+                            >
+                              <Icon
+                                name="ph:arrow-circle-right-duotone"
+                                class="text-primary-500 size-5"
+                              />
+                            </div>
+                            <div class="flex-1">
+                              <BaseHeading
+                                as="h4"
+                                size="sm"
+                                weight="medium"
+                                lead="none"
+                                class="mb-3"
+                              >
+                                {{ step.title }}
+                              </BaseHeading>
+                              <BaseText size="xs" class="text-muted-400">
+                                {{ step.description }}
+                              </BaseText>
+                            </div>
+                          </div>
+                        </BaseCard>
+                      </div>
+                    </div>
                   </div>
-                  <AddonApexcharts
-                    v-bind="barOxygen"
-                    class="relative -start-5"
-                  />
+                  <div v-else class="mt-6 text-center">
+                    <Icon
+                      name="ph:clipboard-text-duotone"
+                      class="text-muted-400 mb-2 size-12"
+                    />
+                    <BaseText size="sm" class="text-muted-400">
+                      در حال حاضر پیشنهادی برای جلسه بعدی وجود ندارد.
+                    </BaseText>
+                  </div>
                 </BaseCard>
-              </div> -->
-              <!-- Chart -->
-              <!-- <div class="col-span-12 sm:col-span-6">
-                <BaseCard shape="curved" class="p-6">
-                  <div class="mb-2 flex items-center justify-between">
-                    <BaseHeading
-                      as="h3"
-                      size="md"
-                      weight="semibold"
-                      lead="tight"
-                      class="text-muted-800 dark:text-white"
-                    >
-                      <span>Overall Progress</span>
-                    </BaseHeading>
-                  </div>
-                  <div>
-                    <BaseParagraph
-                      size="xs"
-                      class="text-muted-400 max-w-[240px]"
-                    >
-                      <Icon name="ph:question-duotone" class="h-4 w-4" />
-                      <span>
-                        Your overall progress is very good. Make it even better.
-                      </span>
-                      <NuxtLink
-                        to="#"
-                        class="text-primary-500 underline-offset-4 hover:underline"
-                      >
-                        Read how
-                      </NuxtLink>
-                    </BaseParagraph>
-                  </div>
-                  <AddonApexcharts
-                    v-bind="areaProgress"
-                    class="relative -start-5"
-                  />
-                </BaseCard>
-              </div> -->
+              </div>
             </div>
           </div>
         </div>

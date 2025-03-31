@@ -22,11 +22,11 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const { open } = usePanels()
 const { getTherapists } = useTherapist()
-const { getCurrentSession, createSession, endSession, updateSession } = useTherapistSession()
+const { getCurrentSession, createSession, endSession } = useTherapistSession()
 const { getMessages, sendMessage } = useTherapistsMessages()
 const route = useRoute()
-
-// Properly typed reactive references
+const nuxtApp = useNuxtApp()
+const toaster = useToaster()
 const conversations = ref<{ id: string, user: Therapist }[]>([])
 const messages = ref<Message[]>([])
 const loading = ref(false)
@@ -45,37 +45,11 @@ const startChargeTime = ref<Date>()
 const search = ref('')
 const { role } = useUser()
 const sessionId = ref<string | null>(null)
+const sessionElapsedTime = ref(0)
+const timeUpdateInterval = ref<NodeJS.Timeout | null>(null)
+const userSubscription = ref<any>(null) // Initialize with null
 
 const { generateAnalysis, createAnalysis } = useSessionAnalysis()
-
-const handleSessionStatusChange = async (newStatus: string) => {
-  if (newStatus === 'done') {
-    try {
-      // Get all messages for this session
-      const allMessages = messages.value.map(msg => ({
-        role: msg.type === 'sent' ? 'patient' : 'therapist',
-        content: msg.text,
-      }))
-
-      // Generate and save analysis
-      const generatedAnalysis = await generateAnalysis({
-        sessionId: activeSession.value?.id,
-        messages: allMessages,
-      })
-
-      await createAnalysis({
-        session: activeSession.value?.id,
-        ...generatedAnalysis,
-      })
-
-      // Navigate to analysis page
-      navigateTo(`/darmana/therapists/analysis?sessionId=${activeSession.value?.id}`)
-    }
-    catch (error) {
-      console.error('Error generating session analysis:', error)
-    }
-  }
-}
 
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
@@ -116,38 +90,34 @@ const initializeFromRoute = async () => {
   const therapistId = route.query.therapistId as string
   if (!therapistId || showNoCharge.value) return
 
-  // Wait for conversations to be loaded if they're not ready yet
   if (conversations.value.length === 0) {
     const therapists = await getTherapists()
     conversations.value = therapists.map(p => ({ id: p.id, user: p }))
   }
 
-  // Find the therapist in conversations
   const conversation = conversations.value.find(c => c.user.id === therapistId)
   if (conversation) {
     activeTherapistId.value = therapistId
     try {
-      // Try to find an in-progress session first
       const session = await getCurrentSession(therapistId)
       if (session) {
-        // Found an in-progress session, use it
         activeSession.value = session
         sessionId.value = session.id
-        // Load existing messages for this session
         const loadedMessages = await getMessages(session.id)
         messages.value = loadedMessages.map(msg => ({
           ...msg,
           timestamp: msg.time,
         }))
         scrollToBottom()
+        startSessionTimer() // Start session timer when messages are loaded
       }
       else if (!showNoCharge.value) {
-        // No in-progress session found and user has charge, create new one
         const newSession = await createSession(therapistId)
         if (newSession) {
           activeSession.value = newSession
           sessionId.value = newSession.id
-          messages.value = [] // New session starts with empty messages
+          messages.value = []
+          startSessionTimer() // Start session timer for new session
         }
       }
     }
@@ -185,33 +155,30 @@ const loadMessages = async (therapistId: string) => {
   currentLoadingTherapistId.value = therapistId
 
   try {
-    const nuxtApp = useNuxtApp()
     if (!nuxtApp.$pb.authStore.isValid) {
       await navigateTo('/auth/login')
       return
     }
 
-    // Try to find an in-progress session first
     const session = await getCurrentSession(therapistId)
     if (session) {
-      // Found an in-progress session, use it
       activeSession.value = session
       sessionId.value = session.id
-      // Load existing messages for this session
       const loadedMessages = await getMessages(session.id)
       messages.value = loadedMessages.map(msg => ({
         ...msg,
         timestamp: msg.time,
       }))
       scrollToBottom()
+      startSessionTimer() // Start session timer when messages are loaded
     }
     else if (!showNoCharge.value) {
-      // No in-progress session found and user has charge, create new one
       const newSession = await createSession(therapistId)
       if (newSession) {
         activeSession.value = newSession
         sessionId.value = newSession.id
-        messages.value = [] // New session starts with empty messages
+        messages.value = []
+        startSessionTimer() // Start session timer for new session
       }
     }
   }
@@ -228,6 +195,10 @@ const loadMessages = async (therapistId: string) => {
 const selectConversation = async (therapistId: string) => {
   activeTherapistId.value = therapistId
   await loadMessages(therapistId)
+  // Update session time immediately after loading messages
+  if (activeSession.value) {
+    updateSessionTime()
+  }
   navigateTo({
     query: {
       ...route.query,
@@ -236,7 +207,6 @@ const selectConversation = async (therapistId: string) => {
   })
 }
 
-// Watch conversations for initial load
 watch(
   () => conversations.value,
   async (newConversations) => {
@@ -250,7 +220,6 @@ watch(
   },
 )
 
-// Watch active therapist changes
 watch(activeTherapistId, async (newId) => {
   if (newId) {
     await loadMessages(newId)
@@ -299,12 +268,10 @@ const showModelError = ref(false)
 const modelSearchInput = ref('')
 const showModelDropdown = ref(false)
 
-// Sync model search input with composable's searchQuery
 watch(modelSearchInput, (newValue) => {
   searchQuery.value = newValue
 })
 
-// Reset streaming response when selecting a new conversation
 watch(activeTherapistId, async (newId) => {
   streamingResponse.value = ''
   if (newId) {
@@ -343,7 +310,6 @@ async function submitMessage() {
       return
     }
 
-    // Use existing session
     const session = activeSession.value
 
     const savedUserMessage = await sendMessage(currentTherapist.id, session.id, userMessage.text, 'sent')
@@ -438,9 +404,7 @@ watch(messages, () => {
 const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
 const showTenMin = ref(false)
 const isGoingToDone = ref(false)
-const type = ref('briefing')
 
-// Time and charge monitoring
 const checkForHalfTime = () => {
   if (!startChargeTime.value || !timeToShow.value) return false
   const start = startChargeTime.value
@@ -451,24 +415,52 @@ const checkForHalfTime = () => {
 
 watch(timeToShow, async (newValue) => {
   if (newValue <= 0 && activeSession.value?.id) {
-    await endSession(activeSession.value.id)
+    const startTime = new Date(activeSession.value.created)
+    const endTime = new Date()
+    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
+
+    await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
+      status: 'done',
+      end_time: endTime.toISOString(),
+      count_of_total_messages: messages.value.length,
+      total_time_passed: totalTimePassedMinutes,
+      updated: endTime.toISOString(),
+    })
+
     showNoCharge.value = true
     pause()
   }
 })
 
-let timeUpdateInterval: NodeJS.Timeout
-let userSubscription: any
+const updateSessionTime = () => {
+  if (activeSession.value && activeSession.value.created) {
+    const startTime = new Date(activeSession.value.created)
+    const currentTime = new Date()
+    sessionElapsedTime.value = Math.round((currentTime - startTime) / (1000 * 60))
+    console.log('Session elapsed time updated:', sessionElapsedTime.value)
+  }
+}
+
+const startSessionTimer = () => {
+  // Initial update
+  updateSessionTime()
+
+  // Update every minute
+  if (timeUpdateInterval.value) {
+    clearInterval(timeUpdateInterval.value)
+  }
+
+  timeUpdateInterval.value = setInterval(() => {
+    updateSessionTime()
+  }, 10000) // Update more frequently for better responsiveness
+}
 
 onMounted(async () => {
   loading.value = true
   try {
-    const nuxtApp = useNuxtApp()
-    // First load therapists
     const therapists = await getTherapists()
     conversations.value = therapists.map(p => ({ id: p.id, user: p }))
 
-    // Then get user info
     const u = await nuxtApp.$pb
       .collection('users')
       .getOne(nuxtApp.$pb.authStore.model.id, {})
@@ -477,7 +469,6 @@ onMounted(async () => {
     startChargeTime.value = new Date(u.startChargeTime)
     timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
 
-    // After conversations are loaded, initialize the route
     const therapistId = route.query.therapistId as string
     if (therapistId) {
       activeTherapistId.value = therapistId
@@ -492,17 +483,15 @@ onMounted(async () => {
       pause()
     }
 
-    // Update time every minute with stored reference
-    timeUpdateInterval = setInterval(() => {
+    timeUpdateInterval.value = setInterval(() => {
       if (timeToShow.value !== undefined) {
         timeToShow.value = timeToShow.value - 1
       }
     }, 60000)
 
-    // Store subscription reference for cleanup using PocketBase's subscribe method
     if (nuxtApp.$pb.authStore.isValid) {
-      userSubscription = await nuxtApp.$pb.collection('users').subscribe(
-        nuxtApp.$pb.authStore.model.id,
+      userSubscription.value = await nuxtApp.$pb.collection('users').subscribe(
+        nuxtApp.$pb.authStore.model?.id,
         (e) => {
           const expireTime = new Date(e.record.expireChargeTime).getTime()
           timeToShow.value = Math.floor((expireTime - new Date().getTime()) / (1000 * 60))
@@ -539,17 +528,14 @@ onMounted(async () => {
   }
 })
 
-// Clean up intervals and subscriptions
 onUnmounted(() => {
   pause()
-  if (timeUpdateInterval) {
-    clearInterval(timeUpdateInterval)
+  if (timeUpdateInterval.value) {
+    clearInterval(timeUpdateInterval.value)
   }
-  // PocketBase uses unsubscribe() method on the subscription object
   try {
-    if (userSubscription) {
-      // Proper cleanup for PocketBase subscription
-      nuxtApp.$pb.collection('users').unsubscribe(userSubscription)
+    if (userSubscription.value) {
+      nuxtApp.$pb.collection('users').unsubscribe(userSubscription.value)
     }
   }
   catch (error) {
@@ -560,14 +546,10 @@ onUnmounted(() => {
 const clearMessages = async (sessionId: string) => {
   if (!sessionId) { throw new Error('Session ID is required') }
   try {
-    const nuxtApp = useNuxtApp()
-
-    // Get message IDs for the current session
     const messageIds = messages.value
       .filter(msg => msg.session === sessionId)
       .map(msg => msg.id)
 
-    // Delete each message by ID
     for (const messageId of messageIds) {
       await nuxtApp.$pb.collection('therapists_messages').delete(messageId)
     }
@@ -639,79 +621,6 @@ const closeReportModal = () => {
   isReportModalOpen.value = false
 }
 
-const submitReport = async () => {
-  try {
-    // Calculate total time passed in minutes
-    const startTime = new Date(activeSession.value.created)
-    const endTime = new Date()
-    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
-
-    // Update session status to done with additional metrics
-    const session = await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
-      status: 'done',
-      end_time: endTime.toISOString(),
-      count_of_total_messages: messages.value.length,
-      total_time_passed: totalTimePassedMinutes,
-      updated: endTime.toISOString(),
-    })
-
-    if (!session) {
-      throw new Error('Failed to update session status')
-    }
-
-    // Add your report generation logic here
-    navigateTo('/darmana/therapists/waitForReport')
-    toaster.show({
-      title: 'موفق',
-      message: 'درخواست ساخت گزارش با موفقیت ارسال شد.',
-      color: 'success',
-      icon: 'ph:check-circle-fill',
-      closable: true,
-    })
-    closeReportModal()
-  }
-  catch (error) {
-    console.error('Error generating report:', error)
-    toaster.show({
-      title: 'خطا',
-      message: 'خطا در ساخت گزارش',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    })
-  }
-}
-
-const handleTextareaClick = () => {
-  if (showNoCharge.value) {
-    toaster.show({
-      title: 'خطا',
-      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    })
-  }
-}
-
-const nuxtApp = useNuxtApp()
-const toaster = useToaster()
-const logout = () => {
-  nuxtApp.$pb.authStore.clear()
-  toaster.show({
-    title: 'خروج از سیستم',
-    message: `خروج موفقیت آمیز بود`,
-    color: 'success',
-    icon: 'ph:check',
-    closable: true,
-  })
-  navigateTo('/auth/login')
-}
-const changeExpanded = () => {
-  expanded.value = !expanded.value
-  localStorage.setItem('expanded', expanded.value + '')
-}
-
 const isDeleteModalOpen = ref(false)
 
 const openDeleteModal = () => {
@@ -745,7 +654,6 @@ const handleEndSession = async () => {
     return
   }
 
-  // Open the report modal first
   isReportModalOpen.value = true
 }
 
@@ -757,15 +665,14 @@ const handleConfirmEndSession = async () => {
   isGeneratingAnalysis.value = true
 
   try {
-    // Get all messages for this session
     const allMessages = messages.value.map(msg => ({
       role: msg.type === 'sent' ? 'patient' : 'therapist',
       content: msg.text,
     }))
 
-    // End the session using the endSession function
-    await endSession(activeSession.value.id)
-    activeSession.value.status = 'done'
+    const startTime = new Date(activeSession.value.created)
+    const endTime = new Date()
+    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
 
     // Generate and save analysis
     const generatedAnalysis = await generateAnalysis({
@@ -778,10 +685,21 @@ const handleConfirmEndSession = async () => {
       ...generatedAnalysis,
     })
 
-    // Close the modal
+    // Update session with the analysis ID
+    await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
+      status: 'done',
+      end_time: endTime.toISOString(),
+      count_of_total_messages: messages.value.length,
+      total_time_passed: totalTimePassedMinutes,
+      updated: endTime.toISOString(),
+      session_analysis_for_system: savedAnalysis.id,
+    })
+
+    activeSession.value.status = 'done'
+    activeSession.value.session_analysis_for_system = savedAnalysis.id
+
     isReportModalOpen.value = false
 
-    // Navigate to analysis page with analysis ID
     await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysis.id}`)
   }
   catch (error) {
@@ -804,7 +722,6 @@ const handleAudioText = (text: string) => {
 }
 
 const handleAudioSend = () => {
-  // Trigger the send button click
   if (newMessage.value && !messageLoading.value) {
     submitMessage()
   }
@@ -1353,27 +1270,31 @@ const handleAudioSend = () => {
             <BaseParagraph size="sm" class="text-muted-400">
               <span>{{ selectedConversationComputed?.user.definingTraits }}</span>
             </BaseParagraph>
-            <div class="my-4">
-              <BaseParagraph
-                size="xs"
-                class="text-muted-500 dark:text-muted-400"
-              >
-                <span>{{ selectedConversationComputed?.user.shortDescription }}</span>
-              </BaseParagraph>
-            </div>
-            <div
-              class="border-muted-200 dark:border-muted-700 flex w-full justify-center border-t pt-4"
-            >
-              <div class="flex items-center justify-center gap-2 px-4">
-                <Icon
-                  name="ph:user-duotone"
-                  class="text-muted-400 size-4"
-                />
-                <span class="text-muted-400 font-sans text-xs">
-                  سن: {{ selectedConversationComputed?.user.age }} سال
-                </span>
+
+            <!-- Session Time Display -->
+            <div v-if="activeSession" class="mt-4 grid grid-cols-2 gap-4">
+              <div class="bg-muted-200 dark:bg-muted-800/50 rounded-xl p-4">
+                <div class="mb-3 flex items-center justify-center gap-2">
+                  <Icon name="ph:timer-duotone" class="text-primary-500 dark:text-primary-400 size-5" />
+                  <span class="text-muted-600 dark:text-muted-300 text-sm">زمان گذشته</span>
+                </div>
+                <div class="flex items-baseline justify-center gap-1">
+                  <span class="text-muted-800 text-2xl font-semibold dark:text-white">{{ sessionElapsedTime || 0 }}</span>
+                  <span class="text-muted-500 dark:text-muted-400 text-sm">دقیقه</span>
+                </div>
+              </div>
+              <div class="bg-muted-200 dark:bg-muted-800/50 rounded-xl p-4">
+                <div class="mb-3 flex items-center justify-center gap-2">
+                  <Icon name="ph:chats-circle-duotone" class="text-primary-500 dark:text-primary-400 size-5" />
+                  <span class="text-muted-600 dark:text-muted-300 text-sm">پیام‌ها</span>
+                </div>
+                <div class="flex items-baseline justify-center gap-1">
+                  <span class="text-muted-800 text-2xl font-semibold dark:text-white">{{ messages.length }}</span>
+                  <span class="text-muted-500 dark:text-muted-400 text-sm">پیام</span>
+                </div>
               </div>
             </div>
+
             <div class="my-4 space-y-2">
               <!-- Model search and selector -->
               <div v-if="!modelsError && role === 'admin'" class="relative">
@@ -1452,14 +1373,13 @@ const handleAudioSend = () => {
               class="fixed inset-0 z-40"
               @click="showModelDropdown = false"
             />
-
-            <BaseButton
-              rounded="lg"
-              class="w-full"
-              @click="navigateTo(`/darmana/therapists/editTherapist?userId=${route.query.therapistId}`)"
-            >
-              نمایش نمایه
-            </BaseButton>
+            <BaseMessage class="mt-5" color="info">
+              لطفا توجه داشته باشید که عامل هوش مصنوعی در فاز توسعه می‌‌باشد
+              و احتمال ارائه‌ی پاسخ‌های اشتباه را دارد.
+            </BaseMessage>
+            <BaseMessage class="mt-5" color="warning">
+              استفاده شما از سامانه به معنای پذیرش قوانین استفاده و حریم خصوصی است.
+            </BaseMessage>
           </div>
         </div>
       </div>

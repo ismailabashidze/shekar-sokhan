@@ -9,10 +9,15 @@ export default defineNuxtRouteMiddleware((to) => {
     '/auth/terms',
     '/auth/privacy',
     '/tarjoman',
+    '/bug-report',
+    '/bug-reports',
   ]
 
+  // Also allow paths that start with /bug-reports/ (for detail pages)
+  const isAllowedPath = allowedPaths.includes(to.path) || to.path.startsWith('/bug-reports/')
+
   // Check if the user is authenticated or if the target path is one of the allowed paths
-  if (!nuxtApp.$pb.authStore.isValid && !allowedPaths.includes(to.path)) {
+  if (!nuxtApp.$pb.authStore.isValid && !isAllowedPath) {
     toaster.clearAll()
     toaster.show({
       title: 'احراز هویت', // Authentication

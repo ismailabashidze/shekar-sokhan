@@ -148,10 +148,88 @@ function useDemoAreaMulti() {
   }
 }
 
+// Alpha state modal
+const showAlphaModal = ref(false)
+const bugReportIconRef = ref(null)
+
+onMounted(() => {
+  // Check if the alpha modal has been shown before
+  const alphaModalShown = localStorage.getItem('alphaModalShown')
+
+  if (!alphaModalShown) {
+    // Show the modal after a short delay
+    setTimeout(() => {
+      showAlphaModal.value = true
+    }, 1000)
+  }
+})
+
+// Close the modal and save to localStorage
+const closeAlphaModal = () => {
+  showAlphaModal.value = false
+  localStorage.setItem('alphaModalShown', 'true')
+}
+
 </script>
 
 <template>
   <div class="relative">
+    <!-- Alpha State Modal -->
+    <TairoModal
+      :open="showAlphaModal"
+      size="lg"
+      @close="closeAlphaModal"
+    >
+      <template #header>
+        <div class="flex w-full items-center justify-between p-4 sm:p-5">
+          <div class="flex items-center gap-2">
+            <div class="flex size-10 items-center justify-center rounded-full bg-yellow-500/20 text-yellow-500">
+              <Icon name="ph:warning" class="size-5" />
+            </div>
+            <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+              نسخه آزمایشی
+            </h3>
+          </div>
+          <BaseButtonClose @click="closeAlphaModal" />
+        </div>
+      </template>
+      <div class="p-4 sm:p-5">
+        <BaseParagraph class="mb-4 text-justify">
+          با سلام و احترام، از اینکه به ما اعتماد کرده‌اید و همراه ما هستید، صمیمانه سپاسگزاریم. این پلتفرم حاصل تلاش شبانه‌روزی تیم ما برای ارائه خدمات بهتر به شماست و هنوز در مرحله آزمایشی (آلفا) قرار دارد.
+        </BaseParagraph>
+        <BaseParagraph class="mb-4 text-justify">
+          ما می‌دانیم که وقت شما ارزشمند است و هر خطا یا مشکلی در سیستم می‌تواند تجربه شما را تحت تأثیر قرار دهد. به همین دلیل، از شما دعوت می‌کنیم تا در این مسیر همراه ما باشید و با گزارش مشکلات، به ما در بهبود سیستم کمک کنید.
+        </BaseParagraph>
+        <BaseParagraph class="mb-6 text-justify">
+          هر بازخورد شما، حتی کوچکترین مورد، برای ما بسیار ارزشمند است و مستقیماً به تیم توسعه ما منتقل می‌شود. با استفاده از دکمه زرد گزارش خطا که در نوار کناری قرار دارد، می‌توانید به راحتی با ما در ارتباط باشید و ما را در مسیر پیشرفت یاری کنید.
+        </BaseParagraph>
+
+        <div class="mb-6 flex items-center justify-center">
+          <div class="border-muted-200 dark:border-muted-700 flex items-center gap-4 rounded-xl border p-4">
+            <div
+              class="flex size-12 cursor-pointer items-center justify-center rounded-2xl bg-yellow-500/20 text-yellow-500 transition-colors duration-300 hover:bg-yellow-500/30 hover:text-yellow-500"
+            >
+              <Icon name="ph:bug" class="size-5" />
+            </div>
+            <div class="flex flex-col">
+              <BaseText size="sm" class="text-muted-400">
+                این دکمه را در نوار کناری پیدا کنید
+              </BaseText>
+              <BaseText>
+                و برای گزارش روی آن کلیک کنید
+              </BaseText>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <BaseButton color="primary" @click="closeAlphaModal">
+            متوجه شدم
+          </BaseButton>
+        </div>
+      </div>
+    </TairoModal>
+
     <!-- Grid -->
     <div class="grid grid-cols-12 gap-6">
       <!-- Column -->
@@ -180,7 +258,7 @@ function useDemoAreaMulti() {
                     </span>
                   </BaseParagraph>
                   <div class="mt-2 flex flex-col gap-2 sm:flex-row">
-                    <BaseButton
+                    <!-- <BaseButton
                       size="sm"
                       color="light"
                       variant="outline"
@@ -189,13 +267,13 @@ function useDemoAreaMulti() {
                     >
                       <Icon name="lucide:users" class="ml-2 size-4" />
                       <span>مراجعین</span>
-                    </BaseButton>
+                    </BaseButton> -->
                     <BaseButton
                       size="sm"
                       color="light"
                       variant="outline"
                       class="w-full sm:w-auto"
-                      to="/darmana/therapists/chooseTherapist"
+                      to="/darmana/therapists/sessions"
                     >
                       <Icon name="ph:robot-duotone" class="ml-2 size-4" />
                       <span>روانشناسان هوش مصنوعی</span>

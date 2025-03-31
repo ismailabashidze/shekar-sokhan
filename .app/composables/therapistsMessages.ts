@@ -21,12 +21,14 @@ export function useTherapistsMessages() {
     }
 
     try {
-      return await nuxtApp.$pb.collection('therapists_messages').getFullList({
+      const data = await nuxtApp.$pb.collection('therapists_messages').getFullList({
         sort: 'created',
         filter: `session = "${sessionId}" && user = "${nuxtApp.$pb.authStore.model.id}"`,
         expand: 'therapist,user',
         batch: 100,
       })
+      console.log(`session = "${sessionId}" && user = "${nuxtApp.$pb.authStore.model.id}"`)
+      return data
     }
     catch (error: any) {
       if (error?.isAbort) {

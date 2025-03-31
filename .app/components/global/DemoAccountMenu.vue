@@ -22,7 +22,7 @@ const props = defineProps<{
             class="relative inline-flex size-10 items-center justify-center rounded-full"
           >
             <img
-              src="/img/avatars/2.svg"
+              src="/img/avatars/1.png"
               class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
               alt=""
             >

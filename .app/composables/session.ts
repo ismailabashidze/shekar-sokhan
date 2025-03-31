@@ -10,7 +10,7 @@ export type Session = {
   status: SessionStatus
   count_of_total_messages: number
   total_time_passed: number
-  analysis: any
+  session_analysis_for_system: SessionAnalysis
   created?: string
   updated?: string
 }
@@ -42,10 +42,10 @@ export function useSessions() {
         filterStr += ` && patient = "${filter.patientId}"`
       }
 
-      return await nuxtApp.$pb.collection('conversations').getFullList({
+      return await nuxtApp.$pb.collection('sessions').getFullList({
         sort: '-created',
         filter: filterStr,
-        expand: 'user',
+        expand: 'user,therapist',
       })
     }
     catch (error: any) {
@@ -63,8 +63,8 @@ export function useSessions() {
     }
 
     try {
-      return await nuxtApp.$pb.collection('conversations').getOne(id, {
-        expand: 'user',
+      return await nuxtApp.$pb.collection('sessions').getOne(id, {
+        expand: 'user,therapist',
       })
     }
     catch (error: any) {
@@ -90,7 +90,7 @@ export function useSessions() {
     }
 
     try {
-      return await nuxtApp.$pb.collection('conversations').create(sessionData)
+      return await nuxtApp.$pb.collection('sessions').create(sessionData)
     }
     catch (error: any) {
       if (error?.isAbort) {
@@ -107,7 +107,7 @@ export function useSessions() {
     }
 
     try {
-      return await nuxtApp.$pb.collection('conversations').update(id, data)
+      return await nuxtApp.$pb.collection('sessions').update(id, data)
     }
     catch (error: any) {
       if (error?.isAbort) {

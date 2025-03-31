@@ -190,7 +190,7 @@ watch(filter, () => {
           <template #image>
             <img
               class="block dark:hidden"
-              src="/img/illustrations/placeholders/flat/placeholder-search-2.svg"
+              src="/img/illustrations/placeholders/flat/placeholder-search.png"
               alt="Placeholder image"
             >
             <img
