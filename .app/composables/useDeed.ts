@@ -7,8 +7,8 @@ export interface Deed {
   description: string
   longDescription: string
   type: 'family' | 'society' | 'spiritual'
-  status: 'draft' | 'pending' | 'approved' | 'reject'
-  author: string
+  status: 'draft' | 'pending' | 'approved' | 'rejected'
+  author: User
   approvedBy: string
   approvedAt: string
   views: number
@@ -26,6 +26,7 @@ interface DeedFilters {
   selectedDifficulties?: string[]
   page?: number
   perPage?: number
+  status?: string
 }
 
 interface DeedResponse {
@@ -60,7 +61,7 @@ export const useDeed = () => {
 
     try {
       const filterConditions = []
-      
+
       // Add search filter
       if (filters.search)
         filterConditions.push(`(title ~ "${filters.search}" || description ~ "${filters.search}")`)
@@ -85,10 +86,13 @@ export const useDeed = () => {
         filterConditions.push(`(${difficultyConditions})`)
       }
 
+      // Add status filter
+      if (filters.status)
+        filterConditions.push(`status = "${filters.status}"`)
+
       const queryParams: Record<string, any> = {
         sort: '-created',
         expand: 'author,approvedBy',
-        status: 'approved',
       }
 
       if (filterConditions.length > 0)
@@ -102,7 +106,6 @@ export const useDeed = () => {
       if (perPage === 1 && page === 1) {
         const fullList = await nuxtApp.$pb.collection('deeds').getFullList({
           ...queryParams,
-          status: 'approved',
         })
         return {
           items: fullList,
@@ -130,6 +133,13 @@ export const useDeed = () => {
       }
       throw error
     }
+  }
+
+  const getApprovedDeeds = async (filters: DeedFilters = {}): Promise<DeedResponse> => {
+    return getDeeds({
+      ...filters,
+      status: 'approved',
+    })
   }
 
   const createDeed = async (data: Partial<Deed>) => {
@@ -187,11 +197,58 @@ export const useDeed = () => {
     }
   }
 
+  const approveDeed = async (id: string) => {
+    if (!nuxtApp.$pb.authStore.isValid)
+      throw new Error('User not authenticated')
+
+    try {
+      return await nuxtApp.$pb.collection('deeds').update(id, {
+        status: 'approved',
+        approvedBy: nuxtApp.$pb.authStore.model.id,
+        approvedAt: new Date().toISOString(),
+      })
+    }
+    catch (error: any) {
+      if (error?.isAbort) {
+        console.log('Request was cancelled')
+        return null
+      }
+      throw error
+    }
+  }
+
+  const rejectDeed = async (id: string) => {
+    if (!nuxtApp.$pb.authStore.isValid)
+      throw new Error('User not authenticated')
+
+    try {
+      const result = await nuxtApp.$pb.collection('deeds').update(id, {
+        status: 'rejected',
+        approvedBy: nuxtApp.$pb.authStore.model.id,
+        approvedAt: new Date().toISOString(),
+      })
+      
+      if (!result) throw new Error('خطا در تغییر وضعیت عمل نیک')
+      return result
+    }
+    catch (error: any) {
+      console.error('Error in rejectDeed:', error)
+      if (error?.isAbort) {
+        console.log('Request was cancelled')
+        return null
+      }
+      throw error
+    }
+  }
+
   return {
     getDeed,
     getDeeds,
+    getApprovedDeeds,
     createDeed,
     updateDeed,
     deleteDeed,
+    approveDeed,
+    rejectDeed,
   }
 }

@@ -43,7 +43,7 @@ const posts = [
     likes: '189',
     views: '2.8K',
     author: {
-      name: 'دکتر مریم عباسی',
+      name: 'دکتر مرضیه یوسفی',
       role: 'روان درمانگر و عضو هیئت علمی دانشگاه',
       avatar: '/img/avatars/5.svg',
     },

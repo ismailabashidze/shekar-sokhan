@@ -49,7 +49,7 @@ const featuredVideos = [
     uploaded: 'دیروز',
     category: 'آموزشی',
     author: {
-      name: 'دکتر نیما قربانی',
+      name: 'دکتر مرتضی زهرایی',
       avatar: '/img/avatars/12.svg',
     },
   },
@@ -523,7 +523,7 @@ function useDemoAreaMulti() {
                       lead="tight"
                       class="text-muted-800 dark:text-white"
                     >
-                      <span>دکتر مریم عباسی</span>
+                      <span>دکتر مرضیه یوسفی</span>
                     </BaseHeading>
                     <BaseParagraph size="xs">
                       <span class="text-muted-400">روان درمانگر و عضو هیئت علمی دانشگاه</span>

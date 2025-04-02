@@ -22,16 +22,19 @@
             <ul class="text-muted-600 dark:text-muted-300 mb-4 list-inside list-disc space-y-1">
               <li>اضافه شدن آمار و ارقام در داشبورد</li>
               <li>اضافه شدن صفحه تاریخچه تغییرات</li>
-              <li>نمایش نسخه برنامه در گوشه صفحه</li>
+              <li>اضافه شدن بخش اعمال نیک</li>
+              <li>بهبود رابط کاربری در بخش پیام‌رسانی</li>
+              <li>اضافه شدن قابلیت ویرایش اعمال نیک برای مدیران</li>
+              <li>بهبود نمایش اطلاعات جمعیت‌شناختی در بخش تحلیل</li>
             </ul>
 
             <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
               بهبودها
             </h3>
             <ul class="text-muted-600 dark:text-muted-300 mb-4 list-inside list-disc space-y-1">
-              <li>بهبود فرآیند پایان جلسه و ایجاد تحلیل</li>
-              <li>بهبود مدیریت خطاها هنگام پایان جلسه</li>
-              <li>بهبود فرآیند گزارش خطا</li>
+              <li>بهینه‌سازی نمایش در نسخه موبایل</li>
+              <li>بهبود عملکرد در بخش پیام‌رسانی</li>
+              <li>اصلاح باگ‌های جزئی در رابط کاربری</li>
             </ul>
 
             <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">

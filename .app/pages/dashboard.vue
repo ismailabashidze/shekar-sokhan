@@ -52,7 +52,7 @@ const featuredVideos = [
     uploaded: 'دیروز',
     category: 'آموزشی',
     author: {
-      name: 'دکتر نیما قربانی',
+      name: 'دکتر مرتضی زهرایی',
       avatar: '/img/avatars/12.svg',
     },
   },
@@ -230,6 +230,11 @@ const closeAlphaModal = () => {
       </div>
     </TairoModal>
 
+    <!-- Bug Report Icon - Only visible when Alpha modal is showing -->
+    <div class="fixed bottom-6 right-6 z-50">
+      <GlobalBugReportIcon :visible="showAlphaModal" />
+    </div>
+
     <div>
       <!-- Statistics Cards Section -->
       <div class="mb-6">
@@ -344,14 +349,13 @@ const closeAlphaModal = () => {
                     />
                   </BaseCard>
                 </div>
-                <div class="col-span-4">
+                <!-- <div class="col-span-4">
                   <BaseCard rounded="lg" class="p-6">
                     <IconsSquare rounded="lg" />
                   </BaseCard>
-                </div>
-                <div class="col-span-8">
+                </div> -->
+                <!-- <div class="col-span-8">
                   <BaseCard rounded="lg" class="p-6">
-                    <!-- Title -->
                     <div class="mb-6">
                       <BaseHeading
                         as="h3"
@@ -365,7 +369,7 @@ const closeAlphaModal = () => {
                     </div>
                     <AddonApexcharts v-bind="demoAreaMulti" />
                   </BaseCard>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -491,7 +495,7 @@ const closeAlphaModal = () => {
                         lead="tight"
                         class="text-muted-800 dark:text-white"
                       >
-                        <span>دکتر مریم عباسی</span>
+                        <span>دکتر مرضیه یوسفی</span>
                       </BaseHeading>
                       <BaseParagraph size="xs">
                         <span class="text-muted-400">روان درمانگر و عضو هیئت علمی دانشگاه</span>

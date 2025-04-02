@@ -318,7 +318,7 @@ onMounted(() => {
       </div>
 
       <!-- Results list -->
-      <div v-else class="mt-6">
+      <div v-else class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <TransitionGroup
           enter-active-class="transform-gpu"
           enter-from-class="opacity-0 -translate-y-4"

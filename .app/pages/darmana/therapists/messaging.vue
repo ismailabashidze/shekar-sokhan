@@ -685,7 +685,7 @@ const handleConfirmEndSession = async () => {
       session: activeSession.value.id,
       ...generatedAnalysis,
     })
-    
+
     savedAnalysisId = savedAnalysis.id
 
     // Try to update session with the analysis ID
@@ -701,13 +701,14 @@ const handleConfirmEndSession = async () => {
 
       activeSession.value.status = 'done'
       activeSession.value.session_analysis_for_system = savedAnalysisId
-    } catch (updateError) {
+    }
+    catch (updateError) {
       console.error('Error updating session:', updateError)
       // Continue even if session update fails - we'll still navigate to analysis
     }
 
     isReportModalOpen.value = false
-    
+
     // Navigate to analysis page
     await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
   }
@@ -720,7 +721,7 @@ const handleConfirmEndSession = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-    
+
     // If we have an analysis ID, still navigate to the analysis page despite the error
     if (savedAnalysisId) {
       isReportModalOpen.value = false
@@ -839,49 +840,73 @@ const handleAudioSend = () => {
       <div
         class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-[9] h-screen w-16 bg-white sm:w-20 lg:border-r"
       >
-        <div class="mt-3 flex h-full flex-col">
+        <div class="mt-3 flex h-full flex-col justify-between gap-2">
           <!-- List -->
-          <a
-            v-for="conversation in conversations"
-            :key="conversation.id"
-            href="#"
-            class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
-            :class="
-              activeTherapistId === conversation.user.id
-                ? 'border-primary-500'
-                : 'border-transparent'
-            "
-            @click.prevent="selectConversation(conversation.user.id)"
-          >
-            <div class="relative flex w-full justify-center gap-2">
-              <div
-                class="relative flex w-14 shrink-0 items-center justify-center"
-              >
-                <a
-                  href="#"
-                  class="relative block"
-                  :class="[
-                    selectedConversationComputed?.user.id === conversation.user.id
-                      ? 'z-10'
-                      : '',
-                  ]"
-                  @click.prevent="selectConversation(conversation.user.id)"
+          <div>
+            <a
+              v-for="conversation in conversations"
+              :key="conversation.id"
+              href="#"
+              class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
+              :class="
+                activeTherapistId === conversation.user.id
+                  ? 'border-primary-500'
+                  : 'border-transparent'
+              "
+              @click.prevent="selectConversation(conversation.user.id)"
+            >
+              <div class="relative flex w-full justify-center gap-2">
+                <div
+                  class="relative flex w-14 shrink-0 items-center justify-center"
                 >
-                  <BaseAvatar
-                    size="sm"
-                    rounded="full"
-                    :src="
-                      conversation.user.avatar
-                        ? `https://pocket.zehna.ir/api/files/therapists/${conversation.user.id}/${conversation.user.avatar}`
-                        : '/img/avatars/1.svg'
-                    "
-                    :text="conversation.user.name?.charAt(0)"
-                    :class="getRandomColor()"
-                  />
-                </a>
+                  <a
+                    href="#"
+                    class="relative block"
+                    :class="[
+                      selectedConversationComputed?.user.id === conversation.user.id
+                        ? 'z-10'
+                        : '',
+                    ]"
+                    @click.prevent="selectConversation(conversation.user.id)"
+                  >
+                    <BaseAvatar
+                      size="sm"
+                      rounded="full"
+                      :src="
+                        conversation.user.avatar
+                          ? `https://pocket.zehna.ir/api/files/therapists/${conversation.user.id}/${conversation.user.avatar}`
+                          : '/img/avatars/1.svg'
+                      "
+                      :text="conversation.user.name?.charAt(0)"
+                      :class="getRandomColor()"
+                    />
+                  </a>
+                </div>
               </div>
-            </div>
-          </a>
+            </a>
+          </div>
+          <div class="mb-10 flex flex-col gap-3 sm:hidden">
+            <button
+              class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-2 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              title="نمایش اطلاعات"
+              @click="expanded = !expanded"
+            >
+              <Icon
+                name="ph:robot"
+                class="size-5"
+              />
+            </button>
+            <button
+              class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-2   flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              title="پایان جلسه"
+              @click="handleEndSession"
+            >
+              <Icon
+                name="ph:check"
+                class="size-5"
+              />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -900,67 +925,61 @@ const handleAudioSend = () => {
             class="flex h-16 w-full items-center justify-between px-4 sm:px-8"
           >
             <div class="flex items-center gap-2">
-              <BaseInput
-                v-model="search"
-                rounded="lg"
-                icon="lucide:search"
-                placeholder="جست و جو"
-              />
+              <div class="flex">
+                <BaseMessage
+                  v-if="!showNoCharge"
+                  class="w-[180px]"
+                  :color="timeToShow > 10 ? 'success' : 'warning'"
+                >
+                  <span v-if="timeToShow > 0">
+                    <span class="mx-2">⏰</span>
+                    {{ timeToShow ?? '--' }} دقیقه</span>
+                  <span v-else>وقت تقریبا تمام است</span>
+                </BaseMessage>
+                <BaseMessage
+                  v-else
+                  class="w-[280px] justify-center !pl-2"
+                  color="warning"
+                >
+                  لطفا اشتراک تهیه فرمایید.
+                  <BaseButtonIcon
+                    rounded="full"
+                    size="sm"
+                    color="success"
+                    class="mr-3"
+                    to="/onboarding"
+                  >
+                    <Icon name="ph:shopping-cart" class="size-5" />
+                  </BaseButtonIcon>
+                </BaseMessage>
+                <div class="hidden sm:flex">
+                  <button
+                    class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                    title="نمایش اطلاعات"
+                    @click="expanded = !expanded"
+                  >
+                    <Icon
+                      name="ph:robot"
+                      class="size-5"
+                    />
+                  </button>
+                  <button
+                    class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                    title="پایان جلسه"
+                    @click="handleEndSession"
+                  >
+                    <Icon
+                      name="ph:check"
+                      class="size-5"
+                    />
+                  </button>
+                </div>
+              </div>
             </div>
 
             <TairoSidebarTools
               class="relative -end-4 z-20 flex h-16 w-full scale-90 items-center justify-end gap-2 sm:end-0 sm:scale-100"
             />
-            <div class="flex">
-              <BaseMessage
-                v-if="!showNoCharge"
-                class="w-[180px]"
-                :color="timeToShow > 10 ? 'success' : 'warning'"
-              >
-                <span v-if="timeToShow > 0">
-                  <span class="mx-2">⏰</span>
-                  {{ timeToShow ?? '--' }} دقیقه</span>
-                <span v-else>وقت تقریبا تمام است</span>
-              </BaseMessage>
-              <BaseMessage
-                v-else
-                class="w-[280px] justify-center !pl-2"
-                color="warning"
-              >
-                لطفا اشتراک تهیه فرمایید.
-                <BaseButtonIcon
-                  rounded="full"
-                  size="sm"
-                  color="success"
-                  class="mr-3"
-                  to="/onboarding"
-                >
-                  <Icon name="ph:shopping-cart" class="size-5" />
-                </BaseButtonIcon>
-              </BaseMessage>
-              <div class="flex">
-                <button
-                  class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                  title="نمایش اطلاعات"
-                  @click="changeExpanded()"
-                >
-                  <Icon
-                    name="ph:robot"
-                    class="size-5"
-                  />
-                </button>
-                <button
-                  class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                  title="پایان جلسه"
-                  @click="handleEndSession"
-                >
-                  <Icon
-                    name="ph:check"
-                    class="size-5"
-                  />
-                </button>
-              </div>
-            </div>
           </div>
           <!-- Body -->
           <div
@@ -1395,6 +1414,14 @@ const handleAudioSend = () => {
             <BaseMessage class="mt-5" color="warning">
               استفاده شما از سامانه به معنای پذیرش قوانین استفاده و حریم خصوصی است.
             </BaseMessage>
+            <BaseButton
+              type="button"
+              class=""
+              @click="expanded = true"
+            >
+              بستن پنل
+              <Icon name="ph:arrow-left" class="mr-2 size-5" />
+            </BaseButton>
           </div>
         </div>
       </div>

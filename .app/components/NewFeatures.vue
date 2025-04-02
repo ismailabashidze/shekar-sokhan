@@ -30,8 +30,8 @@
             class="bg-muted-100 dark:bg-muted-900 flex w-full shrink-0 items-center justify-center rounded-xl sm:size-32"
           >
             <img
-              src="/img/illustrations/ui/recurring.svg"
-              class="w-full"
+              src="/img/illustrations/ui/recurring.png"
+              class="w-full rounded-lg"
               alt=""
             >
           </div>
@@ -65,8 +65,8 @@
             class="bg-muted-200 dark:bg-muted-900 flex w-full shrink-0 items-center justify-center rounded-xl sm:size-32"
           >
             <img
-              src="/img/illustrations/ui/cashback.svg"
-              class="w-full"
+              src="/img/illustrations/ui/analysis.png"
+              class="w-full rounded-lg"
               alt=""
             >
           </div>

@@ -56,7 +56,7 @@ const videos = [
     uploaded: 'دیروز',
     category: 'آموزشی',
     author: {
-      name: 'دکتر نیما قربانی',
+      name: 'دکتر مرتضی زهرایی',
       avatar: '/img/avatars/12.svg',
       bio: 'استاد دانشگاه و متخصص روانشناسی بالینی',
     },

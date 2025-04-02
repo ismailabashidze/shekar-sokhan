@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-4 gap-4">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
     <!-- Time of Usage Card -->
     <div class="nui-card nui-card-rounded-lg nui-card-default flex items-center gap-2 p-3">
       <div

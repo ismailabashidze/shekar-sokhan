@@ -75,7 +75,7 @@ const error = ref<Error | null>(null)
 const typeCounts = ref<Record<string, number>>({})
 const difficultyCounts = ref<Record<string, number>>({})
 
-const { getDeeds } = useDeed()
+const { getApprovedDeeds } = useDeed()
 const deeds = ref([])
 
 // Initialize with all types and difficulties selected
@@ -90,7 +90,7 @@ const fetchDeeds = async () => {
     error.value = null
 
     // Get paginated deeds
-    const result = await getDeeds({
+    const result = await getApprovedDeeds({
       search: search.value || undefined,
       type: selectedType.value === 'all' ? undefined : selectedType.value,
       difficulty: selectedDifficulty.value === 'all' ? undefined : selectedDifficulty.value,
@@ -104,7 +104,7 @@ const fetchDeeds = async () => {
     totalDeeds.value = result?.total || 0
 
     // Get total counts for types and difficulties
-    const totalResult = await getDeeds({
+    const totalResult = await getApprovedDeeds({
       perPage: 1,
       page: 1,
     })

@@ -901,7 +901,8 @@ const {
 
                     <!-- No Data Overlay -->
                     <div
-                      v-if="!analysisData.demographicData"
+                      v-if="!analysisData.demographicData || 
+                        Object.values(analysisData.demographicData).every(value => !value)"
                       class="bg-muted-100/50 dark:bg-muted-900/50 absolute inset-0 flex items-center justify-center rounded-lg backdrop-blur-sm"
                     >
                       <div class="text-center">
