@@ -4,6 +4,8 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 const props = defineProps<{
   horizontal?: boolean
 }>()
+const { user } = useUser()
+
 </script>
 
 <template>
@@ -48,19 +50,19 @@ const props = defineProps<{
                 class="relative inline-flex size-14 items-center justify-center rounded-full"
               >
                 <img
-                  src="/img/avatars/2.svg"
+                  src="/img/avatars/1.png"
                   class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
                   alt=""
                 >
               </div>
-              <div class="ms-3">
+              <div class="ms-3 text-right leading-6">
                 <h6
                   class="font-heading text-muted-800 text-sm font-medium dark:text-white"
                 >
-                  Maya Rosselini
+                  {{ user.record.name ? user.record.name : 'کاربر جدید' }}
                 </h6>
                 <p class="text-muted-400 font-sans text-xs">
-                  Product Manager
+                  {{ user.record.role ? user.record.role : 'کاربر' }}
                 </p>
               </div>
             </div>
@@ -78,14 +80,14 @@ const props = defineProps<{
                 @click.passive="close"
               >
                 <Icon name="ph:user-circle-duotone" class="size-5" />
-                <div class="ms-3">
+                <div class="ms-3 text-right leading-7">
                   <h6
                     class="font-heading text-muted-800 text-xs font-medium leading-none dark:text-white"
                   >
-                    Profile
+                    {{ user.record.name ? user.record.name : 'کاربر جدید' }}
                   </h6>
                   <p class="text-muted-400 font-sans text-xs">
-                    View your profile
+                    مشاهده پروفایل
                   </p>
                 </div>
               </NuxtLink>
@@ -101,15 +103,15 @@ const props = defineProps<{
                 ]"
                 @click.passive="close"
               >
-                <Icon name="ph:briefcase-duotone" class="size-5" />
-                <div class="ms-3">
+                <Icon name="ph:users-three-duotone" class="size-5" />
+                <div class="ms-3 text-right leading-6">
                   <h6
                     class="font-heading text-muted-800 text-xs font-medium leading-none dark:text-white"
                   >
-                    Projects
+                    جلسات
                   </h6>
                   <p class="text-muted-400 font-sans text-xs">
-                    All my projects
+                    همه جلسات من
                   </p>
                 </div>
               </NuxtLink>
@@ -125,15 +127,15 @@ const props = defineProps<{
                 ]"
                 @click.passive="close"
               >
-                <Icon name="ph:users-three-duotone" class="size-5" />
-                <div class="ms-3">
+                <Icon name="ph:wallet-duotone" class="size-5" />
+                <div class="ms-3 text-right leading-6">
                   <h6
                     class="font-heading text-muted-800 text-xs font-medium leading-none dark:text-white"
                   >
-                    Team
+                    پرداختی ها
                   </h6>
                   <p class="text-muted-400 font-sans text-xs">
-                    Manage my team
+                    مدیریت پرداختی ها
                   </p>
                 </div>
               </NuxtLink>
@@ -150,14 +152,14 @@ const props = defineProps<{
                 @click.passive="close"
               >
                 <Icon name="ph:gear-six-duotone" class="size-5" />
-                <div class="ms-3">
+                <div class="ms-3 text-right leading-6">
                   <h6
                     class="font-heading text-muted-800 text-xs font-medium leading-none dark:text-white"
                   >
-                    Settings
+                    تنظیمات
                   </h6>
-                  <p class="text-muted-400 font-sans text-xs">
-                    Account settings
+                  <p class="text-muted-400 font-sans text-xs leading-6">
+                    تنظیمات حساب
                   </p>
                 </div>
               </NuxtLink>

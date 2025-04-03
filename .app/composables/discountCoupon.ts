@@ -5,14 +5,16 @@ export type discountCopoun = {
   code: string
   amount: number
   duration: number
+  type: 'deed' | 'admin'
   isUsed: boolean
   created: string
   updated: string
+  expand: Deed | null
 }
 
 export function useDiscountCopoun() {
   const nuxtApp = useNuxtApp()
-
+  const { user } = useUser()
   const generateRandomCode = (prefix: string = '', length: number = 8) => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     let result = prefix
@@ -34,6 +36,7 @@ export function useDiscountCopoun() {
         amount,
         duration,
         code,
+        type: 'admin',
         isUsed: false,
       }
 
@@ -50,20 +53,15 @@ export function useDiscountCopoun() {
     return coupons
   }
 
-  const generateCoupon = async (amount: number, duration: number, code: string) => {
-    if (!nuxtApp.$pb.authStore.isValid) {
+  const generateCoupon = async (data: Partial<discountCopoun>) => {
+    if (!nuxtApp.$pb.authStore.isValid)
       throw new Error('User not authenticated')
-    }
-
-    const couponData = {
-      amount,
-      duration,
-      code,
-      isUsed: false,
-    }
 
     try {
-      return await nuxtApp.$pb.collection('discountCopoun').create(couponData)
+      return await nuxtApp.$pb.collection('discountCopoun').create({
+        ...data,
+        user: user.value?.record.id,
+      })
     }
     catch (error: any) {
       if (error?.isAbort) return null
@@ -130,7 +128,22 @@ export function useDiscountCopoun() {
       throw error
     }
   }
+  const getMyCoupons = async () => {
+    if (!nuxtApp.$pb.authStore.isValid) {
+      throw new Error('User not authenticated')
+    }
 
+    try {
+      return await nuxtApp.$pb.collection('discountCopoun').getFullList({
+        filter: `user = "${user.value?.record.id}"`,
+        expand: 'deed',
+      })
+    }
+    catch (error: any) {
+      if (error?.isAbort) return []
+      throw error
+    }
+  }
   return {
     generateCoupon,
     generateBatchCoupons,
@@ -138,5 +151,6 @@ export function useDiscountCopoun() {
     validateCoupon,
     markCouponAsUsed,
     deleteCoupons,
+    getMyCoupons,
   }
 }

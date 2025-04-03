@@ -2,7 +2,6 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { definePageMeta } from '#imports'
-import { useDiscountCoupon } from '~/composables/useDiscountCoupon'
 import { useClipboard } from '@vueuse/core'
 import type { Deed } from '~/composables/useDeed'
 
@@ -16,7 +15,7 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 const route = useRoute()
 const id = route.params.id as string
 const { getDeed, updateDeed } = useDeed()
-const { createCoupon } = useDiscountCoupon()
+const { generateCoupon } = useDiscountCopoun()
 const { copy } = useClipboard()
 const toaster = useToaster()
 
@@ -170,11 +169,13 @@ const handleDiscountRequest = async () => {
     discountCode.value = code
 
     // Create coupon
-    await createCoupon({
+    await generateCoupon({
       code,
       amount: 100000,
       isUsed: false,
       duration: durationMap[deed.value.timeRequired] || 60,
+      type: 'deed',
+      deed: id,
     })
 
     // Update deed completions

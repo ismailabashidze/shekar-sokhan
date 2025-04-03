@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0] (2025-04-03)
+
+### 🚀 Features
+
+* **User Deeds:** Enhanced deeds tracking and display
+  * Added personal completion tracking for each deed
+  * Created "My Deeds" page showing user's completed deeds
+  * Added stats display showing views, total completions, and personal completions
+  * Integrated with discount codes system for deed completion tracking
+
+* **Discount Codes:** Improved discount code management
+  * Added user-specific discount code tracking
+  * Created "My Codes" page for viewing personal discount codes
+  * Enhanced code generation with deed completion tracking
+  * Added type support for different code sources (deed, admin)
+
+### 🎨 UI Improvements
+
+* **Stats Display:** Enhanced statistics visualization
+  * Added distinct icons for different types of stats
+  * Improved layout with centered alignment and proper spacing
+  * Color-coded icons for better visual distinction
+
 ## [1.1.0] (2025-04-01)
 
 ### 🚀 Features

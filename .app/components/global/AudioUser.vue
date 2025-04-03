@@ -33,6 +33,32 @@ const silenceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const countDown = ref(3)
 const showCountdown = ref(false)
 
+const deviceInfo = ref('')
+const audioStatus = ref('')
+const errorMessage = ref('')
+
+// Helper function to log status with visual feedback
+const logStatus = (status: string, error = false) => {
+  audioStatus.value = status
+  console.log(`[AudioUser] ${status}`)
+  if (error) {
+    errorMessage.value = status
+  }
+}
+
+// Get device information
+const getDeviceInfo = async () => {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices()
+    const audioDevices = devices.filter(device => device.kind === 'audioinput')
+    deviceInfo.value = `Available audio devices: ${audioDevices.map(d => d.label || 'Unnamed device').join(', ')}`
+    console.log('[AudioUser] Device info:', deviceInfo.value)
+  } catch (err) {
+    console.error('[AudioUser] Error getting device info:', err)
+    deviceInfo.value = `Error getting device info: ${err.message}`
+  }
+}
+
 const startSilenceTimer = () => {
   if (silenceTimer.value) clearTimeout(silenceTimer.value)
   showCountdown.value = true
@@ -185,11 +211,16 @@ const visualize = () => {
 
 // Initialize speech recognition
 const initSpeechRecognition = () => {
+  logStatus('Speech recognition available')
   if ('webkitSpeechRecognition' in window) {
     recognition.value = new (window as any).webkitSpeechRecognition()
     recognition.value.continuous = true
     recognition.value.interimResults = true
     recognition.value.lang = 'fa-IR'
+
+    recognition.value.onstart = () => {
+      logStatus('Recognition started')
+    }
 
     recognition.value.onresult = (event: any) => {
       let finalTranscript = ''
@@ -221,7 +252,13 @@ const initSpeechRecognition = () => {
       }
     }
 
+    recognition.value.onerror = (event: any) => {
+      logStatus(`Recognition error: ${event.error}`, true)
+      console.error('[AudioUser] Recognition error:', event)
+    }
+
     recognition.value.onend = () => {
+      logStatus('Recognition ended')
       if (isStarted.value) {
         // Add a small delay before restarting recognition
         recognitionTimeout.value = setTimeout(() => {
@@ -232,13 +269,6 @@ const initSpeechRecognition = () => {
             console.error('Error restarting recognition:', e)
           }
         }, 100)
-      }
-    }
-
-    recognition.value.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error)
-      if (event.error !== 'no-speech') {
-        isStarted.value = false
       }
     }
   }
@@ -313,15 +343,19 @@ const endRecognition = () => {
 }
 
 const onStream = (stream) => {
-  if (context && analyser) {
-    const input = context.createMediaStreamSource(stream)
-    input.connect(analyser)
-    visualize()
-  }
+  logStatus('Audio stream initialized')
+  context = new AudioContext()
+  const source = context.createMediaStreamSource(stream)
+  analyser = context.createAnalyser()
+  freqs = new Uint8Array(analyser.frequencyBinCount)
+  source.connect(analyser)
+  visualize()
 }
 
 const onStreamError = (e) => {
-  console.error(e)
+  logStatus(`Microphone error: ${e.message}`, true)
+  console.error('[AudioUser] Stream error:', e)
+  isStarted.value = false
 }
 
 const showTipMessage = () => {
@@ -392,22 +426,10 @@ const startAutoCloseTimer = () => {
 }
 
 onMounted(() => {
+  logStatus('Component mounted')
+  getDeviceInfo()
   initSpeechRecognition()
-
-  // Initialize visualizer with a flat line
-  if (canvas.value) {
-    const ctx = canvas.value.getContext('2d')
-    const WIDTH = canvas.value.width = canvas.value.parentElement?.clientWidth || 500
-    const HEIGHT = canvas.value.height = 150
-
-    ctx.clearRect(0, 0, WIDTH, HEIGHT)
-    ctx.beginPath()
-    ctx.moveTo(0, HEIGHT / 2)
-    ctx.lineTo(WIDTH, HEIGHT / 2)
-    ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)'
-    ctx.lineWidth = 1
-    ctx.stroke()
-  }
+  visualize()
 })
 
 onBeforeUnmount(() => {
@@ -443,108 +465,118 @@ onBeforeUnmount(() => {
 <template>
   <div>
     <div>
-      <BaseCard
-        rounded="lg"
-        shadow="md"
-        class="dark:bg-muted-800 bg-white p-6"
-      >
-        <!-- Base message -->
-        <div class="mb-4 text-center">
-          <div class="text-muted-500 dark:text-muted-400 text-sm">
-            پس از ۳ ثانیه سکوت، پیام به صورت خودکار ارسال می‌شود
-          </div>
+      <BaseCard rounded="lg" class="relative">
+        <!-- Add debug info section -->
+        <div v-if="audioStatus || errorMessage || deviceInfo" class="text-sm p-2 bg-gray-100 rounded mb-2">
+          <p v-if="audioStatus" class="text-blue-600">Status: {{ audioStatus }}</p>
+          <p v-if="errorMessage" class="text-red-600">Error: {{ errorMessage }}</p>
+          <p v-if="deviceInfo" class="text-gray-600 text-xs">{{ deviceInfo }}</p>
         </div>
-
-        <!-- Text display area -->
-        <div class="bg-muted-100 dark:bg-muted-700/50 mb-4 min-h-[100px] rounded-lg p-4 text-right">
-          <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm flex items-center justify-between">
-            <div>متن وارد شده:</div>
-          </div>
-          <!-- Show interim text during recognition, final text after release -->
-          <div class="text-muted-800 text-lg dark:text-white">
-            <span
-              v-if="isStarted"
-              id="interim_span"
-              class="bg-primary-500/20 text-primary-600 rounded px-1 dark:text-white"
-            >{{ interimText }}</span>
-            <span
-              v-else
-              id="final_span"
-            >{{ finalText || 'برای شروع ضبط، روی دکمه میکروفون کلیک کنید' }}</span>
-          </div>
-        </div>
-
-        <!-- Visualizer -->
-        <div class="bg-primary-500/10 dark:bg-primary-500/5 mb-4 flex items-center justify-center overflow-hidden rounded-lg" style="height: 150px;">
-          <canvas ref="canvas" class="visualizer-canvas" />
-        </div>
-
-        <!-- Controls -->
-        <div class="flex items-center justify-center gap-4">
-          <!-- Cancel button -->
-          <BaseButton
-            rounded="full"
-            color="muted"
-            @click="closeModal"
+        <div>
+          <BaseCard
+            rounded="lg"
+            shadow="md"
+            class="dark:bg-muted-800 bg-white p-6"
           >
-            <div class="flex items-center gap-2">
-              <Icon name="ph:x-circle-fill" class="size-5" />
-              <span>انصراف</span>
+            <!-- Base message -->
+            <div class="mb-4 text-center">
+              <div class="text-muted-500 dark:text-muted-400 text-sm">
+                پس از ۳ ثانیه سکوت، پیام به صورت خودکار ارسال می‌شود
+              </div>
             </div>
-          </BaseButton>
-          <!-- Record button -->
-          <BaseButton
-            id="button"
-            rounded="full"
-            color="primary"
-            :class="{ 'bg-danger-500 hover:bg-danger-600': isStarted }"
-            @click="toggleRecognition"
-          >
-            <div class="flex items-center gap-2">
-              <div class="relative">
-                <div class="bg-muted-100 dark:bg-muted-700 flex items-center justify-center rounded-full p-3" />
-                <Icon
-                  :name="isStarted ? 'ph:stop-circle-fill' : 'ph:microphone-fill'"
-                  class="absolute right-1/2 top-1/2 size-5 -translate-y-1/2 translate-x-1/2 text-slate-700 dark:text-white"
+
+            <!-- Text display area -->
+            <div class="bg-muted-100 dark:bg-muted-700/50 mb-4 min-h-[100px] rounded-lg p-4 text-right">
+              <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm flex items-center justify-between">
+                <div>متن وارد شده:</div>
+              </div>
+              <!-- Show interim text during recognition, final text after release -->
+              <div class="text-muted-800 text-lg dark:text-white">
+                <span
+                  v-if="isStarted"
+                  id="interim_span"
+                  class="bg-primary-500/20 text-primary-600 rounded px-1 dark:text-white"
+                >{{ interimText }}</span>
+                <span
+                  v-else
+                  id="final_span"
+                >{{ finalText || 'برای شروع ضبط، روی دکمه میکروفون کلیک کنید' }}</span>
+              </div>
+            </div>
+
+            <!-- Visualizer -->
+            <div class="bg-primary-500/10 dark:bg-primary-500/5 mb-4 flex items-center justify-center overflow-hidden rounded-lg" style="height: 150px;">
+              <canvas ref="canvas" class="visualizer-canvas" />
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-center gap-4">
+              <!-- Cancel button -->
+              <BaseButton
+                rounded="full"
+                color="muted"
+                @click="closeModal"
+              >
+                <div class="flex items-center gap-2">
+                  <Icon name="ph:x-circle-fill" class="size-5" />
+                  <span>انصراف</span>
+                </div>
+              </BaseButton>
+              <!-- Record button -->
+              <BaseButton
+                id="button"
+                rounded="full"
+                color="primary"
+                :class="{ 'bg-danger-500 hover:bg-danger-600': isStarted }"
+                @click="toggleRecognition"
+              >
+                <div class="flex items-center gap-2">
+                  <div class="relative">
+                    <div class="bg-muted-100 dark:bg-muted-700 flex items-center justify-center rounded-full p-3" />
+                    <Icon
+                      :name="isStarted ? 'ph:stop-circle-fill' : 'ph:microphone-fill'"
+                      class="absolute right-1/2 top-1/2 size-5 -translate-y-1/2 translate-x-1/2 text-slate-700 dark:text-white"
+                    />
+                  </div>
+                  <span>{{ isStarted ? 'پایان' : 'شروع' }}</span>
+                </div>
+              </BaseButton>
+
+              <!-- Submit button -->
+              <BaseButton
+                rounded="full"
+                color="success"
+                :disabled="!finalText"
+                @click="submitText"
+              >
+                <div class="flex items-center gap-2">
+                  <Icon name="ph:check-circle-fill" class="size-5" />
+                  <span>تایید</span>
+                </div>
+              </BaseButton>
+            </div>
+
+            <!-- Recording status indicator -->
+            <div v-if="isStarted" class="mt-4 text-center">
+              <div class="bg-danger-500/20 text-danger-600 dark:text-danger-400 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm">
+                <span class="bg-danger-500 recording-pulse size-2 animate-pulse rounded-full" />
+                در حال ضبط...
+              </div>
+            </div>
+
+            <!-- Countdown indicator -->
+            <div v-if="showCountdown" class="mt-4 flex flex-col items-center">
+              <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
+                پایان ضبط در {{ countDown }} ثانیه
+              </div>
+              <div class="bg-muted-100 dark:bg-muted-700 h-1 w-full max-w-xs rounded-full">
+                <div
+                  class="bg-primary-500 h-1 rounded-full transition-all duration-1000"
+                  :style="{ width: `${(countDown / 3) * 100}%` }"
                 />
               </div>
-              <span>{{ isStarted ? 'پایان' : 'شروع' }}</span>
             </div>
-          </BaseButton>
-
-          <!-- Submit button -->
-          <BaseButton
-            rounded="full"
-            color="success"
-            :disabled="!finalText"
-            @click="submitText"
-          >
-            <div class="flex items-center gap-2">
-              <Icon name="ph:check-circle-fill" class="size-5" />
-              <span>تایید</span>
-            </div>
-          </BaseButton>
-        </div>
-
-        <!-- Recording status indicator -->
-        <div v-if="isStarted" class="mt-4 text-center">
-          <div class="bg-danger-500/20 text-danger-600 dark:text-danger-400 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm">
-            <span class="bg-danger-500 recording-pulse size-2 animate-pulse rounded-full" />
-            در حال ضبط...
-          </div>
-        </div>
-
-        <!-- Countdown indicator -->
-        <div v-if="showCountdown" class="mt-4 flex flex-col items-center">
-          <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
-            پایان ضبط در {{ countDown }} ثانیه
-          </div>
-          <div class="bg-muted-100 dark:bg-muted-700 h-1 w-full max-w-xs rounded-full">
-            <div
-              class="bg-primary-500 h-1 rounded-full transition-all duration-1000"
-              :style="{ width: `${(countDown / 3) * 100}%` }"
-            />
-          </div>
+          </BaseCard>
         </div>
       </BaseCard>
     </div>

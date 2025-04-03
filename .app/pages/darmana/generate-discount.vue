@@ -127,7 +127,12 @@ const generateCode = async () => {
       await generateBatchCoupons(amount.value!, duration.value!, batchCount.value, prefix.value)
     }
     else {
-      await generateCoupon(amount.value!, duration.value!, code.value)
+      await generateCoupon({
+        amount: amount.value!,
+        duration: duration.value!,
+        code: code.value,
+        type: 'admin',
+      })
     }
     toaster.show({
       title: 'موفق',

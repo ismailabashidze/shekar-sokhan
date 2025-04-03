@@ -324,8 +324,8 @@ const closeAlphaModal = () => {
                     <InfoImage
                       rounded="lg"
                       image="/img/illustrations/widgets/5.svg"
-                      title="تبریک!"
-                      text="نشان نویسنده خلاق را دریافت کرده اید."
+                      title="استفاده آسان"
+                      text="پیشنهادات هوشمندانه را برای شما ارسال می کند"
                     />
                   </BaseCard>
                 </div>
