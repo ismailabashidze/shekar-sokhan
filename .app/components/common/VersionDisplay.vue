@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-const version = '1.1.0' // This matches the version in package.json
+const version = '1.2.0' // This matches the version in package.json
 
 const navigateToChangelog = () => {
   navigateTo('/changelog')
