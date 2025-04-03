@@ -49,9 +49,9 @@ const { user } = useUser()
             </template>
           </BaseDropdownItem>
           <BaseDropdownItem
-            to="#"
-            title="صورتحساب"
-            text="مدیریت صورتحساب"
+            to="/payments"
+            title="پرداختی‌ها"
+            text="مدیریت پرداختی‌ها"
           >
             <template #start>
               <Icon name="ph:bank-duotone" class="me-2 block size-5" />
@@ -89,7 +89,7 @@ const { user } = useUser()
             {{ user?.meta?.shortBio? user?.meta?.shortBio : 'اطلاعات در حال تکمیل شدن است.' }}
           </BaseParagraph>
           <div
-            class="divide-muted-200 dark:divide-muted-800 flex items-center justify-center divide-s"
+            class="divide-muted-200 dark:divide-muted-800 divide-s flex items-center justify-center"
           >
             <div class="text-muted-400 flex h-8 items-center gap-1 ps-4">
               <Icon name="ph:chat" class="size-5" />
@@ -133,7 +133,7 @@ const { user } = useUser()
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
               <Icon
-                name="ph:buildings-duotone"
+                name="ph:brain-duotone"
                 class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
               />
               <BaseHeading
@@ -142,10 +142,35 @@ const { user } = useUser()
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                شرکت
+                مشاوره هوشمند
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                مدیریت شرکت
+                تنظیمات مشاور هوشمند
+              </BaseText>
+            </div>
+          </NuxtLink>
+        </BaseCard>
+        <BaseCard
+          rounded="lg"
+          elevated-hover
+          class="hover:!border-primary-500 group border-2"
+        >
+          <NuxtLink to="/darmana/therapists/sessions" class="block p-6">
+            <div class="text-center">
+              <Icon
+                name="ph:chat-circle-text-duotone"
+                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
+              />
+              <BaseHeading
+                tag="h3"
+                size="sm"
+                weight="semibold"
+                class="mt-2 !text-[0.65rem] uppercase"
+              >
+                جلسات
+              </BaseHeading>
+              <BaseText size="xs" class="text-muted-400">
+                جلسات مشاوره
               </BaseText>
             </div>
           </NuxtLink>
@@ -158,7 +183,7 @@ const { user } = useUser()
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
               <Icon
-                name="ph:users-four-duotone"
+                name="ph:notebook-duotone"
                 class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
               />
               <BaseHeading
@@ -167,10 +192,10 @@ const { user } = useUser()
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                تیم
+                یادداشت‌ها
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                مدیریت تیم
+                مدیریت یادداشت‌ها
               </BaseText>
             </div>
           </NuxtLink>
@@ -183,7 +208,7 @@ const { user } = useUser()
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
               <Icon
-                name="ph:briefcase-duotone"
+                name="ph:heartbeat-duotone"
                 class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
               />
               <BaseHeading
@@ -192,10 +217,10 @@ const { user } = useUser()
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                پروژه‌ها
+                سلامت روان
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                تنظیمات پروژه
+                پیگیری وضعیت سلامت
               </BaseText>
             </div>
           </NuxtLink>
@@ -205,10 +230,10 @@ const { user } = useUser()
           elevated-hover
           class="hover:!border-primary-500 group border-2"
         >
-          <NuxtLink to="#" class="block p-6">
+          <NuxtLink to="/darmana/therapists/chooseTherapist" class="block p-6">
             <div class="text-center">
               <Icon
-                name="ph:users-duotone"
+                name="ph:robot"
                 class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
               />
               <BaseHeading
@@ -217,10 +242,10 @@ const { user } = useUser()
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                کاربران
+                مشاوران
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                مدیریت کاربران
+                مشاهده مشاوران
               </BaseText>
             </div>
           </NuxtLink>
@@ -230,32 +255,7 @@ const { user } = useUser()
           elevated-hover
           class="hover:!border-primary-500 group border-2"
         >
-          <NuxtLink to="#" class="block p-6">
-            <div class="text-center">
-              <Icon
-                name="ph:upload-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
-              <BaseHeading
-                tag="h3"
-                size="sm"
-                weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
-              >
-                آپلود
-              </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
-                مدیریت فایل‌ها
-              </BaseText>
-            </div>
-          </NuxtLink>
-        </BaseCard>
-        <BaseCard
-          rounded="lg"
-          elevated-hover
-          class="hover:!border-primary-500 group border-2"
-        >
-          <NuxtLink to="#" class="block p-6">
+          <NuxtLink to="/payments" class="block p-6">
             <div class="text-center">
               <Icon
                 name="ph:credit-card-duotone"
@@ -267,10 +267,10 @@ const { user } = useUser()
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                صورتحساب
+                پرداختی‌ها
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                مدیریت صورتحساب
+                مدیریت پرداختی‌ها
               </BaseText>
             </div>
           </NuxtLink>
@@ -321,6 +321,31 @@ const { user } = useUser()
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
                 مدیریت امنیت
+              </BaseText>
+            </div>
+          </NuxtLink>
+        </BaseCard>
+        <BaseCard
+          rounded="lg"
+          elevated-hover
+          class="hover:!border-primary-500 group border-2"
+        >
+          <NuxtLink to="/deeds" class="block p-6">
+            <div class="text-center">
+              <Icon
+                name="ph:hands-praying-duotone"
+                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
+              />
+              <BaseHeading
+                tag="h3"
+                size="xs"
+                weight="semibold"
+                class="mt-2 !text-[0.65rem] uppercase"
+              >
+                کار نیک
+              </BaseHeading>
+              <BaseText size="xs" class="text-muted-400">
+                کارهای نیک شما
               </BaseText>
             </div>
           </NuxtLink>

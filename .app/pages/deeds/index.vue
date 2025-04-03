@@ -105,11 +105,11 @@ onMounted(async () => {
 const extractDeeds = (coupons: discountCopoun[]) => {
   // Filter out empty expands and create a map of deed counts
   const deedCounts = new Map<string, number>()
-  
+
   // Count occurrences of each deed
   coupons
     .filter(coupon => coupon.expand?.deed && Object.keys(coupon.expand.deed).length > 0)
-    .forEach(coupon => {
+    .forEach((coupon) => {
       const deedId = coupon.expand.deed.id
       deedCounts.set(deedId, (deedCounts.get(deedId) || 0) + 1)
     })
@@ -229,11 +229,6 @@ const extractDeeds = (coupons: discountCopoun[]) => {
                   زمان
                 </th>
                 <th
-                  class="text-muted-400 border-muted-200 dark:border-muted-700 font-heading p-3 text-right text-xs font-semibold uppercase"
-                >
-                  تاریخ
-                </th>
-                <th
                   class="text-muted-400 border-muted-200 dark:border-muted-700 dark:bg-muted-800 border-b p-3 text-center text-xs font-semibold uppercase last:rounded-tl"
                 >
                   <div class="flex items-center justify-center gap-4">
@@ -298,11 +293,6 @@ const extractDeeds = (coupons: discountCopoun[]) => {
                     {{ getTimeLabel(deed.timeRequired) }}
                   </div>
                 </td>
-                <td class="text-muted-700 dark:text-muted-300 whitespace-nowrap p-3 text-sm">
-                  <span class="bg-muted-100 dark:bg-muted-800 rounded px-2 py-1">
-                    {{ deed.approvedAt }}
-                  </span>
-                </td>
                 <td class="text-muted-700 dark:text-muted-300 whitespace-nowrap p-3 text-center text-sm">
                   <div class="flex items-center justify-center gap-3">
                     <div class="flex items-center gap-1">
@@ -362,3 +352,8 @@ const extractDeeds = (coupons: discountCopoun[]) => {
     </div>
   </div>
 </template>
+<style scoped>
+th, tr {
+  text-align: center;
+}
+</style>
