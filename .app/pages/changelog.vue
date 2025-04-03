@@ -7,6 +7,35 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 1.2.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 1.2.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              3 آوریل 2025
+            </p>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-600 dark:text-muted-300 mb-4 list-inside list-disc space-y-1">
+              <li>اضافه شدن ردیابی تکمیل اعمال نیک شخصی</li>
+              <li>ایجاد صفحه «اعمال نیک من» برای نمایش اعمال تکمیل شده</li>
+              <li>اضافه شدن نمایش آمار بازدید، تکمیل‌ها و تکمیل‌های شخصی</li>
+              <li>بهبود مدیریت کدهای تخفیف با ردیابی کاربر</li>
+            </ul>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              بهبودها
+            </h3>
+            <ul class="text-muted-600 dark:text-muted-300 mb-4 list-inside list-disc space-y-1">
+              <li>بهبود نمایش آمار با آیکون‌های متمایز</li>
+              <li>بهبود چیدمان با تراز مرکزی و فاصله‌گذاری مناسب</li>
+              <li>رنگ‌بندی آیکون‌ها برای تمایز بهتر</li>
+            </ul>
+          </div>
+
           <!-- Version 1.1.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

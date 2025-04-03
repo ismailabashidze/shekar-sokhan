@@ -238,11 +238,6 @@ onMounted(() => {
                     وضعیت
                   </div>
                 </th>
-                <th class="border-muted-200 bg-muted-50 dark:border-muted-700 dark:bg-muted-800 border-b p-3 text-right">
-                  <div class="text-muted-400 font-normal">
-                    تاریخ ایجاد
-                  </div>
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -280,9 +275,6 @@ onMounted(() => {
                   <BaseTag :color="getStatusColor(coupon)" rounded="lg">
                     {{ getStatusText(coupon) }}
                   </BaseTag>
-                </td>
-                <td class="border-muted-200 dark:border-muted-700 border-b p-3">
-                  <BaseText>{{ new Date(coupon.created).toLocaleDateString('fa-IR') }}</BaseText>
                 </td>
               </tr>
             </tbody>
