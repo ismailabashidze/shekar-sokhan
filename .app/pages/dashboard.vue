@@ -534,6 +534,9 @@ const closeAlphaModal = () => {
             <div
               class="bg-muted-200 dark:bg-muted-800 group relative size-full overflow-hidden rounded-2xl"
             >
+              <NuxtLink :to="`/videos/${video.id}`" class="absolute inset-0 z-20">
+                <span class="sr-only">مشاهده {{ video.title }}</span>
+              </NuxtLink>
               <img
                 :src="video.cover"
                 :alt="video.title"
@@ -546,25 +549,22 @@ const closeAlphaModal = () => {
                 class="absolute inset-0 z-20 flex size-full flex-col justify-between"
               >
                 <div class="ptablet:p-10 p-6">
-                  <NuxtLink
-                    :to="`/videos/${video.id}`"
+                  <div
                     class="group-hover:border-primary-500 text-muted-300 group-hover:text-primary-500 shadow-muted-300/30 dark:shadow-muted-900/20 flex size-14 items-center justify-center rounded-full border-2 border-transparent bg-white shadow-2xl transition-colors duration-300"
                   >
                     <Icon name="ic:round-play-arrow" class="size-7" />
-                  </NuxtLink>
+                  </div>
                 </div>
                 <div class="ptablet:p-10 p-6">
-                  <NuxtLink :to="`/videos/${video.id}`">
-                    <BaseHeading
-                      as="h3"
-                      size="3xl"
-                      weight="bold"
-                      lead="tight"
-                      class="xs:text-xl hover:text-primary-300 mb-4 line-clamp-2 text-white transition-colors duration-300"
-                    >
-                      <span>{{ video.title }}</span>
-                    </BaseHeading>
-                  </NuxtLink>
+                  <BaseHeading
+                    as="h3"
+                    size="3xl"
+                    weight="bold"
+                    lead="tight"
+                    class="xs:text-xl hover:text-primary-300 mb-4 line-clamp-2 text-white transition-colors duration-300"
+                  >
+                    <span>{{ video.title }}</span>
+                  </BaseHeading>
                   <div class="flex gap-3">
                     <BaseAvatar
                       :src="video.author.avatar"
@@ -573,18 +573,15 @@ const closeAlphaModal = () => {
                       class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
                     />
                     <div>
-                      <NuxtLink :to="`/videos/${video.id}`">
-                        <BaseHeading
-                          as="h4"
-                          size="xs"
-                          weight="light"
-                          lead="tight"
-                          class="hover:text-primary-500 text-white transition-colors duration-300"
-                        >
-                          <span>{{ video.author.name }}</span>
-                        </BaseHeading>
-                      </NuxtLink>
-
+                      <BaseHeading
+                        as="h4"
+                        size="xs"
+                        weight="light"
+                        lead="tight"
+                        class="hover:text-primary-500 text-white transition-colors duration-300"
+                      >
+                        <span>{{ video.author.name }}</span>
+                      </BaseHeading>
                       <BaseParagraph size="xs">
                         <span class="text-muted-400">{{ video.uploaded }}</span>
                       </BaseParagraph>
@@ -615,7 +612,7 @@ const closeAlphaModal = () => {
                 :key="video.id"
                 class="col-span-12 sm:col-span-6"
               >
-                <div class="group flex h-full flex-col">
+                <NuxtLink :to="`/videos/${video.id}`" class="group flex h-full flex-col">
                   <div
                     class="bg-muted-200 dark:bg-muted-800 relative size-full overflow-hidden rounded-2xl"
                   >
@@ -631,25 +628,22 @@ const closeAlphaModal = () => {
                       class="absolute inset-0 z-20 flex size-full flex-col justify-between"
                     >
                       <div class="p-4">
-                        <NuxtLink
-                          :to="`/videos/${video.id}`"
+                        <div
                           class="group-hover:border-primary-500 text-muted-300 group-hover:text-primary-500 shadow-muted-300/30 dark:shadow-muted-900/20 flex size-10 items-center justify-center rounded-full border-2 border-transparent bg-white shadow-2xl transition-colors duration-300"
                         >
                           <Icon name="ic:round-play-arrow" class="size-5" />
-                        </NuxtLink>
+                        </div>
                       </div>
                       <div class="p-4">
-                        <NuxtLink :to="`/videos/${video.id}`">
-                          <BaseHeading
-                            as="h3"
-                            size="md"
-                            weight="medium"
-                            lead="tight"
-                            class="xs:text-xl ptablet:text-xl ptablet:font-bold xs:font-bold hover:text-primary-300 mb-4 line-clamp-2 text-white transition-colors duration-300"
-                          >
-                            <span>{{ video.title }}</span>
-                          </BaseHeading>
-                        </NuxtLink>
+                        <BaseHeading
+                          as="h3"
+                          size="md"
+                          weight="medium"
+                          lead="tight"
+                          class="xs:text-xl ptablet:text-xl ptablet:font-bold xs:font-bold hover:text-primary-300 mb-4 line-clamp-2 text-white transition-colors duration-300"
+                        >
+                          <span>{{ video.title }}</span>
+                        </BaseHeading>
                         <div class="flex gap-3">
                           <BaseAvatar
                             :src="video.author.avatar"
@@ -658,18 +652,15 @@ const closeAlphaModal = () => {
                             class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
                           />
                           <div>
-                            <NuxtLink :to="`/videos/${video.id}`">
-                              <BaseHeading
-                                as="h4"
-                                size="xs"
-                                weight="light"
-                                lead="tight"
-                                class="hover:text-primary-500 text-white transition-colors duration-300"
-                              >
-                                <span>{{ video.author.name }}</span>
-                              </BaseHeading>
-                            </NuxtLink>
-
+                            <BaseHeading
+                              as="h4"
+                              size="xs"
+                              weight="light"
+                              lead="tight"
+                              class="hover:text-primary-500 text-white transition-colors duration-300"
+                            >
+                              <span>{{ video.author.name }}</span>
+                            </BaseHeading>
                             <BaseParagraph size="xs">
                               <span class="text-muted-400">
                                 {{ video.uploaded }}
@@ -689,7 +680,7 @@ const closeAlphaModal = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </NuxtLink>
               </div>
             </div>
           </div>

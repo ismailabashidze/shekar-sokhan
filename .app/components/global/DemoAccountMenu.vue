@@ -118,7 +118,7 @@ const { user } = useUser()
             </MenuItem>
             <MenuItem v-slot="{ active }" as="div">
               <NuxtLink
-                to="/layouts/user-grid-4"
+                to="/payments"
                 class="group flex w-full items-center rounded-md p-3 text-sm transition-colors duration-300"
                 :class="[
                   active
@@ -142,7 +142,7 @@ const { user } = useUser()
             </MenuItem>
             <MenuItem v-slot="{ active }" as="div">
               <NuxtLink
-                to="/layouts/profile-edit"
+                to="/settings"
                 class="group flex w-full items-center rounded-md p-3 text-sm transition-colors duration-300"
                 :class="[
                   active
