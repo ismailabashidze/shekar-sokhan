@@ -32,7 +32,6 @@ const avatarUrl = computed(() => user.value?.meta?.avatarUrl || '/img/avatars/1.
           class="z-20"
           rounded="lg"
         >
-          <BaseDropdownDivider />
           <BaseDropdownItem
             to="/layouts/profile-edit"
             title="ویرایش"
@@ -42,25 +41,7 @@ const avatarUrl = computed(() => user.value?.meta?.avatarUrl || '/img/avatars/1.
               <Icon name="ph:pencil-duotone" class="me-2 block size-5" />
             </template>
           </BaseDropdownItem>
-          <BaseDropdownDivider />
-          <BaseDropdownItem
-            to="#"
-            title="امنیت"
-            text="تنظیمات امنیتی"
-          >
-            <template #start>
-              <Icon name="ph:lock-duotone" class="me-2 block size-5" />
-            </template>
-          </BaseDropdownItem>
-          <BaseDropdownItem
-            to="/payments"
-            title="پرداختی‌ها"
-            text="مدیریت پرداختی‌ها"
-          >
-            <template #start>
-              <Icon name="ph:bank-duotone" class="me-2 block size-5" />
-            </template>
-          </BaseDropdownItem>
+
           <BaseDropdownDivider />
           <BaseDropdownItem
             to="#"

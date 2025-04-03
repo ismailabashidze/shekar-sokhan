@@ -7,10 +7,29 @@ definePageMeta({
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
+const router = useRouter()
+const toaster = useToaster()
+const { user } = useUser()
+
+// Check for admin access
+onMounted(() => {
+  if (!user.value?.meta?.isAdmin) {
+    toaster.show({
+      title: 'دسترسی محدود',
+      message: 'شما به این بخش دسترسی ندارید',
+      color: 'danger',
+      icon: 'ph:lock-key',
+      closable: true,
+    })
+    router.push('/dashboard')
+    return
+  }
+  loadBugReports()
+})
+
 const { getBugReports, markAsSeen, markAsResolved, markAsUnresolved } = useBugReportApi()
 const bugReports = ref<BugReport[]>([])
 const isLoading = ref(true)
-const toaster = useToaster()
 
 // Priority colors
 const priorityColors = {
@@ -107,15 +126,10 @@ const formatDate = (dateString: string) => {
 }
 
 // Navigate to bug report details
-const router = useRouter()
 const viewBugReport = (id: string) => {
   router.push(`/bug-reports/${id}`)
 }
 
-// Load data on component mount
-onMounted(() => {
-  loadBugReports()
-})
 </script>
 
 <template>
