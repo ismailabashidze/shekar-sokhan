@@ -1,9 +1,9 @@
 <script setup lang="ts">
 definePageMeta({
-  title: 'Settings',
+  title: 'تنظیمات',
   preview: {
-    title: 'Settings',
-    description: 'For displaying account settings',
+    title: 'تنظیمات',
+    description: 'نمایش تنظیمات حساب کاربری',
     categories: ['layouts', 'profile'],
     src: '/img/screens/layouts-subpages-settings.png',
     srcDark: '/img/screens/layouts-subpages-settings-dark.png',
@@ -12,17 +12,17 @@ definePageMeta({
   layout: 'sidebar',
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
-const { data, pending, error, refresh } = await useFetch('/api/profile')
+const { user } = useUser()
 </script>
 
 <template>
   <div class="mx-auto w-full max-w-5xl">
-    <div v-if="!data" />
+    <div v-if="!user" />
     <div v-else class="relative w-full">
       <div class="absolute end-0 top-2 z-20">
         <BaseDropdown
           variant="context"
-          label="Dropdown"
+          label="منو"
           placement="bottom-end"
           size="md"
           class="z-20"
@@ -31,8 +31,8 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
           <BaseDropdownDivider />
           <BaseDropdownItem
             to="/layouts/profile-edit"
-            title="Edit"
-            text="Edit profile"
+            title="ویرایش"
+            text="ویرایش پروفایل"
           >
             <template #start>
               <Icon name="ph:pencil-duotone" class="me-2 block size-5" />
@@ -41,8 +41,8 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
           <BaseDropdownDivider />
           <BaseDropdownItem
             to="#"
-            title="Security"
-            text="Security settings"
+            title="امنیت"
+            text="تنظیمات امنیتی"
           >
             <template #start>
               <Icon name="ph:lock-duotone" class="me-2 block size-5" />
@@ -50,8 +50,8 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
           </BaseDropdownItem>
           <BaseDropdownItem
             to="#"
-            title="Billing"
-            text="Manage billing"
+            title="صورتحساب"
+            text="مدیریت صورتحساب"
           >
             <template #start>
               <Icon name="ph:bank-duotone" class="me-2 block size-5" />
@@ -60,8 +60,8 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
           <BaseDropdownDivider />
           <BaseDropdownItem
             to="#"
-            title="Share"
-            text="Share profile"
+            title="اشتراک‌گذاری"
+            text="اشتراک‌گذاری پروفایل"
           >
             <template #start>
               <Icon name="ph:link-duotone" class="me-2 block size-5" />
@@ -71,8 +71,8 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
       </div>
       <div class="flex w-full flex-col">
         <BaseAvatar
-          :src="data?.personalInfo.picture"
-          :badge-src="data?.personalInfo.badge"
+          :src="user?.picture"
+          :badge-src="user?.badge"
           size="2xl"
           class="mx-auto"
         />
@@ -83,10 +83,10 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
             weight="medium"
             class="mt-4"
           >
-            {{ data?.personalInfo.firstName }} {{ data?.personalInfo.lastName }}
+            {{ user?.firstName }} {{ user?.lastName }}
           </BaseHeading>
           <BaseParagraph size="sm" class="text-muted-400 mb-3 mt-1">
-            {{ data?.personalInfo.shortBio }}
+            {{ user?.shortBio }}
           </BaseParagraph>
           <div
             class="divide-muted-200 dark:divide-muted-800 flex items-center justify-center divide-x"
@@ -94,7 +94,7 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
             <div class="text-muted-400 flex h-8 items-center gap-1 px-4">
               <Icon name="ph:circles-three-duotone" class="size-5" />
               <BaseText size="sm">
-                {{ data?.personalInfo.relations }}+ relations
+                {{ user?.relations }}+ ارتباط
               </BaseText>
             </div>
             <div
@@ -102,12 +102,12 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
             >
               <Icon name="ph:check-circle-duotone" class="size-5" />
               <BaseText size="sm">
-                {{ data?.personalInfo.projects }} projects
+                {{ user?.projects }} پروژه
               </BaseText>
             </div>
             <div class="flex h-8 items-center gap-2 px-4">
               <NuxtLink
-                v-for="link in data?.personalInfo.socials"
+                v-for="link in user?.socials"
                 :key="link.name"
                 :to="link.url"
                 target="_blank"
@@ -142,10 +142,10 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                Company
+                شرکت
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                Manage company
+                مدیریت شرکت
               </BaseText>
             </div>
           </NuxtLink>
@@ -167,10 +167,10 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                Team
+                تیم
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                Manage team
+                مدیریت تیم
               </BaseText>
             </div>
           </NuxtLink>
@@ -192,10 +192,10 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                Projects
+                پروژه‌ها
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                Project settings
+                تنظیمات پروژه
               </BaseText>
             </div>
           </NuxtLink>
@@ -208,44 +208,19 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
               <Icon
-                name="ph:lock-open-duotone"
+                name="ph:users-duotone"
                 class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
               />
               <BaseHeading
                 tag="h3"
-                size="xs"
+                size="sm"
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                Permissions
+                کاربران
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                Manage permissions
-              </BaseText>
-            </div>
-          </NuxtLink>
-        </BaseCard>
-        <BaseCard
-          rounded="lg"
-          elevated-hover
-          class="hover:!border-primary-500 group border-2"
-        >
-          <NuxtLink to="#" class="block p-6">
-            <div class="text-center">
-              <Icon
-                name="ph:note-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
-              <BaseHeading
-                tag="h3"
-                size="xs"
-                weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
-              >
-                Documents
-              </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
-                Data privacy
+                مدیریت کاربران
               </BaseText>
             </div>
           </NuxtLink>
@@ -263,14 +238,14 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
               />
               <BaseHeading
                 tag="h3"
-                size="xs"
+                size="sm"
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                Upload
+                آپلود
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                Upload settings
+                مدیریت فایل‌ها
               </BaseText>
             </div>
           </NuxtLink>
@@ -292,10 +267,10 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                Billing
+                صورتحساب
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                Billing and plans
+                مدیریت صورتحساب
               </BaseText>
             </div>
           </NuxtLink>
@@ -317,10 +292,10 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                Messaging
+                چت
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                Chat settings
+                مدیریت چت
               </BaseText>
             </div>
           </NuxtLink>
@@ -342,10 +317,10 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                Security
+                امنیت
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                Security settings
+                مدیریت امنیت
               </BaseText>
             </div>
           </NuxtLink>
@@ -367,10 +342,10 @@ const { data, pending, error, refresh } = await useFetch('/api/profile')
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                Preferences
+                تنظیمات
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                General settings
+                مدیریت تنظیمات
               </BaseText>
             </div>
           </NuxtLink>
