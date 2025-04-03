@@ -14,14 +14,9 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const { user } = useUser()
-const avatarUrl = ref<string>('/img/avatars/1.png')
+const avatarUrl = computed(() => user.value?.meta?.avatarUrl || '/img/avatars/1.png')
 
-// Watch for user data changes and update avatar
-watch(() => user.value?.meta?.avatarUrl, (newUrl) => {
-  if (newUrl) {
-    avatarUrl.value = newUrl
-  }
-}, { immediate: true })
+// Rest of the code remains the same
 </script>
 
 <template>
@@ -79,9 +74,9 @@ watch(() => user.value?.meta?.avatarUrl, (newUrl) => {
         </BaseDropdown>
       </div>
       <div class="flex w-full flex-col">
-        user?.meta?.avatarUrl {{ user?.meta?.avatarUrl }}
         <BaseAvatar
-          :src="avatarUrl"
+          v-if="user"
+          :src="user.meta?.avatarUrl || '/img/avatars/1.png'"
           badge-src="/img/logo.png"
           size="2xl"
           class="mx-auto"
