@@ -12,7 +12,16 @@ definePageMeta({
   layout: 'sidebar',
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
+
 const { user } = useUser()
+const avatarUrl = ref<string>('/img/avatars/1.png')
+
+// Watch for user data changes and update avatar
+watch(() => user.value?.meta?.avatarUrl, (newUrl) => {
+  if (newUrl) {
+    avatarUrl.value = newUrl
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -70,8 +79,9 @@ const { user } = useUser()
         </BaseDropdown>
       </div>
       <div class="flex w-full flex-col">
+        user?.meta?.avatarUrl {{ user?.meta?.avatarUrl }}
         <BaseAvatar
-          :src="user?.meta?.avatarUrl? user?.meta?.avatarUrl : '/img/avatars/1.png'"
+          :src="avatarUrl"
           badge-src="/img/logo.png"
           size="2xl"
           class="mx-auto"

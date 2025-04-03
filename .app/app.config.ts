@@ -86,11 +86,7 @@ export default defineAppConfig({
             click: () => {
             },
           },
-          {
-            title: 'گزارش باگ',
-            component: 'BugReportIcon',
-            position: 'end',
-          },
+
           {
             title: 'خانه',
             icon: { name: 'ph:house-duotone', class: 'w-5 h-5' },
@@ -98,18 +94,8 @@ export default defineAppConfig({
             position: 'end',
           },
           {
-            title: 'Search',
-            icon: { name: 'ph:magnifying-glass-duotone', class: 'w-5 h-5' },
-            click: () => {
-              const isOpen = useState('search-open', () => false)
-              isOpen.value = true
-            },
-            position: 'end',
-          },
-          {
-            title: 'Settings',
-            icon: { name: 'ph:gear-six-duotone', class: 'w-5 h-5' },
-            to: '/layouts/settings',
+            title: 'گزارش باگ',
+            component: 'BugReportIcon',
             position: 'end',
           },
           {
