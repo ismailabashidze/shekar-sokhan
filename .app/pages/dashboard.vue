@@ -530,13 +530,10 @@ const closeAlphaModal = () => {
           :key="video.id"
           class="ltablet:col-span-6 col-span-12 lg:col-span-6"
         >
-          <div class="flex h-full flex-col">
+          <NuxtLink :to="`/videos/${video.id}`" class="flex h-full flex-col cursor-pointer">
             <div
               class="bg-muted-200 dark:bg-muted-800 group relative size-full overflow-hidden rounded-2xl"
             >
-              <NuxtLink :to="`/videos/${video.id}`" class="absolute inset-0 z-20">
-                <span class="sr-only">مشاهده {{ video.title }}</span>
-              </NuxtLink>
               <img
                 :src="video.cover"
                 :alt="video.title"
@@ -599,7 +596,7 @@ const closeAlphaModal = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </NuxtLink>
         </div>
 
         <!-- Column -->

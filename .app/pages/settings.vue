@@ -9,8 +9,9 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-settings-dark.png',
     order: 81,
   },
+  layout: 'sidebar',
 })
-
+useHead({ htmlAttrs: { dir: 'rtl' } })
 const { data, pending, error, refresh } = await useFetch('/api/profile')
 </script>
 
