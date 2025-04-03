@@ -71,8 +71,8 @@ const { user } = useUser()
       </div>
       <div class="flex w-full flex-col">
         <BaseAvatar
-          :src="user?.picture"
-          :badge-src="user?.badge"
+          :src="user?.meta?.avatarUrl? user?.meta?.avatarUrl : '/img/avatars/1.png'"
+          badge-src="/img/logo.png"
           size="2xl"
           class="mx-auto"
         />
@@ -83,29 +83,29 @@ const { user } = useUser()
             weight="medium"
             class="mt-4"
           >
-            {{ user?.firstName }} {{ user?.lastName }}
+            {{ user?.meta?.name }}
           </BaseHeading>
           <BaseParagraph size="sm" class="text-muted-400 mb-3 mt-1">
-            {{ user?.shortBio }}
+            {{ user?.meta?.shortBio? user?.meta?.shortBio : 'اطلاعات در حال تکمیل شدن است.' }}
           </BaseParagraph>
           <div
-            class="divide-muted-200 dark:divide-muted-800 flex items-center justify-center divide-x"
+            class="divide-muted-200 dark:divide-muted-800 flex items-center justify-center divide-s"
           >
-            <div class="text-muted-400 flex h-8 items-center gap-1 px-4">
-              <Icon name="ph:circles-three-duotone" class="size-5" />
+            <div class="text-muted-400 flex h-8 items-center gap-1 ps-4">
+              <Icon name="ph:chat" class="size-5" />
               <BaseText size="sm">
-                {{ user?.relations }}+ ارتباط
+                {{ user?.messages?.length || 0 }} پیام
               </BaseText>
             </div>
             <div
-              class="text-muted-400 hidden h-8 items-center gap-1 px-4 sm:flex"
+              class="text-muted-400 hidden h-8 items-center gap-1 ps-4 sm:flex"
             >
-              <Icon name="ph:check-circle-duotone" class="size-5" />
+              <Icon name="ph:book" class="size-5" />
               <BaseText size="sm">
-                {{ user?.projects }} پروژه
+                {{ user?.sessions?.length || 0 }} جلسه
               </BaseText>
             </div>
-            <div class="flex h-8 items-center gap-2 px-4">
+            <!-- <div class="flex h-8 items-center gap-2 px-4">
               <NuxtLink
                 v-for="link in user?.socials"
                 :key="link.name"
@@ -117,7 +117,7 @@ const { user } = useUser()
                 <Icon :name="link.icon" class="size-3" />
                 <span class="sr-only">{{ link.name }}</span>
               </NuxtLink>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
