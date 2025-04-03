@@ -725,8 +725,12 @@ const clearHistory = () => {
             viewMode === 'grid' ? 'rounded-xl' : 'flex gap-4 rounded-lg'
           ]"
         >
+          <NuxtLink :to="`/videos/${video.id}`" class="absolute inset-0 z-20">
+            <span class="sr-only">مشاهده {{ video.title }}</span>
+          </NuxtLink>
+
           <!-- Selection Checkbox -->
-          <div class="absolute left-3 top-3 z-10">
+          <div class="absolute left-3 top-3 z-30">
             <input
               type="checkbox"
               :checked="selectedVideos.includes(video.id)"
@@ -736,12 +740,12 @@ const clearHistory = () => {
           </div>
 
           <!-- Premium Badge -->
-          <div v-if="video.premium" class="absolute right-3 top-3 z-10">
+          <div v-if="video.premium" class="absolute right-3 top-3 z-30">
             <span class="bg-warning-500 rounded-full px-2 py-1 text-xs text-white">ویژه</span>
           </div>
 
           <!-- Featured Badge -->
-          <div v-if="video.featured" class="absolute right-3 top-3 z-10">
+          <div v-if="video.featured" class="absolute right-3 top-3 z-30">
             <span class="bg-success-500 rounded-full px-2 py-1 text-xs text-white">منتخب</span>
           </div>
 
@@ -806,25 +810,25 @@ const clearHistory = () => {
               viewMode === 'grid' ? '' : 'flex-1'
             ]"
           >
-            <NuxtLink :to="`/videos/${video.id}`">
+            <div>
               <h3 class="text-muted-800 mb-2 line-clamp-1 text-lg font-bold dark:text-white">
                 {{ video.title }}
               </h3>
-            </NuxtLink>
 
-            <p class="text-muted-500 mb-4 line-clamp-2 text-sm">
-              {{ video.description }}
-            </p>
+              <p class="text-muted-500 mb-4 line-clamp-2 text-sm">
+                {{ video.description }}
+              </p>
 
-            <!-- Tags -->
-            <div class="mb-4 flex flex-wrap gap-2">
-              <span
-                v-for="tag in video.tags"
-                :key="tag"
-                class="bg-muted-100 dark:bg-muted-700 text-muted-500 dark:text-muted-300 rounded-full px-2 py-1 text-xs"
-              >
-                {{ tag }}
-              </span>
+              <!-- Tags -->
+              <div class="mb-4 flex flex-wrap gap-2">
+                <span
+                  v-for="tag in video.tags"
+                  :key="tag"
+                  class="bg-muted-100 dark:bg-muted-700 text-muted-500 dark:text-muted-300 rounded-full px-2 py-1 text-xs"
+                >
+                  {{ tag }}
+                </span>
+              </div>
             </div>
 
             <!-- Comments Preview -->
