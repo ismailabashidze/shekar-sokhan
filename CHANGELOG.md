@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0] (2025-04-05)
+
+### 🔄 System Updates
+
+* **Session Analysis:** Enhanced therapist evaluation system
+  * Removed psychotherapistEvaluationScore in favor of calculated scoring
+  * Updated negativeScoresList with points and cause tracking
+  * Added structured positive behaviors and improvement suggestions
+  * Implemented automatic final score calculation
+  * Enhanced UI with color-coded feedback sections
+
+* **Risk Assessment:** Improved risk factors analysis
+  * Updated schema to emphasize severity and immediate concerns
+  * Enhanced risk factor descriptions for better clarity
+  * Adjusted minimum requirements for risk factor reporting
+  * Improved professional intervention indicators
+
+### 🐛 Bug Fixes
+
+* **Session Management:** Fixed critical session handling issues
+  * Resolved 400 Bad Request errors during session closure
+  * Enhanced automatic session closure handling
+  * Improved navigation to analysis page after session end
+
 ## [1.2.0] (2025-04-03)
 
 ### 🚀 Features

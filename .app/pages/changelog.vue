@@ -7,6 +7,54 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 1.3.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 1.3.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              5 آوریل 2025
+            </p>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              به‌روزرسانی‌های سیستم
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 list-disc space-y-2 pl-6">
+              <li>
+                <span class="font-medium">تحلیل جلسات:</span> بهبود سیستم ارزیابی درمانگر
+                <ul class="mt-1 list-inside list-disc space-y-1 pl-4">
+                  <li>حذف امتیاز ارزیابی مستقیم و جایگزینی با سیستم محاسبه خودکار</li>
+                  <li>به‌روزرسانی لیست امتیازات منفی با امتیازات و دلایل دقیق</li>
+                  <li>اضافه کردن رفتارهای مثبت و پیشنهادات بهبود ساختاریافته</li>
+                  <li>پیاده‌سازی محاسبه خودکار امتیاز نهایی</li>
+                  <li>بهبود رابط کاربری با بخش‌های رنگ‌بندی شده برای بازخورد</li>
+                </ul>
+              </li>
+              <li>
+                <span class="font-medium">ارزیابی ریسک:</span> بهبود تحلیل عوامل خطر
+                <ul class="mt-1 list-inside list-disc space-y-1 pl-4">
+                  <li>به‌روزرسانی ساختار برای تاکید بر شدت و نگرانی‌های فوری</li>
+                  <li>بهبود توضیحات عوامل خطر برای وضوح بیشتر</li>
+                  <li>تنظیم الزامات حداقلی برای گزارش عوامل خطر</li>
+                  <li>بهبود شاخص‌های نیاز به مداخله تخصصی</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 list-disc space-y-2 pl-6">
+              <li>
+                <span class="font-medium">مدیریت جلسات:</span> رفع مشکلات حیاتی در مدیریت جلسات
+                <ul class="mt-1 list-inside list-disc space-y-1 pl-4">
+                  <li>رفع خطای 400 در هنگام بستن جلسات</li>
+                  <li>بهبود مدیریت بستن خودکار جلسات</li>
+                  <li>بهبود هدایت به صفحه تحلیل پس از پایان جلسه</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
           <!-- Version 1.2.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">
