@@ -30,7 +30,7 @@
             class="bg-muted-100 dark:bg-muted-900 flex w-full shrink-0 items-center justify-center rounded-xl sm:size-32"
           >
             <img
-              src="/img/illustrations/ui/recurring.png"
+              src="/img/illustrations/ui/code.png"
               class="w-full rounded-lg"
               alt=""
             >

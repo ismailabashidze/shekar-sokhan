@@ -530,7 +530,7 @@ const closeAlphaModal = () => {
           :key="video.id"
           class="ltablet:col-span-6 col-span-12 lg:col-span-6"
         >
-          <NuxtLink :to="`/videos/${video.id}`" class="flex h-full flex-col cursor-pointer">
+          <NuxtLink :to="`/videos/${video.id}`" class="flex h-full cursor-pointer flex-col">
             <div
               class="bg-muted-200 dark:bg-muted-800 group relative size-full overflow-hidden rounded-2xl"
             >

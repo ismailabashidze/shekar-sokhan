@@ -3,9 +3,7 @@ import { useRoute } from 'vue-router'
 import { watch, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import AudioUser from '@/components/global/AudioUser.vue'
 import { useUser } from '@/composables/user'
-import { useTherapistsMessages } from '@/composables/therapistsMessages'
 import type { Therapist, Message } from '@/types'
-import { useSessionAnalysis } from '~/composables/useSessionAnalysis'
 
 definePageMeta({
   title: 'گفتگو با روانشناس',
@@ -22,7 +20,7 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const { open } = usePanels()
 const { getTherapists } = useTherapist()
-const { getCurrentSession, createSession, endSession } = useTherapistSession()
+const { getCurrentSession, endSession } = useTherapistSession()
 const { getMessages, sendMessage } = useTherapistsMessages()
 const route = useRoute()
 const nuxtApp = useNuxtApp()
@@ -135,6 +133,9 @@ const formatTime = (timestamp: string | Date) => {
   return date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
 }
 
+const showScrollButton = ref(false)
+const isAIResponding = ref(false)
+
 const scrollToBottom = () => {
   nextTick(() => {
     if (chatEl.value) {
@@ -144,6 +145,13 @@ const scrollToBottom = () => {
       })
     }
   })
+}
+
+const checkIfScrolledToBottom = () => {
+  if (!chatEl.value) return true
+  const { scrollHeight, scrollTop, clientHeight } = chatEl.value
+  const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10
+  showScrollButton.value = !isAtBottom
 }
 
 const loadMessages = async (therapistId: string) => {
@@ -333,7 +341,9 @@ async function submitMessage() {
         ...assistantMessage,
         id: messageId,
       })
-      scrollToBottom()
+
+      isAIResponding.value = true
+      showScrollButton.value = false
 
       const therapistDetails = {
         name: currentTherapist.name || '',
@@ -365,7 +375,7 @@ async function submitMessage() {
             if (messageIndex !== -1) {
               messages.value[messageIndex].text = streamingResponse.value
             }
-            scrollToBottom()
+            checkIfScrolledToBottom()
           }
         },
       )
@@ -378,7 +388,8 @@ async function submitMessage() {
           messages.value[messageIndex].id = savedAssistantMessage.id
           messages.value[messageIndex].timestamp = savedAssistantMessage.time
         }
-        scrollToBottom()
+        isAIResponding.value = false
+        checkIfScrolledToBottom()
       }
     }
   }
@@ -398,7 +409,9 @@ async function submitMessage() {
 }
 
 watch(messages, () => {
-  scrollToBottom()
+  if (!isAIResponding.value) {
+    scrollToBottom()
+  }
 }, { deep: true })
 
 const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
@@ -433,11 +446,38 @@ watch(timeToShow, async (newValue) => {
 })
 
 const updateSessionTime = () => {
-  if (activeSession.value && activeSession.value.created) {
-    const startTime = new Date(activeSession.value.created)
-    const currentTime = new Date()
-    sessionElapsedTime.value = Math.round((currentTime - startTime) / (1000 * 60))
-    console.log('Session elapsed time updated:', sessionElapsedTime.value)
+  if (activeSession.value?.created) {
+    try {
+      // Convert the PocketBase timestamp to a Date object
+      const startTime = new Date(activeSession.value.created)
+      const currentTime = new Date()
+
+      // Ensure both dates are valid
+      if (isNaN(startTime.getTime()) || isNaN(currentTime.getTime())) {
+        console.error('Invalid date detected:', { start: activeSession.value.created })
+        sessionElapsedTime.value = 0
+        return
+      }
+
+      const elapsedMilliseconds = currentTime.getTime() - startTime.getTime()
+      const minutes = Math.floor(elapsedMilliseconds / 60000)
+
+      // Sanity check: if minutes is negative or too large, something is wrong
+      if (minutes < 0 || minutes > 24 * 60) {
+        console.error('Invalid elapsed time:', minutes, 'minutes')
+        sessionElapsedTime.value = 0
+        return
+      }
+
+      sessionElapsedTime.value = minutes
+    }
+    catch (error) {
+      console.error('Error calculating session time:', error)
+      sessionElapsedTime.value = 0
+    }
+  }
+  else {
+    sessionElapsedTime.value = 0
   }
 }
 
@@ -445,14 +485,15 @@ const startSessionTimer = () => {
   // Initial update
   updateSessionTime()
 
-  // Update every minute
+  // Clear existing interval if any
   if (timeUpdateInterval.value) {
     clearInterval(timeUpdateInterval.value)
   }
 
+  // Update every 30 seconds
   timeUpdateInterval.value = setInterval(() => {
     updateSessionTime()
-  }, 10000) // Update more frequently for better responsiveness
+  }, 30000)
 }
 
 onMounted(async () => {
@@ -526,6 +567,9 @@ onMounted(async () => {
     }, 300)
     resume()
   }
+  if (chatEl.value) {
+    chatEl.value.addEventListener('scroll', checkIfScrolledToBottom)
+  }
 })
 
 onUnmounted(() => {
@@ -540,6 +584,9 @@ onUnmounted(() => {
   }
   catch (error) {
     console.error('Error unsubscribing:', error)
+  }
+  if (chatEl.value) {
+    chatEl.value.removeEventListener('scroll', checkIfScrolledToBottom)
   }
 })
 
@@ -756,7 +803,7 @@ const handleAudioSend = () => {
             <div
               class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
             >
-              <NuxtLink to="#" class="flex items-center justify-center">
+              <NuxtLink to="/dashboard" class="flex items-center justify-center">
                 <div class="rounded-full bg-white p-[5px]">
                   <img
                     src="/img/logo-no-bg.png"
@@ -788,26 +835,7 @@ const handleAudioSend = () => {
                 <Icon name="lucide:arrow-right" class="size-5" />
               </a>
             </div>
-            <div class="flex h-16 w-full items-center justify-center">
-              <button
-                type="button"
-                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="جستجو"
-                @click="open('search')"
-              >
-                <Icon name="ph:magnifying-glass-duotone" class="size-5" />
-              </button>
-            </div>
 
-            <div class="flex h-16 w-full items-center justify-center">
-              <NuxtLink
-                to="#"
-                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="تنظیمات"
-              >
-                <Icon name="ph:gear-six-duotone" class="size-5" />
-              </NuxtLink>
-            </div>
             <div class="flex h-16 w-full items-center justify-center">
               <button
                 type="button"
@@ -817,18 +845,6 @@ const handleAudioSend = () => {
               >
                 <Icon name="ph:trash-duotone" class="size-5" />
               </button>
-            </div>
-            <div class="flex h-16 w-full items-center justify-center">
-              <NuxtLink
-                class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="خروج"
-                @click="logout()"
-              >
-                <Icon
-                  name="ph:sign-out"
-                  class="pointer-events-none size-5"
-                />
-              </NuxtLink>
             </div>
             <div class="flex h-16 w-full items-center justify-center">
               <DemoAccountMenu />
@@ -897,7 +913,7 @@ const handleAudioSend = () => {
               />
             </button>
             <button
-              class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-2   flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
               title="پایان جلسه"
               @click="handleEndSession"
             >
@@ -988,18 +1004,37 @@ const handleAudioSend = () => {
             :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
           >
             <!-- Loader-->
-            <div
-              class="pointer-events-none absolute inset-0 z-10 size-full bg-[url('../../img/back/back.png')] p-8 transition-opacity duration-300 dark:bg-[url('../../img/back/back-dark.png')]"
-              :class="loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-            >
-              <div class="flex h-full flex-col items-center justify-center">
-                <div class="flex items-center gap-2">
-                  <BaseButtonIcon loading="default" />
+            <div v-if="loading" class="mt-8">
+              <div class="mb-3 flex items-center justify-center">
+                <BasePlaceload
+                  class="size-24 shrink-0 rounded-full"
+                  :width="96"
+                  :height="96"
+                />
+              </div>
+              <div class="flex flex-col items-center">
+                <BasePlaceload class="mb-2 h-3 w-full max-w-40 rounded" />
+                <BasePlaceload class="mb-2 h-3 w-full max-w-24 rounded" />
+                <div class="my-4 flex w-full flex-col items-center">
+                  <BasePlaceload class="mb-2 h-2 w-full max-w-60 rounded" />
+                  <BasePlaceload class="mb-2 h-2 w-full max-w-52 rounded" />
+                </div>
+                <div class="mb-6 flex w-full items-center justify-center">
+                  <div class="px-4">
+                    <BasePlaceload class="h-3 w-14 rounded" />
+                  </div>
+                  <div class="px-4">
+                    <BasePlaceload class="h-3 w-14 rounded" />
+                  </div>
+                </div>
+                <div class="w-full">
+                  <BasePlaceload class="h-10 w-full rounded-xl" />
+                  <BasePlaceload class="mx-auto mt-3 h-3 w-[7.5rem] rounded" />
                 </div>
               </div>
             </div>
             <!-- Messages loop -->
-            <div v-if="!loading" class="space-y-12">
+            <div v-else class="space-y-12">
               <div v-if="messages.length === 0" class="flex h-[60vh] flex-col items-center justify-center text-center">
                 <div class="mb-6">
                   <Icon name="ph:chat-circle-dots-duotone" class="text-primary-500 size-16" />
@@ -1120,6 +1155,7 @@ const handleAudioSend = () => {
           </div>
 
           <!-- Compose form - Fixed at bottom -->
+
           <form
             method="POST"
             action=""
@@ -1127,6 +1163,16 @@ const handleAudioSend = () => {
             @submit.prevent="submitMessage"
           >
             <div class="relative w-full">
+              <!-- Scroll to bottom button -->
+              <button
+                v-if="showScrollButton"
+                class="bg-primary-500/20 hover:bg-primary-500/30 dark:bg-primary-500/30 dark:hover:bg-primary-500/40 absolute bottom-[calc(var(--messages-form-height))] left-0 z-50 flex items-center gap-2 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm transition-all duration-300"
+                title="پایین صفحه برو"
+                @click="scrollToBottom"
+              >
+                <span class="text-primary-500 text-sm">رفتن به آخرین پیام</span>
+                <Icon name="ph:arrow-down-bold" class="text-primary-500 size-5" />
+              </button>
               <BaseTextarea
                 v-model="newMessage"
                 :disabled="showNoCharge"
@@ -1400,13 +1446,6 @@ const handleAudioSend = () => {
               </div>
             </div>
 
-            <!-- Click outside directive for model dropdown -->
-            <button
-              v-if="showModelDropdown"
-              type="button"
-              class="fixed inset-0 z-40"
-              @click="showModelDropdown = false"
-            />
             <BaseMessage class="mt-5" color="info">
               لطفا توجه داشته باشید که عامل هوش مصنوعی در فاز توسعه می‌‌باشد
               و احتمال ارائه‌ی پاسخ‌های اشتباه را دارد.

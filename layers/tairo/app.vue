@@ -19,6 +19,7 @@ useHead({
 
 <template>
   <div>
+    <HorizontalSideBar />
     <BetaRibbon />
     <NuxtLayout>
       <NuxtLoadingIndicator color="var(--color-primary-500)" />

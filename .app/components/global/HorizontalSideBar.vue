@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 bg-white0 relative z-10 block w-full border-r sm:hidden"
+    class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 fixed inset-x-0 top-0 z-50 block w-full border-b bg-white/90 backdrop-blur-md sm:hidden"
   >
     <div class="flex w-full flex-row justify-between">
       <div class="flex flex-row">
@@ -20,9 +20,14 @@
           </NuxtLink>
         </div>
         <div
-          class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
+          class="ltablet:w-full flex size-16 items-center justify-center lg:w-full"
         >
-          <BaseThemeToggle />
+          <div class="mr-14 flex items-center">
+            <BaseThemeToggle />
+            <BaseTag color="primary" class="mr-4">
+              آزمایشی
+            </BaseTag>
+          </div>
         </div>
       </div>
       <div class="ml-5 flex flex-row gap-x-2">
@@ -38,6 +43,20 @@
         </div>
         <div class="flex h-16 w-full items-center justify-center">
           <NuxtLink
+            to="/darmana/therapists/sessions"
+            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+            title="Settings"
+          >
+            <Icon name="ph:robot-duotone" class="size-5" />
+          </NuxtLink>
+          <NuxtLink
+            to="/deeds/start"
+            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+            title="Settings"
+          >
+            <Icon name="ph:hands-praying" class="size-5" />
+          </NuxtLink>
+          <NuxtLink
             to="/dashboard"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
             title="Settings"
@@ -46,14 +65,58 @@
           </NuxtLink>
         </div>
         <div class="flex h-16 w-full items-center justify-center">
-          <NuxtLink
-            to=""
-            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="Settings"
-            @click.prevent="signout"
-          >
-            <Icon name="ph:sign-out" class="size-5" />
-          </NuxtLink>
+          <div class="flex w-full justify-start gap-8">
+            <BaseDropdown
+              variant="custom"
+              :button-class="'inline-flex size-10 items-center justify-center rounded-full'"
+            >
+              <template #button>
+                <div class="relative mt-2.5 inline-flex size-10 cursor-pointer items-center justify-center rounded-full">
+                  <img
+                    :src="user.meta?.avatarUrl || '/img/avatars/1.png'"
+                    class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
+                    alt=""
+                  >
+                </div>
+              </template>
+              <BaseDropdownItem
+                to="/layouts/profile"
+                title="مشاهده پروفایل"
+                :text=" user.record.name ? user.record.name : 'کاربر جدید' "
+                rounded="sm"
+              />
+
+              <BaseDropdownItem
+                to="/darmana/therapists/sessions"
+                title="جلسات"
+                text="همه جلسات من"
+                rounded="sm"
+              />
+
+              <BaseDropdownItem
+                to="/payments"
+                title="پرداختی ها"
+                text="مدیریت پرداختی ها"
+                rounded="sm"
+              />
+
+              <BaseDropdownItem
+                to="/settings"
+                title="تنظیمات"
+                text="تنظیمات حساب"
+                rounded="sm"
+              />
+
+              <BaseDropdownDivider />
+
+              <BaseDropdownItem
+                to="/auth/logout"
+                title="خروج"
+                text="خروج از حساب کاربری"
+                rounded="sm"
+              />
+            </BaseDropdown>
+          </div>
         </div>
       </div>
     </div>
@@ -71,10 +134,7 @@
 //     required: true,
 //   },
 // })
-const signout = () => {}
-const changeExpanded = () => {}
-const canDelete = () => {}
-
+const { user } = useUser()
 </script>
 
   <style scoped>

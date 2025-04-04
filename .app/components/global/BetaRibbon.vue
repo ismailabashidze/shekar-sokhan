@@ -1,5 +1,5 @@
 <template>
-  <div class="beta-ribbon bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 text-white font-semibold shadow-md dark:shadow-lg border border-white/10 dark:border-white/5">
+  <div class="beta-ribbon from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 border border-white/10 bg-gradient-to-r font-semibold text-white shadow-md dark:border-white/5 dark:shadow-lg hidden lg:block">
     <span>آزمایشی</span>
   </div>
 </template>

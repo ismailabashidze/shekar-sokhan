@@ -24,7 +24,7 @@ const { user } = useUser()
             class="relative inline-flex size-10 items-center justify-center rounded-full"
           >
             <img
-              src="/img/avatars/1.png"
+              :src="user.meta?.avatarUrl || '/img/avatars/1.png'"
               class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
               alt=""
             >
@@ -50,7 +50,7 @@ const { user } = useUser()
                 class="relative inline-flex size-14 items-center justify-center rounded-full"
               >
                 <img
-                  src="/img/avatars/1.png"
+                  :src="user.meta?.avatarUrl || '/img/avatars/1.png'"
                   class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
                   alt=""
                 >
@@ -62,7 +62,7 @@ const { user } = useUser()
                   {{ user.record.name ? user.record.name : 'کاربر جدید' }}
                 </h6>
                 <p class="text-muted-400 font-sans text-xs">
-                  {{ user.record.role ? user.record.role : 'کاربر' }}
+                  {{ user.record.role == 'user' ? 'کاربر' : 'ادمین' }}
                 </p>
               </div>
             </div>
@@ -94,7 +94,7 @@ const { user } = useUser()
             </MenuItem>
             <MenuItem v-slot="{ active }" as="div">
               <NuxtLink
-                to="/layouts/projects"
+                to="/darmana/therapists/sessions"
                 class="group flex w-full items-center rounded-md p-3 text-sm transition-colors duration-300"
                 :class="[
                   active
@@ -160,6 +160,36 @@ const { user } = useUser()
                   </h6>
                   <p class="text-muted-400 font-sans text-xs leading-6">
                     تنظیمات حساب
+                  </p>
+                </div>
+              </NuxtLink>
+            </MenuItem>
+            <BaseDropdownDivider />
+
+            <MenuItem v-slot="{ active }" as="div">
+              <NuxtLink
+                to="/auth/logout"
+                class="group flex w-full items-center rounded-md p-3 text-sm transition-colors duration-300"
+                :class="[
+                  active
+                    ? 'bg-muted-100 dark:bg-muted-700 text-primary-500'
+                    : 'text-muted-400',
+                ]"
+                @click.passive="close"
+              >
+                <Icon
+                  name="ph:sign-out-duotone"
+                  class="size-5"
+                  color="red"
+                />
+                <div class="ms-3 text-right leading-6">
+                  <h6
+                    class="font-heading text-danger-800 dark:text-danger-500 text-xs font-medium leading-none"
+                  >
+                    خروج
+                  </h6>
+                  <p class="text-danger-400 font-sans text-xs leading-6">
+                    خروج از حساب کاربری
                   </p>
                 </div>
               </NuxtLink>
