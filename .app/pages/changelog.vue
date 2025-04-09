@@ -1,4 +1,4 @@
-<template>
+w<template>
   <div class="bg-muted-100 dark:bg-muted-900 min-h-screen px-4 pb-10 pt-20 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-4xl">
       <div class="dark:bg-muted-800 rounded-lg bg-white p-6 shadow">
@@ -20,8 +20,9 @@
               بهبود‌ها
             </h3>
             <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود فرآیند استقرار:
-                <ul class="list-disc mr-6 mt-1 space-y-1">
+              <li>
+                بهبود فرآیند استقرار:
+                <ul class="mr-6 mt-1 list-disc space-y-1">
                   <li>بهبود مدیریت فرآیند‌های PM2</li>
                   <li>پیاده‌سازی استقرار تمیز با حذف دایرکتوری .output</li>
                   <li>افزودن محافظت‌های لازم برای توقف و راه‌اندازی مجدد فرآیند</li>
