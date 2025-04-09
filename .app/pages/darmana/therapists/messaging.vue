@@ -20,7 +20,7 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const { open } = usePanels()
 const { getTherapists } = useTherapist()
-const { getCurrentSession, endSession } = useTherapistSession()
+const { getCurrentSession, endSession, createSession } = useTherapistSession()
 const { getMessages, sendMessage } = useTherapistsMessages()
 const route = useRoute()
 const nuxtApp = useNuxtApp()
@@ -41,7 +41,7 @@ const remainingTime = ref<Date>()
 const timeToShow = ref<number>()
 const startChargeTime = ref<Date>()
 const search = ref('')
-const { role } = useUser()
+const { user, role } = useUser()
 const sessionId = ref<string | null>(null)
 const sessionElapsedTime = ref(0)
 const timeUpdateInterval = ref<NodeJS.Timeout | null>(null)
@@ -431,15 +431,9 @@ watch(timeToShow, async (newValue) => {
     const startTime = new Date(activeSession.value.created)
     const endTime = new Date()
     const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
-
-    await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
-      status: 'done',
-      end_time: endTime.toISOString(),
-      count_of_total_messages: messages.value.length,
-      total_time_passed: totalTimePassedMinutes,
-      updated: endTime.toISOString(),
-    })
-
+    isReportModalOpen.value = true
+    isGeneratingAnalysis.value = true
+    await handleConfirmEndSession()
     showNoCharge.value = true
     pause()
   }
@@ -901,7 +895,7 @@ const handleAudioSend = () => {
               </div>
             </a>
           </div>
-          <div class="mb-10 flex flex-col gap-3 sm:hidden">
+          <div class="mb-12 flex flex-col gap-3 sm:hidden">
             <button
               class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-2 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
               title="نمایش اطلاعات"
@@ -913,7 +907,7 @@ const handleAudioSend = () => {
               />
             </button>
             <button
-              class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-2 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
               title="پایان جلسه"
               @click="handleEndSession"
             >
@@ -1166,7 +1160,7 @@ const handleAudioSend = () => {
               <!-- Scroll to bottom button -->
               <button
                 v-if="showScrollButton"
-                class="bg-primary-500/20 hover:bg-primary-500/30 dark:bg-primary-500/30 dark:hover:bg-primary-500/40 absolute bottom-[calc(var(--messages-form-height))] left-0 z-50 flex items-center gap-2 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm transition-all duration-300"
+                class="bg-primary-500/20 hover:bg-primary-500/30 dark:bg-primary-500/30 dark:hover:bg-primary-500/40 absolute bottom-[calc(var(--messages-form-height))] left-0 z-10 flex items-center gap-2 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm transition-all duration-300"
                 title="پایین صفحه برو"
                 @click="scrollToBottom"
               >

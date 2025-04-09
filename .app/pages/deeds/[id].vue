@@ -252,7 +252,7 @@ const formatLongDescription = (html: string) => {
 
               <!-- Main Content -->
               <div class="p-6">
-                <div class="mb-8 flex items-start gap-6">
+                <div class="mb-8 flex items-start gap-3">
                   <div class="nui-placeload animate-nui-placeload size-20 rounded-xl" />
                   <div class="grow space-y-4">
                     <div class="nui-placeload animate-nui-placeload h-8 w-3/4 rounded-lg" />
@@ -364,8 +364,8 @@ const formatLongDescription = (html: string) => {
         <BaseCard rounded="lg" class="mb-6">
           <div class="relative">
             <!-- Status Badge -->
-            <div v-if="deed" class="absolute left-4 top-4 flex flex-col justify-end">
-              <div class="text-left">
+            <div v-if="deed" class="absolute left-4 top-4 z-10 flex flex-col gap-3">
+              <div class="flex items-center justify-end">
                 <BaseTag
                   :color="statusColor"
                   rounded="full"
@@ -375,7 +375,7 @@ const formatLongDescription = (html: string) => {
                 </BaseTag>
               </div>
               <!-- Tags -->
-              <div v-if="deed.tags?.length" class="flex flex-wrap gap-2 pt-3">
+              <div v-if="deed.tags?.length" class="flex flex-wrap gap-2">
                 <BaseTag
                   v-for="tag in deed.tags"
                   :key="tag"
@@ -389,7 +389,7 @@ const formatLongDescription = (html: string) => {
 
             <!-- Main Content -->
             <div class="p-6">
-              <div v-if="deed" class="mb-8 flex items-start gap-6">
+              <div v-if="deed" class="mb-4 flex items-start gap-6 pt-[80px] sm:pt-0">
                 <div class="bg-primary-100 dark:bg-primary-500/20 flex size-20 shrink-0 items-center justify-center rounded-xl text-4xl">
                   {{ deed.emoji }}
                 </div>

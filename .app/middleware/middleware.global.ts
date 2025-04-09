@@ -8,7 +8,6 @@ export default defineNuxtRouteMiddleware((to) => {
     '/auth/login-psychotherapist',
     '/auth/terms',
     '/auth/privacy',
-    '/tarjoman',
     '/bug-report',
     '/bug-reports',
   ]

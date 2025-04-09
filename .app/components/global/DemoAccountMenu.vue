@@ -6,6 +6,12 @@ const props = defineProps<{
 }>()
 const { user } = useUser()
 
+const avatarUrl = ref('/img/avatars/1.png')
+onMounted(() => {
+  if (localStorage.getItem('user')) {
+    avatarUrl.value = JSON.parse(localStorage.getItem('user')!).meta.avatarUrl || '/img/avatars/1.png'
+  }
+})
 </script>
 
 <template>
@@ -24,7 +30,7 @@ const { user } = useUser()
             class="relative inline-flex size-10 items-center justify-center rounded-full"
           >
             <img
-              :src="user.meta?.avatarUrl || '/img/avatars/1.png'"
+              :src="avatarUrl"
               class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
               alt=""
             >
@@ -50,7 +56,7 @@ const { user } = useUser()
                 class="relative inline-flex size-14 items-center justify-center rounded-full"
               >
                 <img
-                  :src="user.meta?.avatarUrl || '/img/avatars/1.png'"
+                  :src="avatarUrl"
                   class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
                   alt=""
                 >

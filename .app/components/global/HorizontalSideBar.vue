@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="!isAuthPage"
     class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 fixed inset-x-0 top-0 z-50 block w-full border-b bg-white/90 backdrop-blur-md sm:hidden"
   >
     <div class="flex w-full flex-row justify-between">
@@ -73,7 +74,7 @@
               <template #button>
                 <div class="relative mt-2.5 inline-flex size-10 cursor-pointer items-center justify-center rounded-full">
                   <img
-                    :src="user.meta?.avatarUrl || '/img/avatars/1.png'"
+                    :src="avatarUrl"
                     class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
                     alt=""
                   >
@@ -124,17 +125,21 @@
 </template>
 
 <script setup>
-// defineProps({
-//   canDelete: {
-//     type: Function,
-//     required: true,
-//   },
-//   signout: {
-//     type: Function,
-//     required: true,
-//   },
-// })
+import { useRoute } from '#app'
+import { computed } from 'vue'
+
+const route = useRoute()
+const isAuthPage = computed(() => route.path.startsWith('/auth'))
+console.log(isAuthPage.value)
+
 const { user } = useUser()
+const avatarUrl = ref('/img/avatars/1.png')
+
+onMounted(() => {
+  if (localStorage.getItem('user')) {
+    avatarUrl.value = JSON.parse(localStorage.getItem('user')).meta.avatarUrl || '/img/avatars/1.png'
+  }
+})
 </script>
 
   <style scoped>

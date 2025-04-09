@@ -66,7 +66,7 @@ const selectedDifficulties = ref<string[]>(
 )
 
 const currentPage = ref(Number(route.query.page) || 1)
-const itemsPerPage = ref(5)
+const itemsPerPage = ref(10)
 const totalDeeds = ref(0)
 
 const loading = ref(true)
@@ -786,9 +786,15 @@ const resetFilters = () => {
                         <!-- <BaseButtonIcon rounded="full" color="primary">
                           <Icon name="ph:play" class="size-5" />
                         </BaseButtonIcon> -->
-                        <BaseButtonIcon rounded="full" @click="navigateTo(`/deeds/${deed.id}`)">
-                          <Icon name="ph:dots-three-circle" class="size-5" />
-                        </BaseButtonIcon>
+                        <BaseButton
+                          rounded="full"
+                          size="sm"
+                          color="info"
+                          @click="navigateTo(`/deeds/${deed.id}`)"
+                        >
+                          <Icon name="ph:info" class="ml-2 size-5" />
+                          <span>جزییات</span>
+                        </BaseButton>
                       </div>
                     </div>
                   </div>

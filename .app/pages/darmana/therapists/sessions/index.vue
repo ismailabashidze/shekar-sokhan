@@ -194,7 +194,7 @@ onMounted(() => {
           <BaseSelect
             v-model="statusFilter"
             shape="rounded"
-            class="w-40"
+            class="hidden w-40 sm:block"
             @update:model-value="fetchSessions"
           >
             <option value="all">
@@ -216,7 +216,7 @@ onMounted(() => {
             icon="lucide:search"
             placeholder="جستجو در جلسات..."
             :classes="{
-              wrapper: 'w-full sm:w-64',
+              wrapper: 'hidden sm:block w-full sm:w-64',
             }"
           />
 
@@ -239,8 +239,6 @@ onMounted(() => {
             <Icon name="ph:plus-bold" class="size-4" />
             <span>جلسه جدید</span>
           </BaseButton>
-
-          <BaseThemeToggle />
         </div>
       </div>
 
@@ -318,7 +316,7 @@ onMounted(() => {
       </div>
 
       <!-- Results list -->
-      <div v-else class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div v-else class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <TransitionGroup
           enter-active-class="transform-gpu"
           enter-from-class="opacity-0 -translate-y-4"

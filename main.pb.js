@@ -175,16 +175,17 @@ onRecordBeforeCreateRequest((e) => {
                 psychotherapistEvaluation: '',
                 negativeScoresList: [],
                 psychotherapistEvaluationScorePositiveBehavior: [],
-                psychotherapistEvaluationScoreSuggestionsToImprove: []
+                psychotherapistEvaluationScoreSuggestionsToImprove: [],
               })
               const savedAnalysis = $app.dao().saveRecord(placeholderAnalysis)
               analysisId = savedAnalysis.id
-            } catch (analysisError) {
+            }
+            catch (analysisError) {
               console.error('Error creating placeholder analysis:', analysisError)
               // Continue even if analysis creation fails
             }
           }
-          
+
           // Get message count
           const messagesResult = $app
             .dao()
@@ -197,12 +198,12 @@ onRecordBeforeCreateRequest((e) => {
               { sessionId: session.id },
             )
           const messageCount = messagesResult.length || 0
-          
+
           // Calculate session duration
           const startTime = new Date(session.get('start_time') || session.get('created'))
           const endTime = new Date()
           const totalTimePassedMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60))
-          
+
           // Update all required fields
           session.set('status', 'done')
           session.set('end_time', endTime.toISOString())
@@ -211,7 +212,7 @@ onRecordBeforeCreateRequest((e) => {
           if (analysisId) {
             session.set('session_analysis_for_system', analysisId)
           }
-          
+
           $app.dao().saveRecord(session)
         })
       }
@@ -329,16 +330,17 @@ cronAdd('removeCharges', '*/1 * * * *', () => {
               psychotherapistEvaluation: '',
               negativeScoresList: [],
               psychotherapistEvaluationScorePositiveBehavior: [],
-              psychotherapistEvaluationScoreSuggestionsToImprove: []
+              psychotherapistEvaluationScoreSuggestionsToImprove: [],
             })
             const savedAnalysis = $app.dao().saveRecord(placeholderAnalysis)
             analysisId = savedAnalysis.id
-          } catch (analysisError) {
+          }
+          catch (analysisError) {
             console.error('Error creating placeholder analysis:', analysisError)
             // Continue even if analysis creation fails
           }
         }
-        
+
         // Get message count
         const messagesResult = $app
           .dao()
@@ -351,12 +353,12 @@ cronAdd('removeCharges', '*/1 * * * *', () => {
             { sessionId: session.id },
           )
         const messageCount = messagesResult.length || 0
-        
+
         // Calculate session duration
         const startTime = new Date(session.get('start_time') || session.get('created'))
         const endTime = new Date()
         const totalTimePassedMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60))
-        
+
         // Update all required fields
         session.set('status', 'done')
         session.set('end_time', endTime.toISOString())
@@ -365,7 +367,7 @@ cronAdd('removeCharges', '*/1 * * * *', () => {
         if (analysisId) {
           session.set('session_analysis_for_system', analysisId)
         }
-        
+
         $app.dao().saveRecord(session)
       })
     }
@@ -382,5 +384,143 @@ routerAdd('POST', '/deleteAllMessages', (c) => {
   })
 })
 
-// Import session statistics hooks
-import './hooks/session-stats.pb.js'
+/**
+ * Session Statistics Hooks
+ *
+ * This file contains hooks for tracking session statistics in the dashboard_data collection
+ */
+
+// After a new session is created, update dashboard statistics
+onModelAfterCreate((e) => {
+  // Only process sessions collection
+  if (e.model.tableName() !== 'sessions') {
+    return
+  }
+
+  console.log('Session created, updating dashboard statistics...')
+
+  try {
+    // Get or create the dashboard_data record
+    let dashboardData = $app
+      .dao()
+      .findFirstRecordByData('dashboard_data', 'id', 'dashboard-12345')
+
+    if (!dashboardData) {
+      const collection = $app.dao().findCollectionByNameOrId('dashboard_data')
+      dashboardData = new Record(collection, {
+        id: 'dashboard-12345',
+        time_of_usage: 0,
+        count_of_messages: 0,
+        count_of_users: 0,
+        count_of_sessions: 0,
+      })
+    }
+
+    // Increment the count of sessions
+    const currentCount = parseInt(dashboardData.get('count_of_sessions') || 0, 10)
+    dashboardData.set('count_of_sessions', currentCount + 1)
+
+    // Save the updated record
+    $app.dao().saveRecord(dashboardData)
+
+    console.log('Dashboard statistics updated successfully')
+  }
+  catch (error) {
+    console.error('Error updating dashboard statistics:', error)
+  }
+}, 'sessions')
+
+// After a session is updated, update time statistics
+onModelAfterUpdate((e) => {
+  // Only process sessions collection
+  if (e.model.tableName() !== 'sessions') {
+    return
+  }
+
+  // Only process if status changed to "done" or "closed"
+  const newStatus = e.model.get('status')
+  const oldStatus = e.model.oldGet('status')
+
+  if ((newStatus === 'done' || newStatus === 'closed') && oldStatus === 'inprogress') {
+    console.log('Session completed, updating time statistics...')
+
+    try {
+      // Get the dashboard_data record
+      let dashboardData = $app
+        .dao()
+        .findFirstRecordByData('dashboard_data', 'id', 'dashboard-12345')
+
+      if (!dashboardData) {
+        console.log('Dashboard data not found, creating new record')
+        const collection = $app.dao().findCollectionByNameOrId('dashboard_data')
+        dashboardData = new Record(collection, {
+          id: 'dashboard-12345',
+          time_of_usage: 0,
+          count_of_messages: 0,
+          count_of_users: 0,
+          count_of_sessions: 0,
+        })
+      }
+
+      // Get the total time passed from the session
+      const totalTimePassed = e.model.get('total_time_passed') || 0
+      const currentTimeOfUsage = parseInt(dashboardData.get('time_of_usage') || 0, 10)
+
+      // Update the time of usage
+      dashboardData.set('time_of_usage', currentTimeOfUsage + totalTimePassed)
+
+      // Update message count if available
+      const messageCount = e.model.get('count_of_total_messages') || 0
+      const currentMessageCount = parseInt(dashboardData.get('count_of_messages') || 0, 10)
+      dashboardData.set('count_of_messages', currentMessageCount + messageCount)
+
+      // Save the updated record
+      $app.dao().saveRecord(dashboardData)
+
+      console.log('Time and message statistics updated successfully')
+    }
+    catch (error) {
+      console.error('Error updating time statistics:', error)
+    }
+  }
+}, 'sessions')
+
+// Track unique users when a new user is created
+onModelAfterCreate((e) => {
+  // Only process users collection
+  if (e.model.tableName() !== 'users') {
+    return
+  }
+
+  console.log('New user created, updating user statistics...')
+
+  try {
+    // Get the dashboard_data record
+    let dashboardData = $app
+      .dao()
+      .findFirstRecordByData('dashboard_data', 'id', 'dashboard-12345')
+
+    if (!dashboardData) {
+      const collection = $app.dao().findCollectionByNameOrId('dashboard_data')
+      dashboardData = new Record(collection, {
+        id: 'dashboard-12345',
+        time_of_usage: 0,
+        count_of_messages: 0,
+        count_of_users: 0,
+        count_of_sessions: 0,
+      })
+    }
+
+    // Increment the count of unique users
+    const currentCount = parseInt(dashboardData.get('count_of_users') || 0, 10)
+    dashboardData.set('count_of_users', currentCount + 1)
+
+    // Save the updated record
+    $app.dao().saveRecord(dashboardData)
+
+    console.log('User statistics updated successfully')
+  }
+  catch (error) {
+    console.error('Error updating user statistics:', error)
+  }
+}, 'users')

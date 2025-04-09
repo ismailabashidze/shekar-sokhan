@@ -15,6 +15,12 @@ echo "Building the application..."
 cd .app && pnpm build && cd ..
 
 # Ensure the output directory exists on the server
+echo "Stopping PM2 process..."
+ssh $SERVER_USER@$SERVER_IP "pm2 stop front || echo \"No PM2 process to stop\""
+
+echo "Cleaning up old output directory..."
+ssh $SERVER_USER@$SERVER_IP "rm -rf $SERVER_PATH/.output"
+
 echo "Creating output directory on server..."
 ssh $SERVER_USER@$SERVER_IP "mkdir -p $SERVER_PATH/.output"
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
     <!-- Time of Usage Card -->
     <div class="nui-card nui-card-rounded-lg nui-card-default flex items-center gap-2 p-3">
       <div
@@ -77,7 +77,7 @@ const dashboardData = ref({
   time_of_usage: 0,
   count_of_messages: 0,
   count_of_users: 0,
-  count_of_sessions: 0
+  count_of_sessions: 0,
 })
 
 // Format numbers with Persian digits and commas
@@ -89,15 +89,15 @@ const formatNumber = (num) => {
 // Format minutes to hours and minutes in Persian
 const formatMinutes = (minutes) => {
   if (!minutes) return '۰'
-  
+
   // Convert to hours and minutes
   const hours = Math.floor(minutes / 60)
   const remainingMinutes = minutes % 60
-  
+
   if (hours > 0) {
     return `${hours.toLocaleString('fa-IR')}:${remainingMinutes.toString().padStart(2, '0').toLocaleString('fa-IR')}`
   }
-  
+
   return minutes.toLocaleString('fa-IR')
 }
 
@@ -106,15 +106,16 @@ const fetchDashboardData = async () => {
   try {
     const nuxtApp = useNuxtApp()
     const response = await nuxtApp.$pb.collection('dashboard_data').getOne('dashboard-12345')
-    
+
     // Update dashboard data
     dashboardData.value = {
       time_of_usage: response.time_of_usage || 0,
       count_of_messages: response.count_of_messages || 0,
       count_of_users: response.count_of_users || 0,
-      count_of_sessions: response.count_of_sessions || 0
+      count_of_sessions: response.count_of_sessions || 0,
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error fetching dashboard data:', error)
   }
 }

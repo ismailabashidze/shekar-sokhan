@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0] (2025-04-09)
+
+### 🔧 Improvements
+
+* **Deployment:** Enhanced deployment process
+  * Added PM2 process management improvements
+  * Implemented clean deployment with `.output` directory removal
+  * Added safeguards for process stopping and restarting
+  * Improved error handling in deployment script
+
 ## [1.3.0] (2025-04-05)
 
 ### 🔄 System Updates

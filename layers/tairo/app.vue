@@ -25,6 +25,7 @@ useHead({
       <NuxtLoadingIndicator color="var(--color-primary-500)" />
       <NuxtPage />
     </NuxtLayout>
+    <CommonVersionDisplay />
   </div>
 </template>
 <style>

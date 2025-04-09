@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="!isAuthPage"
     class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 hidden h-screen w-20 border-r bg-white sm:block"
   >
     <div class="flex h-full flex-col justify-between">
@@ -70,25 +71,17 @@
 </template>
 
 <script setup>
-// defineProps({
-//   canDelete: {
-//     type: Function,
-//     required: true,
-//   },
-//   changeExpanded: {
-//     type: Function,
-//     required: true,
-//   },
-//   signout: {
-//     type: Function,
-//     required: true,
-//   },
-// })
+import { useRoute } from '#app'
+import { computed } from 'vue'
+
+const route = useRoute()
+const isAuthPage = computed(() => route.path.startsWith('/auth'))
+
 const signout = () => {}
 const changeExpanded = () => {}
 const canDelete = () => {}
 </script>
 
-  <style scoped>
-  /* Add any component-specific styles here */
-  </style>
+<style scoped>
+/* Add any component-specific styles here */
+</style>

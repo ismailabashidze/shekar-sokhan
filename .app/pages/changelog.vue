@@ -7,6 +7,30 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 1.4.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 1.4.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              9 آوریل 2025
+            </p>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              بهبود‌ها
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود فرآیند استقرار:
+                <ul class="list-disc mr-6 mt-1 space-y-1">
+                  <li>بهبود مدیریت فرآیند‌های PM2</li>
+                  <li>پیاده‌سازی استقرار تمیز با حذف دایرکتوری .output</li>
+                  <li>افزودن محافظت‌های لازم برای توقف و راه‌اندازی مجدد فرآیند</li>
+                  <li>بهبود مدیریت خطا در اسکریپت استقرار</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
           <!-- Version 1.3.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">
