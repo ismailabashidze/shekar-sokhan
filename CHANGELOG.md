@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0] (2025-04-09)
+
+### 🛠️ Bug Fixes
+
+* **Session Management:** Fixed session status tracking
+  * Corrected originalData access in PocketBase hooks
+  * Added status change logging for better debugging
+  * Improved session state transition handling
+
 ## [1.4.0] (2025-04-09)
 
 ### 🔧 Improvements
