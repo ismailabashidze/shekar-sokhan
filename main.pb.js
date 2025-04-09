@@ -439,7 +439,10 @@ onModelAfterUpdate((e) => {
 
   // Only process if status changed to "done" or "closed"
   const newStatus = e.model.get('status')
-  const oldStatus = e.model.oldGet('status')
+  console.log(newStatus)
+
+  const oldStatus = e.model.originalData?.status
+  console.log(oldStatus)
 
   if ((newStatus === 'done' || newStatus === 'closed') && oldStatus === 'inprogress') {
     console.log('Session completed, updating time statistics...')
@@ -464,6 +467,7 @@ onModelAfterUpdate((e) => {
 
       // Get the total time passed from the session
       const totalTimePassed = e.model.get('total_time_passed') || 0
+      console.log('e.model.get(\'total_time_passed\')', totalTimePassed)
       const currentTimeOfUsage = parseInt(dashboardData.get('time_of_usage') || 0, 10)
 
       // Update the time of usage

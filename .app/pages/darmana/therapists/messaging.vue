@@ -728,7 +728,6 @@ const handleConfirmEndSession = async () => {
     })
 
     savedAnalysisId = savedAnalysis.id
-
     // Try to update session with the analysis ID
     try {
       await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {

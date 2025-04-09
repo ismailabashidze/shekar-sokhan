@@ -126,7 +126,7 @@
 
 <script setup>
 import { useRoute } from '#app'
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 
 const route = useRoute()
 const isAuthPage = computed(() => route.path.startsWith('/auth'))
@@ -136,8 +136,14 @@ const { user } = useUser()
 const avatarUrl = ref('/img/avatars/1.png')
 
 onMounted(() => {
-  if (localStorage.getItem('user')) {
-    avatarUrl.value = JSON.parse(localStorage.getItem('user')).meta.avatarUrl || '/img/avatars/1.png'
+  try {
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      const user = JSON.parse(userData)
+      avatarUrl.value = user?.meta?.avatarUrl || '/img/avatars/1.png'
+    }
+  } catch (error) {
+    console.warn('Failed to load user avatar:', error)
   }
 })
 </script>
