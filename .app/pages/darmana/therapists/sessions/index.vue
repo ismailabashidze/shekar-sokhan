@@ -250,27 +250,28 @@ onMounted(() => {
       <div v-if="loading" class="py-10">
         <div class="flex flex-col items-center justify-center">
           <div class="mt-8 w-full">
-            <div
-              v-for="i in 5"
-              :key="i"
-              class="mb-4"
-            >
-              <BaseCard shape="curved" class="overflow-hidden">
-                <div class="p-4">
-                  <div class="flex items-center justify-between">
-                    <BasePlaceload class="h-5 w-40 rounded" />
-                    <BasePlaceload class="h-5 w-20 rounded" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                v-for="i in 5"
+                :key="i"
+              >
+                <BaseCard shape="curved" class="overflow-hidden">
+                  <div class="p-4">
+                    <div class="flex items-center justify-between">
+                      <BasePlaceload class="h-5 w-40 rounded" />
+                      <BasePlaceload class="h-5 w-20 rounded" />
+                    </div>
+                    <div class="mt-4 flex items-center justify-between">
+                      <BasePlaceload class="h-4 w-32 rounded" />
+                      <BasePlaceload class="h-4 w-24 rounded" />
+                    </div>
+                    <div class="mt-3 flex items-center justify-between">
+                      <BasePlaceload class="h-4 w-28 rounded" />
+                      <BasePlaceload class="h-8 w-24 rounded" />
+                    </div>
                   </div>
-                  <div class="mt-4 flex items-center justify-between">
-                    <BasePlaceload class="h-4 w-32 rounded" />
-                    <BasePlaceload class="h-4 w-24 rounded" />
-                  </div>
-                  <div class="mt-3 flex items-center justify-between">
-                    <BasePlaceload class="h-4 w-28 rounded" />
-                    <BasePlaceload class="h-8 w-24 rounded" />
-                  </div>
-                </div>
-              </BaseCard>
+                </BaseCard>
+              </div>
             </div>
           </div>
         </div>

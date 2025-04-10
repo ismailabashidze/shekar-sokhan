@@ -750,6 +750,7 @@ const handleConfirmEndSession = async () => {
     isReportModalOpen.value = false
 
     // Navigate to analysis page
+    console.log('Navigating to analysis page with ID:', savedAnalysisId)
     await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
   }
   catch (error) {

@@ -252,12 +252,12 @@ const closeAlphaModal = () => {
               <div class="bg-primary-800 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
                 <div class="relative h-[150px] w-[320px] shrink-0 sm:h-[175px]">
                   <img
-                    class="pointer-events-none absolute start-6 top-0 sm:-start-10"
-                    src="/img/illustrations/dashboards/writer/readers.svg"
+                    class="pointer-events-none absolute start-0 top-0 sm:-start-10"
+                    src="/img/illustrations/dashboards/writer/readers.png"
                     alt="Readers illustration"
                   >
                 </div>
-                <div class="mt-6 grow sm:mt-0">
+                <div class="mt-[80px] grow sm:mt-0">
                   <div class="pb-4 text-center sm:pb-0 sm:text-right">
                     <BaseHeading tag="h1" class="text-white opacity-90">
                       <span>سلام، {{ user?.phoneNumber || 'کاربر عزیز' }} ! 👋</span>
@@ -319,7 +319,7 @@ const closeAlphaModal = () => {
                     </div>
                   </Transition>
                 </div>
-                <div class="col-span-4">
+                <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
                     <InfoImage
                       rounded="lg"
@@ -329,7 +329,7 @@ const closeAlphaModal = () => {
                     />
                   </BaseCard>
                 </div>
-                <div class="col-span-4">
+                <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
                     <InfoImage
                       rounded="lg"
@@ -339,11 +339,11 @@ const closeAlphaModal = () => {
                     />
                   </BaseCard>
                 </div>
-                <div class="col-span-4">
+                <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
                     <InfoImage
                       rounded="lg"
-                      image="/img/illustrations/widgets/1.svg"
+                      image="/img/illustrations/widgets/1.png"
                       title="برنامه ریزی و اجرا"
                       text="برای کارتان برنامه ریزی کنید"
                     />

@@ -176,7 +176,7 @@ function getRandomColor() {
               :key="i"
               class="flex flex-col"
             >
-              <BaseCard shape="curved" class="overflow-hidden flex flex-col">
+              <BaseCard shape="curved" class="flex flex-col overflow-hidden">
                 <div class="bg-muted-50 dark:bg-muted-800/30 p-6">
                   <div class="flex items-center justify-between">
                     <BasePlaceload class="h-4 w-20 rounded" />
@@ -218,7 +218,7 @@ function getRandomColor() {
             >
             <img
               class="hidden dark:block"
-              src="/img/illustrations/placeholders/flat/placeholder-search-2-dark.svg"
+              src="/img/illustrations/placeholders/flat/placeholder-search.png"
               alt="Placeholder image"
             >
           </template>
@@ -252,7 +252,7 @@ function getRandomColor() {
             :key="therapist.id"
             class="flex flex-col"
           >
-            <BaseCard shape="curved" class="overflow-hidden flex flex-col">
+            <BaseCard shape="curved" class="flex flex-col overflow-hidden">
               <div class="bg-muted-50 dark:bg-muted-800/30 p-6">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
@@ -266,7 +266,7 @@ function getRandomColor() {
                   </div>
                 </div>
               </div>
-              <div class="flex p-6 therapist-card-content">
+              <div class="therapist-card-content flex p-6">
                 <div class="mb-3 flex w-full items-center justify-center">
                   <BaseAvatar
                     :src="therapist.src"
@@ -290,7 +290,7 @@ function getRandomColor() {
                     {{ therapist.position }}
                   </BaseParagraph>
                 </div>
-                <div class="mt-4 mb-6 text-center">
+                <div class="mb-6 mt-4 text-center">
                   <BaseParagraph size="xs" class="text-muted-500 dark:text-muted-400 therapist-description">
                     {{ therapist.description }}
                   </BaseParagraph>

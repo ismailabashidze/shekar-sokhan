@@ -100,7 +100,8 @@ const fetchDeeds = async () => {
       perPage: itemsPerPage.value,
     })
 
-    deeds.value = result?.items || []
+    const items = result?.items || []
+    deeds.value = items.slice().reverse()
     totalDeeds.value = result?.total || 0
 
     // Get total counts for types and difficulties
