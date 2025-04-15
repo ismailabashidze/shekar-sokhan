@@ -934,7 +934,7 @@ const handleAudioSend = () => {
           <div
             class="flex h-16 w-full items-center justify-between px-4 sm:px-8"
           >
-            <div class="flex items-center gap-2">
+            <div class="mt-[140px] flex items-center gap-2 md:mt-4">
               <div class="flex">
                 <BaseMessage
                   v-if="!showNoCharge"

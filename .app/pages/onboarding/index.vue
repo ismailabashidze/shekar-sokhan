@@ -89,79 +89,81 @@ const pasteCouponCode = () => {
         <div
           class="divide-muted-200 dark:divide-muted-700 grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0"
         >
-          <div class="flex flex-col p-8">
-            <BaseThemeToggle />
-            <BaseAvatar
-              class="mx-auto"
-              size="xl"
-              src="/img/avatars/mana.jpg"
-              badge-src="/img/logo.png"
-            />
-            <div class="mx-auto mb-4 max-w-xs text-center">
-              <BaseHeading
-                as="h2"
-                size="md"
-                weight="medium"
-                class="mt-4"
-              >
-                ذهنا اولین
-                <span class="text-primary-500">سکوی هوش مصنوعی</span>
-                به زبان فارسی را ساخته‌است که به شما حمایت‌های
-                روانشناختی ارائه می‌دهد.
-              </BaseHeading>
-            </div>
-            <div class="mx-auto max-w-sm">
-              <BaseCard elevated class="p-6">
+          <div class="order-2 sm:order-1">
+            <div class="flex flex-col p-8">
+              <BaseThemeToggle />
+              <BaseAvatar
+                class="mx-auto"
+                size="xl"
+                src="/img/avatars/mana.jpg"
+                badge-src="/img/logo.png"
+              />
+              <div class="mx-auto mb-4 max-w-xs text-center">
                 <BaseHeading
-                  as="h3"
-                  size="xs"
+                  as="h2"
+                  size="md"
                   weight="medium"
-                  class="text-muted-400 mb-2 !text-[0.65rem] uppercase"
+                  class="mt-4"
                 >
-                  پیامی از طرف تیم ذهنا
+                  ذهنا اولین
+                  <span class="text-primary-500">سکوی هوش مصنوعی</span>
+                  به زبان فارسی را ساخته‌است که به شما حمایت‌های
+                  روانشناختی ارائه می‌دهد.
                 </BaseHeading>
-                <BaseParagraph
-                  size="xs"
-                  class="text-muted-500 dark:text-muted-400 text-justify"
-                >
-                  برای ما، خوشحالی و سرزندگی شما اولویت اول را دارد. از ابتدا
-                  این سامانه برای بهتر کردن حال شما و کمک به شما (و نه انگیزه
-                  های مالی) توسعه داده شده است. باید دانست که این خدمت‌رسانی
-                  برای تیم توسعه هزینه‌هایی دارد که ما را مجبور به دریافت هزینه
-                  از شما کرده‌است. دوست داشتیم که این خدمت را رایگان در اختیار
-                  شما بگذاریم، ولی می‌دانیم که درک می‌کنید که راه‌اندازی،
-                  نگه‌داری و توسعه این نرم‌افزار دانش‌بنیان هزینه‌هایی دارد که
-                  با کمک شما آن‌ها را پوشش می‌دهیم.
-                </BaseParagraph>
-              </BaseCard>
-
-              <div class="mt-6 flex items-center justify-between gap-2">
-                <BaseButton
-                  color="primary"
-                  class="w-full"
-                >
-                  پرداخت اشتراک
-                </BaseButton>
-                <BaseButton
-                  class="w-full"
-                  :loading="isSubmitting"
-                  @click="openModal"
-                >
-                  کد تخفیف دارم
-                </BaseButton>
               </div>
-              <div class="mt-2 flex items-center justify-between gap-2">
-                <BaseButton
-                  to="/deeds/start"
-                  color="success"
-                  class="w-full"
-                >
-                  دریافت کد در قبال کار نیک
-                </BaseButton>
+              <div class="mx-auto max-w-sm">
+                <BaseCard elevated class="p-6">
+                  <BaseHeading
+                    as="h3"
+                    size="xs"
+                    weight="medium"
+                    class="text-muted-400 mb-2 !text-[0.65rem] uppercase"
+                  >
+                    پیامی از طرف تیم ذهنا
+                  </BaseHeading>
+                  <BaseParagraph
+                    size="xs"
+                    class="text-muted-500 dark:text-muted-400 text-justify"
+                  >
+                    برای ما، خوشحالی و سرزندگی شما اولویت اول را دارد. از ابتدا
+                    این سامانه برای بهتر کردن حال شما و کمک به شما (و نه انگیزه
+                    های مالی) توسعه داده شده است. باید دانست که این خدمت‌رسانی
+                    برای تیم توسعه هزینه‌هایی دارد که ما را مجبور به دریافت هزینه
+                    از شما کرده‌است. دوست داشتیم که این خدمت را رایگان در اختیار
+                    شما بگذاریم، ولی می‌دانیم که درک می‌کنید که راه‌اندازی،
+                    نگه‌داری و توسعه این نرم‌افزار دانش‌بنیان هزینه‌هایی دارد که
+                    با کمک شما آن‌ها را پوشش می‌دهیم.
+                  </BaseParagraph>
+                </BaseCard>
+
+                <div class="mt-6 flex items-center justify-between gap-2">
+                  <BaseButton
+                    color="primary"
+                    class="w-full"
+                  >
+                    پرداخت اشتراک
+                  </BaseButton>
+                  <BaseButton
+                    class="w-full"
+                    :loading="isSubmitting"
+                    @click="openModal"
+                  >
+                    کد تخفیف دارم
+                  </BaseButton>
+                </div>
+                <div class="mt-2 flex items-center justify-between gap-2">
+                  <BaseButton
+                    to="/deeds/start"
+                    color="success"
+                    class="w-full"
+                  >
+                    دریافت کد در قبال کار نیک
+                  </BaseButton>
+                </div>
               </div>
             </div>
           </div>
-          <div>
+          <div class="order-1 sm:order-2">
             <div class="flex flex-col p-8">
               <BaseHeading
                 tag="h2"
