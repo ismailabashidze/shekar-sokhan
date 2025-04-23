@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0] (2025-04-23)
+
+### 🚀 Features
+* Organized emoji picker into emotion-based categories with tabs and horizontal scroll controls.
+* Added new categories (`ترس`, `حیوانات`, `غذا`, `ورزش`) and expanded emoji sets.
+
+### 🎨 UI Improvements
+* Improved dark mode contrast for category tabs.
+* Hidden scrollbar and smooth scrolling animations for tab navigation.
+
 ## [1.5.0] (2025-04-09)
 
 ### 🛠️ Bug Fixes
