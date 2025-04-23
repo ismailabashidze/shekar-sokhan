@@ -23,6 +23,7 @@ export default defineAppConfig({
       //   ],
       // },
       navigation: {
+        startOpen: false,
         logo: {
           component: 'img',
           props: {

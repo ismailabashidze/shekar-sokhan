@@ -1,24 +1,10 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { watch, ref, onMounted, onUnmounted, nextTick } from 'vue'
-import AudioUser from '@/components/global/AudioUser.vue'
-import { useUser } from '@/composables/user'
-import type { Therapist, Message } from '@/types'
 
 definePageMeta({
   title: 'گفتگو با روانشناس',
   layout: 'empty',
-  preview: {
-    title: 'Messaging app',
-    description: 'For chat and messaging apps',
-    categories: ['dashboards'],
-    src: '/img/screens/dashboards-messaging.png',
-    srcDark: '/img/screens/dashboards-messaging-dark.png',
-    order: 26,
-  },
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
-const { open } = usePanels()
 const { getTherapists } = useTherapist()
 const { getCurrentSession, endSession, createSession } = useTherapistSession()
 const { getMessages, sendMessage } = useTherapistsMessages()
@@ -40,12 +26,13 @@ const showNoCharge = ref(true)
 const remainingTime = ref<Date>()
 const timeToShow = ref<number>()
 const startChargeTime = ref<Date>()
-const search = ref('')
-const { user, role } = useUser()
 const sessionId = ref<string | null>(null)
 const sessionElapsedTime = ref(0)
 const timeUpdateInterval = ref<NodeJS.Timeout | null>(null)
 const userSubscription = ref<any>(null) // Initialize with null
+const currentLoadingTherapistId = ref<string | null>(null)
+const showScrollButton = ref(false)
+const isAIResponding = ref(false)
 
 const { generateAnalysis, createAnalysis } = useSessionAnalysis()
 
@@ -53,21 +40,24 @@ const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
 }
 
-const emojis = [
-  '😀', '😃', '😄', '😁', '😆', '😂', '🤣', '😊',
-  '😇', '🙃', '😉', '😊', '😋', '😎', '😍',
-  '😘', '😗', '😙', '😚', '😛', '😝', '😞',
-  '😟', '😠', '😡', '😢', '😣', '😤', '😥',
-  '😦', '😧', '😨', '😩', '😪', '😫', '😬',
-  '😭', '😮', '😯', '😰', '😱', '😲', '😳',
-  '😴', '😵', '😶', '😷', '😸', '😹', '😺',
-  '😻', '😼', '😽', '😾', '😿', '🙀', '🙂',
-  '🙃', '🙄', '🙅', '🙆', '🙇', '🙈',
-  '🙉', '🙊', '🙋', '🙌', '🙍', '🙎', '🙏',
-  '💪', '🤝', '❤️', '💔', '⭐', '🌟', '🎉',
-  '🎊', '🎈', '🎁', '👨‍⚕️', '🏥',
+const emojiCategories = [
+  { name: 'شاد', emojis: ['😀', '😃', '😄', '😁', '😆', '😂', '🤣', '😊', '😇', '😉', '😋', '😎', '😍', '😘', '🥳', '🤗', '😜', '😝'] },
+  { name: 'غمگین', emojis: ['😢', '😭', '😞', '😔', '😟', '😥', '😓', '🥺', '💧', '😪', '😿', '😿'] },
+  { name: 'عصبانی', emojis: ['😠', '😡', '😤', '🤬', '😒', '👿', '💢', '👺', '👹', '🤯'] },
+  { name: 'عشق', emojis: ['❤️', '💕', '💗', '💓', '💖', '😍', '🥰', '😘', '💘', '💝', '💋'] },
+  { name: 'تعجب', emojis: ['😲', '😯', '😦', '😧', '😱', '😨', '🧐', '😮‍💨', '😵‍💫', '🤔'] },
+  { name: 'ترس', emojis: ['😱', '😨', '😰', '😖', '😧', '😣', '👻', '🕷️', '🕸️'] },
+  { name: 'حیوانات', emojis: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵'] },
+  { name: 'غذا', emojis: ['🍏', '🍎', '🍌', '🍉', '🍇', '🍓', '🍔', '🍕', '🍟', '🍿', '🍩', '🍪', '🧁', '🍰', '🍣'] },
+  { name: 'ورزش', emojis: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🥊'] },
 ]
-
+const currentCategory = ref(emojiCategories[0].name)
+const tabContainerRef = ref<HTMLElement | null>(null)
+const scrollTabs = (direction: 'left' | 'right') => {
+  if (!tabContainerRef.value) return
+  const amount = tabContainerRef.value.clientWidth * 0.7
+  tabContainerRef.value.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' })
+}
 const insertEmoji = (emoji: string) => {
   newMessage.value += emoji
 }
@@ -84,58 +74,10 @@ onClickOutside(emojiPickerRef, () => {
   showEmojiPicker.value = false
 })
 
-const initializeFromRoute = async () => {
-  const therapistId = route.query.therapistId as string
-  if (!therapistId || showNoCharge.value) return
-
-  if (conversations.value.length === 0) {
-    const therapists = await getTherapists()
-    conversations.value = therapists.map(p => ({ id: p.id, user: p }))
-  }
-
-  const conversation = conversations.value.find(c => c.user.id === therapistId)
-  if (conversation) {
-    activeTherapistId.value = therapistId
-    try {
-      const session = await getCurrentSession(therapistId)
-      if (session) {
-        activeSession.value = session
-        sessionId.value = session.id
-        const loadedMessages = await getMessages(session.id)
-        messages.value = loadedMessages.map(msg => ({
-          ...msg,
-          timestamp: msg.time,
-        }))
-        scrollToBottom()
-        startSessionTimer() // Start session timer when messages are loaded
-      }
-      else if (!showNoCharge.value) {
-        const newSession = await createSession(therapistId)
-        if (newSession) {
-          activeSession.value = newSession
-          sessionId.value = newSession.id
-          messages.value = []
-          startSessionTimer() // Start session timer for new session
-        }
-      }
-    }
-    catch (error) {
-      console.error('Error initializing session:', error)
-      messages.value = []
-    }
-  }
-}
-
-const currentLoadingTherapistId = ref<string | null>(null)
-
 const formatTime = (timestamp: string | Date) => {
   const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp
   return date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
 }
-
-const showScrollButton = ref(false)
-const isAIResponding = ref(false)
-
 const scrollToBottom = () => {
   nextTick(() => {
     if (chatEl.value) {
@@ -261,7 +203,6 @@ const getRandomColor = () => {
 
 const {
   streamChat,
-  processing: aiProcessing,
   models,
   selectedModel,
   loading: modelsLoading,
@@ -414,9 +355,7 @@ watch(messages, () => {
   }
 }, { deep: true })
 
-const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
-const showTenMin = ref(false)
-const isGoingToDone = ref(false)
+const { pause, resume } = useInterval(1000, { controls: true })
 
 const checkForHalfTime = () => {
   if (!startChargeTime.value || !timeToShow.value) return false
@@ -749,8 +688,6 @@ const handleConfirmEndSession = async () => {
 
     isReportModalOpen.value = false
 
-    // Navigate to analysis page
-    console.log('Navigating to analysis page with ID:', savedAnalysisId)
     await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
   }
   catch (error) {
@@ -907,7 +844,7 @@ const handleAudioSend = () => {
               />
             </button>
             <button
-              class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-2 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
               title="پایان جلسه"
               @click="handleEndSession"
             >
@@ -1224,9 +1161,41 @@ const handleAudioSend = () => {
                             <Icon name="lucide:x" class="size-4" />
                           </BaseButtonIcon>
                         </div>
-                        <div class="grid grid-cols-9 gap-x-3 p-2">
+                        <div class="dark:bg-muted-900 border-muted-200 dark:border-muted-700 relative flex items-center overflow-hidden border-b bg-white p-2">
                           <button
-                            v-for="emoji in emojis"
+                            type="button"
+                            class="text-muted-600 hover:text-primary-500 p-1"
+                            @click="scrollTabs('left')"
+                          >
+                            <Icon name="lucide:chevron-left" class="size-5" />
+                          </button>
+                          <div ref="tabContainerRef" class="hide-scrollbar flex flex-1 space-x-2 overflow-x-auto p-1">
+                            <button
+                              v-for="cat in emojiCategories"
+                              :key="cat.name"
+                              type="button"
+                              :class="[
+                                'whitespace-nowrap rounded-t-lg px-3 py-1 transition-colors duration-150',
+                                currentCategory === cat.name
+                                  ? 'bg-muted-100 dark:bg-muted-700 text-muted-800 border-primary-500 dark:border-primary-400 border-b-2 dark:text-white'
+                                  : 'text-muted-600 dark:text-muted-400 hover:bg-muted-700 dark:hover:bg-muted-600 bg-transparent hover:text-white'
+                              ]"
+                              @click="currentCategory = cat.name"
+                            >
+                              {{ cat.name }}
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            class="text-muted-600 hover:text-primary-500 p-1"
+                            @click="scrollTabs('right')"
+                          >
+                            <Icon name="lucide:chevron-right" class="size-5" />
+                          </button>
+                        </div>
+                        <div class="grid grid-cols-8 gap-2 p-2">
+                          <button
+                            v-for="emoji in emojiCategories.find(c => c.name === currentCategory).emojis"
                             :key="emoji"
                             type="button"
                             class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer items-center justify-center rounded p-1 text-2xl"
@@ -1595,4 +1564,6 @@ const handleAudioSend = () => {
 #no-money-message {
   justify-content: space-evenly;
 }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>

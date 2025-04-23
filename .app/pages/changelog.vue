@@ -7,6 +7,32 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 1.6.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 1.6.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              23 آوریل 2025
+            </p>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>طبقه‌بندی ایموجی‌ها بر اساس احساسات با رابط تب و اسکرول افقی</li>
+              <li>افزودن دسته‌های جدید (ترس، حیوانات، غذا، ورزش) و گسترش مجموعه ایموجی‌ها</li>
+            </ul>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
+              بهبود‌ها
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود کنتراست تب‌ها در حالت تاریک</li>
+              <li>مخفی‌سازی نوار اسکرول و انیمیشن پیمایش نرم برای ناوبری تب‌ها</li>
+            </ul>
+          </div>
+
           <!-- Version 1.5.1 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

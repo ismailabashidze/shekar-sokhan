@@ -18,10 +18,12 @@ onMounted(() => {
     color: 'success',
     timeout: 2000,
   })
-
+  setTimeout(() => {
   // Redirect to login page
-  router.push('/auth/login')
+    router.push('/auth/login')
+  }, 2000)
 })
+useHead({ htmlAttrs: { dir: 'rtl' } })
 </script>
 
 <template>

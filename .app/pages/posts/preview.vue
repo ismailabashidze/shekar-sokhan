@@ -28,6 +28,7 @@ const publishDate = computed(() => previewData.value.publishDate || '')
 const readTime = computed(() => previewData.value.readTime || '')
 const isFeatured = computed(() => previewData.value.isFeatured === true || previewData.value.isFeatured === 'true')
 const allowComments = computed(() => previewData.value.allowComments === true || previewData.value.allowComments === 'true')
+const secretMessage = computed(() => previewData.value.secretMessage || '')
 
 const categoryIcon = computed(() => {
   const icons = {
@@ -71,6 +72,11 @@ function goBack() {
             <span class="text-muted-400 text-xs"><Icon name="ph:calendar" class="me-1 size-3" />{{ publishDate }}</span>
             <span class="text-muted-400 text-xs"><Icon name="ph:clock" class="me-1 size-3" />{{ readTime }} دقیقه</span>
             <span v-if="allowComments" class="text-success-500 text-xs"><Icon name="ph:chat-circle-dots" class="me-1 size-3" />نظردهی فعال است</span>
+          </div>
+          <div v-if="secretMessage" class="mt-8 rounded-xl border border-dashed border-primary-300 bg-primary-50 p-4 text-center text-primary-700 text-lg font-bold flex flex-col items-center gap-2">
+            <Icon name="ph:lock-key" class="size-7 mb-2" />
+            <span>{{ secretMessage }}</span>
+            <span class="text-xs text-primary-400 mt-1">پیام مخفی نویسنده!</span>
           </div>
         </div>
       </div>

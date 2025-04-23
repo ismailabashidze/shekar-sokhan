@@ -509,7 +509,7 @@ const closeAlphaModal = () => {
         </div>
       </div>
     </div>
-    <BaseCard class="mt-5">
+    <BaseCard class="my-5">
       <div class="m-5">
         <BaseHeading
           as="h3"

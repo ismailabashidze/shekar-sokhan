@@ -60,6 +60,22 @@ export interface PatientGenerateOutput {
   moodAndCurrentEmotions: string
 }
 
+export interface TherapistGenerateInput {
+  name: string
+  specialty: string
+  shortDescription: string
+}
+
+export interface TherapistGenerateOutput {
+  longDescription: string
+  definingTraits: string
+  backStory: string
+  personality: string
+  appearance: string
+  approach: string
+  expertise: string
+}
+
 export function useOpenRouter() {
   const config = useRuntimeConfig()
 
@@ -508,6 +524,24 @@ export function useOpenRouter() {
     }
   }
 
+  /**
+   * Generate a list of educational and psychological goals for a given article topic (in Persian, as a list)
+   * @param {string} topic - موضوع مقاله یا خلاصه کوتاه
+   * @returns {Promise<string>} - لیست اهداف به صورت رشته چندخطی
+   */
+  async function generateGoalsList(topic: string): Promise<string> {
+    const prompt = `با توجه به موضوع زیر، یک لیست از اهداف آموزشی و روانشناختی که خواننده پس از مطالعه این مقاله به دست می‌آورد به زبان فارسی بنویس. تاکید: خروجی باید فقط یک لیست باشد و هر هدف در یک خط مجزا نوشته شود.\nموضوع: ${topic}`
+    const messages = [
+      { role: 'system', content: 'شما یک دستیار متخصص تولید محتوای روانشناسی هستید.' },
+      { role: 'user', content: prompt },
+    ]
+    let result = ''
+    await streamChat(messages, {}, (chunk) => {
+      result += chunk.choices?.[0]?.delta?.content || ''
+    })
+    return result
+  }
+
   // Initialize models on composable creation
   onMounted(() => {
     fetchModels()
@@ -530,5 +564,6 @@ export function useOpenRouter() {
     // Patient generation
     generate,
     generateTherapist,
+    generateGoalsList,
   }
 }

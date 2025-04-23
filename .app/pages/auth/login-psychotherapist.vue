@@ -104,7 +104,10 @@ const loginWithGoogle = async () => {
   const authData = await nuxtApp.$pb
     .collection('users')
     .authWithOAuth2({ provider: 'google' })
-  setUser(authData, 'psychotherapist')
+  // Persist Google OAuth meta into PocketBase user record
+  await nuxtApp.$pb.collection('users').update(authData.record.id, { meta: authData.meta })
+  // Store only the user record
+  setUser(authData.record, 'psychotherapist')
 
   toaster.clearAll()
   toaster.show({

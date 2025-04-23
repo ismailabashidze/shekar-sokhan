@@ -1,24 +1,14 @@
 <script setup lang="ts">
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
+import { computed } from 'vue'
 
 const props = defineProps<{
   horizontal?: boolean
 }>()
 const { user } = useUser()
 
-const avatarUrl = ref('/img/avatars/1.png')
-
-onMounted(() => {
-  try {
-    const userData = localStorage.getItem('user')
-    if (userData) {
-      const user = JSON.parse(userData)
-      avatarUrl.value = user?.meta?.avatarUrl || '/img/avatars/1.png'
-    }
-  } catch (error) {
-    console.warn('Failed to load user avatar:', error)
-  }
-})
+const avatarUrl = computed(() => user.value.meta?.avatarUrl || '/img/avatars/1.png')
+const displayName = computed(() => user.value.meta?.name || 'کاربر جدید')
 </script>
 
 <template>
@@ -69,13 +59,11 @@ onMounted(() => {
                 >
               </div>
               <div class="ms-3 text-right leading-6">
-                <h6
-                  class="font-heading text-muted-800 text-sm font-medium dark:text-white"
-                >
-                  {{ user.record.name ? user.record.name : 'کاربر جدید' }}
+                <h6 class="font-heading text-muted-800 text-sm font-medium dark:text-white">
+                  {{ displayName }}
                 </h6>
                 <p class="text-muted-400 font-sans text-xs">
-                  {{ user.record.role == 'user' ? 'کاربر' : 'ادمین' }}
+                  {{ user.role === 'user' ? 'کاربر' : 'ادمین' }}
                 </p>
               </div>
             </div>
@@ -94,10 +82,8 @@ onMounted(() => {
               >
                 <Icon name="ph:user-circle-duotone" class="size-5" />
                 <div class="ms-3 text-right leading-7">
-                  <h6
-                    class="font-heading text-muted-800 text-xs font-medium leading-none dark:text-white"
-                  >
-                    {{ user.record.name ? user.record.name : 'کاربر جدید' }}
+                  <h6 class="font-heading text-muted-800 text-xs font-medium leading-none dark:text-white">
+                    {{ displayName }}
                   </h6>
                   <p class="text-muted-400 font-sans text-xs">
                     مشاهده پروفایل

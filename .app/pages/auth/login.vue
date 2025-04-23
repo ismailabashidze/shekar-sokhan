@@ -6,14 +6,6 @@ import { z } from 'zod'
 definePageMeta({
   layout: 'empty',
   title: 'ورود',
-  preview: {
-    title: 'ورود',
-    description: 'برای سامانه ذهنا',
-    categories: ['layouts', 'authentication'],
-    src: '/img/screens/auth-login-2.png',
-    srcDark: '/img/screens/auth-login-2-dark.png',
-    order: 97,
-  },
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
@@ -23,16 +15,12 @@ const VALIDATION_TEXT = {
   PASSWORD_REQUIRED: 'رمز عبور نیاز است',
 }
 
-// This is the Zod schema for the form input
-// It's used to define the shape that the form data will have
 const zodSchema = z.object({
   email: z.string().email(VALIDATION_TEXT.EMAIL_REQUIRED),
   password: z.string().min(1, VALIDATION_TEXT.PASSWORD_REQUIRED),
   trustDevice: z.boolean(),
 })
 
-// Zod has a great infer method that will
-// infer the shape of the schema into a TypeScript type
 type FormInput = z.infer<typeof zodSchema>
 
 const validationSchema = toTypedSchema(zodSchema)
@@ -46,57 +34,27 @@ const {
   handleSubmit,
   isSubmitting,
   setFieldError,
-  meta,
-  values,
-  errors,
-  resetForm,
-  setFieldValue,
-  setErrors,
 } = useForm({
   validationSchema,
-  initialValues,
 })
 
 const router = useRouter()
 const toaster = useToaster()
 
-// This is where you would send the form data to the server
 const onSubmit = handleSubmit(async (values) => {
-  // here you have access to the validated form values
-  console.log('auth-success', values)
-
   try {
-    // fake delay, this will make isSubmitting value to be true
     await new Promise((resolve, reject) => {
-      if (values.password !== 'password') {
-        // simulate a backend error
-        setTimeout(
-          () => reject(new Error('Fake backend validation error')),
-          2000,
-        )
-      }
+      setTimeout(() => reject(new Error('backend validation error')), 2000)
       setTimeout(resolve, 4000)
-    })
-
-    toaster.clearAll()
-    toaster.show({
-      title: 'Success',
-      message: `خوش آمدید`,
-      color: 'success',
-      icon: 'ph:user-circle-fill',
-      closable: true,
     })
   }
   catch (error: any) {
-    // this will set the error on the form
-    if (error.message === 'Fake backend validation error') {
+    if (error.message === 'backend validation error') {
       setFieldError('email', 'نام کاربری یا رمز عبور اشتباه است')
       setFieldError('password', 'نام کاربری یا رمز عبور اشتباه است')
     }
     return
   }
-
-  router.push('/dashboards')
 })
 const nuxtApp = useNuxtApp()
 const { setUser } = useUser()
@@ -104,7 +62,26 @@ const loginWithGoogle = async () => {
   const authData = await nuxtApp.$pb
     .collection('users')
     .authWithOAuth2({ provider: 'google' })
-  setUser(authData, 'user')
+  await nuxtApp.$pb.collection('users').update(authData.record.id, { meta: authData.meta })
+  const record = authData.record
+  // Build MetaObj explicitly with defaults
+  const pbMeta = authData.meta as Partial<MetaObj> || {}
+  const appUser: User = {
+    username: record.username,
+    email: record.email,
+    hasCharge: record.hasCharge as boolean,
+    startChargeTime: record.startChargeTime as string,
+    expireChargeTime: record.expireChargeTime as string,
+    role: record.role as string,
+    meta: {
+      avatarUrl: pbMeta.avatarUrl ?? '',
+      expiry: pbMeta.expiry ?? '',
+      isNew: pbMeta.isNew ?? false,
+      email: pbMeta.email ?? record.email,
+      name: pbMeta.name ?? '',
+    } as MetaObj,
+  }
+  await setUser(appUser, 'user')
 
   toaster.clearAll()
   toaster.show({
@@ -116,7 +93,7 @@ const loginWithGoogle = async () => {
   })
   setTimeout(() => {
     router.push('/dashboard')
-  }, 2000)
+  }, 1000)
 }
 
 if (nuxtApp.$pb.authStore.isValid) {

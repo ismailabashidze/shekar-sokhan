@@ -81,7 +81,7 @@ const fetchTherapists = async () => {
         done: 0,
         status: therapist.isActive ? 0 : 1,
       },
-      description: therapist.shortDescription || therapist.longDescription || '',
+      description: therapist.definingTraits || therapist.longDescription || '',
     }))
 
     data.value = { data: mappedTherapists }
@@ -237,7 +237,7 @@ function getRandomColor() {
       <!-- Results grid -->
       <div
         v-else
-        class="mt-8 grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        class="mt-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
         <TransitionGroup
           enter-active-class="transform-gpu"
@@ -286,7 +286,7 @@ function getRandomColor() {
                   >
                     {{ therapist.username }}
                   </BaseHeading>
-                  <BaseParagraph size="sm" class="text-muted-400">
+                  <BaseParagraph size="sm" class="text-muted-400 mt-2">
                     {{ therapist.position }}
                   </BaseParagraph>
                 </div>

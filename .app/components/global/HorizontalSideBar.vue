@@ -83,7 +83,7 @@
               <BaseDropdownItem
                 to="/layouts/profile"
                 title="مشاهده پروفایل"
-                :text=" user.record.name ? user.record.name : 'کاربر جدید' "
+                :text="displayName"
                 rounded="sm"
               />
 
@@ -126,26 +126,17 @@
 
 <script setup>
 import { useRoute } from '#app'
-import { computed, ref, onMounted } from 'vue'
+import { computed } from 'vue'
 
 const route = useRoute()
 const isAuthPage = computed(() => route.path.startsWith('/auth'))
 console.log(isAuthPage.value)
 
 const { user } = useUser()
-const avatarUrl = ref('/img/avatars/1.png')
-
-onMounted(() => {
-  try {
-    const userData = localStorage.getItem('user')
-    if (userData) {
-      const user = JSON.parse(userData)
-      avatarUrl.value = user?.meta?.avatarUrl || '/img/avatars/1.png'
-    }
-  } catch (error) {
-    console.warn('Failed to load user avatar:', error)
-  }
-})
+console.log(user.value)
+// Computed avatar and name from user.meta
+const avatarUrl = computed(() => user.value.meta?.avatarUrl || '/img/avatars/1.png')
+const displayName = computed(() => user.value.meta?.name || 'کاربر جدید')
 </script>
 
   <style scoped>
