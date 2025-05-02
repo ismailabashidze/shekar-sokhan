@@ -167,7 +167,6 @@ const handleDiscountRequest = async () => {
     // Generate code
     const code = 'DEED-' + Math.random().toString(36).substring(2, 8).toUpperCase()
     discountCode.value = code
-
     // Create coupon
     await generateCoupon({
       code,

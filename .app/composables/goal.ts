@@ -21,7 +21,7 @@ export function useGoal() {
   const { user } = useUser()
   const getGoals = async () => {
     const { items } = await nuxtApp.$pb.collection('SelectedTherapicGoals').getList(1, 500, {
-      filter: 'currentDivision=' + user.value.record.currentDeletionDivider + ` && user.id = "${user.value.record.id}"`,
+      filter: 'currentDivision=' + user.value.currentDeletionDivider + ` && user.id = "${user.value.id}"`,
       sort: '+created',
       expand: 'generalTherapicGoal',
     })

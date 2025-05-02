@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0] (2025-05-02)
+
+### 🚀 Features
+
+- Bumped version to 1.7.0 (package.json & .app/components/common/VersionDisplay.vue)
+
+### 🩹 Bug Fixes
+
+- Refactored user object reference pattern from `user.value.record.id` to `user.value.id` across multiple components
+- Added null check for user role in DemoAccountMenu component
+- Fixed user reference in discountCoupon composable
+- Improved code formatting and removed unnecessary empty lines
+- Updated changelog entries in CHANGELOG.md & pages/changelog.vue
+
 ## [1.6.0] (2025-04-23)
 
 ### 🚀 Features

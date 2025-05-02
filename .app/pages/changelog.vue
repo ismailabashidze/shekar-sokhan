@@ -7,6 +7,34 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 1.7.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 1.7.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              2 می 2025
+            </p>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بروزرسانی نسخه به 1.7.0 در package.json و VersionDisplay.vue</li>
+            </ul>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>تغییر الگوی ارجاع به شناسه کاربر از <code>user.value.record.id</code> به <code>user.value.id</code> در چندین کامپوننت</li>
+              <li>افزودن بررسی مقدار null برای نقش کاربر در کامپوننت DemoAccountMenu</li>
+              <li>اصلاح ارجاع به کاربر در composable تخفیف (discountCoupon)</li>
+              <li>بهبود فرمت‌بندی کد و حذف خطوط خالی غیرضروری</li>
+              <li>بروزرسانی ورودی‌های changelog در CHANGELOG.md و changelog.vue</li>
+            </ul>
+          </div>
+
           <!-- Version 1.6.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

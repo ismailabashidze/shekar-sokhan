@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// import { generateInlineAnalysis } from '@/composables/useOpenRouter'  // REMOVE this import
+import { useOpenRouter } from '@/composables/useOpenRouter'
 
 definePageMeta({
   title: 'گفتگو با روانشناس',
@@ -24,8 +26,16 @@ const showEmojiPicker = ref(false)
 const showAudioUser = ref(false)
 const showNoCharge = ref(true)
 const remainingTime = ref<Date>()
-const timeToShow = ref<number>()
-const startChargeTime = ref<Date>()
+const currentTime = ref(new Date())
+const timeToShow = computed(() => {
+  if (!remainingTime.value) return 0
+  const diff = remainingTime.value.getTime() - currentTime.value.getTime()
+  return Math.max(0, Math.floor(diff / (1000 * 60)))
+})
+watch(timeToShow, (newVal, oldVal) => {
+  console.log('[Charge Timer] timeToShow changed from', oldVal, 'to', newVal)
+})
+let chargeInterval: number | null = null
 const sessionId = ref<string | null>(null)
 const sessionElapsedTime = ref(0)
 const timeUpdateInterval = ref<NodeJS.Timeout | null>(null)
@@ -35,7 +45,7 @@ const showScrollButton = ref(false)
 const isAIResponding = ref(false)
 
 const { generateAnalysis, createAnalysis } = useSessionAnalysis()
-
+const { role } = useUser()
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
 }
@@ -210,6 +220,7 @@ const {
   searchQuery,
   retryFetch,
   filteredModels,
+  generateInlineAnalysis,
 } = useOpenRouter()
 
 const streamingResponse = ref('')
@@ -270,69 +281,66 @@ async function submitMessage() {
     newMessage.value = ''
     scrollToBottom()
 
-    if (!showNoCharge.value) {
-      const assistantMessage = {
-        type: 'received',
-        text: '',
-        timestamp: now,
-      }
+    const messageId = 'temp-' + Date.now()
 
-      const messageId = 'temp-' + Date.now()
-      messages.value.push({
-        ...assistantMessage,
-        id: messageId,
-      })
+    isAIResponding.value = true
+    showScrollButton.value = false
 
-      isAIResponding.value = true
-      showScrollButton.value = false
-
-      const therapistDetails = {
-        name: currentTherapist.name || '',
-        specialty: currentTherapist.specialty || '',
-        shortDescription: currentTherapist.shortDescription || '',
-        longDescription: currentTherapist.longDescription || '',
-        definingTraits: currentTherapist.definingTraits || '',
-        backStory: currentTherapist.backStory || '',
-        personality: currentTherapist.personality || '',
-        appearance: currentTherapist.appearance || '',
-        approach: currentTherapist.approach || '',
-        expertise: currentTherapist.expertise || '',
-      }
-
-      const messageHistory = messages.value.slice(0, -1).map(msg => ({
+    // Inline Analysis Integration
+    isAIThinking.value = true
+    thinkingResponse.value = null
+    let analysisResult = null
+    try {
+      // Prepare chat history for analysis (convert to ChatMessage[])
+      const chatMessages = messages.value.map(msg => ({
         role: msg.type === 'sent' ? 'user' : 'assistant',
         content: msg.text,
       }))
-
-      let isMessageSaved = false
-      await streamChat(
-        messageHistory,
-        { therapistDetails },
-        async (chunk) => {
-          const content = chunk.choices[0]?.delta?.content || ''
-          if (content && !isMessageSaved) {
-            streamingResponse.value += content
-            const messageIndex = messages.value.findIndex(m => m.id === messageId)
-            if (messageIndex !== -1) {
-              messages.value[messageIndex].text = streamingResponse.value
-            }
-            checkIfScrolledToBottom()
-          }
-        },
-      )
-
-      if (session.id && !isMessageSaved) {
-        isMessageSaved = true
-        const savedAssistantMessage = await sendMessage(currentTherapist.id, session.id, streamingResponse.value, 'received')
-        const messageIndex = messages.value.findIndex(m => m.id === messageId)
-        if (messageIndex !== -1) {
-          messages.value[messageIndex].id = savedAssistantMessage.id
-          messages.value[messageIndex].timestamp = savedAssistantMessage.time
-        }
-        isAIResponding.value = false
-        checkIfScrolledToBottom()
-      }
+      // Find the last message (assuming it's the user's latest)
+      const lastMessageForAnalysis = chatMessages.length > 0 ? [chatMessages[chatMessages.length - 1]] : []
+      // Call generateInlineAnalysis with only the last message
+      analysisResult = await generateInlineAnalysis(lastMessageForAnalysis)
+      thinkingResponse.value = analysisResult
+      isAIThinking.value = false
     }
+    catch (err) {
+      thinkingResponse.value = { error: 'خطا در دریافت تحلیل. لطفا دوباره تلاش کنید.' }
+      console.error('Inline analysis error:', err)
+    }
+    finally {
+      isAIThinking.value = false
+    }
+
+    checkIfScrolledToBottom()
+
+    // Prepare chat history for AI with analysis; let composable inject system prompt
+    const contextMessages = messages.value.map(msg => ({
+      role: msg.type === 'sent' ? 'user' : 'assistant',
+      content: msg.text,
+    }))
+    const chatMessagesForAI = [
+      ...contextMessages,
+      { role: 'user', content: userMessage.text },
+      // { role: 'user', content: userMessage.text + '\n\n[ANALYSIS]\n' + JSON.stringify(thinkingResponse.value) },
+    ]
+    // --- Streaming AI Response ---
+    const pendingAIMessage = {
+      type: 'received',
+      text: '',
+      timestamp: now,
+      id: messageId, // temp id
+    }
+    messages.value.push(pendingAIMessage)
+    await streamChat(chatMessagesForAI, { therapistDetails: currentTherapist }, (chunk) => {
+      pendingAIMessage.text += chunk
+      // scrollToBottom()
+    })
+    // After streaming, save to backend and update id/timestamp
+    const savedAIMessage = await sendMessage(currentTherapist.id, session.id, pendingAIMessage.text, 'received')
+    pendingAIMessage.id = savedAIMessage.id
+    pendingAIMessage.timestamp = savedAIMessage.time
+    checkIfScrolledToBottom()
+    isAIResponding.value = false
   }
   catch (e) {
     console.error('Error in chat:', e)
@@ -349,34 +357,15 @@ async function submitMessage() {
   }
 }
 
-watch(messages, () => {
-  if (!isAIResponding.value) {
-    scrollToBottom()
-  }
-}, { deep: true })
-
-const { pause, resume } = useInterval(1000, { controls: true })
-
-const checkForHalfTime = () => {
-  if (!startChargeTime.value || !timeToShow.value) return false
-  const start = startChargeTime.value
-  const now = new Date()
-  const temp = Math.floor((now.getTime() - start.getTime()) / 60000)
-  return (temp / timeToShow.value > 1)
+const showAnalysis = ref(false)
+const toggleAnalysis = () => {
+  showAnalysis.value = !showAnalysis.value
+  nextTick(() => {
+    if (showAnalysis.value) {
+      scrollToBottom()
+    }
+  })
 }
-
-watch(timeToShow, async (newValue) => {
-  if (newValue <= 0 && activeSession.value?.id) {
-    const startTime = new Date(activeSession.value.created)
-    const endTime = new Date()
-    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
-    isReportModalOpen.value = true
-    isGeneratingAnalysis.value = true
-    await handleConfirmEndSession()
-    showNoCharge.value = true
-    pause()
-  }
-})
 
 const updateSessionTime = () => {
   if (activeSession.value?.created) {
@@ -429,19 +418,31 @@ const startSessionTimer = () => {
   }, 30000)
 }
 
+// --- Timer control functions for pause/resume ---
+function pause() {
+  if (timeUpdateInterval.value) {
+    clearInterval(timeUpdateInterval.value)
+    timeUpdateInterval.value = null
+  }
+}
+function resume() {
+  startSessionTimer()
+}
+
 onMounted(async () => {
   loading.value = true
   try {
     const therapists = await getTherapists()
     conversations.value = therapists.map(p => ({ id: p.id, user: p }))
 
-    const u = await nuxtApp.$pb
-      .collection('users')
-      .getOne(nuxtApp.$pb.authStore.model.id, {})
+    const u = await nuxtApp.$pb.collection('users').getOne(nuxtApp.$pb.authStore.model.id, {})
     showNoCharge.value = !u.hasCharge
     remainingTime.value = new Date(u.expireChargeTime)
-    startChargeTime.value = new Date(u.startChargeTime)
-    timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
+    console.log('[Charge Timer] Initialized: remainingTime =', remainingTime.value, 'timeToShow =', timeToShow.value)
+    chargeInterval = setInterval(() => {
+      currentTime.value = new Date()
+      console.log('[Charge Timer] Tick at', currentTime.value, 'timeToShow =', timeToShow.value)
+    }, 60000)
 
     const therapistId = route.query.therapistId as string
     if (therapistId) {
@@ -457,20 +458,16 @@ onMounted(async () => {
       pause()
     }
 
-    timeUpdateInterval.value = setInterval(() => {
-      if (timeToShow.value !== undefined) {
-        timeToShow.value = timeToShow.value - 1
-      }
-    }, 60000)
-
     if (nuxtApp.$pb.authStore.isValid) {
       userSubscription.value = await nuxtApp.$pb.collection('users').subscribe(
         nuxtApp.$pb.authStore.model?.id,
         (e) => {
-          const expireTime = new Date(e.record.expireChargeTime).getTime()
-          timeToShow.value = Math.floor((expireTime - new Date().getTime()) / (1000 * 60))
+          remainingTime.value = new Date(e.record.expireChargeTime)
+          console.log('[Charge Timer] Subscription event: new expireChargeTime =', e.record.expireChargeTime, 'timeToShow =', timeToShow.value)
           if (!e.record.hasCharge) {
             showNoCharge.value = true
+            console.log('[Charge Timer] Charge expired via subscription, clearing charge timer')
+            if (chargeInterval) clearInterval(chargeInterval)
             setTimeout(() => {
               if (chatEl.value) {
                 chatEl.value.scrollTo({
@@ -497,8 +494,7 @@ onMounted(async () => {
           behavior: 'smooth',
         })
       }
-    }, 300)
-    resume()
+    }, 0)
   }
   if (chatEl.value) {
     chatEl.value.addEventListener('scroll', checkIfScrolledToBottom)
@@ -520,6 +516,10 @@ onUnmounted(() => {
   }
   if (chatEl.value) {
     chatEl.value.removeEventListener('scroll', checkIfScrolledToBottom)
+  }
+  if (chargeInterval) {
+    console.log('[Charge Timer] Clearing charge interval on unmount')
+    clearInterval(chargeInterval)
   }
 })
 
@@ -624,6 +624,7 @@ const handleEndSession = async () => {
     })
     return
   }
+  console.log(messages.value)
 
   if (messages.value.length < 10) {
     toaster.show({
@@ -720,6 +721,20 @@ const handleAudioSend = () => {
     submitMessage()
   }
 }
+const handleTextareaClick = () => {
+  if (showNoCharge.value) {
+    toaster.show({
+      title: 'خطا',
+      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  }
+}
+
+const thinkingResponse = ref(null)
+const isAIThinking = ref(false)
 </script>
 
 <template>
@@ -871,11 +886,11 @@ const handleAudioSend = () => {
           <div
             class="flex h-16 w-full items-center justify-between px-4 sm:px-8"
           >
-            <div class="mt-[140px] flex items-center gap-2 md:mt-4">
+            <div class="mt-[140px] flex items-center gap-2 md:my-4">
               <div class="flex">
                 <BaseMessage
                   v-if="!showNoCharge"
-                  class="w-[180px]"
+                  class="z-10 w-[180px]"
                   :color="timeToShow > 10 ? 'success' : 'warning'"
                 >
                   <span v-if="timeToShow > 0">
@@ -909,6 +924,14 @@ const handleAudioSend = () => {
                       name="ph:robot"
                       class="size-5"
                     />
+                  </button>
+                  <button
+                    class="bg-primary-100 dark:bg-primary-100 dark:text-muted-100 text-muted-600 hover:text-primary-100 hover:bg-primary-100/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                    aria-label="نمایش تحلیل احساسات"
+                    type="button"
+                    @click="showAnalysis = true"
+                  >
+                    <Icon name="ph:chart-bar-duotone" class="text-primary-500 size-6" />
                   </button>
                   <button
                     class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
@@ -987,7 +1010,7 @@ const handleAudioSend = () => {
                     <BaseButton
                       v-else
                       color="primary"
-                      @click="navigateTo('/onboarding')"
+                      @click="$router.push('/onboarding')"
                     >
                       خرید اشتراک
                     </BaseButton>
@@ -998,9 +1021,8 @@ const handleAudioSend = () => {
                 v-else
                 class="space-y-8"
               >
-                <!-- Messages -->
                 <div
-                  v-for="item in messages"
+                  v-for="(item, index) in messages"
                   :key="item.id"
                   class="mb-4"
                 >
@@ -1061,6 +1083,37 @@ const handleAudioSend = () => {
                     </div>
                   </div>
                 </div>
+                <!-- Assistant thinking bubble -->
+                <template v-if="isAIThinking">
+                  <div class="mb-4 flex justify-start">
+                    <div class="flex max-w-[85%] flex-col items-start">
+                      <div class="dark:from-muted-800 dark:via-muted-900 dark:to-muted-800 dark:border-muted-700 w-full rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-100 px-6 py-4 shadow-lg">
+                        <div class="flex items-center space-x-2">
+                          <svg
+                            class="text-primary-500 ml-2 size-5 animate-spin"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                          ><circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                          /><path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          /></svg>
+                          <span class="text-gray-500 dark:text-gray-300">در حال فکر کردن...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+
                 <!-- No Charge Message -->
                 <BaseMessage
                   v-if="showNoCharge"
@@ -1558,6 +1611,81 @@ const handleAudioSend = () => {
         </div>
       </div>
     </template>
+  </TairoModal>
+
+  <TairoModal
+    :open="showAnalysis"
+    size="xl"
+    @close="showAnalysis = false"
+  >
+    <template #header>
+      <div class="border-muted-200 dark:border-muted-700 m-4 flex items-center justify-between border-b pb-4">
+        <div class="flex items-center gap-3">
+          <span class="bg-primary-100 text-primary-600 inline-flex size-10 items-center justify-center rounded-full shadow">
+            <Icon name="ph:chart-bar-duotone" class="size-6" />
+          </span>
+          <span class="text-primary-700 dark:text-primary-300 text-xl font-bold">نتیجه تحلیل احساسات</span>
+        </div>
+        <button
+          class="hover:bg-primary-100 dark:hover:bg-primary-900/40 flex items-center justify-center rounded-full p-2 transition-colors"
+          aria-label="بستن تحلیل"
+          @click="showAnalysis = false"
+        >
+          <Icon name="ph:x-bold" class="text-primary-400 size-5" />
+        </button>
+      </div>
+    </template>
+    <div class="space-y-8 px-8 py-10">
+      <!-- Session Info -->
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm">
+          <div class="mb-1 flex items-center gap-2">
+            <Icon name="ph:target-duotone" class="text-info-500 size-5" />
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">هدف جلسه:</span>
+          </div>
+          <span class="text-right text-base font-bold text-gray-900 dark:text-gray-100">{{ thinkingResponse.session_mainGoal || 'نامشخص' }}</span>
+        </div>
+        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm">
+          <div class="mb-1 flex items-center gap-2">
+            <Icon name="ph:lifebuoy-duotone" class="text-warning-500 size-5" />
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200 ">نیاز به مداخله انسانی:</span>
+          </div>
+          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ thinkingResponse.session_humanInterventionNeeded ? 'بله' : 'خیر' }}</span>
+        </div>
+        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm md:col-span-2">
+          <div class="mb-1 flex items-center gap-2">
+            <Icon name="ph:eye-duotone" class="size-5 text-purple-500" />
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">نیازهای ناهشیار:</span>
+          </div>
+          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ thinkingResponse.session_unconsciousNeeds || 'نامشخص' }}</span>
+        </div>
+      </div>
+      <div class="border-muted-200 dark:border-muted-700 border-t" />
+      <!-- Emotions -->
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm">
+          <div class="mb-1 flex items-center gap-2">
+            <Icon name="ph:smiley-duotone" class="text-success-500 size-5" />
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">احساسات اولیه:</span>
+          </div>
+          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ (thinkingResponse.lastMessage_primaryEmotions || []).join(', ') || 'نامشخص' }}</span>
+        </div>
+        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm">
+          <div class="mb-1 flex items-center gap-2">
+            <Icon name="ph:mask-happy-duotone" class="size-5 text-pink-500" />
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">احساسات دقیق‌تر:</span>
+          </div>
+          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ (thinkingResponse.lastMessage_nuancedEmotions || []).join(', ') || 'نامشخص' }}</span>
+        </div>
+        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm md:col-span-2">
+          <div class="mb-1 flex items-center gap-2">
+            <Icon name="ph:thermometer-duotone" class="size-5 text-red-500" />
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">شدت احساسات:</span>
+          </div>
+          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ thinkingResponse.lastMessage_intensity ?? 'نامشخص' }}</span>
+        </div>
+      </div>
+    </div>
   </TairoModal>
 </template>
 <style scoped>

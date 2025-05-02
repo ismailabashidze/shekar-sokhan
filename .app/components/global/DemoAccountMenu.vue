@@ -63,7 +63,7 @@ const displayName = computed(() => user.value.meta?.name || 'کاربر جدید
                   {{ displayName }}
                 </h6>
                 <p class="text-muted-400 font-sans text-xs">
-                  {{ user.role === 'user' ? 'کاربر' : 'ادمین' }}
+                  {{ (user.role ?? 'user') === 'user' ? 'کاربر' : 'ادمین' }}
                 </p>
               </div>
             </div>

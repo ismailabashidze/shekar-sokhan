@@ -82,8 +82,8 @@ const askForPatient = async () => {
               })
               .filter(Boolean),
           ],
-          userId: user.value.record.id,
-          currentDivision: user.value.record.currentDeletionDivider,
+          userId: user.value.id,
+          currentDivision: user.value.currentDeletionDivider,
           userDetails: userDetails.value[0],
           pId,
         },
@@ -93,11 +93,11 @@ const askForPatient = async () => {
 
       const newMsg = await saveMessage({
         role: 'user',
-        user: user.value.record.id,
+        user: user.value.id,
         time: new Date().toLocaleTimeString('fa'),
         content: JSON.parse(answer),
         contentFa: res,
-        deletionDivider: user.value.record.currentDeletionDivider,
+        deletionDivider: user.value.currentDeletionDivider,
         patient: pId,
       })
 
@@ -419,14 +419,14 @@ const askForMana = async () => {
               })
               .filter(Boolean),
           ],
-          userId: user.value.record.id,
-          currentDivision: user.value.record.currentDeletionDivider,
+          userId: user.value.id,
+          currentDivision: user.value.currentDeletionDivider,
           userDetails: userDetails.value[0],
         },
       })
       const res = await processArrayWithTranslatedTitlesAndValues(JSON.parse(answer))
       const msgId = conversation.value.messages.at(-1).id
-      const uId = user.value.record.id
+      const uId = user.value.id
       sgg.value = await saveSuggest({ message: msgId, user: uId, suggestions: JSON.parse(answer), suggestionsFa: res })
       sggList.value = []
       sgg.value.suggestionsFa.map((s, i) => {
@@ -629,8 +629,8 @@ onMounted(async () => {
     //     role: 'separator',
     //     content: { message: 'Summary and conclusion in the last ten minutes.' },
     //     contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-    //     user: user.value.record.id,
-    //     deletionDivider: user.value.record.currentDeletionDivider,
+    //     user: user.value.id,
+    //     deletionDivider: user.value.currentDeletionDivider,
     //   })
     // }
   }, 60000)
@@ -751,8 +751,8 @@ async function submitMessage() {
     role: 'user',
     content: { message: t },
     contentFa: { message: m },
-    user: user.value.record.id,
-    deletionDivider: user.value.record.currentDeletionDivider,
+    user: user.value.id,
+    deletionDivider: user.value.currentDeletionDivider,
     patient: pId,
   })
   isNewMessagesDone.value = true
@@ -824,13 +824,13 @@ const submitTherapist = async () => {
   }
   submitLoading.value = true
   const newMsg = await saveMessage({
-    user: user.value.record.id,
+    user: user.value.id,
     role: 'assistant',
     time: new Date().toLocaleTimeString('fa'),
     content: conversation.value.messages.at(-1).content,
     contentFa: conversation.value.messages.at(-1)?.contentFa,
     correctedContentFa: conversation.value.messages.at(-1)?.correctedContentFa,
-    deletionDivider: user.value.record.currentDeletionDivider,
+    deletionDivider: user.value.currentDeletionDivider,
     patient: pId,
   })
   conversation.value.messages.at(-1).id = newMsg.id

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { watch, ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { watch, ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import AudioUser from '@/components/global/AudioUser.vue'
 import { useUser } from '@/composables/user'
 
@@ -388,9 +388,14 @@ onMounted(() => {
 
 const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
 const showNoCharge = ref(false)
-const remainingTime = ref()
-const timeToShow = ref()
-const startChargeTime = ref()
+const remainingTime = ref<Date>()
+const currentTime = ref(new Date())
+const timeToShow = computed(() => {
+  if (!remainingTime.value) return 0
+  const diff = remainingTime.value.getTime() - currentTime.value.getTime()
+  return Math.max(0, Math.floor(diff / (1000 * 60)))
+})
+const startChargeTime = ref<Date>()
 const showTenMin = ref(false)
 const isGoingToDone = ref(false)
 const type = ref('briefing')
@@ -418,36 +423,22 @@ onMounted(async () => {
     showNoCharge.value = !u.hasCharge
     remainingTime.value = new Date(u.expireChargeTime)
     startChargeTime.value = new Date(u.startChargeTime)
-    timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
-
     if (timeToShow.value <= 0) {
       showNoCharge.value = true
       pause()
     }
-
-    // Update time every minute
-    setInterval(() => {
-      timeToShow.value = timeToShow.value - 1
-    }, 60000)
 
     // Subscribe to user changes for real-time charge updates
     if (nuxtApp.$pb.authStore.isValid) {
       nuxtApp.$pb.collection('users').subscribe(
         nuxtApp.$pb.authStore.model.id,
         (e) => {
-          timeToShow.value = Math.floor((new Date(e.record.expireChangeTime).getTime() - new Date().getTime()) / (1000 * 60))
+          // Update remainingTime; computed timeToShow will recalc automatically
+          remainingTime.value = new Date(e.record.expireChargeTime)
           if (!e.record.hasCharge) {
             showNoCharge.value = true
-            setTimeout(() => {
-              if (chatEl.value) {
-                chatEl.value.scrollTo({
-                  top: chatEl.value.scrollHeight,
-                  behavior: 'smooth',
-                })
-              }
-            }, 600)
-            pause()
           }
+          console.log('[Timer] Subscription event: new expireChargeTime =', e.record.expireChargeTime, 'updated remainingTime =', remainingTime.value, 'timeToShow =', timeToShow.value)
         },
         {},
       )
@@ -461,14 +452,28 @@ onMounted(async () => {
   }
 })
 
-// Start the counter when component is mounted
+// Start the counter and time updater when component is mounted
 onMounted(() => {
   resume()
+  console.log('[Timer] Starting clock ticks, initial timeToShow =', timeToShow.value)
+  const timer = setInterval(() => {
+    currentTime.value = new Date()
+    console.log('[Timer] Tick at', currentTime.value, 'timeToShow =', timeToShow.value)
+  }, 60000)
+  onUnmounted(() => {
+    console.log('[Timer] Clearing clock ticks')
+    clearInterval(timer)
+  })
 })
 
-// Pause the counter when component is unmounted
-onUnmounted(() => {
-  pause()
+// Log whenever timeToShow recomputes
+watch(timeToShow, (newVal, oldVal) => {
+  console.log('[Timer] timeToShow changed from', oldVal, 'to', newVal)
+})
+
+// Log initial remainingTime, startChargeTime, and timeToShow after loading user data
+onMounted(async () => {
+  console.log('[Timer] Initialized: remainingTime =', remainingTime.value, 'startChargeTime =', startChargeTime.value, 'timeToShow =', timeToShow.value)
 })
 
 const nuxtApp = useNuxtApp()
@@ -901,6 +906,18 @@ const handleTextareaClick = () => {
                     </div>
                   </div>
                 </div>
+                <!-- No Charge / Timer Message -->
+                <BaseMessage
+                  v-if="!showNoCharge"
+                  class="mb-4 w-[180px]"
+                  :color="timeToShow > 10 ? 'success' : 'warning'"
+                >
+                  <span v-if="timeToShow > 0">
+                    <span class="mx-2">⏰</span>
+                    {{ timeToShow ?? '--' }} دقیقه
+                  </span>
+                  <span v-else>وقت تقریبا تمام است</span>
+                </BaseMessage>
                 <!-- No Charge Message -->
                 <BaseMessage
                   v-if="showNoCharge"
@@ -995,7 +1012,8 @@ const handleTextareaClick = () => {
                             v-for="emoji in emojis"
                             :key="emoji"
                             type="button"
-                            class="hover:bg-muted-100 dark:hover:bg-muted-700 flex size-8 items-center justify-center rounded-lg text-xl transition-colors duration-300"
+                            class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer rounded p-2 text-left"
+                            :class="{ 'bg-muted-100 dark:bg-muted-700': emoji === '😀' }"
                             @click="insertEmoji(emoji)"
                           >
                             {{ emoji }}

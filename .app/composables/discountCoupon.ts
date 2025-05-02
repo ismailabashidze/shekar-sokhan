@@ -56,11 +56,10 @@ export function useDiscountCopoun() {
   const generateCoupon = async (data: Partial<discountCopoun>) => {
     if (!nuxtApp.$pb.authStore.isValid)
       throw new Error('User not authenticated')
-
     try {
       return await nuxtApp.$pb.collection('discountCopoun').create({
         ...data,
-        user: user.value?.record.id,
+        user: user.value?.id,
       })
     }
     catch (error: any) {
@@ -135,7 +134,7 @@ export function useDiscountCopoun() {
 
     try {
       return await nuxtApp.$pb.collection('discountCopoun').getFullList({
-        filter: `user = "${user.value?.record.id}"`,
+        filter: `user = "${user.value?.id}"`,
         expand: 'deed',
       })
     }

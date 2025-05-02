@@ -189,7 +189,7 @@ onMounted(async () => {
 //   await saveMessage({
 //     content: m as string,
 //     translatedFa: t,
-//     user: user.value.record.id,
+//     user: user.value.id,
 //     role: 'user',
 //     // evaluations: JSON.parse(userEval),
 //     evaluations: {},
@@ -200,7 +200,7 @@ onMounted(async () => {
 //   await saveMessage({
 //     content: answer,
 //     translatedFa: t2 as string,
-//     user: user.value.record.id,
+//     user: user.value.id,
 //     role: 'assistant',
 //     time: new Date().toLocaleTimeString('fa'),
 //     evaluations: {},
@@ -281,8 +281,8 @@ async function submitMessage() {
     role: 'user',
     content: { message: t },
     contentFa: { message: m },
-    user: user.value.record.id,
-    deletionDivider: user.value.record.currentDeletionDivider,
+    user: user.value.id,
+    deletionDivider: user.value.currentDeletionDivider,
   })
   if (res.id) {
     try {
@@ -312,7 +312,7 @@ async function submitMessage() {
       } = await processResponse(JSON.parse(answer))
 
       const newMsg = await saveMessage({
-        user: user.value.record.id,
+        user: user.value.id,
         role: 'assistant',
         time: new Date().toLocaleTimeString('fa'),
         content: JSON.parse(answer),
@@ -322,7 +322,7 @@ async function submitMessage() {
           action: translatedAction,
           nextSteps: translatedNextSteps,
         },
-        deletionDivider: user.value.record.currentDeletionDivider,
+        deletionDivider: user.value.currentDeletionDivider,
       })
       console.log('newMsg')
       console.log(newMsg)

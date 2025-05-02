@@ -20,7 +20,7 @@ export function useSuggestion() {
   const { user } = useUser()
   const saveSuggest = async (newSuggest) => {
     const post = {
-      user: user.value.record.id,
+      user: user.value.id,
       ...newSuggest,
     }
     try {

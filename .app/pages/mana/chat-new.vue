@@ -81,8 +81,8 @@ const requestForReport = async () => {
           })
           .filter(Boolean),
       ],
-      userId: user.value.record.id,
-      currentDivision: user.value.record.currentDeletionDivider,
+      userId: user.value.id,
+      currentDivision: user.value.currentDeletionDivider,
       userDetails: userDetails.value[0],
     },
   })
@@ -101,8 +101,8 @@ const goToDoneAndEnd = async () => {
     role: 'separator',
     content: { message: 'Summary and conclusion in the last ten minutes.' },
     contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-    user: user.value.record.id,
-    deletionDivider: user.value.record.currentDeletionDivider,
+    user: user.value.id,
+    deletionDivider: user.value.currentDeletionDivider,
   })
   messageLoading.value = true
   pause()
@@ -425,8 +425,8 @@ const askForMana = async () => {
               })
               .filter(Boolean),
           ],
-          userId: user.value.record.id,
-          currentDivision: user.value.record.currentDeletionDivider,
+          userId: user.value.id,
+          currentDivision: user.value.currentDeletionDivider,
           userDetails: userDetails.value[0],
         },
       })
@@ -435,12 +435,12 @@ const askForMana = async () => {
       const res = await processResponse(JSON.parse(answer))
       let informalTranslatedMsg = convertToInformal(res.message)
       const newMsg = await saveMessage({
-        user: user.value.record.id,
+        user: user.value.id,
         role: 'assistant',
         time: new Date().toLocaleTimeString('fa'),
         content: JSON.parse(answer),
         contentFa: res,
-        deletionDivider: user.value.record.currentDeletionDivider,
+        deletionDivider: user.value.currentDeletionDivider,
       })
 
       conversation.value.messages.push({
@@ -602,8 +602,8 @@ onMounted(async () => {
     //     role: 'separator',
     //     content: { message: 'Summary and conclusion in the last ten minutes.' },
     //     contentFa: { message: 'جمع بندی برای ده دقیقه پایانی' },
-    //     user: user.value.record.id,
-    //     deletionDivider: user.value.record.currentDeletionDivider,
+    //     user: user.value.id,
+    //     deletionDivider: user.value.currentDeletionDivider,
     //   })
     // }
   }, 60000)
@@ -658,7 +658,7 @@ onMounted(async () => {
 //   await saveMessage({
 //     content: m as string,
 //     translatedFa: t,
-//     user: user.value.record.id,
+//     user: user.value.id,
 //     role: 'user',
 //     // evaluations: JSON.parse(userEval),
 //     evaluations: {},
@@ -669,7 +669,7 @@ onMounted(async () => {
 //   await saveMessage({
 //     content: answer,
 //     translatedFa: t2 as string,
-//     user: user.value.record.id,
+//     user: user.value.id,
 //     role: 'assistant',
 //     time: new Date().toLocaleTimeString('fa'),
 //     evaluations: {},
@@ -748,8 +748,8 @@ async function submitMessage() {
     role: 'user',
     content: { message: t },
     contentFa: { message: m },
-    user: user.value.record.id,
-    deletionDivider: user.value.record.currentDeletionDivider,
+    user: user.value.id,
+    deletionDivider: user.value.currentDeletionDivider,
   })
   isNewMessagesDone.value = true
   newMessagesIndex.value++

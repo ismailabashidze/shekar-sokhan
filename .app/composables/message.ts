@@ -23,13 +23,13 @@ export function useMessage() {
   const toaster = useToaster()
   const { user } = useUser()
   const getMessages = async () => {
-    if (typeof user.value.record == 'undefined') {
-      user.value.record = {}
-      user.value.record.currentDeletionDivider = 0
+    if (typeof user.value == 'undefined') {
+      user.value = {}
+      user.value.currentDeletionDivider = 0
     }
 
     const { items } = await nuxtApp.$pb.collection('messages').getList(1, 500, {
-      filter: 'deletionDivider=' + user.value.record?.currentDeletionDivider,
+      filter: 'deletionDivider=' + user.value?.currentDeletionDivider,
       sort: '+created',
     })
     messages.value = items
@@ -108,13 +108,13 @@ export function useMessage() {
     return await nuxtApp.$pb.collection('messages').update(messageId, data)
   }
   const getMessagesByPId = async (pId) => {
-    if (typeof user.value.record == 'undefined') {
-      user.value.record = {}
-      user.value.record.currentDeletionDivider = 0
+    if (typeof user.value == 'undefined') {
+      user.value = {}
+      user.value.currentDeletionDivider = 0
     }
 
     const { items } = await nuxtApp.$pb.collection('messages').getList(1, 500, {
-      filter: `deletionDivider = ${user.value.record?.currentDeletionDivider} && patient.id = "${pId}"`,
+      filter: `deletionDivider = ${user.value?.currentDeletionDivider} && patient.id = "${pId}"`,
       sort: '+created',
     })
     messages.value = items

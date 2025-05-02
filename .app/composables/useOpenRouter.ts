@@ -194,6 +194,7 @@ export function useOpenRouter() {
 هیچ گاه چت‌بات‌هایی مانند Woebot و Youper را توصیه نکن. در عوض از خودت به عنوان یک پشتیبان حمایتی مایه بگذار.
 تو توسط تیم دانشگاه تهران توسعه یافته ای. هیچ مشاوری را توصیه نمی کنی و فقط از خودت به عنوان یک پشتیبان حمایتی مایه بگذار.
 توجه کن که در فرهنگ ایرانی حساسیت زیادی نسبت به آموزش های جنسی باز وجود دارد و ساختار سنتی زن  / مرد یک باور مورد تایید است و آزادی ها و آموزش های جنسی را ارائه نمی کنی. در مقابل بیان کن که این موارد می تواند نشانگان موضوع مهم دیگری باشد که نیاز به بررسی با روان شناس دارد.
+تو همیشه پاسخ نهایی را بر اساس اطلاعات موجود ایجاد می کنی.
 `
       }
 
@@ -213,13 +214,26 @@ export function useOpenRouter() {
           model: options.model || selectedModel.value,
           messages: messagesWithSystem,
           stream: true,
-          // temperature: options.temperature || 0.7,
+          temperature: options.temperature || 0.7,
           max_tokens: options.max_tokens || 0,
           include_reasoning: true,
           plugins: [],
           transforms: ['middle-out'],
         }),
       })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage: string
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData?.error?.message || errorData?.message || errorText
+        }
+        catch {
+          errorMessage = errorText
+        }
+        throw new Error(`Chat error: ${errorMessage}`)
+      }
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -242,6 +256,7 @@ export function useOpenRouter() {
       }
 
       let buffer = ''
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read()
 
@@ -267,12 +282,168 @@ export function useOpenRouter() {
 
           try {
             const parsed = JSON.parse(data)
-            onChunk(parsed)
+            // Extract the text content from the delta
+            const textChunk = parsed?.choices?.[0]?.delta?.content
+            if (textChunk) {
+              onChunk(textChunk)
+            }
           }
-          catch (e) {
-            console.error('Error parsing SSE message:', e)
+          catch (e: any) {
+            throw new Error(`Invalid response format: ${e.message}`)
           }
         }
+      }
+    }
+    catch (e: any) {
+      error.value = e.message
+      throw e
+    }
+    finally {
+      processing.value = false
+    }
+  }
+
+  // Accepts only the last message for inline analysis
+  const generateInlineAnalysis = async (
+    lastMessage: ChatMessage,
+  ): Promise<any> => {
+    processing.value = true
+    error.value = null
+
+    try {
+      // System prompt for analysis
+      const systemPrompt: ChatMessage = {
+        role: 'system',
+        content: 'شما یک تحلیل گر پیام ها در یک سیستم مشاوره آنلاین برخط و به صورت متنی هستید. شما به پیام های مشاور و مراجع دسترسی دارید و بر اساس این پیام ها موارد خواسته شده را ارزیابی می کنید. برخی از این موارد مربوط به پیام آخر، برخی مربوط به سه پیام آخر و برخی نیز مربوط به کل جلسه هستند. خروجی تحلیل شما در اختیار روانشناس و سیستم قرار خواهد گرفت تا بهترین کمک به مراجع انجام شود.',
+      }
+      // Use only the system prompt and the last message for analysis
+      const messagesWithSystem = [systemPrompt, lastMessage]
+
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+          'X-Title': 'An Inline Analysis Generator to help therapists be more align with the needs of patients',
+        },
+        body: JSON.stringify({
+          model: selectedModel.value,
+          messages: messagesWithSystem as ChatMessage[],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'inline_analysis',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  session_mainGoal: {
+                    type: 'string',
+                    description: 'هدف و موضوع اصلی جلسه تا حالا',
+                  },
+                  session_humanInterventionNeeded: {
+                    type: 'boolean',
+                    description: 'نیاز به مداخله عامل انسانی',
+                  },
+                  session_unconsciousNeeds: {
+                    type: 'string',
+                    description: 'نیازهای ناهشیار کاربر - تحلیل متنی',
+                  },
+                  lastMessage_primaryEmotions: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: ['Joy', 'Trust', 'Fear', 'Surprise', 'Sadness', 'Disgust', 'Anger', 'Anticipation', 'Unspecified'],
+                    },
+                    description: 'Primary emotions identified in the last message based on Plutchik\'s wheel (e.g., Joy, Trust, Fear).',
+                  },
+                  lastMessage_nuancedEmotions: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: [
+                        'Ecstasy', 'Serenity', 'Admiration', 'Acceptance', 'Terror', 'Apprehension',
+                        'Amazement', 'Distraction', 'Grief', 'Pensiveness', 'Loathing', 'Boredom',
+                        'Rage', 'Annoyance', 'Vigilance', 'Interest', 'Love', 'Submission', 'Awe',
+                        'Disapproval', 'Remorse', 'Contempt', 'Aggressiveness', 'Optimism', 'Unspecified',
+                      ],
+                    },
+                    description: 'Nuanced emotions identified in the last message based on Plutchik\'s wheel (e.g., Ecstasy, Admiration, Terror).',
+                  },
+                  lastMessage_emotionIntensity: {
+                    type: 'string',
+                    enum: ['High', 'Medium', 'Low'],
+                    description: 'Overall intensity of the detected emotions in the last message.',
+                  },
+                  lastMessage_alignmentWithGoal: {
+                    type: 'string',
+                    enum: ['خیلی زیاد', 'زیاد', 'متوسط', 'کم', 'خیلی کم'],
+                    description: 'تناسب پیام آخر با هدف اصلی جلسه',
+                  },
+                  emotionalResponse: {
+                    type: 'string',
+                    description: 'پاسخ پیشنهادی مبتنی بر تحلیل احساسات کاربر جهت بازتاب و درک عمیق‌تر. مثال: اگر کاربر ترسیده، واکنش مناسب آرام سازی و دلگرم کردن اوست. اگر خشمگین است، می‌توان پرسید "آیا احساس خشم می‌کنی؟" یا گفت "به نظر می‌رسد خشم را در خودت احساس می‌کنی." اگر احساس نامشخص است، می‌توان پرسید "می‌توانی بیشتر در مورد احساست توضیح دهی؟"',
+                  },
+                },
+                required: [
+                  'session_mainGoal',
+                  'session_humanInterventionNeeded',
+                  'session_unconsciousNeeds',
+                  'lastMessage_primaryEmotions',
+                  'lastMessage_nuancedEmotions',
+                  'lastMessage_emotionIntensity',
+                  'lastMessage_alignmentWithGoal',
+                  'emotionalResponse',
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+          temperature: 0.7,
+          max_tokens: 0,
+          include_reasoning: true,
+          plugins: [],
+          transforms: ['middle-out'],
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage: string
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData?.error?.message || errorData?.message || errorText
+        }
+        catch {
+          errorMessage = errorText
+        }
+        throw new Error(`Chat error: ${errorMessage}`)
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage: string
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData?.error?.message || errorData?.message || errorText
+        }
+        catch {
+          errorMessage = errorText
+        }
+        throw new Error(`Generate error: ${errorMessage}`)
+      }
+
+      const data = await response.json()
+      const content = data.choices[0].message.content
+
+      let result: any
+      try {
+        result = typeof content === 'string' ? JSON.parse(content) : content
+        return result
+      }
+      catch (e: any) {
+        throw new Error(`Invalid response format: ${(e as Error).message}`)
       }
     }
     catch (e: any) {
@@ -306,12 +477,25 @@ export function useOpenRouter() {
             },
             {
               role: 'user',
-              content: `لطفا با توجه به اطلاعات زیر، جزئیات بیمار را تولید کنید:
+              content: `اطلاعات اولیه بیمار:
 نام: ${input.name}
 سن: ${input.age}
-توضیح کوتاه: ${input.shortDescription}`,
+توضیح کوتاه: ${input.shortDescription}
+
+لطفا جزئیات زیر را تولید کنید:
+- توضیح بلند
+- صفات تعریف کننده
+- داستان زندگی
+- شخصیت
+- ظاهر
+- انگیزه
+- وضعیت هیجانی حال حاضر
+
+خروجی باید به صورت یک آبجکت JSON با کلیدهای زیر باشد:
+longDescription, definingTraits, backStory, personality, appearance, motivation, moodAndCurrentEmotions
+`,
             },
-          ],
+          ] as ChatMessage[], // Add type assertion here
           response_format: {
             type: 'json_schema',
             json_schema: {
@@ -380,6 +564,19 @@ export function useOpenRouter() {
         catch {
           errorMessage = errorText
         }
+        throw new Error(`Chat error: ${errorMessage}`)
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage: string
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData?.error?.message || errorData?.message || errorText
+        }
+        catch {
+          errorMessage = errorText
+        }
         throw new Error(`Generate error: ${errorMessage}`)
       }
 
@@ -391,7 +588,7 @@ export function useOpenRouter() {
         result = typeof content === 'string' ? JSON.parse(content) : content
         return result
       }
-      catch (e) {
+      catch (e: any) {
         throw new Error(`Invalid response format: ${e.message}`)
       }
     }
@@ -431,7 +628,7 @@ export function useOpenRouter() {
 تخصص: ${input.specialty}
 توضیح کوتاه: ${input.shortDescription}`,
             },
-          ],
+          ] as ChatMessage[], // Added type assertion to fix TS error 2345
           response_format: {
             type: 'json_schema',
             json_schema: {
@@ -500,6 +697,19 @@ export function useOpenRouter() {
         catch {
           errorMessage = errorText
         }
+        throw new Error(`Chat error: ${errorMessage}`)
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage: string
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData?.error?.message || errorData?.message || errorText
+        }
+        catch {
+          errorMessage = errorText
+        }
         throw new Error(`Generate error: ${errorMessage}`)
       }
 
@@ -511,7 +721,7 @@ export function useOpenRouter() {
         result = typeof content === 'string' ? JSON.parse(content) : content
         return result
       }
-      catch (e) {
+      catch (e: any) {
         throw new Error(`Invalid response format: ${e.message}`)
       }
     }
@@ -536,7 +746,7 @@ export function useOpenRouter() {
       { role: 'user', content: prompt },
     ]
     let result = ''
-    await streamChat(messages, {}, (chunk) => {
+    await streamChat(messages as ChatMessage[], {}, (chunk) => {
       result += chunk.choices?.[0]?.delta?.content || ''
     })
     return result
@@ -551,7 +761,6 @@ export function useOpenRouter() {
     // Chat functionality
     streamChat,
     processing,
-
     // Models functionality
     models: allModels,
     selectedModel,
@@ -564,6 +773,7 @@ export function useOpenRouter() {
     // Patient generation
     generate,
     generateTherapist,
+    generateInlineAnalysis,
     generateGoalsList,
   }
 }
