@@ -7,6 +7,36 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 1.8.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 1.8.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              14 می 2025
+            </p>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>ارتقای تجربه کاربری جدول کاربران: بومی‌سازی فارسی، تاریخ جلالی و نمایش زمان نسبی</li>
+              <li>افزودن حالت اسکلتی (skeleton) هنگام بارگذاری لیست کاربران</li>
+              <li>افزودن منوی کشویی با آیکون و ترجمه فارسی برای عملیات کاربران</li>
+              <li>نمایش نشان طلایی برای کاربران جدید</li>
+              <li>بهبود صفحه‌بندی و واکنش‌گرایی جدول کاربران</li>
+            </ul>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>اصلاح منطق نمایش نشان کاربران جدید</li>
+              <li>اصلاح نمایش آیکون‌ها در منوی کشویی (استفاده از slot #start)</li>
+              <li>اصلاح منبع ایمیل و کنترل مقدار null</li>
+            </ul>
+          </div>
+
           <!-- Version 1.7.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">
