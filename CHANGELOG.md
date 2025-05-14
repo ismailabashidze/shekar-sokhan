@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0] (2025-05-14)
+
+### 🚀 Features
+- Improved users table UX: Farsi localization, Jalali-style dates, and relative time columns
+- Added skeleton loading state for users table
+- Added dropdown actions with icons, fully localized
+- Added golden dot indicator for new users
+- Enhanced pagination (reactive, updates on page change)
+
+### 🐞 Bug Fixes
+- Fixed avatar badge logic for new users
+- Fixed dropdown icon rendering (now uses #start slot)
+- Corrected email source and null handling
+
+---
+
 ## [1.7.0] (2025-05-02)
 
 ### 🚀 Features
