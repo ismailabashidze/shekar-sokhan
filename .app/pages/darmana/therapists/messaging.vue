@@ -26,16 +26,8 @@ const showEmojiPicker = ref(false)
 const showAudioUser = ref(false)
 const showNoCharge = ref(true)
 const remainingTime = ref<Date>()
-const currentTime = ref(new Date())
-const timeToShow = computed(() => {
-  if (!remainingTime.value) return 0
-  const diff = remainingTime.value.getTime() - currentTime.value.getTime()
-  return Math.max(0, Math.floor(diff / (1000 * 60)))
-})
-watch(timeToShow, (newVal, oldVal) => {
-  console.log('[Charge Timer] timeToShow changed from', oldVal, 'to', newVal)
-})
-let chargeInterval: number | null = null
+const timeToShow = ref<number>()
+const startChargeTime = ref<Date>()
 const sessionId = ref<string | null>(null)
 const sessionElapsedTime = ref(0)
 const timeUpdateInterval = ref<NodeJS.Timeout | null>(null)
@@ -44,8 +36,11 @@ const currentLoadingTherapistId = ref<string | null>(null)
 const showScrollButton = ref(false)
 const isAIResponding = ref(false)
 
+const userReport = ref<Report | null>(null)
+const hasPreviousData = ref(false)
+
 const { generateAnalysis, createAnalysis } = useSessionAnalysis()
-const { role } = useUser()
+
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
 }
@@ -223,6 +218,8 @@ const {
   generateInlineAnalysis,
 } = useOpenRouter()
 
+const { role, user, updateUserRecord, userRecord } = useUser()
+const { createReport, updateReport } = useReport()
 const streamingResponse = ref('')
 const showModelError = ref(false)
 const modelSearchInput = ref('')
@@ -281,15 +278,16 @@ async function submitMessage() {
     newMessage.value = ''
     scrollToBottom()
 
-    const messageId = 'temp-' + Date.now()
+    // Remove temp assistant message logic. Do not push empty message.
 
     isAIResponding.value = true
     showScrollButton.value = false
 
     // Inline Analysis Integration
     isAIThinking.value = true
-    thinkingResponse.value = null
+    thinkingResponse.value = ''
     let analysisResult = null
+    let formattedAnalysis = ''
     try {
       // Prepare chat history for analysis (convert to ChatMessage[])
       const chatMessages = messages.value.map(msg => ({
@@ -300,18 +298,31 @@ async function submitMessage() {
       const lastMessageForAnalysis = chatMessages.length > 0 ? [chatMessages[chatMessages.length - 1]] : []
       // Call generateInlineAnalysis with only the last message
       analysisResult = await generateInlineAnalysis(lastMessageForAnalysis)
-      thinkingResponse.value = analysisResult
-      isAIThinking.value = false
+      // Format and display analysis inline (replace thinking bubble with analysis)
+      formattedAnalysis = formatInlineAnalysis(analysisResult)
+      thinkingResponse.value = formattedAnalysis
     }
     catch (err) {
-      thinkingResponse.value = { error: 'خطا در دریافت تحلیل. لطفا دوباره تلاش کنید.' }
+      thinkingResponse.value = 'خطا در دریافت تحلیل. لطفا دوباره تلاش کنید.'
       console.error('Inline analysis error:', err)
     }
     finally {
       isAIThinking.value = false
     }
 
-    checkIfScrolledToBottom()
+    // --- NEW: Send analysis as detail to streamChat ---
+    // Optionally, push the analysis as a new message (for display) ONLY if it is not empty
+    if (thinkingResponse.value && thinkingResponse.value.trim() !== '') {
+      // messages.value.push({
+      //   type: 'analysis',
+      //   text: thinkingResponse.value,
+      //   timestamp: new Date().toISOString(),
+      //   id: 'analysis-' + Date.now(),
+      //   isExpanded: false,
+      // })
+
+      checkIfScrolledToBottom()
+    }
 
     // Prepare chat history for AI with analysis; let composable inject system prompt
     const contextMessages = messages.value.map(msg => ({
@@ -321,24 +332,28 @@ async function submitMessage() {
     const chatMessagesForAI = [
       ...contextMessages,
       { role: 'user', content: userMessage.text },
-      // { role: 'user', content: userMessage.text + '\n\n[ANALYSIS]\n' + JSON.stringify(thinkingResponse.value) },
     ]
-    // --- Streaming AI Response ---
-    const pendingAIMessage = {
-      type: 'received',
-      text: '',
-      timestamp: now,
-      id: messageId, // temp id
-    }
-    messages.value.push(pendingAIMessage)
+    // Call streamChat with therapistDetails option (so system prompt is automatically added)
+    let aiResponse = ''
+    // Show streaming response in real time
+    isAIThinking.value = true
+    thinkingResponse.value = ''
     await streamChat(chatMessagesForAI, { therapistDetails: currentTherapist }, (chunk) => {
-      pendingAIMessage.text += chunk
-      // scrollToBottom()
+      aiResponse += chunk
+      thinkingResponse.value = aiResponse
     })
-    // After streaming, save to backend and update id/timestamp
-    const savedAIMessage = await sendMessage(currentTherapist.id, session.id, pendingAIMessage.text, 'received')
-    pendingAIMessage.id = savedAIMessage.id
-    pendingAIMessage.timestamp = savedAIMessage.time
+    isAIThinking.value = false
+
+    // Save AI response to PocketBase
+    const savedAIMessage = await sendMessage(currentTherapist.id, session.id, aiResponse, 'received')
+
+    // Add AI response to messages with the correct ID
+    messages.value.push({
+      type: 'received',
+      text: aiResponse,
+      timestamp: savedAIMessage.time, // Use timestamp from saved message
+      id: savedAIMessage.id, // Use ID from saved message
+    })
     checkIfScrolledToBottom()
     isAIResponding.value = false
   }
@@ -366,6 +381,74 @@ const toggleAnalysis = () => {
     }
   })
 }
+
+function formatInlineAnalysis(analysisResult) {
+  if (!analysisResult) return 'نتیجه‌ای یافت نشد.'
+  let output = ''
+
+  if (showAnalysis.value) {
+    output += '<div class="analysis-message bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">'
+
+    if (showAnalysis.value) {
+      output += '<div class="analysis-message bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">'
+
+      if (showAnalysis.value) {
+      // Session Details
+        output += `\n**جزئیات جلسه:**\n`
+        output += `- هدف جلسه: ${analysisResult.session_mainGoal || 'نامشخص'}\n`
+        output += `- نیاز به مداخله انسانی: ${analysisResult.session_humanInterventionNeeded ? 'بله' : 'خیر'}\n`
+        output += `- نیازهای ناهشیار: ${analysisResult.session_unconsciousNeeds || 'نامشخص'}\n`
+
+        // Last Message Analysis
+        output += `\n**تحلیل پیام آخر:**\n`
+        output += `- احساسات اولیه: ${(analysisResult.lastMessage_primaryEmotions || []).join(', ') || 'نامشخص'}\n`
+        output += `- احساسات دقیق‌تر: ${(analysisResult.lastMessage_nuancedEmotions || []).join(', ') || 'نامشخص'}\n`
+        output += `- شدت احساسات: ${analysisResult.lastMessage_emotionIntensity || 'نامشخص'}\n`
+        output += `- تناسب با هدف جلسه: ${analysisResult.lastMessage_alignmentWithGoal || 'نامشخص'}\n`
+        output += `- پاسخ پیشنهادی: ${analysisResult.emotionalResponse || 'نامشخص'}\n`
+      }
+      else {
+        output = '<div class="analysis-icon cursor-pointer" @click="showAnalysis = !showAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>'
+      }
+    }
+    else {
+      output = '<div class="analysis-icon cursor-pointer flex items-center justify-center p-3" @click="toggleAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>'
+    }
+  }
+  else {
+    output = '<div class="analysis-icon cursor-pointer flex items-center justify-center p-3" @click="toggleAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>'
+  }
+  return output + '</div>' + '</div>'
+}
+
+watch(messages, () => {
+  if (!isAIResponding.value) {
+    scrollToBottom()
+  }
+}, { deep: true })
+
+const { pause, resume } = useInterval(1000, { controls: true })
+
+const checkForHalfTime = () => {
+  if (!startChargeTime.value || !timeToShow.value) return false
+  const start = startChargeTime.value
+  const now = new Date()
+  const temp = Math.floor((now.getTime() - start.getTime()) / 60000)
+  return (temp / timeToShow.value > 1)
+}
+
+watch(timeToShow, async (newValue) => {
+  if (newValue <= 0 && activeSession.value?.id) {
+    const startTime = new Date(activeSession.value.created)
+    const endTime = new Date()
+    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
+    isReportModalOpen.value = true
+    isGeneratingAnalysis.value = true
+    await handleConfirmEndSession()
+    showNoCharge.value = true
+    pause()
+  }
+})
 
 const updateSessionTime = () => {
   if (activeSession.value?.created) {
@@ -418,31 +501,19 @@ const startSessionTimer = () => {
   }, 30000)
 }
 
-// --- Timer control functions for pause/resume ---
-function pause() {
-  if (timeUpdateInterval.value) {
-    clearInterval(timeUpdateInterval.value)
-    timeUpdateInterval.value = null
-  }
-}
-function resume() {
-  startSessionTimer()
-}
-
 onMounted(async () => {
   loading.value = true
   try {
     const therapists = await getTherapists()
     conversations.value = therapists.map(p => ({ id: p.id, user: p }))
 
-    const u = await nuxtApp.$pb.collection('users').getOne(nuxtApp.$pb.authStore.model.id, {})
+    const u = await nuxtApp.$pb
+      .collection('users')
+      .getOne(nuxtApp.$pb.authStore.model.id, {})
     showNoCharge.value = !u.hasCharge
     remainingTime.value = new Date(u.expireChargeTime)
-    console.log('[Charge Timer] Initialized: remainingTime =', remainingTime.value, 'timeToShow =', timeToShow.value)
-    chargeInterval = setInterval(() => {
-      currentTime.value = new Date()
-      console.log('[Charge Timer] Tick at', currentTime.value, 'timeToShow =', timeToShow.value)
-    }, 60000)
+    startChargeTime.value = new Date(u.startChargeTime)
+    timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
 
     const therapistId = route.query.therapistId as string
     if (therapistId) {
@@ -458,16 +529,20 @@ onMounted(async () => {
       pause()
     }
 
+    timeUpdateInterval.value = setInterval(() => {
+      if (timeToShow.value !== undefined) {
+        timeToShow.value = timeToShow.value - 1
+      }
+    }, 60000)
+
     if (nuxtApp.$pb.authStore.isValid) {
       userSubscription.value = await nuxtApp.$pb.collection('users').subscribe(
         nuxtApp.$pb.authStore.model?.id,
         (e) => {
-          remainingTime.value = new Date(e.record.expireChargeTime)
-          console.log('[Charge Timer] Subscription event: new expireChargeTime =', e.record.expireChargeTime, 'timeToShow =', timeToShow.value)
+          const expireTime = new Date(e.record.expireChargeTime).getTime()
+          timeToShow.value = Math.floor((expireTime - new Date().getTime()) / (1000 * 60))
           if (!e.record.hasCharge) {
             showNoCharge.value = true
-            console.log('[Charge Timer] Charge expired via subscription, clearing charge timer')
-            if (chargeInterval) clearInterval(chargeInterval)
             setTimeout(() => {
               if (chatEl.value) {
                 chatEl.value.scrollTo({
@@ -480,6 +555,12 @@ onMounted(async () => {
           }
         },
       )
+      // fetching userReport for having memory of previous sessions
+      const userReport = await getReportByUserId(nuxtApp.$pb.authStore.model?.id)
+      if (userReport) {
+        userReport.value = userReport
+        hasPreviousData.value = true
+      }
     }
   }
   catch (error) {
@@ -494,7 +575,8 @@ onMounted(async () => {
           behavior: 'smooth',
         })
       }
-    }, 0)
+    }, 300)
+    resume()
   }
   if (chatEl.value) {
     chatEl.value.addEventListener('scroll', checkIfScrolledToBottom)
@@ -516,10 +598,6 @@ onUnmounted(() => {
   }
   if (chatEl.value) {
     chatEl.value.removeEventListener('scroll', checkIfScrolledToBottom)
-  }
-  if (chargeInterval) {
-    console.log('[Charge Timer] Clearing charge interval on unmount')
-    clearInterval(chargeInterval)
   }
 })
 
@@ -590,6 +668,9 @@ const confirmClearChat = async () => {
 const gotoList = () => {
   navigateTo('/darmana/therapists/chooseTherapist')
 }
+const gotoReport = () => {
+  navigateTo(`/report`)
+}
 
 const isReportModalOpen = ref(false)
 
@@ -624,7 +705,6 @@ const handleEndSession = async () => {
     })
     return
   }
-  console.log(messages.value)
 
   if (messages.value.length < 10) {
     toaster.show({
@@ -681,6 +761,45 @@ const handleConfirmEndSession = async () => {
 
       activeSession.value.status = 'done'
       activeSession.value.session_analysis_for_system = savedAnalysisId
+      let report: Report | null = null
+      if (!userRecord.value.id) {
+        report = await createReport({
+          user: nuxtApp.$pb.authStore.model.id,
+          totalSessions: 1,
+          summaries: [{
+            session: activeSession.value.id,
+            summary: savedAnalysis.summaryOfSession,
+            title: savedAnalysis.title,
+          }],
+          finalDemographicProfile: savedAnalysis.demographicData,
+          possibleRiskFactors: savedAnalysis.possibleRiskFactorsExtracted ? [savedAnalysis.possibleRiskFactorsExtracted] : [],
+          possibleDeeperGoals: savedAnalysis.possibleDeeperGoalsOfPatient ? [savedAnalysis.possibleDeeperGoalsOfPatient] : [],
+        })
+      }
+      else {
+        report = await updateReport(userRecord.value.id, {
+
+          totalSessions: userRecord.value.totalSessions + 1,
+          summaries: [...userRecord.value.summaries, {
+            session: activeSession.value.id,
+            summary: savedAnalysis.summaryOfSession,
+            title: savedAnalysis.title,
+          }],
+          finalDemographicProfile: {
+            ...userRecord.value.finalDemographicProfile,
+            ...savedAnalysis.demographicData,
+          },
+          possibleRiskFactors: [
+            ...userRecord.value.possibleRiskFactors,
+            ...(savedAnalysis.possibleRiskFactorsExtracted ? [savedAnalysis.possibleRiskFactorsExtracted] : []),
+          ],
+          possibleDeeperGoals: [
+            ...userRecord.value.possibleDeeperGoals,
+            ...(savedAnalysis.possibleDeeperGoalsOfPatient ? [savedAnalysis.possibleDeeperGoalsOfPatient] : []),
+          ],
+        })
+      }
+      updateUserRecord(report)
     }
     catch (updateError) {
       console.error('Error updating session:', updateError)
@@ -688,8 +807,6 @@ const handleConfirmEndSession = async () => {
     }
 
     isReportModalOpen.value = false
-
-    await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
   }
   catch (error) {
     console.error('Error ending session:', error)
@@ -700,15 +817,12 @@ const handleConfirmEndSession = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-
-    // If we have an analysis ID, still navigate to the analysis page despite the error
-    if (savedAnalysisId) {
-      isReportModalOpen.value = false
-      await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
-    }
   }
   finally {
     isGeneratingAnalysis.value = false
+    isReportModalOpen.value = false
+
+    await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
   }
 }
 
@@ -732,9 +846,12 @@ const handleTextareaClick = () => {
     })
   }
 }
-
-const thinkingResponse = ref(null)
+const thinkingResponse = ref('')
 const isAIThinking = ref(false)
+// --- Ensure no 'thinking' message is pushed to messages ---
+// In submitMessage or any streaming logic, do not push a 'thinking' or empty message to messages array.
+// Only use isAIThinking and thinkingResponse for the typing indicator.
+
 </script>
 
 <template>
@@ -884,13 +1001,13 @@ const isAIThinking = ref(false)
         <div class="flex w-full flex-col">
           <!-- Header -->
           <div
-            class="flex h-16 w-full items-center justify-between px-4 sm:px-8"
+            class="mb-2 flex h-16 w-full items-center justify-between px-4 sm:px-8"
           >
-            <div class="mt-[140px] flex items-center gap-2 md:my-4">
+            <div class="mt-[140px] flex items-center gap-2 md:mt-4">
               <div class="flex">
                 <BaseMessage
                   v-if="!showNoCharge"
-                  class="z-10 w-[180px]"
+                  class="w-[180px]"
                   :color="timeToShow > 10 ? 'success' : 'warning'"
                 >
                   <span v-if="timeToShow > 0">
@@ -924,14 +1041,6 @@ const isAIThinking = ref(false)
                       name="ph:robot"
                       class="size-5"
                     />
-                  </button>
-                  <button
-                    class="bg-primary-100 dark:bg-primary-100 dark:text-muted-100 text-muted-600 hover:text-primary-100 hover:bg-primary-100/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                    aria-label="نمایش تحلیل احساسات"
-                    type="button"
-                    @click="showAnalysis = true"
-                  >
-                    <Icon name="ph:chart-bar-duotone" class="text-primary-500 size-6" />
                   </button>
                   <button
                     class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
@@ -1022,7 +1131,7 @@ const isAIThinking = ref(false)
                 class="space-y-8"
               >
                 <div
-                  v-for="(item, index) in messages"
+                  v-for="item in messages"
                   :key="item.id"
                   class="mb-4"
                 >
@@ -1084,36 +1193,16 @@ const isAIThinking = ref(false)
                   </div>
                 </div>
                 <!-- Assistant thinking bubble -->
-                <template v-if="isAIThinking">
-                  <div class="mb-4 flex justify-start">
-                    <div class="flex max-w-[85%] flex-col items-start">
-                      <div class="dark:from-muted-800 dark:via-muted-900 dark:to-muted-800 dark:border-muted-700 w-full rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-100 px-6 py-4 shadow-lg">
-                        <div class="flex items-center space-x-2">
-                          <svg
-                            class="text-primary-500 ml-2 size-5 animate-spin"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            viewBox="0 0 24 24"
-                          ><circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                          /><path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8z"
-                          /></svg>
-                          <span class="text-gray-500 dark:text-gray-300">در حال فکر کردن...</span>
-                        </div>
-                      </div>
+                <div v-if="isAIThinking" class="mb-4 flex justify-start">
+                  <div class="flex max-w-[85%] flex-col items-start">
+                    <div class="bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-xl px-4 py-2">
+                      <span class="block flex items-center font-sans">
+                        <AddonMarkdownRemark :source="thinkingResponse || 'در حال فکر کردن'" />
+                        <span class="typing-ellipsis ml-2" />
+                      </span>
                     </div>
                   </div>
-                </template>
-
+                </div>
                 <!-- No Charge Message -->
                 <BaseMessage
                   v-if="showNoCharge"
@@ -1471,7 +1560,15 @@ const isAIThinking = ref(false)
             </BaseMessage>
             <BaseButton
               type="button"
-              class=""
+              class="ml-3"
+              color="primary"
+              @click="gotoReport()"
+            >
+              نمایش پیشینه
+              <Icon name="ph:address-book-tabs" class="mr-2 size-5" />
+            </BaseButton>
+            <BaseButton
+              type="button"
               @click="expanded = true"
             >
               بستن پنل
@@ -1578,7 +1675,7 @@ const isAIThinking = ref(false)
       />
     </div>
     <div class="p-4 text-center md:p-6">
-      <p>آیا مایل به پایان دادن این جلسه و ساخت گزارش از این گفتگو هستید؟</p>
+      <p> {{ isGeneratingAnalysis ? 'در حال ساخت گزارش...' : 'آیا مایل به پایان دادن این جلسه و ساخت گزارش از این گفتگو هستید؟' }} </p>
     </div>
     <template #footer>
       <div class="flex w-full items-center justify-end gap-2 p-4 md:p-6">
@@ -1592,7 +1689,7 @@ const isAIThinking = ref(false)
           :disabled="isGeneratingAnalysis"
           @click="handleConfirmEndSession"
         >
-          {{ isGeneratingAnalysis ? 'در حال ساخت گزارش...' : 'تایید' }}
+          تایید
         </BaseButton>
       </div>
     </template>
@@ -1612,82 +1709,31 @@ const isAIThinking = ref(false)
       </div>
     </template>
   </TairoModal>
-
-  <TairoModal
-    :open="showAnalysis"
-    size="xl"
-    @close="showAnalysis = false"
-  >
-    <template #header>
-      <div class="border-muted-200 dark:border-muted-700 m-4 flex items-center justify-between border-b pb-4">
-        <div class="flex items-center gap-3">
-          <span class="bg-primary-100 text-primary-600 inline-flex size-10 items-center justify-center rounded-full shadow">
-            <Icon name="ph:chart-bar-duotone" class="size-6" />
-          </span>
-          <span class="text-primary-700 dark:text-primary-300 text-xl font-bold">نتیجه تحلیل احساسات</span>
-        </div>
-        <button
-          class="hover:bg-primary-100 dark:hover:bg-primary-900/40 flex items-center justify-center rounded-full p-2 transition-colors"
-          aria-label="بستن تحلیل"
-          @click="showAnalysis = false"
-        >
-          <Icon name="ph:x-bold" class="text-primary-400 size-5" />
-        </button>
-      </div>
-    </template>
-    <div class="space-y-8 px-8 py-10">
-      <!-- Session Info -->
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm">
-          <div class="mb-1 flex items-center gap-2">
-            <Icon name="ph:target-duotone" class="text-info-500 size-5" />
-            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">هدف جلسه:</span>
-          </div>
-          <span class="text-right text-base font-bold text-gray-900 dark:text-gray-100">{{ thinkingResponse.session_mainGoal || 'نامشخص' }}</span>
-        </div>
-        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm">
-          <div class="mb-1 flex items-center gap-2">
-            <Icon name="ph:lifebuoy-duotone" class="text-warning-500 size-5" />
-            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200 ">نیاز به مداخله انسانی:</span>
-          </div>
-          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ thinkingResponse.session_humanInterventionNeeded ? 'بله' : 'خیر' }}</span>
-        </div>
-        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm md:col-span-2">
-          <div class="mb-1 flex items-center gap-2">
-            <Icon name="ph:eye-duotone" class="size-5 text-purple-500" />
-            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">نیازهای ناهشیار:</span>
-          </div>
-          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ thinkingResponse.session_unconsciousNeeds || 'نامشخص' }}</span>
-        </div>
-      </div>
-      <div class="border-muted-200 dark:border-muted-700 border-t" />
-      <!-- Emotions -->
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm">
-          <div class="mb-1 flex items-center gap-2">
-            <Icon name="ph:smiley-duotone" class="text-success-500 size-5" />
-            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">احساسات اولیه:</span>
-          </div>
-          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ (thinkingResponse.lastMessage_primaryEmotions || []).join(', ') || 'نامشخص' }}</span>
-        </div>
-        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm">
-          <div class="mb-1 flex items-center gap-2">
-            <Icon name="ph:mask-happy-duotone" class="size-5 text-pink-500" />
-            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">احساسات دقیق‌تر:</span>
-          </div>
-          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ (thinkingResponse.lastMessage_nuancedEmotions || []).join(', ') || 'نامشخص' }}</span>
-        </div>
-        <div class="bg-muted-50 dark:bg-muted-900/40 flex flex-col items-start gap-1 rounded-lg p-4 shadow-sm md:col-span-2">
-          <div class="mb-1 flex items-center gap-2">
-            <Icon name="ph:thermometer-duotone" class="size-5 text-red-500" />
-            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">شدت احساسات:</span>
-          </div>
-          <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ thinkingResponse.lastMessage_intensity ?? 'نامشخص' }}</span>
-        </div>
-      </div>
-    </div>
-  </TairoModal>
 </template>
+
+<style scoped>
+.typing-ellipsis {
+  display: inline-block;
+  width: 1.5em;
+  text-align: right; /* RTL support */
+  direction: rtl;
+}
+.typing-ellipsis::after {
+  content: '';
+  display: inline-block;
+  width: 1.5em;
+  vertical-align: bottom;
+  animation: ellipsis-rtl steps(4,end) 1.2s infinite;
+}
+@keyframes ellipsis-rtl {
+  0% { content: ''; }
+  25% { content: '\002E'; }        /* . */
+  50% { content: '\002E\002E'; }  /* .. */
+  75% { content: '\002E\002E\002E'; } /* ... */
+  100% { content: ''; }
+}
+
+</style>
 <style scoped>
 #no-money-message {
   justify-content: space-evenly;

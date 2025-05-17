@@ -71,7 +71,7 @@ const displayName = computed(() => user.value.meta?.name || 'کاربر جدید
           <div class="p-2">
             <MenuItem v-slot="{ active }" as="div">
               <NuxtLink
-                to="/layouts/profile"
+                to="/report"
                 class="group flex w-full items-center rounded-md p-3 text-sm transition-colors duration-300"
                 :class="[
                   active

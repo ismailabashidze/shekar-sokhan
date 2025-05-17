@@ -1,42 +1,91 @@
-import { User } from './user'
-
 export type Report = {
-  anonymousUser: User
-  info: Object
+  user: User
+  totalSessions: number
+  summaries: string[]
+  finalDemographicProfile: DemographicData
+  possibleRiskFactors: string[]
+  possibleDeeperGoals: string[]
 }
 
 export function useReport() {
   const nuxtApp = useNuxtApp()
-  const { user } = useUser()
-  const { agentAction } = useCrew()
+  const pb = nuxtApp.$pb
 
-  const report = useLocalStorage('report', {} as Report)
-  const createReport = async () => {
-    if (user.value.id) {
-      report.value = await nuxtApp.$pb
-        .collection('reports')
-        .create({ anonymousUser: user.value.id })
+  const createReport = async (report: Omit<Report, 'id' | 'created' | 'updated'>) => {
+    try {
+      return await pb.collection('final_reports').create(report)
+    }
+    catch (error) {
+      console.error('Error creating report:', error)
+      throw error
     }
   }
-  const udpateReport = async (newMessage: string) => {
-    if (!process.server) {
-      // update the report based on new information
-      // using crew and report_builder
-      const r = await agentAction({
-        task: 'report_builder',
-        text: newMessage,
+
+  const getReports = async () => {
+    try {
+      return await pb.collection('final_reports').getList(1, 50, {
+        sort: '-created',
+        expand: 'user',
       })
-      const nReport = await nuxtApp.$pb
-        .collection('reports')
-        .update(report.value.id, {
-          info: { ...report.value.info, ...JSON.parse(r.data.value.result) },
-        })
-      report.value = nReport
+    }
+    catch (error) {
+      console.error('Error fetching reports:', error)
+      throw error
     }
   }
+
+  const getReportById = async (id: string) => {
+    try {
+      return await pb.collection('final_reports').getOne(id, {
+        expand: 'user',
+      })
+    }
+    catch (error) {
+      console.error(`Error fetching report with id ${id}:`, error)
+      throw error
+    }
+  }
+
+  const updateReport = async (id: string, data: Partial<Report>) => {
+    try {
+      return await pb.collection('final_reports').update(id, data)
+    }
+    catch (error) {
+      console.error(`Error updating report with id ${id}:`, error)
+      throw error
+    }
+  }
+
+  const deleteReport = async (id: string) => {
+    try {
+      return await pb.collection('final_reports').delete(id)
+    }
+    catch (error) {
+      console.error(`Error deleting report with id ${id}:`, error)
+      throw error
+    }
+  }
+
+  const getReportByUserId = async (userId: string) => {
+    try {
+      const result = await pb.collection('final_reports').getList(1, 1, {
+        filter: `user="${userId}"`,
+        expand: 'user',
+      })
+      return result.items[0] || null
+    }
+    catch (error) {
+      console.error(`Error fetching report for userId ${userId}:`, error)
+      throw error
+    }
+  }
+
   return {
-    report,
     createReport,
-    udpateReport,
+    getReports,
+    getReportById,
+    updateReport,
+    deleteReport,
+    getReportByUserId,
   }
 }

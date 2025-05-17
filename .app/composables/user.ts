@@ -19,6 +19,7 @@ export function useUser() {
   const nuxtApp = useNuxtApp()
   const user = useLocalStorage('user', {} as User)
   const role = useLocalStorage('role', '')
+  const userRecord = useLocalStorage('userRecord', {} as Report)
 
   const getAllUsers = async () => {
     return await nuxtApp.$pb.collection('users').getFullList({
@@ -32,10 +33,17 @@ export function useUser() {
     return user
   }
 
+  const updateUserRecord = async (r: Report) => {
+    userRecord.value = r
+    return userRecord
+  }
+
   return {
     user,
     role,
+    userRecord,
     getAllUsers,
     setUser,
+    updateUserRecord,
   }
 }

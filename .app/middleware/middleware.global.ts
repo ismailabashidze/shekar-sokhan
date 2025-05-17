@@ -28,4 +28,30 @@ export default defineNuxtRouteMiddleware((to) => {
     // Redirect to login page with a 401 redirect code
     return navigateTo('/auth/login', { redirectCode: 401 })
   }
+
+  // Additional check: PocketBase auth is present, but user in localStorage is '{}' and role is empty
+  try {
+    const localUserStr = localStorage.getItem('user')
+    const localRole = localStorage.getItem('role')
+    const isUserObjectEmpty = localUserStr && localUserStr.trim() === '{}' // user is '{}'
+    const isRoleEmpty = !localRole || localRole.trim() === ''
+    if (nuxtApp.$pb.authStore.isValid && (isUserObjectEmpty || isRoleEmpty)) {
+      // Try to get user info from PocketBase
+      const pbUser = nuxtApp.$pb.authStore.model
+      if (pbUser && typeof pbUser === 'object' && Object.keys(pbUser).length > 0) {
+        localStorage.setItem('user', JSON.stringify(pbUser))
+        // Use 'role' or 'userType' depending on your schema
+        const pbRole = pbUser.role || pbUser.userType || ''
+        localStorage.setItem('role', pbRole)
+      } else {
+        // If no user info, clear user and role
+        localStorage.setItem('user', '{}')
+        localStorage.setItem('role', '')
+      }
+    }
+  } catch (e) {
+    // Failsafe: do nothing if localStorage is not accessible
+    // Optionally log error
+    // console.error('Failed user/role localStorage sync', e)
+  }
 })

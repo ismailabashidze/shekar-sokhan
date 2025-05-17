@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import KeyPointsList from '~/components/sessions/KeyPointsList.vue'
+import EmotionalJourney from '~/components/sessions/EmotionalJourney.vue'
+import SessionSummary from '~/components/sessions/SessionSummary.vue'
+
 definePageMeta({
-  title: 'Project Details',
+  title: 'گزارش جلسه',
   layout: 'sidebar',
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
@@ -109,7 +113,7 @@ const nextSteps = [
 
 const actionItems = [
   { title: 'تمرین گفتن نه در موقعیت‌های روزمره، حتی اگر سخت باشد', completed: false, dueDate: '2025-05-10', icon: '🛑' },
-  { title: 'نوشتن خاطرات و احساساتم درباره مرزها و تجربه‌های جدیدم', completed: true, icon: '✍️' },
+  { title: 'نوشتن خاطرات و احساساتم درباره مرزها', completed: true, icon: '✍️' },
   { title: 'شناسایی موقعیت‌هایی که مرزهایم رعایت نمی‌شود و تحلیل واکنشم', completed: false, icon: '🔍' },
   { title: 'مطالعه مقاله‌ای درباره مرزهای سالم در روابط', completed: false, icon: '📚' },
 ]
@@ -150,50 +154,50 @@ const relationshipSteps = [
 ]
 
 const tasksData = [
-  { 
-    title: 'تمرین گفتن نه در موقعیت‌های روزمره', 
-    dueDate: '2025-05-10', 
+  {
+    title: 'تمرین گفتن نه در موقعیت‌های روزمره',
+    dueDate: '2025-05-10',
     icon: '🛑',
     status: 'در حال انجام',
     description: 'هر روز در یک موقعیت که احساس می‌کنم مرزهایم نقض می‌شود، تمرین کنم که محترمانه "نه" بگویم.',
     progress: 30,
-    completed: false
+    completed: false,
   },
-  { 
-    title: 'نوشتن خاطرات و احساساتم درباره مرزها', 
-    dueDate: '2025-05-02', 
+  {
+    title: 'نوشتن خاطرات و احساساتم درباره مرزها',
+    dueDate: '2025-05-02',
     icon: '✍️',
     status: 'تکمیل شده',
     description: 'هر شب قبل از خواب درباره احساساتم و تجربیات روزانه‌ام در رابطه با مرزهای شخصی بنویسم.',
     progress: 100,
-    completed: true
+    completed: true,
   },
-  { 
-    title: 'شناسایی موقعیت‌هایی که مرزهایم رعایت نمی‌شود', 
-    dueDate: '2025-05-08', 
+  {
+    title: 'شناسایی موقعیت‌هایی که مرزهایم رعایت نمی‌شود',
+    dueDate: '2025-05-08',
     icon: '🔍',
     status: 'در حال انجام',
     description: 'لیستی از موقعیت‌ها و افرادی که معمولاً باعث می‌شوند احساس ناراحتی کنم تهیه کنم و الگوها را شناسایی کنم.',
     progress: 50,
-    completed: false
+    completed: false,
   },
-  { 
-    title: 'مطالعه مقاله‌ای درباره مرزهای سالم در روابط', 
-    dueDate: '2025-05-15', 
+  {
+    title: 'مطالعه مقاله‌ای درباره مرزهای سالم در روابط',
+    dueDate: '2025-05-15',
     icon: '📚',
     status: 'به زودی',
     description: 'مقاله پیشنهادی درمانگر را درباره نحوه تعیین مرزهای سالم مطالعه کنم و نکات کلیدی را یادداشت کنم.',
     progress: 0,
-    completed: false
+    completed: false,
   },
-  { 
-    title: 'تمرین روزانه ذهن‌آگاهی', 
-    dueDate: '2025-05-16', 
+  {
+    title: 'تمرین روزانه ذهن‌آگاهی',
+    dueDate: '2025-05-16',
     icon: '🧘‍♀️',
     status: 'در حال انجام',
-    description: 'هر روز حداقل ۵ دقیقه تمرین ذهن‌آگاهی انجام دهم و تاثیر آن بر استرس روزانه‌ام را یادداشت کنم.',
+    description: 'هر روز حداقل ۵ دقیقه تمرین ذهن‌آگاهی انجام دهم و تاثیر آن را یادداشت کنم.',
     progress: 40,
-    completed: false
+    completed: false,
   },
 ]
 
@@ -207,35 +211,50 @@ const mainPoints = [
 ]
 
 const homeworksData = [
-  { 
-    title: 'تمرین گفتن نه در موقعیت‌های روزمره', 
-    dueDate: '2025-05-10', 
+  {
+    title: 'تمرین گفتن نه در موقعیت‌های روزمره',
+    dueDate: '2025-05-10',
     icon: '🛑',
-    completed: false
+    completed: false,
+    priority: 'high',
+    progress: 30,
+    category: 'مرزهای سالم',
   },
-  { 
-    title: 'نوشتن خاطرات و احساساتم درباره مرزها', 
-    dueDate: '2025-05-02', 
+  {
+    title: 'نوشتن خاطرات و احساساتم درباره مرزها',
+    dueDate: '2025-05-02',
     icon: '✍️',
-    completed: true
+    completed: true,
+    priority: 'medium',
+    progress: 100,
+    category: 'خودشناسی',
   },
-  { 
-    title: 'شناسایی موقعیت‌هایی که مرزهایم رعایت نمی‌شود', 
-    dueDate: '2025-05-08', 
+  {
+    title: 'شناسایی موقعیت‌هایی که مرزهایم رعایت نمی‌شود',
+    dueDate: '2025-05-08',
     icon: '🔍',
-    completed: false
+    completed: false,
+    priority: 'medium',
+    progress: 60,
+    category: 'مرزهای سالم',
   },
-  { 
-    title: 'مطالعه مقاله‌ای درباره مرزهای سالم در روابط', 
-    dueDate: '2025-05-15', 
+  {
+    title: 'مطالعه مقاله‌ای درباره مرزهای سالم در روابط',
+    dueDate: '2025-05-15',
     icon: '📚',
-    completed: false
+    completed: false,
+    priority: 'low',
+    progress: 10,
+    category: 'آموزش',
   },
-  { 
-    title: 'تمرین روزانه ذهن‌آگاهی', 
-    dueDate: '2025-05-16', 
+  {
+    title: 'تمرین روزانه ذهن‌آگاهی',
+    dueDate: '2025-05-16',
     icon: '🧘‍♀️',
-    completed: false
+    completed: false,
+    priority: 'high',
+    progress: 45,
+    category: 'تمرین',
   },
 ]
 
@@ -243,23 +262,155 @@ const activeFilter = ref('all')
 
 const filteredHomeworks = computed(() => {
   const today = new Date()
-  
+
   if (activeFilter.value === 'all') {
     return homeworksData
-  } else if (activeFilter.value === 'completed') {
+  }
+  else if (activeFilter.value === 'completed') {
     return homeworksData.filter(hw => hw.completed)
-  } else if (activeFilter.value === 'pending') {
+  }
+  else if (activeFilter.value === 'pending') {
     return homeworksData.filter(hw => !hw.completed)
-  } else if (activeFilter.value === 'upcoming') {
-    return homeworksData.filter(hw => {
+  }
+  else if (activeFilter.value === 'upcoming') {
+    return homeworksData.filter((hw) => {
       if (!hw.dueDate) return false
       const dueDate = new Date(hw.dueDate)
       return dueDate > today && !hw.completed
     })
   }
-  
+
   return homeworksData
 })
+
+// Add emotions data for the chart showing intensity over the 4 quarters of the session
+const emotionsTimeData = ref([
+  {
+    emotion: 'شادی',
+    data: [
+      { time: 'Q1', value: 2 },
+      { time: 'Q2', value: 3 },
+      { time: 'Q3', value: 3 },
+      { time: 'Q4', value: 4 },
+    ],
+    color: '#10b981', // green
+  },
+  {
+    emotion: 'اضطراب',
+    data: [
+      { time: 'Q1', value: 4 },
+      { time: 'Q2', value: 4 },
+      { time: 'Q3', value: 3 },
+      { time: 'Q4', value: 2 },
+    ],
+    color: '#f43f5e', // red
+  },
+  {
+    emotion: 'امیدواری',
+    data: [
+      { time: 'Q1', value: 2 },
+      { time: 'Q2', value: 3 },
+      { time: 'Q3', value: 4 },
+      { time: 'Q4', value: 4 },
+    ],
+    color: '#3b82f6', // blue
+  },
+  {
+    emotion: 'تردید',
+    data: [
+      { time: 'Q1', value: 3 },
+      { time: 'Q2', value: 3 },
+      { time: 'Q3', value: 2 },
+      { time: 'Q4', value: 1 },
+    ],
+    color: '#8b5cf6', // purple
+  },
+  {
+    emotion: 'آرامش',
+    data: [
+      { time: 'Q1', value: 1 },
+      { time: 'Q2', value: 2 },
+      { time: 'Q3', value: 3 },
+      { time: 'Q4', value: 4 },
+    ],
+    color: '#60a5fa', // light blue
+  },
+])
+
+// Add dominant emotion per quarter for background coloring
+const quarterDominantEmotions = ref([
+  { emotion: 'اضطراب', color: 'rgba(244, 63, 94, 0.1)', emoji: '😟' }, // Q1: anxiety dominant
+  { emotion: 'امیدواری', color: 'rgba(59, 130, 246, 0.1)', emoji: '🙂' }, // Q2: hope growing
+  { emotion: 'امیدواری', color: 'rgba(59, 130, 246, 0.1)', emoji: '😊' }, // Q3: hope strong
+  { emotion: 'شادی', color: 'rgba(16, 185, 129, 0.1)', emoji: '😄' }, // Q4: happiness dominant
+])
+
+// Setup chart options
+const emotionChartOptions = ref({
+  height: 240,
+  grid: {
+    vertLines: {
+      visible: false,
+    },
+    horzLines: {
+      visible: false,
+    },
+  },
+  rightPriceScale: {
+    visible: true,
+    borderVisible: false,
+  },
+  timeScale: {
+    visible: true,
+    borderVisible: false,
+  },
+  crosshair: {
+    vertLine: {
+      visible: true,
+      labelVisible: false,
+    },
+    horzLine: {
+      visible: true,
+      labelVisible: true,
+    },
+  },
+})
+
+// For chart DOM reference
+const emotionChartEl = ref()
+
+// Function to generate SVG path for line chart - make variables available in component
+const width = 400
+const height = 180
+const paddingTop = 20
+const paddingBottom = 20
+const paddingLeft = 5
+const paddingRight = 5
+const xScale = (width - paddingLeft - paddingRight) / 3 // 3 = distance between 4 quarters
+const yScale = (height - paddingTop - paddingBottom) / 5 // 0-5 scale for emotional intensity
+
+function generateLinePath(data) {
+  // Generate path
+  let path = ''
+  data.forEach((point, index) => {
+    // X coordinate distributes points evenly across chart width
+    const x = paddingLeft + index * xScale
+
+    // Y coordinate places points by intensity level (5 = top, 1 = bottom)
+    // Flip Y axis since SVG 0,0 is at top-left
+    const y = height - paddingBottom - point.value * yScale
+
+    if (index === 0) {
+      path += `M ${x},${y}`
+    }
+    else {
+      path += ` L ${x},${y}`
+    }
+  })
+
+  return path
+}
+
 </script>
 
 <template>
@@ -381,10 +532,7 @@ const filteredHomeworks = computed(() => {
             label: 'ارتباط درمانی',
             value: 'therapeutic',
           },
-          {
-            label: 'تکالیف',
-            value: 'tasks',
-          },
+
           {
             label: 'تکالیف',
             value: 'homeworks',
@@ -414,33 +562,14 @@ const filteredHomeworks = computed(() => {
                       >
                         تاریخ جلسه: {{ '۲ اردیبهشت ۱۴۰۴' }}
                       </BaseParagraph>
-                      
+
                       <!-- Main Points -->
                       <div class="mt-6">
-                        <BaseHeading
-                          tag="h3"
-                          size="lg"
-                          weight="medium"
-                          class="mb-4"
-                        >
-                          نکات کلیدی جلسه
-                        </BaseHeading>
-                        <div class="flex flex-wrap gap-3">
-                          <BaseTag 
-                            v-for="point in mainPoints"
-                            :key="point.title"
-                            color="default"
-                            flavor="pastel"
-                            size="md"
-                            class="rtl:ml-2 ltr:mr-2 mb-2"
-                          >
-                            {{ point.icon }} {{ point.title }}
-                          </BaseTag>
-                        </div>
+                        <KeyPointsList :key-points="mainPoints" />
                       </div>
-                      
+
                       <!-- Emotional Journey -->
-                      <div class="mt-6 border-t border-muted-200 dark:border-muted-700 pt-6">
+                      <div class="border-muted-200 dark:border-muted-700 mt-6 border-t pt-6">
                         <BaseHeading
                           tag="h3"
                           size="lg"
@@ -449,40 +578,43 @@ const filteredHomeworks = computed(() => {
                         >
                           سفر احساسی
                         </BaseHeading>
-                        <div class="mb-4 flex items-center gap-1 text-xl">
-                          <span>😊😌😐😔</span>
-                        </div>
-                        <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300 mb-4">
+                        <EmotionalJourney :stages="[
+                          { emoji: '😔', label: 'شروع', highlighted: true, color: 'primary' },
+                          { emoji: '😐', label: 'میانه' },
+                          { emoji: '😌', label: 'پیشرفت' },
+                          { emoji: '😊', label: 'پایان', highlighted: true, color: 'success' }
+                        ]">
                           در ابتدای جلسه کمی مضطرب بودم اما با صحبت کردن درباره احساساتم آرام‌تر شدم. در طول جلسه احساس امیدواری و شادی بیشتری پیدا کردم و در پایان جلسه حس سبکی داشتم. با این حال، هنوز گاهی اضطراب و تردید سراغم می‌آید.
-                        </BaseParagraph>
-                        
-                        <div class="mb-4">
-                          <BaseHeading
-                            tag="h4"
-                            size="md"
-                            weight="medium"
-                            class="mb-2"
-                          >
-                            احساسات کلیدی
-                          </BaseHeading>
-                          <div class="flex flex-wrap gap-2">
-                            <BaseProgress
-                              v-for="(value, emotion) in keyEmotions"
-                              :key="emotion"
-                              :value="value * 20"
-                              :color="emotion === 'اضطراب' || emotion === 'تردید' ? 'warning' : 'primary'"
-                              size="xs"
-                              label-position="start"
-                              class="mb-3 w-full max-w-md"
-                            >
-                              {{ emotion }}
-                            </BaseProgress>
-                          </div>
-                        </div>
+                        </EmotionalJourney>
                       </div>
-                      
+
+                      <!-- Summary of Session -->
+                      <div class="border-muted-200 dark:border-muted-700 mt-6 border-t pt-6">
+                        <BaseHeading
+                          tag="h3"
+                          size="lg"
+                          weight="medium"
+                          class="mb-4"
+                        >
+                          خلاصه جلسه
+                        </BaseHeading>
+                        <SessionSummary 
+                          :summary="'در این جلسه روی تعیین مرزهای سالم و تمرین جرأت‌مندی تمرکز کردیم. مراجع از پیشرفت خود در گفتن نه به درخواست‌های غیرمنطقی ابراز رضایت کرد و توانست یک هدف هفتگی را با موفقیت به پایان برساند. همچنین مهارت‌های مدیریت استرس و تکنیک‌های تنفس عمیق تمرین شد.'"
+                          :goals="[
+                            'تقویت مهارت‌های جرأت‌مندی',
+                            'آموزش تکنیک‌های مدیریت استرس',
+                            'بررسی پیشرفت در تعیین مرزهای سالم'
+                          ]"
+                          :progress="[
+                            'موفقیت در گفتن نه به یک درخواست غیرمنطقی',
+                            'افزایش اعتماد به نفس در بیان احساسات',
+                            'بهبود در مدیریت موقعیت‌های استرس‌زا'
+                          ]"
+                        />
+                      </div>
+
                       <!-- Insights/Learnings -->
-                      <div class="mt-6 border-t border-muted-200 dark:border-muted-700 pt-6">
+                      <div class="border-muted-200 dark:border-muted-700 mt-6 border-t pt-6">
                         <BaseHeading
                           tag="h3"
                           size="lg"
@@ -491,7 +623,7 @@ const filteredHomeworks = computed(() => {
                         >
                           بینش‌ها و یادگیری‌ها
                         </BaseHeading>
-                        
+
                         <div class="mb-4">
                           <BaseHeading
                             tag="h4"
@@ -501,17 +633,18 @@ const filteredHomeworks = computed(() => {
                           >
                             بینش‌ها
                           </BaseHeading>
-                          <ul class="ps-4 space-y-2">
-                            <li v-for="insight in insightsData" 
-                                :key="insight.text"
-                                class="text-muted-600 dark:text-muted-300 flex items-start gap-2"
+                          <ul class="space-y-2 ps-4">
+                            <li
+                              v-for="insight in insightsData"
+                              :key="insight.text"
+                              class="text-muted-600 dark:text-muted-300 flex items-start gap-2"
                             >
                               <span>{{ insight.icon }}</span>
                               <span>{{ insight.text }}</span>
                             </li>
                           </ul>
                         </div>
-                        
+
                         <div class="mb-4">
                           <BaseHeading
                             tag="h4"
@@ -521,10 +654,11 @@ const filteredHomeworks = computed(() => {
                           >
                             یادگیری‌ها
                           </BaseHeading>
-                          <ul class="ps-4 space-y-2">
-                            <li v-for="learning in learningsData" 
-                                :key="learning.text"
-                                class="text-muted-600 dark:text-muted-300 flex items-start gap-2"
+                          <ul class="space-y-2 ps-4">
+                            <li
+                              v-for="learning in learningsData"
+                              :key="learning.text"
+                              class="text-muted-600 dark:text-muted-300 flex items-start gap-2"
                             >
                               <span>{{ learning.icon }}</span>
                               <span>{{ learning.text }}</span>
@@ -534,7 +668,7 @@ const filteredHomeworks = computed(() => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Action Items -->
                   <div>
                     <BaseHeading
@@ -549,28 +683,101 @@ const filteredHomeworks = computed(() => {
                       <BaseListItem
                         v-for="item in actionItems"
                         :key="item.title"
-                        class="border-muted-200 dark:border-muted-700 rounded-lg border p-4"
+                        :class="[
+                          'border-muted-200 dark:border-muted-700 list-none rounded-2xl border p-5 shadow-sm transition-all duration-300',
+                          item.completed
+                            ? 'bg-success-50 dark:bg-success-500/10 border-success-100 dark:border-success-500/20'
+                            : 'hover:bg-muted-50 dark:hover:bg-muted-800/50'
+                        ]"
                       >
                         <template #start>
-                          <BaseCheckbox
-                            :model-value="item.completed"
-                            :color="item.completed ? 'success' : 'muted'"
-                            :disabled="true"
-                            class="me-2"
-                          />
+                          <div class="relative">
+                            <BaseCheckbox
+                              :model-value="item.completed"
+                              :color="item.completed ? 'success' : 'primary'"
+                              :disabled="true"
+                              class="me-2"
+                            />
+                            <div
+                              v-if="item.completed"
+                              class="text-success-500 dark:text-success-400 absolute -right-1 -top-1"
+                            >
+                              <Icon name="ph:check-circle-fill" class="size-4" />
+                            </div>
+                          </div>
                         </template>
                         <div class="flex flex-1 flex-col">
-                          <p class="text-muted-800 dark:text-muted-100 font-sans text-sm font-medium leading-tight">
-                            <span>{{ item.icon }}</span> {{ item.title }}
-                          </p>
-                          <p class="text-muted-400 font-sans text-xs" v-if="item.dueDate">
-                            <span class="me-1">
-                              <Icon name="ph:calendar-duotone" class="size-3" />
-                            </span>
-                            <span>تا تاریخ {{ item.dueDate }}</span>
-                          </p>
+                          <div class="flex flex-wrap items-center gap-3">
+                            <div
+                              :class="[
+                                'flex size-10 items-center justify-center rounded-full',
+                                item.completed
+                                  ? 'bg-success-100 dark:bg-success-500/20 text-success-500 dark:text-success-400'
+                                  : 'bg-primary-100 dark:bg-primary-500/20 text-primary-500 dark:text-primary-400'
+                              ]"
+                            >
+                              {{ item.icon }}
+                            </div>
+                            <p class="text-muted-800 dark:text-muted-100 flex-1 font-sans text-sm font-medium leading-tight">
+                              <span :class="{ 'text-muted-400 line-through': item.completed }">{{ item.title }}</span>
+                            </p>
+                            <BaseTag
+                              v-if="item.completed"
+                              color="success"
+                              flavor="pastel"
+                              size="xs"
+                              class="rounded-full px-3"
+                            >
+                              تکمیل شده
+                            </BaseTag>
+                          </div>
+
+                          <div class="mt-3 flex flex-wrap items-center gap-3">
+                            <BaseTag
+                              color="info"
+                              flavor="pastel"
+                              size="sm"
+                              class="rounded-full px-3"
+                            >
+                              مرزهای سالم
+                            </BaseTag>
+                          </div>
+
+                          <div v-if="!item.completed" class="mt-4 flex justify-end gap-3">
+                            <BaseButton
+                              color="success"
+                              flavor="pastel"
+                              shape="full"
+                              size="sm"
+                              class="flex size-9 items-center justify-center rounded-full p-0"
+                              tooltip="تکمیل شد"
+                            >
+                              <Icon name="ph:check-bold" class="size-4" />
+                            </BaseButton>
+                            <BaseButton
+                              color="info"
+                              flavor="pastel"
+                              shape="full"
+                              size="sm"
+                              class="flex size-9 items-center justify-center rounded-full p-0"
+                              tooltip="ویرایش"
+                            >
+                              <Icon name="ph:pencil-simple-line" class="size-4" />
+                            </BaseButton>
+                          </div>
                         </div>
                       </BaseListItem>
+                    </div>
+                    <div class="mt-4 flex justify-center">
+                      <BaseButton
+                        color="primary"
+                        flavor="solid"
+                        size="sm"
+                        class="px-4"
+                      >
+                        <Icon name="ph:plus-duotone" class="me-1 size-4" />
+                        افزودن تکلیف جدید
+                      </BaseButton>
                     </div>
                   </div>
                 </BaseCard>
@@ -588,13 +795,13 @@ const filteredHomeworks = computed(() => {
                       نقاط قوت
                     </BaseHeading>
                     <div class="flex flex-wrap gap-2">
-                      <BaseTag 
+                      <BaseTag
                         v-for="strength in strengthsData"
                         :key="strength.label"
                         color="success"
                         flavor="pastel"
                         size="md"
-                        class="rtl:ml-2 ltr:mr-2 mb-2"
+                        class="mb-2 ltr:mr-2 rtl:ml-2"
                       >
                         {{ strength.icon }} {{ strength.label }}
                       </BaseTag>
@@ -603,7 +810,7 @@ const filteredHomeworks = computed(() => {
                       در این جلسه متوجه شدم که انعطاف‌پذیری و صداقتم به من کمک می‌کند تا روابط بهتری داشته باشم. همچنین توانستم بازخورد درمانگر را بدون احساس تدافعی بپذیرم و درباره احساساتم با شجاعت بیشتری صحبت کنم.
                     </BaseParagraph>
                   </BaseCard>
-                  
+
                   <!-- Areas for Growth -->
                   <BaseCard class="p-6">
                     <BaseHeading
@@ -615,8 +822,9 @@ const filteredHomeworks = computed(() => {
                       زمینه‌های رشد
                     </BaseHeading>
                     <div class="space-y-4">
-                      <div v-for="area in growthAreas" 
-                          :key="area.title"
+                      <div
+                        v-for="area in growthAreas"
+                        :key="area.title"
                       >
                         <BaseHeading
                           tag="h4"
@@ -638,19 +846,23 @@ const filteredHomeworks = computed(() => {
                           >
                             اقدامات پیشنهادی:
                           </BaseHeading>
-                          <ul class="ps-2 space-y-1">
-                            <li v-for="action in area.suggestedActions" 
-                                :key="action.title"
-                                class="text-muted-600 dark:text-muted-300 text-sm flex items-start gap-2">
-                              <span>{{ action.icon }}</span>
-                              <span>{{ action.title }}</span>
+                          <ul class="space-y-1 ps-2">
+                            <li
+                              v-for="action in area.suggestedActions"
+                              :key="action.title"
+                              class="hover:bg-muted-100 dark:hover:bg-muted-700/40 flex items-start gap-2 rounded-xl p-2 transition-colors duration-200"
+                            >
+                              <div class="bg-info-100 dark:bg-info-500/20 text-info-500 dark:text-info-400 flex size-7 shrink-0 items-center justify-center rounded-full">
+                                <span>{{ action.icon }}</span>
+                              </div>
+                              <span class="text-muted-700 dark:text-muted-200 font-sans text-sm">{{ action.title }}</span>
                             </li>
                           </ul>
                         </div>
                       </div>
                     </div>
                   </BaseCard>
-                  
+
                   <!-- Therapeutic Relationship -->
                   <BaseCard class="p-6">
                     <BaseHeading
@@ -662,51 +874,96 @@ const filteredHomeworks = computed(() => {
                       ارتباط درمانی
                     </BaseHeading>
                     <div class="mb-4">
-                      <div class="grid grid-cols-3 gap-3 mb-4">
+                      <div class="mb-4 grid grid-cols-3 gap-3">
                         <div class="text-center">
-                          <div class="bg-muted-100 dark:bg-muted-700 rounded-md p-2 mb-1">
+                          <div class="bg-muted-100 dark:bg-muted-700 mb-1 rounded-md p-2">
                             <div class="text-primary-500 text-2xl">
                               <Icon name="ph:chat-circle-text-duotone" class="size-8" />
                             </div>
                           </div>
-                          <div class="text-sm font-medium">کیفیت ارتباط</div>
-                          <div class="text-muted-400 text-xs">خوب</div>
+                          <div class="text-sm font-medium">
+                            کیفیت ارتباط
+                          </div>
+                          <div class="text-muted-400 text-xs">
+                            خوب
+                          </div>
                         </div>
                         <div class="text-center">
-                          <div class="bg-muted-100 dark:bg-muted-700 rounded-md p-2 mb-1">
+                          <div class="bg-muted-100 dark:bg-muted-700 mb-1 rounded-md p-2">
                             <div class="text-warning-500 text-2xl">
                               <Icon name="ph:brain-duotone" class="size-8" />
                             </div>
                           </div>
-                          <div class="text-sm font-medium">سطح درک</div>
-                          <div class="text-muted-400 text-xs">متوسط</div>
+                          <div class="text-sm font-medium">
+                            سطح درک
+                          </div>
+                          <div class="text-muted-400 text-xs">
+                            متوسط
+                          </div>
                         </div>
                         <div class="text-center">
-                          <div class="bg-muted-100 dark:bg-muted-700 rounded-md p-2 mb-1">
+                          <div class="bg-muted-100 dark:bg-muted-700 mb-1 rounded-md p-2">
                             <div class="text-info-500 text-2xl">
                               <Icon name="ph:handshake-duotone" class="size-8" />
                             </div>
                           </div>
-                          <div class="text-sm font-medium">سطح اعتماد</div>
-                          <div class="text-muted-400 text-xs">در حال رشد</div>
+                          <div class="text-sm font-medium">
+                            سطح اعتماد
+                          </div>
+                          <div class="text-muted-400 text-xs">
+                            در حال رشد
+                          </div>
                         </div>
                       </div>
-                      
+
                       <BaseHeading
                         tag="h4"
                         size="md"
                         weight="medium"
-                        class="mt-4 mb-2"
+                        class="mb-2 mt-4"
                       >
                         گام‌های بعدی برای بهبود ارتباط
                       </BaseHeading>
-                      <ul class="ps-4 space-y-2">
-                        <li v-for="step in relationshipSteps" 
-                            :key="step.title"
-                            class="text-muted-600 dark:text-muted-300 flex items-start gap-2"
+                      <ul class="space-y-2 ps-4">
+                        <li
+                          v-for="step in relationshipSteps"
+                          :key="step.title"
+                          class="bg-muted-50 dark:bg-muted-800/40 hover:bg-muted-100 dark:hover:bg-muted-800/60 flex items-start gap-3 rounded-xl p-3 transition-colors duration-200"
                         >
-                          <span>{{ step.icon }}</span>
-                          <span>{{ step.title }}</span>
+                          <div class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 dark:text-primary-400 flex size-9 shrink-0 items-center justify-center rounded-full">
+                            <span>{{ step.icon }}</span>
+                          </div>
+                          <div class="flex-1">
+                            <span class="text-muted-800 dark:text-muted-100 font-medium">{{ step.title }}</span>
+                            <div class="mt-1.5">
+                              <div class="flex items-center justify-between text-xs">
+                                <span class="text-muted-500 dark:text-muted-400">پیشرفت</span>
+                                <span class="text-primary-500 font-medium">{{ Math.floor(Math.random() * 60 + 20) }}%</span>
+                              </div>
+                              <div class="bg-muted-200 dark:bg-muted-700 mt-1 h-1 w-full rounded-full">
+                                <div class="bg-primary-500 h-1 rounded-full" :style="`width: ${Math.floor(Math.random() * 60 + 20)}%`" />
+                              </div>
+                            </div>
+                            <div class="mt-2 flex items-center gap-2">
+                              <div v-if="Math.random() > 0.5" class="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
+                                در حال پیشرفت
+                              </div>
+                              <div v-if="Math.random() > 0.5" class="bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 rounded-full px-2 py-0.5 text-xs">
+                                نیاز به تمرکز
+                              </div>
+                              <div v-if="Math.random() > 0.7" class="bg-success-100 dark:bg-success-500/20 text-success-600 dark:text-success-400 rounded-full px-2 py-0.5 text-xs">
+                                اولویت بالا
+                              </div>
+                            </div>
+                            <div class="mt-2 flex justify-end gap-2">
+                              <button class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-500/30 rounded-full p-1 transition-colors">
+                                <Icon name="ph:info-duotone" class="size-4" />
+                              </button>
+                              <button class="bg-warning-100 dark:bg-warning-500/20 text-warning-500 dark:text-warning-400 hover:bg-warning-200 dark:hover:bg-warning-500/30 rounded-full p-1 transition-colors">
+                                <Icon name="ph:star-duotone" class="size-4" />
+                              </button>
+                            </div>
+                          </div>
                         </li>
                       </ul>
                       <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400 mt-4">
@@ -731,9 +988,9 @@ const filteredHomeworks = computed(() => {
                   >
                     پیشرفت جلسه
                   </BaseHeading>
-                  
+
                   <!-- Strengths -->
-                  <div class="mb-8 border-b border-muted-200 dark:border-muted-700 pb-6">
+                  <div class="border-muted-200 dark:border-muted-700 mb-8 border-b pb-6">
                     <BaseHeading
                       tag="h3"
                       size="lg"
@@ -742,14 +999,14 @@ const filteredHomeworks = computed(() => {
                     >
                       نقاط قوت شناسایی شده
                     </BaseHeading>
-                    <div class="flex flex-wrap gap-2 mb-4">
-                      <BaseTag 
+                    <div class="mb-4 flex flex-wrap gap-2">
+                      <BaseTag
                         v-for="strength in strengthsData"
                         :key="strength.label"
                         color="success"
                         flavor="pastel"
                         size="md"
-                        class="rtl:ml-2 ltr:mr-2 mb-2"
+                        class="mb-2 ltr:mr-2 rtl:ml-2"
                       >
                         {{ strength.icon }} {{ strength.label }}
                       </BaseTag>
@@ -758,9 +1015,9 @@ const filteredHomeworks = computed(() => {
                       در این جلسه متوجه شدم که انعطاف‌پذیری و صداقتم به من کمک می‌کند تا روابط بهتری داشته باشم. همچنین توانستم بازخورد درمانگر را بدون احساس تدافعی بپذیرم و درباره احساساتم با شجاعت بیشتری صحبت کنم.
                     </BaseParagraph>
                   </div>
-                  
+
                   <!-- Achievements -->
-                  <div class="mb-8 border-b border-muted-200 dark:border-muted-700 pb-6">
+                  <div class="border-muted-200 dark:border-muted-700 mb-8 border-b pb-6">
                     <BaseHeading
                       tag="h3"
                       size="lg"
@@ -770,14 +1027,16 @@ const filteredHomeworks = computed(() => {
                       دستاوردها
                     </BaseHeading>
                     <div class="space-y-4">
-                      <BaseCard 
+                      <BaseCard
                         v-for="achievement in achievements"
                         :key="achievement.title"
-                        class="border-muted-200 dark:border-muted-700 shadow-none border"
+                        class="border-muted-200 dark:border-muted-700 border shadow-none"
                       >
                         <div class="p-4">
                           <div class="flex items-start gap-3">
-                            <div class="text-2xl">{{ achievement.icon }}</div>
+                            <div class="text-2xl">
+                              {{ achievement.icon }}
+                            </div>
                             <div>
                               <BaseHeading
                                 tag="h4"
@@ -787,8 +1046,8 @@ const filteredHomeworks = computed(() => {
                               >
                                 {{ achievement.title }}
                               </BaseHeading>
-                              <div v-if="achievement.date" class="text-muted-400 text-xs mb-2">
-                                <Icon name="ph:calendar-duotone" class="size-3 inline-block" />
+                              <div v-if="achievement.date" class="text-muted-400 mb-2 text-xs">
+                                <Icon name="ph:calendar-duotone" class="inline-block size-3" />
                                 <span class="ms-1">{{ achievement.date }}</span>
                               </div>
                               <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300">
@@ -803,9 +1062,9 @@ const filteredHomeworks = computed(() => {
                       پیشرفت خوبی در پیگیری اهدافم داشتم و از اینکه توانستم در موقعیت‌های چالش‌برانگیز بهتر عمل کنم، به خودم افتخار می‌کنم.
                     </BaseParagraph>
                   </div>
-                  
+
                   <!-- Areas for Growth -->
-                  <div class="mb-8 border-b border-muted-200 dark:border-muted-700 pb-6">
+                  <div class="border-muted-200 dark:border-muted-700 mb-8 border-b pb-6">
                     <BaseHeading
                       tag="h3"
                       size="lg"
@@ -815,9 +1074,10 @@ const filteredHomeworks = computed(() => {
                       زمینه‌های رشد
                     </BaseHeading>
                     <div class="space-y-5">
-                      <div v-for="area in growthAreas" 
-                          :key="area.title"
-                          class="bg-muted-50 dark:bg-muted-800/30 rounded-lg p-5"
+                      <div
+                        v-for="area in growthAreas"
+                        :key="area.title"
+                        class="bg-muted-50 dark:bg-muted-800/30 rounded-lg p-5"
                       >
                         <BaseHeading
                           tag="h4"
@@ -830,7 +1090,7 @@ const filteredHomeworks = computed(() => {
                         <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300 mb-4">
                           {{ area.reason }}
                         </BaseParagraph>
-                        <div class="bg-white dark:bg-muted-800 rounded p-4">
+                        <div class="dark:bg-muted-800 rounded bg-white/50 p-4">
                           <BaseHeading
                             tag="h5"
                             size="sm"
@@ -840,12 +1100,15 @@ const filteredHomeworks = computed(() => {
                             اقدامات پیشنهادی
                           </BaseHeading>
                           <ul class="space-y-2">
-                            <li v-for="action in area.suggestedActions" 
-                                :key="action.title"
-                                class="text-muted-600 dark:text-muted-300 text-sm flex items-start gap-2"
+                            <li
+                              v-for="action in area.suggestedActions"
+                              :key="action.title"
+                              class="hover:bg-muted-100 dark:hover:bg-muted-700/40 flex items-start gap-2 rounded-xl p-2 transition-colors duration-200"
                             >
-                              <span>{{ action.icon }}</span>
-                              <span>{{ action.title }}</span>
+                              <div class="bg-info-100 dark:bg-info-500/20 text-info-500 dark:text-info-400 flex size-7 shrink-0 items-center justify-center rounded-full">
+                                <span>{{ action.icon }}</span>
+                              </div>
+                              <span class="text-muted-700 dark:text-muted-200 font-sans text-sm">{{ action.title }}</span>
                             </li>
                           </ul>
                         </div>
@@ -855,7 +1118,7 @@ const filteredHomeworks = computed(() => {
                       برای رشد شخصی‌ام تصمیم گرفتم مهارت‌های جرأت‌مندی و مدیریت استرس را به طور منظم تمرین کنم. همچنین می‌خواهم بیشتر به احساسات خودم توجه کنم و اجازه ندهم ترس از قضاوت دیگران مانع بیان خودم شود.
                     </BaseParagraph>
                   </div>
-                  
+
                   <!-- Next Steps -->
                   <div>
                     <BaseHeading
@@ -873,23 +1136,25 @@ const filteredHomeworks = computed(() => {
                         class="border-muted-200 dark:border-muted-700 rounded-lg border p-4"
                       >
                         <template #start>
-                          <div class="text-lg me-2">{{ step.icon }}</div>
+                          <div class="me-2 text-lg">
+                            {{ step.icon }}
+                          </div>
                         </template>
                         <div class="flex flex-1 flex-col">
-                          <p class="text-muted-800 dark:text-muted-100 font-sans text-sm font-medium leading-tight mb-1">
+                          <p class="text-muted-800 dark:text-muted-100 mb-1 font-sans text-sm font-medium leading-tight">
                             {{ step.title }}
                           </p>
-                          <div class="flex items-center gap-3 text-xs text-muted-400 my-1">
+                          <div class="text-muted-400 my-1 flex items-center gap-3 text-xs">
                             <div>
-                              <Icon name="ph:user-duotone" class="size-3 inline-block" />
+                              <Icon name="ph:user-duotone" class="inline-block size-3" />
                               <span class="ms-1">{{ step.responsible }}</span>
                             </div>
                             <div v-if="step.dueDate">
-                              <Icon name="ph:calendar-duotone" class="size-3 inline-block" />
+                              <Icon name="ph:calendar-duotone" class="inline-block size-3" />
                               <span class="ms-1">تا تاریخ {{ step.dueDate }}</span>
                             </div>
                           </div>
-                          <p class="text-muted-600 dark:text-muted-300 font-sans text-sm mt-1">
+                          <p class="text-muted-600 dark:text-muted-300 mt-1 font-sans text-sm">
                             {{ step.description }}
                           </p>
                         </div>
@@ -913,9 +1178,9 @@ const filteredHomeworks = computed(() => {
                   >
                     سفر احساسی
                   </BaseHeading>
-                  
-                  <div class="flex flex-col md:flex-row gap-6 mb-8 border-b border-muted-200 dark:border-muted-700 pb-8">
-                    <div class="md:w-1/3 mb-4 md:mb-0">
+
+                  <div class="border-muted-200 dark:border-muted-700 mb-8 flex flex-col gap-6 border-b pb-8 md:flex-row">
+                    <div class="mb-4 md:mb-0 md:w-1/3">
                       <BaseHeading
                         tag="h3"
                         size="lg"
@@ -925,16 +1190,165 @@ const filteredHomeworks = computed(() => {
                         حالت کلی
                       </BaseHeading>
                       <div class="bg-muted-100 dark:bg-muted-800 rounded-lg p-4 text-center">
-                        <div class="text-4xl mb-4">😊😌😐😔</div>
-                        <div class="inline-block bg-primary-500/20 text-primary-500 dark:bg-primary-500/30 dark:text-primary-400 px-3 py-1 rounded-full text-sm font-medium mb-4">
+                        <div class="mb-4 text-4xl">
+                          😊😌😐😔
+                        </div>
+                        <div class="bg-primary-500/20 text-primary-500 dark:bg-primary-500/30 dark:text-primary-400 inline-block rounded-full px-3 py-1 text-sm font-medium">
                           حالت کلی: خوب
                         </div>
                         <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300 text-right">
                           در ابتدای جلسه کمی مضطرب بودم اما با صحبت کردن درباره احساساتم آرام‌تر شدم. در طول جلسه احساس امیدواری و شادی بیشتری پیدا کردم و در پایان جلسه حس سبکی داشتم. با این حال، هنوز گاهی اضطراب و تردید سراغم می‌آید.
                         </BaseParagraph>
+                        <div class="mb-4">
+                          <div class="flex">
+                            <!-- Y-axis labels as a separate column with improved spacing -->
+                            <div class="rtl mt-0 flex h-72 w-24 flex-col justify-between py-10 pr-3 text-right">
+                              <div class="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                -
+                              </div>
+                              <div class="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                خیلی زیاد
+                              </div>
+                              <div class="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                زیاد
+                              </div>
+                              <div class="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                متوسط
+                              </div>
+                              <div class="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                کم
+                              </div>
+                              <div class="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                خیلی کم
+                              </div>
+                            </div>
+
+                            <!-- Chart container without Y-axis labels inside -->
+                            <div ref="emotionChartEl" class="relative h-72 w-full overflow-hidden rounded-lg border border-gray-100 bg-white/50 dark:border-gray-700 dark:bg-gray-800/20">
+                              <!-- Line chart for emotions -->
+                              <client-only>
+                                <div class="absolute inset-0">
+                                  <div class="relative z-10 size-full">
+                                    <div v-if="emotionChartEl" class="size-full">
+                                      <!-- Chart container -->
+                                      <div class="relative size-full">
+                                        <!-- Horizontal grid lines with dashed vertical lines -->
+                                        <div class="absolute inset-0">
+                                          <!-- Vertical dashed grid lines -->
+                                          <div class="absolute inset-0 flex flex-row-reverse">
+                                            <div class="flex-1 border-l border-dashed border-gray-300/60 dark:border-gray-600/60" />
+                                            <div class="flex-1 border-l border-dashed border-gray-300/60 dark:border-gray-600/60" />
+                                            <div class="flex-1 border-l border-dashed border-gray-300/60 dark:border-gray-600/60" />
+                                            <div class="flex-1 border-l border-dashed border-gray-300/60 first:border-l-0 dark:border-gray-600/60" />
+                                          </div>
+
+                                          <!-- Horizontal grid lines -->
+                                          <div class="flex h-full flex-col justify-between pb-6 pt-10">
+                                            <div class="border-b border-gray-300/40 dark:border-gray-600/40" />
+                                            <div class="border-b border-gray-300/40 dark:border-gray-600/40" />
+                                            <div class="border-b border-gray-300/40 dark:border-gray-600/40" />
+                                            <div class="border-b border-gray-300/40 dark:border-gray-600/40" />
+                                            <div class="border-b border-gray-300/40 dark:border-gray-600/40" />
+                                            <div class="border-b border-gray-300/40 dark:border-gray-600/40" />
+                                          </div>
+                                        </div>
+
+                                        <!-- Quarter background colors and emojis -->
+                                        <div class="absolute inset-0 flex flex-row-reverse">
+                                          <div
+                                            v-for="(qtr, idx) in quarterDominantEmotions"
+                                            :key="idx"
+                                            class="flex flex-1 items-start justify-center border-l border-gray-200/60 pt-3 first:border-l-0 dark:border-gray-600/60"
+                                            :style="{ backgroundColor: qtr.color }"
+                                          >
+                                            <div class="z-10 text-center text-3xl">
+                                              {{ qtr.emoji }}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <!-- Base chart component -->
+                                        <div class="absolute inset-x-0 inset-y-5">
+                                          <svg class="size-full" preserveAspectRatio="none">
+                                            <!-- Chart grid lines would be here -->
+                                          </svg>
+                                        </div>
+
+                                        <div class="absolute inset-0 mx-2 pb-6 pt-10">
+                                          <!-- Lines for each emotion -->
+                                          <svg
+                                            v-for="(emotion, idx) in emotionsTimeData"
+                                            :key="idx"
+                                            class="absolute inset-0 size-full"
+                                            preserveAspectRatio="none"
+                                            viewBox="0 0 400 180"
+                                          >
+                                            <path
+                                              :d="generateLinePath(emotion.data)"
+                                              :stroke="emotion.color"
+                                              fill="none"
+                                              stroke-width="2.5"
+                                              stroke-linejoin="round"
+                                              :stroke-dasharray="emotion.emotion === 'تردید' ? '5,5' : ''"
+                                            />
+                                            <!-- Add dots at each data point -->
+                                            <circle
+                                              v-for="(point, pointIdx) in emotion.data"
+                                              :key="pointIdx"
+                                              :cx="paddingLeft + pointIdx * xScale"
+                                              :cy="height - paddingBottom - point.value * yScale"
+                                              r="3.5"
+                                              :fill="emotion.color"
+                                              stroke="white"
+                                              stroke-width="1"
+                                            />
+                                          </svg>
+                                        </div>
+
+                                        <!-- X-axis labels -->
+                                        <div class="absolute bottom-0 left-8 right-4 z-10 flex flex-row-reverse justify-between pb-2 pt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                          <div class="px-1 text-center">
+                                            ربع اول
+                                          </div>
+                                          <div class="px-1 text-center">
+                                            ربع دوم
+                                          </div>
+                                          <div class="px-1 text-center">
+                                            ربع سوم
+                                          </div>
+                                          <div class="px-1 text-center">
+                                            ربع چهارم
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </client-only>
+                            </div>
+                          </div>
+
+                          <!-- Legend for the chart -->
+                          <div class="mt-4 flex flex-wrap justify-center gap-4">
+                            <div
+                              v-for="(emotion, idx) in emotionsTimeData"
+                              :key="idx"
+                              class="flex items-center gap-2"
+                            >
+                              <div
+                                class="size-3 rounded-full"
+                                :style="{
+                                  backgroundColor: emotion.color,
+                                  border: emotion.emotion === 'تردید' ? '1px dashed ' + emotion.color : 'none'
+                                }"
+                              />
+                              <span class="text-sm font-medium">{{ emotion.emotion }}</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    
+
                     <div class="md:w-2/3">
                       <BaseHeading
                         tag="h3"
@@ -946,30 +1360,35 @@ const filteredHomeworks = computed(() => {
                       </BaseHeading>
                       <div class="bg-muted-100 dark:bg-muted-800 rounded-lg p-6">
                         <div class="space-y-4">
-                          <div v-for="(value, emotion, index) in keyEmotions" 
-                              :key="emotion"
-                              class="relative"
+                          <div
+                            v-for="(value, emotion, index) in keyEmotions"
+                            :key="emotion"
+                            class="relative"
                           >
-                            <div class="flex items-center justify-between mb-1">
-                              <div class="text-muted-800 dark:text-muted-100 font-medium">{{ emotion }}</div>
-                              <div class="text-muted-400 text-xs">{{ value }} از 5</div>
+                            <div class="mb-1 flex items-center justify-between">
+                              <div class="text-muted-800 dark:text-muted-100 font-medium">
+                                {{ emotion }}
+                              </div>
+                              <div class="text-muted-400 text-xs">
+                                {{ value }} از 5
+                              </div>
                             </div>
-                            <div class="h-3 w-full bg-muted-200 dark:bg-muted-700 rounded-full overflow-hidden">
-                              <div 
-                                class="h-full rounded-full" 
+                            <div class="bg-muted-200 dark:bg-muted-700 h-3 w-full overflow-hidden rounded-full">
+                              <div
+                                class="h-full rounded-full"
                                 :class="{
                                   'bg-success-500': emotion === 'شادی' || emotion === 'امیدواری' || emotion === 'آرامش',
                                   'bg-warning-500': emotion === 'اضطراب' || emotion === 'تردید'
                                 }"
                                 :style="{ width: `${value * 20}%` }"
-                              ></div>
+                              />
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  
+
                   <BaseHeading
                     tag="h3"
                     size="lg"
@@ -978,16 +1397,18 @@ const filteredHomeworks = computed(() => {
                   >
                     استراتژی‌های مقابله با استرس
                   </BaseHeading>
-                  
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <BaseCard 
+
+                  <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <BaseCard
                       v-for="strategy in strategiesData"
                       :key="strategy.title"
-                      class="border-muted-200 dark:border-muted-700 shadow-none border"
+                      class="border-muted-200 dark:border-muted-700 border shadow-none"
                     >
                       <div class="p-4">
                         <div class="flex items-start gap-3">
-                          <div class="text-2xl">{{ strategy.icon }}</div>
+                          <div class="text-2xl">
+                            {{ strategy.icon }}
+                          </div>
                           <div>
                             <BaseHeading
                               tag="h4"
@@ -1002,8 +1423,8 @@ const filteredHomeworks = computed(() => {
                       </div>
                     </BaseCard>
                   </div>
-                  
-                  <div class="bg-muted-50 dark:bg-muted-800/30 rounded-lg p-5 mb-4">
+
+                  <div class="bg-muted-50 dark:bg-muted-800/30 mb-4 rounded-lg p-5">
                     <BaseHeading
                       tag="h4"
                       size="md"
@@ -1016,8 +1437,8 @@ const filteredHomeworks = computed(() => {
                       احساس می‌کنم تکنیک‌های ذهن‌آگاهی و نوشتن احساساتم بیشترین تاثیر را داشتند. صحبت با دوستان هم به کاهش اضطرابم کمک کرد، اما هنوز باید تمرین کنم تا به طور مداوم از این روش‌ها استفاده کنم.
                     </BaseParagraph>
                   </div>
-                  
-                  <div class="flex flex-wrap gap-2 mt-6">
+
+                  <div class="mt-6 flex flex-wrap gap-2">
                     <BaseButton color="primary" flavor="pastel">
                       <Icon name="ph:plus-circle-duotone" class="me-2" />
                       افزودن استراتژی جدید
@@ -1031,6 +1452,7 @@ const filteredHomeworks = computed(() => {
               </div>
             </div>
           </div>
+
           <!-- Personal Growth Tab -->
           <div v-else-if="activeValue === 'personal'">
             <div class="grid grid-cols-12 gap-6">
@@ -1044,9 +1466,9 @@ const filteredHomeworks = computed(() => {
                   >
                     رشد شخصی
                   </BaseHeading>
-                  
+
                   <!-- Insights Section -->
-                  <div class="mb-8 border-b border-muted-200 dark:border-muted-700 pb-8">
+                  <div class="border-muted-200 dark:border-muted-700 mb-8 border-b pb-8">
                     <BaseHeading
                       tag="h3"
                       size="lg"
@@ -1055,22 +1477,24 @@ const filteredHomeworks = computed(() => {
                     >
                       بینش‌ها
                     </BaseHeading>
-                    
-                    <div class="bg-muted-50 dark:bg-muted-800/30 rounded-lg p-5 mb-6">
+
+                    <div class="bg-muted-50 dark:bg-muted-800/30 mb-6 rounded-lg p-5">
                       <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300 italic">
                         "در این جلسه به این نتیجه رسیدم که مراقبت از خود و تعیین مرزها برای آرامش روانم ضروری است. همچنین فهمیدم که رشد شخصی یک فرآیند تدریجی است و باید به خودم فرصت بدهم."
                       </BaseParagraph>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <BaseCard 
+
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <BaseCard
                         v-for="insight in insightsData"
                         :key="insight.text"
-                        class="border-muted-200 dark:border-muted-700 shadow-none border"
+                        class="border-muted-200 dark:border-muted-700 border shadow-none"
                       >
                         <div class="p-4">
                           <div class="flex items-start gap-3">
-                            <div class="text-2xl shrink-0">{{ insight.icon }}</div>
+                            <div class="shrink-0 text-2xl">
+                              {{ insight.icon }}
+                            </div>
                             <div>
                               <BaseParagraph size="sm" class="text-muted-800 dark:text-muted-100">
                                 {{ insight.text }}
@@ -1081,7 +1505,7 @@ const filteredHomeworks = computed(() => {
                       </BaseCard>
                     </div>
                   </div>
-                  
+
                   <!-- Learnings Section -->
                   <div class="mb-8">
                     <BaseHeading
@@ -1092,21 +1516,23 @@ const filteredHomeworks = computed(() => {
                     >
                       یادگیری‌ها
                     </BaseHeading>
-                    
-                    <div class="bg-muted-50 dark:bg-muted-800/30 rounded-lg p-5 mb-6">
+
+                    <div class="bg-muted-50 dark:bg-muted-800/30 mb-6 rounded-lg p-5">
                       <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300 italic">
                         "در این جلسه مهارت‌هایی را تمرین کردم که می‌توانم در زندگی روزمره‌ام به کار ببرم و به تدریج اعتماد به نفس بیشتری پیدا کنم."
                       </BaseParagraph>
                     </div>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      <BaseCard 
+
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                      <BaseCard
                         v-for="learning in learningsData"
                         :key="learning.text"
-                        class="bg-white dark:bg-muted-800 p-4 rounded-lg shadow-sm"
+                        class="dark:bg-muted-800 rounded-lg bg-white p-4 shadow-sm"
                       >
                         <div class="flex flex-col items-center text-center">
-                          <div class="text-3xl mb-3">{{ learning.icon }}</div>
+                          <div class="mb-3 text-3xl">
+                            {{ learning.icon }}
+                          </div>
                           <BaseHeading
                             tag="h4"
                             size="sm"
@@ -1119,7 +1545,7 @@ const filteredHomeworks = computed(() => {
                       </BaseCard>
                     </div>
                   </div>
-                  
+
                   <!-- Growth Tracking -->
                   <div>
                     <BaseHeading
@@ -1130,7 +1556,7 @@ const filteredHomeworks = computed(() => {
                     >
                       ثبت پیشرفت شخصی
                     </BaseHeading>
-                    
+
                     <div class="flex flex-wrap gap-3">
                       <BaseButton color="primary">
                         <Icon name="ph:star-duotone" class="me-2" />
@@ -1208,7 +1634,7 @@ const filteredHomeworks = computed(() => {
                       />
                       <div class="text-center leading-none sm:text-left">
                         <h4
-                          class="text-muted-800 dark:text-muted-100 font-sans text-base font-medium"
+                          class="text-muted-800 dark:text-muted-100 mb-2 font-sans text-base font-medium leading-tight"
                         >
                           {{ item.tooltip }}
                         </h4>
@@ -1245,101 +1671,7 @@ const filteredHomeworks = computed(() => {
               </div>
             </div>
           </div>
-          <!-- Tasks -->
-          <div v-else-if="activeValue === 'tasks'">
-            <div class="grid gap-6 sm:grid-cols-3">
-              <BaseCard
-                v-for="item in data?.project.tasks"
-                :key="item.id"
-                elevated-hover
-                class="hover:!border-primary-500 flex cursor-pointer flex-col"
-                @click="openTaskPanel(item.id, data?.project?.tasks)"
-              >
-                <div class="flex flex-col items-center p-5 sm:flex-row">
-                  <div class="flex flex-col gap-3 sm:flex-row">
-                    <Icon
-                      v-if="item.status === 0"
-                      name="ph:plus-circle-duotone"
-                      class="text-muted-400 size-6 shrink-0"
-                    />
-                    <Icon
-                      v-else-if="item.status === 5"
-                      name="ph:check-circle-duotone"
-                      class="text-success-500 size-6 shrink-0"
-                    />
-                    <Icon
-                      v-else-if="item.status === 1"
-                      name="ph:timer-duotone"
-                      class="text-muted-400 size-6 shrink-0"
-                    />
-                    <Icon
-                      v-else-if="item.status === 2 || item.status === 3"
-                      name="ph:warning-duotone"
-                      class="text-warning-500 size-6 shrink-0"
-                    />
-                    <div class="text-center leading-none sm:text-left">
-                      <h4
-                        class="text-muted-800 dark:text-muted-100 mb-2 font-sans text-base font-medium leading-tight"
-                      >
-                        {{ item.name }}
-                      </h4>
-                      <p class="text-muted-400 line-clamp-2 font-sans text-xs">
-                        {{ item.description }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="bg-muted-50 dark:bg-muted-700/50 mt-auto flex items-center justify-between rounded-b-lg px-5 py-3"
-                >
-                  <div class="flex max-w-[180px] grow items-center gap-2">
-                    <BaseAvatar
-                      size="xxs"
-                      :src="item.assignee.src"
-                      :data-nui-tooltip="item.assignee.tooltip"
-                    />
-                    <BaseProgress
-                      :value="item.completion"
-                      size="xs"
-                      :color="item.status === 5 ? 'success' : 'primary'"
-                    />
-                  </div>
-                  <div class="text-muted-400 flex items-center gap-4">
-                    <div class="flex items-center gap-1 text-sm">
-                      <Icon name="ph:paperclip-duotone" class="size-4" />
-                      <span class="font-sans">
-                        {{ item.files.length }}
-                      </span>
-                    </div>
-                    <div class="flex items-center gap-1 text-sm">
-                      <Icon name="ph:chat-circle-duotone" class="size-4" />
-                      <span class="font-sans">
-                        {{ item.comments.length }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </BaseCard>
-              <!-- Invite -->
-              <div>
-                <button
-                  type="button"
-                  class="border-muted-300 dark:border-muted-800 hover:border-primary-500 dark:hover:border-primary-500 group flex size-full items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 transition-colors duration-300"
-                >
-                  <span class="block text-center font-sans">
-                    <span
-                      class="text-muted-800 dark:text-muted-100 group-hover:text-primary-500 dark:group-hover:text-primary-500 block transition-colors duration-300"
-                    >
-                      Create a new task
-                    </span>
-                    <span class="text-muted-400 block text-sm">
-                      Add a new task to your project
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
+
           <!-- Main Points Tab -->
           <div v-else-if="activeValue === 'mainpoints'">
             <div class="grid grid-cols-12 gap-6">
@@ -1353,8 +1685,8 @@ const filteredHomeworks = computed(() => {
                   >
                     نکات کلیدی
                   </BaseHeading>
-                  
-                  <div class="mb-8 border-b border-muted-200 dark:border-muted-700 pb-8">
+
+                  <div class="border-muted-200 dark:border-muted-700 mb-8 border-b pb-8">
                     <BaseHeading
                       tag="h3"
                       size="lg"
@@ -1363,17 +1695,17 @@ const filteredHomeworks = computed(() => {
                     >
                       تعیین مرزهای سالم
                     </BaseHeading>
-                    
-                    <div class="flex items-center gap-2 mb-4">
-                      <div class="inline-block bg-primary-500/20 text-primary-500 dark:bg-primary-500/30 dark:text-primary-400 px-3 py-1 rounded-full text-sm font-medium">
+
+                    <div class="mb-4 flex items-center gap-2">
+                      <div class="bg-primary-500/20 text-primary-500 dark:bg-primary-500/30 dark:text-primary-400 inline-block rounded-full px-3 py-1 text-sm font-medium">
                         اهمیت: بالا
                       </div>
                     </div>
-                    
+
                     <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300 mb-6">
                       در این جلسه متوجه شدم که تعیین مرزهای سالم چگونه می‌تواند به بهبود روابط من با دیگران کمک کند. درباره موقعیت‌هایی که مرزهایم نقض شده بود صحبت کردم و احساساتم را بیان کردم. همچنین یاد گرفتم که احترام به مرزهای خودم نشانه خوددوستی است و به من احساس امنیت و آرامش بیشتری می‌دهد.
                     </BaseParagraph>
-                    
+
                     <BaseHeading
                       tag="h4"
                       size="md"
@@ -1382,7 +1714,7 @@ const filteredHomeworks = computed(() => {
                     >
                       تکالیف مرتبط
                     </BaseHeading>
-                    
+
                     <div class="space-y-3">
                       <BaseListItem
                         v-for="item in actionItems"
@@ -1400,7 +1732,7 @@ const filteredHomeworks = computed(() => {
                           <p class="text-muted-800 dark:text-muted-100 font-sans text-sm font-medium leading-tight">
                             <span>{{ item.icon }}</span> {{ item.title }}
                           </p>
-                          <p class="text-muted-400 font-sans text-xs" v-if="item.dueDate">
+                          <p v-if="item.dueDate" class="text-muted-400 font-sans text-xs">
                             <span class="me-1">
                               <Icon name="ph:calendar-duotone" class="size-3" />
                             </span>
@@ -1410,7 +1742,7 @@ const filteredHomeworks = computed(() => {
                       </BaseListItem>
                     </div>
                   </div>
-                  
+
                   <BaseHeading
                     tag="h3"
                     size="lg"
@@ -1419,16 +1751,18 @@ const filteredHomeworks = computed(() => {
                   >
                     سایر نکات کلیدی جلسه
                   </BaseHeading>
-                  
-                  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    <BaseCard 
+
+                  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <BaseCard
                       v-for="point in mainPointsData"
                       :key="point.title"
-                      class="border-muted-200 dark:border-muted-700 shadow-none border"
+                      class="border-muted-200 dark:border-muted-700 border shadow-none"
                     >
                       <div class="p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                          <div class="text-2xl">{{ point.icon }}</div>
+                        <div class="mb-2 flex items-center gap-2">
+                          <div class="text-2xl">
+                            {{ point.icon }}
+                          </div>
                           <BaseHeading
                             tag="h4"
                             size="md"
@@ -1460,9 +1794,9 @@ const filteredHomeworks = computed(() => {
                   >
                     ارتباط درمانی
                   </BaseHeading>
-                  
+
                   <!-- Relationship Metrics -->
-                  <div class="mb-8 border-b border-muted-200 dark:border-muted-700 pb-8">
+                  <div class="border-muted-200 dark:border-muted-700 mb-8 border-b pb-8">
                     <BaseHeading
                       tag="h3"
                       size="lg"
@@ -1471,10 +1805,10 @@ const filteredHomeworks = computed(() => {
                     >
                       وضعیت کنونی ارتباط
                     </BaseHeading>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                       <div class="bg-muted-100 dark:bg-muted-800 rounded-lg p-5 text-center">
-                        <div class="bg-primary-100 dark:bg-primary-900/30 rounded-full size-16 mx-auto mb-4 flex items-center justify-center">
+                        <div class="bg-primary-100 dark:bg-primary-900/30 mx-auto mb-4 flex size-16 items-center justify-center rounded-full">
                           <Icon name="ph:chat-circle-text-duotone" class="text-primary-500 size-8" />
                         </div>
                         <BaseHeading
@@ -1485,16 +1819,16 @@ const filteredHomeworks = computed(() => {
                         >
                           کیفیت ارتباط
                         </BaseHeading>
-                        <div class="text-primary-500 dark:text-primary-400 text-lg font-medium mb-2">
+                        <div class="text-primary-500 dark:text-primary-400 mb-2 text-lg font-medium">
                           خوب
                         </div>
                         <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400">
                           ارتباط مؤثر با بازخورد مثبت از هر دو طرف
                         </BaseParagraph>
                       </div>
-                      
+
                       <div class="bg-muted-100 dark:bg-muted-800 rounded-lg p-5 text-center">
-                        <div class="bg-warning-100 dark:bg-warning-900/30 rounded-full size-16 mx-auto mb-4 flex items-center justify-center">
+                        <div class="bg-warning-100 dark:bg-warning-900/30 mx-auto mb-4 flex size-16 items-center justify-center rounded-full">
                           <Icon name="ph:brain-duotone" class="text-warning-500 size-8" />
                         </div>
                         <BaseHeading
@@ -1505,16 +1839,16 @@ const filteredHomeworks = computed(() => {
                         >
                           سطح درک متقابل
                         </BaseHeading>
-                        <div class="text-warning-500 dark:text-warning-400 text-lg font-medium mb-2">
+                        <div class="text-warning-500 dark:text-warning-400 mb-2 text-lg font-medium">
                           متوسط
                         </div>
                         <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400">
                           در حال ساخت درک عمیق‌تر از احساسات و نیازها
                         </BaseParagraph>
                       </div>
-                      
+
                       <div class="bg-muted-100 dark:bg-muted-800 rounded-lg p-5 text-center">
-                        <div class="bg-info-100 dark:bg-info-900/30 rounded-full size-16 mx-auto mb-4 flex items-center justify-center">
+                        <div class="bg-info-100 dark:bg-info-900/30 mx-auto mb-4 flex size-16 items-center justify-center rounded-full">
                           <Icon name="ph:handshake-duotone" class="text-info-500 size-8" />
                         </div>
                         <BaseHeading
@@ -1525,7 +1859,7 @@ const filteredHomeworks = computed(() => {
                         >
                           سطح اعتماد
                         </BaseHeading>
-                        <div class="text-info-500 dark:text-info-400 text-lg font-medium mb-2">
+                        <div class="text-info-500 dark:text-info-400 mb-2 text-lg font-medium">
                           در حال رشد
                         </div>
                         <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400">
@@ -1534,9 +1868,9 @@ const filteredHomeworks = computed(() => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Next Steps -->
-                  <div class="mb-8 border-b border-muted-200 dark:border-muted-700 pb-8">
+                  <div class="border-muted-200 dark:border-muted-700 mb-8 border-b pb-8">
                     <BaseHeading
                       tag="h3"
                       size="lg"
@@ -1545,23 +1879,25 @@ const filteredHomeworks = computed(() => {
                     >
                       گام‌های بعدی برای بهبود ارتباط
                     </BaseHeading>
-                    
-                    <div class="bg-muted-50 dark:bg-muted-800/30 rounded-lg p-5 mb-6">
+
+                    <div class="bg-muted-50 dark:bg-muted-800/30 mb-6 rounded-lg p-5">
                       <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300">
                         می‌خواهم ارتباطم با درمانگرم را بازتر و شفاف‌تر کنم تا بهتر بتوانم پیشرفت کنم. گاهی هنوز احساس خجالت دارم اما تصمیم دارم این احساس را مدیریت کنم و بیشتر به خودم اعتماد کنم.
                       </BaseParagraph>
                     </div>
-                    
+
                     <div class="space-y-4">
                       <BaseListItem
                         v-for="step in relationshipSteps"
                         :key="step.title"
-                        class="bg-white dark:bg-muted-800 rounded-lg p-4 border border-muted-200 dark:border-muted-700 shadow-sm"
+                        class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 rounded-lg border bg-white p-4 shadow-sm"
                       >
                         <template #start>
-                          <div class="text-xl me-3">{{ step.icon }}</div>
+                          <div class="me-3 text-xl">
+                            {{ step.icon }}
+                          </div>
                         </template>
-                        
+
                         <BaseHeading
                           tag="h4"
                           size="sm"
@@ -1573,7 +1909,7 @@ const filteredHomeworks = computed(() => {
                       </BaseListItem>
                     </div>
                   </div>
-                  
+
                   <!-- Historical Progress -->
                   <div>
                     <BaseHeading
@@ -1584,23 +1920,31 @@ const filteredHomeworks = computed(() => {
                     >
                       پیشرفت ارتباط درمانی در طول زمان
                     </BaseHeading>
-                    
-                    <div class="flex items-center mb-6">
+
+                    <div class="mb-6 flex items-center">
                       <div class="w-full max-w-md">
-                        <div class="flex justify-between mb-2">
-                          <div class="text-muted-400 text-xs">جلسه اول</div>
-                          <div class="text-muted-400 text-xs">جلسه هفتم (کنونی)</div>
+                        <div class="mb-2 flex justify-between">
+                          <div class="text-muted-400 text-xs">
+                            جلسه اول
+                          </div>
+                          <div class="text-muted-400 text-xs">
+                            جلسه هفتم (کنونی)
+                          </div>
                         </div>
-                        <div class="h-2 bg-muted-200 dark:bg-muted-700 rounded-full overflow-hidden">
-                          <div class="bg-gradient-to-r from-info-300 to-primary-500 h-full rounded-full" style="width: 65%"></div>
+                        <div class="bg-muted-200 dark:bg-muted-700 h-2 overflow-hidden rounded-full">
+                          <div class="from-info-300 to-primary-500 h-full rounded-full bg-gradient-to-r" style="width: 65%" />
                         </div>
                       </div>
                       <div class="ms-4">
-                        <div class="text-primary-500 dark:text-primary-400 text-lg font-medium">65%</div>
-                        <div class="text-muted-400 text-xs">پیشرفت</div>
+                        <div class="text-primary-500 dark:text-primary-400 text-lg font-medium">
+                          65%
+                        </div>
+                        <div class="text-muted-400 text-xs">
+                          پیشرفت
+                        </div>
                       </div>
                     </div>
-                    
+
                     <BaseButton color="primary">
                       <Icon name="ph:chat-centered-dots-duotone" class="me-2" />
                       یادداشت بازخورد برای درمانگر
@@ -1615,7 +1959,7 @@ const filteredHomeworks = computed(() => {
             <div class="grid grid-cols-12 gap-6">
               <div class="col-span-12">
                 <BaseCard class="p-6">
-                  <div class="flex justify-between items-center mb-6">
+                  <div class="mb-6 flex items-center justify-between">
                     <BaseHeading
                       tag="h2"
                       size="2xl"
@@ -1623,97 +1967,119 @@ const filteredHomeworks = computed(() => {
                     >
                       تکالیف
                     </BaseHeading>
-                    <BaseButton color="primary" flavor="outline" class="rtl:ml-2 ltr:mr-2">
+                    <BaseButton
+                      color="primary"
+                      flavor="outline"
+                      class="ltr:mr-2 rtl:ml-2"
+                    >
                       <span class="flex items-center gap-2">
                         <Icon name="ph:plus-duotone" class="size-4" />
                         <span>افزودن تکلیف جدید</span>
                       </span>
                     </BaseButton>
                   </div>
-                  
+
                   <!-- Filter Options -->
-                  <div class="flex flex-wrap gap-2 mb-6">
-                    <BaseTag 
+                  <div class="mb-6 flex flex-wrap gap-2">
+                    <BaseTag
                       color="muted"
                       flavor="pastel"
                       size="md"
                       class="cursor-pointer"
-                      :class="{ 'bg-primary-500 text-white dark:bg-primary-500 dark:text-white': activeFilter === 'all' }"
+                      :class="{ 'bg-primary-500 dark:bg-primary-500 text-white dark:text-white': activeFilter === 'all' }"
                       @click="activeFilter = 'all'"
                     >
                       همه
                     </BaseTag>
-                    <BaseTag 
+                    <BaseTag
                       color="success"
                       flavor="pastel"
                       size="md"
                       class="cursor-pointer"
-                      :class="{ 'bg-success-500 text-white dark:bg-success-500 dark:text-white': activeFilter === 'completed' }"
+                      :class="{ 'bg-success-500 dark:bg-success-500 text-white dark:text-white': activeFilter === 'completed' }"
                       @click="activeFilter = 'completed'"
                     >
                       تکمیل شده
                     </BaseTag>
-                    <BaseTag 
+                    <BaseTag
                       color="danger"
                       flavor="pastel"
                       size="md"
                       class="cursor-pointer"
-                      :class="{ 'bg-danger-500 text-white dark:bg-danger-500 dark:text-white': activeFilter === 'pending' }"
+                      :class="{ 'bg-danger-500 dark:bg-danger-500 text-white dark:text-white': activeFilter === 'pending' }"
                       @click="activeFilter = 'pending'"
                     >
                       در انتظار
                     </BaseTag>
-                    <BaseTag 
+                    <BaseTag
                       color="warning"
                       flavor="pastel"
                       size="md"
                       class="cursor-pointer"
-                      :class="{ 'bg-warning-500 text-white dark:bg-warning-500 dark:text-white': activeFilter === 'upcoming' }"
+                      :class="{ 'bg-warning-500 dark:bg-warning-500 text-white dark:text-white': activeFilter === 'upcoming' }"
                       @click="activeFilter = 'upcoming'"
                     >
                       آینده
                     </BaseTag>
                   </div>
-                  
+
                   <!-- Homeworks List -->
                   <div class="space-y-4">
-                    <BaseCard 
+                    <BaseCard
                       v-for="(homework, index) in filteredHomeworks"
                       :key="index"
-                      class="border-muted-200 dark:border-muted-700 shadow-none border"
+                      class="border-muted-200 dark:border-muted-700 border shadow-none"
                     >
                       <div class="p-4">
                         <div class="flex items-start justify-between">
                           <div class="flex items-start gap-3">
                             <div class="mt-0.5">
-                              <BaseCheckbox 
-                                v-model="homework.completed" 
+                              <BaseCheckbox
+                                v-model="homework.completed"
                                 :color="homework.completed ? 'success' : 'muted'"
-                                class="h-5 w-5"
+                                class="size-5"
                               />
                             </div>
                             <div>
-                              <p class="text-muted-800 dark:text-muted-100 font-sans text-sm font-medium leading-tight flex items-center gap-2">
-                                <span>{{ homework.icon }}</span> 
-                                <span :class="{ 'line-through text-muted-400': homework.completed }">{{ homework.title }}</span>
+                              <p class="text-muted-800 dark:text-muted-100 flex items-center gap-2 font-sans text-sm font-medium leading-tight">
+                                <span>{{ homework.icon }}</span>
+                                <span :class="{ 'text-muted-400 line-through': homework.completed }">{{ homework.title }}</span>
                               </p>
-                              <div class="flex items-center gap-4 mt-2 text-muted-400 text-xs">
-                                <span class="flex items-center gap-1" v-if="homework.dueDate">
-                                  <Icon name="ph:calendar-duotone" class="size-3.5" />
-                                  <span>تا تاریخ {{ homework.dueDate }}</span>
+                              <div class="text-muted-400 mt-2 flex items-center gap-4 text-xs">
+                                <span v-if="homework.dueDate" class="flex items-center gap-1">
+                                  <Icon name="ph:calendar-duotone" class="inline-block size-3.5" />
+                                  <span class="ms-1">تا تاریخ {{ homework.dueDate }}</span>
                                 </span>
                                 <span class="flex items-center gap-1">
-                                  <Icon name="ph:tag-duotone" class="size-3.5" />
-                                  <span>مرزهای سالم</span>
+                                  <Icon name="ph:tag-duotone" class="inline-block size-3.5" />
+                                  <span>{{ homework.category }}</span>
+                                </span>
+                                <span class="flex items-center gap-1">
+                                  <Icon name="ph:star-duotone" class="inline-block size-3.5" />
+                                  <span>{{ homework.priority }}</span>
+                                </span>
+                                <span class="flex items-center gap-1">
+                                  <Icon name="ph:chart-line-up-duotone" class="inline-block size-3.5" />
+                                  <span>{{ homework.progress }}%</span>
                                 </span>
                               </div>
                             </div>
                           </div>
                           <div class="flex items-center gap-2">
-                            <BaseButton color="info" flavor="ghost" shape="circle" size="xs">
+                            <BaseButton
+                              color="info"
+                              flavor="ghost"
+                              shape="circle"
+                              size="xs"
+                            >
                               <Icon name="ph:pencil-duotone" class="size-4" />
                             </BaseButton>
-                            <BaseButton color="danger" flavor="ghost" shape="circle" size="xs">
+                            <BaseButton
+                              color="danger"
+                              flavor="ghost"
+                              shape="circle"
+                              size="xs"
+                            >
                               <Icon name="ph:trash-duotone" class="size-4" />
                             </BaseButton>
                           </div>
@@ -1721,14 +2087,20 @@ const filteredHomeworks = computed(() => {
                       </div>
                     </BaseCard>
                   </div>
-                  
+
                   <!-- No Homeworks State -->
-                  <div v-if="filteredHomeworks.length === 0" class="text-center py-8">
+                  <div v-if="filteredHomeworks.length === 0" class="py-8 text-center">
                     <div class="text-muted-400 mb-2">
-                      <Icon name="ph:clipboard-text-duotone" class="size-12 mx-auto" />
+                      <Icon name="ph:clipboard-text-duotone" class="mx-auto size-12" />
                     </div>
-                    <p class="text-muted-500 dark:text-muted-400 mb-2">هیچ تکلیفی یافت نشد</p>
-                    <BaseButton color="primary" flavor="outline" size="sm">
+                    <p class="text-muted-500 dark:text-muted-400 mb-2">
+                      هیچ تکلیفی یافت نشد
+                    </p>
+                    <BaseButton
+                      color="primary"
+                      flavor="outline"
+                      size="sm"
+                    >
                       افزودن تکلیف جدید
                     </BaseButton>
                   </div>

@@ -260,9 +260,18 @@ const closeAlphaModal = () => {
                 <div class="mt-[80px] grow sm:mt-0">
                   <div class="pb-4 text-center sm:pb-0 sm:text-right">
                     <BaseHeading tag="h1" class="text-white opacity-90">
-                      <span>سلام، {{ user?.phoneNumber || 'کاربر عزیز' }} ! 👋</span>
+                      <span class="flex items-center gap-2 justify-center sm:justify-start">
+                        سلام،
+                        <BaseAvatar
+                          :src="user?.meta?.avatarUrl || '/img/avatars/default-male.jpg'"
+                          :text="user?.meta?.name?.substring(0, 2) || 'کا'"
+                          size="xs"
+                          class="inline-block align-middle"
+                        />
+                        <span>{{ user?.meta?.name || 'کاربر عزیز' }} ! 👋</span>
+                      </span>
                     </BaseHeading>
-                    <BaseParagraph size="sm" class="max-w-xs text-white opacity-70">
+                    <BaseParagraph size="sm" class="my-3 text-white opacity-70">
                       <span>
                         این جا پنل شماست. در این بخش می توانید جلسات و برنامه ها، اطلاعات جلسات، محتوای متنی و دیگر بخش ها
                         را مدیریت و نظارت کنید.

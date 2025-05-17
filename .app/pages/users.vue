@@ -30,7 +30,7 @@ const { data, pending, error, refresh } = await useAsyncData(
           avatarUrl: item.meta?.avatarUrl,
           name: item.meta?.name,
           username: item.username,
-          email: item.email,
+          email: item.meta?.email,
           emailVisibility: item.emailVisibility,
           role: item.role,
           hasCharge: item.hasCharge,
@@ -38,6 +38,7 @@ const { data, pending, error, refresh } = await useAsyncData(
           expireChargeTime: item.expireChargeTime,
           created: item.created,
           initials: item.meta?.name?.substring(0, 2) || 'کا',
+          isNew: item.meta?.isNew,
         })),
         total: resultList.totalItems,
       }
@@ -68,6 +69,35 @@ function toggleAllVisibleSelection() {
   }
 }
 
+function toPersianNumber(num: number | string) {
+  return String(num).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)])
+}
+
+function getRelativeTime(dateString: string) {
+  const now = new Date()
+  const date = new Date(dateString)
+  const diffMs = now.getTime() - date.getTime()
+  const diffSec = Math.floor(diffMs / 1000)
+  const diffMin = Math.floor(diffSec / 60)
+  const diffHour = Math.floor(diffMin / 60)
+  const diffDay = Math.floor(diffHour / 24)
+
+  if (diffSec < 60) return 'لحظاتی پیش'
+  if (diffMin < 60) return `${toPersianNumber(diffMin)} دقیقه پیش`
+  if (diffHour < 24) return `${toPersianNumber(diffHour)} ساعت پیش`
+  return `${toPersianNumber(diffDay)} روز پیش`
+}
+
+function formatPersianDateTime(dateInput: string | number | Date): string {
+  const date = new Date(dateInput)
+  if (isNaN(date.getTime())) return 'نامشخص'
+  return date.toLocaleTimeString('fa-IR') + ' - ' + date.toLocaleDateString('fa-IR')
+}
+
+function onPageChange(newPage: number) {
+  query.page = newPage
+}
+
 </script>
 
 <template>
@@ -95,8 +125,110 @@ function toggleAllVisibleSelection() {
           </BasePlaceholderPage>
         </div>
         <div v-else-if="pending">
-          <div class="flex h-60 items-center justify-center">
-            <BaseProgress size="lg" />
+          <div class="w-full">
+            <TairoTable rounded="sm" :scrollable="false">
+              <template #header>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="p-4"
+                >
+                  <div class="flex items-center">
+                    <BasePlaceload class="size-5 rounded" />
+                  </div>
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  آواتار
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  نام
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  وضعیت ایمیل
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  شروع شارژ
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  پایان شارژ
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  تاریخ ساخت
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  زمان نسبی
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  عملیات
+                </TairoTableHeading>
+              </template>
+              <TairoTableRow v-for="index in 10" :key="index">
+                <TairoTableCell spaced>
+                  <BasePlaceload class="size-5 rounded" />
+                </TairoTableCell>
+                <TairoTableCell
+                  light
+                  spaced
+                  class="text-center"
+                >
+                  <BasePlaceload class="size-[46px] shrink-0 rounded-xl" />
+                </TairoTableCell>
+                <TairoTableCell spaced class="text-center">
+                  <BasePlaceload class="h-3 w-24 rounded-lg" />
+                </TairoTableCell>
+                <TairoTableCell
+                  light
+                  spaced
+                  class="text-center"
+                >
+                  <BasePlaceload class="h-3 w-12 rounded-lg" />
+                </TairoTableCell>
+                <TairoTableCell spaced class="text-center">
+                  <BasePlaceload class="h-3 w-24 rounded-lg" />
+                </TairoTableCell>
+                <TairoTableCell spaced class="text-center">
+                  <BasePlaceload class="h-3 w-24 rounded-lg" />
+                </TairoTableCell>
+                <TairoTableCell spaced class="text-center">
+                  <BasePlaceload class="h-3 w-24 rounded-lg" />
+                </TairoTableCell>
+                <TairoTableCell spaced class="text-center">
+                  <BasePlaceload class="h-3 w-16 rounded-lg" />
+                </TairoTableCell>
+              </TairoTableRow>
+            </TairoTable>
           </div>
         </div>
         <div v-else-if="!data?.data?.length">
@@ -138,36 +270,63 @@ function toggleAllVisibleSelection() {
                     />
                   </div>
                 </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>
-                  Avatar
-                </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>
-                  Name
-                </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>
-                  Email
-                </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>
-                  Email Visibility
-                </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>
-                  Role
-                </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>
-                  Start Charge
-                </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>
-                  Expire Charge
-                </TairoTableHeading>
-                <TairoTableHeading uppercase spaced>
-                  Created
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  آواتار
                 </TairoTableHeading>
                 <TairoTableHeading
                   uppercase
                   spaced
-                  class="text-end"
+                  class="text-center"
                 >
-                  Action
+                  نام
+                </TairoTableHeading>
+
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  وضعیت ایمیل
+                </TairoTableHeading>
+
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  شروع شارژ
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  پایان شارژ
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  تاریخ ساخت
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  زمان نسبی
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
+                  عملیات
                 </TairoTableHeading>
               </template>
 
@@ -187,11 +346,22 @@ function toggleAllVisibleSelection() {
                     color="primary"
                   />
                 </TairoTableCell>
-                <TairoTableCell light spaced>
-                  <BaseAvatar :src="user.avatarUrl" :text="user.initials" />
+                <TairoTableCell
+                  light
+                  spaced
+                  class="text-center"
+                >
+                  <BaseAvatar
+                    :src="user.avatarUrl"
+                    :text="user.initials"
+                    :badge-src="user.isNew ? '/img/icons/banking/bank-1.svg' : ''"
+                  />
                 </TairoTableCell>
                 <TairoTableCell spaced>
                   <div class="leading-none">
+                    <p class="text-muted-400 font-sans text-xs">
+                      {{ user.email }}
+                    </p>
                     <h4 class="font-sans text-sm font-medium">
                       {{ user.name }}
                     </h4>
@@ -200,10 +370,12 @@ function toggleAllVisibleSelection() {
                     </p>
                   </div>
                 </TairoTableCell>
-                <TairoTableCell light spaced>
-                  {{ user.email }}
-                </TairoTableCell>
-                <TairoTableCell spaced>
+
+                <TairoTableCell
+                  light
+                  spaced
+                  class="text-center"
+                >
                   <BaseTag
                     v-if="user.emailVisibility"
                     color="success"
@@ -211,7 +383,7 @@ function toggleAllVisibleSelection() {
                     rounded="full"
                     size="sm"
                   >
-                    Visible
+                    قابل نمایش
                   </BaseTag>
                   <BaseTag
                     v-else
@@ -220,22 +392,38 @@ function toggleAllVisibleSelection() {
                     rounded="full"
                     size="sm"
                   >
-                    Hidden
+                    مخفی
                   </BaseTag>
                 </TairoTableCell>
-                <TairoTableCell spaced>
-                  {{ user.role }}
+
+                <TairoTableCell
+                  spaced
+                  class="text-center"
+                >
+                  {{ formatPersianDateTime(user.startChargeTime) }}
                 </TairoTableCell>
-                <TairoTableCell spaced>
-                  {{ new Date(user.startChargeTime).toLocaleString() }}
+                <TairoTableCell
+                  spaced
+                  class="text-center"
+                >
+                  {{ formatPersianDateTime(user.expireChargeTime) }}
                 </TairoTableCell>
-                <TairoTableCell spaced>
-                  {{ new Date(user.expireChargeTime).toLocaleString() }}
+                <TairoTableCell
+                  spaced
+                  class="text-center"
+                >
+                  {{ new Date(user.created).toLocaleDateString('fa-IR') }}
                 </TairoTableCell>
-                <TairoTableCell spaced>
-                  {{ new Date(user.created).toLocaleDateString() }}
+                <TairoTableCell
+                  spaced
+                  class="text-center"
+                >
+                  {{ getRelativeTime(user.created) }}
                 </TairoTableCell>
-                <TairoTableCell spaced>
+                <TairoTableCell
+                  spaced
+                  class="text-center"
+                >
                   <div class="flex justify-end">
                     <BaseDropdown
                       variant="context"
@@ -244,10 +432,58 @@ function toggleAllVisibleSelection() {
                     >
                       <BaseDropdownItem
                         to="#"
-                        title="View"
-                        text="View details"
+                        text="مشاهده پروفایل"
                         rounded="md"
-                      />
+                      >
+                        <template #start>
+                          <Icon name="lucide:user" class="me-2 block text-[1.15rem]" />
+                        </template>
+                      </BaseDropdownItem>
+                      <BaseDropdownItem
+                        to="#"
+                        text="مشاهده نشست‌ها"
+                        rounded="md"
+                      >
+                        <template #start>
+                          <Icon name="lucide:clock" class="me-2 block text-[1.15rem]" />
+                        </template>
+                      </BaseDropdownItem>
+                      <BaseDropdownItem
+                        to="#"
+                        text="مشاهده تحلیل‌ها"
+                        rounded="md"
+                      >
+                        <template #start>
+                          <Icon name="lucide:bar-chart" class="me-2 block text-[1.15rem]" />
+                        </template>
+                      </BaseDropdownItem>
+                      <BaseDropdownItem
+                        to="#"
+                        text="مشاهده تراکنش‌ها"
+                        rounded="md"
+                      >
+                        <template #start>
+                          <Icon name="lucide:repeat-2" class="me-2 block text-[1.15rem]" />
+                        </template>
+                      </BaseDropdownItem>
+                      <BaseDropdownItem
+                        to="#"
+                        text="مشاهده اسناد"
+                        rounded="md"
+                      >
+                        <template #start>
+                          <Icon name="lucide:file-text" class="me-2 block text-[1.15rem]" />
+                        </template>
+                      </BaseDropdownItem>
+                      <BaseDropdownItem
+                        to="#"
+                        text="مسدود / رفع مسدودی"
+                        rounded="md"
+                      >
+                        <template #start>
+                          <Icon name="lucide:ban" class="me-2 block text-[1.15rem]" />
+                        </template>
+                      </BaseDropdownItem>
                     </BaseDropdown>
                   </div>
                 </TairoTableCell>
@@ -260,6 +496,7 @@ function toggleAllVisibleSelection() {
               :item-per-page="query.perPage"
               :current-page="query.page"
               rounded="lg"
+              @update:current-page="onPageChange"
             />
           </div>
         </div>
