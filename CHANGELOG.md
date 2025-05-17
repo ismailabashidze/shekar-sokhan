@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0] (2025-05-17)
+
+### 🚀 Features
+- Added AI conversation summary feature that checks for previous sessions
+- Improved typing indicator for showing AI message generation progress
+- Disabled input field when AI is responding to messages
+
+### 🎨 UI Improvements
+- Enhanced user experience with clear processing state indicators
+- Optimized report page performance with loading and empty states
+
+---
+
 ## [1.8.0] (2025-05-14)
 
 ### 🚀 Features

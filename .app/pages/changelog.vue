@@ -7,6 +7,33 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 1.9.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 1.9.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              17 می 2025
+            </p>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>افزودن قابلیت شروع مکالمه توسط هوش مصنوعی با خلاصه‌ای از جلسات قبلی کاربر</li>
+              <li>بهبود نمایشگر تایپ برای نشان دادن پیشرفت هوش مصنوعی در هنگام تولید پاسخ</li>
+              <li>غیرفعال کردن ورودی پیام در هنگام پاسخگویی هوش مصنوعی</li>
+            </ul>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
+              بهبود‌ها
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود تجربه کاربری برای نشان دادن وضعیت پردازش پیام‌ها</li>
+              <li>بهینه‌سازی عملکرد در صفحه گزارش با حالت‌های بارگذاری و خالی</li>
+            </ul>
+          </div>
+          
           <!-- Version 1.8.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

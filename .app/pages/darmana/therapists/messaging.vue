@@ -40,6 +40,7 @@ const userReport = ref<Report | null>(null)
 const hasPreviousData = ref(false)
 
 const { generateAnalysis, createAnalysis } = useSessionAnalysis()
+const { getReportByUserId } = useReport()
 
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
@@ -338,11 +339,14 @@ async function submitMessage() {
     // Show streaming response in real time
     isAIThinking.value = true
     thinkingResponse.value = ''
-    await streamChat(chatMessagesForAI, { therapistDetails: currentTherapist }, (chunk) => {
+    await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user.id }, (chunk) => {
       aiResponse += chunk
       thinkingResponse.value = aiResponse
     })
     isAIThinking.value = false
+
+    // Remove any temporary typing indicators
+    messages.value = messages.value.filter(msg => !msg.isTyping)
 
     // Save AI response to PocketBase
     const savedAIMessage = await sendMessage(currentTherapist.id, session.id, aiResponse, 'received')
@@ -556,10 +560,32 @@ onMounted(async () => {
         },
       )
       // fetching userReport for having memory of previous sessions
-      const userReport = await getReportByUserId(nuxtApp.$pb.authStore.model?.id)
-      if (userReport) {
-        userReport.value = userReport
+      const userReportData = await getReportByUserId(nuxtApp.$pb.authStore.model?.id)
+      if (userReportData) {
+        userReport.value = userReportData
         hasPreviousData.value = true
+
+        // If there are previous sessions (totalSessions > 0), we'll have AI start the conversation
+        if (userReportData.totalSessions && userReportData.totalSessions > 0) {
+          console.log('This user has previous sessions, AI will start with a summary')
+          // Wait a moment for UI to initialize properly
+          setTimeout(() => {
+            const session = activeSession.value
+            if (!session) {
+              console.error('No active session found')
+              return
+            }
+
+            // Check if there are already messages in the conversation
+            // If there are messages, don't trigger the AI introduction
+            if (messages.value.length === 0) {
+              startAIConversationWithSummary(selectedConversationComputed.value?.user, session.id, userReportData)
+            }
+            else {
+              console.log('Messages already exist in conversation, skipping AI introduction')
+            }
+          }, 1000)
+        }
       }
     }
   }
@@ -670,6 +696,90 @@ const gotoList = () => {
 }
 const gotoReport = () => {
   navigateTo(`/report`)
+}
+
+// Function to have the AI start the conversation with a summary of previous sessions
+async function startAIConversationWithSummary(therapist: any, sessionId: string, report: any) {
+  if (!therapist || !sessionId || !report) return
+
+  try {
+    isAIResponding.value = true
+    messageLoading.value = true
+    streamingResponse.value = ''
+    isAIThinking.value = true
+    thinkingResponse.value = '...'
+
+    // Add a temporary thinking message to show the user something is happening
+    const tempThinkingId = 'thinking-' + Date.now()
+    messages.value.push({
+      type: 'received',
+      text: 'درحال تحلیل جلسات قبلی...',
+      timestamp: new Date().toISOString(),
+      id: tempThinkingId,
+      isTyping: true,
+    })
+
+    // Create a system message with the report summary data
+    const systemContext = {
+      role: 'system',
+      content: `مراجع قبلا ${report.totalSessions} جلسه مشاوره داشته است. خلاصه جلسات قبلی:
+${report.summaries?.map((session: any, idx: number) =>
+  `جلسه ${idx + 1}: ${session.title}\n${session.summary}`,
+).join('\n\n')}
+
+اهداف عمیق‌تر احتمالی مراجع:
+${report.possibleDeeperGoals?.join('\n')}
+
+عوامل خطر احتمالی:
+${report.possibleRiskFactors?.flat().map((risk: any) =>
+  `${risk.title}: ${risk.description}`,
+).join('\n')}
+
+با توجه به اطلاعات بالا، جلسه جدید را با یک خلاصه از جلسات قبلی و وضعیت مراجع شروع کن و از مراجع بپرس که امروز حالش چطور است و میخواهد درباره چه مسائلی صحبت کند. لحن باید گرم و حرفه‌ای باشد.`,
+    }
+
+    // Generate initial AI message
+    let aiResponse = ''
+
+    // Call the OpenRouter API with the system context
+    await streamChat([systemContext], { therapistDetails: therapist }, (chunk) => {
+      aiResponse += chunk
+      thinkingResponse.value = aiResponse
+    })
+
+    isAIThinking.value = false
+
+    // Remove the temporary typing message
+    messages.value = messages.value.filter(msg => !msg.isTyping)
+
+    // Save AI response to PocketBase
+    const savedAIMessage = await sendMessage(therapist.id, sessionId, aiResponse, 'received')
+
+    // Add AI response to messages with the correct ID
+    messages.value.push({
+      type: 'received',
+      text: aiResponse,
+      timestamp: savedAIMessage.time,
+      id: savedAIMessage.id,
+    })
+
+    scrollToBottom()
+  }
+  catch (e) {
+    console.error('Error starting AI conversation with summary:', e)
+    // Add fallback message if the summary fails
+    messages.value.push({
+      type: 'received',
+      text: 'سلام، من روانشناس شما هستم. به نظر می‌رسد جلسات قبلی با هم داشته‌ایم. امروز حالتان چطور است و درباره چه چیزی می‌خواهید صحبت کنیم؟',
+      timestamp: new Date().toISOString(),
+      id: 'auto-' + Date.now(),
+    })
+    scrollToBottom()
+  }
+  finally {
+    isAIResponding.value = false
+    messageLoading.value = false
+  }
 }
 
 const isReportModalOpen = ref(false)
@@ -1248,11 +1358,11 @@ const isAIThinking = ref(false)
               </button>
               <BaseTextarea
                 v-model="newMessage"
-                :disabled="showNoCharge"
+                :disabled="showNoCharge || isAIResponding || isAIThinking"
                 size="sm"
                 label="پیام شما"
                 rounded="md"
-                :placeholder="showNoCharge ? 'بسته مصرفی شما به اتمام رسیده است' : 'برای ارسال از ↵ + crtl  استفاده کنید.'"
+                :placeholder="showNoCharge ? 'بسته مصرفی شما به اتمام رسیده است' : isAIResponding || isAIThinking ? 'لطفا صبر کنید...' : 'برای ارسال از ↵ + crtl  استفاده کنید.'"
                 :rows="6"
                 addon
                 class="dark:bg-muted-800 bg-white"
