@@ -7,6 +7,34 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.0.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.0.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              31 خرداد 1404
+            </p>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>به‌روزرسانی اصلی به نسخه 2.0.0</li>
+              <li>افزودن قابلیت جامع مدیریت پرداخت‌ها با کنترل‌های ادمین</li>
+              <li>پیاده‌سازی نمایش پرداخت‌های کاربران با قابلیت فیلتر و صفحه‌بندی</li>
+              <li>افزودن دکمه‌های عملیاتی برای مدیریت پرداخت‌ها</li>
+            </ul>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های رابط کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود جدول پرداخت‌ها با نشانگر وضعیت و دکمه‌های عملیاتی</li>
+              <li>بهبود رابط مدیریت پرداخت‌ها برای مدیران سیستم</li>
+            </ul>
+          </div>
+
           <!-- Version 1.9.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

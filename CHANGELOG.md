@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0] (2025-05-21)
+
+### 🚀 Features
+- Major version bump to 2.0.0
+- Added comprehensive payments functionality with admin controls
+- Implemented user-specific payment views with filtering and pagination
+- Added action buttons for payment management
+
+### 🎨 UI Improvements
+- Enhanced payments table with status indicators and action buttons
+- Improved admin interface for managing user payments
+
+---
+
 ## [1.9.0] (2025-05-17)
 
 ### 🚀 Features
