@@ -276,8 +276,14 @@ const {
               <BaseParagraph size="lg" class="text-white opacity-80">
                 <span class="mt-2 flex items-center justify-center gap-2 sm:justify-start">
                   <span class="text-white/80">گزارش تحلیلی جلسه درمانی</span>
+                  <BaseAvatar
+                    :src="analysisData?.expand?.session?.expand?.user.meta.avatarUrl || '/img/avatars/default-male.jpg'"
+                    :text="analysisData?.expand?.session?.expand?.user.meta.name?.substring(0, 2) || 'کا'"
+                    size="xs"
+                    class="inline-block align-middle"
+                  />
                   <span class="font-bold text-white">
-                    {{ analysisData?.expand?.session?.expand?.user?.name }}
+                    {{ analysisData?.expand?.session?.expand?.user.meta.name }}
                   </span>
                   <span class="rounded-full bg-white/10 px-2 py-0.5 text-sm text-white/80">با</span>
                   <span class="font-bold text-white">
@@ -901,7 +907,7 @@ const {
 
                     <!-- No Data Overlay -->
                     <div
-                      v-if="!analysisData.demographicData || 
+                      v-if="!analysisData.demographicData ||
                         Object.values(analysisData.demographicData).every(value => !value)"
                       class="bg-muted-100/50 dark:bg-muted-900/50 absolute inset-0 flex items-center justify-center rounded-lg backdrop-blur-sm"
                     >

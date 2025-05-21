@@ -14,6 +14,9 @@ export type Message = {
 
 export function useTherapistsMessages() {
   const nuxtApp = useNuxtApp()
+  const { role } = useUser()
+
+  const isAdmin = computed(() => role.value === 'admin')
 
   const getMessages = async (sessionId: string) => {
     if (!nuxtApp.$pb.authStore.isValid) {
@@ -28,6 +31,33 @@ export function useTherapistsMessages() {
         batch: 100,
       })
       console.log(`session = "${sessionId}" && user = "${nuxtApp.$pb.authStore.model.id}"`)
+      return data
+    } catch (error: any) {
+      if (error?.isAbort) {
+        console.log('Request was cancelled')
+        return []
+      }
+      throw error
+    }
+  }
+
+  const getMessagesForAdmin = async (sessionId: string) => {
+    if (!nuxtApp.$pb.authStore.isValid) {
+      throw new Error('User not authenticated')
+    }
+
+    if (!isAdmin.value) {
+      throw new Error('Unauthorized: Admin access required')
+    }
+
+    try {
+      const data = await nuxtApp.$pb.collection('therapists_messages').getFullList({
+        sort: 'created',
+        filter: `session = "${sessionId}"`,
+        expand: 'therapist,user',
+        batch: 100,
+      })
+      console.log(`[Admin] session = "${sessionId}"`)
       return data
     }
     catch (error: any) {
@@ -99,6 +129,7 @@ export function useTherapistsMessages() {
 
   return {
     getMessages,
+    getMessagesForAdmin,
     sendMessage,
     deleteMessage,
     updateMessage,

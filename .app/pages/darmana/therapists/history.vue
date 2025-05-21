@@ -18,7 +18,7 @@ definePageMeta({
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
-const { getMessages } = useTherapistsMessages()
+const { getMessages, getMessagesForAdmin } = useTherapistsMessages()
 const route = useRoute()
 
 // Reactive references
@@ -62,12 +62,6 @@ const loadSessionMessages = async (sessionId: string) => {
   loading.value = true
 
   try {
-    const nuxtApp = useNuxtApp()
-    if (!nuxtApp.$pb.authStore.isValid) {
-      await navigateTo('/auth/login')
-      return
-    }
-
     // Get session details directly from PocketBase
     try {
       const session = await nuxtApp.$pb.collection('sessions').getOne(sessionId, {
@@ -82,10 +76,16 @@ const loadSessionMessages = async (sessionId: string) => {
           activeTherapistId.value = session.expand.therapist.id
         }
 
-        // Load messages for this session using the composable
+        // Load messages for this session using the appropriate method based on user role
         try {
-          const loadedMessages = await getMessages(sessionId)
-          console.log(loadedMessages)
+          const { role } = useUser()
+          const isAdmin = role.value === 'admin'
+          
+          const loadedMessages = isAdmin 
+            ? await getMessagesForAdmin(sessionId)
+            : await getMessages(sessionId)
+            
+          console.log('Loaded messages:', loadedMessages)
           messages.value = loadedMessages.map(msg => ({
             ...msg,
             timestamp: msg.time,

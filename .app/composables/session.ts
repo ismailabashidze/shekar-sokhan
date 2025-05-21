@@ -30,6 +30,16 @@ export function useSessions() {
     }
 
     try {
+      // For admin viewing another user's sessions
+      if (filter?.patientId) {
+        return await nuxtApp.$pb.collection('sessions').getFullList({
+          sort: '-created',
+          filter: `user = "${filter.patientId}"`,
+          expand: 'user,therapist',
+        })
+      }
+
+      // Regular user or admin viewing their own sessions
       let filterStr = `user = "${nuxtApp.$pb.authStore.model?.id}"`
 
       if (filter?.status) {
@@ -37,9 +47,6 @@ export function useSessions() {
       }
       if (filter?.therapistId) {
         filterStr += ` && therapist = "${filter.therapistId}"`
-      }
-      if (filter?.patientId) {
-        filterStr += ` && patient = "${filter.patientId}"`
       }
 
       return await nuxtApp.$pb.collection('sessions').getFullList({

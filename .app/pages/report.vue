@@ -487,11 +487,14 @@
             </div>
             <div class="mt-6">
               <div v-if="report.possibleRiskFactors.length > 0" class="space-y-4">
-                <div v-for="(group, idx) in report.possibleRiskFactors" :key="idx">
+                <div
+                  v-for="(group, idx) in report.possibleRiskFactors"
+                  :key="idx"
+                >
                   <div
                     v-for="(risk, j) in group"
                     :key="j"
-                    class="group relative"
+                    class="group relative mt-4"
                   >
                     <BaseCard
                       shape="rounded"
@@ -544,8 +547,22 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 const isLoading = ref(true)
 const hasData = ref(true)
 const router = useRouter()
+const route = useRoute()
 const { getReportByUserId } = useReport()
 const nuxtApp = useNuxtApp()
+const { user, role } = useUser()
+
+// Check if current user is admin
+const isAdmin = computed(() => role.value === 'admin')
+
+// Get target user ID from query params or use current user
+const targetUserId = computed(() => {
+  const queryUserId = Array.isArray(route.query.userId)
+    ? route.query.userId[0]
+    : route.query.userId
+
+  return queryUserId || nuxtApp.$pb.authStore.model?.id
+})
 // For demo, we'll simulate data fetching with a timeout
 const report = ref({
   collectionId: '',
@@ -574,16 +591,25 @@ async function fetchReport() {
   isLoading.value = true
 
   try {
-    // Get current user
-    const userId = nuxtApp.$pb.authStore.baseModel.id
+    // Check if user is trying to access another user's report without admin rights
+    const queryUserId = Array.isArray(route.query.userId)
+      ? route.query.userId[0]
+      : route.query.userId
 
-    if (!userId) {
+    if (queryUserId && !isAdmin.value) {
+      // Non-admin trying to access another user's report - redirect to their own report
+      router.push('/report')
+      return
+    }
+
+    // If no user ID is available
+    if (!targetUserId.value) {
       hasData.value = false
       return
     }
 
-    // Get report for the current user
-    const userReport = await getReportByUserId(userId)
+    // Get report for the target user
+    const userReport = await getReportByUserId(targetUserId.value)
 
     if (userReport) {
       report.value = userReport
@@ -605,6 +631,11 @@ async function fetchReport() {
 onMounted(() => {
   fetchReport()
 })
+
+// Watch for query parameter changes
+watch(() => route.query, () => {
+  fetchReport()
+}, { immediate: false })
 
 function startNewSession() {
   // Navigate to the session creation page

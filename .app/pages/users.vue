@@ -431,18 +431,20 @@ function onPageChange(newPage: number) {
                       rounded="md"
                     >
                       <BaseDropdownItem
-                        to="#"
+                        :to="`/report?userId=${user.id}`"
                         text="مشاهده پروفایل"
                         rounded="md"
+                        @click="$event.stopPropagation()"
                       >
                         <template #start>
                           <Icon name="lucide:user" class="me-2 block text-[1.15rem]" />
                         </template>
                       </BaseDropdownItem>
                       <BaseDropdownItem
-                        to="#"
+                        :to="`/darmana/therapists/sessions?userId=${user.id}`"
                         text="مشاهده نشست‌ها"
                         rounded="md"
+                        @click="$event.stopPropagation()"
                       >
                         <template #start>
                           <Icon name="lucide:clock" class="me-2 block text-[1.15rem]" />
@@ -458,9 +460,10 @@ function onPageChange(newPage: number) {
                         </template>
                       </BaseDropdownItem>
                       <BaseDropdownItem
-                        to="#"
+                        :to="`/payments?userId=${user.id}`"
                         text="مشاهده تراکنش‌ها"
                         rounded="md"
+                        @click="$event.stopPropagation()"
                       >
                         <template #start>
                           <Icon name="lucide:repeat-2" class="me-2 block text-[1.15rem]" />

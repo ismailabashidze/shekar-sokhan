@@ -18,13 +18,16 @@ const perPage = ref(10)
 const sessions = ref([])
 const loading = ref(false)
 const toaster = useToaster()
+const nuxtApp = useNuxtApp()
+const { role } = useUser()
 
-watch([filter, statusFilter, perPage], () => {
-  router.push({
-    query: {
-      page: undefined,
-    },
-  })
+const isAdmin = computed(() => role.value === 'admin')
+const targetUserId = computed(() => {
+  const queryUserId = Array.isArray(route.query.userId)
+    ? route.query.userId[0]
+    : route.query.userId
+
+  return queryUserId || nuxtApp.$pb.authStore.model?.id
 })
 
 const { getSessions } = useSessions()
@@ -87,14 +90,39 @@ const formatTime = (timeString) => {
   }).format(date)
 }
 
+// Check if user is trying to access another user's sessions without admin rights
+const checkAccess = () => {
+  const queryUserId = Array.isArray(route.query.userId)
+    ? route.query.userId[0]
+    : route.query.userId
+
+  if (queryUserId && !isAdmin.value) {
+    // Non-admin trying to access another user's sessions - redirect to their own sessions
+    router.push('/darmana/therapists/sessions')
+    return false
+  }
+  return true
+}
+
 // Fetch sessions
 const fetchSessions = async () => {
   loading.value = true
+
+  if (!checkAccess()) {
+    loading.value = false
+    return
+  }
+
   try {
-    let filterObj = {}
+    let filterObj: any = {}
 
     if (statusFilter.value !== 'all') {
       filterObj.status = statusFilter.value
+    }
+
+    // If admin is viewing another user's sessions, use patientId filter
+    if (isAdmin.value && route.query.userId) {
+      filterObj.patientId = route.query.userId
     }
 
     const result = await getSessions(filterObj)
