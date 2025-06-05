@@ -48,9 +48,15 @@ export function useReport() {
 
   const updateReport = async (id: string, data: Partial<Report>) => {
     try {
-      return await pb.collection('final_reports').update(id, data)
-    }
-    catch (error) {
+      // Update remote
+      const updated = await pb.collection('final_reports').update(id, data)
+      // Update localStorage
+      const userRecord = useLocalStorage('userRecord', {} as Report)
+      if (userRecord.value && userRecord.value.id === id) {
+        userRecord.value = { ...userRecord.value, ...data }
+      }
+      return updated
+    } catch (error) {
       console.error(`Error updating report with id ${id}:`, error)
       throw error
     }

@@ -94,6 +94,8 @@ import PersianCalendar from '~/components/PersianCalendar.vue'
 import AddonMarkdownRemark from '~/components/AddonMarkdownRemark.vue'
 
 const router = useRouter()
+const toaster = useToaster()
+const { streamChat, processing } = useOpenRouter()
 
 const title = ref('')
 const description = ref('')
@@ -109,21 +111,24 @@ const slug = ref('')
 const allowComments = ref(true)
 const isFeatured = ref(false)
 const secretMessage = ref('')
-const aiSuggestion = ref('')
-const aiFeedback = ref('')
 const goals = ref('')
 
-const postType = ref('normal')
-const commentStatus = ref('enabled')
+// Loading state for AI suggestion buttons
+const titleAiLoading = ref(false)
+const secretMessageAiLoading = ref(false)
+const goalsAiLoading = ref(false)
+const categoryAiLoading = ref(false)
+const tagsAiLoading = ref(false)
+const excerptAiLoading = ref(false)
+const slugAiLoading = ref(false)
+const contentLongAiLoading = ref(false)
+const generateGoalsAiLoading = ref(false)
 
 const errors = ref({})
 const loading = ref(false)
 const success = ref(false)
-const showPreview = ref(false)
 
 const categories = [
-  { value: 'all', label: 'همه', icon: 'ph:circles-four-duotone' },
-  { value: 'psychology', label: 'روانشناسی', icon: 'ph:brain-duotone' },
   { value: 'meditation', label: 'مدیتیشن', icon: 'ph:person-simple-duotone' },
   { value: 'yoga', label: 'یوگا', icon: 'ph:person-simple-walk-duotone' },
   { value: 'mental-health', label: 'سلامت روان', icon: 'ph:heartbeat-duotone' },
@@ -166,17 +171,6 @@ function formatFileSize(size: number) {
   if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB'
   return (size / 1024 / 1024).toFixed(1) + ' MB'
 }
-
-const categoryIcon = computed(() => {
-  const cat = categories.find(c => c.label === category.value)
-  return cat ? cat.icon : ''
-})
-
-const imageUrl = computed(() => {
-  if (!uploadedFiles.value) return ''
-  if (typeof uploadedFiles.value === 'string') return uploadedFiles.value
-  return URL.createObjectURL(uploadedFiles.value[0])
-})
 
 function validate() {
   errors.value = {}
@@ -267,74 +261,189 @@ function backToPosts() {
   router.push('/posts/list')
 }
 
-function requestAISuggestion() {
-  // Fake AI suggestion for demo (replace with API call)
-  aiSuggestion.value = 'تو قوی‌تر از چیزی هستی که فکر می‌کنی!'
-  aiFeedback.value = ''
-}
-function acceptAISuggestion() {
-  secretMessage.value = aiSuggestion.value
-  aiFeedback.value = ''
-}
-function rejectAISuggestion() {
-  aiFeedback.value = 'این پیشنهاد مورد پسند واقع نشد. لطفاً بازنویسی کنید.'
-}
-function regenerateAISuggestion() {
-  // Fake regenerate (replace with API call + feedback)
-  aiSuggestion.value = 'هر روز یک شروع دوباره است، ازش لذت ببر!'
-  aiFeedback.value = ''
-}
 
-// AI suggestion functions
-import { useOpenRouter } from '~/composables/useOpenRouter'
-const { streamChat, processing } = useOpenRouter()
-
-async function suggestAIField(field) {
-  // Gather all relevant info for context
-  const context = {
-    title: title.value,
-    secretMessage: secretMessage.value,
-    tags: tags.value.join('، '),
-    excerpt: excerpt.value,
-    slug: slug.value,
-    readTime: readTime.value,
-    description: description.value,
-    contentLong: contentLong.value,
-    goals: goals.value,
+async function suggestAIField(field: string) {
+  switch (field) {
+    case 'title': titleAiLoading.value = true; break;
+    case 'secretMessage': secretMessageAiLoading.value = true; break;
+    case 'goals': goalsAiLoading.value = true; break;
+    case 'category': categoryAiLoading.value = true; break;
+    case 'tags': tagsAiLoading.value = true; break;
+    case 'excerpt': excerptAiLoading.value = true; break;
+    case 'slug': slugAiLoading.value = true; break;
+    case 'contentLong': contentLongAiLoading.value = true; break;
   }
-  // Compose context string (exclude the current field)
-  const contextString = Object.entries(context)
-    .filter(([key]) => key !== field && context[key])
-    .map(([key, val]) => `${key}: ${val}`)
-    .join('\n')
-
-  const prompts = {
-    title: 'یک عنوان مناسب برای مقاله پیشنهاد بده که حتماً با ساختار مارک‌داون و با استفاده از # در ابتدای خط نوشته شود. فقط عنوان را به صورت مارک‌داون بازگردان.',
-    secretMessage: `یک پیام مخفی کوتاه، بسیار دقیق، مرتبط و عمیق فقط برای همین مقاله پیشنهاد بده. پیام باید کاملاً متناسب با موضوع عنوان و سایر اطلاعات مقاله باشد و به خواننده حس خاص و الهام‌بخش منتقل کند. از پیام‌های کلیشه‌ای و بی‌ربط یا جملات بی‌معنی خودداری کن. فقط یک پیام کاملاً مرتبط و معنی‌دار ارائه بده که واقعا به دل خواننده بنشیند.`,
-    tags: 'چند برچسب مرتبط فقط با همین مقاله پیشنهاد بده (با ویرگول جدا کن). فقط لیست برچسب‌ها را بنویس.',
-    excerpt: 'یک خلاصه کوتاه و مناسب فقط برای همین مقاله پیشنهاد بده. فقط خلاصه را بنویس.',
-    slug: 'یک اسلاگ مناسب (لاتین و بدون فاصله) فقط برای همین مقاله پیشنهاد بده. فقط اسلاگ را بنویس.',
-    readTime: 'زمان تقریبی مطالعه (بر حسب دقیقه) فقط برای همین مقاله پیشنهاد بده. فقط یک عدد بنویس.',
-    description: 'یک توضیح کوتاه فقط برای همین مقاله پیشنهاد بده. فقط توضیح را بنویس.',
-    contentLong: `یک متن کامل و منسجم برای مقاله بنویس. حتماً فقط و فقط با مارک‌داون بنویس. متن باید حداقل ۵۰۰۰ کلمه باشد و تا حد ممکن از ساختارها و امکانات مختلف مارک‌داون (سرفصل، لیست، چک‌لیست، نقل‌قول، جدول، کد، تصویر، پیوند و غیره) استفاده کن. پاسخ نهایی باید حتماً ساختار مارک‌داون داشته باشد و نشانه‌های مارک‌داون (مثل # برای عنوان، - یا * برای لیست و ...) به‌درستی رعایت شود. مثال‌های زیر را برای تنوع ساختار ببین:
-${markdownGuide}`,
-    goals: 'اهداف آموزشی و روانشناختی مقاله را بنویسید. هدف روانشناس از نگارش مقاله، دستاوردها و مطالبی که خواننده یاد می‌گیرد را اینجا بنویسید...',
-  }
-  const prompt = prompts[field] || 'یک مقدار مناسب پیشنهاد بده.'
-  const userContent = context[field]
-  const messages = [
-    { role: 'user', content: userContent ? `${prompt}\nمقدار فعلی: ${userContent}\nاطلاعات دیگر مقاله:\n${contextString}` : `${prompt}\nاطلاعات دیگر مقاله:\n${contextString}` },
-  ]
+  
   try {
-    let suggestion = ''
-    await streamChat(messages, {}, (chunk) => {
-      suggestion += chunk.choices?.[0]?.delta?.content || ''
-    })
-    console.log(suggestion)
-    setFieldValue(field, suggestion.trim())
+    // For category field, we'll select from predefined categories
+    if (field === 'category') {
+      const prompt = `با توجه به متن زیر، مناسب‌ترین دسته‌بندی را از بین گزینه‌های زیر انتخاب کن. فقط نام دسته‌بندی را برگردان و هیچ چیز دیگری ننویس.\n\nمتن: ${title.value || description.value || 'بدون عنوان'}\n\nدسته‌بندی‌های موجود: ${categories.map(c => c.value).join('، ')}`
+      const messages = [
+        { role: 'user', content: prompt }
+      ]
+      
+      let suggestion = ''
+      categoryAiLoading.value = true
+      
+      try {
+        await streamChat(messages, {}, (chunk) => {
+          const content = chunk
+          if (content) {
+            suggestion += content
+            // Find the best matching category from our predefined list
+            const matchedCategory = categories.find(cat => 
+              cat.value.toLowerCase().includes(suggestion.trim().toLowerCase()) ||
+              suggestion.trim().toLowerCase().includes(cat.value.toLowerCase())
+            )
+            if (matchedCategory) {
+              category.value = matchedCategory.value
+            }
+            console.log(category.value)
+          }
+        })
+        
+        // Show success toast
+        toaster.show({
+          title: 'موفقیت',
+          message: 'دسته‌بندی با موفقیت پیشنهاد شد.',
+          color: 'success',
+          icon: 'ph:check-circle',
+          closable: true,
+        })
+        
+        return // Exit early after handling category
+      } catch (e: any) {
+        toaster.show({
+          title: 'خطا',
+          message: `خطا در دریافت پیشنهاد دسته‌بندی: ${e.message || 'خطای ناشناخته'}`,
+          color: 'danger',
+          icon: 'ph:warning',
+          closable: true,
+        })
+        throw e
+      } finally {
+        categoryAiLoading.value = false
+      }
+    }
+    
+    
+    
+    // For other fields, use the existing logic
+    const context = {
+      title: title.value,
+      secretMessage: secretMessage.value,
+      tags: tags.value.join('، '),
+      excerpt: excerpt.value,
+      slug: slug.value,
+      readTime: readTime.value,
+      description: description.value,
+      contentLong: contentLong.value,
+      goals: goals.value,
+    }
+    // Compose context string (exclude the current field)
+    const contextString = Object.entries(context)
+      .filter(([key]) => key !== field && context[key])
+      .map(([key, val]) => `${key}: ${val}`)
+      .join('\n')
+
+    const prompts = {
+      title: 'یک عنوان مناسب برای مقاله پیشنهاد بده که حتماً با ساختار مارک‌داون و با استفاده از # در ابتدای خط نوشته شود. فقط عنوان را به صورت مارک‌داون بازگردان.',
+      secretMessage: `یک پیام مخفی کوتاه، بسیار دقیق، مرتبط و عمیق فقط برای همین مقاله پیشنهاد بده. پیام باید کاملاً متناسب با موضوع عنوان و سایر اطلاعات مقاله باشد و به خواننده حس خاص و الهام‌بخش منتقل کند. از پیام‌های کلیشه‌ای و بی‌ربط یا جملات بی‌معنی خودداری کن. فقط یک پیام کاملاً مرتبط و معنی‌دار ارائه بده که واقعا به دل خواننده بنشیند.`,
+      tags: 'چند برچسب مرتبط فقط با همین مقاله پیشنهاد بده (با ویرگول جدا کن). فقط لیست برچسب‌ها را بنویس.',
+      excerpt: 'یک خلاصه کوتاه و مناسب فقط برای همین مقاله پیشنهاد بده. فقط خلاصه را بنویس.',
+      slug: 'یک اسلاگ مناسب (لاتین و بدون فاصله) فقط برای همین مقاله پیشنهاد بده. فقط اسلاگ را بنویس.',
+      readTime: 'زمان تقریبی مطالعه (بر حسب دقیقه) فقط برای همین مقاله پیشنهاد بده. فقط یک عدد بنویس.',
+      description: 'یک توضیح کوتاه فقط برای همین مقاله پیشنهاد بده. فقط توضیح را بنویس.',
+      contentLong: `یک متن کامل و منسجم برای مقاله بنویس. حتماً فقط و فقط با مارک‌داون بنویس. متن باید حداقل ۵۰۰۰ کلمه باشد و تا حد ممکن از ساختارها و امکانات مختلف مارک‌داون (سرفصل، لیست، چک‌لیست، نقل‌قول، جدول، کد، تصویر، پیوند و غیره) استفاده کن. پاسخ نهایی باید حتماً ساختار مارک‌داون داشته باشد و نشانه‌های مارک‌داون (مثل # برای عنوان، - یا * برای لیست و ...) به‌درستی رعایت شود. مثال‌های زیر را برای تنوع ساختار ببین:
+${markdownGuide}`,
+      goals: 'اهداف آموزشی و روانشناختی مقاله را بنویسید. هدف روانشناس از نگارش مقاله، دستاوردها و مطالبی که خواننده یاد می‌گیرد را اینجا بنویسید...',
+    }
+    const prompt = prompts[field] || 'یک مقدار مناسب پیشنهاد بده.'
+    const userContent = context[field]
+    const messages = [
+      { role: 'user', content: userContent ? `${prompt}\nمقدار فعلی: ${userContent}\nاطلاعات دیگر مقاله:\n${contextString}` : `${prompt}\nاطلاعات دیگر مقاله:\n${contextString}` },
+    ]
+    try {
+      let suggestion = ''
+      // For all fields, update in real-time as chunks arrive
+      const initialContent = getFieldValue(field)
+      
+      // Create a promise that resolves when streaming is complete
+      await new Promise((resolve, reject) => {
+        streamChat(messages, {}, (chunk) => {
+          const content = chunk
+          if (content) {
+            suggestion += content
+            
+            // Update the field in real-time
+            switch (field) {
+              case 'title': 
+                title.value = (initialContent + ' ' + suggestion).trim()
+                break
+              case 'description': 
+                description.value = (initialContent + ' ' + suggestion).trim()
+                break
+              case 'excerpt': 
+                excerpt.value = (initialContent + ' ' + suggestion).trim()
+                break
+              case 'slug': 
+                slug.value = (initialContent + ' ' + suggestion).trim()
+                break
+              // case 'category': 
+              //   category.value = (initialContent + ' ' + suggestion).trim()
+              //   break
+              case 'secretMessage': 
+                secretMessage.value = (initialContent + ' ' + suggestion).trim()
+                break
+              case 'goals': 
+                goals.value = (initialContent + '\n' + suggestion).trim()
+                break
+              case 'contentLong': 
+                contentLong.value = (initialContent + '\n' + suggestion).trim()
+                break
+              case 'tags':
+                const newTags = (initialContent ? initialContent + ', ' : '') + suggestion
+                tags.value = newTags.split(',').map(t => t.trim()).filter(Boolean)
+                break
+            }
+          }
+        })
+        .then(resolve)
+        .catch(reject)
+      })
+      
+      // Show success toast
+      toaster.show({
+        title: 'موفقیت',
+        message: `پیشنهاد هوش مصنوعی با موفقیت اعمال شد.`,
+        color: 'success',
+        icon: 'ph:check-circle',
+        closable: true,
+      })
+    }
+    catch (e: any) {
+      toaster.show({
+        title: 'خطا',
+        message: `خطا در دریافت پیشنهاد هوش مصنوعی: ${e.message || 'خطای ناشناخته'}`,
+        color: 'danger',
+        icon: 'ph:warning',
+        closable: true,
+      })
+      throw e // Re-throw to be caught by outer try-catch
+    }
   }
-  catch (e) {
-    // handle error (optional toast)
+  finally {
+    // Ensure loading state is always reset
+    switch (field) {
+      case 'title': titleAiLoading.value = false; break;
+      case 'secretMessage': secretMessageAiLoading.value = false; break;
+      case 'goals': goalsAiLoading.value = false; break;
+      case 'category': categoryAiLoading.value = false; break;
+      case 'tags': tagsAiLoading.value = false; break;
+      case 'excerpt': excerptAiLoading.value = false; break;
+      case 'slug': slugAiLoading.value = false; break;
+      case 'contentLong': contentLongAiLoading.value = false; break;
+    }
   }
 }
 function getFieldValue(field) {
@@ -394,7 +503,7 @@ function applyMarkdownAiEdit() {
     { role: 'user', content: prompt },
   ]
   streamChat(messages, {}, (chunk) => {
-    const suggestion = chunk.choices?.[0]?.delta?.content || ''
+    const suggestion = chunk
     contentLong.value = contentLong.value.replace(selectedMarkdownText.value, suggestion)
     showMarkdownAiEdit.value = false
     markdownAiEditDesc.value = ''
@@ -415,33 +524,95 @@ function handleMarkdownSelection() {
     }
   }
 }
-// Attach selection handler
+// Load preview data from localStorage
+const loadPreviewFromLocalStorage = () => {
+  const savedData = localStorage.getItem('postPreview')
+  if (savedData) {
+    const data = JSON.parse(savedData)
+    title.value = data.title || ''
+    description.value = data.description || ''
+    contentLong.value = data.contentLong || ''
+    excerpt.value = data.excerpt || ''
+    slug.value = data.slug || ''
+    category.value = data.category || ''
+    tags.value = data.tags || []
+    publishDate.value = data.publishDate || ''
+    readTime.value = data.readTime || ''
+    isFeatured.value = data.isFeatured || false
+    allowComments.value = data.allowComments ?? true
+    secretMessage.value = data.secretMessage || ''
+    goals.value = data.goals || ''
+    uploadedFiles.value = data.uploadedFiles || null
+  }
+}
+
+// Attach selection handler and load saved data
 onMounted(() => {
   const textarea = markdownTextarea.value?.$el?.querySelector('textarea')
   if (textarea) {
     textarea.addEventListener('mouseup', handleMarkdownSelection)
     textarea.addEventListener('keyup', handleMarkdownSelection)
   }
+
+  // Load saved data when component mounts
+  loadPreviewFromLocalStorage()
 })
 
 const generateGoalsListAI = async () => {
-  const { streamChat, processing } = useOpenRouter()
-  goals.value = ''
-  const topic = title.value.trim()
-  const prompt = `با توجه به عنوان مقاله زیر، یک لیست از اهداف آموزشی و روانشناختی مرتبط با همان عنوان که خواننده پس از مطالعه این مقاله به دست می‌آورد به زبان فارسی بنویس. تاکید: خروجی باید فقط یک لیست باشد و هر هدف در یک خط مجزا نوشته شود.\nعنوان مقاله: ${topic}`
-  const messages = [
-    { role: 'system', content: 'شما یک دستیار متخصص تولید محتوای روانشناسی هستید.' },
-    { role: 'user', content: prompt },
-  ]
+  const toaster = useToaster()
+  generateGoalsAiLoading.value = true
+  
   try {
+    const topic = title.value.trim()
+    if (!topic) {
+      toaster.show({
+        title: 'هشدار',
+        message: 'لطفاً ابتدا عنوان مقاله را وارد کنید.',
+        color: 'warning',
+        icon: 'ph:warning',
+        closable: true,
+      })
+      return
+    }
+
+    goals.value = ''
+    const prompt = `با توجه به عنوان مقاله زیر، یک لیست از اهداف آموزشی و روانشناختی مرتبط با همان عنوان که خواننده پس از مطالعه این مقاله به دست می‌آورد به زبان فارسی بنویس. تاکید: خروجی باید فقط یک لیست باشد و هر هدف در یک خط مجزا نوشته شود.\nعنوان مقاله: ${topic}`
+    
+    const messages = [
+      { role: 'system', content: 'شما یک دستیار متخصص تولید محتوای روانشناسی هستید.' },
+      { role: 'user', content: prompt },
+    ]
+
+    const { streamChat } = useOpenRouter()
     let result = ''
+    
     await streamChat(messages, {}, (chunk) => {
-      result += chunk.choices?.[0]?.delta?.content || ''
-      goals.value = result
+      const content = chunk
+      result += content
+      goals.value = result // Update in real-time
+    })
+
+    toaster.show({
+      title: 'موفقیت',
+      message: 'اهداف آموزشی با موفقیت تولید شدند.',
+      color: 'success',
+      icon: 'ph:check-circle',
+      closable: true,
     })
   }
-  catch (e) {
+  catch (e: any) {
+    toaster.show({
+      title: 'خطا',
+      message: `خطا در تولید اهداف: ${e.message || 'خطای ناشناخته'}`,
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
     goals.value = 'خطا در دریافت اهداف از هوش مصنوعی.'
+    throw e
+  }
+  finally {
+    generateGoalsAiLoading.value = false
   }
 }
 </script>
@@ -490,8 +661,10 @@ const generateGoalsListAI = async () => {
                           data-nui-tooltip="پیشنهاد هوش مصنوعی"
                           class="text-muted-400 hover:text-primary-500 absolute end-0 top-0 z-[1] flex size-8 items-center justify-center transition-colors duration-300"
                           @click="suggestAIField('title')"
+                          :disabled="titleAiLoading"
                         >
-                          <Icon name="ph:sparkle" class="size-4" />
+                          <Icon v-if="!titleAiLoading" name="ph:sparkle" class="size-4" />
+                          <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
                         </button>
                       </template>
                     </BaseInput>
@@ -510,8 +683,10 @@ const generateGoalsListAI = async () => {
                           data-nui-tooltip="پیشنهاد هوش مصنوعی"
                           class="text-muted-400 hover:text-primary-500 absolute end-0 top-0 z-[1] flex size-8 items-center justify-center transition-colors duration-300"
                           @click="suggestAIField('secretMessage')"
+                          :disabled="secretMessageAiLoading"
                         >
-                          <Icon name="ph:sparkle" class="size-4" />
+                          <Icon v-if="!secretMessageAiLoading" name="ph:sparkle" class="size-4" />
+                          <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
                         </button>
                       </template>
                     </BaseInput>
@@ -525,8 +700,10 @@ const generateGoalsListAI = async () => {
                       type="button"
                       class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
                       @click="generateGoalsListAI"
+                      :disabled="generateGoalsAiLoading"
                     >
-                      <Icon name="ph:sparkle" class="size-4" />
+                      <Icon v-if="!generateGoalsAiLoading" name="ph:sparkle" class="size-4" />
+                      <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
                     </button>
                   </div>
                   <BaseTextarea
@@ -541,8 +718,10 @@ const generateGoalsListAI = async () => {
                         data-nui-tooltip="پیشنهاد هوش مصنوعی"
                         class="text-muted-400 hover:text-primary-500 absolute end-0 top-0 z-[1] flex size-8 items-center justify-center transition-colors duration-300"
                         @click="suggestAIField('goals')"
+                        :disabled="goalsAiLoading"
                       >
-                        <Icon name="ph:sparkle" class="size-4" />
+                        <Icon v-if="!goalsAiLoading" name="ph:sparkle" class="size-4" />
+                        <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
                       </button>
                     </template>
                   </BaseTextarea>
@@ -552,23 +731,25 @@ const generateGoalsListAI = async () => {
                 </div>
                 <!-- Category Selection -->
                 <div class="mb-6">
-                  <label class="text-muted-800 dark:text-muted-100 mb-2 block font-semibold">دسته‌بندی
+                  <div class="mb-2 flex items-center justify-between">
+                    <label class="text-muted-800 dark:text-muted-100 font-semibold">دسته بندی {{ category }}</label>
                     <button
                       type="button"
-                      data-nui-tooltip="پیشنهاد هوش مصنوعی"
-                      class="text-muted-400 hover:text-primary-500 ml-2 flex size-7 items-center justify-center transition-colors duration-300"
+                      class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
                       @click="suggestAIField('category')"
+                      :disabled="categoryAiLoading"
                     >
-                      <Icon name="ph:sparkle" class="size-4" />
+                      <Icon v-if="!categoryAiLoading" name="ph:sparkle" class="size-4" />
+                      <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
                     </button>
-                  </label>
-                  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                  </div>
+                  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 mt-3">
                     <BaseRadioHeadless
                       v-for="cat in categories"
                       :key="cat.value"
                       v-model="category"
                       :name="'category'"
-                      :value="cat.label"
+                      :value="cat.value"
                     >
                       <BaseCard
                         rounded="lg"
@@ -596,8 +777,10 @@ const generateGoalsListAI = async () => {
                       data-nui-tooltip="پیشنهاد هوش مصنوعی"
                       class="text-muted-400 hover:text-primary-500 ml-2 flex size-8 items-center justify-center transition-colors duration-300"
                       @click="suggestAIField('tags')"
+                      :disabled="tagsAiLoading"
                     >
-                      <Icon name="ph:sparkle" class="size-4" />
+                      <Icon v-if="!tagsAiLoading" name="ph:sparkle" class="size-4" />
+                      <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
                     </button>
                   </div>
                   <div class="mb-2 flex flex-wrap gap-2">
@@ -738,8 +921,10 @@ const generateGoalsListAI = async () => {
                       data-nui-tooltip="پیشنهاد هوش مصنوعی"
                       class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
                       @click="suggestAIField('excerpt')"
+                      :disabled="excerptAiLoading"
                     >
-                      <Icon name="ph:sparkle" class="size-5" />
+                      <Icon v-if="!excerptAiLoading" name="ph:sparkle" class="size-5" />
+                      <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-5 animate-spin" />
                     </button>
                   </template>
                 </BaseTextarea>
@@ -758,8 +943,10 @@ const generateGoalsListAI = async () => {
                       data-nui-tooltip="پیشنهاد هوش مصنوعی"
                       class="text-muted-400 hover:text-primary-500 absolute end-0 top-0 z-[1] flex size-8 items-center justify-center transition-colors duration-300"
                       @click="suggestAIField('slug')"
+                      :disabled="slugAiLoading"
                     >
-                      <Icon name="ph:sparkle" class="size-4" />
+                      <Icon v-if="!slugAiLoading" name="ph:sparkle" class="size-4" />
+                      <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
                     </button>
                   </template>
                 </BaseInput>
@@ -796,13 +983,15 @@ const generateGoalsListAI = async () => {
                   <div class="flex items-center justify-between">
                     <label class="text-muted-800 dark:text-muted-100 mb-2 block font-semibold">متن کامل مقاله (مارک‌داون)</label>
                     <button
-                      type="button"
-                      data-nui-tooltip="پیشنهاد هوش مصنوعی"
-                      class="text-muted-400 hover:text-primary-500 ml-2 flex size-8 items-center justify-center transition-colors duration-300"
-                      @click="suggestAIField('contentLong')"
-                    >
-                      <Icon name="ph:sparkle" class="size-4" />
-                    </button>
+                       type="button"
+                       data-nui-tooltip="پیشنهاد هوش مصنوعی"
+                       class="text-muted-400 hover:text-primary-500 ml-2 flex size-8 items-center justify-center transition-colors duration-300"
+                       @click="suggestAIField('contentLong')"
+                       :disabled="contentLongAiLoading"
+                     >
+                       <Icon v-if="!contentLongAiLoading" name="ph:sparkle" class="size-4" />
+                       <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
+                     </button>
                   </div>
                   <BaseTextarea
                     ref="markdownTextarea"
@@ -816,13 +1005,15 @@ const generateGoalsListAI = async () => {
                   >
                     <template #action>
                       <button
-                        type="button"
-                        data-nui-tooltip="پیشنهاد هوش مصنوعی"
-                        class="text-muted-400 hover:text-primary-500 absolute end-0 top-0 z-[1] flex size-8 items-center justify-center transition-colors duration-300"
-                        @click="suggestAIField('contentLong')"
-                      >
-                        <Icon name="ph:sparkle" class="size-4" />
-                      </button>
+                         type="button"
+                         data-nui-tooltip="پیشنهاد هوش مصنوعی"
+                         class="text-muted-400 hover:text-primary-500 absolute end-0 top-0 z-[1] flex size-8 items-center justify-center transition-colors duration-300"
+                         @click="suggestAIField('contentLong')"
+                         :disabled="contentLongAiLoading"
+                       >
+                         <Icon v-if="!contentLongAiLoading" name="ph:sparkle" class="size-4" />
+                         <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
+                       </button>
                     </template>
                   </BaseTextarea>
                   <!-- Markdown Preview -->

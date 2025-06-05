@@ -63,6 +63,9 @@ const getStatusInfo = (status) => {
       return { text: 'تکمیل شده', color: 'success' }
     case 'closed':
       return { text: 'بسته شده', color: 'info' }
+    case 'deleted':
+      return { text: 'حذف شده', color: 'danger' }
+
     default:
       return { text: 'نامشخص', color: 'muted' }
   }
@@ -236,6 +239,9 @@ onMounted(() => {
             </option>
             <option value="closed">
               بسته شده
+            </option>
+            <option value="deleted">
+              حذف شده
             </option>
           </BaseSelect>
 
@@ -506,7 +512,7 @@ onMounted(() => {
         </TransitionGroup>
 
         <!-- Pagination -->
-        <div v-if="filteredSessions.length > perPage" class="mt-6">
+        <div v-if="filteredSessions.length > perPage" class="my-6">
           <BasePagination
             :total-items="filteredSessions.length"
             :item-per-page="perPage"

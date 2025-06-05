@@ -39,7 +39,7 @@ const isAIResponding = ref(false)
 const userReport = ref<Report | null>(null)
 const hasPreviousData = ref(false)
 
-const { generateAnalysis, createAnalysis } = useSessionAnalysis()
+const { generateAnalysis, createAnalysis, getAnalysisForSession } = useSessionAnalysis()
 const { getReportByUserId } = useReport()
 
 const toggleAudioUser = () => {
@@ -339,7 +339,7 @@ async function submitMessage() {
     // Show streaming response in real time
     isAIThinking.value = true
     thinkingResponse.value = ''
-    await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user.id }, (chunk) => {
+    await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user }, (chunk) => {
       aiResponse += chunk
       thinkingResponse.value = aiResponse
     })
@@ -837,6 +837,34 @@ const handleConfirmEndSession = async () => {
   let savedAnalysisId = null
 
   try {
+    // 1. Check if analysis already exists for this session
+    let existingAnalysis = null
+    try {
+      existingAnalysis = await getAnalysisForSession(activeSession.value.id)
+    } catch (error: any) {
+      if (error?.status !== 404) {
+        console.error('Error getting analysis for session:', error)
+        toaster.show({
+          title: 'خطا',
+          message: 'خطا در بررسی آنالیز جلسه',
+          color: 'danger',
+          icon: 'ph:warning-circle-fill',
+          closable: true,
+        })
+        isGeneratingAnalysis.value = false
+        isReportModalOpen.value = false
+        return
+      }
+      // If 404, just continue (analysis does not exist)
+    }
+    if (existingAnalysis) {
+      savedAnalysisId = existingAnalysis.id
+      isReportModalOpen.value = false
+      await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
+      return
+    }
+
+    // 2. If not, generate and save analysis
     const allMessages = messages.value.map(msg => ({
       role: msg.type === 'sent' ? 'patient' : 'therapist',
       content: msg.text,
@@ -880,6 +908,8 @@ const handleConfirmEndSession = async () => {
             session: activeSession.value.id,
             summary: savedAnalysis.summaryOfSession,
             title: savedAnalysis.title,
+            date: activeSession.value.created,
+            duration: totalTimePassedMinutes,
           }],
           finalDemographicProfile: savedAnalysis.demographicData,
           possibleRiskFactors: savedAnalysis.possibleRiskFactorsExtracted ? [savedAnalysis.possibleRiskFactorsExtracted] : [],
@@ -894,6 +924,8 @@ const handleConfirmEndSession = async () => {
             session: activeSession.value.id,
             summary: savedAnalysis.summaryOfSession,
             title: savedAnalysis.title,
+            date: activeSession.value.created,
+            duration: totalTimePassedMinutes,
           }],
           finalDemographicProfile: {
             ...userRecord.value.finalDemographicProfile,

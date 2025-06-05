@@ -528,3 +528,464 @@ onModelAfterCreate((e) => {
     console.error('Error updating user statistics:', error)
   }
 }, 'users')
+
+/**
+ * Cron job for inactive sessions management
+ * Runs daily at midnight
+ */
+cronAdd('manageInactiveSessions', '0 0 * * *', () => {
+  console.log('Running the daily inactive sessions management job...')
+
+  // Get yesterday's date (24 hours ago)
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+
+  // Find all inprogress sessions from yesterday or earlier
+  const inProgressSessions = $app
+    .dao()
+    .findRecordsByFilter(
+      'sessions',
+      'status = "inprogress" && created <= {:yesterday}',
+      '+created',
+      10000, 0,
+      { yesterday: yesterday.toISOString() },
+    )
+
+  console.log(`Found ${inProgressSessions.length} inactive sessions to process`)
+
+  let closedCount = 0
+  let deletedCount = 0
+
+  inProgressSessions.forEach((session) => {
+    const startTime = new Date(session.get('start_time') || session.get('created'))
+    const currentTime = new Date()
+    const hoursDifference = (currentTime.getTime() - startTime.getTime()) / (1000 * 60 * 60)
+
+    // Get message count and time passed
+    const messageCount = session.get('count_of_total_messages') || 0
+    const timePassed = session.get('total_time_passed') || 0
+
+    // Set end time to current time
+    session.set('end_time', currentTime.toISOString())
+
+    // Case 1: Empty session (no messages, no time)
+    if (messageCount === 0 && timePassed === 0) {
+      session.set('status', 'deleted')
+      deletedCount++
+      console.log(`Session ${session.id} marked as deleted (empty session)`)
+    }
+    // Case 2: Session open for more than 3 hours OR from yesterday with messages
+    else if ((hoursDifference > 3 || hoursDifference >= 24) && messageCount > 0) {
+      session.set('status', 'closed')
+
+      // Calculate and update total time if not already set
+      if (timePassed === 0) {
+        const minutesDifference = Math.round(hoursDifference * 60)
+        session.set('total_time_passed', minutesDifference)
+      }
+
+      // If message count is not set, try to count messages
+      if (messageCount === 0) {
+        try {
+          const messagesResult = $app
+            .dao()
+            .findRecordsByFilter(
+              'messages',
+              'session_id = {:sessionId}',
+              '+created',
+              1000, 0,
+              { sessionId: session.id },
+            )
+          session.set('count_of_total_messages', messagesResult.length)
+        }
+        catch (error) {
+          console.error(`Error counting messages for session ${session.id}:`, error)
+        }
+      }
+
+      closedCount++
+      console.log(`Session ${session.id} marked as closed (inactive for > 3 hours)`)
+    }
+
+    // Save the updated session
+    $app.dao().saveRecord(session)
+  })
+
+  // Update dashboard statistics
+  try {
+    let dashboardData = $app
+      .dao()
+      .findFirstRecordByData('dashboard_data', 'id', 'dashboard-12345')
+
+    if (dashboardData) {
+      // Update closed count
+      const currentClosedCount = parseInt(dashboardData.get('count_of_closed') || 0, 10)
+      dashboardData.set('count_of_closed', currentClosedCount + closedCount)
+
+      // Update deleted count
+      const currentDeletedCount = parseInt(dashboardData.get('count_of_deleted') || 0, 10)
+      dashboardData.set('count_of_deleted', currentDeletedCount + deletedCount)
+
+      // Save the updated record
+      $app.dao().saveRecord(dashboardData)
+      console.log(`Dashboard statistics updated: ${closedCount} closed, ${deletedCount} deleted`)
+    }
+    else {
+      console.error('Dashboard data record not found')
+    }
+  }
+  catch (error) {
+    console.error('Error updating dashboard statistics:', error)
+  }
+})
+
+/**
+ * Custom endpoint to manage inactive sessions
+ *
+ * Allows manual triggering of the session cleanup process
+ * Optional query parameter "days" to specify how many days back to check
+ * Default is 1 day (yesterday)
+ */
+routerAdd('GET', '/api/manage-inactive-sessions', (c) => {
+  console.log('API endpoint: manage-inactive-sessions triggered')
+
+  // Get days parameter from query with default of 1
+  const daysBack = parseInt(c.queryParam('days') || '1', 10)
+
+  // Validate input
+  if (isNaN(daysBack) || daysBack < 1 || daysBack > 30) {
+    return c.json(400, {
+      success: false,
+      message: 'Invalid days parameter. Must be between 1 and 30.',
+    })
+  }
+
+  try {
+    // Get date from N days ago
+    const targetDate = new Date()
+    targetDate.setDate(targetDate.getDate() - daysBack)
+
+    console.log(`Looking for sessions older than ${targetDate.toISOString()}`)
+
+    // Find all inprogress sessions from target date or earlier
+    const inProgressSessions = $app
+      .dao()
+      .findRecordsByFilter(
+        'sessions',
+        'status = "inprogress" && created <= {:targetDate}',
+        '+created',
+        10000, 0,
+        { targetDate: targetDate.toISOString() },
+      )
+
+    console.log(`Found ${inProgressSessions.length} inactive sessions to process`)
+
+    let closedCount = 0
+    let deletedCount = 0
+
+    inProgressSessions.forEach((session) => {
+      const startTime = new Date(session.get('start_time') || session.get('created'))
+      const currentTime = new Date()
+      const hoursDifference = (currentTime.getTime() - startTime.getTime()) / (1000 * 60 * 60)
+
+      // Get message count and time passed
+      const messageCount = session.get('count_of_total_messages') || 0
+      const timePassed = session.get('total_time_passed') || 0
+
+      // Set end time to current time
+      session.set('end_time', currentTime.toISOString())
+
+      // Case 1: Empty session (no messages, no time)
+      if (messageCount === 0 && timePassed === 0) {
+        session.set('status', 'deleted')
+        deletedCount++
+        console.log(`Session ${session.id} marked as deleted (empty session)`)
+      }
+      // Case 2: Session open for more than 3 hours OR from yesterday with messages
+      else if ((hoursDifference > 3 || hoursDifference >= 24) && messageCount > 0) {
+        session.set('status', 'closed')
+
+        // Calculate and update total time if not already set
+        if (timePassed === 0) {
+          const minutesDifference = Math.round(hoursDifference * 60)
+          session.set('total_time_passed', minutesDifference)
+        }
+
+        // If message count is not set, try to count messages
+        if (messageCount === 0) {
+          try {
+            const messagesResult = $app
+              .dao()
+              .findRecordsByFilter(
+                'messages',
+                'session_id = {:sessionId}',
+                '+created',
+                1000, 0,
+                { sessionId: session.id },
+              )
+            session.set('count_of_total_messages', messagesResult.length)
+          }
+          catch (error) {
+            console.error(`Error counting messages for session ${session.id}:`, error)
+          }
+        }
+
+        closedCount++
+        console.log(`Session ${session.id} marked as closed (inactive for > 3 hours)`)
+      }
+
+      // Save the updated session
+      $app.dao().saveRecord(session)
+    })
+
+    // Update dashboard statistics
+    try {
+      let dashboardData = $app
+        .dao()
+        .findFirstRecordByData('dashboard_data', 'id', 'dashboard-12345')
+
+      if (dashboardData) {
+        // Update closed count
+        const currentClosedCount = parseInt(dashboardData.get('count_of_closed') || 0, 10)
+        dashboardData.set('count_of_closed', currentClosedCount + closedCount)
+
+        // Update deleted count
+        const currentDeletedCount = parseInt(dashboardData.get('count_of_deleted') || 0, 10)
+        dashboardData.set('count_of_deleted', currentDeletedCount + deletedCount)
+
+        // Save the updated record
+        $app.dao().saveRecord(dashboardData)
+        console.log(`Dashboard statistics updated: ${closedCount} closed, ${deletedCount} deleted`)
+      }
+      else {
+        console.error('Dashboard data record not found')
+      }
+    }
+    catch (error) {
+      console.error('Error updating dashboard statistics:', error)
+    }
+
+    // Return success with statistics
+    return c.json(200, {
+      success: true,
+      message: `Successfully processed inactive sessions from the past ${daysBack} days`,
+      statistics: {
+        closedSessions: closedCount,
+        deletedSessions: deletedCount,
+        totalProcessed: closedCount + deletedCount,
+      },
+    })
+  }
+  catch (error) {
+    console.error('Error in manage-inactive-sessions endpoint:', error)
+    return c.json(500, {
+      success: false,
+      message: 'An error occurred while processing inactive sessions',
+      error: error.message,
+    })
+  }
+}, $apis.activityLogger($app))
+
+// Start a payment, register with Dargah, create payment record
+routerAdd('POST', '/startPayment', async (c) => {
+  const { userId, amount, duration } = $apis.requestInfo(c).data
+  const factor_number = 'F-' + Date.now() + '-' + Math.floor(Math.random() * 10000)
+  // 1. Get valid Dargah token
+  try {
+    let settings = $app.dao().findFirstRecordByData('settings', 'key', 'dargah_token')
+    if (settings && settings.get('expires_at') > Date.now()) {
+      const dargahRes = $http.send({
+        url: 'https://dargahno.net/api/v2/transaction/register',
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${JSON.stringify(settings.get('token')).slice(1, JSON.stringify(settings.get('token')).length - 1)}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          merchent_id: 'e07ef02a-4723-4355-9006-88bbbabf8918',
+          price: amount,
+          factor_number,
+          callback_url: 'https://zehna.ir/onboarding/payment-callback',
+        }),
+      })
+      console.log('dargahRes')
+      console.log(JSON.stringify(dargahRes))
+    }
+    else {
+      throw ('time is passed, generate a new code')
+    }
+  }
+  catch (e) {
+    // Otherwise, login and get new token (use env or settings for credentials)
+    const password = '0210511373'
+    const username = '09121248393'
+    const grant_type = 'password'
+
+    // Construct the body as a URL-encoded string
+    const formBody = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&grant_type=${encodeURIComponent(grant_type)}`
+
+    console.log('Attempting to send this form data to /api/v2/auth/login:', formBody)
+
+    const loginRes = $http.send({
+      url: 'https://dargahno.net/api/v2/auth/login',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formBody,
+      timeout: 10000,
+    })
+
+    if (loginRes.statusCode === 200 && loginRes.json.access_token) {
+      const settingsCol = $app.dao().findCollectionByNameOrId('settings')
+      console.log(JSON.stringify({
+        key: 'dargah_token',
+        token: loginRes.json.access_token,
+        expires_at: Date.now() + (loginRes.json.expire_time || 30) * 1000 * 60,
+      }))
+      const settings = new Record(settingsCol, {
+        key: 'dargah_token',
+        token: loginRes.json.access_token,
+        expires_at: Date.now() + (loginRes.json.expire_time || 30) * 1000 * 60,
+      })
+
+      $app.dao().saveRecord(settings)
+      token = loginRes.json.access_token
+      const dargahRes = $http.send({
+        url: 'https://dargahno.net/api/v2/transaction/register',
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          merchent_id: 'e07ef02a-4723-4355-9006-88bbbabf8918',
+          price: amount,
+          factor_number: factor_number,
+          callback_url: 'https://zehna.ir/onboarding/payment-callback',
+        }),
+      })
+      console.log('dargahRes')
+      console.log(JSON.stringify(dargahRes))
+    }
+    else {
+      throw new BadRequestError('Could not authenticate with Dargah: ' + (loginRes.json.detail || 'Unknown error'))
+    }
+  }
+
+  const { authority } = dargahRes.json
+  // 2. Create payment record
+  const paymentCol = $app.dao().findCollectionByNameOrId('payment')
+
+  console.log(JSON.stringify({
+    user: userId,
+    amount,
+    factor_number,
+    authority,
+    status: 'pending',
+    gateway_response: dargahRes.json,
+  }))
+  const payment = new Record(paymentCol, {
+    user: userId,
+    amount,
+    factor_number,
+    authority,
+    status: 'pending',
+    gateway_response: dargahRes.json,
+  })
+  $app.dao().saveRecord(payment)
+  // 3. Return payment URL
+  return c.json(200, {
+    paymentUrl: `https://pay.dargahno.net/?authority=${authority}`,
+  })
+})
+
+// Verify payment after callback, update payment and grant charge
+routerAdd('POST', '/verifyPayment', async (c) => {
+  const { authority } = $apis.requestInfo(c).data
+  // 1. Find payment record
+  const payment = $app.dao().findFirstRecordByData('payment', 'authority', authority)
+  if (!payment) throw new BadRequestError('Payment not found')
+  // 2. Get valid Dargah token
+  let token = null
+  let settings = $app.dao().findFirstRecordByData('settings', 'key', 'dargah_token')
+  if (settings && settings.get('token') && settings.get('expires_at') > Date.now()) {
+    return settings.get('token')
+  }
+  // Otherwise, login and get new token (use env or settings for credentials)
+  const merchent_id = 'e07ef02a-4723-4355-9006-88bbbabf8918' // TODO: replace with real value or fetch from settings
+  const password = '0210511373' // TODO: replace with real value or fetch from settings
+  const loginRes = $http.send({
+    url: 'https://dargahno.net/api/v2/auth/login',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ merchent_id, password }),
+  })
+  if (loginRes.statusCode === 200 && loginRes.json.access_token) {
+    if (!settings) {
+      const settingsCol = $app.dao().findCollectionByNameOrId('settings')
+      settings = new Record(settingsCol, {
+        key: 'dargah_token',
+        token: loginRes.json.access_token,
+        expires_at: Date.now() + (loginRes.json.expires_in || 3600) * 1000,
+      })
+    }
+    else {
+      settings.set('token', loginRes.json.access_token)
+      settings.set('expires_at', Date.now() + (loginRes.json.expires_in || 3600) * 1000)
+    }
+    $app.dao().saveRecord(settings)
+    token = loginRes.json.access_token
+  }
+  else {
+    throw new BadRequestError('Could not authenticate with Dargah: ' + (loginRes.json.detail || 'Unknown error'))
+  }
+
+  // 3. Call Dargah /check
+  const checkRes = $http.send({
+    url: 'https://dargahno.net/api/v2/transaction/check',
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      authority,
+      new_price: payment.get('amount').toString(),
+    }),
+  })
+  const result = checkRes.json
+  // 3. Update payment status
+  if (result.status === 100) {
+    payment.set('status', 'paid')
+    payment.set('ref_id', result.ref_id)
+    payment.set('gateway_response', result)
+    $app.dao().saveRecord(payment)
+    // 4. Grant charge if not already granted
+    const chargeCol = $app.dao().findCollectionByNameOrId('charge')
+    // Check if charge already exists for this payment
+    const existingCharge = $app.dao().findRecordsByFilter(
+      'charge',
+      'payment = {:payment}',
+      '+created',
+      1, 0,
+      { payment: payment.id },
+    )
+    if (!existingCharge.length) {
+      const charge = new Record(chargeCol, {
+        user: payment.get('user'),
+        totalCharge: payment.get('amount'),
+        used: 0,
+        duration: duration || 60, // fallback duration
+        isDone: false,
+        isOutdated: false,
+        payment: payment.id,
+      })
+      $app.dao().saveRecord(charge)
+    }
+  }
+  else {
+    payment.set('status', 'failed')
+    payment.set('gateway_response', result)
+    $app.dao().saveRecord(payment)
+  }
+  return c.json(200, { status: result.status, msg: result.msg })
+})

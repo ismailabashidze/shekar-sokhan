@@ -15,8 +15,16 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const isModalOpen = ref(false)
 const isSubmitting = ref(false)
+const isPaymentLoading = ref(false)
 
 const couponCode = ref('')
+
+// Subscription plan details
+const subscriptionPlan = {
+  price: 590000, // Price in IRR/Rials
+  name: 'اشتراک ذهنا',
+  description: 'اشتراک یک‌ماهه سرویس ذهنا'
+}
 
 function closeModal() {
   isModalOpen.value = false
@@ -26,6 +34,10 @@ function openModal() {
 }
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
+const router = useRouter()
+
+// Import the Dargah payment gateway composable
+const { registerTransaction, redirectToPayment, isLoading: isPaymentProcessing } = useDargah()
 const redeem = async () => {
   isModalOpen.value = false
   isSubmitting.value = true
@@ -80,6 +92,43 @@ const pasteCouponCode = () => {
     console.error('Clipboard error: ', error);
   }
 }
+
+// Function to initiate payment through backend (PocketBase) and redirect to Dargah
+const initiatePayment = async () => {
+  try {
+    isPaymentLoading.value = true;
+    const currentUser = nuxtApp.$pb.authStore.model;
+    // Call backend endpoint
+    const { data, error } = await useAsyncData(async () => {
+      return await nuxtApp.$pb.send('/startPayment', {
+        method: 'POST',
+        body: {
+          userId: currentUser.id,
+          amount: subscriptionPlan.price,
+          duration: 60, // or whatever duration logic you want
+        },
+      })
+    });
+
+    if (error.value || !data.value?.paymentUrl) {
+      throw new Error('خطا در ایجاد تراکنش');
+    }
+
+    // Redirect to Dargah payment page
+    window.location.href = data.value.paymentUrl;
+  } catch (error) {
+    toaster.show({
+      title: 'خطا در پرداخت',
+      message: error.message || 'مشکلی در هنگام اتصال به درگاه پرداخت رخ داد. لطفا دوباره تلاش کنید.',
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    });
+  } finally {
+    isPaymentLoading.value = false;
+  }
+}
+
 </script>
 
 <template>
@@ -140,6 +189,8 @@ const pasteCouponCode = () => {
                   <BaseButton
                     color="primary"
                     class="w-full"
+                    :loading="isPaymentLoading || isPaymentProcessing"
+                    @click="initiatePayment"
                   >
                     پرداخت اشتراک
                   </BaseButton>

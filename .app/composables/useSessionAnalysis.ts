@@ -476,7 +476,7 @@ ${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`,
   const getAnalysisForSession = async (sessionId: string): Promise<SessionAnalysis | null> => {
     try {
       const nuxtApp = useNuxtApp()
-      const records = await nuxtApp.$pb.collection('session_analysis').getList(1, 1, {
+      const records = await nuxtApp.$pb.collection('session_analysis_for_system').getList(1, 1, {
         filter: `session="${sessionId}"`,
         sort: '-created',
         expand: 'session',
@@ -487,9 +487,12 @@ ${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`,
       }
       return null
     }
-    catch (error) {
+    catch (error: any) {
+      if (error?.status === 404) {
+        return null
+      }
       console.error('Error getting analysis for session:', error)
-      return null
+      throw error
     }
   }
 

@@ -153,31 +153,123 @@
             </BaseParagraph>
           </div>
           <div class="mt-6">
-            <div
-              v-for="(summary, idx) in report.summaries"
-              :key="summary.session"
-              class="mb-6"
-            >
-              <BaseCard
-                shape="rounded"
-                class="border-primary-100 dark:border-primary-500/20 border-2 p-5 transition-all duration-300 hover:shadow-lg"
+            <template v-if="report.summaries && report.summaries.length > 0">
+              <div
+                v-for="(summary, idx) in visibleSummaries"
+                :key="summary.session"
+                class="mb-6"
               >
+                <BaseCard
+                  shape="rounded"
+                  class="border-primary-100 dark:border-primary-500/20 relative border-2 p-5 transition-all duration-300 hover:shadow-lg"
+                >
+                  <BaseHeading
+                    as="h4"
+                    size="sm"
+                    weight="medium"
+                    lead="tight"
+                    class="text-primary-500 dark:text-primary-400 mb-2"
+                  >
+                    {{ summary.title }}
+                  </BaseHeading>
+                  <div class="my-2 flex flex-wrap gap-4">
+                    <span v-if="summary.date" class="text-muted-500 dark:text-muted-400 text-xs">
+                      تاریخ برگزاری: {{ formatDate(summary.date) }}
+                    </span>
+                    <span v-if="summary.duration" class="text-muted-500 dark:text-muted-400 text-xs">
+                      مدت جلسه: {{ summary.duration }} دقیقه
+                    </span>
+                  </div>
+
+                  <BaseText size="sm" class="text-muted-700 dark:text-muted-300 mb-2">
+                    {{ summary.summary }}
+                  </BaseText>
+                  <!-- Delete button -->
+                  <button
+                    class="text-danger-500 hover:text-danger-600 dark:text-danger-400 dark:hover:text-danger-300 absolute left-2 top-2 transition-colors duration-300"
+                    @click.prevent="openDeleteModal(idx, summary)"
+                  >
+                    <Icon name="ph:trash-duotone" class="size-5" />
+                  </button>
+                </BaseCard>
+              </div>
+              <!-- Show More Button -->
+              <div v-if="report.summaries.length > visibleCount" class="mt-6 text-center">
+                <BaseButton @click="showMore" color="primary" class="mx-auto">
+                  نمایش بیشتر ({{ report.summaries.length - visibleCount }} مورد دیگر)
+                </BaseButton>
+              </div>
+            </template>
+            <template v-else>
+              <div class="flex flex-col items-center justify-center py-10 text-center">
+                <Icon name="ph:notepad-duotone" class="text-muted-300 mb-2 size-12" />
                 <BaseHeading
                   as="h4"
                   size="sm"
-                  weight="medium"
-                  lead="none"
-                  class="text-primary-500 mb-3"
+                  class="text-muted-500 mb-2"
                 >
-                  {{ summary.title }}
+                  خلاصه‌ای برای نمایش وجود ندارد
                 </BaseHeading>
-                <BaseText size="xs" class="text-muted-500 leading-relaxed">
-                  {{ summary.summary }}
+                <BaseText size="xs" class="text-muted-400">
+                  هنوز هیچ خلاصه‌ای برای جلسات شما ثبت نشده است.
                 </BaseText>
-              </BaseCard>
-            </div>
+              </div>
+            </template>
           </div>
         </BaseCard>
+
+        <!-- Delete Confirmation Modal -->
+        <TairoModal
+          :open="isDeleteModalOpen"
+          size="sm"
+          @close="isDeleteModalOpen = false"
+        >
+          <template #header>
+            <div class="flex w-full items-center justify-between p-4 md:p-6">
+              <BaseHeading
+                tag="h3"
+                size="md"
+                weight="medium"
+                class="text-muted-800 dark:text-white"
+              >
+                تایید حذف
+              </BaseHeading>
+              <div class="flex items-center gap-2">
+                <ButtonClose @click="isDeleteModalOpen = false" />
+              </div>
+            </div>
+          </template>
+          <div class="p-4 text-center md:p-6">
+            <div class="relative mx-auto mb-4 flex size-24 justify-center">
+              <Icon
+                name="ph:trash-duotone"
+                class="text-danger-500 size-24"
+              />
+            </div>
+            <BaseParagraph class="text-muted-700 dark:text-muted-300 mb-4">
+              آیا از حذف خلاصه «{{ summaryToDelete?.title }}» اطمینان دارید؟
+            </BaseParagraph>
+            <BaseParagraph class="text-muted-500 mb-4 text-sm">
+              پس از حذف، امکان بازیابی وجود ندارد.
+              این اطلاعات از دسترس هوش مصنوعی خارج خواهد شد.
+            </BaseParagraph>
+          </div>
+          <template #footer>
+            <div class="flex items-center justify-end gap-2 p-4 sm:p-6">
+              <BaseButton @click="isDeleteModalOpen = false">
+                انصراف
+              </BaseButton>
+              <BaseButton
+                color="danger"
+                :loading="isDeleting"
+                @click="confirmDelete"
+              >
+                حذف
+              </BaseButton>
+            </div>
+          </template>
+        </TairoModal>
+
         <!-- Demographic Profile Card -->
         <BaseCard shape="curved" class="mt-4 p-6">
           <div class="mb-2 flex items-center justify-between">
@@ -190,6 +282,36 @@
             >
               <span>اطلاعات دموگرافیک</span>
             </BaseHeading>
+            <BaseButton
+              v-if="!isEditingDemographic"
+              color="primary"
+              size="sm"
+              class="ms-2"
+              @click="enableEditDemographic"
+            >
+              <Icon name="ph:pencil-duotone" class="ms-1 size-4" /> ویرایش
+            </BaseButton>
+            <template v-else>
+              <div>
+                <BaseButton
+                  color="success"
+                  size="sm"
+                  class="ms-2"
+                  :loading="isSavingDemographic"
+                  @click="saveDemographicProfile"
+                >
+                  <Icon name="ph:check-duotone" class="ms-1 size-4" /> ذخیره
+                </BaseButton>
+                <BaseButton
+                  color="muted"
+                  size="sm"
+                  class="ms-2"
+                  @click="cancelEditDemographic"
+                >
+                  <Icon name="ph:x-duotone" class="ms-1 size-4" /> انصراف
+                </BaseButton>
+              </div>
+            </template>
           </div>
           <div class="flex justify-between">
             <BaseParagraph size="xs" class="text-muted-400 max-w-full">
@@ -209,12 +331,12 @@
                   <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
                 </div>
                 <BaseInput
-                  :model-value="report.finalDemographicProfile?.firstName || ''"
-                  disabled
+                  v-model="editDemographicProfile.firstName"
+                  :disabled="!isEditingDemographic"
                   type="text"
                   icon="ph:user-duotone"
                   placeholder="نام"
-                  :class="{'opacity-50': !report.finalDemographicProfile?.firstName}"
+                  :class="{'opacity-50': !editDemographicProfile.firstName && !isEditingDemographic}"
                 />
               </div>
 
@@ -226,12 +348,12 @@
                   <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
                 </div>
                 <BaseInput
-                  :model-value="report.finalDemographicProfile?.lastName || ''"
-                  disabled
+                  v-model="editDemographicProfile.lastName"
+                  :disabled="!isEditingDemographic"
                   type="text"
                   icon="ph:user-duotone"
                   placeholder="نام خانوادگی"
-                  :class="{'opacity-50': !report.finalDemographicProfile?.lastName}"
+                  :class="{'opacity-50': !editDemographicProfile.lastName && !isEditingDemographic}"
                 />
               </div>
 
@@ -243,12 +365,12 @@
                   <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
                 </div>
                 <BaseInput
-                  :model-value="report.finalDemographicProfile?.age || ''"
-                  disabled
+                  v-model="editDemographicProfile.age"
+                  :disabled="!isEditingDemographic"
                   type="number"
                   icon="ph:calendar-duotone"
                   placeholder="سن"
-                  :class="{'opacity-50': !report.finalDemographicProfile?.age}"
+                  :class="{'opacity-50': !editDemographicProfile.age && !isEditingDemographic}"
                 />
               </div>
 
@@ -260,10 +382,10 @@
                   <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
                 </div>
                 <BaseSelect
-                  :model-value="report.finalDemographicProfile?.gender || ''"
-                  disabled
+                  v-model="editDemographicProfile.gender"
+                  :disabled="!isEditingDemographic"
                   placeholder="جنسیت"
-                  :class="{'opacity-50': !report.finalDemographicProfile?.gender}"
+                  :class="{'opacity-50': !editDemographicProfile.gender && !isEditingDemographic}"
                 >
                   <option value="">
                     جنسیت
@@ -288,10 +410,10 @@
                   <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
                 </div>
                 <BaseSelect
-                  :model-value="report.finalDemographicProfile?.education || ''"
-                  disabled
+                  v-model="editDemographicProfile.education"
+                  :disabled="!isEditingDemographic"
                   placeholder="تحصیلات"
-                  :class="{'opacity-50': !report.finalDemographicProfile?.education}"
+                  :class="{'opacity-50': !editDemographicProfile.education && !isEditingDemographic}"
                 >
                   <option value="">
                     تحصیلات
@@ -325,10 +447,10 @@
                   <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
                 </div>
                 <BaseSelect
-                  :model-value="report.finalDemographicProfile?.occupation || ''"
-                  disabled
+                  v-model="editDemographicProfile.occupation"
+                  :disabled="!isEditingDemographic"
                   placeholder="شغل"
-                  :class="{'opacity-50': !report.finalDemographicProfile?.occupation}"
+                  :class="{'opacity-50': !editDemographicProfile.occupation && !isEditingDemographic}"
                 >
                   <option value="">
                     شغل
@@ -365,10 +487,10 @@
                   <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
                 </div>
                 <BaseSelect
-                  :model-value="report.finalDemographicProfile?.maritalStatus || ''"
-                  disabled
+                  v-model="editDemographicProfile.maritalStatus"
+                  :disabled="!isEditingDemographic"
                   placeholder="وضعیت تأهل"
-                  :class="{'opacity-50': !report.finalDemographicProfile?.maritalStatus}"
+                  :class="{'opacity-50': !editDemographicProfile.maritalStatus && !isEditingDemographic}"
                 >
                   <option value="">
                     وضعیت تأهل
@@ -434,7 +556,7 @@
             <div class="mt-6">
               <div v-if="report.possibleDeeperGoals.length > 0" class="space-y-4">
                 <div
-                  v-for="(goal, idx) in report.possibleDeeperGoals"
+                  v-for="(goal, idx) in visibleDeeperGoals"
                   :key="idx"
                   class="group relative"
                 >
@@ -453,6 +575,17 @@
                       </div>
                     </div>
                   </BaseCard>
+                </div>
+                <!-- Show More Button for Deeper Goals -->
+                <div v-if="report.possibleDeeperGoals.length > visibleDeeperGoalsCount" class="mt-4 text-center">
+                  <BaseButton 
+                    @click="showMoreDeeperGoals" 
+                    color="primary" 
+                    size="sm"
+                    class="mx-auto"
+                  >
+                    نمایش بیشتر ({{ report.possibleDeeperGoals.length - visibleDeeperGoalsCount }} مورد دیگر)
+                  </BaseButton>
                 </div>
               </div>
               <div v-else class="text-center">
@@ -488,14 +621,14 @@
             <div class="mt-6">
               <div v-if="report.possibleRiskFactors.length > 0" class="space-y-4">
                 <div
-                  v-for="(group, idx) in report.possibleRiskFactors"
+                  v-for="(group, idx) in visibleRiskFactors"
                   :key="idx"
+                  class="space-y-4"
                 >
                   <div
                     v-for="(risk, j) in group"
                     :key="j"
-                    class="group relative mt-4"
-                  >
+                    class="group relative">
                     <BaseCard
                       shape="rounded"
                       class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
@@ -522,6 +655,17 @@
                     </BaseCard>
                   </div>
                 </div>
+                <!-- Show More Button for Risk Factors -->
+                <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
+                  <BaseButton 
+                    @click="showMoreRiskFactors" 
+                    color="primary" 
+                    size="sm"
+                    class="mx-auto"
+                  >
+                    نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
+                  </BaseButton>
+                </div>
               </div>
               <div v-else class="text-center">
                 <Icon name="ph:warning-circle-duotone" class="text-muted-400 mb-2 size-12" />
@@ -538,6 +682,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, watch, computed } from 'vue'
 definePageMeta({
   title: 'گزارش نهایی',
   layout: 'sidebar',
@@ -546,24 +691,6 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const isLoading = ref(true)
 const hasData = ref(true)
-const router = useRouter()
-const route = useRoute()
-const { getReportByUserId } = useReport()
-const nuxtApp = useNuxtApp()
-const { user, role } = useUser()
-
-// Check if current user is admin
-const isAdmin = computed(() => role.value === 'admin')
-
-// Get target user ID from query params or use current user
-const targetUserId = computed(() => {
-  const queryUserId = Array.isArray(route.query.userId)
-    ? route.query.userId[0]
-    : route.query.userId
-
-  return queryUserId || nuxtApp.$pb.authStore.model?.id
-})
-// For demo, we'll simulate data fetching with a timeout
 const report = ref({
   collectionId: '',
   collectionName: '',
@@ -585,6 +712,134 @@ const report = ref({
   updated: '',
   user: '',
 })
+
+const router = useRouter()
+const route = useRoute()
+const { getReportByUserId, updateReport } = useReport()
+const nuxtApp = useNuxtApp()
+const { user, role } = useUser()
+
+// Batching state
+const visibleCount = ref(5)
+const visibleDeeperGoalsCount = ref(5)
+const visibleRiskFactorsCount = ref(5)
+
+// Computed property for visible deeper goals
+const visibleDeeperGoals = computed(() => {
+  return [...(report.value.possibleDeeperGoals || [])].slice(0, visibleDeeperGoalsCount.value)
+})
+
+// Computed property for visible risk factors
+const visibleRiskFactors = computed(() => {
+  return [...(report.value.possibleRiskFactors || [])].slice(0, visibleRiskFactorsCount.value)
+})
+
+// Show more items for deeper goals
+function showMoreDeeperGoals() {
+  visibleDeeperGoalsCount.value += 5
+}
+
+// Show more items for risk factors
+function showMoreRiskFactors() {
+  visibleRiskFactorsCount.value += 5
+}
+
+// Delete modal state
+const isDeleteModalOpen = ref(false)
+const isDeleting = ref(false)
+const summaryToDelete = ref(null)
+const summaryIndexToDelete = ref(-1)
+
+// Computed property for visible summaries (reversed and limited)
+const visibleSummaries = computed(() => {
+  // Create a new array to avoid mutating the original
+  const reversed = [...(report.value.summaries || [])].reverse()
+  return reversed.slice(0, visibleCount.value)
+})
+
+// Show more items
+function showMore() {
+  visibleCount.value += 5
+}
+
+const toaster = useToaster()
+
+// Demographic profile edit state
+const isEditingDemographic = ref(false)
+const isSavingDemographic = ref(false)
+const editDemographicProfile = reactive({
+  firstName: '',
+  lastName: '',
+  age: '',
+  gender: '',
+  education: '',
+  occupation: '',
+  maritalStatus: '',
+})
+
+watch(
+  () => report.value.finalDemographicProfile,
+  (profile) => {
+    if (!isEditingDemographic.value && profile) {
+      Object.assign(editDemographicProfile, profile)
+    }
+  },
+  { immediate: true },
+)
+
+function enableEditDemographic() {
+  isEditingDemographic.value = true
+  Object.assign(editDemographicProfile, report.value.finalDemographicProfile || {})
+}
+
+function cancelEditDemographic() {
+  isEditingDemographic.value = false
+  Object.assign(editDemographicProfile, report.value.finalDemographicProfile || {})
+}
+
+async function saveDemographicProfile() {
+  isSavingDemographic.value = true
+  try {
+    await updateReport(report.value.id, {
+      finalDemographicProfile: { ...editDemographicProfile },
+    })
+    report.value.finalDemographicProfile = { ...editDemographicProfile }
+    isEditingDemographic.value = false
+    toaster.clearAll()
+    toaster.show({
+      title: 'ذخیره موفق',
+      message: 'اطلاعات دموگرافیک با موفقیت ذخیره شد',
+      color: 'success',
+      icon: 'ph:user-circle-fill',
+      closable: true,
+    })
+  }
+  catch (error) {
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در ذخیره اطلاعات دموگرافیک',
+      color: 'danger',
+      icon: 'ph:warning-circle-duotone',
+      closable: true,
+    })
+  }
+  finally {
+    isSavingDemographic.value = false
+  }
+}
+
+// Check if current user is admin
+const isAdmin = computed(() => role.value === 'admin')
+
+// Get target user ID from query params or use current user
+const targetUserId = computed(() => {
+  const queryUserId = Array.isArray(route.query.userId)
+    ? route.query.userId[0]
+    : route.query.userId
+
+  return queryUserId || nuxtApp.$pb.authStore.model?.id
+})
+// For demo, we'll simulate data fetching with a timeout
 
 // Function to fetch reports
 async function fetchReport() {
@@ -632,9 +887,17 @@ onMounted(() => {
   fetchReport()
 })
 
-// Watch for query parameter changes
-watch(() => route.query, () => {
-  fetchReport()
+// Reset visible counts when data changes
+watch(() => report.value.summaries, () => {
+  visibleCount.value = 5
+})
+
+watch(() => report.value.possibleDeeperGoals, () => {
+  visibleDeeperGoalsCount.value = 5
+})
+
+watch(() => report.value.possibleRiskFactors, () => {
+  visibleRiskFactorsCount.value = 5
 }, { immediate: false })
 
 function startNewSession() {
@@ -651,6 +914,68 @@ function formatDate(dateStr: string) {
   const timeOnly = d.toLocaleTimeString('fa-IR', { timeStyle: 'short' })
 
   return `${dateOnly}-${timeOnly}`
+}
+
+// Open the delete confirmation modal
+function openDeleteModal(index: number, summary: any) {
+  summaryIndexToDelete.value = index
+  summaryToDelete.value = summary
+  isDeleteModalOpen.value = true
+}
+
+// Confirm deletion of summary
+async function confirmDelete() {
+  if (summaryIndexToDelete.value < 0 || !summaryToDelete.value) return
+
+  isDeleting.value = true
+
+  try {
+    // Create a copy of summaries array
+    const updatedSummaries = [...report.value.summaries]
+
+    // Remove the selected summary
+    updatedSummaries.splice(summaryIndexToDelete.value, 1)
+
+    // Update the report with the new summaries array
+    const updatedReport = {
+      ...report.value,
+      summaries: updatedSummaries,
+    }
+
+    // Save to database
+    await updateReport(report.value.id, { summaries: updatedSummaries })
+
+    // Update local state
+    report.value = updatedReport
+
+    // Close modal
+    isDeleteModalOpen.value = false
+
+    // Show success notification
+    toaster.clearAll()
+    toaster.show({
+      title: 'حذف موفق',
+      message: 'خلاصه با موفقیت حذف شد',
+      color: 'success',
+      icon: 'ph:trash-duotone',
+      closable: true,
+    })
+  }
+  catch (error) {
+    console.error('Error deleting summary:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در حذف خلاصه',
+      color: 'danger',
+      icon: 'ph:warning-circle-duotone',
+      closable: true,
+    })
+  }
+  finally {
+    isDeleting.value = false
+    summaryIndexToDelete.value = -1
+    summaryToDelete.value = null
+  }
 }
 </script>
 
