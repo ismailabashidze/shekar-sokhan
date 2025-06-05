@@ -224,6 +224,10 @@ function removeTag(tag: string) {
   tags.value = tags.value.filter(t => t !== tag)
 }
 
+function removeAllTags() {
+  tags.value = []
+}
+
 function savePreviewToLocalStorage() {
   const data = {
     title: title.value,
@@ -326,7 +330,65 @@ async function suggestAIField(field: string) {
       }
     }
     
-    
+    // For tags field specifically
+    if (field === 'tags') {
+      const prompt = `چند برچسب مرتبط با این مقاله پیشنهاد بده. فقط برچسب‌ها را با کاما (،) جدا کن و چیز دیگری ننویس.\n\nعنوان: ${title.value || 'بدون عنوان'}\nتوضیحات: ${description.value || 'بدون توضیحات'}`
+      const messages = [
+        { role: 'user', content: prompt }
+      ]
+      
+      let suggestion = ''
+      tagsAiLoading.value = true
+      
+      try {
+        // First, collect the complete suggestion
+        await new Promise<void>((resolve, reject) => {
+          streamChat(messages, {}, (chunk) => {
+            if (chunk) {
+              suggestion += chunk
+            }
+          })
+          .then(resolve)
+          .catch(reject)
+        })
+        
+        // After complete message is received, process tags
+        if (suggestion) {
+          // Split by both English and Persian commas, then clean up
+          const newTags = suggestion
+            .split(/[،,]/)
+            .map(tag => tag.trim())
+            .filter(tag => tag.length > 0)
+          
+          // Update tags with new unique values
+          if (newTags.length > 0) {
+            tags.value = [...new Set(newTags)]
+          }
+        }
+        
+        // Show success toast
+        toaster.show({
+          title: 'موفقیت',
+          message: 'برچسب‌ها با موفقیت پیشنهاد شدند.',
+          color: 'success',
+          icon: 'ph:check-circle',
+          closable: true,
+        })
+        
+        return // Exit early after handling tags
+      } catch (e: any) {
+        toaster.show({
+          title: 'خطا',
+          message: `خطا در دریافت پیشنهاد برچسب‌ها: ${e.message || 'خطای ناشناخته'}`,
+          color: 'danger',
+          icon: 'ph:warning',
+          closable: true,
+        })
+        throw e
+      } finally {
+        tagsAiLoading.value = false
+      }
+    }
     
     // For other fields, use the existing logic
     const context = {
@@ -767,20 +829,31 @@ const generateGoalsListAI = async () => {
 
                 <!-- Tags -->
                 <div class="border-muted-200 dark:border-muted-700 dark:bg-muted-800/50 mb-6 rounded-xl border bg-white p-4">
-                  <div class="mb-4 flex items-center gap-2">
-                    <Icon name="ph:tag" class="text-primary-500 size-5" />
-                    <h3 class="text-muted-800 text-lg font-medium dark:text-white">
-                      برچسب‌ها
-                    </h3>
+                  <div class="mb-4 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <Icon name="ph:tag" class="text-primary-500 size-5" />
+                      <h3 class="text-muted-800 text-lg font-medium dark:text-white">
+                        برچسب‌ها
+                      </h3>
+                      <button
+                        type="button"
+                        data-nui-tooltip="پیشنهاد هوش مصنوعی"
+                        class="text-muted-400 hover:text-primary-500 ml-2 flex size-8 items-center justify-center transition-colors duration-300"
+                        @click="suggestAIField('tags')"
+                        :disabled="tagsAiLoading"
+                      >
+                        <Icon v-if="!tagsAiLoading" name="ph:sparkle" class="size-4" />
+                        <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
+                      </button>
+                    </div>
                     <button
+                      v-if="tags.length > 0"
                       type="button"
-                      data-nui-tooltip="پیشنهاد هوش مصنوعی"
-                      class="text-muted-400 hover:text-primary-500 ml-2 flex size-8 items-center justify-center transition-colors duration-300"
-                      @click="suggestAIField('tags')"
-                      :disabled="tagsAiLoading"
+                      @click="removeAllTags"
+                      class="text-danger-500 hover:text-danger-600 flex items-center gap-1 text-sm transition-colors"
                     >
-                      <Icon v-if="!tagsAiLoading" name="ph:sparkle" class="size-4" />
-                      <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4 animate-spin" />
+                      <Icon name="ph:trash" class="size-4" />
+                      <span>حذف همه</span>
                     </button>
                   </div>
                   <div class="mb-2 flex flex-wrap gap-2">
