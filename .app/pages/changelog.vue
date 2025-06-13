@@ -7,6 +7,23 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.1.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.1.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              23 خرداد 1404
+            </p>
+
+            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>جا به جایی فرم پرداخت با کار نیک و افزودن دکمه ی همدلی</li>
+            </ul>
+
+          </div>
           <!-- Version 2.0.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

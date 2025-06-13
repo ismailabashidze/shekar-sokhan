@@ -508,7 +508,17 @@ const formatLongDescription = (html: string) => {
         <!-- Action Buttons -->
         <BaseCard rounded="lg" class="mb-6">
           <div class="space-y-3 p-6">
+            
             <BaseButton
+              color="success"
+              class="w-full"
+              rounded="lg"
+              @click="handleDiscountRequest"
+            >
+              <Icon name="ph:ticket" class="me-2" />
+              درخواست کد تخفیف
+            </BaseButton>
+            <!-- <BaseButton
               color="success"
               class="w-full"
               rounded="lg"
@@ -516,7 +526,7 @@ const formatLongDescription = (html: string) => {
             >
               <Icon name="ph:ticket" class="me-2" />
               درخواست کد تخفیف
-            </BaseButton>
+            </BaseButton> -->
           </div>
         </BaseCard>
 

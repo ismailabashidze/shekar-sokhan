@@ -1246,10 +1246,10 @@ const isAIThinking = ref(false)
                 </div>
                 <div class="max-w-sm">
                   <h3 class="font-heading text-muted-800 text-xl font-medium leading-normal dark:text-white">
-                    {{ showNoCharge ? 'نیاز به خرید اشتراک' : 'شروع گفت و گو' }}
+                    {{ showNoCharge ? 'امکان استفاده رایگان' : 'شروع گفت و گو' }}
                   </h3>
                   <p class="text-muted-400 mt-2">
-                    {{ showNoCharge ? 'برای گفتگو با روانشناس نیاز به خرید اشتراک دارید.' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
+                    {{ showNoCharge ? 'با توجه به نیاز به همدلی، در حال حاضر می توانید رایگان از سیستم استفاده کنید' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
                   </p>
                   <div class="mt-4">
                     <BaseButton
@@ -1261,10 +1261,9 @@ const isAIThinking = ref(false)
                     <BaseButton
                       v-else
                       color="primary"
-                      @click="$router.push('/onboarding')"
+                      @click="$router.push('/deeds/flwuszbc7yo9obf')"
                     >
-                      خرید اشتراک
-                    </BaseButton>
+دریافت کد                    </BaseButton>
                   </div>
                 </div>
               </div>

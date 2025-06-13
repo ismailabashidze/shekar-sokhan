@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0] (2025-06-13)
+
+### 🚀 Features
+- Minor version bump to 2.1.0
+- Updates on deeds and restriction on Deeds.
+
 ## [2.0.0] (2025-05-21)
 
 ### 🚀 Features

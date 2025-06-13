@@ -49,6 +49,7 @@ const props = withDefaults(
       'html',
       'vue',
       'bash',
+      'python',
       'dockerfile',
       'json',
       'yaml',

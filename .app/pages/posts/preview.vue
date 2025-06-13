@@ -91,7 +91,7 @@ function goBack() {
             <span class="flex items-center"><Icon name="ph:calendar-blank-duotone" class="me-1.5 size-5" />تاریخ انتشار: {{ publishDate }}</span>
             <span class="flex items-center"><Icon name="ph:clock-duotone" class="me-1.5 size-5" />زمان مطالعه: {{ readTime }} دقیقه</span>
             <div v-if="tags && tags.length" class="flex flex-wrap items-center gap-2 pt-1 sm:pt-0">
-              <Icon name="ph:tags-duotone" class="size-5 me-1" />
+              <Icon name="ph:tag" class="size-5 me-1" />
               <span v-for="tag in tags" :key="tag" class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-200">
                 {{ tag }}
               </span>
