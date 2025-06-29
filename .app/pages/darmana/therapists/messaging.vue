@@ -949,7 +949,11 @@ const handleConfirmEndSession = async () => {
           }],
           finalDemographicProfile: {
             ...(existingReport.finalDemographicProfile || {}),
-            ...savedAnalysis.demographicData,
+            // Only merge non-null values from new demographic data
+            ...Object.fromEntries(
+              Object.entries(savedAnalysis.demographicData || {})
+                .filter(([key, value]) => value !== null && value !== undefined)
+            ),
           },
           possibleRiskFactors: [
             ...(existingReport.possibleRiskFactors || []),
