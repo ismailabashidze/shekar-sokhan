@@ -810,6 +810,19 @@ const closeDeleteModal = () => {
   isDeleteModalOpen.value = false
 }
 
+const isMessageDetailModalOpen = ref(false)
+const selectedMessage = ref<any>(null)
+
+const openMessageDetailModal = (message: any) => {
+  selectedMessage.value = message
+  isMessageDetailModalOpen.value = true
+}
+
+const closeMessageDetailModal = () => {
+  isMessageDetailModalOpen.value = false
+  selectedMessage.value = null
+}
+
 const handleEndSession = async () => {
   if (!activeSession.value) return
 
@@ -1328,24 +1341,42 @@ const isAIThinking = ref(false)
                               : 'items-start',
                           ]"
                         >
-                          <div
-                            class="rounded-xl px-4 py-2"
+                          <div class="flex items-start gap-2"
                             :class="[
                               item.type === 'sent'
-                                ? 'bg-primary-500 prose-p:text-white text-white'
-                                : 'bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                                ? 'flex-row-reverse'
+                                : 'flex-row',
                             ]"
                           >
-                            <span
-                              class="block font-sans"
+                            <div
+                              class="rounded-xl px-4 py-2"
                               :class="[
                                 item.type === 'sent'
-                                  ? 'prose-p:text-white text-white'
-                                  : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                                  ? 'bg-primary-500 prose-p:text-white text-white'
+                                  : 'bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
                               ]"
                             >
-                              <AddonMarkdownRemark :source="item.text" />
-                            </span>
+                              <span
+                                class="block font-sans"
+                                :class="[
+                                  item.type === 'sent'
+                                    ? 'prose-p:text-white text-white'
+                                    : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                                ]"
+                              >
+                                <AddonMarkdownRemark :source="item.text" />
+                              </span>
+                            </div>
+                            <!-- Detail button for sent messages -->
+                            <button
+                              v-if="item.type === 'sent'"
+                              type="button"
+                              class="text-muted-400 hover:text-primary-500 flex size-6 items-center justify-center rounded transition-colors duration-300 mt-1"
+                              title="مشاهده جزئیات"
+                              @click="openMessageDetailModal(item)"
+                            >
+                              <Icon name="ph:magnifying-glass-duotone" class="size-4" />
+                            </button>
                           </div>
                           <span class="text-muted-400 font-sans text-xs">
                             {{ formatTime(item.timestamp) }}
@@ -1875,6 +1906,92 @@ const isAIThinking = ref(false)
 
         <div class="flex flex-col gap-4">
           <!-- Existing modal content -->
+        </div>
+      </div>
+    </template>
+  </TairoModal>
+
+  <!-- Message Detail Modal -->
+  <TairoModal
+    :open="isMessageDetailModalOpen"
+    size="md"
+    @close="closeMessageDetailModal"
+  >
+    <template #header>
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+          جزئیات پیام
+        </h3>
+        <BaseButtonClose @click="closeMessageDetailModal" />
+      </div>
+    </template>
+
+    <div class="p-4 md:p-6">
+      <div v-if="selectedMessage" class="space-y-4">
+        <!-- Message content -->
+        <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+          <div class="mb-2 flex items-center gap-2">
+            <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
+            <span class="text-sm font-medium text-muted-600 dark:text-muted-300">محتوای پیام</span>
+          </div>
+          <div class="prose prose-sm max-w-none dark:prose-invert">
+            <AddonMarkdownRemark :source="selectedMessage.text" />
+          </div>
+        </div>
+
+        <!-- Message metadata -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <!-- Message ID -->
+          <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+            <div class="mb-2 flex items-center gap-2">
+              <Icon name="ph:hash-duotone" class="text-info-500 size-5" />
+              <span class="text-sm font-medium text-muted-600 dark:text-muted-300">شناسه پیام</span>
+            </div>
+            <span class="text-xs font-mono text-muted-500 dark:text-muted-400">{{ selectedMessage.id }}</span>
+          </div>
+
+          <!-- Message time -->
+          <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+            <div class="mb-2 flex items-center gap-2">
+              <Icon name="ph:clock-duotone" class="text-warning-500 size-5" />
+              <span class="text-sm font-medium text-muted-600 dark:text-muted-300">زمان ارسال</span>
+            </div>
+            <span class="text-sm text-muted-700 dark:text-muted-300">
+              {{ new Date(selectedMessage.time || selectedMessage.timestamp).toLocaleString('fa') }}
+            </span>
+          </div>
+
+          <!-- Message type -->
+          <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+            <div class="mb-2 flex items-center gap-2">
+              <Icon name="ph:user-duotone" class="text-success-500 size-5" />
+              <span class="text-sm font-medium text-muted-600 dark:text-muted-300">نوع پیام</span>
+            </div>
+            <span class="text-sm text-muted-700 dark:text-muted-300">
+              {{ selectedMessage.type === 'sent' ? 'ارسالی (کاربر)' : 'دریافتی (روانشناس)' }}
+            </span>
+          </div>
+
+          <!-- Character count -->
+          <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+            <div class="mb-2 flex items-center gap-2">
+              <Icon name="ph:text-aa-duotone" class="text-purple-500 size-5" />
+              <span class="text-sm font-medium text-muted-600 dark:text-muted-300">تعداد کاراکتر</span>
+            </div>
+            <span class="text-sm text-muted-700 dark:text-muted-300">
+              {{ selectedMessage.text?.length || 0 }} کاراکتر
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="p-4 md:p-6">
+        <div class="flex justify-end">
+          <BaseButton @click="closeMessageDetailModal">
+            بستن
+          </BaseButton>
         </div>
       </div>
     </template>
