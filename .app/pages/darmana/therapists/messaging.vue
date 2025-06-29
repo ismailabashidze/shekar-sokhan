@@ -1914,7 +1914,7 @@ const isAIThinking = ref(false)
   <!-- Message Detail Modal -->
   <TairoModal
     :open="isMessageDetailModalOpen"
-    size="md"
+    size="xl"
     @close="closeMessageDetailModal"
   >
     <template #header>
@@ -1926,7 +1926,7 @@ const isAIThinking = ref(false)
       </div>
     </template>
 
-    <div class="p-4 md:p-6">
+    <div class="max-h-[70vh] overflow-y-auto p-4 md:p-6">
       <div v-if="selectedMessage" class="space-y-4">
         <!-- Message content -->
         <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
@@ -1982,6 +1982,14 @@ const isAIThinking = ref(false)
               {{ selectedMessage.text?.length || 0 }} کاراکتر
             </span>
           </div>
+        </div>
+        <!-- Emotion Wheel -->
+        <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+          <div class="mb-2 flex items-center gap-2">
+            <Icon name="ph:heart-duotone" class="text-pink-500 size-5" />
+            <span class="text-sm font-medium text-muted-600 dark:text-muted-300">حالت روانی</span>
+          </div>
+          <EmotionWheel :model-value="selectedMessage.emotions" lang="pes" />
         </div>
       </div>
     </div>
