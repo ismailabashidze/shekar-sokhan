@@ -338,23 +338,12 @@ export function useOpenRouter() {
               schema: {
                 type: 'object',
                 properties: {
-                  session_mainGoal: {
-                    type: 'string',
-                    description: 'هدف و موضوع اصلی جلسه تا حالا',
-                  },
-                  session_humanInterventionNeeded: {
-                    type: 'boolean',
-                    description: 'نیاز به مداخله عامل انسانی',
-                  },
-                  session_unconsciousNeeds: {
-                    type: 'string',
-                    description: 'نیازهای ناهشیار کاربر - تحلیل متنی',
-                  },
+                 
                   lastMessage_primaryEmotions: {
                     type: 'array',
                     items: {
                       type: 'string',
-                      enum: ['Joy', 'Trust', 'Fear', 'Surprise', 'Sadness', 'Disgust', 'Anger', 'Anticipation', 'Unspecified'],
+                      enum: ['شادی', 'اعتماد', 'ترس', 'تعجب', 'غم', 'انزجار', 'خشم', 'انتظار', 'نامشخص'],
                     },
                     description: 'Primary emotions identified in the last message based on Plutchik\'s wheel (e.g., Joy, Trust, Fear).',
                   },
@@ -376,24 +365,15 @@ export function useOpenRouter() {
                     enum: ['High', 'Medium', 'Low'],
                     description: 'Overall intensity of the detected emotions in the last message.',
                   },
-                  lastMessage_alignmentWithGoal: {
-                    type: 'string',
-                    enum: ['خیلی زیاد', 'زیاد', 'متوسط', 'کم', 'خیلی کم'],
-                    description: 'تناسب پیام آخر با هدف اصلی جلسه',
-                  },
                   emotionalResponse: {
                     type: 'string',
-                    description: 'پاسخ پیشنهادی مبتنی بر تحلیل احساسات کاربر جهت بازتاب و درک عمیق‌تر. مثال: اگر کاربر ترسیده، واکنش مناسب آرام سازی و دلگرم کردن اوست. اگر خشمگین است، می‌توان پرسید "آیا احساس خشم می‌کنی؟" یا گفت "به نظر می‌رسد خشم را در خودت احساس می‌کنی." اگر احساس نامشخص است، می‌توان پرسید "می‌توانی بیشتر در مورد احساست توضیح دهی؟"',
+                    description: 'پاسخ پیشنهادی مبتنی بر تحلیل احساسات کاربر جهت بازتاب و درک عمیق‌تر. مثال: اگر کاربر ترسیده، واکنش مناسب آرام سازی و دلگرم کردن اوست. اگر خشمگین است، می‌توان پرسید "آیا احساس خشم می‌کنی؟" یا گفت "به نظر می‌رسد خشم را در خودت احساس می‌کنی." اگر احساس نامشخص است، می‌توان پرسید "می‌توانی بیشتر در مورد احساست توضیح دهی؟ این پاسخ باید به فارسی باشد."',
                   },
                 },
                 required: [
-                  'session_mainGoal',
-                  'session_humanInterventionNeeded',
-                  'session_unconsciousNeeds',
                   'lastMessage_primaryEmotions',
                   'lastMessage_nuancedEmotions',
                   'lastMessage_emotionIntensity',
-                  'lastMessage_alignmentWithGoal',
                   'emotionalResponse',
                 ],
                 additionalProperties: false,

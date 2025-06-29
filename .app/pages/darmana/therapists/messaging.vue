@@ -295,10 +295,12 @@ async function submitMessage() {
         content: msg.text,
       }))
       // Find the last message (assuming it's the user's latest)
-      const lastMessageForAnalysis = chatMessages.length > 0 ? [chatMessages[chatMessages.length - 1]] : []
+      const lastMessage = chatMessages.length > 0 ? chatMessages[chatMessages.length - 1] : null
       // Call generateInlineAnalysis with only the last message
-      analysisResult = await generateInlineAnalysis(lastMessageForAnalysis)
-      // Format and display analysis inline (replace thinking bubble with analysis)
+      if (lastMessage) {
+        analysisResult = await generateInlineAnalysis(lastMessage)
+        console.log("analysisResult", analysisResult);
+      }
       formattedAnalysis = formatInlineAnalysis(analysisResult)
       thinkingResponse.value = formattedAnalysis
     }
