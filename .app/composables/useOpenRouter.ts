@@ -352,10 +352,10 @@ export function useOpenRouter() {
                     items: {
                       type: 'string',
                       enum: [
-                        'Ecstasy', 'Serenity', 'Admiration', 'Acceptance', 'Terror', 'Apprehension',
-                        'Amazement', 'Distraction', 'Grief', 'Pensiveness', 'Loathing', 'Boredom',
-                        'Rage', 'Annoyance', 'Vigilance', 'Interest', 'Love', 'Submission', 'Awe',
-                        'Disapproval', 'Remorse', 'Contempt', 'Aggressiveness', 'Optimism', 'Unspecified',
+                        'وجد', 'آرامش', 'تحسین', 'پذیرش', 'وحشت', 'نگرانی',
+                        'اعجاب', 'حواس‌پرتی', 'اندوه', 'تأمل', 'تنفر', 'کسالت',
+                        'غضب', 'رنجش', 'هوشیاری', 'علاقه', 'عشق', 'تسلیم', 'شگفت‌زدگی',
+                        'عدم تایید', 'پشیمانی', 'تحقیر', 'پرخاشگری', 'خوش‌بینی', 'نامشخص',
                       ],
                     },
                     description: 'Nuanced emotions identified in the last message based on Plutchik\'s wheel (e.g., Ecstasy, Admiration, Terror).',
