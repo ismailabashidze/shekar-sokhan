@@ -873,7 +873,14 @@ const handleConfirmEndSession = async () => {
     }
 
     // 2. If not, generate and save analysis
-    const allMessages = messages.value.map(msg => ({
+    // Remove first AI message if it was the starting message (for users with previous sessions)
+    let messagesToAnalyze = messages.value
+    if (messages.value.length > 0 && messages.value[0].type === 'received') {
+      // If first message is from AI (received), exclude it from analysis
+      messagesToAnalyze = messages.value.slice(1)
+    }
+    
+    const allMessages = messagesToAnalyze.map(msg => ({
       role: msg.type === 'sent' ? 'patient' : 'therapist',
       content: msg.text,
     }))
@@ -899,7 +906,7 @@ const handleConfirmEndSession = async () => {
       await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
         status: 'done',
         end_time: endTime.toISOString(),
-        count_of_total_messages: messages.value.length,
+        count_of_total_messages: messagesToAnalyze.length,
         total_time_passed: totalTimePassedMinutes,
         updated: endTime.toISOString(),
         session_analysis_for_system: savedAnalysisId,
