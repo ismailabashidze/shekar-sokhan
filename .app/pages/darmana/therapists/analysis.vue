@@ -302,7 +302,7 @@ const {
                     </span>
                     <div class="rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm">
                       <span class="text-sm font-bold text-white">
-                        {{ new Date(analysisData?.expand?.session?.start_time).toLocaleString('fa') }}
+                        {{ new Date(analysisData?.expand?.session?.start_time).toLocaleString('fa').replace(',', ' -') }}
                       </span>
                     </div>
                   </div>
@@ -315,7 +315,7 @@ const {
                     </span>
                     <div class="rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm">
                       <span class="text-sm font-bold text-white">
-                        {{ new Date(analysisData?.expand?.session?.end_time).toLocaleString('fa') }}
+                        {{ new Date(analysisData?.expand?.session?.end_time).toLocaleString('fa').replace(',', ' -') }}
                       </span>
                     </div>
                   </div>
