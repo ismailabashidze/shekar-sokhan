@@ -40,7 +40,6 @@ const userReport = ref<Report | null>(null)
 const hasPreviousData = ref(false)
 
 const { generateAnalysis, createAnalysis, getAnalysisForSession } = useSessionAnalysis()
-const { getReportByUserId } = useReport()
 
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
@@ -219,8 +218,8 @@ const {
   generateInlineAnalysis,
 } = useOpenRouter()
 
-const { role, user, updateUserRecord, userRecord } = useUser()
-const { createReport, updateReport } = useReport()
+const { role, user } = useUser()
+const { createReport, updateReport, getReportByUserId } = useReport()
 const streamingResponse = ref('')
 const showModelError = ref(false)
 const modelSearchInput = ref('')
@@ -559,6 +558,7 @@ onMounted(async () => {
           }
         },
       )
+      
       // fetching userReport for having memory of previous sessions
       const userReportData = await getReportByUserId(nuxtApp.$pb.authStore.model?.id)
       if (userReportData) {
@@ -566,7 +566,7 @@ onMounted(async () => {
         hasPreviousData.value = true
 
         // If there are previous sessions (totalSessions > 0), we'll have AI start the conversation
-        if (userReportData.totalSessions && userReportData.totalSessions > 0) {
+        if (userReportData.totalSessions && userReportData.totalSessions > 0 && userReportData.summaries.length > 0) {
           console.log('This user has previous sessions, AI will start with a summary')
           // Wait a moment for UI to initialize properly
           setTimeout(() => {
@@ -578,7 +578,7 @@ onMounted(async () => {
 
             // Check if there are already messages in the conversation
             // If there are messages, don't trigger the AI introduction
-            if (messages.value.length === 0) {
+            if (messages.value.length === 0 ) {
               startAIConversationWithSummary(selectedConversationComputed.value?.user, session.id, userReportData)
             }
             else {
@@ -900,7 +900,12 @@ const handleConfirmEndSession = async () => {
       activeSession.value.status = 'done'
       activeSession.value.session_analysis_for_system = savedAnalysisId
       let report: Report | null = null
-      if (!userRecord.value.id) {
+      
+      // Check if user already has a report
+      const existingReport = await getReportByUserId(nuxtApp.$pb.authStore.model?.id)
+      
+      if (!existingReport) {
+        // Create new report
         report = await createReport({
           user: nuxtApp.$pb.authStore.model.id,
           totalSessions: 1,
@@ -917,10 +922,10 @@ const handleConfirmEndSession = async () => {
         })
       }
       else {
-        report = await updateReport(userRecord.value.id, {
-
-          totalSessions: userRecord.value.totalSessions + 1,
-          summaries: [...userRecord.value.summaries, {
+        // Update existing report
+        const updatedData = {
+          totalSessions: (existingReport.totalSessions || 0) + 1,
+          summaries: [...(existingReport.summaries || []), {
             session: activeSession.value.id,
             summary: savedAnalysis.summaryOfSession,
             title: savedAnalysis.title,
@@ -928,20 +933,20 @@ const handleConfirmEndSession = async () => {
             duration: totalTimePassedMinutes,
           }],
           finalDemographicProfile: {
-            ...userRecord.value.finalDemographicProfile,
+            ...(existingReport.finalDemographicProfile || {}),
             ...savedAnalysis.demographicData,
           },
           possibleRiskFactors: [
-            ...userRecord.value.possibleRiskFactors,
+            ...(existingReport.possibleRiskFactors || []),
             ...(savedAnalysis.possibleRiskFactorsExtracted ? [savedAnalysis.possibleRiskFactorsExtracted] : []),
           ],
           possibleDeeperGoals: [
-            ...userRecord.value.possibleDeeperGoals,
+            ...(existingReport.possibleDeeperGoals || []),
             ...(savedAnalysis.possibleDeeperGoalsOfPatient ? [savedAnalysis.possibleDeeperGoalsOfPatient] : []),
           ],
-        })
+        }
+        report = await updateReport(existingReport.id, updatedData)
       }
-      updateUserRecord(report)
     }
     catch (updateError) {
       console.error('Error updating session:', updateError)

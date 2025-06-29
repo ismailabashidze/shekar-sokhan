@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0] (2025-01-26)
+
+### 🗑️ Breaking Changes
+- Removed `userRecord` from localStorage completely
+- Removed sync system between localStorage and database
+
+### ⚡ Performance Improvements
+- Simplified data flow by using direct API calls instead of localStorage sync
+- Removed unnecessary sync operations that could cause performance issues
+- Eliminated potential data inconsistency between localStorage and database
+
+### 🧹 Code Cleanup
+- Removed `syncUserRecord`, `loadUserRecord`, `updateUserRecord` functions
+- Deleted `composables/sync.ts` file
+- Simplified user record management in messaging component
+- Reduced code complexity and improved maintainability
+
+---
+
 ## [2.1.0] (2025-06-13)
 
 ### 🚀 Features

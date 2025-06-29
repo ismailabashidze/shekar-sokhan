@@ -1224,13 +1224,13 @@ const handleTextareaClick = () => {
                 @click="showModelDropdown = false"
               />
 
-              <BaseButton
+              <!-- <BaseButton
                 rounded="lg"
                 class="w-full"
                 @click="navigateTo(`/darmana/patients/editPatient?userId=${route.query.patientId}`)"
               >
                 نمایش نمایه
-              </BaseButton>
+              </BaseButton> -->
             </div>
           </div>
         </div>

@@ -1,10 +1,13 @@
 export type Report = {
-  user: User
+  id?: string
+  created?: string
+  updated?: string
+  user: string
   totalSessions: number
-  summaries: string[]
-  finalDemographicProfile: DemographicData
-  possibleRiskFactors: string[]
-  possibleDeeperGoals: string[]
+  summaries: any[]
+  finalDemographicProfile: any
+  possibleRiskFactors: any[]
+  possibleDeeperGoals: any[]
 }
 
 export function useReport() {
@@ -48,13 +51,8 @@ export function useReport() {
 
   const updateReport = async (id: string, data: Partial<Report>) => {
     try {
-      // Update remote
+      // Update remote only - sync with localStorage is handled by user.ts
       const updated = await pb.collection('final_reports').update(id, data)
-      // Update localStorage
-      const userRecord = useLocalStorage('userRecord', {} as Report)
-      if (userRecord.value && userRecord.value.id === id) {
-        userRecord.value = { ...userRecord.value, ...data }
-      }
       return updated
     } catch (error) {
       console.error(`Error updating report with id ${id}:`, error)

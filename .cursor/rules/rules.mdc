@@ -1,0 +1,17 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+1. The environment is Windows 11 with Git Bash enabled as the default terminal.
+2. Use `pnpm` as the primary package manager for all JavaScript/Node.js operations.
+3. The project uses Nuxt 3, TypeScript, Tailwind CSS, and Vite.
+4. The main app entry is `.app/`, and the demo entry is `.demo/`.
+5. Documentation and extra features are in the `layers/` directory.
+
+# Rules
+6. Do not work on formatting or stylistic issues unless requested.
+7. Do not replace code with abstract comments; always provide concrete, working code.
+8. When editing files, ensure all code blocks and elements are properly opened and closed.
+
+9. If a task is ambiguous, ask for clarification before proceeding.

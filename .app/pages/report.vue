@@ -195,7 +195,11 @@
               </div>
               <!-- Show More Button -->
               <div v-if="report.summaries.length > visibleCount" class="mt-6 text-center">
-                <BaseButton @click="showMore" color="primary" class="mx-auto">
+                <BaseButton
+                  @click="showMore"
+                  color="primary"
+                  class="mx-auto"
+                >
                   نمایش بیشتر ({{ report.summaries.length - visibleCount }} مورد دیگر)
                 </BaseButton>
               </div>
@@ -270,6 +274,110 @@
           </template>
         </TairoModal>
 
+        <!-- Delete All Deeper Goals Confirmation Modal -->
+        <TairoModal
+          :open="isDeleteAllDeeperGoalsModalOpen"
+          size="sm"
+          @close="isDeleteAllDeeperGoalsModalOpen = false"
+        >
+          <template #header>
+            <div class="flex w-full items-center justify-between p-4 md:p-6">
+              <BaseHeading
+                tag="h3"
+                size="md"
+                weight="medium"
+                class="text-muted-800 dark:text-white"
+              >
+                تایید حذف همه اهداف
+              </BaseHeading>
+              <div class="flex items-center gap-2">
+                <ButtonClose @click="isDeleteAllDeeperGoalsModalOpen = false" />
+              </div>
+            </div>
+          </template>
+          <div class="p-4 text-center md:p-6">
+            <div class="relative mx-auto mb-4 flex size-24 justify-center">
+              <Icon
+                name="ph:trash-duotone"
+                class="text-danger-500 size-24"
+              />
+            </div>
+            <BaseParagraph class="text-muted-700 dark:text-muted-300 mb-4">
+              آیا از حذف تمامی اهداف عمیق‌تر ({{ report.possibleDeeperGoals.length }} مورد) اطمینان دارید؟
+            </BaseParagraph>
+            <BaseParagraph class="text-muted-500 mb-4 text-sm">
+              پس از حذف، امکان بازیابی وجود ندارد.
+              تمام اهداف از دسترس هوش مصنوعی خارج خواهد شد.
+            </BaseParagraph>
+          </div>
+          <template #footer>
+            <div class="flex items-center justify-end gap-2 p-4 sm:p-6">
+              <BaseButton @click="isDeleteAllDeeperGoalsModalOpen = false">
+                انصراف
+              </BaseButton>
+              <BaseButton
+                color="danger"
+                :loading="isDeletingAllDeeperGoals"
+                @click="confirmDeleteAllDeeperGoals"
+              >
+                حذف همه
+              </BaseButton>
+            </div>
+          </template>
+        </TairoModal>
+
+        <!-- Delete All Risk Factors Confirmation Modal -->
+        <TairoModal
+          :open="isDeleteAllRiskFactorsModalOpen"
+          size="sm"
+          @close="isDeleteAllRiskFactorsModalOpen = false"
+        >
+          <template #header>
+            <div class="flex w-full items-center justify-between p-4 md:p-6">
+              <BaseHeading
+                tag="h3"
+                size="md"
+                weight="medium"
+                class="text-muted-800 dark:text-white"
+              >
+                تایید حذف همه عوامل خطر
+              </BaseHeading>
+              <div class="flex items-center gap-2">
+                <ButtonClose @click="isDeleteAllRiskFactorsModalOpen = false" />
+              </div>
+            </div>
+          </template>
+          <div class="p-4 text-center md:p-6">
+            <div class="relative mx-auto mb-4 flex size-24 justify-center">
+              <Icon
+                name="ph:trash-duotone"
+                class="text-danger-500 size-24"
+              />
+            </div>
+            <BaseParagraph class="text-muted-700 dark:text-muted-300 mb-4">
+              آیا از حذف تمامی عوامل خطر احتمالی ({{ report.possibleRiskFactors.length }} مورد) اطمینان دارید؟
+            </BaseParagraph>
+            <BaseParagraph class="text-muted-500 mb-4 text-sm">
+              پس از حذف، امکان بازیابی وجود ندارد.
+              تمام عوامل خطر از دسترس هوش مصنوعی خارج خواهد شد.
+            </BaseParagraph>
+          </div>
+          <template #footer>
+            <div class="flex items-center justify-end gap-2 p-4 sm:p-6">
+              <BaseButton @click="isDeleteAllRiskFactorsModalOpen = false">
+                انصراف
+              </BaseButton>
+              <BaseButton
+                color="danger"
+                :loading="isDeletingAllRiskFactors"
+                @click="confirmDeleteAllRiskFactors"
+              >
+                حذف همه
+              </BaseButton>
+            </div>
+          </template>
+        </TairoModal>
+
         <!-- Demographic Profile Card -->
         <BaseCard shape="curved" class="mt-4 p-6">
           <div class="mb-2 flex items-center justify-between">
@@ -287,6 +395,8 @@
               color="primary"
               size="sm"
               class="ms-2"
+              :disabled="!report.finalDemographicProfile ||
+                Object.values(report.finalDemographicProfile).every(value => !value)"
               @click="enableEditDemographic"
             >
               <Icon name="ph:pencil-duotone" class="ms-1 size-4" /> ویرایش
@@ -336,7 +446,7 @@
                   type="text"
                   icon="ph:user-duotone"
                   placeholder="نام"
-                  :class="{'opacity-50': !editDemographicProfile.firstName && !isEditingDemographic}"
+                  :class="{'opacity-50': !isEditingDemographic}"
                 />
               </div>
 
@@ -353,7 +463,7 @@
                   type="text"
                   icon="ph:user-duotone"
                   placeholder="نام خانوادگی"
-                  :class="{'opacity-50': !editDemographicProfile.lastName && !isEditingDemographic}"
+                  :class="{'opacity-50': !isEditingDemographic}"
                 />
               </div>
 
@@ -370,7 +480,7 @@
                   type="number"
                   icon="ph:calendar-duotone"
                   placeholder="سن"
-                  :class="{'opacity-50': !editDemographicProfile.age && !isEditingDemographic}"
+                  :class="{'opacity-50': !isEditingDemographic}"
                 />
               </div>
 
@@ -385,7 +495,7 @@
                   v-model="editDemographicProfile.gender"
                   :disabled="!isEditingDemographic"
                   placeholder="جنسیت"
-                  :class="{'opacity-50': !editDemographicProfile.gender && !isEditingDemographic}"
+                  :class="{'opacity-50': !isEditingDemographic}"
                 >
                   <option value="">
                     جنسیت
@@ -413,7 +523,7 @@
                   v-model="editDemographicProfile.education"
                   :disabled="!isEditingDemographic"
                   placeholder="تحصیلات"
-                  :class="{'opacity-50': !editDemographicProfile.education && !isEditingDemographic}"
+                  :class="{'opacity-50': !isEditingDemographic}"
                 >
                   <option value="">
                     تحصیلات
@@ -450,7 +560,7 @@
                   v-model="editDemographicProfile.occupation"
                   :disabled="!isEditingDemographic"
                   placeholder="شغل"
-                  :class="{'opacity-50': !editDemographicProfile.occupation && !isEditingDemographic}"
+                  :class="{'opacity-50': !isEditingDemographic}"
                 >
                   <option value="">
                     شغل
@@ -490,7 +600,7 @@
                   v-model="editDemographicProfile.maritalStatus"
                   :disabled="!isEditingDemographic"
                   placeholder="وضعیت تأهل"
-                  :class="{'opacity-50': !editDemographicProfile.maritalStatus && !isEditingDemographic}"
+                  :class="{'opacity-50': !isEditingDemographic}"
                 >
                   <option value="">
                     وضعیت تأهل
@@ -515,7 +625,7 @@
             <div
               v-if="!report.finalDemographicProfile ||
                 Object.values(report.finalDemographicProfile).every(value => !value)"
-              class="bg-muted-100/50 dark:bg-muted-900/50 absolute inset-0 flex items-center justify-center rounded-lg backdrop-blur-sm"
+              class="bg-muted-100/50 dark:bg-muted-900/50 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm"
             >
               <div class="text-center">
                 <Icon
@@ -546,6 +656,15 @@
               >
                 <span>اهداف عمیق‌تر ممکن</span>
               </BaseHeading>
+              <BaseButton
+                v-if="report.possibleDeeperGoals.length > 0"
+                color="danger"
+                size="sm"
+                class="ms-2"
+                @click="openDeleteAllDeeperGoalsModal"
+              >
+                <Icon name="ph:trash-duotone" class="ms-1 size-4" /> حذف همه
+              </BaseButton>
             </div>
             <div class="flex justify-between">
               <BaseParagraph size="xs" class="text-muted-400 max-w-full">
@@ -578,9 +697,9 @@
                 </div>
                 <!-- Show More Button for Deeper Goals -->
                 <div v-if="report.possibleDeeperGoals.length > visibleDeeperGoalsCount" class="mt-4 text-center">
-                  <BaseButton 
-                    @click="showMoreDeeperGoals" 
-                    color="primary" 
+                  <BaseButton
+                    @click="showMoreDeeperGoals"
+                    color="primary"
                     size="sm"
                     class="mx-auto"
                   >
@@ -611,6 +730,15 @@
               >
                 <span>عوامل خطر احتمالی</span>
               </BaseHeading>
+              <BaseButton
+                v-if="report.possibleRiskFactors.length > 0"
+                color="danger"
+                size="sm"
+                class="ms-2"
+                @click="openDeleteAllRiskFactorsModal"
+              >
+                <Icon name="ph:trash-duotone" class="ms-1 size-4" /> حذف همه
+              </BaseButton>
             </div>
             <div class="flex justify-between">
               <BaseParagraph size="xs" class="text-muted-400 max-w-full">
@@ -657,9 +785,9 @@
                 </div>
                 <!-- Show More Button for Risk Factors -->
                 <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
-                  <BaseButton 
-                    @click="showMoreRiskFactors" 
-                    color="primary" 
+                  <BaseButton
+                    @click="showMoreRiskFactors"
+                    color="primary"
                     size="sm"
                     class="mx-auto"
                   >
@@ -750,6 +878,14 @@ const isDeleting = ref(false)
 const summaryToDelete = ref(null)
 const summaryIndexToDelete = ref(-1)
 
+// Delete all deeper goals modal state
+const isDeleteAllDeeperGoalsModalOpen = ref(false)
+const isDeletingAllDeeperGoals = ref(false)
+
+// Delete all risk factors modal state
+const isDeleteAllRiskFactorsModalOpen = ref(false)
+const isDeletingAllRiskFactors = ref(false)
+
 // Computed property for visible summaries (reversed and limited)
 const visibleSummaries = computed(() => {
   // Create a new array to avoid mutating the original
@@ -789,7 +925,15 @@ watch(
 
 function enableEditDemographic() {
   isEditingDemographic.value = true
-  Object.assign(editDemographicProfile, report.value.finalDemographicProfile || {})
+  // Initialize with existing data or empty strings
+  const profile = report.value.finalDemographicProfile || {}
+  editDemographicProfile.firstName = profile.firstName || ''
+  editDemographicProfile.lastName = profile.lastName || ''
+  editDemographicProfile.age = profile.age || ''
+  editDemographicProfile.gender = profile.gender || ''
+  editDemographicProfile.education = profile.education || ''
+  editDemographicProfile.occupation = profile.occupation || ''
+  editDemographicProfile.maritalStatus = profile.maritalStatus || ''
 }
 
 function cancelEditDemographic() {
@@ -923,6 +1067,16 @@ function openDeleteModal(index: number, summary: any) {
   isDeleteModalOpen.value = true
 }
 
+// Open the delete all deeper goals confirmation modal
+function openDeleteAllDeeperGoalsModal() {
+  isDeleteAllDeeperGoalsModalOpen.value = true
+}
+
+// Open the delete all risk factors confirmation modal
+function openDeleteAllRiskFactorsModal() {
+  isDeleteAllRiskFactorsModalOpen.value = true
+}
+
 // Confirm deletion of summary
 async function confirmDelete() {
   if (summaryIndexToDelete.value < 0 || !summaryToDelete.value) return
@@ -977,9 +1131,88 @@ async function confirmDelete() {
     summaryToDelete.value = null
   }
 }
+
+// Confirm deletion of all deeper goals
+async function confirmDeleteAllDeeperGoals() {
+  isDeletingAllDeeperGoals.value = true
+
+  try {
+    // Update the report with empty deeper goals array
+    await updateReport(report.value.id, { possibleDeeperGoals: [] })
+
+    // Update local state
+    report.value.possibleDeeperGoals = []
+
+    // Close modal
+    isDeleteAllDeeperGoalsModalOpen.value = false
+
+    // Show success notification
+    toaster.clearAll()
+    toaster.show({
+      title: 'حذف موفق',
+      message: 'تمامی اهداف عمیق‌تر با موفقیت حذف شدند',
+      color: 'success',
+      icon: 'ph:trash-duotone',
+      closable: true,
+    })
+  }
+  catch (error) {
+    console.error('Error deleting all deeper goals:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در حذف اهداف عمیق‌تر',
+      color: 'danger',
+      icon: 'ph:warning-circle-duotone',
+      closable: true,
+    })
+  }
+  finally {
+    isDeletingAllDeeperGoals.value = false
+  }
+}
+
+// Confirm deletion of all risk factors
+async function confirmDeleteAllRiskFactors() {
+  isDeletingAllRiskFactors.value = true
+
+  try {
+    // Update the report with empty risk factors array
+    await updateReport(report.value.id, { possibleRiskFactors: [] })
+
+    // Update local state
+    report.value.possibleRiskFactors = []
+
+    // Close modal
+    isDeleteAllRiskFactorsModalOpen.value = false
+
+    // Show success notification
+    toaster.clearAll()
+    toaster.show({
+      title: 'حذف موفق',
+      message: 'تمامی عوامل خطر احتمالی با موفقیت حذف شدند',
+      color: 'success',
+      icon: 'ph:trash-duotone',
+      closable: true,
+    })
+  }
+  catch (error) {
+    console.error('Error deleting all risk factors:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در حذف عوامل خطر احتمالی',
+      color: 'danger',
+      icon: 'ph:warning-circle-duotone',
+      closable: true,
+    })
+  }
+  finally {
+    isDeletingAllRiskFactors.value = false
+  }
+}
 </script>
 
 <style scoped>
 /* Optional: custom styles for RTL and better appearance */
 [dir="rtl"] .list-disc { padding-right: 1.5rem; }
+
 </style>
