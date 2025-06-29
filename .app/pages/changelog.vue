@@ -7,6 +7,43 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.2.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.2.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              26 ژانویه 2025
+            </p>
+
+            <h3 class="text-danger-500 mb-2 text-lg font-medium">
+              تغییرات اساسی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>حذف کامل <code>userRecord</code> از localStorage</li>
+              <li>حذف سیستم همگام‌سازی بین localStorage و پایگاه داده</li>
+            </ul>
+
+            <h3 class="text-success-500 mb-2 mt-4 text-lg font-medium">
+              بهبود عملکرد
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>ساده‌سازی جریان داده با استفاده مستقیم از API</li>
+              <li>حذف عملیات همگام‌سازی غیرضروری که باعث کاهش عملکرد می‌شد</li>
+              <li>حذف ناسازگاری احتمالی داده بین localStorage و پایگاه داده</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              تمیزسازی کد
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>حذف توابع <code>syncUserRecord</code>, <code>loadUserRecord</code>, <code>updateUserRecord</code></li>
+              <li>حذف فایل <code>composables/sync.ts</code></li>
+              <li>ساده‌سازی مدیریت اطلاعات کاربر در کامپوننت پیام‌رسانی</li>
+              <li>کاهش پیچیدگی کد و بهبود قابلیت نگهداری</li>
+            </ul>
+          </div>
+
           <!-- Version 2.1.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">
@@ -22,7 +59,6 @@
             <ul class="text-muted-500 dark:text-muted-400 space-y-2">
               <li>جا به جایی فرم پرداخت با کار نیک و افزودن دکمه ی همدلی</li>
             </ul>
-
           </div>
           <!-- Version 2.0.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
