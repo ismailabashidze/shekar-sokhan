@@ -296,7 +296,10 @@ const {
               >
                 <div class="flex-1">
                   <div class="flex flex-col gap-1">
-                    <span class="text-xs font-medium text-white/50">شروع جلسه</span>
+                    <span class="text-xs font-medium text-white/50 flex items-center gap-1">
+                      <Icon name="ph:play-circle-duotone" class="size-3" />
+                      شروع جلسه
+                    </span>
                     <div class="rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm">
                       <span class="text-sm font-bold text-white">
                         {{ new Date(analysisData?.expand?.session?.start_time).toLocaleString('fa') }}
@@ -306,7 +309,10 @@ const {
                 </div>
                 <div class="flex-1">
                   <div class="flex flex-col gap-1">
-                    <span class="text-xs font-medium text-white/50">پایان جلسه</span>
+                    <span class="text-xs font-medium text-white/50 flex items-center gap-1">
+                      <Icon name="ph:stop-circle-duotone" class="size-3" />
+                      پایان جلسه
+                    </span>
                     <div class="rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm">
                       <span class="text-sm font-bold text-white">
                         {{ new Date(analysisData?.expand?.session?.end_time).toLocaleString('fa') }}
@@ -316,14 +322,28 @@ const {
                 </div>
                 <div class="flex-1">
                   <div class="flex flex-col gap-1">
-                    <span class="text-xs font-medium text-white/50">وضعیت</span>
+                    <span class="text-xs font-medium text-white/50 flex items-center gap-1">
+                      <Icon 
+                        :name="analysisData?.expand?.session?.status === 'done' ? 'ph:check-circle-duotone' : 'ph:clock-duotone'"
+                        class="size-3" 
+                      />
+                      وضعیت
+                    </span>
                     <div
-                      class="rounded-xl px-4 py-2"
+                      class="rounded-xl px-4 py-2 flex items-center gap-2"
                       :class="{
                         'bg-success-500/20 backdrop-blur-sm': analysisData?.expand?.session?.status === 'done',
                         'bg-info-500/20 backdrop-blur-sm': analysisData?.expand?.session?.status !== 'done'
                       }"
                     >
+                      <Icon 
+                        :name="analysisData?.expand?.session?.status === 'done' ? 'ph:check-circle-fill' : 'ph:clock-fill'"
+                        class="size-4"
+                        :class="{
+                          'text-success-400': analysisData?.expand?.session?.status === 'done',
+                          'text-info-400': analysisData?.expand?.session?.status !== 'done'
+                        }"
+                      />
                       <span
                         class="text-sm font-bold"
                         :class="{
@@ -338,8 +358,12 @@ const {
                 </div>
                 <div class="flex-1">
                   <div class="flex flex-col gap-1">
-                    <span class="text-xs font-medium text-white/50">تعداد پیام‌ها</span>
-                    <div class="bg-primary-500/20 rounded-xl px-4 py-2 backdrop-blur-sm">
+                    <span class="text-xs font-medium text-white/50 flex items-center gap-1">
+                      <Icon name="ph:chat-circle-duotone" class="size-3" />
+                      تعداد پیام‌ها
+                    </span>
+                    <div class="bg-primary-500/20 rounded-xl px-4 py-2 backdrop-blur-sm flex items-center gap-2">
+                      <Icon name="ph:chat-circle-fill" class="size-4 text-primary-400" />
                       <span class="text-primary-400 text-sm font-bold">
                         {{ analysisData?.expand?.session?.count_of_total_messages }} پیام
                       </span>
@@ -909,7 +933,7 @@ const {
                     <div
                       v-if="!analysisData.demographicData ||
                         Object.values(analysisData.demographicData).every(value => !value)"
-                      class="bg-muted-100/50 dark:bg-muted-900/50 absolute inset-0 flex items-center justify-center rounded-lg backdrop-blur-sm"
+                      class="bg-muted-100/50 dark:bg-muted-900/50 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm"
                     >
                       <div class="text-center">
                         <Icon
