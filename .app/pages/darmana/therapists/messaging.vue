@@ -734,10 +734,16 @@ ${report.possibleDeeperGoals?.join('\n')}
 ${report.possibleRiskFactors?.flat().map((risk: any) =>
   `${risk.title}: ${risk.description}`,
 ).join('\n')}
-
-با توجه به اطلاعات بالا، جلسه جدید را با یک خلاصه از جلسات قبلی و وضعیت مراجع شروع کن و از مراجع بپرس که امروز حالش چطور است و میخواهد درباره چه مسائلی صحبت کند. لحن باید گرم و حرفه‌ای باشد.`,
+همچنین ممکن است اطلاعات دموگرافیک ارائه شده باشند: ${report.finalDemographicProfile}
+اگر مقادیر مشخص نیستند، یعنی کاربر اطلاعات دموگرافیک را ارائه نکرده است.
+از اطلاعاتی استفاده کن که کاربر وارد کرده است.
+ با توجه به اطلاعات بالا، جلسه جدید را با یک خلاصه از جلسات قبلی و وضعیت مراجع شروع کن و از مراجع بپرس که امروز حالش چطور است و میخواهد درباره چه مسائلی صحبت کند. لحن باید گرم و حرفه‌ای باشد.
+ همین طور از اهداف عمیق تر احتمالی نیز استفاده کن.  کاربر را ترغیب به دادن پاسخ در مورد موضوعات احتمالی کن.
+ از ایموجی های خوب و جذاب استفاده کن.
+ `,
     }
-
+    console.log('report', report);
+    
     // Generate initial AI message
     let aiResponse = ''
 
@@ -789,7 +795,9 @@ const openReportModal = () => {
 }
 
 const closeReportModal = () => {
-  isReportModalOpen.value = false
+  if (!isGeneratingAnalysis.value) {
+    isReportModalOpen.value = false
+  }
 }
 
 const isDeleteModalOpen = ref(false)
@@ -952,8 +960,6 @@ const handleConfirmEndSession = async () => {
       console.error('Error updating session:', updateError)
       // Continue even if session update fails - we'll still navigate to analysis
     }
-
-    isReportModalOpen.value = false
   }
   catch (error) {
     console.error('Error ending session:', error)
@@ -1812,6 +1818,10 @@ const isAIThinking = ref(false)
         <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
           ساخت گزارش
         </h3>
+        <BaseButtonClose 
+          v-if="!isGeneratingAnalysis"
+          @click="closeReportModal" 
+        />
       </div>
     </template>
     <div class="relative mx-auto mb-4 flex size-24 justify-center">
@@ -1825,7 +1835,10 @@ const isAIThinking = ref(false)
     </div>
     <template #footer>
       <div class="flex w-full items-center justify-end gap-2 p-4 md:p-6">
-        <BaseButton @click="closeReportModal">
+        <BaseButton 
+          :disabled="isGeneratingAnalysis"
+          @click="closeReportModal"
+        >
           انصراف
         </BaseButton>
         <BaseButton
