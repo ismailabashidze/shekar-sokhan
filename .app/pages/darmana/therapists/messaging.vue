@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // import { generateInlineAnalysis } from '@/composables/useOpenRouter'  // REMOVE this import
 import { useOpenRouter } from '@/composables/useOpenRouter'
+import { convertToEmotionWheel } from '@/utils/emotion-mapper'
 
 definePageMeta({
   title: 'گفتگو با روانشناس',
@@ -40,6 +41,7 @@ const userReport = ref<Report | null>(null)
 const hasPreviousData = ref(false)
 
 const { generateAnalysis, createAnalysis, getAnalysisForSession } = useSessionAnalysis()
+const { createAndLinkAnalysis, getMessageAnalysis } = useMessageAnalysis()
 
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
@@ -120,10 +122,38 @@ const loadMessages = async (therapistId: string) => {
       activeSession.value = session
       sessionId.value = session.id
       const loadedMessages = await getMessages(session.id)
-      messages.value = loadedMessages.map(msg => ({
-        ...msg,
-        timestamp: msg.time,
-      }))
+      
+      // Load analysis data for messages that have message_analysis
+      const messagesWithAnalysis = await Promise.all(
+        loadedMessages.map(async (msg) => {
+          let analysisResult = null
+          
+          // Only try to load analysis for user messages (sent) that have message_analysis field
+          if (msg.type === 'sent' && msg.message_analysis) {
+            try {
+              const analysisData = await getMessageAnalysis(msg.message_analysis)
+                             // Convert database format to the format expected by the UI
+               analysisResult = {
+                 lastMessage_emotions: analysisData.emotions || [],
+                 correspondingEmojis: analysisData.emojis || '',
+                 // Note: emotionalResponse is not stored in message_analysis collection
+                 // It's part of the full analysis result generated dynamically
+               }
+            } catch (analysisError) {
+              console.error('Error loading analysis for message:', msg.id, analysisError)
+              // Continue without analysis if loading fails
+            }
+          }
+          
+          return {
+            ...msg,
+            timestamp: msg.time,
+            analysisResult,
+          }
+        })
+      )
+      
+      messages.value = messagesWithAnalysis
       scrollToBottom()
       startSessionTimer() // Start session timer when messages are loaded
     }
@@ -270,39 +300,50 @@ async function submitMessage() {
     const session = activeSession.value
 
     const savedUserMessage = await sendMessage(currentTherapist.id, session.id, userMessage.text, 'sent')
+    
+    // Add user message immediately (without analysis first)
+    const messageId = savedUserMessage.id
     messages.value.push({
       ...userMessage,
-      id: savedUserMessage.id,
+      id: messageId,
       timestamp: savedUserMessage.time,
+      analysisResult: null, // Will be updated later
     })
     newMessage.value = ''
     scrollToBottom()
 
-    // Remove temp assistant message logic. Do not push empty message.
-
-    isAIResponding.value = true
-    showScrollButton.value = false
-
-    // Inline Analysis Integration
+    // Inline Analysis Integration (in background)
     isAIThinking.value = true
     thinkingResponse.value = ''
     let analysisResult = null
     let formattedAnalysis = ''
     try {
-      // Prepare chat history for analysis (convert to ChatMessage[])
-      const chatMessages = messages.value.map(msg => ({
-        role: msg.type === 'sent' ? 'user' : 'assistant',
-        content: msg.text,
-      }))
-      // Find the last message (assuming it's the user's latest)
-      const lastMessage = chatMessages.length > 0 ? chatMessages[chatMessages.length - 1] : null
-      // Call generateInlineAnalysis with only the last message
-      if (lastMessage) {
-        analysisResult = await generateInlineAnalysis(lastMessage)
-        console.log("analysisResult", analysisResult);
+      // Call generateInlineAnalysis with the user message
+      const lastMessage = {
+        role: 'user',
+        content: userMessage.text,
       }
+      analysisResult = await generateInlineAnalysis(lastMessage)
+      
+      console.log("analysisResult", analysisResult);
+      
+      // Save analysis to database and link to message
+      try {
+        const { analysis: savedAnalysis } = await createAndLinkAnalysis(messageId, analysisResult)
+        console.log("Analysis saved to database:", savedAnalysis)
+      } catch (dbError) {
+        console.error('Error saving analysis to database:', dbError)
+        // Continue even if database save fails
+      }
+      
       formattedAnalysis = formatInlineAnalysis(analysisResult)
       thinkingResponse.value = formattedAnalysis
+      
+      // Update the message with analysis result using message ID
+      const messageToUpdate = messages.value.find(msg => msg.id === messageId)
+      if (messageToUpdate) {
+        messageToUpdate.analysisResult = analysisResult
+      }
     }
     catch (err) {
       thinkingResponse.value = 'خطا در دریافت تحلیل. لطفا دوباره تلاش کنید.'
@@ -311,6 +352,11 @@ async function submitMessage() {
     finally {
       isAIThinking.value = false
     }
+
+    // Remove temp assistant message logic. Do not push empty message.
+
+    isAIResponding.value = true
+    showScrollButton.value = false
 
     // --- NEW: Send analysis as detail to streamChat ---
     // Optionally, push the analysis as a new message (for display) ONLY if it is not empty
@@ -824,6 +870,20 @@ const closeMessageDetailModal = () => {
   isMessageDetailModalOpen.value = false
   selectedMessage.value = null
 }
+
+// Convert analysis result to EmotionWheel format
+const selectedMessageEmotions = computed(() => {
+  if (!selectedMessage.value?.analysisResult?.lastMessage_emotions) {
+    return []
+  }
+  
+  try {
+    return convertToEmotionWheel(selectedMessage.value.analysisResult.lastMessage_emotions)
+  } catch (error) {
+    console.error('Error converting emotions:', error)
+    return []
+  }
+})
 
 const handleEndSession = async () => {
   if (!activeSession.value) return
@@ -1370,15 +1430,16 @@ const isAIThinking = ref(false)
                               </span>
                             </div>
                             <!-- Detail button for sent messages -->
-                            <button
+                            <BaseButton
                               v-if="item.type === 'sent'"
-                              type="button"
-                              class="text-muted-400 hover:text-primary-500 flex size-6 items-center justify-center rounded transition-colors duration-300 mt-1"
+                              rounded="full"
                               title="مشاهده جزئیات"
+                              size="sm"
+                              color="primary"
                               @click="openMessageDetailModal(item)"
                             >
                               <Icon name="ph:magnifying-glass-duotone" class="size-4" />
-                            </button>
+                            </BaseButton>
                           </div>
                           <span class="text-muted-400 font-sans text-xs">
                             {{ formatTime(item.timestamp) }}
@@ -1875,7 +1936,7 @@ const isAIThinking = ref(false)
       />
     </div>
     <div class="p-4 text-center md:p-6">
-      <p> {{ isGeneratingAnalysis ? 'در حال ساخت گزارش...' : 'آیا مایل به پایان دادن این جلسه و ساخت گزارش از این گفتگو هستید؟' }} </p>
+      <p> {{ isGeneratingAnalysis ? 'در حال ساخت گزارش هستیم. لطفا منتظر  بمانید. . . ' : 'آیا مایل به پایان دادن این جلسه و ساخت گزارش از این گفتگو هستید؟' }} </p>
     </div>
     <template #footer>
       <div class="flex w-full items-center justify-end gap-2 p-4 md:p-6">
@@ -1936,7 +1997,7 @@ const isAIThinking = ref(false)
             <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
             <span class="text-sm font-medium text-muted-600 dark:text-muted-300">محتوای پیام</span>
           </div>
-          <div class="prose prose-sm max-w-none dark:prose-invert">
+          <div class="prose prose-sm max-w-none dark:prose-invert text-right">
             <AddonMarkdownRemark :source="selectedMessage.text" />
           </div>
         </div>
@@ -1986,12 +2047,57 @@ const isAIThinking = ref(false)
           </div>
         </div>
         <!-- Emotion Wheel -->
-        <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
-          <div class="mb-2 flex items-center gap-2">
+        <div v-if="selectedMessage.analysisResult?.lastMessage_emotions" class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+          <div class="mb-4 flex items-center gap-2">
             <Icon name="ph:heart-duotone" class="text-pink-500 size-5" />
-            <span class="text-sm font-medium text-muted-600 dark:text-muted-300">حالت روانی</span>
+            <span class="text-sm font-medium text-muted-600 dark:text-muted-300">حالت احساسی پیام</span>
           </div>
-          <EmotionWheel :model-value="selectedMessage.emotions" lang="pes" />
+          
+          <!-- Emotions Summary -->
+          <div class="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div v-for="emotion in selectedMessage.analysisResult.lastMessage_emotions.filter(e => e.severity !== 'خالی')" 
+                 :key="emotion.emotionName" 
+                 class="flex items-center justify-between rounded-lg bg-white dark:bg-muted-700 p-2">
+              <span class="text-sm font-medium">{{ emotion.emotionName }}</span>
+              <span class="rounded-full px-2 py-1 text-xs" 
+                    :class="{
+                      'bg-red-100 text-red-800': emotion.severity === 'زیاد',
+                      'bg-orange-100 text-orange-800': emotion.severity === 'متوسط', 
+                      'bg-blue-100 text-blue-800': emotion.severity === 'کم'
+                    }">
+                {{ emotion.severity }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Corresponding Emojis -->
+          <div v-if="selectedMessage.analysisResult.correspondingEmojis" class="mb-4 text-center">
+            <div class="mb-2 text-sm font-medium text-muted-600 dark:text-muted-300">ایموجی‌های متناظر</div>
+            <div class="text-2xl">{{ selectedMessage.analysisResult.correspondingEmojis }}</div>
+          </div>
+
+          <!-- Emotion Wheel Visualization -->
+          <div class="mb-4">
+            <div class="mb-2 text-sm font-medium text-muted-600 dark:text-muted-300">چرخه احساسات</div>
+            <EmotionWheel :model-value="selectedMessageEmotions" lang="pes" />
+          </div>
+
+          <!-- Emotional Response -->
+          <div v-if="selectedMessage.analysisResult.emotionalResponse" class="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3">
+            <div class="mb-2 flex items-center gap-2">
+              <Icon name="ph:lightbulb-duotone" class="text-blue-500 size-4" />
+              <span class="text-sm font-medium text-blue-700 dark:text-blue-300">پاسخ پیشنهادی</span>
+            </div>
+            <p class="text-sm text-blue-600 dark:text-blue-400 text-right">{{ selectedMessage.analysisResult.emotionalResponse }}</p>
+          </div>
+        </div>
+
+        <!-- No Analysis Available -->
+        <div v-else class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+          <div class="text-center text-muted-500 dark:text-muted-400">
+            <Icon name="ph:chart-line-duotone" class="size-12 mx-auto mb-2 opacity-50" />
+            <p class="text-sm">تحلیل احساسات برای این پیام در دسترس نیست</p>
+          </div>
         </div>
       </div>
     </div>

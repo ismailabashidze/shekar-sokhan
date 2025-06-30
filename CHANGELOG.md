@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0] (2025-01-26)
+
+### 🚀 Features
+- Implemented comprehensive emotion analysis system for therapy sessions
+- Added real-time emotion analysis for user messages during therapy sessions
+- Created detailed message analysis modal with emotion wheel visualization
+- Integrated database storage for message analysis data
+- Extended history page with emotion analysis viewing capabilities
+
+### 🎨 UI Improvements
+- Added magnifying glass buttons for viewing detailed message analysis
+- Implemented interactive emotion wheel component for visual emotion representation
+- Added color-coded emotion badges with severity indicators (red=زیاد, orange=متوسط, blue=کم)
+- Enhanced user experience by showing messages immediately before analysis completes
+- Created comprehensive modal for viewing message metadata and emotion analysis
+
+### 🧰 Technical Improvements
+- Redesigned OpenRouter emotion analysis JSON schema for better data structure
+- Created emotion mapping utilities to convert Persian analysis to wheel format
+- Added new composable `useMessageAnalysis` for database operations
+- Implemented proper emotion data flow from API to UI components
+- Added support for 9 core emotions with Persian names and severity levels
+
+### 🐞 Bug Fixes
+- Fixed login page validation messages to show proper Persian error text instead of "Required"
+- Corrected Zod schema validation for email and password fields
+- Fixed linter errors in login page HTML structure
+
+### 🌐 Localization
+- Improved Persian language support in emotion analysis interface
+- Added Persian emotion names mapping (شادی، اعتماد، ترس، تعجب، غم، انزجار، خشم، انتظار، نامشخص)
+- Enhanced validation messages with proper Persian translations
+
+---
+
 ## [2.2.0] (2025-01-26)
 
 ### 🗑️ Breaking Changes

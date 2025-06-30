@@ -2,6 +2,7 @@
 import { useRoute } from 'vue-router'
 import { watch, ref, onMounted, nextTick } from 'vue'
 import { useTherapistsMessages } from '@/composables/therapistsMessages'
+import { convertToEmotionWheel } from '@/utils/emotion-mapper'
 import type { Message } from '@/types'
 
 definePageMeta({
@@ -19,6 +20,7 @@ definePageMeta({
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const { getMessages, getMessagesForAdmin } = useTherapistsMessages()
+const { getMessageAnalysis } = useMessageAnalysis()
 const route = useRoute()
 
 // Reactive references
@@ -30,6 +32,34 @@ const activeTherapistId = ref<string | null>(null)
 const activeSession = ref<any>(null)
 const search = ref('')
 const sessionId = ref<string | null>(null)
+
+// Message detail modal
+const isMessageDetailModalOpen = ref(false)
+const selectedMessage = ref<any>(null)
+
+const openMessageDetailModal = (message: any) => {
+  selectedMessage.value = message
+  isMessageDetailModalOpen.value = true
+}
+
+const closeMessageDetailModal = () => {
+  isMessageDetailModalOpen.value = false
+  selectedMessage.value = null
+}
+
+// Convert analysis result to EmotionWheel format
+const selectedMessageEmotions = computed(() => {
+  if (!selectedMessage.value?.analysisResult?.lastMessage_emotions) {
+    return []
+  }
+  
+  try {
+    return convertToEmotionWheel(selectedMessage.value.analysisResult.lastMessage_emotions)
+  } catch (error) {
+    console.error('Error converting emotions:', error)
+    return []
+  }
+})
 
 const formatTime = (timestamp: string | Date) => {
   const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp
@@ -86,10 +116,38 @@ const loadSessionMessages = async (sessionId: string) => {
             : await getMessages(sessionId)
             
           console.log('Loaded messages:', loadedMessages)
-          messages.value = loadedMessages.map(msg => ({
-            ...msg,
-            timestamp: msg.time,
-          }))
+          
+          // Load analysis data for messages that have message_analysis
+          const messagesWithAnalysis = await Promise.all(
+            loadedMessages.map(async (msg) => {
+              let analysisResult = null
+              
+              // Only try to load analysis for user messages (sent) that have message_analysis field
+              if (msg.type === 'sent' && msg.message_analysis) {
+                try {
+                  const analysisData = await getMessageAnalysis(msg.message_analysis)
+                  // Convert database format to the format expected by the UI
+                  analysisResult = {
+                    lastMessage_emotions: analysisData.emotions || [],
+                    correspondingEmojis: analysisData.emojis || '',
+                    // Note: emotionalResponse is not stored in message_analysis collection
+                    // It's part of the full analysis result generated dynamically
+                  }
+                } catch (analysisError) {
+                  console.error('Error loading analysis for message:', msg.id, analysisError)
+                  // Continue without analysis if loading fails
+                }
+              }
+              
+              return {
+                ...msg,
+                timestamp: msg.time,
+                analysisResult,
+              }
+            })
+          )
+          
+          messages.value = messagesWithAnalysis
           scrollToBottom()
         }
         catch (messageError) {
@@ -470,24 +528,43 @@ const filteredMessages = computed(() => {
                               : 'items-start',
                           ]"
                         >
-                          <div
-                            class="rounded-xl px-4 py-2"
+                          <div class="flex items-start gap-2"
                             :class="[
                               item.type === 'sent'
-                                ? 'bg-primary-500 prose-p:text-white text-white'
-                                : 'bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                                ? 'flex-row-reverse'
+                                : 'flex-row',
                             ]"
                           >
-                            <span
-                              class="block font-sans"
+                            <div
+                              class="rounded-xl px-4 py-2"
                               :class="[
                                 item.type === 'sent'
-                                  ? 'prose-p:text-white text-white'
-                                  : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                                  ? 'bg-primary-500 prose-p:text-white text-white'
+                                  : 'bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
                               ]"
                             >
-                              <AddonMarkdownRemark :source="item.text" />
-                            </span>
+                              <span
+                                class="block font-sans"
+                                :class="[
+                                  item.type === 'sent'
+                                    ? 'prose-p:text-white text-white'
+                                    : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                                ]"
+                              >
+                                <AddonMarkdownRemark :source="item.text" />
+                              </span>
+                            </div>
+                            <!-- Detail button for sent messages -->
+                            <BaseButton
+                              v-if="item.type === 'sent'"
+                              rounded="full"
+                              title="مشاهده جزئیات"
+                              size="sm"
+                              color="primary"
+                              @click="openMessageDetailModal(item)"
+                            >
+                              <Icon name="ph:magnifying-glass-duotone" class="size-4" />
+                            </BaseButton>
                           </div>
                           <span class="text-muted-400 font-sans text-xs">
                             {{ formatTime(item.timestamp) }}
@@ -650,6 +727,146 @@ const filteredMessages = computed(() => {
         </div>
       </div>
     </div>
+
+    <!-- Message Detail Modal -->
+    <TairoModal
+      :open="isMessageDetailModalOpen"
+      size="xl"
+      @close="closeMessageDetailModal"
+    >
+      <template #header>
+        <div class="flex w-full items-center justify-between p-4 md:p-6">
+          <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+            جزئیات پیام
+          </h3>
+          <BaseButtonClose @click="closeMessageDetailModal" />
+        </div>
+      </template>
+
+      <div class="max-h-[70vh] overflow-y-auto p-4 md:p-6">
+        <div v-if="selectedMessage" class="space-y-4">
+          <!-- Message content -->
+          <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+            <div class="mb-2 flex items-center gap-2">
+              <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
+              <span class="text-sm font-medium text-muted-600 dark:text-muted-300">محتوای پیام</span>
+            </div>
+            <div class="prose prose-sm max-w-none dark:prose-invert text-right">
+              <AddonMarkdownRemark :source="selectedMessage.text" />
+            </div>
+          </div>
+
+          <!-- Message metadata -->
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <!-- Message ID -->
+            <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+              <div class="mb-2 flex items-center gap-2">
+                <Icon name="ph:hash-duotone" class="text-info-500 size-5" />
+                <span class="text-sm font-medium text-muted-600 dark:text-muted-300">شناسه پیام</span>
+              </div>
+              <span class="text-xs font-mono text-muted-500 dark:text-muted-400">{{ selectedMessage.id }}</span>
+            </div>
+
+            <!-- Message time -->
+            <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+              <div class="mb-2 flex items-center gap-2">
+                <Icon name="ph:clock-duotone" class="text-warning-500 size-5" />
+                <span class="text-sm font-medium text-muted-600 dark:text-muted-300">زمان ارسال</span>
+              </div>
+              <span class="text-sm text-muted-700 dark:text-muted-300">
+                {{ new Date(selectedMessage.time || selectedMessage.timestamp).toLocaleString('fa') }}
+              </span>
+            </div>
+
+            <!-- Message type -->
+            <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+              <div class="mb-2 flex items-center gap-2">
+                <Icon name="ph:user-duotone" class="text-success-500 size-5" />
+                <span class="text-sm font-medium text-muted-600 dark:text-muted-300">نوع پیام</span>
+              </div>
+              <span class="text-sm text-muted-700 dark:text-muted-300">
+                {{ selectedMessage.type === 'sent' ? 'ارسالی (کاربر)' : 'دریافتی (روانشناس)' }}
+              </span>
+            </div>
+
+            <!-- Character count -->
+            <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+              <div class="mb-2 flex items-center gap-2">
+                <Icon name="ph:text-aa-duotone" class="text-purple-500 size-5" />
+                <span class="text-sm font-medium text-muted-600 dark:text-muted-300">تعداد کاراکتر</span>
+              </div>
+              <span class="text-sm text-muted-700 dark:text-muted-300">
+                {{ selectedMessage.text?.length || 0 }} کاراکتر
+              </span>
+            </div>
+          </div>
+
+          <!-- Emotion Wheel -->
+          <div v-if="selectedMessage.analysisResult?.lastMessage_emotions" class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+            <div class="mb-4 flex items-center gap-2">
+              <Icon name="ph:heart-duotone" class="text-pink-500 size-5" />
+              <span class="text-sm font-medium text-muted-600 dark:text-muted-300">حالت احساسی پیام</span>
+            </div>
+            
+            <!-- Emotions Summary -->
+            <div class="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div v-for="emotion in selectedMessage.analysisResult.lastMessage_emotions.filter(e => e.severity !== 'خالی')" 
+                   :key="emotion.emotionName" 
+                   class="flex items-center justify-between rounded-lg bg-white dark:bg-muted-700 p-2">
+                <span class="text-sm font-medium">{{ emotion.emotionName }}</span>
+                <span class="rounded-full px-2 py-1 text-xs" 
+                      :class="{
+                        'bg-red-100 text-red-800': emotion.severity === 'زیاد',
+                        'bg-orange-100 text-orange-800': emotion.severity === 'متوسط', 
+                        'bg-blue-100 text-blue-800': emotion.severity === 'کم'
+                      }">
+                  {{ emotion.severity }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Corresponding Emojis -->
+            <div v-if="selectedMessage.analysisResult.correspondingEmojis" class="mb-4 text-center">
+              <div class="mb-2 text-sm font-medium text-muted-600 dark:text-muted-300">ایموجی‌های متناظر</div>
+              <div class="text-2xl">{{ selectedMessage.analysisResult.correspondingEmojis }}</div>
+            </div>
+
+            <!-- Emotion Wheel Visualization -->
+            <div class="mb-4">
+              <div class="mb-2 text-sm font-medium text-muted-600 dark:text-muted-300">چرخه احساسات</div>
+              <EmotionWheel :model-value="selectedMessageEmotions" lang="pes" />
+            </div>
+
+            <!-- Emotional Response -->
+            <div v-if="selectedMessage.analysisResult.emotionalResponse" class="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3">
+              <div class="mb-2 flex items-center gap-2">
+                <Icon name="ph:lightbulb-duotone" class="text-blue-500 size-4" />
+                <span class="text-sm font-medium text-blue-700 dark:text-blue-300">پاسخ پیشنهادی</span>
+              </div>
+              <p class="text-sm text-blue-600 dark:text-blue-400 text-right">{{ selectedMessage.analysisResult.emotionalResponse }}</p>
+            </div>
+          </div>
+
+          <!-- No Analysis Available -->
+          <div v-else class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+            <div class="text-center text-muted-500 dark:text-muted-400">
+              <Icon name="ph:chart-line-duotone" class="size-12 mx-auto mb-2 opacity-50" />
+              <p class="text-sm">تحلیل احساسات برای این پیام در دسترس نیست</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="p-4 md:p-6">
+          <div class="flex justify-end">
+            <BaseButton @click="closeMessageDetailModal">
+              بستن
+            </BaseButton>
+          </div>
+        </div>
+      </template>
+    </TairoModal>
   </div>
 </template>
 <style scoped>

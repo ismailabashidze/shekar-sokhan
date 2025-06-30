@@ -11,13 +11,14 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const VALIDATION_TEXT = {
-  EMAIL_REQUIRED: 'یک ایمیل معتبر نیاز است',
+  EMAIL_REQUIRED: 'آدرس ایمیل نیاز است',
+  EMAIL_INVALID: 'یک ایمیل معتبر وارد کنید',
   PASSWORD_REQUIRED: 'رمز عبور نیاز است',
 }
 
 const zodSchema = z.object({
-  email: z.string().email(VALIDATION_TEXT.EMAIL_REQUIRED),
-  password: z.string().min(1, VALIDATION_TEXT.PASSWORD_REQUIRED),
+  email: z.string({ required_error: VALIDATION_TEXT.EMAIL_REQUIRED }).min(1, VALIDATION_TEXT.EMAIL_REQUIRED).email(VALIDATION_TEXT.EMAIL_INVALID),
+  password: z.string({ required_error: VALIDATION_TEXT.PASSWORD_REQUIRED }).min(1, VALIDATION_TEXT.PASSWORD_REQUIRED),
   trustDevice: z.boolean(),
 })
 
@@ -162,7 +163,7 @@ if (nuxtApp.$pb.authStore.isValid) {
             </NuxtLink>
             است.
           </BaseParagraph>
-          <!-- 	Social Sign Up Buttons	 -->
+          <!-- Social Sign Up Buttons -->
           <div class="flex flex-wrap justify-between gap-4">
             <!--Google button-->
             <button
@@ -185,7 +186,7 @@ if (nuxtApp.$pb.authStore.isValid) {
               <Icon name="fa6-brands:linkedin-in" class="mx-auto h-4 w-4" />
             </button> -->
           </div>
-          <!-- 'or' divider		 -->
+          <!-- 'or' divider -->
           <div class="flex-100 mt-8 flex items-center">
             <hr
               class="border-muted-200 dark:border-muted-700 flex-auto border-t-2"

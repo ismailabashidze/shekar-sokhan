@@ -338,32 +338,30 @@ export function useOpenRouter() {
               schema: {
                 type: 'object',
                 properties: {
-                 
-                  lastMessage_primaryEmotions: {
+                  lastMessage_emotions: {
                     type: 'array',
                     items: {
-                      type: 'string',
-                      enum: ['شادی', 'اعتماد', 'ترس', 'تعجب', 'غم', 'انزجار', 'خشم', 'انتظار', 'نامشخص'],
+                      type: 'object',
+                      properties: {
+                        emotionName: {
+                          type: 'string',
+                          enum: ['شادی', 'اعتماد', 'ترس', 'تعجب', 'غم', 'انزجار', 'خشم', 'انتظار', 'نامشخص'],
+                          description: 'نام احساس بر اساس چرخه احساسات پلوچیک',
+                        },
+                        severity: {
+                          type: 'string',
+                          enum: ['خالی', 'کم', 'متوسط', 'زیاد'],
+                          description: 'شدت احساس شناسایی شده',
+                        },
+                      },
+                      required: ['emotionName', 'severity'],
+                      additionalProperties: false,
                     },
-                    description: 'Primary emotions identified in the last message based on Plutchik\'s wheel (e.g., Joy, Trust, Fear).',
+                    description: 'آرایه باید دقیقاً شامل 9 عنصر باشد - یکی برای هر احساس اصلی: شادی، اعتماد، ترس، تعجب، غم، انزجار، خشم، انتظار، نامشخص. هیچ احساسی نباید حذف یا تکرار شود.',
                   },
-                  lastMessage_nuancedEmotions: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      enum: [
-                        'وجد', 'آرامش', 'تحسین', 'پذیرش', 'وحشت', 'نگرانی',
-                        'اعجاب', 'حواس‌پرتی', 'اندوه', 'تأمل', 'تنفر', 'کسالت',
-                        'غضب', 'رنجش', 'هوشیاری', 'علاقه', 'عشق', 'تسلیم', 'شگفت‌زدگی',
-                        'عدم تایید', 'پشیمانی', 'تحقیر', 'پرخاشگری', 'خوش‌بینی', 'نامشخص',
-                      ],
-                    },
-                    description: 'Nuanced emotions identified in the last message based on Plutchik\'s wheel (e.g., Ecstasy, Admiration, Terror).',
-                  },
-                  lastMessage_emotionIntensity: {
+                  correspondingEmojis: {
                     type: 'string',
-                    enum: ['High', 'Medium', 'Low'],
-                    description: 'Overall intensity of the detected emotions in the last message.',
+                    description: 'ایموجی‌های متناظر که احساس کلی پیام را به صورت کامل بازتاب می‌دهند. می‌توانند ترکیب چند ایموجی در کنار هم باشند. مثال: "😊💖" یا "😰😔" یا "🤔💭" - باید احساس اصلی و غالب پیام را نشان دهند.',
                   },
                   emotionalResponse: {
                     type: 'string',
@@ -371,9 +369,8 @@ export function useOpenRouter() {
                   },
                 },
                 required: [
-                  'lastMessage_primaryEmotions',
-                  'lastMessage_nuancedEmotions',
-                  'lastMessage_emotionIntensity',
+                  'lastMessage_emotions',
+                  'correspondingEmojis',
                   'emotionalResponse',
                 ],
                 additionalProperties: false,

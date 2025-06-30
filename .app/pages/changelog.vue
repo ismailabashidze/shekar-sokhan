@@ -7,6 +7,67 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.3.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.3.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              26 ژانویه 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>پیاده‌سازی سیستم جامع تحلیل احساسات برای جلسات درمان</li>
+              <li>افزودن تحلیل احساسات بلادرنگ برای پیام‌های کاربران در جلسات درمان</li>
+              <li>ایجاد مودال تفصیلی تحلیل پیام با نمایش چرخ احساسات</li>
+              <li>یکپارچه‌سازی ذخیره‌سازی داده‌های تحلیل در پایگاه داده</li>
+              <li>گسترش صفحه تاریخچه با قابلیت مشاهده تحلیل احساسات</li>
+            </ul>
+
+            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های رابط کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>افزودن دکمه‌های ذره‌بین برای مشاهده تحلیل تفصیلی پیام‌ها</li>
+              <li>پیاده‌سازی کامپوننت تعاملی چرخ احساسات</li>
+              <li>افزودن نشان‌های رنگی احساسات (قرمز=زیاد، نارنجی=متوسط، آبی=کم)</li>
+              <li>بهبود تجربه کاربری با نمایش فوری پیام‌ها قبل از تکمیل تحلیل</li>
+              <li>ایجاد مودال جامع برای مشاهده متادیتا و تحلیل احساسات پیام</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بازطراحی schema JSON تحلیل احساسات OpenRouter</li>
+              <li>ایجاد ابزارهای mapping احساسات برای تبدیل تحلیل فارسی به فرمت چرخ</li>
+              <li>افزودن composable جدید <code>useMessageAnalysis</code> برای عملیات پایگاه داده</li>
+              <li>پیاده‌سازی جریان صحیح داده‌های احساسات از API به کامپوننت‌های UI</li>
+              <li>پشتیبانی از 9 احساس اصلی با نام‌های فارسی و سطوح شدت</li>
+            </ul>
+
+            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>اصلاح پیام‌های validation صفحه ورود برای نمایش متن فارسی به جای "Required"</li>
+              <li>تصحیح schema اعتبارسنجی Zod برای فیلدهای ایمیل و رمز عبور</li>
+              <li>رفع خطاهای linter در ساختار HTML صفحه ورود</li>
+            </ul>
+
+            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
+              بومی‌سازی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود پشتیبانی زبان فارسی در رابط تحلیل احساسات</li>
+              <li>افزودن mapping نام‌های فارسی احساسات (شادی، اعتماد، ترس، تعجب، غم، انزجار، خشم، انتظار، نامشخص)</li>
+              <li>بهبود پیام‌های اعتبارسنجی با ترجمه‌های فارسی مناسب</li>
+            </ul>
+          </div>
+
           <!-- Version 2.2.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">
