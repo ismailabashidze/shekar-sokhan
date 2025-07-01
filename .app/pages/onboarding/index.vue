@@ -23,7 +23,7 @@ const couponCode = ref('')
 const subscriptionPlan = {
   price: 590000, // Price in IRR/Rials
   name: 'اشتراک ذهنا',
-  description: 'اشتراک یک‌ماهه سرویس ذهنا'
+  description: 'اشتراک یک‌ماهه سرویس ذهنا',
 }
 
 function closeModal() {
@@ -38,6 +38,124 @@ const router = useRouter()
 
 // Import the Dargah payment gateway composable
 const { registerTransaction, redirectToPayment, isLoading: isPaymentProcessing } = useDargah()
+const { createPayment } = usePayment()
+
+// Payment function
+const startPayment = async () => {
+  if (!nuxtApp.$pb.authStore.isValid || !nuxtApp.$pb.authStore.model?.id) {
+    toaster.show({
+      title: 'خطا',
+      message: 'ابتدا وارد حساب کاربری خود شوید',
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
+    return
+  }
+
+  isPaymentLoading.value = true
+
+  try {
+    // Create payment record in database
+    const paymentRecord = await createPayment({
+      amount: subscriptionPlan.price,
+      description: subscriptionPlan.description,
+      status: 'pending',
+      transactionId: '', // Will be updated after successful payment
+    })
+
+    if (!paymentRecord) {
+      throw new Error('Failed to create payment record')
+    }
+
+    console.log('💾 Payment record created:', {
+      id: paymentRecord.id,
+      amount: paymentRecord.amount,
+      status: paymentRecord.status
+    })
+
+    // Register transaction with Dargah
+    const config = useRuntimeConfig()
+    const merchantId = String(config.public.dargahMerchantId || 'e07ef02a-4723-4355-9006-88bbbabf8918')
+    const username = String(config.public.dargahUsername || '')
+    const password = String(config.public.dargahPassword || '')
+
+    console.log('merchantId', merchantId)
+    console.log('username', username)
+    console.log('password', password)
+    console.log('username length:', username.length)
+    console.log('password length:', password.length)
+
+    if (!username || !password || username === 'undefined' || password === 'undefined') {
+      throw new Error('لطفاً ابتدا اطلاعات لاگین درگاه‌نو را در تنظیمات وارد کنید')
+    }
+
+    // Generate a valid factor number (must be a positive integer)
+    const factorNumber = Math.floor(Math.random() * 1000000) + Date.now() % 1000000
+    
+    const transactionData = {
+      merchent_id: merchantId,
+      price: Number(subscriptionPlan.price), // Ensure it's a number
+      factor_number: factorNumber,
+      callback_url: `${window.location.origin}/onboarding/payment-callback`,
+      shop_id: '37664064', // Set as null for now, can be configured later
+      category: 'Forwarder', // Explicitly set category
+      transaction_fee_side: 'Seller', // Set fee side
+      description: subscriptionPlan.description,
+      mobile: nuxtApp.$pb.authStore.model?.phoneNumber || '',
+      name: nuxtApp.$pb.authStore.model?.firstName || '',
+      email: nuxtApp.$pb.authStore.model?.email || '',
+    }
+
+    const credentials = {
+      username,
+      password,
+    }
+
+    console.log('🧪 Transaction data being sent:', {
+      ...transactionData,
+      factorNumber: transactionData.factor_number,
+      price: subscriptionPlan.price,
+      merchantId: transactionData.merchent_id
+    })
+
+    const result = await registerTransaction(transactionData, credentials)
+
+    if (result?.authority) {
+      // Store payment info in localStorage for callback processing
+      localStorage.setItem('pending_payment', JSON.stringify({
+        paymentId: paymentRecord.id,
+        authority: result.authority,
+        amount: subscriptionPlan.price,
+      }))
+
+      // Redirect to payment gateway
+      redirectToPayment(result.authority)
+    }
+    else {
+      throw new Error('Failed to register transaction with payment gateway')
+    }
+  }
+  catch (error) {
+    console.error('Payment error:', error)
+    console.error('Full error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
+    
+    toaster.show({
+      title: 'خطا در پرداخت',
+      message: `خطا: ${error.message}`,
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
+  }
+  finally {
+    isPaymentLoading.value = false
+  }
+}
 const redeem = async () => {
   isModalOpen.value = false
   isSubmitting.value = true
@@ -45,7 +163,7 @@ const redeem = async () => {
   const { data, error } = await useAsyncData(async () => {
     const record = await nuxtApp.$pb.send(`/redeemDiscount`, {
       body: {
-        userId: nuxtApp.$pb.authStore.model.id,
+        userId: nuxtApp.$pb.authStore.model?.id,
         code: couponCode.value,
       },
       method: 'POST',
@@ -79,60 +197,26 @@ const pasteCouponCode = () => {
   try {
     if (navigator && navigator.clipboard) {
       navigator.clipboard.readText()
-        .then(text => {
-          couponCode.value = text;
+        .then((text) => {
+          couponCode.value = text
         })
-        .catch(err => {
-          console.error('Failed to read clipboard: ', err);
-        });
-    } else {
-      console.warn('Clipboard API not available');
+        .catch((err) => {
+          console.error('Failed to read clipboard: ', err)
+        })
     }
-  } catch (error) {
-    console.error('Clipboard error: ', error);
+    else {
+      console.warn('Clipboard API not available')
+    }
   }
-}
-
-// Function to initiate payment through backend (PocketBase) and redirect to Dargah
-const initiatePayment = async () => {
-  try {
-    isPaymentLoading.value = true;
-    const currentUser = nuxtApp.$pb.authStore.model;
-    // Call backend endpoint
-    const { data, error } = await useAsyncData(async () => {
-      return await nuxtApp.$pb.send('/startPayment', {
-        method: 'POST',
-        body: {
-          userId: currentUser.id,
-          amount: subscriptionPlan.price,
-          duration: 60, // or whatever duration logic you want
-        },
-      })
-    });
-
-    if (error.value || !data.value?.paymentUrl) {
-      throw new Error('خطا در ایجاد تراکنش');
-    }
-
-    // Redirect to Dargah payment page
-    window.location.href = data.value.paymentUrl;
-  } catch (error) {
-    toaster.show({
-      title: 'خطا در پرداخت',
-      message: error.message || 'مشکلی در هنگام اتصال به درگاه پرداخت رخ داد. لطفا دوباره تلاش کنید.',
-      color: 'danger',
-      icon: 'ph:warning',
-      closable: true,
-    });
-  } finally {
-    isPaymentLoading.value = false;
+  catch (error) {
+    console.error('Clipboard error: ', error)
   }
 }
 
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center py-8">
+  <div class="flex min-h-screen items-center justify-center py-8" data-tour="welcome">
     <div class="mx-auto w-full max-w-4xl">
       <BaseCard>
         <div
@@ -185,12 +269,13 @@ const initiatePayment = async () => {
                   </BaseParagraph>
                 </BaseCard>
 
-                <div class="mt-6 flex items-center justify-between gap-2">
+                <div class="mt-6 flex items-center justify-between gap-2" data-tour="payment-options">
                   <BaseButton
                     color="primary"
                     class="w-full"
                     :loading="isPaymentLoading || isPaymentProcessing"
-                    @click="initiatePayment"
+                    @click="startPayment"
+                    data-tour="payment-button"
                   >
                     پرداخت اشتراک
                   </BaseButton>
@@ -198,6 +283,7 @@ const initiatePayment = async () => {
                     class="w-full"
                     :loading="isSubmitting"
                     @click="openModal"
+                    data-tour="coupon-button"
                   >
                     کد تخفیف دارم
                   </BaseButton>
@@ -422,4 +508,10 @@ const initiatePayment = async () => {
       </div>
     </template>
   </TairoModal>
+
+  <!-- Tour Component -->
+  <TourButton 
+    :auto-start="'onboarding'"
+    :auto-start-delay="3000"
+  />
 </template>

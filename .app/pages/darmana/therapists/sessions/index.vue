@@ -1,6 +1,33 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { ref, computed, onMounted } from 'vue'
+import type { SessionAnalysis } from '~/composables/useSessionAnalysis'
+
+// Define types
+interface Therapist {
+  id: string
+  name: string
+  specialty?: string
+  avatar?: string
+}
+
+interface SessionWithExpanded {
+  id: string
+  session_type: 'educational' | 'therapic'
+  start_time: string
+  end_time: string
+  user: string
+  status: 'inprogress' | 'done' | 'closed' | 'deleted'
+  count_of_total_messages: number
+  total_time_passed: number
+  session_analysis_for_system: string
+  created: string
+  updated?: string
+  expand?: {
+    therapist?: Therapist
+    session_analysis_for_system?: SessionAnalysis
+  }
+}
 
 definePageMeta({
   title: 'جلسات مشاوره',
@@ -15,7 +42,7 @@ const page = computed(() => parseInt((route.query.page as string) ?? '1'))
 const filter = ref('')
 const statusFilter = ref('all')
 const perPage = ref(10)
-const sessions = ref([])
+const sessions = ref<SessionWithExpanded[]>([])
 const loading = ref(false)
 const toaster = useToaster()
 const nuxtApp = useNuxtApp()
@@ -33,7 +60,7 @@ const targetUserId = computed(() => {
 const { getSessions } = useSessions()
 
 // Format date to Persian format
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return 'تاریخ نامشخص'
   const date = new Date(dateString)
   return new Intl.DateTimeFormat('fa-IR', {
@@ -46,7 +73,7 @@ const formatDate = (dateString) => {
 }
 
 // Format duration in minutes to readable format
-const formatDuration = (minutes) => {
+const formatDuration = (minutes: number | undefined): string => {
   if (!minutes || minutes <= 0) return 'زمان ثبت نشده'
   if (minutes < 60) return `${minutes} دقیقه`
   const hours = Math.floor(minutes / 60)
@@ -55,42 +82,73 @@ const formatDuration = (minutes) => {
 }
 
 // Get status display text and color
-const getStatusInfo = (status) => {
+const getStatusInfo = (status: SessionWithExpanded['status']) => {
   switch (status) {
     case 'inprogress':
-      return { text: 'در حال انجام', color: 'warning' }
+      return { text: 'در حال انجام', color: 'warning' as const }
     case 'done':
-      return { text: 'تکمیل شده', color: 'success' }
+      return { text: 'تکمیل شده', color: 'success' as const }
     case 'closed':
-      return { text: 'بسته شده', color: 'info' }
+      return { text: 'بسته شده', color: 'info' as const }
     case 'deleted':
-      return { text: 'حذف شده', color: 'danger' }
-
+      return { text: 'حذف شده', color: 'danger' as const }
     default:
-      return { text: 'نامشخص', color: 'muted' }
+      return { text: 'نامشخص', color: 'muted' as const }
   }
 }
 
 // Get session type display text and color
-const getSessionTypeInfo = (type) => {
+const getSessionTypeInfo = (type: SessionWithExpanded['session_type']) => {
   switch (type) {
     case 'educational':
-      return { text: 'آموزشی', color: 'info', icon: 'ph:graduation-cap-duotone' }
+      return { text: 'آموزشی', color: 'info' as const, icon: 'ph:graduation-cap-duotone' }
     case 'therapic':
-      return { text: 'درمانی', color: 'success', icon: 'ph:heartbeat-duotone' }
+      return { text: 'درمانی', color: 'success' as const, icon: 'ph:heartbeat-duotone' }
     default:
-      return { text: 'نامشخص', color: 'muted', icon: 'ph:question-duotone' }
+      return { text: 'نامشخص', color: 'muted' as const, icon: 'ph:question-duotone' }
   }
 }
 
 // Format time for display
-const formatTime = (timeString) => {
+const formatTime = (timeString: string | undefined): string => {
   if (!timeString) return 'زمان نامشخص'
   const date = new Date(timeString)
   return new Intl.DateTimeFormat('fa-IR', {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date)
+}
+
+// Get trust level color
+const getTrustLevelColor = (level: 'veryHigh' | 'high' | 'low' | 'veryLow') => {
+  switch (level) {
+    case 'veryHigh':
+      return 'success' as const
+    case 'high':
+      return 'info' as const
+    case 'low':
+      return 'warning' as const
+    case 'veryLow':
+      return 'danger' as const
+    default:
+      return 'muted' as const
+  }
+}
+
+// Get trust level text
+const getTrustLevelText = (level: 'veryHigh' | 'high' | 'low' | 'veryLow') => {
+  switch (level) {
+    case 'veryHigh':
+      return 'بسیار بالا'
+    case 'high':
+      return 'بالا'
+    case 'low':
+      return 'پایین'
+    case 'veryLow':
+      return 'بسیار پایین'
+    default:
+      return 'نامشخص'
+  }
 }
 
 // Check if user is trying to access another user's sessions without admin rights
@@ -129,7 +187,7 @@ const fetchSessions = async () => {
     }
 
     const result = await getSessions(filterObj)
-    sessions.value = result
+    sessions.value = result as unknown as SessionWithExpanded[]
     console.log('Sessions loaded:', sessions.value)
   }
   catch (error) {
@@ -160,17 +218,17 @@ const refreshSessions = () => {
 }
 
 // Navigate to session analysis
-const viewSessionAnalysis = (sessionId) => {
+const viewSessionAnalysis = (sessionId: string) => {
   navigateTo(`/darmana/therapists/analysis?analysis_id=${sessionId}`)
 }
 
 // Navigate to session history
-const viewSessionHistory = (sessionId) => {
+const viewSessionHistory = (sessionId: string) => {
   navigateTo(`/darmana/therapists/history?sessionId=${sessionId}`)
 }
 
 // Continue a session
-const continueSession = (therapistId) => {
+const continueSession = (therapistId: string) => {
   navigateTo(`/darmana/therapists/messaging?therapistId=${therapistId}`)
 }
 
@@ -226,6 +284,7 @@ onMounted(() => {
             v-model="statusFilter"
             shape="rounded"
             class="hidden w-40 sm:block"
+            data-tour="sessions-filter"
             @update:model-value="fetchSessions"
           >
             <option value="all">
@@ -249,6 +308,7 @@ onMounted(() => {
             v-model="filter"
             icon="lucide:search"
             placeholder="جستجو در جلسات..."
+            data-tour="sessions-search"
             :classes="{
               wrapper: 'hidden sm:block w-full sm:w-64',
             }"
@@ -258,6 +318,7 @@ onMounted(() => {
             color="success"
             shape="curved"
             class="gap-1"
+            data-tour="sessions-refresh"
             @click="refreshSessions"
           >
             <Icon name="ph:arrows-clockwise-duotone" class="size-4" />
@@ -268,6 +329,7 @@ onMounted(() => {
             color="primary"
             class="w-full gap-1 sm:w-auto"
             shape="curved"
+            data-tour="sessions-new"
             @click="navigateTo('/darmana/therapists/chooseTherapist')"
           >
             <Icon name="ph:plus-bold" class="size-4" />
@@ -351,7 +413,7 @@ onMounted(() => {
       </div>
 
       <!-- Results list -->
-      <div v-else class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div v-else class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 auto-rows-fr" data-tour="sessions-list">
         <TransitionGroup
           enter-active-class="transform-gpu"
           enter-from-class="opacity-0 -translate-y-4"
@@ -361,10 +423,11 @@ onMounted(() => {
           leave-to-class="opacity-0 -translate-y-4"
         >
           <BaseCard
-            v-for="session in paginatedSessions"
+            v-for="(session, index) in paginatedSessions"
             :key="session.id"
             shape="curved"
-            class="border-muted-200 dark:border-muted-700 mb-4 overflow-hidden border transition-all duration-300 hover:shadow-lg"
+            class="mb-4 flex h-full flex-col overflow-hidden border border-muted-200 transition-all duration-300 hover:shadow-lg dark:border-muted-700"
+            :data-tour="index === 0 ? 'sessions-card' : undefined"
           >
             <div class="bg-muted-50 dark:bg-muted-800/30 border-muted-200 dark:border-muted-700 border-b p-4">
               <div class="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -424,88 +487,208 @@ onMounted(() => {
               </div>
             </div>
 
-            <div class="p-4">
-              <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
-                  <div class="bg-primary-100 dark:bg-primary-500/20 ml-3 rounded-full p-2">
-                    <Icon name="ph:clock-duotone" class="text-primary-500 size-5" />
+            <div class="flex-1 p-4">
+              <!-- Main Content Grid -->
+              <div class="grid h-full grid-cols-1 gap-4">
+                <!-- Left Column: Session Stats -->
+                <div class="space-y-3">
+                  <div class="flex items-center rounded-lg bg-muted-100 p-3 dark:bg-muted-800">
+                    <div class="ml-3 rounded-full bg-primary-100 p-2 dark:bg-primary-500/20">
+                      <Icon name="ph:clock-duotone" class="size-4 text-primary-500" />
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-xs text-muted-400">مدت جلسه</span>
+                      <span class="font-medium text-muted-800 dark:text-white">
+                        {{ formatDuration(session.total_time_passed) }}
+                      </span>
+                    </div>
                   </div>
-                  <div class="flex flex-col">
-                    <span class="text-muted-400 text-xs">مدت جلسه</span>
-                    <span class="text-muted-800 font-medium dark:text-white">
-                      {{ formatDuration(session.total_time_passed) }}
-                    </span>
+
+                  <div class="flex items-center rounded-lg bg-muted-100 p-3 dark:bg-muted-800">
+                    <div class="ml-3 rounded-full bg-info-100 p-2 dark:bg-info-500/20">
+                      <Icon name="ph:chat-dots-duotone" class="size-4 text-info-500" />
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-xs text-muted-400">تعداد پیام‌ها</span>
+                      <span class="font-medium text-muted-800 dark:text-white">
+                        {{ session.count_of_total_messages || '0' }} پیام
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center rounded-lg bg-muted-100 p-3 dark:bg-muted-800">
+                    <div class="ml-3 rounded-full bg-success-100 p-2 dark:bg-success-500/20">
+                      <Icon name="ph:timer-duotone" class="size-4 text-success-500" />
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-xs text-muted-400">زمان شروع/پایان</span>
+                      <span class="font-medium text-muted-800 dark:text-white">
+                        {{ formatTime(session.start_time) }} - {{ formatTime(session.end_time) }}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
-                  <div class="bg-info-100 dark:bg-info-500/20 ml-3 rounded-full p-2">
-                    <Icon name="ph:chat-dots-duotone" class="text-info-500 size-5" />
+                <!-- Right Column: Analysis Summary -->
+                <div v-if="session.expand?.session_analysis_for_system" class="rounded-lg bg-muted-50 p-4 dark:bg-muted-900/50">
+                  <div class="mb-3 flex items-center">
+                    <div class="ml-2 rounded-full bg-info-100 p-1 dark:bg-info-500/20">
+                      <Icon name="ph:brain-duotone" class="size-4 text-info-500" />
+                    </div>
+                    <BaseHeading
+                      tag="h4"
+                      size="xs"
+                      weight="medium"
+                      class="text-muted-700 dark:text-muted-300"
+                    >
+                      تحلیل جلسه
+                    </BaseHeading>
                   </div>
-                  <div class="flex flex-col">
-                    <span class="text-muted-400 text-xs">تعداد پیام‌ها</span>
-                    <span class="text-muted-800 font-medium dark:text-white">
-                      {{ session.count_of_total_messages || '0' }} پیام
-                    </span>
+
+                  <div class="space-y-3">
+                    <!-- Session Title -->
+                    <div v-if="session.expand.session_analysis_for_system.title">
+                      <BaseHeading
+                        tag="h5"
+                        size="xs"
+                        weight="medium"
+                        class="mb-1 text-muted-600 dark:text-muted-400"
+                      >
+                        {{ session.expand.session_analysis_for_system.title }}
+                      </BaseHeading>
+                      <BaseParagraph
+                        v-if="session.expand.session_analysis_for_system.summaryOfSession"
+                        size="xs"
+                        class="text-muted-500"
+                      >
+                        {{ session.expand.session_analysis_for_system.summaryOfSession }}
+                      </BaseParagraph>
+                    </div>
+
+                    <!-- Trust Level -->
+                    <div v-if="session.expand.session_analysis_for_system.finalTrustAndOppennessOfUser" class="flex items-center justify-between">
+                      <span class="text-xs text-muted-600 dark:text-muted-400">سطح اعتماد:</span>
+                      <BaseTag
+                        :color="getTrustLevelColor(session.expand.session_analysis_for_system.finalTrustAndOppennessOfUser)"
+                        shape="curved"
+                        size="sm"
+                      >
+                        {{ getTrustLevelText(session.expand.session_analysis_for_system.finalTrustAndOppennessOfUser) }}
+                      </BaseTag>
+                    </div>
+
+                    <!-- Key Headlines -->
+                    <div v-if="session.expand.session_analysis_for_system.headlines && session.expand.session_analysis_for_system.headlines.length > 0">
+                      <span class="mb-2 block text-xs text-muted-600 dark:text-muted-400">نکات کلیدی:</span>
+                      <div class="space-y-1">
+                        <div
+                          v-for="(headline, index) in session.expand.session_analysis_for_system.headlines.slice(0, 1)"
+                          :key="index"
+                          class="rounded-md bg-white p-2 dark:bg-muted-800"
+                        >
+                          <span class="text-xs font-medium text-muted-700 dark:text-muted-300">{{ headline.title }}</span>
+                          <BaseParagraph size="xs" class="mt-1 text-muted-500">
+                            {{ headline.description }}
+                          </BaseParagraph>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
-                  <div class="bg-success-100 dark:bg-success-500/20 ml-3 rounded-full p-2">
-                    <Icon name="ph:timer-duotone" class="text-success-500 size-5" />
+                <!-- Fallback for sessions without analysis -->
+                <div v-else class="rounded-lg bg-muted-50 p-4 dark:bg-muted-900/50">
+                  <div class="mb-3 flex items-center">
+                    <div class="ml-2 rounded-full bg-muted-200 p-1 dark:bg-muted-700">
+                      <Icon name="ph:clock-duotone" class="size-4 text-muted-500" />
+                    </div>
+                    <BaseHeading
+                      tag="h4"
+                      size="xs"
+                      weight="medium"
+                      class="text-muted-600 dark:text-muted-400"
+                    >
+                      اطلاعات جلسه
+                    </BaseHeading>
                   </div>
-                  <div class="flex flex-col">
-                    <span class="text-muted-400 text-xs">زمان شروع/پایان</span>
-                    <span class="text-muted-800 font-medium dark:text-white">
-                      {{ formatTime(session.start_time) }} - {{ formatTime(session.end_time) }}
-                    </span>
+
+                  <div class="space-y-3">
+                    <!-- Session ID -->
+                    <div>
+                      <span class="text-xs text-muted-600 dark:text-muted-400">شناسه جلسه:</span>
+                      <BaseParagraph size="xs" class="mt-1 font-mono text-muted-700 dark:text-muted-300">
+                        {{ session.id.slice(-8) }}
+                      </BaseParagraph>
+                    </div>
+
+                    <!-- Status Info -->
+                    <div v-if="session.status === 'inprogress'" class="text-center">
+                      <Icon name="ph:play-duotone" class="mx-auto mb-2 size-6 text-primary-500" />
+                      <BaseParagraph size="xs" class="text-primary-600 dark:text-primary-400">
+                        این جلسه در حال انجام است
+                      </BaseParagraph>
+                    </div>
+
+                    <div v-else-if="session.status === 'done'" class="text-center">
+                      <Icon name="ph:clock-countdown-duotone" class="mx-auto mb-2 size-6 text-info-500" />
+                      <BaseParagraph size="xs" class="text-muted-500">
+                        تحلیل این جلسه در حال پردازش است
+                      </BaseParagraph>
+                    </div>
+
+                    <div v-else class="text-center">
+                      <Icon name="ph:info-duotone" class="mx-auto mb-2 size-6 text-muted-400" />
+                      <BaseParagraph size="xs" class="text-muted-400">
+                        تحلیل برای این جلسه در دسترس نیست
+                      </BaseParagraph>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div class="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
-                <div class="flex items-center" />
+            <!-- Action Buttons -->
+            <div class="border-t border-muted-200 p-4 dark:border-muted-700" :data-tour="index === 0 ? 'sessions-actions' : undefined">
+              <div class="flex flex-wrap items-center justify-end gap-2">
+                <BaseButton
+                  v-if="session.status === 'inprogress'"
+                  color="primary"
+                  shape="curved"
+                  @click="continueSession(session.expand?.therapist?.id || '')"
+                >
+                  <Icon name="ph:chat-circle-dots-duotone" class="ml-1 size-4" />
+                  ادامه گفتگو
+                </BaseButton>
 
-                <div class="flex items-center justify-start gap-2 md:justify-end">
-                  <BaseButton
-                    v-if="session.status === 'inprogress'"
-                    color="primary"
-                    shape="curved"
-                    @click="continueSession(session.expand?.therapist?.id)"
-                  >
-                    <Icon name="ph:chat-circle-dots-duotone" class="ml-1 size-4" />
-                    ادامه گفتگو
-                  </BaseButton>
+                <BaseButton
+                  v-if="session.status === 'done'"
+                  color="info"
+                  shape="curved"
+                  @click="viewSessionAnalysis(session.session_analysis_for_system)"
+                >
+                  <Icon name="ph:chart-line-duotone" class="ml-1 size-4" />
+                  مشاهده تحلیل
+                </BaseButton>
 
-                  <BaseButton
-                    v-if="session.status === 'done'"
-                    color="info"
-                    shape="curved"
-                    @click="viewSessionAnalysis(session.session_analysis_for_system)"
-                  >
-                    <Icon name="ph:chart-line-duotone" class="ml-1 size-4" />
-                    مشاهده تحلیل
-                  </BaseButton>
+                <BaseButton
+                  color="warning"
+                  shape="curved"
+                  :data-tour="index === 0 ? 'sessions-history' : undefined"
+                  @click="viewSessionHistory(session.id)"
+                >
+                  <Icon name="ph:clock-counter-clockwise-duotone" class="ml-1 size-4" />
+                  تاریخچه
+                </BaseButton>
 
-                  <BaseButton
-                    color="warning"
-                    shape="curved"
-                    @click="viewSessionHistory(session.id)"
-                  >
-                    <Icon name="ph:clock-counter-clockwise-duotone" class="ml-1 size-4" />
-                    تاریخچه
-                  </BaseButton>
-
-                  <BaseButton
-                    v-if="!['done', 'inprogress'].includes(session.status)"
-                    color="muted"
-                    shape="curved"
-                    disabled
-                  >
-                    <Icon name="ph:info-duotone" class="ml-1 size-4" />
-                    {{ session.status === 'closed' ? 'جلسه بسته شده' : 'غیرقابل دسترس' }}
-                  </BaseButton>
-                </div>
+                <BaseButton
+                  v-if="!['done', 'inprogress'].includes(session.status)"
+                  color="muted"
+                  shape="curved"
+                  disabled
+                >
+                  <Icon name="ph:info-duotone" class="ml-1 size-4" />
+                  {{ session.status === 'closed' ? 'جلسه بسته شده' : 'غیرقابل دسترس' }}
+                </BaseButton>
               </div>
             </div>
           </BaseCard>
@@ -522,6 +705,12 @@ onMounted(() => {
         </div>
       </div>
     </TairoContentWrapper>
+
+    <!-- Tour Component -->
+    <TourButton 
+      :auto-start="'sessions'"
+      :auto-start-delay="2000"
+    />
   </div>
 </template>
 

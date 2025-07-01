@@ -35,7 +35,7 @@ export function useSessions() {
         return await nuxtApp.$pb.collection('sessions').getFullList({
           sort: '-created',
           filter: `user = "${filter.patientId}"`,
-          expand: 'user,therapist',
+          expand: 'user,therapist,session_analysis_for_system',
         })
       }
 
@@ -52,7 +52,7 @@ export function useSessions() {
       return await nuxtApp.$pb.collection('sessions').getFullList({
         sort: '-created',
         filter: filterStr,
-        expand: 'user,therapist',
+        expand: 'user,therapist,session_analysis_for_system',
       })
     }
     catch (error: any) {
@@ -71,7 +71,7 @@ export function useSessions() {
 
     try {
       return await nuxtApp.$pb.collection('sessions').getOne(id, {
-        expand: 'user,therapist',
+        expand: 'user,therapist,session_analysis_for_system',
       })
     }
     catch (error: any) {

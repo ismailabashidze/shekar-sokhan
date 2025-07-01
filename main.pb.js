@@ -384,6 +384,128 @@ routerAdd('POST', '/deleteAllMessages', (c) => {
   })
 })
 
+// Payment verification endpoint
+routerAdd('POST', '/verifyPayment', (c) => {
+  const data = $apis.requestInfo(c).data
+  const { authority, paymentId } = data
+
+  if (!authority) {
+    throw new BadRequestError('Authority is required')
+  }
+
+  try {
+    // Verify payment with Dargah gateway
+    const verifyResponse = $http.send({
+      url: 'https://dargahno.net/api/v2/transaction/check',
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ authority }),
+      timeout: 30,
+    })
+
+    if (verifyResponse.statusCode !== 200) {
+      throw new BadRequestError('Payment verification failed')
+    }
+
+    const verifyData = verifyResponse.json
+    
+    // Check if payment was successful (status 100 means success in Iranian gateways)
+    if (verifyData.status === 100) {
+      // Find and update payment record
+      try {
+        let payment = null
+        
+        // Try to find payment by paymentId first, then by authority
+        if (paymentId) {
+          try {
+            payment = $app.dao().findRecordById('payments', paymentId)
+          } catch (e) {
+            console.log('Payment not found by ID:', paymentId)
+          }
+        }
+        
+        // If not found by ID, try to find by authority
+        if (!payment) {
+          try {
+            payment = $app.dao().findFirstRecordByData('payments', 'transactionId', authority)
+          } catch (e) {
+            console.log('Payment not found by authority:', authority)
+          }
+        }
+        
+        if (payment) {
+          payment.set('status', 'success')
+          payment.set('transactionId', authority)
+          $app.dao().saveRecord(payment)
+
+          // Create or update user subscription
+          const userId = payment.get('user')
+          const user = $app.dao().findRecordById('users', userId)
+          
+          // Create subscription charge record
+          const collection = $app.dao().findCollectionByNameOrId('charge')
+          const newCharge = new Record(collection, {
+            user: userId,
+            totalCharge: payment.get('amount') / 1000, // Convert to charge units (assuming 1000 IRR = 1 charge unit)
+            used: 0,
+            duration: 43200, // 30 days in minutes (30 * 24 * 60)
+            isDone: false,
+            isOutDated: false,
+          })
+          $app.dao().saveRecord(newCharge)
+
+          // Update user subscription status
+          user.set('hasCharge', true)
+          let expireTime = new Date()
+          expireTime = new Date(expireTime.getTime() + 43200 * 60000) // 30 days
+          user.set('expireChargeTime', expireTime)
+          user.set('startChargeTime', new Date())
+          $app.dao().saveRecord(user)
+
+          return c.json(200, {
+            status: 100,
+            msg: 'Payment verified successfully',
+            refId: verifyData.refId,
+            authority: authority,
+          })
+        } else {
+          // Create payment record if not found - this is a fallback
+          console.log('Payment record not found, creating new one')
+          
+          // We need to get user ID from auth context - this is a fallback scenario
+          // In normal flow, payment record should exist from frontend
+          console.warn('Warning: Payment record not found. This might indicate an issue in the payment flow.')
+          
+          return c.json(200, {
+            status: 100,
+            msg: 'Payment verified successfully but record not found',
+            refId: verifyData.refId,
+            authority: authority,
+            warning: 'Payment record was missing'
+          })
+        }
+      } catch (recordError) {
+        console.error('Error updating payment record:', recordError)
+        return c.json(200, {
+          status: 100,
+          msg: 'Payment verified but record update failed',
+          refId: verifyData.refId,
+          authority: authority,
+        })
+      }
+    } else {
+      return c.json(400, {
+        status: verifyData.status,
+        msg: verifyData.msg || 'Payment verification failed',
+        authority: authority,
+      })
+    }
+  } catch (error) {
+    console.error('Payment verification error:', error)
+    throw new BadRequestError('Payment verification failed: ' + error.message)
+  }
+}, $apis.activityLogger($app))
+
 /**
  * Session Statistics Hooks
  *
@@ -786,206 +908,3 @@ routerAdd('GET', '/api/manage-inactive-sessions', (c) => {
   }
 }, $apis.activityLogger($app))
 
-// Start a payment, register with Dargah, create payment record
-routerAdd('POST', '/startPayment', async (c) => {
-  const { userId, amount, duration } = $apis.requestInfo(c).data
-  const factor_number = 'F-' + Date.now() + '-' + Math.floor(Math.random() * 10000)
-  // 1. Get valid Dargah token
-  try {
-    let settings = $app.dao().findFirstRecordByData('settings', 'key', 'dargah_token')
-    if (settings && settings.get('expires_at') > Date.now()) {
-      const dargahRes = $http.send({
-        url: 'https://dargahno.net/api/v2/transaction/register',
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${JSON.stringify(settings.get('token')).slice(1, JSON.stringify(settings.get('token')).length - 1)}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          merchent_id: 'e07ef02a-4723-4355-9006-88bbbabf8918',
-          price: amount,
-          factor_number,
-          callback_url: 'https://zehna.ir/onboarding/payment-callback',
-        }),
-      })
-      console.log('dargahRes')
-      console.log(JSON.stringify(dargahRes))
-    }
-    else {
-      throw ('time is passed, generate a new code')
-    }
-  }
-  catch (e) {
-    // Otherwise, login and get new token (use env or settings for credentials)
-    const password = '0210511373'
-    const username = '09121248393'
-    const grant_type = 'password'
-
-    // Construct the body as a URL-encoded string
-    const formBody = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&grant_type=${encodeURIComponent(grant_type)}`
-
-    console.log('Attempting to send this form data to /api/v2/auth/login:', formBody)
-
-    const loginRes = $http.send({
-      url: 'https://dargahno.net/api/v2/auth/login',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formBody,
-      timeout: 10000,
-    })
-
-    if (loginRes.statusCode === 200 && loginRes.json.access_token) {
-      const settingsCol = $app.dao().findCollectionByNameOrId('settings')
-      console.log(JSON.stringify({
-        key: 'dargah_token',
-        token: loginRes.json.access_token,
-        expires_at: Date.now() + (loginRes.json.expire_time || 30) * 1000 * 60,
-      }))
-      const settings = new Record(settingsCol, {
-        key: 'dargah_token',
-        token: loginRes.json.access_token,
-        expires_at: Date.now() + (loginRes.json.expire_time || 30) * 1000 * 60,
-      })
-
-      $app.dao().saveRecord(settings)
-      token = loginRes.json.access_token
-      const dargahRes = $http.send({
-        url: 'https://dargahno.net/api/v2/transaction/register',
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          merchent_id: 'e07ef02a-4723-4355-9006-88bbbabf8918',
-          price: amount,
-          factor_number: factor_number,
-          callback_url: 'https://zehna.ir/onboarding/payment-callback',
-        }),
-      })
-      console.log('dargahRes')
-      console.log(JSON.stringify(dargahRes))
-    }
-    else {
-      throw new BadRequestError('Could not authenticate with Dargah: ' + (loginRes.json.detail || 'Unknown error'))
-    }
-  }
-
-  const { authority } = dargahRes.json
-  // 2. Create payment record
-  const paymentCol = $app.dao().findCollectionByNameOrId('payment')
-
-  console.log(JSON.stringify({
-    user: userId,
-    amount,
-    factor_number,
-    authority,
-    status: 'pending',
-    gateway_response: dargahRes.json,
-  }))
-  const payment = new Record(paymentCol, {
-    user: userId,
-    amount,
-    factor_number,
-    authority,
-    status: 'pending',
-    gateway_response: dargahRes.json,
-  })
-  $app.dao().saveRecord(payment)
-  // 3. Return payment URL
-  return c.json(200, {
-    paymentUrl: `https://pay.dargahno.net/?authority=${authority}`,
-  })
-})
-
-// Verify payment after callback, update payment and grant charge
-routerAdd('POST', '/verifyPayment', async (c) => {
-  const { authority } = $apis.requestInfo(c).data
-  // 1. Find payment record
-  const payment = $app.dao().findFirstRecordByData('payment', 'authority', authority)
-  if (!payment) throw new BadRequestError('Payment not found')
-  // 2. Get valid Dargah token
-  let token = null
-  let settings = $app.dao().findFirstRecordByData('settings', 'key', 'dargah_token')
-  if (settings && settings.get('token') && settings.get('expires_at') > Date.now()) {
-    return settings.get('token')
-  }
-  // Otherwise, login and get new token (use env or settings for credentials)
-  const merchent_id = 'e07ef02a-4723-4355-9006-88bbbabf8918' // TODO: replace with real value or fetch from settings
-  const password = '0210511373' // TODO: replace with real value or fetch from settings
-  const loginRes = $http.send({
-    url: 'https://dargahno.net/api/v2/auth/login',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ merchent_id, password }),
-  })
-  if (loginRes.statusCode === 200 && loginRes.json.access_token) {
-    if (!settings) {
-      const settingsCol = $app.dao().findCollectionByNameOrId('settings')
-      settings = new Record(settingsCol, {
-        key: 'dargah_token',
-        token: loginRes.json.access_token,
-        expires_at: Date.now() + (loginRes.json.expires_in || 3600) * 1000,
-      })
-    }
-    else {
-      settings.set('token', loginRes.json.access_token)
-      settings.set('expires_at', Date.now() + (loginRes.json.expires_in || 3600) * 1000)
-    }
-    $app.dao().saveRecord(settings)
-    token = loginRes.json.access_token
-  }
-  else {
-    throw new BadRequestError('Could not authenticate with Dargah: ' + (loginRes.json.detail || 'Unknown error'))
-  }
-
-  // 3. Call Dargah /check
-  const checkRes = $http.send({
-    url: 'https://dargahno.net/api/v2/transaction/check',
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      authority,
-      new_price: payment.get('amount').toString(),
-    }),
-  })
-  const result = checkRes.json
-  // 3. Update payment status
-  if (result.status === 100) {
-    payment.set('status', 'paid')
-    payment.set('ref_id', result.ref_id)
-    payment.set('gateway_response', result)
-    $app.dao().saveRecord(payment)
-    // 4. Grant charge if not already granted
-    const chargeCol = $app.dao().findCollectionByNameOrId('charge')
-    // Check if charge already exists for this payment
-    const existingCharge = $app.dao().findRecordsByFilter(
-      'charge',
-      'payment = {:payment}',
-      '+created',
-      1, 0,
-      { payment: payment.id },
-    )
-    if (!existingCharge.length) {
-      const charge = new Record(chargeCol, {
-        user: payment.get('user'),
-        totalCharge: payment.get('amount'),
-        used: 0,
-        duration: duration || 60, // fallback duration
-        isDone: false,
-        isOutdated: false,
-        payment: payment.id,
-      })
-      $app.dao().saveRecord(charge)
-    }
-  }
-  else {
-    payment.set('status', 'failed')
-    payment.set('gateway_response', result)
-    $app.dao().saveRecord(payment)
-  }
-  return c.json(200, { status: result.status, msg: result.msg })
-})

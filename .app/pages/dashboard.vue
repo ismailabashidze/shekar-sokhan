@@ -237,7 +237,7 @@ const closeAlphaModal = () => {
 
     <div>
       <!-- Statistics Cards Section -->
-      <div class="mb-6">
+      <div class="mb-6" data-tour="statistics">
         <DashboardStatisticsCards />
       </div>
 
@@ -248,7 +248,7 @@ const closeAlphaModal = () => {
           <!-- Inner grid -->
           <div class="grid grid-cols-12 gap-6">
             <!-- Header -->
-            <div class="col-span-12">
+            <div class="col-span-12" data-tour="welcome-section">
               <div class="bg-primary-800 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
                 <div class="relative h-[150px] w-[320px] shrink-0 sm:h-[175px]">
                   <img
@@ -277,7 +277,7 @@ const closeAlphaModal = () => {
                         را مدیریت و نظارت کنید.
                       </span>
                     </BaseParagraph>
-                    <div class="mt-2 flex flex-col gap-2 sm:flex-row">
+                    <div class="mt-2 flex flex-col gap-2 sm:flex-row" data-tour="quick-actions">
                       <!-- <BaseButton
                         size="sm"
                         color="light"
@@ -294,6 +294,7 @@ const closeAlphaModal = () => {
                         variant="outline"
                         class="w-full sm:w-auto"
                         to="/darmana/therapists/sessions"
+                        data-tour="therapists-button"
                       >
                         <Icon name="ph:robot-duotone" class="ml-2 size-4" />
                         <span>روانشناسان هوش مصنوعی</span>
@@ -313,7 +314,7 @@ const closeAlphaModal = () => {
                     leave-from-class="transform scale-y-100 opacity-100"
                     leave-to-class="transform scale-y-0 opacity-0"
                   >
-                    <div v-if="showFeatures" class="w-full">
+                    <div v-if="showFeatures" class="w-full" data-tour="new-features">
                       <!--Features widget-->
                       <NewFeatures>
                         <template #actions>
@@ -386,7 +387,7 @@ const closeAlphaModal = () => {
 
         <!-- Column -->
         <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
-          <div class="bg-muted-200 dark:bg-muted-800/70  rounded-2xl p-6">
+          <div class="bg-muted-200 dark:bg-muted-800/70  rounded-2xl p-6" data-tour="articles-section">
             <!-- Title -->
             <div class="mb-8 flex items-center justify-between">
               <BaseHeading
@@ -518,7 +519,7 @@ const closeAlphaModal = () => {
         </div>
       </div>
     </div>
-    <BaseCard class="my-5">
+    <BaseCard class="my-5" data-tour="video-section">
       <div class="m-5">
         <BaseHeading
           as="h3"
@@ -693,5 +694,11 @@ const closeAlphaModal = () => {
         </div>
       </div>
     </BaseCard>
+
+    <!-- Tour Component -->
+    <TourButton 
+      :auto-start="'dashboard'"
+      :auto-start-delay="2000"
+    />
   </div>
 </template>

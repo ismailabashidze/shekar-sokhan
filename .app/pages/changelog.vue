@@ -7,6 +7,66 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.4.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.4.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              27 ژانویه 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>پیاده‌سازی سیستم جامع تور محصول با استفاده از Driver.js</li>
+              <li>افزودن تورهای تعاملی راهنما برای شروع کار کاربران و کشف ویژگی‌ها</li>
+              <li>ایجاد کامپوننت دکمه تور با بومی‌سازی فارسی</li>
+              <li>یکپارچه‌سازی قابلیت تور در سراسر برنامه با پشتیبانی RTL مناسب</li>
+            </ul>
+
+            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های رابط کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>افزودن استایل زیبا برای پاپ‌آپ تور با افکت‌های شیشه‌ای</li>
+              <li>پیاده‌سازی رابط تور بهینه‌شده برای RTL با فونت‌های فارسی</li>
+              <li>افزودن افکت‌های گرادیانت انیمیشنی و انتقال‌های روان برای عناصر تور</li>
+              <li>ایجاد طراحی واکنش‌گرا برای تور که در موبایل و دسکتاپ کار می‌کند</li>
+              <li>بهبود تجربه کاربری با نشانگرهای پیشرفت و کنترل‌های ناوبری</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>افزودن کتابخانه Driver.js برای قابلیت تور</li>
+              <li>ایجاد composable <code>useTour</code> برای مدیریت وضعیت تور</li>
+              <li>پیاده‌سازی پلاگین client تور برای راه‌اندازی صحیح</li>
+              <li>افزودن استایل‌های جامع CSS برای کامپوننت‌های تور با پشتیبانی تم تاریک/روشن</li>
+              <li>ایجاد صفحه نمایشی تور برای تست و توسعه</li>
+            </ul>
+
+            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>اصلاح یکپارچه‌سازی سیستم پرداخت و مدیریت callback</li>
+              <li>بهبود مدیریت جلسات و قابلیت داشبورد</li>
+              <li>بهبود جریان شروع کار با مدیریت بهتر خطاها</li>
+            </ul>
+
+            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
+              بومی‌سازی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>پشتیبانی کامل زبان فارسی برای رابط تور</li>
+              <li>بهینه‌سازی چیدمان RTL برای عناصر تور</li>
+              <li>تایپوگرافی و رندر فونت فارسی مناسب در تورها</li>
+            </ul>
+          </div>
+
           <!-- Version 2.3.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

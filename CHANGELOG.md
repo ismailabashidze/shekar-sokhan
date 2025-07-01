@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0] (2025-01-27)
+
+### 🚀 Features
+- Implemented comprehensive product tour system using Driver.js
+- Added interactive guided tours for user onboarding and feature discovery
+- Created tour button component with Persian localization
+- Integrated tour functionality across the application with proper RTL support
+
+### 🎨 UI Improvements
+- Added beautiful tour popover styling with glassmorphism effects
+- Implemented RTL-optimized tour interface with Persian fonts
+- Added animated gradient effects and smooth transitions for tour elements
+- Created responsive tour design that works on mobile and desktop
+- Enhanced user experience with progress indicators and navigation controls
+
+### 🧰 Technical Improvements
+- Added Driver.js library for tour functionality
+- Created `useTour` composable for tour state management
+- Implemented tour client plugin for proper initialization
+- Added comprehensive CSS styling for tour components with dark/light theme support
+- Created tour demo page for testing and development
+
+### 🐞 Bug Fixes
+- Fixed payment system integration and callback handling
+- Improved session management and dashboard functionality
+- Enhanced onboarding flow with better error handling
+
+### 🌐 Localization
+- Full Persian language support for tour interface
+- RTL layout optimization for tour elements
+- Proper Persian typography and font rendering in tours
+
+---
+
 ## [2.3.0] (2025-01-26)
 
 ### 🚀 Features

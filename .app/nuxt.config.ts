@@ -29,6 +29,7 @@ export default defineNuxtConfig({
   css: [
     '@fontsource-variable/inter/index.css',
     '@fontsource-variable/karla/index.css',
+    '~/assets/css/tour.css',
   ],
 
   nitro: {
@@ -45,6 +46,10 @@ export default defineNuxtConfig({
     public: {
       appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:3000',
       openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
+      dargahMerchantId: process.env.DARGAH_MERCHANT_ID || '',
+      dargahBaseUrl: process.env.DARGAH_BASE_URL || 'https://dargahno.net',
+      dargahUsername: process.env.DARGAH_USERNAME || '',
+      dargahPassword: process.env.DARGAH_PASSWORD || '',
     },
   },
   buildModules: [
