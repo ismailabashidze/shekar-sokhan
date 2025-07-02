@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0] (2025-07-02)
+
+### 🚀 Features
+- Implemented Progressive Web App (PWA) functionality for offline support and app installation
+- Added PWA install prompt with native-like installation experience
+- Created manual PWA manifest and service worker for reliable functionality
+- Added install button component positioned next to tour button
+
+### 🎨 UI Improvements
+- Enhanced PWA install popup with improved spacing, larger icons, and better typography
+- Added download icon to install button for better user recognition
+- Improved RTL layout support for install prompt with proper Persian text alignment
+- Enhanced dark mode compatibility for PWA components
+
+### 🧰 Technical Improvements
+- Created custom service worker for caching strategies and offline functionality
+- Implemented PWA manifest with proper Persian metadata and RTL direction
+- Added Nuxt plugin for service worker registration and management
+- Removed automatic tour start functionality to prevent interference with modals
+- Added meta tags for mobile web app capabilities and theme colors
+
+### 🐞 Bug Fixes
+- Fixed tour auto-start conflicts with experimental version modal
+- Removed debug logs from PWA components for cleaner console output
+- Disabled automatic tour initialization on page load
+
+### 🌐 Localization
+- Full Persian language support for PWA installation interface
+- Added Persian app name and description in PWA manifest
+- RTL-optimized PWA install prompt with proper text direction
+
+---
+
 ## [2.4.0] (2025-01-27)
 
 ### 🚀 Features

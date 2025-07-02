@@ -1,78 +1,128 @@
 <script setup lang="ts">
-// --- راهنمای مارک‌داون برای استفاده در پرامپت هوش مصنوعی ---
-const markdownGuide = `# راهنمای نگارش مارک‌داون
+// --- راهنمای جامع مارک‌داون برای ایجاد محتوای متنوع و تأثیرگذار ---
+const markdownGuide = `# راهنمای کامل نگارش مارک‌داون
 
-مارک‌داون یک روش ساده برای قالب‌بندی متن است. در این راهنما، نحوه استفاده از آن را یاد می‌گیرید.
+## ساختار سرفصل‌ها (استفاده اجباری)
+# عنوان اصلی مقاله (H1) - فقط یکی
+## سرفصل اصلی (H2) - برای بخش‌های اصلی
+### زیرعنوان (H3) - برای زیربخش‌ها  
+#### جزئیات (H4) - برای نکات خاص
+##### نکته فرعی (H5)
+###### جزئیات کوچک (H6)
 
-## سرفصل‌ها
-برای ایجاد سرفصل از علامت # استفاده کنید. تعداد # نشان‌دهنده سطح سرفصل است.
+## انواع تأکیدات متنی (استفاده کنید)
+- **متن پررنگ و مهم** با **متن**
+- *متن مورب برای تأکید* با *متن*
+- ***متن بسیار مهم*** با ***متن***
+- ~~متن اشتباه یا منسوخ~~ با ~~متن~~
+- \`کد یا اصطلاح خاص\` با \`کد\`
+- ==متن برجسته== با ==متن==
 
-# سرفصل سطح ۱
-## سرفصل سطح ۲
-### سرفصل سطح ۳
-#### سرفصل سطح ۴
+## انواع لیست‌ها (حتماً استفاده کنید)
+### لیست نامرتب برای نکات کلیدی
+- نکته اول
+  - جزئیات نکته اول
+    - زیرجزئیات
+  - جزئیات دیگر
+- نکته دوم
+* می‌توانید از * استفاده کنید
++ یا از + برای تنوع
 
-## متن‌های ویژه
-می‌توانید متن را به شکل‌های مختلف قالب‌بندی کنید:
+### لیست مرتب برای مراحل و گام‌ها
+1. مرحله اول
+2. مرحله دوم
+   1. زیرمرحله اول
+   2. زیرمرحله دوم
+3. مرحله سوم
 
-- **متن پررنگ** با **متن**
-- *متن مورب* با *متن*
-- ***متن پررنگ و مورب*** با ***متن***
-- ~~متن خط خورده~~ با ~~متن~~
-- کد تک خطی با کد
+### چک‌لیست عملی (بسیار مفید)
+- [ ] کار انجام نشده
+- [x] کار انجام شده
+- [ ] تمرین شماره ۱
+- [ ] تمرین شماره ۲
 
-## لیست‌ها
-### لیست نامرتب
-- مورد اول
-  - زیرمورد اول
-  - زیرمورد دوم
-- مورد دوم
-  * می‌توانید از * هم استفاده کنید
-  + یا از + استفاده کنید
+## نقل‌قول‌های الهام‌بخش (استفاده کنید)
+> این یک نقل‌قول ساده است
 
-### لیست مرتب
-1. مورد اول
-2. مورد دوم
-   1. زیرمورد اول
-   2. زیرمورد دوم
-3. مورد سوم
+> نقل‌قول چندخطی
+> که ادامه دارد
+> و بیشتر تأثیرگذار است
 
-## نقل قول
-نقل قول‌ها با > شروع می‌شوند:
+>> نقل‌قول تو در تو
+>> برای تأکید بیشتر
 
-> این یک نقل قول است
-> که می‌تواند چند خط باشد
->> حتی می‌توانید نقل قول تو در تو داشته باشید
+> **نقل‌قول پررنگ**
+> *برای جملات کلیدی*
 
-## پیوندها
+## جدول‌های کاربردی (حتماً استفاده کنید)
+### جدول ساده
+| موضوع | توضیح | مثال |
+|--------|-------|-------|
+| مفهوم اول | توضیح اول | نمونه اول |
+| مفهوم دوم | توضیح دوم | نمونه دوم |
+
+### جدول با تراز متن
+| راست | وسط | چپ |
+|------:|:----:|:----|
+| راست‌چین | وسط‌چین | چپ‌چین |
+| ۱۲۳ | ۴۵۶ | ۷۸۹ |
+
+## کدها و مثال‌ها
+### کد تک خطی
+برای \`متغیر خاص\` یا \`کلیدواژه\` استفاده کنید.
+
+### کد چندخطی
+\`\`\`
+این یک مثال کد است
+که چندین خط دارد
+و قابل خواندن است
+\`\`\`
+
+## پیوندها و ارجاعات
 - [لینک ساده](https://example.com)
-- [لینک با توضیح](https://example.com "روی من هاور کنید!")
-- لینک مستقیم: <https://example.com>
+- [لینک با توضیح](https://example.com "توضیح ضروری")
+- [لینک داخلی](#بخش-مربوطه)
+- <https://example.com> برای نمایش مستقیم
+- [لینک مرجع][1] برای ارجاع
 
-## تصاویر
-تصاویر مانند لینک‌ها هستند، فقط با یک ! در ابتدا:
+[1]: https://example.com "توضیح مرجع"
 
-![توضیح تصویر](https://picsum.photos/200/100)
+## تصاویر و رسانه
+![توضیح مهم تصویر](https://picsum.photos/400/200 "عنوان تصویر")
 
+[![تصویر با لینک](https://picsum.photos/200/100)](https://example.com)
 
-## جدول‌ها
-جدول‌ها با خط عمودی (|) ایجاد می‌شوند:
-
-| عنوان ۱ | عنوان ۲ | عنوان ۳ |
-|---------|---------|---------|
-| سلول ۱  | سلول ۲  | سلول ۳  |
-| ردیف ۲  | مقدار   | دیگر    |
-
-## خط افقی
-سه خط تیره یا بیشتر یک خط افقی ایجاد می‌کند:
-
+## خطوط جداکننده (برای بخش‌بندی)
 ---
+***
+___
 
-### پانویس
-متن با پانویس[^1] و پانویس دیگر[^2]
+## ترکیبات پیشرفته
+### لیست با نقل‌قول
+1. نکته اول
+   > نقل‌قول مربوطه
+2. نکته دوم
+   > نقل‌قول دیگر
 
-[^1]: این توضیح پانویس اول است
-[^2]: این توضیح پانویس دوم است
+### جدول با لیست
+| عنوان | جزئیات |
+|--------|---------|
+| مورد اول | - نکته ۱<br>- نکته ۲ |
+| مورد دوم | - نکته ۳<br>- نکته ۴ |
+
+## پانویس‌ها برای ارجاعات
+متن با پانویس[^1] و ارجاع دیگر[^مرجع-مهم]
+
+[^1]: توضیح کامل در پانویس
+[^مرجع-مهم]: مرجع مهم و معتبر
+
+## نکات مهم برای مقالات روانشناسی:
+- از سرفصل‌بندی منطقی استفاده کنید
+- نقل‌قول‌های الهام‌بخش بگنجانید  
+- چک‌لیست‌های عملی ارائه دهید
+- جدول‌های مقایسه‌ای بسازید
+- از تأکیدات متنی برای نکات کلیدی استفاده کنید
+- بخش‌ها را با خط افقی از هم جدا کنید
 `
 
 definePageMeta({
@@ -96,6 +146,8 @@ import AddonMarkdownRemark from '~/components/AddonMarkdownRemark.vue'
 const router = useRouter()
 const toaster = useToaster()
 const { streamChat, processing } = useOpenRouter()
+const { createPost, loading: postsLoading, error: postsError } = usePosts()
+const { user } = useUser()
 
 const title = ref('')
 const description = ref('')
@@ -123,6 +175,19 @@ const excerptAiLoading = ref(false)
 const slugAiLoading = ref(false)
 const contentLongAiLoading = ref(false)
 const generateGoalsAiLoading = ref(false)
+const syncAllFieldsLoading = ref(false)
+
+// کنترل طول متن
+const contentLengthTarget = ref(5000) // طول پیش‌فرض ۵۰۰۰ کلمه
+const minContentLength = 1000
+const maxContentLength = 15000
+
+// تولید و افزودن تصویر
+const imageGenerationLoading = ref(false)
+const showImageModal = ref(false)
+const selectedTextForImage = ref('')
+const imageCaption = ref('')
+const imagePrompt = ref('')
 
 const errors = ref({})
 const loading = ref(false)
@@ -217,15 +282,69 @@ function formatLongContent(html: string) {
 
 async function submit() {
   if (!validate()) return
+  
   loading.value = true
-  // Simulate API call
-  setTimeout(() => {
-    loading.value = false
+  
+  try {
+    // تبدیل tags از رشته به آرایه اگر ضروری باشد
+    const tagsArray = Array.isArray(tags.value) ? tags.value : []
+    
+    // داده‌های مقاله برای ایجاد
+    const postData = {
+      title: title.value.trim(),
+      description: description.value.trim(),
+      secretMessage: secretMessage.value.trim() || undefined,
+      goals: goals.value.trim() || undefined,
+      excerpt: excerpt.value.trim() || undefined,
+      contentLong: contentLong.value.trim(),
+      category: category.value,
+      tags: tagsArray,
+      slug: slug.value.trim() || undefined,
+      publishDate: publishDate.value || new Date().toISOString().split('T')[0],
+      readTime: readTime.value ? parseInt(readTime.value) : undefined,
+      featuredImage: uploadedFiles.value?.[0] || null,
+      isFeatured: isFeatured.value || false,
+      allowComments: allowComments.value !== false,
+      status: 'draft' as const, // پیش‌فرض روی draft
+      contentLengthTarget: contentLengthTarget.value || undefined,
+      author: user.value?.id || '',
+      viewCount: 0,
+      likeCount: 0
+    }
+
+    // ایجاد مقاله با استفاده از کامپوزبل
+    const newPost = await createPost(postData)
+    
     success.value = true
+    
+    // نمایش پیام موفقیت
+    toaster.show({
+      title: 'موفقیت آمیز',
+      message: 'مقاله با موفقیت ایجاد شد',
+      color: 'success',
+      icon: 'ph:check-circle',
+      closable: true,
+    })
+    
+    // انتقال به صفحه لیست پس از تأخیر کوتاه
     setTimeout(() => {
       router.push('/posts/list')
-    }, 1200)
-  }, 1200)
+    }, 1000)
+    
+  } catch (error: any) {
+    // مدیریت خطا
+    toaster.show({
+      title: 'خطا در ایجاد مقاله',
+      message: error.message || 'خطای ناشناخته رخ داد',
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
+    
+    console.error('Error creating post:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 function addTag() {
@@ -258,6 +377,7 @@ function savePreviewToLocalStorage() {
     allowComments: allowComments.value,
     secretMessage: secretMessage.value,
     goals: goals.value,
+    contentLengthTarget: contentLengthTarget.value,
     // image: skip for now
   }
   localStorage.setItem('postPreview', JSON.stringify(data))
@@ -293,9 +413,35 @@ watch(
     allowComments,
     secretMessage,
     goals,
+    contentLengthTarget,
   ],
   savePreviewToLocalStorage,
 )
+
+// پیشنهاد همگام‌سازی هنگام تغییر فیلدهای کلیدی
+const syncSuggestionShown = ref(false)
+
+watch([title, secretMessage, category], () => {
+  // فقط اگر حداقل عنوان و یکی از فیلدهای دیگر پر باشد
+  if (!syncSuggestionShown.value && title.value.trim() && 
+      (secretMessage.value.trim() || category.value)) {
+    
+    // نمایش پیشنهاد همگام‌سازی با تأخیر کوتاه
+    setTimeout(() => {
+      if (!syncSuggestionShown.value) {
+        toaster.show({
+          title: '💡 پیشنهاد هوشمند',
+          message: 'برای همخوانی بهتر فیلدها، از دکمه "همگام‌سازی هوشمند" استفاده کنید.',
+          color: 'info',
+          icon: 'ph:lightbulb',
+          timeout: 5000,
+          closable: true,
+        })
+        syncSuggestionShown.value = true
+      }
+    }, 2000) // تأخیر ۲ ثانیه‌ای
+  }
+}, { debounce: 1000 }) // debounce برای جلوگیری از فراخوانی مکرر
 
 function backToPosts() {
   router.push('/posts/list')
@@ -462,29 +608,111 @@ async function suggestAIField(field: string) {
       description: description.value,
       contentLong: contentLong.value,
       goals: goals.value,
+      category: category.value,
     }
     // Compose context string (exclude the current field)
-    const contextString = Object.entries(context)
-      .filter(([key]) => key !== field && context[key])
-      .map(([key, val]) => `${key}: ${val}`)
+    const contextMapping = {
+      title: 'عنوان مقاله',
+      secretMessage: 'پیام مخفی',
+      tags: 'برچسب‌ها',
+      excerpt: 'خلاصه کوتاه',
+      slug: 'اسلاگ',
+      readTime: 'زمان مطالعه',
+      description: 'توضیحات',
+      contentLong: 'متن کامل',
+      goals: 'اهداف آموزشی',
+      category: 'دسته‌بندی',
+    }
+    
+    // Add category label if selected
+    let enrichedContext = { ...context }
+    if (enrichedContext.category) {
+      const selectedCategory = categories.find(c => c.value === enrichedContext.category)
+      if (selectedCategory) {
+        enrichedContext.category = `${selectedCategory.label} (${enrichedContext.category})`
+      }
+    }
+    
+    const contextString = Object.entries(enrichedContext)
+      .filter(([key]) => key !== field && enrichedContext[key])
+      .map(([key, val]) => `${contextMapping[key] || key}: ${val}`)
       .join('\n')
 
     const prompts = {
       title:
-        'یک عنوان مناسب برای مقاله پیشنهاد بده که حتماً با ساختار مارک‌داون و با استفاده از # در ابتدای خط نوشته شود. فقط عنوان را به صورت مارک‌داون بازگردان.',
-      secretMessage: `یک پیام مخفی کوتاه، بسیار دقیق، مرتبط و عمیق فقط برای همین مقاله پیشنهاد بده. پیام باید کاملاً متناسب با موضوع عنوان و سایر اطلاعات مقاله باشد و به خواننده حس خاص و الهام‌بخش منتقل کند. از پیام‌های کلیشه‌ای و بی‌ربط یا جملات بی‌معنی خودداری کن. فقط یک پیام کاملاً مرتبط و معنی‌دار ارائه بده که واقعا به دل خواننده بنشیند.`,
-      tags: 'چند برچسب مرتبط فقط با همین مقاله پیشنهاد بده (با ویرگول جدا کن). فقط لیست برچسب‌ها را بنویس.',
+        `یک عنوان قوی، جذاب و هوک‌دار برای مقاله پیشنهاد بده که حتماً با ساختار مارک‌داون و با استفاده از # در ابتدای خط نوشته شود. عنوان باید:
+        - کاملاً متناسب با پیام مخفی و اهداف آموزشی باشد
+        - برای دسته‌بندی انتخاب شده مناسب باشد  
+        - احساسات خواننده را برانگیزد
+        - کنجکاوی ایجاد کند
+        فقط عنوان را به صورت مارک‌داون بازگردان.`,
+      secretMessage: `یک پیام مخفی عمیق، تأثیرگذار و کاملاً منحصربه‌فرد برای این مقاله خاص پیشنهاد بده. پیام باید:
+        - از صمیم قلب و روح موضوع مقاله باشد
+        - با عنوان، اهداف آموزشی و دسته‌بندی کاملاً همخوان باشد
+        - به‌گونه‌ای باشد که در متن کامل مقاله به صورت طبیعی و زیبا منعکس شود
+        - تحول‌آفرین و الهام‌بخش باشد
+        - خواننده را به تفکر عمیق وادارد
+        از کلیشه‌ها و پیام‌های عمومی خودداری کن. پیام باید منحصراً برای همین موضوع باشد.`,
+      tags: `برچسب‌هایی پیشنهاد بده که:
+        - کاملاً با عنوان، پیام مخفی و اهداف مقاله همخوان باشند
+        - برای دسته‌بندی انتخابی مناسب باشند
+        - جستجوپذیری مقاله را افزایش دهند
+        - ترکیبی از کلیدواژه‌های اصلی و احساسی باشند
+        برچسب‌ها را با ویرگول جدا کن. فقط لیست برچسب‌ها را بنویس.`,
       excerpt:
-        'یک خلاصه کوتاه و مناسب فقط برای همین مقاله پیشنهاد بده. فقط خلاصه را بنویس.',
-      slug: 'یک اسلاگ مناسب (لاتین و بدون فاصله) فقط برای همین مقاله پیشنهاد بده. فقط اسلاگ را بنویس.',
+        `یک خلاصه جذاب و هوک‌دار بنویس که:
+        - جوهره پیام مخفی را منعکس کند
+        - خواننده را تشویق به مطالعه کند  
+        - با اهداف آموزشی همخوان باشد
+        - تیزر مناسبی برای محتوای اصلی باشد
+        فقط خلاصه را بنویس.`,
+      slug: `یک اسلاگ SEO-friendly پیشنهاد بده که:
+        - کاملاً با عنوان و موضوع اصلی مرتبط باشد
+        - لاتین و بدون فاصله باشد
+        - جستجوپذیری بالایی داشته باشد
+        فقط اسلاگ را بنویس.`,
       readTime:
-        'زمان تقریبی مطالعه (بر حسب دقیقه) فقط برای همین مقاله پیشنهاد بده. فقط یک عدد بنویس.',
+        'بر اساس محتوای موجود و پیچیدگی موضوع، زمان تقریبی مطالعه (بر حسب دقیقه) را محاسبه کن. فقط یک عدد بنویس.',
       description:
-        'یک توضیح کوتاه فقط برای همین مقاله پیشنهاد بده. فقط توضیح را بنویس.',
-      contentLong: `یک متن کامل و منسجم برای مقاله بنویس. حتماً فقط و فقط با مارک‌داون بنویس. متن باید حداقل ۵۰۰۰ کلمه باشد و تا حد ممکن از ساختارها و امکانات مختلف مارک‌داون (سرفصل، لیست، چک‌لیست، نقل‌قول، جدول، کد، تصویر، پیوند و غیره) استفاده کن. پاسخ نهایی باید حتماً ساختار مارک‌داون داشته باشد و نشانه‌های مارک‌داون (مثل # برای عنوان، - یا * برای لیست و ...) به‌درستی رعایت شود. مثال‌های زیر را برای تنوع ساختار ببین:
-${markdownGuide}`,
+        `یک توضیح جامع و جذاب بنویس که:
+        - خلاصه‌ای از مطالبی که خواننده یاد می‌گیرد باشد
+        - با پیام مخفی و اهداف آموزشی همخوان باشد
+        - انگیزه مطالعه ایجاد کند
+        فقط توضیح را بنویس.`,
+      contentLong: `یک متن کامل، جامع و تأثیرگذار برای مقاله بنویس که:
+
+**الزامات اساسی:**
+- حتماً فقط و فقط با مارک‌داون نوشته شود
+- تقریباً ${contentLengthTarget.value} کلمه باشد (حداقل ${Math.floor(contentLengthTarget.value * 0.8)} و حداکثر ${Math.floor(contentLengthTarget.value * 1.2)} کلمه)
+- کاملاً با عنوان، پیام مخفی، اهداف آموزشی و دسته‌بندی همخوان باشد
+
+**ساختار مطلوب:**
+- پیام مخفی به صورت طبیعی و زیبا در طول متن منعکس شود (نه به صورت مستقیم)
+- هر یک از اهداف آموزشی در بخش‌های مختلف مقاله پوشش داده شود
+- تناسب کامل با دسته‌بندی انتخابی داشته باشد
+
+**تنوع مارک‌داون (حتماً استفاده کن):**
+- سرفصل‌های مختلف (H1, H2, H3, H4)
+- لیست‌های مرتب و نامرتب  
+- چک‌لیست‌های عملی
+- نقل‌قول‌های الهام‌بخش
+- جدول‌های مفید
+- کدهای نمونه (در صورت نیاز)
+- پیوندهای مرجع
+- تأکیدات متنی (bold, italic)
+- بخش‌بندی با خط افقی
+
+راهنمای مارک‌داون:
+${markdownGuide}
+
+متن نهایی باید خواننده را تحت تأثیر قرار دهد و احساس رضایت و دستاورد به او بدهد.`,
       goals:
-        'اهداف آموزشی و روانشناختی مقاله را بنویسید. هدف روانشناس از نگارش مقاله، دستاوردها و مطالبی که خواننده یاد می‌گیرد را اینجا بنویسید...',
+        `بر اساس عنوان، پیام مخفی و دسته‌بندی مقاله، اهداف آموزشی و روانشناختی مشخص و قابل اندازه‌گیری بنویس که:
+        - مستقیماً با موضوع اصلی مرتبط باشند
+        - قابل دستیابی و عملی باشند  
+        - شامل جنبه‌های عاطفی، شناختی و رفتاری باشند
+        - تحول مثبت در زندگی خواننده ایجاد کنند
+        هر هدف را در یک خط مجزا بنویس.`,
     }
     const prompt = prompts[field] || 'یک مقدار مناسب پیشنهاد بده.'
     const userContent = context[field]
@@ -850,6 +1078,7 @@ function handleMarkdownSelection(event: Event) {
       if (selectedText) {
         console.log('Selected text:', selectedText) // Debug log
         selectedMarkdownText.value = selectedText
+        selectedTextForImage.value = selectedText // برای تولید تصویر
         selectedTextRange.value = { start, end }
 
         // Show the inline buttons when text is selected
@@ -962,6 +1191,7 @@ function resetForm() {
   goals.value = ''
   tags.value = []
   uploadedFiles.value = null
+  contentLengthTarget.value = 5000
 
   // Close the modal after resetting
   showClearConfirm.value = false
@@ -994,6 +1224,7 @@ const loadPreviewFromLocalStorage = () => {
     allowComments.value = data.allowComments ?? true
     secretMessage.value = data.secretMessage || ''
     goals.value = data.goals || ''
+    contentLengthTarget.value = data.contentLengthTarget || 5000
     uploadedFiles.value = data.uploadedFiles || null
   }
 }
@@ -1018,6 +1249,185 @@ onMounted(() => {
   loadPreviewFromLocalStorage()
 })
 
+// همگام‌سازی هوشمند تمام فیلدها
+const syncAllFieldsAI = async () => {
+  syncAllFieldsLoading.value = true
+
+  try {
+    if (!title.value.trim()) {
+      toaster.show({
+        title: 'هشدار',
+        message: 'برای همگام‌سازی، ابتدا عنوان مقاله را وارد کنید.',
+        color: 'warning',
+        icon: 'ph:warning',
+        closable: true,
+      })
+      return
+    }
+
+    // توضیح برای کاربر
+    toaster.show({
+      title: 'در حال همگام‌سازی',
+      message: 'تمام فیلدها بر اساس عنوان و اطلاعات موجود به‌روزرسانی می‌شوند...',
+      color: 'info',
+      icon: 'svg-spinners:90-ring-with-bg',
+      timeout: 0,
+    })
+
+    // ترتیب بهینه برای همگام‌سازی
+    const syncOrder = [
+      'secretMessage',
+      'category', 
+      'description',
+      'goals',
+      'tags',
+      'excerpt',
+      'slug',
+      'contentLong'
+    ]
+
+    // همگام‌سازی با تأخیر برای جلوگیری از بارگذاری زیاد سرور
+    for (const fieldName of syncOrder) {
+      try {
+        await suggestAIField(fieldName)
+        // تأخیر کوتاه بین درخواست‌ها
+        await new Promise(resolve => setTimeout(resolve, 500))
+      } catch (error) {
+        console.warn(`خطا در همگام‌سازی ${fieldName}:`, error)
+        // ادامه با فیلد بعدی حتی در صورت خطا
+      }
+    }
+
+    toaster.show({
+      title: 'موفقیت',
+      message: 'همگام‌سازی با موفقیت انجام شد. تمام فیلدها به‌روزرسانی شدند.',
+      color: 'success',
+      icon: 'ph:check-circle',
+      closable: true,
+      timeout: 5000,
+    })
+
+  } catch (error) {
+    console.error('خطا در همگام‌سازی:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در همگام‌سازی فیلدها. لطفاً دوباره امتحان کنید.',
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
+  } finally {
+    syncAllFieldsLoading.value = false
+  }
+}
+
+// تولید تصویر متناسب با متن انتخابی
+const generateImageForText = async () => {
+  if (!selectedTextForImage.value.trim()) {
+    toaster.show({
+      title: 'هشدار',
+      message: 'ابتدا بخشی از متن را انتخاب کنید.',
+      color: 'warning',
+      icon: 'ph:warning',
+      closable: true,
+    })
+    return
+  }
+
+  imageGenerationLoading.value = true
+
+  try {
+    // تولید prompt برای تصویر
+    const prompt = `بر اساس متن زیر، یک توضیح دقیق و جذاب برای تولید تصویر بنویس. توضیح باید شامل عناصر بصری، رنگ‌ها، ترکیب‌بندی و حالت کلی تصویر باشد:
+
+${selectedTextForImage.value}
+
+همچنین یک زیرنویس مناسب و جذاب برای این تصویر پیشنهاد بده که با محتوای متن هماهنگ باشد.
+
+فرمت پاسخ:
+PROMPT: [توضیح تصویر]
+CAPTION: [زیرنویس تصویر]`
+
+    const messages = [{ role: 'user', content: prompt }]
+    
+    let result = ''
+    await streamChat(messages, {}, (chunk) => {
+      result += chunk
+    })
+
+    if (result) {
+      // استخراج prompt و caption از پاسخ
+      const promptMatch = result.match(/PROMPT:\s*(.+?)(?=CAPTION:|$)/s)
+      const captionMatch = result.match(/CAPTION:\s*(.+)$/s)
+
+      if (promptMatch) {
+        imagePrompt.value = promptMatch[1].trim()
+      }
+      if (captionMatch) {
+        imageCaption.value = captionMatch[1].trim()
+      }
+
+      showImageModal.value = true
+    }
+
+  } catch (error) {
+    console.error('خطا در تولید prompt تصویر:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در تولید اطلاعات تصویر. لطفاً دوباره امتحان کنید.',
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
+  } finally {
+    imageGenerationLoading.value = false
+  }
+}
+
+// افزودن markdown تصویر به متن
+const insertImageMarkdown = () => {
+  if (!imagePrompt.value.trim() || !imageCaption.value.trim()) {
+    toaster.show({
+      title: 'هشدار', 
+      message: 'لطفاً prompt و زیرنویس تصویر را کامل کنید.',
+      color: 'warning',
+      icon: 'ph:warning',
+      closable: true,
+    })
+    return
+  }
+
+  // تولید URL ساختگی برای نمونه - در عمل باید از API تولید تصویر استفاده شود
+  const imageUrl = `https://picsum.photos/600/400?random=${Date.now()}`
+  
+  const imageMarkdown = `\n\n![${imageCaption.value}](${imageUrl})\n*${imageCaption.value}*\n\n`
+  
+  // افزودن به محل انتخاب یا انتهای متن
+  const textarea = markdownTextarea.value?.$el?.querySelector('textarea')
+  if (textarea && selectedTextRange.value.end > 0) {
+    const currentValue = textarea.value
+    const beforeText = currentValue.substring(0, selectedTextRange.value.end)
+    const afterText = currentValue.substring(selectedTextRange.value.end)
+    contentLong.value = beforeText + imageMarkdown + afterText
+  } else {
+    contentLong.value += imageMarkdown
+  }
+
+  // بستن modal و پاک کردن فیلدها
+  showImageModal.value = false
+  selectedTextForImage.value = ''
+  imagePrompt.value = ''
+  imageCaption.value = ''
+
+  toaster.show({
+    title: 'موفقیت',
+    message: 'تصویر با موفقیت به متن اضافه شد.',
+    color: 'success',
+    icon: 'ph:check-circle',
+    closable: true,
+  })
+}
+
 const generateGoalsListAI = async () => {
   generateGoalsAiLoading.value = true
 
@@ -1035,7 +1445,32 @@ const generateGoalsListAI = async () => {
     }
 
     goals.value = ''
-    const prompt = `با توجه به عنوان مقاله زیر، یک لیست از اهداف آموزشی و روانشناختی مرتبط با همان عنوان که خواننده پس از مطالعه این مقاله به دست می‌آورد به زبان فارسی بنویس. تاکید: خروجی باید فقط یک لیست باشد و هر هدف در یک خط مجزا نوشته شود.\nعنوان مقاله: ${topic}`
+    
+    // جمع‌آوری اطلاعات موجود برای ایجاد زمینه بهتر
+    const contextInfo = []
+    if (title.value.trim()) contextInfo.push(`عنوان: ${title.value}`)
+    if (secretMessage.value.trim()) contextInfo.push(`پیام مخفی: ${secretMessage.value}`)
+    if (category.value) {
+      const selectedCategory = categories.find(c => c.value === category.value)
+      if (selectedCategory) contextInfo.push(`دسته‌بندی: ${selectedCategory.label}`)
+    }
+    if (tags.value.length > 0) contextInfo.push(`برچسب‌ها: ${tags.value.join('، ')}`)
+    if (description.value.trim()) contextInfo.push(`توضیحات: ${description.value}`)
+    
+    const contextString = contextInfo.join('\n')
+    
+    const prompt = `بر اساس اطلاعات زیر، اهداف آموزشی و روانشناختی دقیق و قابل اندازه‌گیری بنویس که خواننده پس از مطالعه این مقاله به دست خواهد آورد:
+
+${contextString}
+
+اهداف باید:
+- مستقیماً با عنوان و پیام مخفی مرتبط باشند
+- برای دسته‌بندی انتخابی مناسب باشند
+- شامل ابعاد شناختی، عاطفی و رفتاری باشند
+- عملی و قابل دستیابی باشند
+- تحول مثبت در زندگی خواننده ایجاد کنند
+
+هر هدف را در یک خط مجزا و به صورت مشخص بنویس. حداقل ۵ و حداکثر ۱۰ هدف ارائه دهید.`
 
     const messages = [
       {
@@ -1585,6 +2020,54 @@ const generateGoalsListAI = async () => {
                       />
                     </button>
                   </div>
+                  
+                  <!-- Content Length Control -->
+                  <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="flex items-center gap-2">
+                        <Icon name="ph:text-aa" class="text-primary-500 size-5" />
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          طول متن مطلوب: <span class="text-primary-600 dark:text-primary-400 font-bold">{{ contentLengthTarget.toLocaleString() }}</span> کلمه
+                        </label>
+                      </div>
+                      <span class="text-xs text-gray-500 bg-white dark:bg-gray-700 px-2 py-1 rounded-full border">
+                        {{ minContentLength.toLocaleString() }} - {{ maxContentLength.toLocaleString() }}
+                      </span>
+                    </div>
+                    
+                    <!-- Custom Slider -->
+                    <div class="relative mb-3">
+                      <input
+                        v-model.number="contentLengthTarget"
+                        type="range"
+                        :min="minContentLength"
+                        :max="maxContentLength"
+                        :step="500"
+                        class="content-length-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                      />
+                      <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
+                        <span class="bg-white dark:bg-gray-700 px-2 py-1 rounded border">کوتاه</span>
+                        <span class="bg-white dark:bg-gray-700 px-2 py-1 rounded border">متوسط</span>
+                        <span class="bg-white dark:bg-gray-700 px-2 py-1 rounded border">بلند</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Length Indicators -->
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                      <div class="text-center p-2 bg-white dark:bg-gray-700 rounded border">
+                        <div class="text-orange-500 font-semibold">کوتاه</div>
+                        <div class="text-gray-500">۱,۰۰۰ - ۳,۰۰۰</div>
+                      </div>
+                      <div class="text-center p-2 bg-white dark:bg-gray-700 rounded border">
+                        <div class="text-blue-500 font-semibold">متوسط</div>
+                        <div class="text-gray-500">۳,۰۰۰ - ۸,۰۰۰</div>
+                      </div>
+                      <div class="text-center p-2 bg-white dark:bg-gray-700 rounded border">
+                        <div class="text-green-500 font-semibold">بلند</div>
+                        <div class="text-gray-500">۸,۰۰۰ - ۱۵,۰۰۰</div>
+                      </div>
+                    </div>
+                  </div>
                   <BaseTextarea
                     ref="markdownTextarea"
                     v-model="contentLong"
@@ -1633,6 +2116,29 @@ const generateGoalsListAI = async () => {
                           />
                           <span>{{ action.title }}</span>
                         </button>
+                        
+                        <!-- دکمه تولید تصویر -->
+                        <button
+                          :disabled="imageGenerationLoading || !selectedTextForImage"
+                          :class="[
+                            'flex items-center gap-1 px-2 py-1 text-xs text-right rounded-md transition-colors border',
+                            'border-green-200 hover:bg-green-100 dark:border-green-600 dark:hover:bg-green-700',
+                          ]"
+                          title="تولید تصویر متناسب"
+                          @click="generateImageForText"
+                        >
+                          <Icon
+                            v-if="imageGenerationLoading"
+                            name="svg-spinners:90-ring-with-bg"
+                            class="size-3 flex-shrink-0"
+                          />
+                          <Icon
+                            v-else
+                            name="ph:image"
+                            class="text-green-500 size-3 flex-shrink-0"
+                          />
+                          <span>افزودن تصویر</span>
+                        </button>
                       </div>
                     </template>
                   </BaseTextarea>
@@ -1650,7 +2156,8 @@ const generateGoalsListAI = async () => {
                       </h3>
                     </div>
                     <div
-                      class="prose prose-sm dark:prose-invert prose-headings:mb-4 prose-ul:list-disc prose-ol:list-decimal prose-li:mr-4 rtl max-w-none"
+                      class="prose prose-sm dark:prose-invert prose-headings:mb-4 prose-ul:list-disc prose-ol:list-decimal prose-li:mr-4 rtl max-w-none prose-p:text-right prose-ul:text-right prose-ol:text-right"
+                      style="margin-left: 0 !important; padding-left: 0 !important;"
                     >
                       <div
                         class="text-muted-500 dark:text-muted-400 leading-relaxed"
@@ -1716,6 +2223,17 @@ const generateGoalsListAI = async () => {
               پاک کردن همه
             </BaseButton>
             <BaseButton
+              color="success"
+              :loading="syncAllFieldsLoading"
+              :disabled="!title.trim() || syncAllFieldsLoading"
+              class="w-full rounded-xl px-4 py-3 text-base font-bold mb-3"
+              data-nui-tooltip="تمام فیلدها را بر اساس عنوان و اطلاعات موجود به‌روزرسانی می‌کند"
+              @click="syncAllFieldsAI"
+            >
+              <Icon name="ph:arrows-clockwise" class="ml-2 size-4" />
+              همگام‌سازی هوشمند
+            </BaseButton>
+            <BaseButton
               title="ویرایش دکمه‌های هوش مصنوعی"
               class="mb-2 flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-right text-xs transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
               @click="openActionEditor"
@@ -1740,12 +2258,14 @@ const generateGoalsListAI = async () => {
                 راهنما
               </BaseHeading>
               <BaseParagraph class="text-muted-500 dark:text-muted-400">
-                <ul class="list-inside list-disc space-y-2">
-                  <li>عنوان باید کوتاه و گویا باشد</li>
-                  <li>توضیح کوتاه برای نمایش در لیست مقالات استفاده می‌شود</li>
-                  <li>متن کامل مقاله باید شامل جزئیات کافی باشد</li>
-                  <li>تاریخ انتشار باید تعیین شود</li>
-                  <li>برچسب‌ها به جستجوپذیری مقاله کمک می‌کنند</li>
+                <ul class="list-inside list-disc space-y-2 text-sm">
+                  <li><strong>عنوان</strong> پایه تمام فیلدهای دیگر است</li>
+                  <li><strong>پیام مخفی</strong> باید در کل متن منعکس شود</li>
+                  <li><strong>همگام‌سازی هوشمند</strong> تمام فیلدها را هماهنگ می‌کند</li>
+                  <li><strong>کنترل طول متن</strong> با slider قابل تنظیم است</li>
+                  <li><strong>تولید تصویر:</strong> متن را انتخاب کنید و "افزودن تصویر" کلیک کنید</li>
+                  <li>متن کامل باید با اهداف آموزشی همخوان باشد</li>
+                  <li>برچسب‌ها باید با دسته‌بندی مرتبط باشند</li>
                 </ul>
               </BaseParagraph>
             </div>
@@ -1825,6 +2345,76 @@ const generateGoalsListAI = async () => {
       <BaseButton color="primary" @click="applyMarkdownAiEdit">
         اعمال تغییر
       </BaseButton>
+    </div>
+  </TairoModal>
+
+  <!-- Image Generation Modal -->
+  <TairoModal
+    :open="showImageModal"
+    size="lg"
+    @close="showImageModal = false"
+    rounded="lg"
+  >
+    <template #header>
+      <div class="flex w-full items-center justify-between p-4">
+        <h2 class="text-primary-500 text-lg font-bold">
+          <Icon name="ph:image" class="mr-2 inline-block size-5" />
+          تولید تصویر متناسب با متن
+        </h2>
+        <button
+          type="button"
+          class="text-muted-400 hover:text-muted-500 dark:hover:text-muted-300 transition-colors"
+          @click="showImageModal = false"
+        >
+          <Icon name="ph:x" class="size-5" />
+        </button>
+      </div>
+    </template>
+
+    <div class="px-6 pb-6 space-y-4">
+      <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+        <h3 class="text-sm font-medium mb-2">متن انتخاب شده:</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">{{ selectedTextForImage }}</p>
+      </div>
+
+      <div>
+        <BaseTextarea
+          v-model="imagePrompt"
+          label="توضیح تصویر (Prompt)"
+          placeholder="توضیح دقیق تصویر مورد نظر..."
+          rows="4"
+          class="mb-4"
+        />
+      </div>
+
+      <div>
+        <BaseInput
+          v-model="imageCaption"
+          label="زیرنویس تصویر"
+          placeholder="زیرنویس جذاب برای تصویر..."
+        />
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-4">
+        <BaseButton
+          color="muted"
+          variant="pastel"
+          class="px-4 py-2 text-sm font-medium"
+          @click="showImageModal = false"
+        >
+          <Icon name="ph:arrow-counter-clockwise" class="ml-1.5 size-4" />
+          انصراف
+        </BaseButton>
+        <BaseButton
+          color="primary"
+          :disabled="!imagePrompt.trim() || !imageCaption.trim()"
+          class="px-4 py-2 text-sm font-medium"
+          @click="insertImageMarkdown"
+        >
+          <Icon name="ph:plus-circle" class="ml-1.5 size-4" />
+          افزودن تصویر به متن
+        </BaseButton>
+      </div>
     </div>
   </TairoModal>
 
@@ -1933,5 +2523,135 @@ const generateGoalsListAI = async () => {
 
 .long-description ol {
   @apply list-decimal list-inside mb-4;
+}
+
+/* Fix for markdown preview spacing */
+.prose {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  direction: rtl;
+  text-align: right;
+}
+
+.prose > * {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  text-align: right;
+}
+
+.prose p,
+.prose li,
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  text-align: right !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+.prose ul,
+.prose ol {
+  text-align: right !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 1.5rem;
+}
+
+.prose blockquote {
+  text-align: right !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 1rem;
+  border-right: 4px solid;
+  border-left: none;
+}
+
+.prose table {
+  text-align: right !important;
+  margin-left: 0 !important;
+}
+
+.prose th,
+.prose td {
+  text-align: right !important;
+}
+
+/* Custom Slider Styles */
+.content-length-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.content-length-slider::-webkit-slider-track {
+  background: linear-gradient(90deg, #f59e0b 0%, #3b82f6 50%, #10b981 100%);
+  height: 8px;
+  border-radius: 5px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.content-length-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.content-length-slider::-webkit-slider-thumb:hover {
+  background: #3b82f6;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.content-length-slider::-moz-range-track {
+  background: linear-gradient(90deg, #f59e0b 0%, #3b82f6 50%, #10b981 100%);
+  height: 8px;
+  border-radius: 5px;
+  border: none;
+}
+
+.content-length-slider::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.content-length-slider::-moz-range-thumb:hover {
+  background: #3b82f6;
+  transform: scale(1.1);
+}
+
+/* Dark mode adjustments */
+.dark .content-length-slider::-webkit-slider-thumb {
+  background: #1f2937;
+  border-color: #60a5fa;
+}
+
+.dark .content-length-slider::-webkit-slider-thumb:hover {
+  background: #60a5fa;
+}
+
+.dark .content-length-slider::-moz-range-thumb {
+  background: #1f2937;
+  border-color: #60a5fa;
+}
+
+.dark .content-length-slider::-moz-range-thumb:hover {
+  background: #60a5fa;
 }
 </style>

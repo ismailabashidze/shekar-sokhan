@@ -707,9 +707,7 @@ onMounted(() => {
     </TairoContentWrapper>
 
     <!-- Tour Component -->
-    <TourButton 
-      :auto-start="'sessions'"
-      :auto-start-delay="2000"
+        <TourButton
     />
   </div>
 </template>

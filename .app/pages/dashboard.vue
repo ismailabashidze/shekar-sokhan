@@ -696,9 +696,7 @@ const closeAlphaModal = () => {
     </BaseCard>
 
     <!-- Tour Component -->
-    <TourButton 
-      :auto-start="'dashboard'"
-      :auto-start-delay="2000"
+        <TourButton
     />
   </div>
 </template>

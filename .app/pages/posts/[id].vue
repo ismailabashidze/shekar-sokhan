@@ -13,412 +13,556 @@ definePageMeta({
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
+
 const route = useRoute()
-const postId = Number(route.params.id)
+const router = useRouter()
+const toaster = useToaster()
 
-// Sample posts data
-const posts = [
-  {
-    id: 1,
-    title: 'چگونه خودآگاهی می‌تواند زندگی‌تان را تغییر دهد',
-    description: 'کشف قدرت خودآگاهی برای بهبود زندگی و راهکارهای کاربردی برای تقویت آن.',
-    content: `
-      <p>خودآگاهی یکی از مهم‌ترین مهارت‌هایی است که می‌تواند زندگی شما را متحول کند. در این مقاله، به بررسی مفهوم خودآگاهی، فواید آن و راهکارهایی برای تقویت این مهارت می‌پردازیم.</p>
-      
-      <h2>خودآگاهی چیست؟</h2>
-      <p>خودآگاهی به معنای شناخت عمیق از خود، شامل احساسات، افکار، باورها، ارزش‌ها و انگیزه‌های درونی است. این مهارت به ما کمک می‌کند تا بتوانیم رفتارهای خود را بهتر درک کنیم و در نتیجه، کنترل بیشتری بر زندگی خود داشته باشیم.</p>
-      
-      <h2>فواید خودآگاهی</h2>
-      <ul>
-        <li>بهبود روابط بین فردی</li>
-        <li>افزایش اعتماد به نفس</li>
-        <li>تصمیم‌گیری بهتر</li>
-        <li>مدیریت استرس و اضطراب</li>
-        <li>رشد شخصی و حرفه‌ای</li>
-      </ul>
-      
-      <h2>راهکارهایی برای تقویت خودآگاهی</h2>
-      <p>تمرین مدیتیشن و ذهن‌آگاهی، نوشتن خاطرات روزانه، دریافت بازخورد از دیگران، و خودارزیابی منظم از جمله راهکارهایی هستند که می‌توانند به تقویت خودآگاهی کمک کنند.</p>
-    `,
-    image: '/img/illustrations/dashboards/writer/post-1.svg',
-    category: 'روانشناسی',
-    tags: ['خودآگاهی', 'رشد فردی', 'سلامت روان'],
-    date: '۲ هفته پیش',
-    readTime: '۵ دقیقه',
-    likes: '245',
-    views: '3.2K',
-    author: {
-      name: 'دکتر علی مرادی',
-      role: 'روانشناس بالینی',
-      avatar: '/img/avatars/6.svg',
-      bio: 'دکتر علی مرادی، روانشناس بالینی با بیش از ۱۵ سال تجربه در زمینه روانشناسی مثبت‌نگر و رشد فردی. نویسنده چندین کتاب پرفروش در زمینه خودآگاهی و هوش هیجانی.',
-    },
-    comments: [
-      {
-        id: 1,
-        user: 'سارا احمدی',
-        avatar: '/img/avatars/10.svg',
-        text: 'مقاله بسیار مفیدی بود. من از تکنیک‌های خودآگاهی که معرفی کردید استفاده کردم و واقعاً تأثیر مثبتی در زندگی‌ام داشته است.',
-        date: '۳ روز پیش',
-        likes: 15,
-      },
-      {
-        id: 2,
-        user: 'محمد کریمی',
-        avatar: '/img/avatars/11.svg',
-        text: 'ممنون از اشتراک‌گذاری این اطلاعات ارزشمند. آیا کتاب خاصی در این زمینه پیشنهاد می‌کنید؟',
-        date: '۱ هفته پیش',
-        likes: 8,
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: 'استرس را بکش، قبل از اینکه تو را بکشد',
-    description: 'چرا باید استرس داشته باشیم، وقتی می توانیم شاد باشیم؟',
-    content: `
-      <p>استرس یکی از بزرگترین چالش‌های زندگی مدرن است. در این مقاله، به بررسی منابع استرس، تأثیرات آن بر سلامت جسمی و روانی، و راهکارهایی برای مدیریت استرس می‌پردازیم.</p>
-      
-      <h2>استرس چیست؟</h2>
-      <p>استرس پاسخ طبیعی بدن به فشارها و تهدیدهای محیطی است. اما وقتی این پاسخ به صورت مزمن ادامه پیدا کند، می‌تواند تأثیرات مخربی بر سلامت ما داشته باشد.</p>
-      
-      <h2>تأثیرات استرس بر سلامت</h2>
-      <ul>
-        <li>افزایش فشار خون</li>
-        <li>ضعف سیستم ایمنی</li>
-        <li>اختلالات خواب</li>
-        <li>افسردگی و اضطراب</li>
-        <li>مشکلات گوارشی</li>
-      </ul>
-      
-      <h2>راهکارهایی برای مدیریت استرس</h2>
-      <p>تمرینات تنفسی، مدیتیشن، فعالیت بدنی منظم، خواب کافی، و تغذیه سالم از جمله راهکارهایی هستند که می‌توانند به کاهش استرس کمک کنند.</p>
-    `,
-    image: '/img/illustrations/dashboards/writer/post-2.svg',
-    category: 'سلامت روان',
-    tags: ['استرس', 'آرامش', 'سلامت روان'],
-    date: '۱ ماه پیش',
-    readTime: '۷ دقیقه',
-    likes: '189',
-    views: '2.8K',
-    author: {
-      name: 'دکتر مرضیه یوسفی',
-      role: 'روان درمانگر و عضو هیئت علمی دانشگاه',
-      avatar: '/img/avatars/5.svg',
-      bio: 'دکتر مرضیه یوسفی، روان درمانگر با تخصص در درمان اختلالات اضطرابی و استرس. عضو هیئت علمی دانشگاه و نویسنده چندین مقاله علمی در زمینه مدیریت استرس و سلامت روان.',
-    },
-    comments: [
-      {
-        id: 1,
-        user: 'رضا محمدی',
-        avatar: '/img/avatars/12.svg',
-        text: 'واقعاً ممنون از این مقاله کاربردی. من تکنیک‌های تنفسی رو شروع کردم و خیلی کمکم کرده.',
-        date: '۲ هفته پیش',
-        likes: 12,
-      },
-    ],
-  },
-]
+// استفاده از کامپوزبل posts
+const { 
+  currentPost, 
+  loading, 
+  error,
+  getPost,
+  getPostsByCategory,
+  incrementViewCount,
+  toggleLike
+} = usePosts()
 
-// Find the current post
-const post = computed(() => posts.find(p => p.id === postId) || posts[0])
+const postId = route.params.id as string
 
-// Related posts (excluding current post)
-const relatedPosts = computed(() =>
-  posts.filter(p => p.id !== postId && p.category === post.value.category).slice(0, 2),
-)
+// State for related posts and comments
+const relatedPosts = ref([])
+const comments = ref([])
+
+// Load post and related data
+const loadPost = async () => {
+  try {
+    await getPost(postId)
+    
+    if (currentPost.value) {
+      // Increment view count
+      await incrementViewCount(postId)
+      
+      // Load related posts from same category
+      if (currentPost.value.category) {
+        const relatedData = await getPostsByCategory(currentPost.value.category, {
+          page: 1,
+          perPage: 3,
+          filters: { status: 'published' }
+        })
+        // Exclude current post from related posts
+        relatedPosts.value = relatedData.items?.filter(p => p.id !== postId).slice(0, 2) || []
+      }
+    }
+  } catch (err) {
+    console.error('Error loading post:', err)
+    if (err?.message?.includes('404') || err?.message?.includes('not found')) {
+      // Post not found, redirect to 404 or posts list
+      router.push('/posts/list')
+    }
+  }
+}
+
+// Format functions
+const formatDate = (dateString: string): string => {
+  if (!dateString) return ''
+  
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMs = now.getTime() - date.getTime()
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+  
+  if (diffInDays === 0) return 'امروز'
+  if (diffInDays === 1) return 'دیروز'
+  if (diffInDays < 7) return `${diffInDays} روز پیش`
+  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} هفته پیش`
+  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} ماه پیش`
+  return `${Math.floor(diffInDays / 365)} سال پیش`
+}
+
+const formatViewCount = (count: number): string => {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K`
+  }
+  return count.toString()
+}
+
+// Computed properties for display
+const post = computed(() => currentPost.value)
+
+const displayAuthor = computed(() => {
+  if (!post.value?.author) return null
+  
+  // Handle both expanded and non-expanded author data
+  if (typeof post.value.author === 'string') {
+    return {
+      name: 'نویسنده',
+      role: '',
+      avatar: '/img/avatars/placeholder.svg',
+      bio: ''
+    }
+  }
+  
+  return {
+    name: post.value.author.name || post.value.author.meta?.name || 'نویسنده',
+    role: 'نویسنده مقاله',
+    avatar: post.value.author.avatar || post.value.author.meta?.avatarUrl || '/img/avatars/placeholder.svg',
+    bio: post.value.author.bio || 'نویسنده محترم این مقاله'
+  }
+})
+
+// Load data on mount
+onMounted(() => {
+  loadPost()
+})
 
 // Comment form
 const newComment = ref('')
 const submitComment = () => {
   if (!newComment.value.trim()) return
 
-  // In a real app, this would send the comment to an API
-  alert('نظر شما با موفقیت ثبت شد')
+  // TODO: Implement comment API
+  toaster.show({
+    title: 'ویژگی نظرات',
+    message: 'قابلیت نظردهی به زودی فعال خواهد شد',
+    color: 'info',
+    icon: 'ph:info',
+    closable: true,
+  })
   newComment.value = ''
 }
 
 // Like post
-const likePost = () => {
-  // In a real app, this would update the like count via an API
-  post.value.likes = (parseInt(post.value.likes) + 1).toString()
+const likePost = async () => {
+  if (!post.value?.id) return
+  
+  try {
+    await toggleLike(post.value.id)
+    toaster.show({
+      title: 'پسندیدن',
+      message: 'مقاله پسندیده شد',
+      color: 'success',
+      icon: 'ph:heart',
+      closable: true,
+    })
+  } catch (err) {
+    console.error('Error liking post:', err)
+  }
 }
+
+// SEO Meta
+watchEffect(() => {
+  if (post.value) {
+    useHead({
+      title: post.value.title,
+      meta: [
+        { name: 'description', content: post.value.description || post.value.excerpt },
+        { property: 'og:title', content: post.value.title },
+        { property: 'og:description', content: post.value.description || post.value.excerpt },
+        { property: 'og:image', content: post.value.featuredImage || '/img/og-default.jpg' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'keywords', content: post.value.tags?.join(', ') || '' },
+      ]
+    })
+  }
+})
 </script>
 
 <template>
   <div>
-    <BasePageHeading
-      :title="post.title"
-      :subtitle="post.description"
-    >
-      <template #pageTitle>
-        <div class="flex items-center">
-          <Icon name="ph:article-duotone" class="text-primary-500 me-2 size-6" />
-          <span>مقاله</span>
-        </div>
-      </template>
-    </BasePageHeading>
+    <!-- Loading State -->
+    <div v-if="loading" class="flex justify-center py-20">
+      <BasePlaceload class="size-16" />
+    </div>
 
-    <div class="pb-20">
-      <BaseCard class="p-5">
-        <!-- Back Button -->
-        <div class="mb-6">
-          <NuxtLink
-            to="/posts/list"
-            class="border-muted-200 hover:bg-muted-100 dark:border-muted-700 dark:hover:bg-muted-700 flex w-fit items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors"
-          >
-            <Icon name="ph:arrow-right-duotone" class="text-muted-500 size-4" />
-            <span class="text-muted-500">بازگشت به مقالات</span>
-          </NuxtLink>
-        </div>
+    <!-- Error State -->
+    <div v-else-if="error" class="py-20 text-center">
+      <div class="text-muted-400 mb-4">
+        <Icon name="ph:warning-duotone" class="mx-auto size-16" />
+      </div>
+      <h3 class="text-muted-800 dark:text-muted-200 mb-2 text-lg font-semibold">
+        خطا در بارگیری مقاله
+      </h3>
+      <p class="text-muted-500 mb-4">{{ error }}</p>
+      <div class="flex justify-center gap-3">
+        <BaseButton
+          color="primary"
+          variant="pastel"
+          @click="loadPost"
+        >
+          تلاش مجدد
+        </BaseButton>
+        <BaseButton
+          color="muted"
+          variant="pastel"
+          @click="router.push('/posts/list')"
+        >
+          بازگشت به لیست
+        </BaseButton>
+      </div>
+    </div>
 
-        <!-- Post Header -->
-        <div class="mb-8">
-          <h1 class="text-muted-800 mb-4 text-3xl font-bold dark:text-white">
-            {{ post.title }}
-          </h1>
+    <!-- Post Content -->
+    <div v-else-if="post">
+      <BasePageHeading
+        :title="post.title"
+        :subtitle="post.description"
+      >
+        <template #pageTitle>
+          <div class="flex items-center">
+            <Icon name="ph:article-duotone" class="text-primary-500 me-2 size-6" />
+            <span>مقاله</span>
+          </div>
+        </template>
+      </BasePageHeading>
 
-          <div class="mb-6 flex flex-wrap items-center gap-4">
-            <div class="flex items-center gap-2">
-              <img
-                :src="post.author.avatar"
-                :alt="post.author.name"
-                class="size-10 rounded-full"
-              >
-              <div>
-                <h4 class="text-muted-800 text-sm font-medium dark:text-white">
-                  {{ post.author.name }}
-                </h4>
-                <p class="text-muted-400 text-xs">
-                  {{ post.author.role }}
-                </p>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-4">
-              <div class="flex items-center gap-1">
-                <Icon name="ph:clock-duotone" class="text-muted-400 size-4" />
-                <span class="text-muted-400 text-xs">{{ post.date }}</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <Icon name="ph:book-open-duotone" class="text-muted-400 size-4" />
-                <span class="text-muted-400 text-xs">{{ post.readTime }}</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <Icon name="ph:eye-duotone" class="text-muted-400 size-4" />
-                <span class="text-muted-400 text-xs">{{ post.views }}</span>
-              </div>
-            </div>
+      <div class="pb-20">
+        <BaseCard class="p-5">
+          <!-- Back Button -->
+          <div class="mb-6">
+            <NuxtLink
+              to="/posts/list"
+              class="border-muted-200 hover:bg-muted-100 dark:border-muted-700 dark:hover:bg-muted-700 flex w-fit items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+            >
+              <Icon name="ph:arrow-right-duotone" class="text-muted-500 size-4" />
+              <span class="text-muted-500">بازگشت به مقالات</span>
+            </NuxtLink>
           </div>
 
-          <!-- Featured Image -->
-          <img
-            :src="post.image"
-            :alt="post.title"
-            class="mb-6 w-full rounded-xl object-cover"
-            style="max-height: 400px;"
-          >
+          <!-- Post Header -->
+          <div class="mb-8">
+            <h1 class="text-muted-800 mb-4 text-3xl font-bold dark:text-white">
+              {{ post.title }}
+            </h1>
 
-          <!-- Tags -->
-          <div class="mb-6 flex flex-wrap gap-2">
-            <span
-              v-for="tag in post.tags"
-              :key="tag"
-              class="bg-muted-100 dark:bg-muted-700 text-muted-500 dark:text-muted-300 rounded-full px-3 py-1 text-sm"
-            >
-              {{ tag }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Post Content -->
-        <div class="mb-10">
-          <div class="prose prose-lg dark:prose-invert max-w-none" v-html="post.content" />
-        </div>
-
-        <!-- Post Actions -->
-        <div class="border-muted-200 dark:border-muted-700 mb-10 flex items-center justify-between border-y py-4">
-          <div class="flex items-center gap-4">
-            <button
-              class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-rose-500/10 hover:text-rose-500"
-              @click="likePost"
-            >
-              <Icon name="ph:heart-duotone" class="size-5 text-rose-500" />
-              <span>{{ post.likes }} پسندیدن</span>
-            </button>
-
-            <button class="hover:bg-primary-500/10 hover:text-primary-500 flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors">
-              <Icon name="ph:share-network-duotone" class="text-muted-400 size-5" />
-              <span>اشتراک‌گذاری</span>
-            </button>
-          </div>
-
-          <button class="hover:bg-primary-500/10 hover:text-primary-500 flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors">
-            <Icon name="ph:bookmark-simple-duotone" class="text-muted-400 size-5" />
-            <span>ذخیره</span>
-          </button>
-        </div>
-
-        <!-- Author Bio -->
-        <div class="dark:bg-muted-800 bg-muted-50 mb-10 rounded-xl p-6">
-          <div class="flex items-start gap-4">
-            <img
-              :src="post.author.avatar"
-              :alt="post.author.name"
-              class="size-16 rounded-full"
-            >
-            <div>
-              <h3 class="text-muted-800 mb-2 text-lg font-bold dark:text-white">
-                {{ post.author.name }}
-              </h3>
-              <p class="text-muted-500 mb-4 text-sm">
-                {{ post.author.bio }}
-              </p>
-              <div class="flex gap-2">
-                <button class="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm text-white transition-colors">
-                  دنبال کردن
-                </button>
-                <button class="border-muted-200 hover:bg-muted-100 dark:border-muted-700 dark:hover:bg-muted-700 rounded-lg border px-4 py-2 text-sm transition-colors">
-                  مشاهده پروفایل
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Related Posts -->
-        <div class="mb-10">
-          <h3 class="text-muted-800 mb-6 text-xl font-bold dark:text-white">
-            مقالات مرتبط
-          </h3>
-
-          <div class="grid gap-6 sm:grid-cols-2">
-            <div
-              v-for="relatedPost in relatedPosts"
-              :key="relatedPost.id"
-              class="dark:bg-muted-800 group relative overflow-hidden rounded-xl bg-white shadow-lg transition-transform hover:-translate-y-1"
-            >
-              <div class="bg-muted-200 dark:bg-muted-700 relative aspect-video overflow-hidden">
+            <div class="mb-6 flex flex-wrap items-center gap-4">
+              <div v-if="displayAuthor" class="flex items-center gap-2">
                 <img
-                  :src="relatedPost.image"
-                  :alt="relatedPost.title"
-                  class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  :src="displayAuthor.avatar"
+                  :alt="displayAuthor.name"
+                  class="size-10 rounded-full"
                 >
-                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-
-                <NuxtLink
-                  :to="`/posts/${relatedPost.id}`"
-                  class="absolute inset-0 flex items-center justify-center"
-                >
-                  <div class="flex size-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-                    <Icon name="ph:article-duotone" class="size-6 text-white" />
-                  </div>
-                </NuxtLink>
-
-                <div class="absolute bottom-2 right-2 rounded-lg bg-black/50 px-2 py-1 backdrop-blur-sm">
-                  <span class="text-xs text-white">{{ relatedPost.readTime }}</span>
-                </div>
-              </div>
-
-              <div class="p-4">
-                <NuxtLink :to="`/posts/${relatedPost.id}`">
-                  <h4 class="text-muted-800 mb-2 line-clamp-1 text-lg font-bold dark:text-white">
-                    {{ relatedPost.title }}
+                <div>
+                  <h4 class="text-muted-800 text-sm font-medium dark:text-white">
+                    {{ displayAuthor.name }}
                   </h4>
-                </NuxtLink>
-
-                <p class="text-muted-500 mb-4 line-clamp-2 text-sm">
-                  {{ relatedPost.description }}
-                </p>
-
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <img
-                      :src="relatedPost.author.avatar"
-                      :alt="relatedPost.author.name"
-                      class="size-8 rounded-full"
-                    >
-                    <span class="text-muted-400 text-xs">{{ relatedPost.author.name }}</span>
-                  </div>
-
-                  <div class="flex items-center gap-2">
-                    <Icon name="ph:heart-duotone" class="size-4 text-rose-500" />
-                    <span class="text-muted-400 text-xs">{{ relatedPost.likes }}</span>
-                  </div>
+                  <p class="text-muted-400 text-xs">
+                    {{ displayAuthor.role }}
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Comments Section -->
-        <div>
-          <h3 class="text-muted-800 mb-6 text-xl font-bold dark:text-white">
-            نظرات ({{ post.comments?.length || 0 }})
-          </h3>
-
-          <!-- Comment List -->
-          <div class="mb-6 space-y-4">
-            <div
-              v-for="comment in post.comments"
-              :key="comment.id"
-              class="dark:bg-muted-800 bg-muted-50 rounded-xl p-4"
-            >
-              <div class="mb-2 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <img
-                    :src="comment.avatar"
-                    :alt="comment.user"
-                    class="size-8 rounded-full"
-                  >
-                  <div>
-                    <h4 class="text-muted-800 text-sm font-medium dark:text-white">
-                      {{ comment.user }}
-                    </h4>
-                    <p class="text-muted-400 text-xs">
-                      {{ comment.date }}
-                    </p>
-                  </div>
-                </div>
-
+              <div class="flex items-center gap-4">
                 <div class="flex items-center gap-1">
-                  <Icon name="ph:heart-duotone" class="size-4 text-rose-500" />
-                  <span class="text-muted-400 text-xs">{{ comment.likes }}</span>
+                  <Icon name="ph:clock-duotone" class="text-muted-400 size-4" />
+                  <span class="text-muted-400 text-xs">{{ formatDate(post.created || post.publishDate) }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <Icon name="ph:book-open-duotone" class="text-muted-400 size-4" />
+                  <span class="text-muted-400 text-xs">{{ post.readTime || 5 }} دقیقه</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <Icon name="ph:eye-duotone" class="text-muted-400 size-4" />
+                  <span class="text-muted-400 text-xs">{{ formatViewCount(post.viewCount || 0) }}</span>
                 </div>
               </div>
+            </div>
 
-              <p class="text-muted-500 text-sm">
-                {{ comment.text }}
-              </p>
+            <!-- Featured Image -->
+            <img
+              v-if="post.featuredImage || post.image"
+              :src="post.featuredImage || post.image"
+              :alt="post.title"
+              class="mb-6 w-full rounded-xl object-cover"
+              style="max-height: 400px;"
+            >
+
+            <!-- Tags -->
+            <div v-if="post.tags && post.tags.length > 0" class="mb-6 flex flex-wrap gap-2">
+              <span
+                v-for="tag in post.tags"
+                :key="tag"
+                class="bg-muted-100 dark:bg-muted-700 text-muted-500 dark:text-muted-300 rounded-full px-3 py-1 text-sm"
+              >
+                {{ tag }}
+              </span>
             </div>
           </div>
 
-          <!-- Comment Form -->
-          <div class="dark:bg-muted-800 rounded-xl bg-white p-4 shadow-sm">
-            <h4 class="text-muted-800 mb-4 text-lg font-medium dark:text-white">
-              ارسال نظر
-            </h4>
-
-            <div class="mb-4">
-              <textarea
-                v-model="newComment"
-                rows="4"
-                placeholder="نظر خود را بنویسید..."
-                class="border-muted-200 bg-muted-50 dark:border-muted-700 dark:bg-muted-900 focus:ring-primary-500 w-full rounded-lg border p-3 text-sm focus:outline-none focus:ring-1 dark:text-white"
-              />
+          <!-- Post Content -->
+          <div class="mb-10">
+            <AddonMarkdownRemark 
+              v-if="post.contentLong" 
+              :value="post.contentLong" 
+              class="prose prose-lg dark:prose-invert max-w-none markdown-content"
+            />
+            <div v-else class="text-muted-500 text-center py-8">
+              محتوای مقاله در دسترس نیست
             </div>
+          </div>
 
-            <div class="flex justify-end">
+          <!-- Post Actions -->
+          <div class="border-muted-200 dark:border-muted-700 mb-10 flex items-center justify-between border-y py-4">
+            <div class="flex items-center gap-4">
               <button
-                class="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm text-white transition-colors"
-                @click="submitComment"
+                class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-rose-500/10 hover:text-rose-500"
+                @click="likePost"
               >
-                ارسال نظر
+                <Icon name="ph:heart-duotone" class="size-5 text-rose-500" />
+                <span>{{ post.likeCount || 0 }} پسندیدن</span>
+              </button>
+
+              <button class="hover:bg-primary-500/10 hover:text-primary-500 flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors">
+                <Icon name="ph:share-network-duotone" class="text-muted-400 size-5" />
+                <span>اشتراک‌گذاری</span>
               </button>
             </div>
+
+            <button class="hover:bg-primary-500/10 hover:text-primary-500 flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors">
+              <Icon name="ph:bookmark-simple-duotone" class="text-muted-400 size-5" />
+              <span>ذخیره</span>
+            </button>
           </div>
-        </div>
-      </BaseCard>
+
+          <!-- Author Bio -->
+          <div v-if="displayAuthor" class="dark:bg-muted-800 bg-muted-50 mb-10 rounded-xl p-6">
+            <div class="flex items-start gap-4">
+              <img
+                :src="displayAuthor.avatar"
+                :alt="displayAuthor.name"
+                class="size-16 rounded-full"
+              >
+              <div>
+                <h3 class="text-muted-800 mb-2 text-lg font-bold dark:text-white">
+                  {{ displayAuthor.name }}
+                </h3>
+                <p class="text-muted-500 mb-4 text-sm">
+                  {{ displayAuthor.bio }}
+                </p>
+                <div class="flex gap-2">
+                  <button class="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm text-white transition-colors">
+                    دنبال کردن
+                  </button>
+                  <button class="border-muted-200 hover:bg-muted-100 dark:border-muted-700 dark:hover:bg-muted-700 rounded-lg border px-4 py-2 text-sm transition-colors">
+                    مشاهده پروفایل
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Related Posts -->
+          <div v-if="relatedPosts && relatedPosts.length > 0" class="mb-10">
+            <h3 class="text-muted-800 mb-6 text-xl font-bold dark:text-white">
+              مقالات مرتبط
+            </h3>
+
+            <div class="grid gap-6 sm:grid-cols-2">
+              <div
+                v-for="relatedPost in relatedPosts"
+                :key="relatedPost.id"
+                class="dark:bg-muted-800 group relative overflow-hidden rounded-xl bg-white shadow-lg transition-transform hover:-translate-y-1"
+              >
+                <div class="bg-muted-200 dark:bg-muted-700 relative aspect-video overflow-hidden">
+                  <img
+                    :src="relatedPost.featuredImage || relatedPost.image || '/img/placeholder.jpg'"
+                    :alt="relatedPost.title"
+                    class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  >
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+
+                  <NuxtLink
+                    :to="`/posts/${relatedPost.id}`"
+                    class="absolute inset-0 flex items-center justify-center"
+                  >
+                    <div class="flex size-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
+                      <Icon name="ph:article-duotone" class="size-6 text-white" />
+                    </div>
+                  </NuxtLink>
+
+                  <div class="absolute bottom-2 right-2 rounded-lg bg-black/50 px-2 py-1 backdrop-blur-sm">
+                    <span class="text-xs text-white">{{ relatedPost.readTime || 5 }} دقیقه</span>
+                  </div>
+                </div>
+
+                <div class="p-4">
+                  <NuxtLink :to="`/posts/${relatedPost.id}`">
+                    <h4 class="text-muted-800 mb-2 line-clamp-1 text-lg font-bold dark:text-white">
+                      {{ relatedPost.title }}
+                    </h4>
+                  </NuxtLink>
+
+                  <p class="text-muted-500 mb-4 line-clamp-2 text-sm">
+                    {{ relatedPost.description }}
+                  </p>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <img
+                        :src="relatedPost.author?.avatar || relatedPost.author?.meta?.avatarUrl || '/img/avatars/placeholder.svg'"
+                        :alt="relatedPost.author?.name || 'نویسنده'"
+                        class="size-8 rounded-full"
+                      >
+                      <span class="text-muted-400 text-xs">
+                        {{ relatedPost.author?.name || relatedPost.author?.meta?.name || 'نویسنده' }}
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      <Icon name="ph:heart-duotone" class="size-4 text-rose-500" />
+                      <span class="text-muted-400 text-xs">{{ relatedPost.likeCount || 0 }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div>
+            <h3 class="text-muted-800 mb-6 text-xl font-bold dark:text-white">
+              نظرات ({{ comments.length }})
+            </h3>
+
+            <!-- Comment List -->
+            <div v-if="comments.length > 0" class="mb-6 space-y-4">
+              <div
+                v-for="comment in comments"
+                :key="comment.id"
+                class="dark:bg-muted-800 bg-muted-50 rounded-xl p-4"
+              >
+                <div class="mb-2 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <img
+                      :src="comment.avatar || '/img/avatars/placeholder.svg'"
+                      :alt="comment.user || 'کاربر'"
+                      class="size-8 rounded-full"
+                    >
+                    <div>
+                      <h4 class="text-muted-800 text-sm font-medium dark:text-white">
+                        {{ comment.user || 'کاربر ناشناس' }}
+                      </h4>
+                      <p class="text-muted-400 text-xs">
+                        {{ formatDate(comment.date || comment.created) }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-1">
+                    <Icon name="ph:heart-duotone" class="size-4 text-rose-500" />
+                    <span class="text-muted-400 text-xs">{{ comment.likes || 0 }}</span>
+                  </div>
+                </div>
+
+                <p class="text-muted-500 text-sm">
+                  {{ comment.text || comment.content }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Empty comments state -->
+            <div v-else class="mb-6 text-center py-8">
+              <div class="text-muted-400 mb-2">
+                <Icon name="ph:chat-circle-duotone" class="mx-auto size-12" />
+              </div>
+              <p class="text-muted-500 text-sm">هنوز نظری ثبت نشده است</p>
+            </div>
+
+            <!-- Comment Form -->
+            <div class="dark:bg-muted-800 rounded-xl bg-white p-4 shadow-sm">
+              <h4 class="text-muted-800 mb-4 text-lg font-medium dark:text-white">
+                ارسال نظر
+              </h4>
+
+              <div class="mb-4">
+                <textarea
+                  v-model="newComment"
+                  rows="4"
+                  placeholder="نظر خود را بنویسید..."
+                  class="border-muted-200 bg-muted-50 dark:border-muted-700 dark:bg-muted-900 focus:ring-primary-500 w-full rounded-lg border p-3 text-sm focus:outline-none focus:ring-1 dark:text-white"
+                />
+              </div>
+
+              <div class="flex justify-end">
+                <button
+                  class="bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg px-4 py-2 text-sm text-white transition-colors"
+                  :disabled="!newComment.trim()"
+                  @click="submitComment"
+                >
+                  ارسال نظر
+                </button>
+              </div>
+            </div>
+          </div>
+        </BaseCard>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Markdown content styling */
+.markdown-content {
+  direction: rtl;
+  text-align: right;
+}
+
+.markdown-content :deep(h1),
+.markdown-content :deep(h2),
+.markdown-content :deep(h3),
+.markdown-content :deep(h4),
+.markdown-content :deep(h5),
+.markdown-content :deep(h6) {
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.markdown-content :deep(p) {
+  text-align: right;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.markdown-content :deep(ul),
+.markdown-content :deep(ol) {
+  text-align: right;
+  margin-bottom: 1rem;
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+.markdown-content :deep(blockquote) {
+  border-right: 4px solid #e5e7eb;
+  border-left: none;
+  padding-right: 1rem;
+  padding-left: 0;
+  margin: 1rem 0;
+  font-style: italic;
+}
+
+.markdown-content :deep(table) {
+  direction: rtl;
+  text-align: right;
+}
+
+.markdown-content :deep(th),
+.markdown-content :deep(td) {
+  text-align: right;
+}
+
+.markdown-content :deep(code) {
+  direction: ltr;
+  text-align: left;
+}
+
+.markdown-content :deep(pre) {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Dark mode adjustments */
+.dark .markdown-content :deep(blockquote) {
+  border-right-color: #374151;
+}
+</style>

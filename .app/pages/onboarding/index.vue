@@ -510,8 +510,6 @@ const pasteCouponCode = () => {
   </TairoModal>
 
   <!-- Tour Component -->
-  <TourButton 
-    :auto-start="'onboarding'"
-    :auto-start-delay="3000"
+      <TourButton
   />
 </template>

@@ -7,6 +7,65 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.5.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.5.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              2 ژولای 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>پیاده‌سازی قابلیت Progressive Web App (PWA) برای پشتیبانی آفلاین و نصب اپلیکیشن</li>
+              <li>افزودن PWA install prompt با تجربه نصب شبیه اپلیکیشن‌های بومی</li>
+              <li>ایجاد manifest و service worker دستی PWA برای عملکرد قابل اعتماد</li>
+              <li>افزودن کامپوننت دکمه نصب در کنار دکمه تور</li>
+            </ul>
+
+            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های رابط کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود پاپ‌آپ نصب PWA با فاصله‌گذاری بهتر، آیکون‌های بزرگ‌تر و تایپوگرافی بهتر</li>
+              <li>افزودن آیکون دانلود به دکمه نصب برای بهتر شناخته شدن توسط کاربر</li>
+              <li>بهبود پشتیبانی چیدمان RTL برای install prompt با هم‌ترازی مناسب متن فارسی</li>
+              <li>بهبود سازگاری حالت تاریک برای کامپوننت‌های PWA</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>ایجاد service worker سفارشی برای استراتژی‌های کش و قابلیت آفلاین</li>
+              <li>پیاده‌سازی manifest PWA با متادیتای فارسی مناسب و جهت RTL</li>
+              <li>افزودن پلاگین Nuxt برای ثبت و مدیریت service worker</li>
+              <li>حذف قابلیت شروع خودکار تور برای جلوگیری از تداخل با مودال‌ها</li>
+              <li>افزودن meta tag ها برای قابلیت‌های web app موبایل و رنگ‌های تم</li>
+            </ul>
+
+            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>رفع تداخل شروع خودکار تور با مودال نسخه آزمایشی</li>
+              <li>حذف لاگ‌های debug از کامپوننت‌های PWA برای کنسول تمیزتر</li>
+              <li>غیرفعال کردن راه‌اندازی خودکار تور در بارگذاری صفحه</li>
+            </ul>
+
+            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
+              بومی‌سازی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>پشتیبانی کامل زبان فارسی برای رابط نصب PWA</li>
+              <li>افزودن نام و توضیحات فارسی اپلیکیشن در manifest PWA</li>
+              <li>بهینه‌سازی RTL برای install prompt با جهت متن مناسب</li>
+            </ul>
+          </div>
+
           <!-- Version 2.4.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

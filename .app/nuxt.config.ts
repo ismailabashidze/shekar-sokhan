@@ -22,6 +22,26 @@ export default defineNuxtConfig({
     '../layers/tairo',
   ],
 
+  app: {
+    head: {
+      meta: [
+        { name: 'mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
+        { name: 'apple-mobile-web-app-title', content: 'ذهنا' },
+        { name: 'application-name', content: 'ذهنا' },
+        { name: 'msapplication-TileColor', content: '#4F46E5' },
+        { name: 'theme-color', content: '#4F46E5' },
+      ],
+      link: [
+        { rel: 'manifest', href: '/manifest.json' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/pwa-192x192.png' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon.ico' },
+      ],
+    },
+  },
+
   /**
    * Load local font with @fontsource packages
    * @see https://fontsource.org/
@@ -52,7 +72,7 @@ export default defineNuxtConfig({
       dargahPassword: process.env.DARGAH_PASSWORD || '',
     },
   },
-  buildModules: [
-    '@nuxtjs/pwa',
-  ],
+  // modules: [
+  //   '@vite-pwa/nuxt'
+  // ],
 })

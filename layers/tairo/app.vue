@@ -26,6 +26,8 @@ useHead({
       <NuxtPage />
     </NuxtLayout>
     <CommonVersionDisplay />
+    <PwaInstallPrompt />
+    <TairoPwaInstallButton />
   </div>
 </template>
 <style>

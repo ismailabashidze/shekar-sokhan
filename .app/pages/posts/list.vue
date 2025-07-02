@@ -13,7 +13,27 @@ definePageMeta({
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
-const posts = [
+
+// استفاده از کامپوزبل posts
+const { 
+  posts, 
+  loading, 
+  error, 
+  totalPages, 
+  totalItems,
+  getPosts, 
+  deletePost,
+  searchPosts,
+  getPostsByCategory,
+  getUserPosts
+} = usePosts()
+
+// State for pagination and filtering
+const currentPage = ref(1)
+const postsPerPage = ref(9)
+
+// Sample posts for backup - will be replaced by API data
+const samplePosts = [
   {
     id: 1,
     title: 'چگونه خودآگاهی می‌تواند زندگی‌تان را تغییر دهد',
@@ -115,42 +135,142 @@ const sortOptions = [
   { value: 'views', label: 'پربازدیدترین' },
 ]
 
-// Computed properties
-const filteredPosts = computed(() => {
-  let result = [...posts]
-
-  // Apply category filter
-  if (selectedCategory.value !== 'all') {
-    result = result.filter(p => p.category.toLowerCase() === selectedCategory.value)
+// Search and filter functions
+const performSearch = async () => {
+  if (searchQuery.value.trim()) {
+    await searchPosts(searchQuery.value, {
+      page: currentPage.value,
+      perPage: postsPerPage.value,
+      sort: getSortValue(),
+    })
+  } else {
+    await loadPosts()
   }
+}
 
-  // Apply search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(p =>
-      p.title.toLowerCase().includes(query)
-      || p.description.toLowerCase().includes(query)
-      || p.tags.some(tag => tag.toLowerCase().includes(query)),
-    )
+const filterByCategory = async (category: string) => {
+  selectedCategory.value = category
+  currentPage.value = 1
+  
+  if (category === 'all') {
+    await loadPosts()
+  } else {
+    await getPostsByCategory(category, {
+      page: currentPage.value,
+      perPage: postsPerPage.value,
+      sort: getSortValue(),
+    })
   }
+}
 
-  // Apply sorting
+const getSortValue = () => {
   switch (sortBy.value) {
     case 'oldest':
-      // Assuming newer posts have higher IDs
-      result.sort((a, b) => a.id - b.id)
-      break
+      return '+created'
     case 'popular':
-      result.sort((a, b) => parseInt(b.likes) - parseInt(a.likes))
-      break
+      return '-likeCount'
     case 'views':
-      result.sort((a, b) => parseInt(b.views.replace('K', '000')) - parseInt(a.views.replace('K', '000')))
-      break
+      return '-viewCount'
     default: // newest
-      result.sort((a, b) => b.id - a.id)
+      return '-created'
   }
+}
 
-  return result
+// Main load posts function
+const loadPosts = async () => {
+  try {
+    await getPosts({
+      page: currentPage.value,
+      perPage: postsPerPage.value,
+      sort: getSortValue(),
+      filters: {
+        status: 'published' // فقط مقالات منتشر شده
+      }
+    })
+  } catch (err) {
+    console.error('Error loading posts:', err)
+  }
+}
+
+// Watch for changes in sort and search
+watch(sortBy, () => {
+  if (searchQuery.value.trim()) {
+    performSearch()
+  } else if (selectedCategory.value !== 'all') {
+    filterByCategory(selectedCategory.value)
+  } else {
+    loadPosts()
+  }
+})
+
+// Simple debounce function
+let searchTimeout: NodeJS.Timeout | null = null
+
+watch(searchQuery, () => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  
+  searchTimeout = setTimeout(() => {
+    performSearch()
+  }, 500)
+})
+
+// Pagination
+const changePage = (page: number) => {
+  currentPage.value = page
+  if (searchQuery.value.trim()) {
+    performSearch()
+  } else if (selectedCategory.value !== 'all') {
+    filterByCategory(selectedCategory.value)
+  } else {
+    loadPosts()
+  }
+}
+
+// Delete post function
+const handleDeletePost = async (postId: string) => {
+  if (confirm('آیا از حذف این مقاله اطمینان دارید؟')) {
+    try {
+      await deletePost(postId)
+      await loadPosts() // Reload after delete
+    } catch (err) {
+      console.error('Error deleting post:', err)
+    }
+  }
+}
+
+// Format functions for display
+const formatViewCount = (count: number | string): string => {
+  const num = typeof count === 'string' ? parseInt(count) : count
+  if (num >= 1000) {
+    return `${(num / 1000).toFixed(1)}K`
+  }
+  return num.toString()
+}
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMs = now.getTime() - date.getTime()
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+  
+  if (diffInDays === 0) return 'امروز'
+  if (diffInDays === 1) return 'دیروز'
+  if (diffInDays < 7) return `${diffInDays} روز پیش`
+  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} هفته پیش`
+  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} ماه پیش`
+  return `${Math.floor(diffInDays / 365)} سال پیش`
+}
+
+// Load posts on mount
+onMounted(() => {
+  loadPosts()
+})
+
+// Computed properties for display
+const displayPosts = computed(() => {
+  return posts.value.length > 0 ? posts.value : samplePosts
 })
 
 // View mode (grid or list)
@@ -236,7 +356,7 @@ const viewMode = ref('grid')
                     ? 'bg-primary-500 text-white'
                     : 'bg-muted-100 text-muted-500 hover:bg-primary-500/10 hover:text-primary-500 dark:bg-muted-800 dark:text-muted-300'
                 ]"
-                @click="selectedCategory = category.value"
+                @click="filterByCategory(category.value)"
               >
                 <Icon :name="category.icon" class="size-4" />
                 {{ category.label }}
@@ -264,14 +384,56 @@ const viewMode = ref('grid')
             </div>
           </div>
 
+          <!-- Loading State -->
+          <div v-if="loading" class="flex justify-center py-12">
+            <BasePlaceload class="size-12" />
+          </div>
+
+          <!-- Error State -->
+          <div v-else-if="error" class="py-12 text-center">
+            <div class="text-muted-400 mb-4">
+              <Icon name="ph:warning-duotone" class="mx-auto size-16" />
+            </div>
+            <h3 class="text-muted-800 dark:text-muted-200 mb-2 text-lg font-semibold">
+              خطا در بارگیری مقالات
+            </h3>
+            <p class="text-muted-500 mb-4">{{ error }}</p>
+            <BaseButton
+              color="primary"
+              variant="pastel"
+              @click="loadPosts"
+            >
+              تلاش مجدد
+            </BaseButton>
+          </div>
+
           <!-- Posts Grid/List -->
           <div
+            v-else
             :class="[
               viewMode === 'grid' ? 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3' : 'space-y-6'
             ]"
           >
+            <!-- Empty State -->
+            <div v-if="displayPosts.length === 0" class="col-span-full py-12 text-center">
+              <div class="text-muted-400 mb-4">
+                <Icon name="ph:article-duotone" class="mx-auto size-16" />
+              </div>
+              <h3 class="text-muted-800 dark:text-muted-200 mb-2 text-lg font-semibold">
+                هیچ مقاله‌ای یافت نشد
+              </h3>
+              <p class="text-muted-500 mb-4">مقاله‌ای با معیارهای جستجوی شما پیدا نشد.</p>
+              <BaseButton
+                color="primary"
+                variant="pastel"
+                @click="searchQuery = ''; selectedCategory = 'all'; loadPosts()"
+              >
+                مشاهده همه مقالات
+              </BaseButton>
+            </div>
+
             <div
-              v-for="post in filteredPosts"
+              v-for="post in displayPosts"
               :key="post.id"
               :class="[
                 'dark:bg-muted-800 group relative overflow-hidden bg-white shadow-lg transition-transform duration-300 hover:-translate-y-1',
@@ -302,7 +464,7 @@ const viewMode = ref('grid')
                 </NuxtLink>
 
                 <div class="absolute bottom-2 right-2 rounded-lg bg-black/50 px-2 py-1 backdrop-blur-sm">
-                  <span class="text-xs text-white">{{ post.readTime }}</span>
+                  <span class="text-xs text-white">{{ post.readTime || '5' }} دقیقه</span>
                 </div>
               </div>
 
@@ -338,34 +500,101 @@ const viewMode = ref('grid')
                   <!-- Author -->
                   <div class="flex items-center gap-2">
                     <img
-                      :src="post.author.avatar"
-                      :alt="post.author.name"
+                      :src="post.author?.avatar || post.author?.meta?.avatarUrl || '/img/avatars/placeholder.svg'"
+                      :alt="post.author?.name || post.author?.meta?.name || 'نویسنده'"
                       class="size-8 rounded-full"
                     >
                     <div>
                       <h4 class="text-muted-800 text-sm font-medium dark:text-white">
-                        {{ post.author.name }}
+                        {{ post.author?.name || post.author?.meta?.name || 'نویسنده' }}
                       </h4>
                       <p class="text-muted-400 text-xs">
-                        {{ post.author.role }}
+                        {{ formatDate(post.created || post.publishDate) }}
                       </p>
                     </div>
                   </div>
 
-                  <!-- Stats -->
-                  <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1">
-                      <Icon name="ph:eye-duotone" class="text-muted-400 size-4" />
-                      <span class="text-muted-400 text-xs">{{ post.views }}</span>
+                  <!-- Stats and Actions -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="flex items-center gap-1">
+                        <Icon name="ph:eye-duotone" class="text-muted-400 size-4" />
+                        <span class="text-muted-400 text-xs">{{ formatViewCount(post.viewCount || post.views || 0) }}</span>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <Icon name="ph:heart-duotone" class="size-4 text-rose-500" />
+                        <span class="text-muted-400 text-xs">{{ post.likeCount || post.likes || 0 }}</span>
+                      </div>
                     </div>
-                    <div class="flex items-center gap-1">
-                      <Icon name="ph:heart-duotone" class="size-4 text-rose-500" />
-                      <span class="text-muted-400 text-xs">{{ post.likes }}</span>
+
+                    <!-- Action Buttons (only show for actual posts from API) -->
+                    <div v-if="post.id && typeof post.id === 'string'" class="flex items-center gap-1">
+                      <NuxtLink
+                        :to="`/posts/edit?id=${post.id}`"
+                        class="flex size-7 items-center justify-center rounded-full bg-primary-500/10 text-primary-500 transition-colors hover:bg-primary-500/20"
+                      >
+                        <Icon name="ph:pencil" class="size-3" />
+                      </NuxtLink>
+                      <button
+                        class="flex size-7 items-center justify-center rounded-full bg-danger-500/10 text-danger-500 transition-colors hover:bg-danger-500/20"
+                        @click="handleDeletePost(post.id)"
+                      >
+                        <Icon name="ph:trash" class="size-3" />
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            <!-- Pagination -->
+            <div v-if="totalPages > 1" class="mt-8 flex justify-center">
+              <div class="flex items-center gap-2">
+                <BaseButton
+                  :disabled="currentPage === 1"
+                  color="muted"
+                  variant="pastel"
+                  size="sm"
+                  @click="changePage(currentPage - 1)"
+                >
+                  <Icon name="ph:arrow-right" class="size-4" />
+                  قبلی
+                </BaseButton>
+
+                <div class="flex items-center gap-1">
+                  <BaseButton
+                    v-for="page in Math.min(totalPages, 7)"
+                    :key="page"
+                    :color="currentPage === page ? 'primary' : 'muted'"
+                    :variant="currentPage === page ? 'solid' : 'pastel'"
+                    size="sm"
+                    class="min-w-[2rem]"
+                    @click="changePage(page)"
+                  >
+                    {{ page }}
+                  </BaseButton>
+                </div>
+
+                <BaseButton
+                  :disabled="currentPage === totalPages"
+                  color="muted"
+                  variant="pastel"
+                  size="sm"
+                  @click="changePage(currentPage + 1)"
+                >
+                  بعدی
+                  <Icon name="ph:arrow-left" class="size-4" />
+                </BaseButton>
+              </div>
+            </div>
+
+            <!-- Create Post Button (Floating Action Button) -->
+            <NuxtLink
+              to="/posts/create"
+              class="fixed bottom-6 left-6 z-50 flex size-14 items-center justify-center rounded-full bg-primary-500 text-white shadow-lg transition-transform hover:scale-110 hover:bg-primary-600"
+            >
+              <Icon name="ph:plus-bold" class="size-6" />
+            </NuxtLink>
           </div>
         </div>
       </BaseCard>

@@ -128,16 +128,13 @@
 <script setup lang="ts">
 interface Props {
   showFloatingButton?: boolean
-  autoStart?: string
-  autoStartDelay?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showFloatingButton: true,
-  autoStartDelay: 2000
+  showFloatingButton: true
 })
 
-const { tours, startTour, resetAllTours, autoStartTour } = useTour()
+const { tours, startTour, resetAllTours } = useTour()
 const isModalOpen = ref(false)
 
 // Available tours for current page
@@ -194,12 +191,7 @@ const resetAllToursAndClose = () => {
   })
 }
 
-// Auto start tour when component mounts
-onMounted(() => {
-  if (props.autoStart) {
-    autoStartTour(props.autoStart, props.autoStartDelay)
-  }
-})
+// Component is ready - no auto start
 </script>
 
 <style scoped>
