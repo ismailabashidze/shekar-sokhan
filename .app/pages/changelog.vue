@@ -7,6 +7,34 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.5.1 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.5.1
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              30 ژانویه 2025
+            </p>
+
+            <h3 class="text-danger-500 mb-2 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>رفع اشکالات جزئی و بهبود عملکرد</li>
+              <li>بهبود پایداری و تجربه کاربری</li>
+              <li>به‌روزرسانی وابستگی‌ها و پچ‌های امنیتی</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهینه‌سازی و پاکسازی کد</li>
+              <li>بهبود مدیریت خطاها</li>
+              <li>بهبود تجربه توسعه</li>
+            </ul>
+          </div>
+
           <!-- Version 2.5.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

@@ -1,6 +1,5 @@
 const CACHE_NAME = 'zehna-pwa-v1'
 const urlsToCache = [
-  '/',
   '/manifest.json',
   '/pwa-192x192.png',
   '/pwa-512x512.png'
@@ -38,11 +37,21 @@ self.addEventListener('activate', event => {
 
 // Fetch event
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request)
-      })
-  )
+  // Skip navigation requests to allow redirects to work properly
+  if (event.request.mode === 'navigate') {
+    return
+  }
+  
+  // Only cache static assets, not HTML pages
+  if (event.request.destination === 'image' || 
+      event.request.destination === 'script' || 
+      event.request.destination === 'style' ||
+      event.request.url.includes('/manifest.json')) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          return response || fetch(event.request)
+        })
+    )
+  }
 })

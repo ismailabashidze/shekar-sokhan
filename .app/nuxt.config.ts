@@ -72,12 +72,4 @@ export default defineNuxtConfig({
       dargahPassword: process.env.DARGAH_PASSWORD || '',
     },
   },
-  modules: [
-    '@vite-pwa/nuxt'
-  ],
-
-  pwa: {
-    // Disable auto-generation since we have manual setup
-    disable: true,
-  },
 })

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.1] (2025-01-30)
+
+### 🐞 Bug Fixes
+- Minor bug fixes and performance improvements
+- Enhanced stability and user experience
+- Updated dependencies and security patches
+
+### 🧰 Technical Improvements
+- Code optimization and cleanup
+- Improved error handling
+- Enhanced development experience
+
+---
+
 ## [2.5.0] (2025-07-02)
 
 ### 🚀 Features

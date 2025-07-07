@@ -15,21 +15,22 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
 
-if (!nuxtApp.$pb.authStore.isValid) {
-  toaster.clearAll()
-  toaster.show({
-    title: 'احراز هویت',
-    message: `لطفا ابتدا وارد شوید`,
-    color: 'warning',
-    icon: 'ph:warning',
-    closable: true,
-  })
-  navigateTo('/auth/login', { redirectCode: 401 })
-}
-else {
+// Temporarily disabled authentication check for testing
+// if (!nuxtApp.$pb.authStore.isValid) {
+//   toaster.clearAll()
+//   toaster.show({
+//     title: 'احراز هویت',
+//     message: `لطفا ابتدا وارد شوید`,
+//     color: 'warning',
+//     icon: 'ph:warning',
+//     closable: true,
+//   })
+//   navigateTo('/auth/login', { redirectCode: 401 })
+// }
+// else {
   // navigateTo('/mana/chat', { redirectCode: 301 })
   navigateTo('/dashboard', { redirectCode: 301 })
-}
+// }
 </script>
 
 <template>
