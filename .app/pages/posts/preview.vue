@@ -11,7 +11,8 @@ onMounted(() => {
   if (raw) {
     try {
       previewData.value = JSON.parse(raw)
-    } catch (e) {
+    }
+    catch (e) {
       console.error('Error parsing preview data from localStorage:', e)
       previewData.value = {}
     }
@@ -67,32 +68,47 @@ function goBack() {
   <div class="container mx-auto max-w-3xl py-10 font-sans">
     <BaseCard class="overflow-hidden shadow-xl dark:shadow-gray-800/50">
       <!-- Image Section -->
-      <img v-if="imageUrl" :src="imageUrl" alt="تصویر مقاله" class="w-full h-auto max-h-[400px] object-cover mb-0 block" />
+      <img
+        v-if="imageUrl"
+        :src="imageUrl"
+        alt="تصویر مقاله"
+        class="mb-0 block h-auto max-h-[400px] w-full object-cover"
+      >
 
       <div class="p-6 md:p-8">
         <!-- Header: Category, Title, Excerpt -->
         <div class="mb-6">
-          <div class="flex flex-wrap items-center gap-2 mb-4">
-            <span v-if="category" class="inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-500/20 px-3.5 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-300">
+          <div class="mb-4 flex flex-wrap items-center gap-2">
+            <span v-if="category" class="bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-300 inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-medium">
               <Icon :name="categoryIcon" class="me-2 size-4" />{{ category }}
             </span>
-            <span v-if="isFeatured" class="inline-flex items-center rounded-full bg-yellow-100 dark:bg-yellow-500/20 px-3.5 py-1.5 text-sm font-medium text-yellow-700 dark:text-yellow-300">
+            <span v-if="isFeatured" class="inline-flex items-center rounded-full bg-yellow-100 px-3.5 py-1.5 text-sm font-medium text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300">
               <Icon name="ph:star-fill" class="me-2 size-4 text-yellow-500 dark:text-yellow-400" />مقاله ویژه
             </span>
           </div>
-          <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">{{ title }}</h1>
-          <p v-if="excerpt" class="text-lg text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">{{ excerpt }}</p>
-          <p v-if="description && description !== excerpt" class="text-md text-gray-500 dark:text-gray-300 leading-relaxed">{{ description }}</p>
+          <h1 class="mb-3 text-3xl font-bold leading-tight text-gray-900 lg:text-4xl dark:text-white">
+            {{ title }}
+          </h1>
+          <p v-if="excerpt" class="mb-4 text-lg leading-relaxed text-gray-600 dark:text-gray-400">
+            {{ excerpt }}
+          </p>
+          <p v-if="description && description !== excerpt" class="text-md leading-relaxed text-gray-500 dark:text-gray-300">
+            {{ description }}
+          </p>
         </div>
 
         <!-- Meta Info: Date, Read Time, Tags -->
-        <div class="border-t border-b border-gray-200 dark:border-gray-700 py-4 my-8">
-          <div class="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-x-6 gap-y-3 text-sm text-gray-500 dark:text-gray-400">
+        <div class="my-8 border-y border-gray-200 py-4 dark:border-gray-700">
+          <div class="flex flex-col flex-wrap items-start gap-x-6 gap-y-3 text-sm text-gray-500 sm:flex-row sm:items-center dark:text-gray-400">
             <span class="flex items-center"><Icon name="ph:calendar-blank-duotone" class="me-1.5 size-5" />تاریخ انتشار: {{ publishDate }}</span>
             <span class="flex items-center"><Icon name="ph:clock-duotone" class="me-1.5 size-5" />زمان مطالعه: {{ readTime }} دقیقه</span>
             <div v-if="tags && tags.length" class="flex flex-wrap items-center gap-2 pt-1 sm:pt-0">
-              <Icon name="ph:tag" class="size-5 me-1" />
-              <span v-for="tag in tags" :key="tag" class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-200">
+              <Icon name="ph:tag" class="me-1 size-5" />
+              <span
+                v-for="tag in tags"
+                :key="tag"
+                class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+              >
                 {{ tag }}
               </span>
             </div>
@@ -105,14 +121,18 @@ function goBack() {
         </div>
 
         <!-- Secret Message -->
-        <div v-if="secretMessage" class="mt-10 rounded-xl border-2 border-dashed border-purple-400 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/40 p-6 text-center">
-          <Icon name="ph:keyhole-duotone" class="text-purple-500 dark:text-purple-400 size-10 mx-auto mb-3" />
-          <p class="text-xl font-semibold text-purple-700 dark:text-purple-300 mb-1">{{ secretMessage }}</p>
-          <p class="text-sm text-purple-500 dark:text-purple-400">پیام مخفی نویسنده!</p>
+        <div v-if="secretMessage" class="mt-10 rounded-xl border-2 border-dashed border-purple-400 bg-purple-50 p-6 text-center dark:border-purple-600 dark:bg-purple-900/40">
+          <Icon name="ph:keyhole-duotone" class="mx-auto mb-3 size-10 text-purple-500 dark:text-purple-400" />
+          <p class="mb-1 text-xl font-semibold text-purple-700 dark:text-purple-300">
+            {{ secretMessage }}
+          </p>
+          <p class="text-sm text-purple-500 dark:text-purple-400">
+            پیام مخفی نویسنده!
+          </p>
         </div>
 
         <!-- Comments Status -->
-        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="mt-8 border-t border-gray-200 pt-6 dark:border-gray-700">
           <div v-if="allowComments" class="flex items-center justify-center gap-2 text-sm text-green-600 dark:text-green-400">
             <Icon name="ph:chats-circle-duotone" class="size-5" />
             <span>نظردهی برای این مقاله فعال است.</span>
@@ -124,14 +144,20 @@ function goBack() {
         </div>
 
         <!-- Back Button -->
-        <div class="flex justify-start mt-12">
-          <BaseButton flavor="outline" color="muted" @click="goBack" size="lg" class="rounded-lg">
+        <div class="mt-12 flex justify-start">
+          <BaseButton
+            flavor="outline"
+            color="muted"
+            size="lg"
+            class="rounded-lg"
+            @click="goBack"
+          >
             <Icon name="ph:arrow-elbow-left-down-duotone" class="me-2 size-5" />بازگشت به ویرایشگر
           </BaseButton>
         </div>
       </div>
     </BaseCard>
-    <div class="mt-8"></div> <!-- Spacer at the bottom -->
+    <div class="mt-8" /> <!-- Spacer at the bottom -->
   </div>
 </template>
 

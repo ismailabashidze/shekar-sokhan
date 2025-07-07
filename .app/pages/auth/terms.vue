@@ -125,7 +125,7 @@ const accordion = ref([{
                   <div class="text-muted-900 mb-7 text-right dark:text-white">
                     در زیر قوانین استفاده از سامانه ذهنا آورده شده است. تمام این قوانین لازم الاجرا و مهم می باشند.
                   </div>
-                  <div class="w-[100%]">
+                  <div class="w-full">
                     <BaseAccordion :items="accordion" class="terms-accordion" />
                   </div>
                 </BaseCard>

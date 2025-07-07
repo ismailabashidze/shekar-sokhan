@@ -104,7 +104,7 @@ onMounted(async () => {
     // Check if the payment was successful on gateway
     if (status !== 'OK') {
       errorMessage.value = 'پرداخت توسط کاربر لغو شد یا با خطا مواجه شد'
-      
+
       // Clean up localStorage on failure
       localStorage.removeItem('pending_payment')
       isLoading.value = false
@@ -117,7 +117,8 @@ onMounted(async () => {
     if (pendingPaymentStr) {
       try {
         pendingPayment = JSON.parse(pendingPaymentStr)
-      } catch (e) {
+      }
+      catch (e) {
         console.error('Error parsing pending payment:', e)
       }
     }
@@ -126,7 +127,7 @@ onMounted(async () => {
     const { data, error } = await useAsyncData(async () => {
       return await nuxtApp.$pb.send('/verifyPayment', {
         method: 'POST',
-        body: { 
+        body: {
           authority,
           paymentId: pendingPayment?.paymentId,
         },
@@ -142,15 +143,15 @@ onMounted(async () => {
     // Backend returns status 100 for success
     if (data.value.status === 100) {
       paymentSuccess.value = true
-      
+
       // Clean up localStorage on success
       localStorage.removeItem('pending_payment')
-      
+
       // Show success message (with warning if payment record was missing)
-      const message = data.value.warning 
+      const message = data.value.warning
         ? 'اشتراک شما فعال شد، ولی ممکن است نیاز به بررسی بیشتر باشد'
         : 'اشتراک شما با موفقیت فعال شد'
-      
+
       toaster.show({
         title: 'اشتراک فعال شد',
         message,
@@ -179,7 +180,7 @@ onMounted(async () => {
     }
     else {
       errorMessage.value = data.value.msg || 'تایید پرداخت با مشکل مواجه شد'
-      
+
       // Clean up localStorage on failure
       localStorage.removeItem('pending_payment')
     }
@@ -187,7 +188,7 @@ onMounted(async () => {
   catch (error) {
     console.error('Error processing payment callback:', error)
     errorMessage.value = 'خطا در پردازش نتیجه پرداخت'
-    
+
     // Clean up localStorage on error
     localStorage.removeItem('pending_payment')
   }

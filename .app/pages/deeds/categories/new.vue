@@ -76,7 +76,7 @@
             <button
               v-for="level in difficultyLevels"
               :key="level.value"
-              class="flex flex-col items-center gap-1 rounded-xl border bg-white p-4 transition-colors hover:border-primary-500 hover:bg-primary-50 dark:border-muted-600 dark:bg-muted-700 dark:hover:border-primary-500 dark:hover:bg-primary-500/20"
+              class="hover:border-primary-500 hover:bg-primary-50 dark:border-muted-600 dark:bg-muted-700 dark:hover:border-primary-500 dark:hover:bg-primary-500/20 flex flex-col items-center gap-1 rounded-xl border bg-white p-4 transition-colors"
               :class="{
                 'border-primary-500 bg-primary-50 dark:border-primary-500 dark:bg-primary-500/20': category.difficulty === level.value && category.timeRequired === level.timeRequired,
               }"
@@ -85,8 +85,8 @@
                 category.timeRequired = level.timeRequired
               }"
             >
-              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-500/20">
-                <Icon :name="level.icon" class="size-6 text-primary-500" />
+              <div class="bg-primary-100 dark:bg-primary-500/20 flex size-10 items-center justify-center rounded-lg">
+                <Icon :name="level.icon" class="text-primary-500 size-6" />
               </div>
               <span class="text-muted-800 dark:text-muted-100 text-sm font-medium">{{ level.label }}</span>
               <span class="text-muted-400 text-xs">{{ level.timeLabel }}</span>
@@ -127,13 +127,15 @@
             rounded="lg"
             @keyup.enter="addTag"
           />
-          <BaseButton color="primary" @click="addTag">افزودن</BaseButton>
+          <BaseButton color="primary" @click="addTag">
+            افزودن
+          </BaseButton>
         </div>
       </div>
     </div>
 
     <!-- Bottom Navigation -->
-    <div class="fixed inset-x-0 bottom-0 z-10 flex justify-center gap-2 border-t bg-white p-4 dark:border-muted-700 dark:bg-muted-900">
+    <div class="dark:border-muted-700 dark:bg-muted-900 fixed inset-x-0 bottom-0 z-10 flex justify-center gap-2 border-t bg-white p-4">
       <div class="flex w-full max-w-3xl justify-between gap-2">
         <BaseButton
           to="/deeds/categories"

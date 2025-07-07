@@ -413,7 +413,11 @@ onMounted(() => {
       </div>
 
       <!-- Results list -->
-      <div v-else class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 auto-rows-fr" data-tour="sessions-list">
+      <div
+        v-else
+        class="mt-6 grid auto-rows-fr grid-cols-1 gap-4 md:grid-cols-2"
+        data-tour="sessions-list"
+      >
         <TransitionGroup
           enter-active-class="transform-gpu"
           enter-from-class="opacity-0 -translate-y-4"
@@ -426,7 +430,7 @@ onMounted(() => {
             v-for="(session, index) in paginatedSessions"
             :key="session.id"
             shape="curved"
-            class="mb-4 flex h-full flex-col overflow-hidden border border-muted-200 transition-all duration-300 hover:shadow-lg dark:border-muted-700"
+            class="border-muted-200 dark:border-muted-700 mb-4 flex h-full flex-col overflow-hidden border transition-all duration-300 hover:shadow-lg"
             :data-tour="index === 0 ? 'sessions-card' : undefined"
           >
             <div class="bg-muted-50 dark:bg-muted-800/30 border-muted-200 dark:border-muted-700 border-b p-4">
@@ -492,37 +496,37 @@ onMounted(() => {
               <div class="grid h-full grid-cols-1 gap-4">
                 <!-- Left Column: Session Stats -->
                 <div class="space-y-3">
-                  <div class="flex items-center rounded-lg bg-muted-100 p-3 dark:bg-muted-800">
-                    <div class="ml-3 rounded-full bg-primary-100 p-2 dark:bg-primary-500/20">
-                      <Icon name="ph:clock-duotone" class="size-4 text-primary-500" />
+                  <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
+                    <div class="bg-primary-100 dark:bg-primary-500/20 ml-3 rounded-full p-2">
+                      <Icon name="ph:clock-duotone" class="text-primary-500 size-4" />
                     </div>
                     <div class="flex flex-col">
-                      <span class="text-xs text-muted-400">مدت جلسه</span>
-                      <span class="font-medium text-muted-800 dark:text-white">
+                      <span class="text-muted-400 text-xs">مدت جلسه</span>
+                      <span class="text-muted-800 font-medium dark:text-white">
                         {{ formatDuration(session.total_time_passed) }}
                       </span>
                     </div>
                   </div>
 
-                  <div class="flex items-center rounded-lg bg-muted-100 p-3 dark:bg-muted-800">
-                    <div class="ml-3 rounded-full bg-info-100 p-2 dark:bg-info-500/20">
-                      <Icon name="ph:chat-dots-duotone" class="size-4 text-info-500" />
+                  <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
+                    <div class="bg-info-100 dark:bg-info-500/20 ml-3 rounded-full p-2">
+                      <Icon name="ph:chat-dots-duotone" class="text-info-500 size-4" />
                     </div>
                     <div class="flex flex-col">
-                      <span class="text-xs text-muted-400">تعداد پیام‌ها</span>
-                      <span class="font-medium text-muted-800 dark:text-white">
+                      <span class="text-muted-400 text-xs">تعداد پیام‌ها</span>
+                      <span class="text-muted-800 font-medium dark:text-white">
                         {{ session.count_of_total_messages || '0' }} پیام
                       </span>
                     </div>
                   </div>
 
-                  <div class="flex items-center rounded-lg bg-muted-100 p-3 dark:bg-muted-800">
-                    <div class="ml-3 rounded-full bg-success-100 p-2 dark:bg-success-500/20">
-                      <Icon name="ph:timer-duotone" class="size-4 text-success-500" />
+                  <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
+                    <div class="bg-success-100 dark:bg-success-500/20 ml-3 rounded-full p-2">
+                      <Icon name="ph:timer-duotone" class="text-success-500 size-4" />
                     </div>
                     <div class="flex flex-col">
-                      <span class="text-xs text-muted-400">زمان شروع/پایان</span>
-                      <span class="font-medium text-muted-800 dark:text-white">
+                      <span class="text-muted-400 text-xs">زمان شروع/پایان</span>
+                      <span class="text-muted-800 font-medium dark:text-white">
                         {{ formatTime(session.start_time) }} - {{ formatTime(session.end_time) }}
                       </span>
                     </div>
@@ -530,10 +534,10 @@ onMounted(() => {
                 </div>
 
                 <!-- Right Column: Analysis Summary -->
-                <div v-if="session.expand?.session_analysis_for_system" class="rounded-lg bg-muted-50 p-4 dark:bg-muted-900/50">
+                <div v-if="session.expand?.session_analysis_for_system" class="bg-muted-50 dark:bg-muted-900/50 rounded-lg p-4">
                   <div class="mb-3 flex items-center">
-                    <div class="ml-2 rounded-full bg-info-100 p-1 dark:bg-info-500/20">
-                      <Icon name="ph:brain-duotone" class="size-4 text-info-500" />
+                    <div class="bg-info-100 dark:bg-info-500/20 ml-2 rounded-full p-1">
+                      <Icon name="ph:brain-duotone" class="text-info-500 size-4" />
                     </div>
                     <BaseHeading
                       tag="h4"
@@ -552,7 +556,7 @@ onMounted(() => {
                         tag="h5"
                         size="xs"
                         weight="medium"
-                        class="mb-1 text-muted-600 dark:text-muted-400"
+                        class="text-muted-600 dark:text-muted-400 mb-1"
                       >
                         {{ session.expand.session_analysis_for_system.title }}
                       </BaseHeading>
@@ -567,7 +571,7 @@ onMounted(() => {
 
                     <!-- Trust Level -->
                     <div v-if="session.expand.session_analysis_for_system.finalTrustAndOppennessOfUser" class="flex items-center justify-between">
-                      <span class="text-xs text-muted-600 dark:text-muted-400">سطح اعتماد:</span>
+                      <span class="text-muted-600 dark:text-muted-400 text-xs">سطح اعتماد:</span>
                       <BaseTag
                         :color="getTrustLevelColor(session.expand.session_analysis_for_system.finalTrustAndOppennessOfUser)"
                         shape="curved"
@@ -579,15 +583,15 @@ onMounted(() => {
 
                     <!-- Key Headlines -->
                     <div v-if="session.expand.session_analysis_for_system.headlines && session.expand.session_analysis_for_system.headlines.length > 0">
-                      <span class="mb-2 block text-xs text-muted-600 dark:text-muted-400">نکات کلیدی:</span>
+                      <span class="text-muted-600 dark:text-muted-400 mb-2 block text-xs">نکات کلیدی:</span>
                       <div class="space-y-1">
                         <div
                           v-for="(headline, index) in session.expand.session_analysis_for_system.headlines.slice(0, 1)"
                           :key="index"
-                          class="rounded-md bg-white p-2 dark:bg-muted-800"
+                          class="dark:bg-muted-800 rounded-md bg-white p-2"
                         >
-                          <span class="text-xs font-medium text-muted-700 dark:text-muted-300">{{ headline.title }}</span>
-                          <BaseParagraph size="xs" class="mt-1 text-muted-500">
+                          <span class="text-muted-700 dark:text-muted-300 text-xs font-medium">{{ headline.title }}</span>
+                          <BaseParagraph size="xs" class="text-muted-500 mt-1">
                             {{ headline.description }}
                           </BaseParagraph>
                         </div>
@@ -597,10 +601,10 @@ onMounted(() => {
                 </div>
 
                 <!-- Fallback for sessions without analysis -->
-                <div v-else class="rounded-lg bg-muted-50 p-4 dark:bg-muted-900/50">
+                <div v-else class="bg-muted-50 dark:bg-muted-900/50 rounded-lg p-4">
                   <div class="mb-3 flex items-center">
-                    <div class="ml-2 rounded-full bg-muted-200 p-1 dark:bg-muted-700">
-                      <Icon name="ph:clock-duotone" class="size-4 text-muted-500" />
+                    <div class="bg-muted-200 dark:bg-muted-700 ml-2 rounded-full p-1">
+                      <Icon name="ph:clock-duotone" class="text-muted-500 size-4" />
                     </div>
                     <BaseHeading
                       tag="h4"
@@ -615,29 +619,29 @@ onMounted(() => {
                   <div class="space-y-3">
                     <!-- Session ID -->
                     <div>
-                      <span class="text-xs text-muted-600 dark:text-muted-400">شناسه جلسه:</span>
-                      <BaseParagraph size="xs" class="mt-1 font-mono text-muted-700 dark:text-muted-300">
+                      <span class="text-muted-600 dark:text-muted-400 text-xs">شناسه جلسه:</span>
+                      <BaseParagraph size="xs" class="text-muted-700 dark:text-muted-300 mt-1 font-mono">
                         {{ session.id.slice(-8) }}
                       </BaseParagraph>
                     </div>
 
                     <!-- Status Info -->
                     <div v-if="session.status === 'inprogress'" class="text-center">
-                      <Icon name="ph:play-duotone" class="mx-auto mb-2 size-6 text-primary-500" />
+                      <Icon name="ph:play-duotone" class="text-primary-500 mx-auto mb-2 size-6" />
                       <BaseParagraph size="xs" class="text-primary-600 dark:text-primary-400">
                         این جلسه در حال انجام است
                       </BaseParagraph>
                     </div>
 
                     <div v-else-if="session.status === 'done'" class="text-center">
-                      <Icon name="ph:clock-countdown-duotone" class="mx-auto mb-2 size-6 text-info-500" />
+                      <Icon name="ph:clock-countdown-duotone" class="text-info-500 mx-auto mb-2 size-6" />
                       <BaseParagraph size="xs" class="text-muted-500">
                         تحلیل این جلسه در حال پردازش است
                       </BaseParagraph>
                     </div>
 
                     <div v-else class="text-center">
-                      <Icon name="ph:info-duotone" class="mx-auto mb-2 size-6 text-muted-400" />
+                      <Icon name="ph:info-duotone" class="text-muted-400 mx-auto mb-2 size-6" />
                       <BaseParagraph size="xs" class="text-muted-400">
                         تحلیل برای این جلسه در دسترس نیست
                       </BaseParagraph>
@@ -648,7 +652,7 @@ onMounted(() => {
             </div>
 
             <!-- Action Buttons -->
-            <div class="border-t border-muted-200 p-4 dark:border-muted-700" :data-tour="index === 0 ? 'sessions-actions' : undefined">
+            <div class="border-muted-200 dark:border-muted-700 border-t p-4" :data-tour="index === 0 ? 'sessions-actions' : undefined">
               <div class="flex flex-wrap items-center justify-end gap-2">
                 <BaseButton
                   v-if="session.status === 'inprogress'"
@@ -707,8 +711,7 @@ onMounted(() => {
     </TairoContentWrapper>
 
     <!-- Tour Component -->
-        <TourButton
-    />
+    <TourButton />
   </div>
 </template>
 

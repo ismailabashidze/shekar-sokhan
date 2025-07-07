@@ -106,9 +106,11 @@ export function usePosts() {
     Object.entries(postData).forEach(([key, value]) => {
       if (key === 'featuredImage' && value instanceof File) {
         formData.append(key, value)
-      } else if (key === 'tags' || key === 'keywords') {
+      }
+      else if (key === 'tags' || key === 'keywords') {
         formData.append(key, JSON.stringify(value || []))
-      } else if (value !== undefined && value !== null) {
+      }
+      else if (value !== undefined && value !== null) {
         formData.append(key, String(value))
       }
     })
@@ -126,7 +128,7 @@ export function usePosts() {
         page = 1,
         perPage = 10,
         sort = '-created',
-        filters = {}
+        filters = {},
       } = options
 
       const filterString = buildFilterString(filters)
@@ -134,7 +136,7 @@ export function usePosts() {
       const result = await nuxtApp.$pb.collection('posts').getList(page, perPage, {
         filter: filterString || undefined,
         sort,
-        expand: 'author'
+        expand: 'author',
       })
 
       posts.value = result.items as Post[]
@@ -142,11 +144,13 @@ export function usePosts() {
       totalItems.value = result.totalItems
 
       return result
-    } catch (e: any) {
+    }
+    catch (e: any) {
       error.value = e.message || 'خطا در دریافت مقالات'
       console.error('Error fetching posts:', e)
       throw e
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }
@@ -158,16 +162,18 @@ export function usePosts() {
 
     try {
       const post = await nuxtApp.$pb.collection('posts').getOne(id, {
-        expand: 'author'
+        expand: 'author',
       })
 
       currentPost.value = post as Post
       return post
-    } catch (e: any) {
+    }
+    catch (e: any) {
       error.value = e.message || 'خطا در دریافت مقاله'
       console.error('Error fetching post:', e)
       throw e
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }
@@ -180,7 +186,7 @@ export function usePosts() {
     try {
       const result = await nuxtApp.$pb.collection('posts').getList(1, 1, {
         filter: `slug = "${slug}"`,
-        expand: 'author'
+        expand: 'author',
       })
 
       if (result.items.length === 0) {
@@ -189,11 +195,13 @@ export function usePosts() {
 
       currentPost.value = result.items[0] as Post
       return result.items[0]
-    } catch (e: any) {
+    }
+    catch (e: any) {
       error.value = e.message || 'خطا در دریافت مقاله'
       console.error('Error fetching post by slug:', e)
       throw e
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }
@@ -229,20 +237,22 @@ export function usePosts() {
       })
 
       return newPost
-    } catch (e: any) {
+    }
+    catch (e: any) {
       error.value = e.message || 'خطا در ایجاد مقاله'
       console.error('Error creating post:', e)
-      
+
       toaster.show({
         title: 'خطا',
         message: error.value,
-        color: 'danger', 
+        color: 'danger',
         icon: 'ph:warning',
         closable: true,
       })
 
       throw e
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }
@@ -279,20 +289,22 @@ export function usePosts() {
       })
 
       return updatedPost
-    } catch (e: any) {
+    }
+    catch (e: any) {
       error.value = e.message || 'خطا در به‌روزرسانی مقاله'
       console.error('Error updating post:', e)
-      
+
       toaster.show({
         title: 'خطا',
         message: error.value,
         color: 'danger',
-        icon: 'ph:warning', 
+        icon: 'ph:warning',
         closable: true,
       })
 
       throw e
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }
@@ -321,10 +333,11 @@ export function usePosts() {
       })
 
       return true
-    } catch (e: any) {
+    }
+    catch (e: any) {
       error.value = e.message || 'خطا در حذف مقاله'
       console.error('Error deleting post:', e)
-      
+
       toaster.show({
         title: 'خطا',
         message: error.value,
@@ -334,7 +347,8 @@ export function usePosts() {
       })
 
       throw e
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }
@@ -345,8 +359,8 @@ export function usePosts() {
       ...options,
       filters: {
         ...options.filters,
-        status: 'published'
-      }
+        status: 'published',
+      },
     })
   }
 
@@ -357,8 +371,8 @@ export function usePosts() {
       filters: {
         ...options.filters,
         featured: true,
-        status: 'published'
-      }
+        status: 'published',
+      },
     })
   }
 
@@ -369,8 +383,8 @@ export function usePosts() {
       filters: {
         ...options.filters,
         category,
-        status: 'published'
-      }
+        status: 'published',
+      },
     })
   }
 
@@ -380,8 +394,8 @@ export function usePosts() {
       ...options,
       filters: {
         ...options.filters,
-        search: query
-      }
+        search: query,
+      },
     })
   }
 
@@ -396,8 +410,8 @@ export function usePosts() {
       ...options,
       filters: {
         ...options.filters,
-        author: authorId
-      }
+        author: authorId,
+      },
     })
   }
 
@@ -406,9 +420,9 @@ export function usePosts() {
     try {
       const post = await nuxtApp.$pb.collection('posts').getOne(id)
       const newViewCount = (post.viewCount || 0) + 1
-      
+
       await nuxtApp.$pb.collection('posts').update(id, {
-        viewCount: newViewCount
+        viewCount: newViewCount,
       })
 
       // Update local state if current post
@@ -421,8 +435,8 @@ export function usePosts() {
       if (index !== -1) {
         posts.value[index].viewCount = newViewCount
       }
-
-    } catch (e: any) {
+    }
+    catch (e: any) {
       console.error('Error incrementing view count:', e)
     }
   }
@@ -432,9 +446,9 @@ export function usePosts() {
     try {
       const post = await nuxtApp.$pb.collection('posts').getOne(id)
       const newLikeCount = Math.max(0, (post.likeCount || 0) + 1)
-      
+
       await nuxtApp.$pb.collection('posts').update(id, {
-        likeCount: newLikeCount
+        likeCount: newLikeCount,
       })
 
       // Update local state
@@ -448,7 +462,8 @@ export function usePosts() {
       }
 
       return newLikeCount
-    } catch (e: any) {
+    }
+    catch (e: any) {
       console.error('Error toggling like:', e)
       throw e
     }
@@ -492,4 +507,4 @@ export function usePosts() {
     // Utilities
     clearPosts,
   }
-} 
+}

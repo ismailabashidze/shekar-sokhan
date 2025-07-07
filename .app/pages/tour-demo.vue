@@ -1,4 +1,4 @@
- <template>
+<template>
   <div>
     <TairoContentWrapper>
       <div class="mb-6">
@@ -22,18 +22,18 @@
             tag="h2"
             size="lg"
             weight="medium"
-            class="text-muted-800 dark:text-white mb-4"
+            class="text-muted-800 mb-4 dark:text-white"
           >
             کنترل راهنماها
           </BaseHeading>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div
               v-for="tour in tours"
               :key="tour.id"
-              class="p-4 bg-muted-50 dark:bg-muted-800 rounded-lg"
+              class="bg-muted-50 dark:bg-muted-800 rounded-lg p-4"
             >
-              <div class="flex items-center justify-between mb-3">
+              <div class="mb-3 flex items-center justify-between">
                 <BaseHeading
                   tag="h3"
                   size="sm"
@@ -49,14 +49,14 @@
                   {{ hasSeen(tour.id) ? 'دیده شده' : 'جدید' }}
                 </BaseTag>
               </div>
-              
+
               <BaseParagraph
                 size="xs"
                 class="text-muted-500 dark:text-muted-400 mb-4"
               >
                 {{ tour.steps.length }} مرحله
               </BaseParagraph>
-              
+
               <div class="flex gap-2">
                 <BaseButton
                   size="sm"
@@ -77,13 +77,13 @@
             </div>
           </div>
 
-          <div class="mt-6 pt-4 border-t border-muted-200 dark:border-muted-700">
+          <div class="border-muted-200 dark:border-muted-700 mt-6 border-t pt-4">
             <BaseButton
               color="danger"
               variant="outline"
               @click="resetAllToursWithConfirm"
             >
-              <Icon name="ph:arrow-clockwise" class="w-4 h-4 mr-2" />
+              <Icon name="ph:arrow-clockwise" class="mr-2 size-4" />
               بازنشانی همه راهنماها
             </BaseButton>
           </div>
@@ -91,35 +91,43 @@
       </div>
 
       <!-- Sample Elements for Testing -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <!-- Dashboard Elements -->
         <BaseCard class="p-6">
           <BaseHeading
             tag="h2"
             size="lg"
             weight="medium"
-            class="text-muted-800 dark:text-white mb-4"
+            class="text-muted-800 mb-4 dark:text-white"
             data-tour="welcome-section"
           >
             🏠 بخش خوش‌آمدگویی
           </BaseHeading>
-          
+
           <div class="space-y-4">
-            <div class="flex items-center gap-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg" data-tour="statistics">
-              <Icon name="ph:chart-bar" class="w-8 h-8 text-primary-500" />
+            <div class="bg-primary-50 dark:bg-primary-900/20 flex items-center gap-4 rounded-lg p-4" data-tour="statistics">
+              <Icon name="ph:chart-bar" class="text-primary-500 size-8" />
               <div>
-                <BaseHeading tag="h3" size="sm" weight="medium">آمار و ارقام</BaseHeading>
-                <BaseParagraph size="xs" class="text-muted-500">نمایش آمار فعالیت‌ها</BaseParagraph>
+                <BaseHeading
+                  tag="h3"
+                  size="sm"
+                  weight="medium"
+                >
+                  آمار و ارقام
+                </BaseHeading>
+                <BaseParagraph size="xs" class="text-muted-500">
+                  نمایش آمار فعالیت‌ها
+                </BaseParagraph>
               </div>
             </div>
-            
+
             <div class="flex gap-2" data-tour="quick-actions">
               <BaseButton
                 size="sm"
                 color="primary"
                 data-tour="therapists-button"
               >
-                <Icon name="ph:robot" class="w-4 h-4 mr-2" />
+                <Icon name="ph:robot" class="mr-2 size-4" />
                 روانشناسان هوش مصنوعی
               </BaseButton>
             </div>
@@ -132,12 +140,12 @@
             tag="h2"
             size="lg"
             weight="medium"
-            class="text-muted-800 dark:text-white mb-4"
+            class="text-muted-800 mb-4 dark:text-white"
             data-tour="welcome"
           >
             🎉 بخش پرداخت
           </BaseHeading>
-          
+
           <div class="space-y-4">
             <div class="flex gap-2" data-tour="payment-options">
               <BaseButton
@@ -160,12 +168,12 @@
       </div>
 
       <!-- Additional Test Elements -->
-      <BaseCard class="p-6 mb-6" data-tour="new-features">
+      <BaseCard class="mb-6 p-6" data-tour="new-features">
         <BaseHeading
           tag="h2"
           size="lg"
           weight="medium"
-          class="text-muted-800 dark:text-white mb-4"
+          class="text-muted-800 mb-4 dark:text-white"
         >
           ✨ امکانات جدید
         </BaseHeading>
@@ -179,7 +187,7 @@
           tag="h2"
           size="lg"
           weight="medium"
-          class="text-muted-800 dark:text-white mb-4"
+          class="text-muted-800 mb-4 dark:text-white"
         >
           🎥 ویدئوهای آموزشی
         </BaseHeading>
@@ -194,7 +202,7 @@
           color="info"
           @click="testHighlight"
         >
-          <Icon name="ph:lightbulb" class="w-4 h-4 mr-2" />
+          <Icon name="ph:lightbulb" class="mr-2 size-4" />
           تست هایلایت تک المان
         </BaseButton>
       </div>
@@ -233,7 +241,7 @@ const testHighlight = () => {
   highlight('[data-tour="video-section"]', {
     title: 'تست هایلایت',
     description: 'این یک تست برای هایلایت کردن یک المان است.',
-    side: 'top'
+    side: 'top',
   })
 }
-</script> 
+</script>

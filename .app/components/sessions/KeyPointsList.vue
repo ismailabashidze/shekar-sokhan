@@ -1,10 +1,10 @@
 <script setup lang="ts">
 defineProps<{
   keyPoints: Array<{
-    title: string;
-    icon: string;
-  }>;
-}>();
+    title: string
+    icon: string
+  }>
+}>()
 </script>
 
 <template>

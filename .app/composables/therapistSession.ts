@@ -56,22 +56,22 @@ export function useTherapistSession() {
     try {
       // Get current session to access its data
       const session = await nuxtApp.$pb.collection('sessions').getOne(sessionId)
-      
+
       // Get messages for this session to count them
       const messagesResult = await nuxtApp.$pb.collection('messages').getList(1, 1000, {
         filter: `session_id = "${sessionId}"`,
       })
-      
+
       const messageCount = messagesResult.items.length
-      
+
       // Calculate session duration
       const startTime = new Date(session.start_time || session.created)
       const endTime = new Date()
       const totalTimePassedMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60))
-      
+
       // Check if there's an existing analysis
       let analysisId = session.session_analysis_for_system
-      
+
       // If no analysis exists and we need one, create a placeholder
       if (!analysisId) {
         console.log('Creating placeholder analysis for session')
@@ -86,15 +86,16 @@ export function useTherapistSession() {
             psychotherapistEvaluation: '',
             negativeScoresList: [],
             psychotherapistEvaluationScorePositiveBehavior: [],
-            psychotherapistEvaluationScoreSuggestionsToImprove: []
+            psychotherapistEvaluationScoreSuggestionsToImprove: [],
           })
           analysisId = placeholderAnalysis.id
-        } catch (analysisError) {
+        }
+        catch (analysisError) {
           console.error('Error creating placeholder analysis:', analysisError)
           // Continue even if analysis creation fails
         }
       }
-      
+
       // Update the session with all required fields
       return await nuxtApp.$pb.collection('sessions').update(sessionId, {
         status: 'done',

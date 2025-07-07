@@ -5,41 +5,41 @@ import { convertToEmotionWheel, getActiveEmotions, getDominantEmotion } from '~/
 // Example JSON data from API response
 const emotionAnalysisData = ref([
   {
-    "emotionName": "غم",
-    "severity": "زیاد"
+    emotionName: 'غم',
+    severity: 'زیاد',
   },
   {
-    "emotionName": "ترس",
-    "severity": "متوسط"
+    emotionName: 'ترس',
+    severity: 'متوسط',
   },
   {
-    "emotionName": "انتظار",
-    "severity": "متوسط"
+    emotionName: 'انتظار',
+    severity: 'متوسط',
   },
   {
-    "emotionName": "شادی",
-    "severity": "خالی"
+    emotionName: 'شادی',
+    severity: 'خالی',
   },
   {
-    "emotionName": "اعتماد",
-    "severity": "خالی"
+    emotionName: 'اعتماد',
+    severity: 'خالی',
   },
   {
-    "emotionName": "تعجب",
-    "severity": "خالی"
+    emotionName: 'تعجب',
+    severity: 'خالی',
   },
   {
-    "emotionName": "انزجار",
-    "severity": "خالی"
+    emotionName: 'انزجار',
+    severity: 'خالی',
   },
   {
-    "emotionName": "خشم",
-    "severity": "خالی"
+    emotionName: 'خشم',
+    severity: 'خالی',
   },
   {
-    "emotionName": "نامشخص",
-    "severity": "خالی"
-  }
+    emotionName: 'نامشخص',
+    severity: 'خالی',
+  },
 ])
 
 // Convert to EmotionWheel format
@@ -62,11 +62,15 @@ const handleEmotionChange = (newSelected: string[]) => {
   <div class="space-y-6">
     <!-- Emotion Analysis Summary -->
     <div class="rounded-lg bg-white p-4 shadow-sm">
-      <h3 class="mb-4 text-lg font-medium">تحلیل احساسات</h3>
-      
+      <h3 class="mb-4 text-lg font-medium">
+        تحلیل احساسات
+      </h3>
+
       <!-- Dominant Emotion -->
       <div v-if="dominantEmotion" class="mb-4">
-        <p class="text-sm text-gray-600">احساس غالب:</p>
+        <p class="text-sm text-gray-600">
+          احساس غالب:
+        </p>
         <p class="text-lg font-semibold">
           {{ dominantEmotion.emotionName }} - {{ dominantEmotion.severity }}
         </p>
@@ -74,10 +78,12 @@ const handleEmotionChange = (newSelected: string[]) => {
 
       <!-- Active Emotions List -->
       <div v-if="activeEmotions.length > 0" class="mb-4">
-        <p class="mb-2 text-sm text-gray-600">احساسات فعال:</p>
+        <p class="mb-2 text-sm text-gray-600">
+          احساسات فعال:
+        </p>
         <div class="flex flex-wrap gap-2">
-          <span 
-            v-for="emotion in activeEmotions" 
+          <span
+            v-for="emotion in activeEmotions"
             :key="emotion.emotionName"
             class="rounded-full bg-blue-100 px-3 py-1 text-sm"
           >
@@ -89,8 +95,10 @@ const handleEmotionChange = (newSelected: string[]) => {
 
     <!-- Emotion Wheel Visualization -->
     <div class="rounded-lg bg-white p-4 shadow-sm">
-      <h3 class="mb-4 text-lg font-medium">چرخه احساسات</h3>
-      <EmotionWheel 
+      <h3 class="mb-4 text-lg font-medium">
+        چرخه احساسات
+      </h3>
+      <EmotionWheel
         :model-value="selectedEmotions"
         lang="pes"
         @update:model-value="handleEmotionChange"
@@ -99,9 +107,11 @@ const handleEmotionChange = (newSelected: string[]) => {
 
     <!-- Raw Data (for debugging) -->
     <details class="rounded-lg bg-gray-50 p-4">
-      <summary class="cursor-pointer font-medium">داده‌های خام (برای دیباگ)</summary>
+      <summary class="cursor-pointer font-medium">
+        داده‌های خام (برای دیباگ)
+      </summary>
       <pre class="mt-2 text-xs">{{ JSON.stringify(emotionAnalysisData, null, 2) }}</pre>
       <pre class="mt-2 text-xs">Selected for wheel: {{ selectedEmotions }}</pre>
     </details>
   </div>
-</template> 
+</template>

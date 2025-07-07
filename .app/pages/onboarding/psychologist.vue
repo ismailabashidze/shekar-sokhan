@@ -49,10 +49,10 @@ const redeem = async () => {
         lazy: false,
         immediate: true,
         watch: false,
-        retry: 0
-      }
+        retry: 0,
+      },
     )
-    
+
     if (!error.value) {
       toaster.show({
         title: 'ثبت کد',
@@ -72,7 +72,8 @@ const redeem = async () => {
         closable: true,
       })
     }
-  } catch (e) {
+  }
+  catch (e) {
     console.error('Error redeeming discount:', e)
     toaster.show({
       title: 'خطا',
@@ -81,7 +82,8 @@ const redeem = async () => {
       icon: 'ph:warning',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     isSubmitting.value = false
   }
 }

@@ -19,14 +19,14 @@ const router = useRouter()
 const toaster = useToaster()
 
 // استفاده از کامپوزبل posts
-const { 
-  currentPost, 
-  loading, 
+const {
+  currentPost,
+  loading,
   error,
   getPost,
   getPostsByCategory,
   incrementViewCount,
-  toggleLike
+  toggleLike,
 } = usePosts()
 
 const postId = route.params.id as string
@@ -39,23 +39,24 @@ const comments = ref([])
 const loadPost = async () => {
   try {
     await getPost(postId)
-    
+
     if (currentPost.value) {
       // Increment view count
       await incrementViewCount(postId)
-      
+
       // Load related posts from same category
       if (currentPost.value.category) {
         const relatedData = await getPostsByCategory(currentPost.value.category, {
           page: 1,
           perPage: 3,
-          filters: { status: 'published' }
+          filters: { status: 'published' },
         })
         // Exclude current post from related posts
         relatedPosts.value = relatedData.items?.filter(p => p.id !== postId).slice(0, 2) || []
       }
     }
-  } catch (err) {
+  }
+  catch (err) {
     console.error('Error loading post:', err)
     if (err?.message?.includes('404') || err?.message?.includes('not found')) {
       // Post not found, redirect to 404 or posts list
@@ -67,12 +68,12 @@ const loadPost = async () => {
 // Format functions
 const formatDate = (dateString: string): string => {
   if (!dateString) return ''
-  
+
   const date = new Date(dateString)
   const now = new Date()
   const diffInMs = now.getTime() - date.getTime()
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
-  
+
   if (diffInDays === 0) return 'امروز'
   if (diffInDays === 1) return 'دیروز'
   if (diffInDays < 7) return `${diffInDays} روز پیش`
@@ -93,22 +94,22 @@ const post = computed(() => currentPost.value)
 
 const displayAuthor = computed(() => {
   if (!post.value?.author) return null
-  
+
   // Handle both expanded and non-expanded author data
   if (typeof post.value.author === 'string') {
     return {
       name: 'نویسنده',
       role: '',
       avatar: '/img/avatars/placeholder.svg',
-      bio: ''
+      bio: '',
     }
   }
-  
+
   return {
     name: post.value.author.name || post.value.author.meta?.name || 'نویسنده',
     role: 'نویسنده مقاله',
     avatar: post.value.author.avatar || post.value.author.meta?.avatarUrl || '/img/avatars/placeholder.svg',
-    bio: post.value.author.bio || 'نویسنده محترم این مقاله'
+    bio: post.value.author.bio || 'نویسنده محترم این مقاله',
   }
 })
 
@@ -136,7 +137,7 @@ const submitComment = () => {
 // Like post
 const likePost = async () => {
   if (!post.value?.id) return
-  
+
   try {
     await toggleLike(post.value.id)
     toaster.show({
@@ -146,7 +147,8 @@ const likePost = async () => {
       icon: 'ph:heart',
       closable: true,
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.error('Error liking post:', err)
   }
 }
@@ -163,7 +165,7 @@ watchEffect(() => {
         { property: 'og:image', content: post.value.featuredImage || '/img/og-default.jpg' },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'keywords', content: post.value.tags?.join(', ') || '' },
-      ]
+      ],
     })
   }
 })
@@ -184,7 +186,9 @@ watchEffect(() => {
       <h3 class="text-muted-800 dark:text-muted-200 mb-2 text-lg font-semibold">
         خطا در بارگیری مقاله
       </h3>
-      <p class="text-muted-500 mb-4">{{ error }}</p>
+      <p class="text-muted-500 mb-4">
+        {{ error }}
+      </p>
       <div class="flex justify-center gap-3">
         <BaseButton
           color="primary"
@@ -292,12 +296,12 @@ watchEffect(() => {
 
           <!-- Post Content -->
           <div class="mb-10">
-            <AddonMarkdownRemark 
-              v-if="post.contentLong" 
-              :value="post.contentLong" 
-              class="prose prose-lg dark:prose-invert max-w-none markdown-content"
+            <AddonMarkdownRemark
+              v-if="post.contentLong"
+              :value="post.contentLong"
+              class="prose prose-lg dark:prose-invert markdown-content max-w-none"
             />
-            <div v-else class="text-muted-500 text-center py-8">
+            <div v-else class="text-muted-500 py-8 text-center">
               محتوای مقاله در دسترس نیست
             </div>
           </div>
@@ -462,11 +466,13 @@ watchEffect(() => {
             </div>
 
             <!-- Empty comments state -->
-            <div v-else class="mb-6 text-center py-8">
+            <div v-else class="mb-6 py-8 text-center">
               <div class="text-muted-400 mb-2">
                 <Icon name="ph:chat-circle-duotone" class="mx-auto size-12" />
               </div>
-              <p class="text-muted-500 text-sm">هنوز نظری ثبت نشده است</p>
+              <p class="text-muted-500 text-sm">
+                هنوز نظری ثبت نشده است
+              </p>
             </div>
 
             <!-- Comment Form -->
@@ -486,7 +492,7 @@ watchEffect(() => {
 
               <div class="flex justify-end">
                 <button
-                  class="bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg px-4 py-2 text-sm text-white transition-colors"
+                  class="bg-primary-500 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   :disabled="!newComment.trim()"
                   @click="submitComment"
                 >

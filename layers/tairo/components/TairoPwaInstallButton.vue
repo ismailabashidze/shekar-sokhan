@@ -3,20 +3,20 @@
     <!-- Install Button -->
     <button
       v-if="canInstall && !isInstalled"
+      class="bg-primary-500 hover:bg-primary-600 mb-16 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-white shadow-lg transition-colors"
       @click="installPwa"
-      class="mb-16 bg-primary-500 hover:bg-primary-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium transition-colors flex items-center gap-2"
     >
-      <Icon name="mdi:download" class="w-4 h-4" />
+      <Icon name="mdi:download" class="size-4" />
       نصب اپ
     </button>
 
     <!-- Installed Indicator -->
     <div
       v-else-if="isInstalled"
-      class="mb-16 bg-green-500 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium flex items-center gap-2"
-       style="display: none;"
+      class="mb-16 flex items-center gap-2 rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white shadow-lg"
+      style="display: none;"
     >
-      <Icon name="mdi:check" class="w-4 h-4" />
+      <Icon name="mdi:check" class="size-4" />
       نصب شده
     </div>
   </div>
@@ -36,8 +36,8 @@ const deferredPrompt = ref<BeforeInstallPromptEvent | null>(null)
 onMounted(() => {
   if (process.client) {
     // Check if running in standalone mode (already installed)
-    isStandalone.value = window.matchMedia('(display-mode: standalone)').matches || 
-                        (window.navigator as any).standalone === true
+    isStandalone.value = window.matchMedia('(display-mode: standalone)').matches
+    || (window.navigator as any).standalone === true
 
     if (isStandalone.value) {
       isInstalled.value = true
@@ -57,7 +57,7 @@ onMounted(() => {
       canInstall.value = false
       deferredPrompt.value = null
     })
-    
+
     // Force show install button for testing (if needed)
     setTimeout(() => {
       if (!canInstall.value && !isInstalled.value) {
@@ -75,15 +75,16 @@ const installPwa = async () => {
   try {
     await deferredPrompt.value.prompt()
     const { outcome } = await deferredPrompt.value.userChoice
-    
+
     if (outcome === 'accepted') {
       isInstalled.value = true
     }
-    
+
     canInstall.value = false
     deferredPrompt.value = null
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در نصب اپلیکیشن:', error)
   }
 }
-</script> 
+</script>

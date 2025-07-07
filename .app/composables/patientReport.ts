@@ -22,11 +22,11 @@ export interface MainPoint {
 export interface SessionProgress {
   session: string
   strengthsIdentified: {
-    strengths: { label: string; icon?: string }[]
+    strengths: { label: string, icon?: string }[]
     notes?: string
   }
   areasForGrowth: {
-    areas: { title: string, reason?: string, suggestedActions?: { title: string; icon?: string }[], icon?: string }[]
+    areas: { title: string, reason?: string, suggestedActions?: { title: string, icon?: string }[], icon?: string }[]
     notes?: string
   }
   achievements: {
@@ -49,7 +49,7 @@ export interface EmotionalJourney {
     [emotion: string]: number // e.g. { joy: 3, sadness: 1 }
   }
   copingStrategies: {
-    strategies: { title: string; icon?: string }[]
+    strategies: { title: string, icon?: string }[]
     effectiveness: string
   }
 }
@@ -57,11 +57,11 @@ export interface EmotionalJourney {
 export interface PersonalGrowth {
   session: string
   insights: {
-    insights: { text: string; icon?: string }[]
+    insights: { text: string, icon?: string }[]
     summary?: string
   }
   learnings: {
-    learnings: { text: string; icon?: string }[]
+    learnings: { text: string, icon?: string }[]
     summary?: string
   }
 }
@@ -72,7 +72,7 @@ export interface TherapeuticRelationship {
   understandingLevel: UnderstandingLevel
   trustLevel: TrustLevel
   nextStepsForBetterCommunication: {
-    steps: { title: string; icon?: string }[]
+    steps: { title: string, icon?: string }[]
     notes?: string
   }
 }
@@ -80,7 +80,7 @@ export interface TherapeuticRelationship {
 export interface SessionAnalysisForPatient {
   session: string
   sessionNumber: number
-  mainPoints: { title: string; icon?: string }[]
+  mainPoints: { title: string, icon?: string }[]
   sessionProgress: string
   emotionalJourney: string
   personalGrowth: string

@@ -32,7 +32,8 @@ export function useTherapistsMessages() {
       })
       console.log(`session = "${sessionId}" && user = "${nuxtApp.$pb.authStore.model.id}"`)
       return data
-    } catch (error: any) {
+    }
+    catch (error: any) {
       if (error?.isAbort) {
         console.log('Request was cancelled')
         return []

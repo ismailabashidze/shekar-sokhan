@@ -52,9 +52,9 @@ export function useReport() {
   const updateReport = async (id: string, data: Partial<Report>) => {
     try {
       // Update remote only - sync with localStorage is handled by user.ts
-      const updated = await pb.collection('final_reports').update(id, data)
-      return updated
-    } catch (error) {
+      return await pb.collection('final_reports').update(id, data)
+    }
+    catch (error) {
       console.error(`Error updating report with id ${id}:`, error)
       throw error
     }

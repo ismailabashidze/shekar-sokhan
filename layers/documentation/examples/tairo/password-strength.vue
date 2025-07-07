@@ -1,9 +1,7 @@
 <template>
   <div class="max-w-md">
     <div class="relative mb-2">
-      <label class="text-muted-500 dark:text-muted-400 mb-2 block text-xs font-semibold"
-        >Password strength</label
-      >
+      <label class="text-muted-500 dark:text-muted-400 mb-2 block text-xs font-semibold">Password strength</label>
 
       <BaseInput
         v-model="password"
@@ -13,16 +11,16 @@
       >
         <template #action>
           <button
-            class="leading-0 text-muted-400 peer-focus-within:text-primary-500 absolute right-0 top-0 flex h-10 w-10 items-center justify-center text-center text-xl"
+            class="leading-0 text-muted-400 peer-focus-within:text-primary-500 absolute right-0 top-0 flex size-10 items-center justify-center text-center text-xl"
             @click.prevent="showPasswordField = !showPasswordField"
           >
             <div
-              class="relative flex h-full w-full items-center justify-center"
+              class="relative flex size-full items-center justify-center"
               :data-tooltip="`${showPasswordField ? 'Show' : 'Hide'} password`"
             >
               <Icon
                 :name="showPasswordField ? 'mdi:eye-outline' : 'mdi:eye-off-outline'"
-                class="h-5 w-5"
+                class="size-5"
               />
             </div>
           </button>

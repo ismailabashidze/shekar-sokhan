@@ -53,7 +53,8 @@ const getDeviceInfo = async () => {
     const audioDevices = devices.filter(device => device.kind === 'audioinput')
     deviceInfo.value = `Available audio devices: ${audioDevices.map(d => d.label || 'Unnamed device').join(', ')}`
     console.log('[AudioUser] Device info:', deviceInfo.value)
-  } catch (err) {
+  }
+  catch (err) {
     console.error('[AudioUser] Error getting device info:', err)
     deviceInfo.value = `Error getting device info: ${err.message}`
   }
@@ -293,7 +294,7 @@ const startRecognition = () => {
     interimText.value = ''
     allText.value = ''
     lastProcessedIndex.value = -1
-    
+
     // Add a small delay before starting recognition
     setTimeout(() => {
       try {
@@ -324,14 +325,14 @@ const endRecognition = () => {
       clearTimeout(recognitionTimeout.value)
       recognitionTimeout.value = null
     }
-    
+
     try {
       recognition.value.stop()
     }
     catch (e) {
       console.error('Error stopping recognition:', e)
     }
-    
+
     isStarted.value = false
 
     // Stop the audio context
@@ -405,7 +406,8 @@ const resetState = () => {
   if (recognition.value) {
     try {
       recognition.value.stop()
-    } catch (e) {
+    }
+    catch (e) {
       console.error('Error stopping recognition:', e)
     }
   }
@@ -467,10 +469,16 @@ onBeforeUnmount(() => {
     <div>
       <BaseCard rounded="lg" class="relative">
         <!-- Add debug info section -->
-        <div v-if="audioStatus || errorMessage || deviceInfo" class="text-sm p-2 bg-gray-100 rounded mb-2">
-          <p v-if="audioStatus" class="text-blue-600">Status: {{ audioStatus }}</p>
-          <p v-if="errorMessage" class="text-red-600">Error: {{ errorMessage }}</p>
-          <p v-if="deviceInfo" class="text-gray-600 text-xs">{{ deviceInfo }}</p>
+        <div v-if="audioStatus || errorMessage || deviceInfo" class="mb-2 rounded bg-gray-100 p-2 text-sm">
+          <p v-if="audioStatus" class="text-blue-600">
+            Status: {{ audioStatus }}
+          </p>
+          <p v-if="errorMessage" class="text-red-600">
+            Error: {{ errorMessage }}
+          </p>
+          <p v-if="deviceInfo" class="text-xs text-gray-600">
+            {{ deviceInfo }}
+          </p>
         </div>
         <div>
           <BaseCard
@@ -487,7 +495,7 @@ onBeforeUnmount(() => {
 
             <!-- Text display area -->
             <div class="bg-muted-100 dark:bg-muted-700/50 mb-4 min-h-[100px] rounded-lg p-4 text-right">
-              <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm flex items-center justify-between">
+              <div class="text-muted-500 dark:text-muted-400 mb-2 flex items-center justify-between text-sm">
                 <div>متن وارد شده:</div>
               </div>
               <!-- Show interim text during recognition, final text after release -->

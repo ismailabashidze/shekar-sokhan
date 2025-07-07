@@ -260,7 +260,7 @@ const closeAlphaModal = () => {
                 <div class="mt-[80px] grow sm:mt-0">
                   <div class="pb-4 text-center sm:pb-0 sm:text-right">
                     <BaseHeading tag="h1" class="text-white opacity-90">
-                      <span class="flex items-center gap-2 justify-center sm:justify-start">
+                      <span class="flex items-center justify-center gap-2 sm:justify-start">
                         سلام،
                         <BaseAvatar
                           :src="user?.meta?.avatarUrl || '/img/avatars/default-male.jpg'"
@@ -314,7 +314,11 @@ const closeAlphaModal = () => {
                     leave-from-class="transform scale-y-100 opacity-100"
                     leave-to-class="transform scale-y-0 opacity-0"
                   >
-                    <div v-if="showFeatures" class="w-full" data-tour="new-features">
+                    <div
+                      v-if="showFeatures"
+                      class="w-full"
+                      data-tour="new-features"
+                    >
                       <!--Features widget-->
                       <NewFeatures>
                         <template #actions>
@@ -696,7 +700,6 @@ const closeAlphaModal = () => {
     </BaseCard>
 
     <!-- Tour Component -->
-        <TourButton
-    />
+    <TourButton />
   </div>
 </template>

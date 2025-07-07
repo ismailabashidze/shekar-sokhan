@@ -17,7 +17,7 @@ const data = ref([
     createdAt: '2025-04-30T10:30:00',
     updatedAt: '2025-05-01T14:15:00',
     tags: ['جلسه', 'اسپرینت', 'برنامه‌ریزی'],
-    category: 'جلسات داخلی'
+    category: 'جلسات داخلی',
   },
   {
     id: '2',
@@ -26,7 +26,7 @@ const data = ref([
     createdAt: '2025-05-03T09:45:00',
     updatedAt: '2025-05-03T09:45:00',
     tags: ['ایده‌پردازی', 'توسعه محصول', 'رابط کاربری'],
-    category: 'توسعه محصول'
+    category: 'توسعه محصول',
   },
   {
     id: '3',
@@ -35,7 +35,7 @@ const data = ref([
     createdAt: '2025-05-05T16:20:00',
     updatedAt: '2025-05-05T16:20:00',
     tags: ['API', 'مستندات', 'توسعه'],
-    category: 'مستندات فنی'
+    category: 'مستندات فنی',
   },
   {
     id: '4',
@@ -44,7 +44,7 @@ const data = ref([
     createdAt: '2025-05-06T11:10:00',
     updatedAt: '2025-05-06T11:10:00',
     tags: ['جلسات', 'برنامه‌ریزی', 'اسپرینت'],
-    category: 'برنامه‌ریزی'
+    category: 'برنامه‌ریزی',
   },
   {
     id: '5',
@@ -53,43 +53,45 @@ const data = ref([
     createdAt: '2025-05-07T08:30:00',
     updatedAt: '2025-05-07T08:30:00',
     tags: ['پروژه', 'وظایف', 'برنامه‌ریزی'],
-    category: 'مدیریت پروژه'
-  }
+    category: 'مدیریت پروژه',
+  },
 ])
 </script>
 
 <template>
   <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">یادداشت‌ها</h1>
-      <NuxtLink to="/notes/create" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
+    <div class="mb-6 flex items-center justify-between">
+      <h1 class="text-2xl font-bold">
+        یادداشت‌ها
+      </h1>
+      <NuxtLink to="/notes/create" class="bg-primary hover:bg-primary-dark rounded-md px-4 py-2 text-white">
         یادداشت جدید
       </NuxtLink>
     </div>
 
     <div v-if="pending" class="flex justify-center py-10">
-      <div class="loader"></div>
+      <div class="loader" />
     </div>
-    
-    <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+
+    <div v-else-if="error" class="rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
       خطا در بارگذاری یادداشت‌ها
     </div>
-    
-    <div v-else-if="!data || data.length === 0" class="text-center py-10 text-gray-500">
+
+    <div v-else-if="!data || data.length === 0" class="py-10 text-center text-gray-500">
       یادداشتی یافت نشد
     </div>
-    
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+    <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       <div
         v-for="note in data"
         :key="note.id"
-        class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+        class="overflow-hidden rounded-lg bg-white shadow-md transition-shadow duration-300 hover:shadow-lg"
       >
         <NuxtLink :to="`/notes/${note.id}`">
           <div class="p-6">
             <!-- دسته‌بندی یادداشت -->
-            <div class="flex justify-between items-center mb-2">
-              <span v-if="note.category" class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+            <div class="mb-2 flex items-center justify-between">
+              <span v-if="note.category" class="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs">
                 {{ note.category }}
               </span>
               <span v-if="note.updatedAt && note.updatedAt !== note.createdAt" class="text-xs text-gray-400">
@@ -97,16 +99,20 @@ const data = ref([
               </span>
             </div>
 
-            <h2 class="text-xl font-semibold mb-2 truncate">{{ note.title }}</h2>
-            <p class="text-gray-600 line-clamp-3">{{ note.content }}</p>
+            <h2 class="mb-2 truncate text-xl font-semibold">
+              {{ note.title }}
+            </h2>
+            <p class="line-clamp-3 text-gray-600">
+              {{ note.content }}
+            </p>
 
             <!-- برچسب‌ها و تاریخ -->
             <div class="mt-4 flex flex-wrap items-center justify-between">
-              <div class="flex flex-wrap gap-1 mb-1">
-                <span 
-                  v-for="tag in note.tags" 
-                  :key="tag" 
-                  class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+              <div class="mb-1 flex flex-wrap gap-1">
+                <span
+                  v-for="tag in note.tags"
+                  :key="tag"
+                  class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
                 >
                   {{ tag }}
                 </span>

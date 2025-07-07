@@ -102,38 +102,39 @@ onModelAfterUpdate((e) => {
 // Track unique users when a new user is created
 onModelAfterCreate((e) => {
   // Only process users collection
-  if (e.model.tableName() !== "users") {
-    return;
+  if (e.model.tableName() !== 'users') {
+    return
   }
-  
-  console.log("New user created, updating user statistics...");
-  
+
+  console.log('New user created, updating user statistics...')
+
   try {
     // Get the dashboard_data record
     let dashboardData = $app
       .dao()
-      .findFirstRecordByData('dashboard_data', 'id', 'dashboard-12345');
-    
+      .findFirstRecordByData('dashboard_data', 'id', 'dashboard-12345')
+
     if (!dashboardData) {
-      const collection = $app.dao().findCollectionByNameOrId('dashboard_data');
+      const collection = $app.dao().findCollectionByNameOrId('dashboard_data')
       dashboardData = new Record(collection, {
         id: 'dashboard-12345',
         time_of_usage: 0,
         count_of_messages: 0,
         count_of_users: 0,
-        count_of_sessions: 0
-      });
+        count_of_sessions: 0,
+      })
     }
-    
+
     // Increment the count of unique users
-    const currentCount = dashboardData.get('count_of_users') || 0;
-    dashboardData.set('count_of_users', currentCount + 1);
-    
+    const currentCount = dashboardData.get('count_of_users') || 0
+    dashboardData.set('count_of_users', currentCount + 1)
+
     // Save the updated record
-    $app.dao().saveRecord(dashboardData);
-    
-    console.log("User statistics updated successfully");
-  } catch (error) {
-    console.error("Error updating user statistics:", error);
+    $app.dao().saveRecord(dashboardData)
+
+    console.log('User statistics updated successfully')
   }
-}, "users");
+  catch (error) {
+    console.error('Error updating user statistics:', error)
+  }
+}, 'users')

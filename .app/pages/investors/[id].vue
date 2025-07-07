@@ -112,7 +112,7 @@ const statusColors = {
   'تأیید شده': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
   'مذاکره': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   'در انتظار': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  'رد شده': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+  'رد شده': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 }
 
 // Handle 404
@@ -151,7 +151,7 @@ if (!investor.value) {
             <Icon name="ph:envelope-duotone" class="size-5" />
             <span>ارسال ایمیل</span>
           </button>
-          <button class="bg-emerald-500 hover:bg-emerald-600 flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors duration-300">
+          <button class="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-white transition-colors duration-300 hover:bg-emerald-600">
             <Icon name="ph:phone-duotone" class="size-5" />
             <span>تماس</span>
           </button>
@@ -163,7 +163,9 @@ if (!investor.value) {
         <!-- Main Information Card -->
         <BaseCard class="md:col-span-2">
           <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-6">
-            <h3 class="text-muted-800 text-lg font-bold dark:text-white">اطلاعات سرمایه‌گذار</h3>
+            <h3 class="text-muted-800 text-lg font-bold dark:text-white">
+              اطلاعات سرمایه‌گذار
+            </h3>
             <span
               :class="[
                 'rounded-full px-3 py-1 text-sm',
@@ -173,83 +175,115 @@ if (!investor.value) {
               {{ investor.status }}
             </span>
           </div>
-          
+
           <div class="p-6">
             <div class="grid gap-y-6 md:grid-cols-2 md:gap-x-6">
               <!-- Name -->
               <div>
-                <h4 class="text-muted-400 mb-2 text-sm font-medium">نام</h4>
-                <p class="text-muted-800 dark:text-muted-100">{{ investor.name }}</p>
+                <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                  نام
+                </h4>
+                <p class="text-muted-800 dark:text-muted-100">
+                  {{ investor.name }}
+                </p>
               </div>
-              
+
               <!-- Company -->
               <div>
-                <h4 class="text-muted-400 mb-2 text-sm font-medium">شرکت</h4>
-                <p class="text-muted-800 dark:text-muted-100">{{ investor.company }}</p>
+                <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                  شرکت
+                </h4>
+                <p class="text-muted-800 dark:text-muted-100">
+                  {{ investor.company }}
+                </p>
               </div>
-              
+
               <!-- Position -->
               <div>
-                <h4 class="text-muted-400 mb-2 text-sm font-medium">سمت</h4>
-                <p class="text-muted-800 dark:text-muted-100">{{ investor.position }}</p>
+                <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                  سمت
+                </h4>
+                <p class="text-muted-800 dark:text-muted-100">
+                  {{ investor.position }}
+                </p>
               </div>
-              
+
               <!-- Email -->
               <div>
-                <h4 class="text-muted-400 mb-2 text-sm font-medium">ایمیل</h4>
-                <a 
-                  :href="`mailto:${investor.email}`" 
+                <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                  ایمیل
+                </h4>
+                <a
+                  :href="`mailto:${investor.email}`"
                   class="text-primary-500 hover:text-primary-600 transition-colors"
                 >
                   {{ investor.email }}
                 </a>
               </div>
-              
+
               <!-- Phone -->
               <div>
-                <h4 class="text-muted-400 mb-2 text-sm font-medium">تلفن</h4>
-                <a 
-                  :href="`tel:${investor.phone}`" 
+                <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                  تلفن
+                </h4>
+                <a
+                  :href="`tel:${investor.phone}`"
                   class="text-primary-500 hover:text-primary-600 transition-colors"
                 >
                   {{ investor.phone }}
                 </a>
               </div>
-              
+
               <!-- Website -->
               <div>
-                <h4 class="text-muted-400 mb-2 text-sm font-medium">وب‌سایت</h4>
-                <a 
-                  :href="`https://${investor.website}`" 
+                <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                  وب‌سایت
+                </h4>
+                <a
+                  :href="`https://${investor.website}`"
                   target="_blank"
                   class="text-primary-500 hover:text-primary-600 transition-colors"
                 >
                   {{ investor.website }}
                 </a>
               </div>
-              
+
               <!-- Address -->
               <div class="md:col-span-2">
-                <h4 class="text-muted-400 mb-2 text-sm font-medium">آدرس</h4>
-                <p class="text-muted-800 dark:text-muted-100">{{ investor.address }}</p>
+                <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                  آدرس
+                </h4>
+                <p class="text-muted-800 dark:text-muted-100">
+                  {{ investor.address }}
+                </p>
               </div>
-              
+
               <!-- Created Date -->
               <div>
-                <h4 class="text-muted-400 mb-2 text-sm font-medium">تاریخ ثبت</h4>
-                <p class="text-muted-800 dark:text-muted-100">{{ investor.created }}</p>
+                <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                  تاریخ ثبت
+                </h4>
+                <p class="text-muted-800 dark:text-muted-100">
+                  {{ investor.created }}
+                </p>
               </div>
-              
+
               <!-- Investment Range -->
               <div>
-                <h4 class="text-muted-400 mb-2 text-sm font-medium">محدوده سرمایه‌گذاری</h4>
-                <p class="text-muted-800 dark:text-muted-100">{{ investor.investmentRange }}</p>
+                <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                  محدوده سرمایه‌گذاری
+                </h4>
+                <p class="text-muted-800 dark:text-muted-100">
+                  {{ investor.investmentRange }}
+                </p>
               </div>
             </div>
-            
+
             <!-- Investment Interests -->
             <div class="mt-6">
-              <h4 class="text-muted-400 mb-2 text-sm font-medium">علاقه‌مندی‌های سرمایه‌گذاری</h4>
+              <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                علاقه‌مندی‌های سرمایه‌گذاری
+              </h4>
               <div class="flex flex-wrap gap-2">
                 <span
                   v-for="interest in investor.investmentInterests"
@@ -260,60 +294,74 @@ if (!investor.value) {
                 </span>
               </div>
             </div>
-            
+
             <!-- Message -->
             <div class="mt-6">
-              <h4 class="text-muted-400 mb-2 text-sm font-medium">پیام</h4>
+              <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                پیام
+              </h4>
               <div class="bg-muted-100 dark:bg-muted-700 rounded-lg p-4">
-                <p class="text-muted-800 dark:text-muted-100">{{ investor.message }}</p>
+                <p class="text-muted-800 dark:text-muted-100">
+                  {{ investor.message }}
+                </p>
               </div>
             </div>
           </div>
         </BaseCard>
-        
+
         <!-- Notes Card -->
         <BaseCard>
           <div class="border-muted-200 dark:border-muted-700 border-b p-6">
-            <h3 class="text-muted-800 text-lg font-bold dark:text-white">یادداشت‌ها</h3>
+            <h3 class="text-muted-800 text-lg font-bold dark:text-white">
+              یادداشت‌ها
+            </h3>
           </div>
-          
+
           <div class="p-6">
             <div class="bg-muted-100 dark:bg-muted-700 rounded-lg p-4">
-              <p class="text-muted-800 dark:text-muted-100 whitespace-pre-line">{{ investor.notes }}</p>
+              <p class="text-muted-800 dark:text-muted-100 whitespace-pre-line">
+                {{ investor.notes }}
+              </p>
             </div>
-            
+
             <!-- Add New Note Form -->
             <div class="mt-6">
-              <h4 class="text-muted-400 mb-2 text-sm font-medium">افزودن یادداشت جدید</h4>
+              <h4 class="text-muted-400 mb-2 text-sm font-medium">
+                افزودن یادداشت جدید
+              </h4>
               <textarea
-                class="text-muted-600 dark:text-muted-200 placeholder:text-muted-300 dark:placeholder:text-muted-500 border-muted-300 dark:border-muted-700 bg-white dark:bg-muted-900 min-h-[120px] w-full rounded-lg border p-3 transition-colors duration-300 focus:border-primary-500 focus:outline-none"
+                class="text-muted-600 dark:text-muted-200 placeholder:text-muted-300 dark:placeholder:text-muted-500 border-muted-300 dark:border-muted-700 dark:bg-muted-900 focus:border-primary-500 min-h-[120px] w-full rounded-lg border bg-white p-3 transition-colors duration-300 focus:outline-none"
                 placeholder="یادداشت خود را وارد کنید..."
-              ></textarea>
+              />
               <button class="bg-primary-500 hover:bg-primary-600 mt-3 rounded-lg px-4 py-2 text-white transition-colors duration-300">
                 ذخیره یادداشت
               </button>
             </div>
           </div>
         </BaseCard>
-        
+
         <!-- Activity Timeline Card -->
         <BaseCard class="md:col-span-3">
           <div class="border-muted-200 dark:border-muted-700 border-b p-6">
-            <h3 class="text-muted-800 text-lg font-bold dark:text-white">تاریخچه فعالیت‌ها</h3>
+            <h3 class="text-muted-800 text-lg font-bold dark:text-white">
+              تاریخچه فعالیت‌ها
+            </h3>
           </div>
-          
+
           <div class="p-6">
             <div class="relative">
               <!-- Timeline -->
-              <div class="absolute bottom-0 top-0 left-0 right-0 mr-5 border-l-2 border-dashed border-primary-500"></div>
-              
+              <div class="border-primary-500 absolute inset-0 mr-5 border-l-2 border-dashed" />
+
               <!-- Timeline Items -->
               <div class="space-y-8">
                 <div class="relative flex">
-                  <div class="bg-primary-500 z-10 mr-3 mt-0.5 size-4 rounded-full"></div>
-                  <div class="flex-1 rounded-lg bg-white p-4 shadow-md dark:bg-muted-800">
+                  <div class="bg-primary-500 z-10 mr-3 mt-0.5 size-4 rounded-full" />
+                  <div class="dark:bg-muted-800 flex-1 rounded-lg bg-white p-4 shadow-md">
                     <div class="mb-2 flex items-center justify-between">
-                      <h4 class="text-muted-800 font-medium dark:text-white">ثبت درخواست سرمایه‌گذاری</h4>
+                      <h4 class="text-muted-800 font-medium dark:text-white">
+                        ثبت درخواست سرمایه‌گذاری
+                      </h4>
                       <span class="text-muted-400 text-sm">{{ investor.created }}</span>
                     </div>
                     <p class="text-muted-500 text-sm">
@@ -321,12 +369,14 @@ if (!investor.value) {
                     </p>
                   </div>
                 </div>
-                
+
                 <div class="relative flex">
-                  <div class="bg-primary-500 z-10 mr-3 mt-0.5 size-4 rounded-full"></div>
-                  <div class="flex-1 rounded-lg bg-white p-4 shadow-md dark:bg-muted-800">
+                  <div class="bg-primary-500 z-10 mr-3 mt-0.5 size-4 rounded-full" />
+                  <div class="dark:bg-muted-800 flex-1 rounded-lg bg-white p-4 shadow-md">
                     <div class="mb-2 flex items-center justify-between">
-                      <h4 class="text-muted-800 font-medium dark:text-white">بررسی اولیه</h4>
+                      <h4 class="text-muted-800 font-medium dark:text-white">
+                        بررسی اولیه
+                      </h4>
                       <span class="text-muted-400 text-sm">{{ new Date(new Date(investor.created).getTime() + 2*24*60*60*1000).toISOString().split('T')[0] }}</span>
                     </div>
                     <p class="text-muted-500 text-sm">
@@ -334,12 +384,14 @@ if (!investor.value) {
                     </p>
                   </div>
                 </div>
-                
+
                 <div class="relative flex">
-                  <div class="bg-primary-500 z-10 mr-3 mt-0.5 size-4 rounded-full"></div>
-                  <div class="flex-1 rounded-lg bg-white p-4 shadow-md dark:bg-muted-800">
+                  <div class="bg-primary-500 z-10 mr-3 mt-0.5 size-4 rounded-full" />
+                  <div class="dark:bg-muted-800 flex-1 rounded-lg bg-white p-4 shadow-md">
                     <div class="mb-2 flex items-center justify-between">
-                      <h4 class="text-muted-800 font-medium dark:text-white">وضعیت: {{ investor.status }}</h4>
+                      <h4 class="text-muted-800 font-medium dark:text-white">
+                        وضعیت: {{ investor.status }}
+                      </h4>
                       <span class="text-muted-400 text-sm">{{ new Date(new Date(investor.created).getTime() + 5*24*60*60*1000).toISOString().split('T')[0] }}</span>
                     </div>
                     <p class="text-muted-500 text-sm">

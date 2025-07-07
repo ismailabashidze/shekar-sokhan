@@ -3,11 +3,11 @@
     <!-- Floating Help Button -->
     <button
       v-if="showFloatingButton"
-      @click="openTourModal"
-      class="fixed bottom-6 left-6 z-50 bg-primary-500 hover:bg-primary-600 text-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110"
+      class="bg-primary-500 hover:bg-primary-600 fixed bottom-6 left-6 z-50 rounded-full p-3 text-white shadow-lg transition-all duration-300 hover:scale-110"
       title="راهنما"
+      @click="openTourModal"
     >
-      <Icon name="ph:question" class="w-6 h-6" />
+      <Icon name="ph:question" class="size-6" />
     </button>
 
     <!-- Tour Selection Modal -->
@@ -17,16 +17,16 @@
       @close="closeModal"
     >
       <template #header>
-        <div class="flex items-center justify-between p-6 border-b border-muted-200 dark:border-muted-700">
+        <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-6">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-xl flex items-center justify-center">
-              <Icon name="ph:compass-duotone" class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <div class="bg-primary-100 dark:bg-primary-900 flex size-10 items-center justify-center rounded-xl">
+              <Icon name="ph:compass-duotone" class="text-primary-600 dark:text-primary-400 size-5" />
             </div>
             <div>
               <h3 class="font-heading text-muted-900 text-xl font-bold leading-6 dark:text-white">
                 راهنمای آموزشی
               </h3>
-              <p class="text-muted-500 dark:text-muted-400 text-sm mt-1">
+              <p class="text-muted-500 dark:text-muted-400 mt-1 text-sm">
                 آموزش گام به گام استفاده از سیستم
               </p>
             </div>
@@ -35,13 +35,13 @@
         </div>
       </template>
 
-      <div class="p-6 tour-modal-content">
+      <div class="tour-modal-content p-6">
         <div class="mb-8">
-          <div class="text-center mb-6">
-            <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary-500/25">
-              <Icon name="ph:graduation-cap-duotone" class="w-8 h-8 text-white" />
+          <div class="mb-6 text-center">
+            <div class="from-primary-500 to-primary-600 shadow-primary-500/25 mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg">
+              <Icon name="ph:graduation-cap-duotone" class="size-8 text-white" />
             </div>
-            <h4 class="text-lg font-semibold text-muted-800 dark:text-white mb-2">
+            <h4 class="text-muted-800 mb-2 text-lg font-semibold dark:text-white">
               راهنمای مناسب برای شما را انتخاب کنید
             </h4>
             <p class="text-muted-500 dark:text-muted-400 text-sm">
@@ -51,71 +51,71 @@
         </div>
 
         <div class="space-y-4">
-                      <div 
-            v-for="tour in availableTours" 
+          <div
+            v-for="tour in availableTours"
             :key="tour.id"
-            class="group relative overflow-hidden bg-gradient-to-r from-muted-50 to-muted-100 dark:from-muted-800 dark:to-muted-700 rounded-2xl border border-muted-200 dark:border-muted-600 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-primary-500/10 hover:scale-[1.02] tour-card-mobile"
+            class="from-muted-50 to-muted-100 dark:from-muted-800 dark:to-muted-700 border-muted-200 dark:border-muted-600 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-primary-500/10 tour-card-mobile group relative cursor-pointer overflow-hidden rounded-2xl border bg-gradient-to-r transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
             @click="startSelectedTour(tour.id)"
           >
             <div class="flex items-center justify-between p-5">
               <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Icon name="ph:play-fill" class="w-5 h-5 text-white" />
+                <div class="from-primary-500 to-primary-600 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg transition-transform duration-300 group-hover:scale-110">
+                  <Icon name="ph:play-fill" class="size-5 text-white" />
                 </div>
                 <div>
-                  <h4 class="font-semibold text-muted-900 dark:text-white text-base mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                  <h4 class="text-muted-900 group-hover:text-primary-600 dark:group-hover:text-primary-400 mb-1 text-base font-semibold transition-colors dark:text-white">
                     {{ tour.name }}
                   </h4>
                   <div class="flex items-center gap-2">
                     <div class="flex items-center gap-1">
-                      <Icon name="ph:steps" class="w-3 h-3 text-muted-400" />
-                      <span class="text-sm text-muted-500 dark:text-muted-400">{{ tour.steps.length }} مرحله</span>
+                      <Icon name="ph:steps" class="text-muted-400 size-3" />
+                      <span class="text-muted-500 dark:text-muted-400 text-sm">{{ tour.steps.length }} مرحله</span>
                     </div>
                     <span class="text-muted-300 dark:text-muted-600">•</span>
                     <div class="flex items-center gap-1">
-                      <Icon name="ph:clock" class="w-3 h-3 text-muted-400" />
-                      <span class="text-sm text-muted-500 dark:text-muted-400">{{ Math.ceil(tour.steps.length * 0.5) }} دقیقه</span>
+                      <Icon name="ph:clock" class="text-muted-400 size-3" />
+                      <span class="text-muted-500 dark:text-muted-400 text-sm">{{ Math.ceil(tour.steps.length * 0.5) }} دقیقه</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
-                  <Icon name="ph:arrow-left" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              <div class="translate-x-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+                <div class="bg-primary-100 dark:bg-primary-900 flex size-8 items-center justify-center rounded-lg">
+                  <Icon name="ph:arrow-left" class="text-primary-600 dark:text-primary-400 size-4" />
                 </div>
               </div>
             </div>
-            
+
             <!-- Hover gradient overlay -->
-            <div class="absolute inset-0 bg-gradient-to-r from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shimmer-effect"></div>
+            <div class="from-primary-500/5 shimmer-effect pointer-events-none absolute inset-0 bg-gradient-to-r to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </div>
         </div>
 
-        <div class="mt-8 pt-6 border-t border-muted-200 dark:border-muted-700">
+        <div class="border-muted-200 dark:border-muted-700 mt-8 border-t pt-6">
           <div class="flex gap-3">
             <BaseButton
-              @click="resetAllToursAndClose"
               variant="outline"
               color="muted"
-              class="flex-1 h-12"
+              class="h-12 flex-1"
               shape="curved"
+              @click="resetAllToursAndClose"
             >
-              <Icon name="ph:arrow-clockwise-duotone" class="w-4 h-4 mr-2" />
+              <Icon name="ph:arrow-clockwise-duotone" class="mr-2 size-4" />
               <span>بازنشانی همه راهنماها</span>
             </BaseButton>
             <BaseButton
-              @click="closeModal"
               color="primary"
-              class="flex-1 h-12"
+              class="h-12 flex-1"
               shape="curved"
+              @click="closeModal"
             >
-              <Icon name="ph:x" class="w-4 h-4 mr-2" />
+              <Icon name="ph:x" class="mr-2 size-4" />
               <span>بستن</span>
             </BaseButton>
           </div>
-          
+
           <div class="mt-4 text-center">
-            <p class="text-xs text-muted-400">
+            <p class="text-muted-400 text-xs">
               می‌توانید در هر زمان با کلیک روی دکمه راهنما، این پنجره را مجدداً باز کنید
             </p>
           </div>
@@ -131,7 +131,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showFloatingButton: true
+  showFloatingButton: true,
 })
 
 const { tours, startTour, resetAllTours } = useTour()
@@ -141,11 +141,11 @@ const isModalOpen = ref(false)
 const availableTours = computed(() => {
   // You can filter tours based on current route
   const route = useRoute()
-  
+
   if (route.path === '/dashboard') {
     return tours.filter(tour => tour.id === 'dashboard')
   }
-  
+
   if (route.path.includes('onboarding')) {
     return tours.filter(tour => tour.id === 'onboarding')
   }
@@ -153,11 +153,11 @@ const availableTours = computed(() => {
   if (route.path.includes('therapists/sessions')) {
     return tours.filter(tour => tour.id === 'sessions')
   }
-  
+
   if (route.path.includes('therapists')) {
     return tours.filter(tour => ['therapist-selection', 'session-management'].includes(tour.id))
   }
-  
+
   return tours
 })
 
@@ -179,7 +179,7 @@ const startSelectedTour = (tourId: string) => {
 const resetAllToursAndClose = () => {
   resetAllTours()
   closeModal()
-  
+
   // Show success message
   const toaster = useToaster()
   toaster.show({
@@ -248,7 +248,7 @@ const resetAllToursAndClose = () => {
     left: 20px;
     padding: 12px;
   }
-  
+
   /* Make tour cards stack better on mobile */
   .tour-card-mobile {
     flex-direction: column;
@@ -284,4 +284,4 @@ const resetAllToursAndClose = () => {
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
-</style> 
+</style>

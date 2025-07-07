@@ -7,6 +7,71 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.6.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.6.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              30 ژانویه 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>پیاده‌سازی سیستم پیشرفته مدیریت اعلان‌های ادمین با عملیات CRUD کامل</li>
+              <li>افزودن صفحه‌بندی سمت سرور و اسکرول نامحدود برای لیست کاربران در پنل اعلان‌ها</li>
+              <li>یکپارچه‌سازی جستجوی بلادرنگ با قابلیت debounce برای جستجوی کاربران</li>
+              <li>ایجاد داشبورد جامع اعلان‌ها با آمار و تحلیل‌ها</li>
+              <li>افزودن قابلیت ارسال اعلان گروهی با فیلتر بر اساس نقش</li>
+              <li>پیاده‌سازی قالب‌های اعلان سیستم (خوش‌آمدگویی، یادآوری، هشدار، تعمیرات)</li>
+            </ul>
+
+            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های رابط کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود کارت‌های اعلان با نشانگرهای بصری وضعیت و طراحی مدرن</li>
+              <li>افزودن آواتار کاربران و نمایش جامع اطلاعات فرستنده/گیرنده</li>
+              <li>پیاده‌سازی طراحی واکنش‌گرا با چیدمان بهینه‌شده برای موبایل</li>
+              <li>بهبود سلسله‌مراتب بصری با نشان‌ها، آیکون‌ها و نشانگرهای رنگی وضعیت</li>
+              <li>افزودن سطوح اولویت و تصویرسازی وضعیت خوانده/نخوانده</li>
+              <li>بهبود قابلیت پیش‌نمایش اعلان با اعتبارسنجی فرم بلادرنگ</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>ایجاد composable <code>useAdminNotifications</code> برای مدیریت متمرکز اعلان‌ها</li>
+              <li>یکپارچه‌سازی PocketBase با گسترش صحیح روابط برای داده‌های کاربران</li>
+              <li>پیاده‌سازی سیستم صفحه‌بندی کارآمد با بارگذاری 20 آیتم در هر صفحه</li>
+              <li>افزودن مدیریت صحیح خطاها و وضعیت‌های بارگذاری در سراسر سیستم</li>
+              <li>ایجاد middleware ادمین برای کنترل دسترسی مبتنی بر نقش</li>
+              <li>بهبود ابزارهای تبدیل داده برای فرمت یکسان داده‌های UI</li>
+            </ul>
+
+            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>رفع خطاهای syntax در کامپوننت‌های Vue</li>
+              <li>اصلاح نمایش تعداد کاربران در آمار داشبورد</li>
+              <li>حل مشکل فعال‌سازی اسکرول نامحدود و قابلیت بارگذاری بیشتر</li>
+              <li>رفع مشکلات چیدمان واکنش‌گرا در دستگاه‌های موبایل</li>
+            </ul>
+
+            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
+              بومی‌سازی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>پشتیبانی کامل زبان فارسی برای رابط اعلان‌های ادمین</li>
+              <li>چیدمان بهینه‌شده RTL با جهت متن صحیح برای تمام کامپوننت‌ها</li>
+              <li>فرمت‌بندی تاریخ/زمان فارسی و پیام‌های وضعیت کاربرپسند</li>
+            </ul>
+          </div>
+
           <!-- Version 2.5.1 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">
@@ -322,7 +387,7 @@
               <li>بهینه‌سازی عملکرد در صفحه گزارش با حالت‌های بارگذاری و خالی</li>
             </ul>
           </div>
-          
+
           <!-- Version 1.8.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

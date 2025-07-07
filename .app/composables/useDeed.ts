@@ -227,7 +227,7 @@ export const useDeed = () => {
         approvedBy: nuxtApp.$pb.authStore.model.id,
         approvedAt: new Date().toISOString(),
       })
-      
+
       if (!result) throw new Error('خطا در تغییر وضعیت عمل نیک')
       return result
     }

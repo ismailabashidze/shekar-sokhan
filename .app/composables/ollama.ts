@@ -9,8 +9,8 @@ export type LLMMessage = {
 export function useOllama() {
   // const LLM_ADDRESS =
   // 'https://zvfiuquih3rs4n-8000.proxy.runpod.net/v1/chat/completions'
-  const LLM_ADDRESS =
-    'https://api.runpod.ai/v2/piygbpf2k35rym/openai/v1/chat/completions'
+  const LLM_ADDRESS
+    = 'https://api.runpod.ai/v2/piygbpf2k35rym/openai/v1/chat/completions'
   // const LLM_ADDRESS = 'http://localhost:11434/api/chat'
   // const LLM_ADDRESS = 'https://bb15-2-190-129-92.ngrok-free.app/api/chat'
   const { getMessages } = useMessage()
@@ -40,7 +40,7 @@ export function useOllama() {
     {
       name: 'PsychotherapistSummerizer',
       description:
-        "You are sam, Your main goal is to summerize multiple messages of a conversation which is from a psychotherapist, and are separated with | symbol. Tell interventions and activities psychotherapist done to patient. List activities, not narrate. NOTE that you are not psychotherapist and you don't need to complete these messages. I want you to summerize it instead.",
+        'You are sam, Your main goal is to summerize multiple messages of a conversation which is from a psychotherapist, and are separated with | symbol. Tell interventions and activities psychotherapist done to patient. List activities, not narrate. NOTE that you are not psychotherapist and you don\'t need to complete these messages. I want you to summerize it instead.',
     },
     {
       name: 'SummaryJsonizer',
@@ -71,7 +71,7 @@ export function useOllama() {
   const ask = async (AIName: string, question: string) => {
     let selectedMessages = [] as LLMMessage[]
     const msgs = await getMessages()
-    selectedPersona.value = personas.value.find((p) => p.name == AIName)
+    selectedPersona.value = personas.value.find(p => p.name == AIName)
     if (AIName === 'Mana') {
       selectedMessages = msgs.map((m) => {
         return {
@@ -79,7 +79,8 @@ export function useOllama() {
           content: m.content,
         }
       })
-    } else {
+    }
+    else {
       selectedMessages = [{ role: 'user', content: question }]
     }
     llmMessages.value = [
@@ -93,7 +94,7 @@ export function useOllama() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer 8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3',
+        'Authorization': 'Bearer 8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3',
       },
       body: JSON.stringify({
         model: 'cognitivecomputations/dolphin-2.6-mistral-7b-dpo-laser',

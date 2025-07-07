@@ -282,13 +282,13 @@ function formatLongContent(html: string) {
 
 async function submit() {
   if (!validate()) return
-  
+
   loading.value = true
-  
+
   try {
     // تبدیل tags از رشته به آرایه اگر ضروری باشد
     const tagsArray = Array.isArray(tags.value) ? tags.value : []
-    
+
     // داده‌های مقاله برای ایجاد
     const postData = {
       title: title.value.trim(),
@@ -309,14 +309,14 @@ async function submit() {
       contentLengthTarget: contentLengthTarget.value || undefined,
       author: user.value?.id || '',
       viewCount: 0,
-      likeCount: 0
+      likeCount: 0,
     }
 
     // ایجاد مقاله با استفاده از کامپوزبل
     const newPost = await createPost(postData)
-    
+
     success.value = true
-    
+
     // نمایش پیام موفقیت
     toaster.show({
       title: 'موفقیت آمیز',
@@ -325,13 +325,13 @@ async function submit() {
       icon: 'ph:check-circle',
       closable: true,
     })
-    
+
     // انتقال به صفحه لیست پس از تأخیر کوتاه
     setTimeout(() => {
       router.push('/posts/list')
     }, 1000)
-    
-  } catch (error: any) {
+  }
+  catch (error: any) {
     // مدیریت خطا
     toaster.show({
       title: 'خطا در ایجاد مقاله',
@@ -340,9 +340,10 @@ async function submit() {
       icon: 'ph:warning',
       closable: true,
     })
-    
+
     console.error('Error creating post:', error)
-  } finally {
+  }
+  finally {
     loading.value = false
   }
 }
@@ -355,7 +356,7 @@ function addTag() {
 }
 
 function removeTag(tag: string) {
-  tags.value = tags.value.filter((t) => t !== tag)
+  tags.value = tags.value.filter(t => t !== tag)
 }
 
 function removeAllTags() {
@@ -390,9 +391,9 @@ function goToPreview() {
 
 const isPreviewDisabled = computed(() => {
   return (
-    !title.value.trim() &&
-    !contentLong.value.trim() &&
-    !description.value.trim()
+    !title.value.trim()
+    && !contentLong.value.trim()
+    && !description.value.trim()
   )
 })
 
@@ -423,9 +424,8 @@ const syncSuggestionShown = ref(false)
 
 watch([title, secretMessage, category], () => {
   // فقط اگر حداقل عنوان و یکی از فیلدهای دیگر پر باشد
-  if (!syncSuggestionShown.value && title.value.trim() && 
-      (secretMessage.value.trim() || category.value)) {
-    
+  if (!syncSuggestionShown.value && title.value.trim()
+    && (secretMessage.value.trim() || category.value)) {
     // نمایش پیشنهاد همگام‌سازی با تأخیر کوتاه
     setTimeout(() => {
       if (!syncSuggestionShown.value) {
@@ -480,7 +480,7 @@ async function suggestAIField(field: string) {
     if (field === 'category') {
       const prompt = `با توجه به متن زیر، مناسب‌ترین دسته‌بندی را از بین گزینه‌های زیر انتخاب کن. فقط نام دسته‌بندی را برگردان و هیچ چیز دیگری ننویس.\n\nمتن: ${
         title.value || description.value || 'بدون عنوان'
-      }\n\nدسته‌بندی‌های موجود: ${categories.map((c) => c.value).join('، ')}`
+      }\n\nدسته‌بندی‌های موجود: ${categories.map(c => c.value).join('، ')}`
       const messages = [{ role: 'user', content: prompt }]
 
       let suggestion = ''
@@ -493,14 +493,14 @@ async function suggestAIField(field: string) {
             suggestion += content
             // Find the best matching category from our predefined list
             const matchedCategory = categories.find(
-              (cat) =>
+              cat =>
                 cat.value
                   .toLowerCase()
-                  .includes(suggestion.trim().toLowerCase()) ||
-                suggestion
-                  .trim()
-                  .toLowerCase()
-                  .includes(cat.value.toLowerCase()),
+                  .includes(suggestion.trim().toLowerCase())
+                  || suggestion
+                    .trim()
+                    .toLowerCase()
+                    .includes(cat.value.toLowerCase()),
             )
             if (matchedCategory) {
               category.value = matchedCategory.value
@@ -519,7 +519,8 @@ async function suggestAIField(field: string) {
         })
 
         return // Exit early after handling category
-      } catch (e: any) {
+      }
+      catch (e: any) {
         toaster.show({
           title: 'خطا',
           message: `خطا در دریافت پیشنهاد دسته‌بندی: ${
@@ -530,7 +531,8 @@ async function suggestAIField(field: string) {
           closable: true,
         })
         throw e
-      } finally {
+      }
+      finally {
         categoryAiLoading.value = false
       }
     }
@@ -562,8 +564,8 @@ async function suggestAIField(field: string) {
           // Split by both English and Persian commas, then clean up
           const newTags = suggestion
             .split(/[،,]/)
-            .map((tag) => tag.trim())
-            .filter((tag) => tag.length > 0)
+            .map(tag => tag.trim())
+            .filter(tag => tag.length > 0)
 
           // Update tags with new unique values
           if (newTags.length > 0) {
@@ -581,7 +583,8 @@ async function suggestAIField(field: string) {
         })
 
         return // Exit early after handling tags
-      } catch (e: any) {
+      }
+      catch (e: any) {
         toaster.show({
           title: 'خطا',
           message: `خطا در دریافت پیشنهاد برچسب‌ها: ${
@@ -592,7 +595,8 @@ async function suggestAIField(field: string) {
           closable: true,
         })
         throw e
-      } finally {
+      }
+      finally {
         tagsAiLoading.value = false
       }
     }
@@ -623,7 +627,7 @@ async function suggestAIField(field: string) {
       goals: 'اهداف آموزشی',
       category: 'دسته‌بندی',
     }
-    
+
     // Add category label if selected
     let enrichedContext = { ...context }
     if (enrichedContext.category) {
@@ -632,7 +636,7 @@ async function suggestAIField(field: string) {
         enrichedContext.category = `${selectedCategory.label} (${enrichedContext.category})`
       }
     }
-    
+
     const contextString = Object.entries(enrichedContext)
       .filter(([key]) => key !== field && enrichedContext[key])
       .map(([key, val]) => `${contextMapping[key] || key}: ${val}`)
@@ -763,11 +767,11 @@ ${markdownGuide}
                 contentLong.value = (initialContent + '\n' + suggestion).trim()
                 break
               case 'tags':
-                const newTags =
-                  (initialContent ? initialContent + ', ' : '') + suggestion
+                const newTags
+                  = (initialContent ? initialContent + ', ' : '') + suggestion
                 tags.value = newTags
                   .split(',')
-                  .map((t) => t.trim())
+                  .map(t => t.trim())
                   .filter(Boolean)
                 break
             }
@@ -785,7 +789,8 @@ ${markdownGuide}
         icon: 'ph:check-circle',
         closable: true,
       })
-    } catch (e: any) {
+    }
+    catch (e: any) {
       toaster.show({
         title: 'خطا',
         message: `خطا در دریافت پیشنهاد هوش مصنوعی: ${
@@ -797,7 +802,8 @@ ${markdownGuide}
       })
       throw e // Re-throw to be caught by outer try-catch
     }
-  } finally {
+  }
+  finally {
     // Ensure loading state is always reset
     switch (field) {
       case 'title':
@@ -859,11 +865,13 @@ function setFieldValue(field, value) {
       if (typeof value === 'string') {
         tags.value = value
           .split('،')
-          .map((t) => t.trim())
+          .map(t => t.trim())
           .filter(Boolean)
-      } else if (Array.isArray(value)) {
+      }
+      else if (Array.isArray(value)) {
         tags.value = value
-      } else {
+      }
+      else {
         tags.value = []
       }
       break
@@ -1001,10 +1009,10 @@ function saveAction() {
 
   // Validate required fields
   if (
-    !editingAction.value.title ||
-    !editingAction.value.action ||
-    !editingAction.value.icon ||
-    !editingAction.value.prompt
+    !editingAction.value.title
+    || !editingAction.value.action
+    || !editingAction.value.icon
+    || !editingAction.value.prompt
   ) {
     return
   }
@@ -1012,7 +1020,8 @@ function saveAction() {
   if (editingActionIndex.value > -1) {
     // Update existing action
     aiActions.value[editingActionIndex.value] = { ...editingAction.value }
-  } else {
+  }
+  else {
     // Add new action
     aiActions.value.push({ ...editingAction.value })
   }
@@ -1108,7 +1117,7 @@ async function handleAIAction(action: string) {
 
   try {
     // Find the action configuration
-    const actionConfig = aiActions.value.find((a) => a.action === action)
+    const actionConfig = aiActions.value.find(a => a.action === action)
     if (!actionConfig) return
 
     // Use the prompt from the action configuration
@@ -1158,7 +1167,8 @@ async function handleAIAction(action: string) {
         timeout: 3000,
       })
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('AI rewrite error:', error)
     toaster.show({
       title: 'خطا',
@@ -1167,7 +1177,8 @@ async function handleAIAction(action: string) {
       icon: 'ph:warning-circle',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     // Hide buttons after action completes
     showFloatingMenu.value = false
     textarea.focus()
@@ -1240,7 +1251,8 @@ onMounted(() => {
       textarea.addEventListener('keyup', handleMarkdownSelection)
       textarea.addEventListener('click', handleMarkdownSelection)
       textarea.addEventListener('select', handleMarkdownSelection)
-    } else {
+    }
+    else {
       console.warn('Textarea element not found')
     }
   }, 500) // Give it some time to render
@@ -1277,13 +1289,13 @@ const syncAllFieldsAI = async () => {
     // ترتیب بهینه برای همگام‌سازی
     const syncOrder = [
       'secretMessage',
-      'category', 
+      'category',
       'description',
       'goals',
       'tags',
       'excerpt',
       'slug',
-      'contentLong'
+      'contentLong',
     ]
 
     // همگام‌سازی با تأخیر برای جلوگیری از بارگذاری زیاد سرور
@@ -1292,7 +1304,8 @@ const syncAllFieldsAI = async () => {
         await suggestAIField(fieldName)
         // تأخیر کوتاه بین درخواست‌ها
         await new Promise(resolve => setTimeout(resolve, 500))
-      } catch (error) {
+      }
+      catch (error) {
         console.warn(`خطا در همگام‌سازی ${fieldName}:`, error)
         // ادامه با فیلد بعدی حتی در صورت خطا
       }
@@ -1306,8 +1319,8 @@ const syncAllFieldsAI = async () => {
       closable: true,
       timeout: 5000,
     })
-
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در همگام‌سازی:', error)
     toaster.show({
       title: 'خطا',
@@ -1316,7 +1329,8 @@ const syncAllFieldsAI = async () => {
       icon: 'ph:warning',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     syncAllFieldsLoading.value = false
   }
 }
@@ -1349,7 +1363,7 @@ PROMPT: [توضیح تصویر]
 CAPTION: [زیرنویس تصویر]`
 
     const messages = [{ role: 'user', content: prompt }]
-    
+
     let result = ''
     await streamChat(messages, {}, (chunk) => {
       result += chunk
@@ -1369,8 +1383,8 @@ CAPTION: [زیرنویس تصویر]`
 
       showImageModal.value = true
     }
-
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در تولید prompt تصویر:', error)
     toaster.show({
       title: 'خطا',
@@ -1379,7 +1393,8 @@ CAPTION: [زیرنویس تصویر]`
       icon: 'ph:warning',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     imageGenerationLoading.value = false
   }
 }
@@ -1388,7 +1403,7 @@ CAPTION: [زیرنویس تصویر]`
 const insertImageMarkdown = () => {
   if (!imagePrompt.value.trim() || !imageCaption.value.trim()) {
     toaster.show({
-      title: 'هشدار', 
+      title: 'هشدار',
       message: 'لطفاً prompt و زیرنویس تصویر را کامل کنید.',
       color: 'warning',
       icon: 'ph:warning',
@@ -1399,9 +1414,9 @@ const insertImageMarkdown = () => {
 
   // تولید URL ساختگی برای نمونه - در عمل باید از API تولید تصویر استفاده شود
   const imageUrl = `https://picsum.photos/600/400?random=${Date.now()}`
-  
+
   const imageMarkdown = `\n\n![${imageCaption.value}](${imageUrl})\n*${imageCaption.value}*\n\n`
-  
+
   // افزودن به محل انتخاب یا انتهای متن
   const textarea = markdownTextarea.value?.$el?.querySelector('textarea')
   if (textarea && selectedTextRange.value.end > 0) {
@@ -1409,7 +1424,8 @@ const insertImageMarkdown = () => {
     const beforeText = currentValue.substring(0, selectedTextRange.value.end)
     const afterText = currentValue.substring(selectedTextRange.value.end)
     contentLong.value = beforeText + imageMarkdown + afterText
-  } else {
+  }
+  else {
     contentLong.value += imageMarkdown
   }
 
@@ -1445,7 +1461,7 @@ const generateGoalsListAI = async () => {
     }
 
     goals.value = ''
-    
+
     // جمع‌آوری اطلاعات موجود برای ایجاد زمینه بهتر
     const contextInfo = []
     if (title.value.trim()) contextInfo.push(`عنوان: ${title.value}`)
@@ -1456,9 +1472,9 @@ const generateGoalsListAI = async () => {
     }
     if (tags.value.length > 0) contextInfo.push(`برچسب‌ها: ${tags.value.join('، ')}`)
     if (description.value.trim()) contextInfo.push(`توضیحات: ${description.value}`)
-    
+
     const contextString = contextInfo.join('\n')
-    
+
     const prompt = `بر اساس اطلاعات زیر، اهداف آموزشی و روانشناختی دقیق و قابل اندازه‌گیری بنویس که خواننده پس از مطالعه این مقاله به دست خواهد آورد:
 
 ${contextString}
@@ -1496,7 +1512,8 @@ ${contextString}
       icon: 'ph:check-circle',
       closable: true,
     })
-  } catch (e: any) {
+  }
+  catch (e: any) {
     toaster.show({
       title: 'خطا',
       message: `خطا در تولید اهداف: ${e.message || 'خطای ناشناخته'}`,
@@ -1506,7 +1523,8 @@ ${contextString}
     })
     goals.value = 'خطا در دریافت اهداف از هوش مصنوعی.'
     throw e
-  } finally {
+  }
+  finally {
     generateGoalsAiLoading.value = false
   }
 }
@@ -1611,8 +1629,7 @@ ${contextString}
                   <div class="mb-2 flex items-center justify-between">
                     <label
                       class="text-muted-800 dark:text-muted-100 font-semibold"
-                      >اهداف آموزشی و روانشناختی مقاله</label
-                    >
+                    >اهداف آموزشی و روانشناختی مقاله</label>
                     <button
                       type="button"
                       class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
@@ -1667,8 +1684,7 @@ ${contextString}
                   <div class="mb-2 flex items-center justify-between">
                     <label
                       class="text-muted-800 dark:text-muted-100 font-semibold"
-                      >دسته بندی {{ category }}</label
-                    >
+                    >دسته بندی {{ category }}</label>
                     <button
                       type="button"
                       class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
@@ -1779,7 +1795,11 @@ ${contextString}
                       size="sm"
                       @keyup.enter="addTag"
                     />
-                    <BaseButton color="primary" size="sm" @click="addTag">
+                    <BaseButton
+                      color="primary"
+                      size="sm"
+                      @click="addTag"
+                    >
                       افزودن
                     </BaseButton>
                   </div>
@@ -1789,8 +1809,7 @@ ${contextString}
                 <div class="mb-6 w-full">
                   <label
                     class="text-muted-800 dark:text-muted-100 mb-2 block font-semibold"
-                    >تصویر مقاله (آپلود)</label
-                  >
+                  >تصویر مقاله (آپلود)</label>
                   <BaseInputFileHeadless
                     v-slot="{ open, remove, preview, drop, files }"
                     v-model="uploadedFiles"
@@ -1834,13 +1853,11 @@ ${contextString}
                           <div>
                             <span
                               class="text-muted-400 font-sans text-[0.7rem] font-semibold uppercase"
-                              >یا</span
-                            >
+                            >یا</span>
                           </div>
                           <label
                             class="text-muted-400 group-hover:text-primary-500 group-focus:text-primary-500 cursor-pointer font-sans text-sm underline underline-offset-4 transition-colors duration-300"
-                            >انتخاب فایل</label
-                          >
+                          >انتخاب فایل</label>
                         </div>
                       </div>
                       <ul v-else class="mt-6 space-y-2">
@@ -1855,19 +1872,18 @@ ${contextString}
                                   class="size-14 rounded-xl object-cover object-center"
                                   :src="preview(file).value"
                                   alt="Image preview"
-                                />
+                                >
                                 <img
                                   v-else
                                   class="size-14 rounded-xl object-cover object-center"
                                   src="/img/avatars/placeholder-file.png"
                                   alt="Image preview"
-                                />
+                                >
                               </div>
                               <div class="font-sans">
                                 <span
                                   class="text-muted-800 dark:text-muted-100 line-clamp-1 block text-sm"
-                                  >{{ file.name }}</span
-                                >
+                                >{{ file.name }}</span>
                                 <span class="text-muted-400 block text-xs">{{
                                   formatFileSize(file.size)
                                 }}</span>
@@ -1882,8 +1898,7 @@ ${contextString}
                               >
                                 <Icon name="lucide:x" class="size-4" /><span
                                   class="sr-only"
-                                  >Remove</span
-                                >
+                                >Remove</span>
                               </button>
                             </div>
                           </div>
@@ -1969,8 +1984,7 @@ ${contextString}
                   <div>
                     <label
                       class="text-muted-800 dark:text-muted-100 mb-2 block font-semibold"
-                      >تاریخ انتشار</label
-                    >
+                    >تاریخ انتشار</label>
                     <PersianCalendar v-model="publishDate" class="w-full" />
                     <div
                       v-if="errors.publishDate"
@@ -1982,8 +1996,7 @@ ${contextString}
                   <div>
                     <label
                       class="text-muted-800 dark:text-muted-100 mb-2 block font-semibold"
-                      >زمان مطالعه (دقیقه)</label
-                    >
+                    >زمان مطالعه (دقیقه)</label>
                     <BaseInput
                       v-model="readTime"
                       type="number"
@@ -1999,8 +2012,7 @@ ${contextString}
                   <div class="flex items-center justify-between">
                     <label
                       class="text-muted-800 dark:text-muted-100 mb-2 block font-semibold"
-                      >متن کامل مقاله (مارک‌داون)</label
-                    >
+                    >متن کامل مقاله (مارک‌داون)</label>
                     <button
                       type="button"
                       data-nui-tooltip="پیشنهاد هوش مصنوعی"
@@ -2020,21 +2032,21 @@ ${contextString}
                       />
                     </button>
                   </div>
-                  
+
                   <!-- Content Length Control -->
-                  <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center justify-between mb-3">
+                  <div class="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-800">
+                    <div class="mb-3 flex items-center justify-between">
                       <div class="flex items-center gap-2">
                         <Icon name="ph:text-aa" class="text-primary-500 size-5" />
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                           طول متن مطلوب: <span class="text-primary-600 dark:text-primary-400 font-bold">{{ contentLengthTarget.toLocaleString() }}</span> کلمه
                         </label>
                       </div>
-                      <span class="text-xs text-gray-500 bg-white dark:bg-gray-700 px-2 py-1 rounded-full border">
+                      <span class="rounded-full border bg-white px-2 py-1 text-xs text-gray-500 dark:bg-gray-700">
                         {{ minContentLength.toLocaleString() }} - {{ maxContentLength.toLocaleString() }}
                       </span>
                     </div>
-                    
+
                     <!-- Custom Slider -->
                     <div class="relative mb-3">
                       <input
@@ -2043,28 +2055,40 @@ ${contextString}
                         :min="minContentLength"
                         :max="maxContentLength"
                         :step="500"
-                        class="content-length-slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                      />
-                      <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                        <span class="bg-white dark:bg-gray-700 px-2 py-1 rounded border">کوتاه</span>
-                        <span class="bg-white dark:bg-gray-700 px-2 py-1 rounded border">متوسط</span>
-                        <span class="bg-white dark:bg-gray-700 px-2 py-1 rounded border">بلند</span>
+                        class="content-length-slider h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700"
+                      >
+                      <div class="mt-2 flex justify-between px-1 text-xs text-gray-500">
+                        <span class="rounded border bg-white px-2 py-1 dark:bg-gray-700">کوتاه</span>
+                        <span class="rounded border bg-white px-2 py-1 dark:bg-gray-700">متوسط</span>
+                        <span class="rounded border bg-white px-2 py-1 dark:bg-gray-700">بلند</span>
                       </div>
                     </div>
-                    
+
                     <!-- Length Indicators -->
                     <div class="grid grid-cols-3 gap-2 text-xs">
-                      <div class="text-center p-2 bg-white dark:bg-gray-700 rounded border">
-                        <div class="text-orange-500 font-semibold">کوتاه</div>
-                        <div class="text-gray-500">۱,۰۰۰ - ۳,۰۰۰</div>
+                      <div class="rounded border bg-white p-2 text-center dark:bg-gray-700">
+                        <div class="font-semibold text-orange-500">
+                          کوتاه
+                        </div>
+                        <div class="text-gray-500">
+                          ۱,۰۰۰ - ۳,۰۰۰
+                        </div>
                       </div>
-                      <div class="text-center p-2 bg-white dark:bg-gray-700 rounded border">
-                        <div class="text-blue-500 font-semibold">متوسط</div>
-                        <div class="text-gray-500">۳,۰۰۰ - ۸,۰۰۰</div>
+                      <div class="rounded border bg-white p-2 text-center dark:bg-gray-700">
+                        <div class="font-semibold text-blue-500">
+                          متوسط
+                        </div>
+                        <div class="text-gray-500">
+                          ۳,۰۰۰ - ۸,۰۰۰
+                        </div>
                       </div>
-                      <div class="text-center p-2 bg-white dark:bg-gray-700 rounded border">
-                        <div class="text-green-500 font-semibold">بلند</div>
-                        <div class="text-gray-500">۸,۰۰۰ - ۱۵,۰۰۰</div>
+                      <div class="rounded border bg-white p-2 text-center dark:bg-gray-700">
+                        <div class="font-semibold text-green-500">
+                          بلند
+                        </div>
+                        <div class="text-gray-500">
+                          ۸,۰۰۰ - ۱۵,۰۰۰
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2077,10 +2101,10 @@ ${contextString}
                     icon="ph:file-text"
                     :error="errors.contentLong"
                     class="mb-6"
+                    addon
                     @mouseup="handleMarkdownSelection"
                     @keyup="handleMarkdownSelection"
                     @click="handleMarkdownSelection"
-                    addon
                     @select="handleMarkdownSelection"
                   >
                     <template #addon>
@@ -2096,7 +2120,7 @@ ${contextString}
                           :key="action.action"
                           :disabled="processing || !selectedMarkdownText"
                           :class="[
-                            'flex items-center gap-1 px-2 py-1 text-xs text-right rounded-md transition-colors border',
+                            'flex items-center gap-1 rounded-md border px-2 py-1 text-right text-xs transition-colors',
                             activeAction === action.action
                               ? 'bg-primary-100 border-primary-500 dark:bg-primary-900 dark:border-primary-500'
                               : 'border-gray-200 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700',
@@ -2107,21 +2131,21 @@ ${contextString}
                           <Icon
                             v-if="processing"
                             name="svg-spinners:90-ring-with-bg"
-                            class="size-3 flex-shrink-0"
+                            class="size-3 shrink-0"
                           />
                           <Icon
                             v-else
                             :name="action.icon"
-                            class="text-primary-500 size-3 flex-shrink-0"
+                            class="text-primary-500 size-3 shrink-0"
                           />
                           <span>{{ action.title }}</span>
                         </button>
-                        
+
                         <!-- دکمه تولید تصویر -->
                         <button
                           :disabled="imageGenerationLoading || !selectedTextForImage"
                           :class="[
-                            'flex items-center gap-1 px-2 py-1 text-xs text-right rounded-md transition-colors border',
+                            'flex items-center gap-1 rounded-md border px-2 py-1 text-right text-xs transition-colors',
                             'border-green-200 hover:bg-green-100 dark:border-green-600 dark:hover:bg-green-700',
                           ]"
                           title="تولید تصویر متناسب"
@@ -2130,12 +2154,12 @@ ${contextString}
                           <Icon
                             v-if="imageGenerationLoading"
                             name="svg-spinners:90-ring-with-bg"
-                            class="size-3 flex-shrink-0"
+                            class="size-3 shrink-0"
                           />
                           <Icon
                             v-else
                             name="ph:image"
-                            class="text-green-500 size-3 flex-shrink-0"
+                            class="size-3 shrink-0 text-green-500"
                           />
                           <span>افزودن تصویر</span>
                         </button>
@@ -2156,7 +2180,7 @@ ${contextString}
                       </h3>
                     </div>
                     <div
-                      class="prose prose-sm dark:prose-invert prose-headings:mb-4 prose-ul:list-disc prose-ol:list-decimal prose-li:mr-4 rtl max-w-none prose-p:text-right prose-ul:text-right prose-ol:text-right"
+                      class="prose prose-sm dark:prose-invert prose-headings:mb-4 prose-ul:list-disc prose-ol:list-decimal prose-li:mr-4 rtl prose-p:text-right prose-ul:text-right prose-ol:text-right max-w-none"
                       style="margin-left: 0 !important; padding-left: 0 !important;"
                     >
                       <div
@@ -2226,7 +2250,7 @@ ${contextString}
               color="success"
               :loading="syncAllFieldsLoading"
               :disabled="!title.trim() || syncAllFieldsLoading"
-              class="w-full rounded-xl px-4 py-3 text-base font-bold mb-3"
+              class="mb-3 w-full rounded-xl px-4 py-3 text-base font-bold"
               data-nui-tooltip="تمام فیلدها را بر اساس عنوان و اطلاعات موجود به‌روزرسانی می‌کند"
               @click="syncAllFieldsAI"
             >
@@ -2240,7 +2264,7 @@ ${contextString}
             >
               <Icon
                 name="ph:pencil-simple"
-                class="text-primary-500 size-3 flex-shrink-0"
+                class="text-primary-500 size-3 shrink-0"
               />
               <span>ویرایش دکمه‌ها</span>
             </BaseButton>
@@ -2279,8 +2303,8 @@ ${contextString}
   <TairoModal
     :open="showClearConfirm"
     size="sm"
-    @close="showClearConfirm = false"
     rounded="lg"
+    @close="showClearConfirm = false"
   >
     <template #header>
       <div class="flex w-full items-center justify-between p-4">
@@ -2331,7 +2355,9 @@ ${contextString}
   <!-- Markdown AI edit popup -->
   <TairoModal v-model="showMarkdownAiEdit" size="md">
     <template #header>
-      <h2 class="text-lg font-bold">ویرایش هوشمند بخش انتخابی</h2>
+      <h2 class="text-lg font-bold">
+        ویرایش هوشمند بخش انتخابی
+      </h2>
     </template>
     <div class="flex flex-col gap-4 p-4">
       <div class="bg-muted-100 rounded p-2">
@@ -2352,8 +2378,8 @@ ${contextString}
   <TairoModal
     :open="showImageModal"
     size="lg"
-    @close="showImageModal = false"
     rounded="lg"
+    @close="showImageModal = false"
   >
     <template #header>
       <div class="flex w-full items-center justify-between p-4">
@@ -2371,10 +2397,14 @@ ${contextString}
       </div>
     </template>
 
-    <div class="px-6 pb-6 space-y-4">
-      <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-        <h3 class="text-sm font-medium mb-2">متن انتخاب شده:</h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400">{{ selectedTextForImage }}</p>
+    <div class="space-y-4 px-6 pb-6">
+      <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+        <h3 class="mb-2 text-sm font-medium">
+          متن انتخاب شده:
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          {{ selectedTextForImage }}
+        </p>
       </div>
 
       <div>
@@ -2422,8 +2452,8 @@ ${contextString}
   <TairoModal
     :open="showActionEditor"
     size="sm"
-    @close="showActionEditor = false"
     rounded="lg"
+    @close="showActionEditor = false"
   >
     <template #header>
       <div class="flex w-full items-center justify-between p-4">

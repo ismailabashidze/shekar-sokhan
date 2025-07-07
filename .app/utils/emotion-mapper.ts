@@ -7,27 +7,27 @@ interface EmotionData {
 
 // Mapping Persian emotion names to English categories
 const emotionMapping: Record<string, string> = {
-  'شادی': 'joy',
-  'اعتماد': 'trust',
-  'ترس': 'fear',
-  'تعجب': 'surprise',
-  'غم': 'sadness',
-  'انزجار': 'disgust',
-  'خشم': 'anger',
-  'انتظار': 'anticipation',
-  'نامشخص': 'unknown'
+  شادی: 'joy',
+  اعتماد: 'trust',
+  ترس: 'fear',
+  تعجب: 'surprise',
+  غم: 'sadness',
+  انزجار: 'disgust',
+  خشم: 'anger',
+  انتظار: 'anticipation',
+  نامشخص: 'unknown',
 }
 
 // Mapping severity to emotion variants (based on EmotionWheel structure)
 const severityToVariant: Record<string, Record<string, string>> = {
-  'joy': { 'کم': 'serenity', 'متوسط': 'joy', 'زیاد': 'ecstasy' },
-  'trust': { 'کم': 'acceptance', 'متوسط': 'trust', 'زیاد': 'admiration' },
-  'fear': { 'کم': 'apprehension', 'متوسط': 'fear', 'زیاد': 'terror' },
-  'surprise': { 'کم': 'distraction', 'متوسط': 'surprise', 'زیاد': 'amazement' },
-  'sadness': { 'کم': 'pensiveness', 'متوسط': 'sadness', 'زیاد': 'grief' },
-  'disgust': { 'کم': 'boredom', 'متوسط': 'disgust', 'زیاد': 'loathing' },
-  'anger': { 'کم': 'annoyance', 'متوسط': 'anger', 'زیاد': 'rage' },
-  'anticipation': { 'کم': 'interest', 'متوسط': 'anticipation', 'زیاد': 'vigilance' }
+  joy: { کم: 'serenity', متوسط: 'joy', زیاد: 'ecstasy' },
+  trust: { کم: 'acceptance', متوسط: 'trust', زیاد: 'admiration' },
+  fear: { کم: 'apprehension', متوسط: 'fear', زیاد: 'terror' },
+  surprise: { کم: 'distraction', متوسط: 'surprise', زیاد: 'amazement' },
+  sadness: { کم: 'pensiveness', متوسط: 'sadness', زیاد: 'grief' },
+  disgust: { کم: 'boredom', متوسط: 'disgust', زیاد: 'loathing' },
+  anger: { کم: 'annoyance', متوسط: 'anger', زیاد: 'rage' },
+  anticipation: { کم: 'interest', متوسط: 'anticipation', زیاد: 'vigilance' },
 }
 
 /**
@@ -69,8 +69,8 @@ export function convertToEmotionWheel(emotionsData: EmotionData[]): string[] {
  * @returns Filtered array of non-empty emotions
  */
 export function getActiveEmotions(emotionsData: EmotionData[]): EmotionData[] {
-  return emotionsData.filter(emotion => 
-    emotion.severity !== 'خالی' && emotion.emotionName !== 'نامشخص'
+  return emotionsData.filter(emotion =>
+    emotion.severity !== 'خالی' && emotion.emotionName !== 'نامشخص',
   )
 }
 
@@ -81,15 +81,15 @@ export function getActiveEmotions(emotionsData: EmotionData[]): EmotionData[] {
  */
 export function getDominantEmotion(emotionsData: EmotionData[]): EmotionData | null {
   const activeEmotions = getActiveEmotions(emotionsData)
-  
+
   if (activeEmotions.length === 0) return null
 
   // Sort by severity priority: زیاد > متوسط > کم
-  const severityOrder = { 'زیاد': 3, 'متوسط': 2, 'کم': 1, 'خالی': 0 }
-  
+  const severityOrder = { زیاد: 3, متوسط: 2, کم: 1, خالی: 0 }
+
   return activeEmotions.reduce((dominant, current) => {
-    return severityOrder[current.severity] > severityOrder[dominant.severity] 
-      ? current 
+    return severityOrder[current.severity] > severityOrder[dominant.severity]
+      ? current
       : dominant
   })
-} 
+}

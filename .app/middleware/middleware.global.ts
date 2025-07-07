@@ -43,13 +43,15 @@ export default defineNuxtRouteMiddleware((to) => {
         // Use 'role' or 'userType' depending on your schema
         const pbRole = pbUser.role || pbUser.userType || ''
         localStorage.setItem('role', pbRole)
-      } else {
+      }
+      else {
         // If no user info, clear user and role
         localStorage.setItem('user', '{}')
         localStorage.setItem('role', '')
       }
     }
-  } catch (e) {
+  }
+  catch (e) {
     // Failsafe: do nothing if localStorage is not accessible
     // Optionally log error
     // console.error('Failed user/role localStorage sync', e)

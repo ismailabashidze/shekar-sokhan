@@ -508,7 +508,6 @@ const formatLongDescription = (html: string) => {
         <!-- Action Buttons -->
         <BaseCard rounded="lg" class="mb-6">
           <div class="space-y-3 p-6">
-            
             <BaseButton
               color="success"
               class="w-full"

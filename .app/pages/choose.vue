@@ -117,7 +117,7 @@ const plans = [
 ]
 
 const selectedPlan = computed(() => {
-  return plans.find((plan) => plan.name === customRadio.value)
+  return plans.find(plan => plan.name === customRadio.value)
 })
 
 const planColor = computed(() => {
@@ -145,11 +145,14 @@ const chooseService = () => {
   // } else
   if (selectedPlan.value?.name === 'دانا، هوش مصنوعی فارسی') {
     navigateTo('/dana')
-  } else if (selectedPlan.value?.name === 'مانا') {
+  }
+  else if (selectedPlan.value?.name === 'مانا') {
     navigateTo('/Mana/chat')
-  } else if (selectedPlan.value?.name === 'خبره') {
+  }
+  else if (selectedPlan.value?.name === 'خبره') {
     navigateTo('/Khebre')
-  } else {
+  }
+  else {
     toaster.show({
       title: 'خطا',
       message: 'سرویس در حال توسعه می باشد',
@@ -234,11 +237,11 @@ const chooseService = () => {
           class="text-muted-400/50 group relative p-6 text-center peer-checked:!border-yellow-400 peer-checked:text-yellow-400 peer-checked:[&_.child]:!opacity-100"
         >
           <div
-            class="child border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border bg-white opacity-0"
+            class="child border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute end-3 top-3 flex size-7 items-center justify-center rounded-full border bg-white opacity-0"
           >
-            <Icon name="lucide:check" class="h-3 w-3 text-current" />
+            <Icon name="lucide:check" class="size-3 text-current" />
           </div>
-          <TairoLogo class="mx-auto mb-2 h-9 w-9" />
+          <TairoLogo class="mx-auto mb-2 size-9" />
           <BaseHeading
             as="h4"
             size="sm"
@@ -247,9 +250,13 @@ const chooseService = () => {
           >
             دانا، هوش مصنوعی فارسی
           </BaseHeading>
-          <BaseText size="xs" lead="tight" class="text-muted-400"
-            >با دانا، هوش مصنوعی اختصاصی صحبت کنید!</BaseText
+          <BaseText
+            size="xs"
+            lead="tight"
+            class="text-muted-400"
           >
+            با دانا، هوش مصنوعی اختصاصی صحبت کنید!
+          </BaseText>
         </BaseCard>
       </BaseRadioHeadless>
       <BaseRadioHeadless
@@ -262,11 +269,11 @@ const chooseService = () => {
           class="text-muted-400/50 group relative p-6 text-center peer-checked:!border-indigo-500 peer-checked:text-indigo-500 peer-checked:[&_.child]:!opacity-100"
         >
           <div
-            class="child border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border bg-white opacity-0"
+            class="child border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute end-3 top-3 flex size-7 items-center justify-center rounded-full border bg-white opacity-0"
           >
-            <Icon name="lucide:check" class="h-3 w-3 text-current" />
+            <Icon name="lucide:check" class="size-3 text-current" />
           </div>
-          <TairoLogo class="mx-auto mb-2 h-9 w-9" />
+          <TairoLogo class="mx-auto mb-2 size-9" />
           <BaseHeading
             as="h4"
             size="sm"
@@ -275,9 +282,13 @@ const chooseService = () => {
           >
             درمانا
           </BaseHeading>
-          <BaseText size="xs" lead="tight" class="text-muted-400"
-            >محیطی امن و ایمن برای تمرین روان درمانی</BaseText
+          <BaseText
+            size="xs"
+            lead="tight"
+            class="text-muted-400"
           >
+            محیطی امن و ایمن برای تمرین روان درمانی
+          </BaseText>
         </BaseCard>
       </BaseRadioHeadless>
       <BaseRadioHeadless
@@ -290,11 +301,11 @@ const chooseService = () => {
           class="text-muted-400/50 peer-checked:!border-primary-500 peer-checked:text-primary-500 group relative p-6 text-center peer-checked:[&_.child]:!opacity-100"
         >
           <div
-            class="child border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border bg-white opacity-0"
+            class="child border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute end-3 top-3 flex size-7 items-center justify-center rounded-full border bg-white opacity-0"
           >
-            <Icon name="lucide:check" class="h-3 w-3 text-current" />
+            <Icon name="lucide:check" class="size-3 text-current" />
           </div>
-          <TairoLogo class="mx-auto mb-2 h-9 w-9" />
+          <TairoLogo class="mx-auto mb-2 size-9" />
           <BaseHeading
             as="h4"
             size="sm"
@@ -303,22 +314,30 @@ const chooseService = () => {
           >
             طنین آرامش
           </BaseHeading>
-          <BaseText size="xs" lead="tight" class="text-muted-400"
-            >دستیار سلامت روان شما</BaseText
+          <BaseText
+            size="xs"
+            lead="tight"
+            class="text-muted-400"
           >
+            دستیار سلامت روان شما
+          </BaseText>
         </BaseCard>
       </BaseRadioHeadless>
-      <BaseRadioHeadless v-model="customRadio" name="radio_custom" value="مانا">
+      <BaseRadioHeadless
+        v-model="customRadio"
+        name="radio_custom"
+        value="مانا"
+      >
         <BaseCard
           shape="rounded"
-          class="text-muted-400/50 peer-checked:!border-orange-500 peer-checked:text-orange-500 group relative p-6 text-center peer-checked:[&_.child]:!opacity-100"
+          class="text-muted-400/50 group relative p-6 text-center peer-checked:!border-orange-500 peer-checked:text-orange-500 peer-checked:[&_.child]:!opacity-100"
         >
           <div
-            class="child border-muted-200 dark:border-muted-700 dark:bg-orange-500 absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border bg-white opacity-0"
+            class="child border-muted-200 dark:border-muted-700 absolute end-3 top-3 flex size-7 items-center justify-center rounded-full border bg-white opacity-0 dark:bg-orange-500"
           >
-            <Icon name="lucide:check" class="h-3 w-3 text-current" />
+            <Icon name="lucide:check" class="size-3 text-current" />
           </div>
-          <TairoLogo class="mx-auto mb-2 h-9 w-9" />
+          <TairoLogo class="mx-auto mb-2 size-9" />
           <BaseHeading
             as="h4"
             size="sm"
@@ -327,8 +346,12 @@ const chooseService = () => {
           >
             مانا
           </BaseHeading>
-          <BaseText size="xs" lead="tight" class="text-muted-400"
-            >سیستم هوشمند مداخله پیش از اقدام برای خودکشی
+          <BaseText
+            size="xs"
+            lead="tight"
+            class="text-muted-400"
+          >
+            سیستم هوشمند مداخله پیش از اقدام برای خودکشی
           </BaseText>
         </BaseCard>
       </BaseRadioHeadless>
@@ -339,14 +362,14 @@ const chooseService = () => {
       >
         <BaseCard
           shape="rounded"
-          class="text-muted-400/50 peer-checked:!border-green-500 peer-checked:text-green-500 group relative p-6 text-center peer-checked:[&_.child]:!opacity-100"
+          class="text-muted-400/50 group relative p-6 text-center peer-checked:!border-green-500 peer-checked:text-green-500 peer-checked:[&_.child]:!opacity-100"
         >
           <div
-            class="child border-muted-200 dark:border-muted-700 dark:bg-green-500 absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border bg-white opacity-0"
+            class="child border-muted-200 dark:border-muted-700 absolute end-3 top-3 flex size-7 items-center justify-center rounded-full border bg-white opacity-0 dark:bg-green-500"
           >
-            <Icon name="lucide:check" class="h-3 w-3 text-current" />
+            <Icon name="lucide:check" class="size-3 text-current" />
           </div>
-          <TairoLogo class="mx-auto mb-2 h-9 w-9" />
+          <TairoLogo class="mx-auto mb-2 size-9" />
           <BaseHeading
             as="h4"
             size="sm"
@@ -355,22 +378,30 @@ const chooseService = () => {
           >
             تحلیل گر خبر
           </BaseHeading>
-          <BaseText size="xs" lead="tight" class="text-muted-400"
-            >تحلیل معنایی و محتوایی خبر
+          <BaseText
+            size="xs"
+            lead="tight"
+            class="text-muted-400"
+          >
+            تحلیل معنایی و محتوایی خبر
           </BaseText>
         </BaseCard>
       </BaseRadioHeadless>
-      <BaseRadioHeadless v-model="customRadio" name="radio_custom" value="خبره">
+      <BaseRadioHeadless
+        v-model="customRadio"
+        name="radio_custom"
+        value="خبره"
+      >
         <BaseCard
           shape="rounded"
-          class="text-muted-400/50 peer-checked:!border-blue-500 peer-checked:text-blue-500 group relative p-6 text-center peer-checked:[&_.child]:!opacity-100"
+          class="text-muted-400/50 group relative p-6 text-center peer-checked:!border-blue-500 peer-checked:text-blue-500 peer-checked:[&_.child]:!opacity-100"
         >
           <div
-            class="child border-muted-200 dark:border-muted-700 dark:bg-blue-500 absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border bg-white opacity-0"
+            class="child border-muted-200 dark:border-muted-700 absolute end-3 top-3 flex size-7 items-center justify-center rounded-full border bg-white opacity-0 dark:bg-blue-500"
           >
-            <Icon name="lucide:check" class="h-3 w-3 text-current" />
+            <Icon name="lucide:check" class="size-3 text-current" />
           </div>
-          <TairoLogo class="mx-auto mb-2 h-9 w-9" />
+          <TairoLogo class="mx-auto mb-2 size-9" />
           <BaseHeading
             as="h4"
             size="sm"
@@ -379,8 +410,12 @@ const chooseService = () => {
           >
             خبره
           </BaseHeading>
-          <BaseText size="xs" lead="tight" class="text-muted-400"
-            >خلاصه سازی و تهیه مستندات جلسات
+          <BaseText
+            size="xs"
+            lead="tight"
+            class="text-muted-400"
+          >
+            خلاصه سازی و تهیه مستندات جلسات
           </BaseText>
         </BaseCard>
       </BaseRadioHeadless>
@@ -388,16 +423,25 @@ const chooseService = () => {
     <div>
       <BaseCard shape="rounded" class="p-8">
         <div class="flex gap-12">
-          <TairoLogo class="h-12 w-12 shrink-0" :class="planColor" />
+          <TairoLogo class="size-12 shrink-0" :class="planColor" />
           <div>
-            <BaseText size="md" lead="tight" weight="semibold"
-              >{{ selectedPlan?.price.monthly }} میلیون تومان
-              <span class="text-muted-400 font-normal">/ در ماه</span></BaseText
+            <BaseText
+              size="md"
+              lead="tight"
+              weight="semibold"
             >
-            <BaseText size="xs" lead="tight" class="mb-2" :class="planColor"
-              >{{ selectedPlan?.price.yearly }} میلیون تومان سالیانه با
-              تخفیف</BaseText
+              {{ selectedPlan?.price.monthly }} میلیون تومان
+              <span class="text-muted-400 font-normal">/ در ماه</span>
+            </BaseText>
+            <BaseText
+              size="xs"
+              lead="tight"
+              class="mb-2"
+              :class="planColor"
             >
+              {{ selectedPlan?.price.yearly }} میلیون تومان سالیانه با
+              تخفیف
+            </BaseText>
             <BaseParagraph size="xs" class="text-muted-500 dark:text-muted-400">
               {{ selectedPlan?.description }}
             </BaseParagraph>
@@ -423,7 +467,7 @@ const chooseService = () => {
                 class="flex items-center gap-2"
                 :class="planColor"
               >
-                <Icon name="lucide:check" class="h-3 w-3 text-current" />
+                <Icon name="lucide:check" class="size-3 text-current" />
                 <span class="text-muted-400">{{ item }}</span>
               </li>
             </ul>
@@ -436,7 +480,7 @@ const chooseService = () => {
                 class="flex items-center gap-2"
                 :class="planColor"
               >
-                <Icon name="lucide:check" class="h-3 w-3 text-current" />
+                <Icon name="lucide:check" class="size-3 text-current" />
                 <span class="text-muted-400">{{ item }}</span>
               </li>
             </ul>

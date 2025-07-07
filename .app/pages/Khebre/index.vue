@@ -13,7 +13,7 @@ const voice = ref<FileList | null>(null)
 const isLoading = ref(false)
 
 const sleep = (time: number): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, time))
+  return new Promise(resolve => setTimeout(resolve, time))
 }
 const back = () => {
   navigateTo('/choose')
@@ -42,17 +42,20 @@ const upload = async () => {
 </script>
 
 <template>
-  <div class="w-full flex flex-row-reverse mb-5 gap-3">
+  <div class="mb-5 flex w-full flex-row-reverse gap-3">
     <BaseButton
       color="primary"
-      @click="upload"
       :loading="isLoading"
       :disabled="!voice || isLoading"
-      >آپلود فایل</BaseButton
+      @click="upload"
     >
-    <BaseButton @click="back">بازگشت</BaseButton>
+      آپلود فایل
+    </BaseButton>
+    <BaseButton @click="back">
+      بازگشت
+    </BaseButton>
   </div>
-  <div class="font-thin mb-5 mt-0">
+  <div class="mb-5 mt-0 font-thin">
     خبره اولین خلاصه ساز، و مستند ساز صوت جلسات است که با پردازش معنایی از صوت
     (که در حال حاضر جلسه فرض می شود) اطلاعات معنایی آن را استخراج و در فرمت
     نوشتاری در اختیار قرار می دهد. خبره در زمینه ی معنایی فعالیت می کند و
@@ -62,7 +65,7 @@ const upload = async () => {
     جلسه را آماده می کند.
   </div>
 
-  <div class="mt-4 w-full grid grid-cols-1 gap-6">
+  <div class="mt-4 grid w-full grid-cols-1 gap-6">
     <BaseInputFile
       v-model="voice"
       shape="straight"

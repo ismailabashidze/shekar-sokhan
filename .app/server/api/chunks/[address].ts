@@ -20,7 +20,8 @@ export default defineEventHandler((event) => {
     fs.readdir(chunksDir, (err, files) => {
       if (err) {
         reject({ statusCode: 500, message: 'Error reading chunks directory' })
-      } else {
+      }
+      else {
         resolve(files)
       }
     })

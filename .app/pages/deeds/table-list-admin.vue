@@ -102,7 +102,7 @@ const handleReject = async (deed: Deed) => {
     if (!result) {
       throw new Error('خطا در تغییر وضعیت عمل نیک')
     }
-    
+
     toaster.show({
       title: 'موفقیت‌آمیز',
       message: deed.status === 'approved' ? 'عمل نیک با موفقیت غیرفعال شد' : 'عمل نیک با موفقیت رد شد',
@@ -296,21 +296,23 @@ const statusText = {
                 </TairoTableCell>
                 <TairoTableCell spaced>
                   <div class="flex items-center gap-2">
-                    <Icon name="ph:eye" class="size-4 text-muted-400" />
+                    <Icon name="ph:eye" class="text-muted-400 size-4" />
                     <span class="text-sm">{{ deed.views || 0 }}</span>
                   </div>
                 </TairoTableCell>
                 <TairoTableCell spaced>
                   <div class="flex items-center gap-2">
-                    <Icon name="ph:check-circle" class="size-4 text-muted-400" />
+                    <Icon name="ph:check-circle" class="text-muted-400 size-4" />
                     <span class="text-sm">{{ deed.completions || 0 }}</span>
                   </div>
                 </TairoTableCell>
                 <TairoTableCell spaced>
-                  <div v-if="deed.approvedAt" class="text-sm text-muted-500">
+                  <div v-if="deed.approvedAt" class="text-muted-500 text-sm">
                     {{ new Date(deed.approvedAt).toLocaleDateString('fa-IR') }}
                   </div>
-                  <div v-else class="text-sm text-muted-400">-</div>
+                  <div v-else class="text-muted-400 text-sm">
+                    -
+                  </div>
                 </TairoTableCell>
                 <TairoTableCell spaced>
                   <div class="flex items-center justify-end gap-2">

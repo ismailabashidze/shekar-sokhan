@@ -1,12 +1,12 @@
 <script setup lang="ts">
 defineProps<{
   stages: Array<{
-    emoji: string;
-    label: string;
-    color?: string;
-    highlighted?: boolean;
-  }>;
-}>();
+    emoji: string
+    label: string
+    color?: string
+    highlighted?: boolean
+  }>
+}>()
 </script>
 
 <template>
@@ -23,18 +23,18 @@ defineProps<{
       <div class="relative flex items-center justify-between px-2 py-4">
         <!-- Timeline bar -->
         <div class="bg-muted-200 dark:bg-muted-700 absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full" />
-        
+
         <!-- Emotion stages -->
-        <div 
-          v-for="(stage, index) in stages" 
+        <div
+          v-for="(stage, index) in stages"
           :key="index"
           class="relative z-10 flex flex-col items-center"
         >
-          <div 
+          <div
             class="flex size-10 items-center justify-center rounded-full"
             :class="[
-              stage.highlighted 
-                ? `bg-${stage.color || 'primary'}-100 dark:bg-${stage.color || 'primary'}-500/20 border-${stage.color || 'primary'}-500 border-2` 
+              stage.highlighted
+                ? `bg-${stage.color || 'primary'}-100 dark:bg-${stage.color || 'primary'}-500/20 border-${stage.color || 'primary'}-500 border-2`
                 : 'bg-muted-100 dark:bg-muted-700'
             ]"
           >
@@ -45,7 +45,7 @@ defineProps<{
       </div>
     </div>
     <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300 mb-4">
-      <slot></slot>
+      <slot />
     </BaseParagraph>
   </div>
 </template>

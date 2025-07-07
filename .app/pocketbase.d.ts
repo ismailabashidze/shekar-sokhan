@@ -1,5 +1,5 @@
 import 'nuxt'
-import PocketBase from 'pocketbase'
+import type PocketBase from 'pocketbase'
 
 declare module '#app' {
   interface NuxtApp {

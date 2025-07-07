@@ -84,11 +84,11 @@ const filteredInvestors = computed(() => {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(
       investor =>
-        investor.name.toLowerCase().includes(query) ||
-        investor.company.toLowerCase().includes(query) ||
-        investor.email.toLowerCase().includes(query) ||
-        investor.phone.includes(query) ||
-        investor.message.toLowerCase().includes(query)
+        investor.name.toLowerCase().includes(query)
+        || investor.company.toLowerCase().includes(query)
+        || investor.email.toLowerCase().includes(query)
+        || investor.phone.includes(query)
+        || investor.message.toLowerCase().includes(query),
     )
   }
 
@@ -139,7 +139,7 @@ const viewMode = ref('list')
             <div class="flex items-center gap-3">
               <NuxtLink
                 to="/dashboard"
-                class="bg-muted-100 dark:bg-muted-700 hover:bg-muted-200 dark:hover:bg-muted-600 flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300"
+                class="bg-muted-100 dark:bg-muted-700 hover:bg-muted-200 dark:hover:bg-muted-600 flex size-8 items-center justify-center rounded-full transition-colors duration-300"
               >
                 <Icon name="ph:arrow-right-duotone" class="size-5" />
                 <span class="text-muted-500">بازگشت</span>
@@ -155,7 +155,7 @@ const viewMode = ref('list')
                 <input
                   v-model="searchQuery"
                   type="text"
-                  class="text-muted-600 dark:text-muted-200 placeholder:text-muted-300 dark:placeholder:text-muted-500 pe-10 ps-4 border-muted-300 dark:border-muted-700 bg-white dark:bg-muted-900 h-10 w-full rounded-lg border transition-colors duration-300 focus:border-primary-500 focus:outline-none"
+                  class="text-muted-600 dark:text-muted-200 placeholder:text-muted-300 dark:placeholder:text-muted-500 border-muted-300 dark:border-muted-700 dark:bg-muted-900 focus:border-primary-500 h-10 w-full rounded-lg border bg-white pe-10 ps-4 transition-colors duration-300 focus:outline-none"
                   placeholder="جستجو..."
                 >
                 <Icon name="ph:magnifying-glass-duotone" class="text-muted-400 absolute left-3 top-2.5 size-5" />
@@ -196,7 +196,7 @@ const viewMode = ref('list')
               <label class="text-muted-400 text-sm">مرتب‌سازی:</label>
               <select
                 v-model="sortBy"
-                class="text-muted-600 dark:text-muted-200 border-muted-300 dark:border-muted-700 bg-white dark:bg-muted-900 h-10 rounded-lg border px-3 transition-colors duration-300 focus:border-primary-500 focus:outline-none"
+                class="text-muted-600 dark:text-muted-200 border-muted-300 dark:border-muted-700 dark:bg-muted-900 focus:border-primary-500 h-10 rounded-lg border bg-white px-3 transition-colors duration-300 focus:outline-none"
               >
                 <option
                   v-for="option in sortOptions"
@@ -215,24 +215,40 @@ const viewMode = ref('list')
               <table class="w-full border-collapse">
                 <thead>
                   <tr class="bg-muted-100 dark:bg-muted-700 text-left">
-                    <th class="p-3 text-right">نام</th>
-                    <th class="p-3 text-right">شرکت</th>
-                    <th class="p-3 text-right">ایمیل</th>
-                    <th class="p-3 text-right">تلفن</th>
-                    <th class="p-3 text-right">پیام</th>
-                    <th class="p-3 text-right">اقدامات</th>
+                    <th class="p-3 text-right">
+                      نام
+                    </th>
+                    <th class="p-3 text-right">
+                      شرکت
+                    </th>
+                    <th class="p-3 text-right">
+                      ایمیل
+                    </th>
+                    <th class="p-3 text-right">
+                      تلفن
+                    </th>
+                    <th class="p-3 text-right">
+                      پیام
+                    </th>
+                    <th class="p-3 text-right">
+                      اقدامات
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="investor in filteredInvestors"
                     :key="investor.id"
-                    class="border-muted-200 dark:border-muted-700 border-b hover:bg-muted-50 dark:hover:bg-muted-800/50"
+                    class="border-muted-200 dark:border-muted-700 hover:bg-muted-50 dark:hover:bg-muted-800/50 border-b"
                   >
                     <td class="p-3">
-                      <div class="font-medium">{{ investor.name }}</div>
+                      <div class="font-medium">
+                        {{ investor.name }}
+                      </div>
                     </td>
-                    <td class="p-3">{{ investor.company }}</td>
+                    <td class="p-3">
+                      {{ investor.company }}
+                    </td>
                     <td class="p-3">
                       <a
                         :href="`mailto:${investor.email}`"
@@ -250,7 +266,9 @@ const viewMode = ref('list')
                       </a>
                     </td>
                     <td class="p-3">
-                      <div class="max-w-xs truncate">{{ investor.message }}</div>
+                      <div class="max-w-xs truncate">
+                        {{ investor.message }}
+                      </div>
                     </td>
                     <td class="p-3">
                       <div class="flex gap-2">
@@ -282,9 +300,11 @@ const viewMode = ref('list')
                 <h3 class="text-muted-800 text-lg font-bold dark:text-white">
                   {{ investor.name }}
                 </h3>
-                <p class="text-muted-500 text-sm">{{ investor.company }}</p>
+                <p class="text-muted-500 text-sm">
+                  {{ investor.company }}
+                </p>
               </div>
-              
+
               <div class="space-y-2">
                 <div class="flex items-center gap-2">
                   <Icon name="ph:envelope-duotone" class="text-primary-500 size-5" />
@@ -295,7 +315,7 @@ const viewMode = ref('list')
                     {{ investor.email }}
                   </a>
                 </div>
-                
+
                 <div class="flex items-center gap-2">
                   <Icon name="ph:phone-duotone" class="text-primary-500 size-5" />
                   <a
@@ -305,13 +325,15 @@ const viewMode = ref('list')
                     {{ investor.phone }}
                   </a>
                 </div>
-                
+
                 <div class="flex gap-2">
-                  <Icon name="ph:chat-text-duotone" class="text-primary-500 mt-1 size-5 flex-shrink-0" />
-                  <p class="text-muted-500 text-sm">{{ investor.message }}</p>
+                  <Icon name="ph:chat-text-duotone" class="text-primary-500 mt-1 size-5 shrink-0" />
+                  <p class="text-muted-500 text-sm">
+                    {{ investor.message }}
+                  </p>
                 </div>
               </div>
-              
+
               <div class="mt-4 flex justify-end">
                 <button
                   class="bg-primary-500 hover:bg-primary-600 rounded px-4 py-2 text-sm text-white"

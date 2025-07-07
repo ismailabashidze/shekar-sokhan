@@ -209,13 +209,15 @@ defineExpose({
 
 <template>
   <div class="relative">
-    <div v-if="label" class="mb-1 block text-sm font-medium text-gray-700">{{ label }}</div>
+    <div v-if="label" class="mb-1 block text-sm font-medium text-gray-700">
+      {{ label }}
+    </div>
     <BaseInput
       :model-value="formatted"
       readonly
       :placeholder="placeholder"
       class="cursor-pointer"
-      :class="[inputClass, { 'opacity-60 cursor-not-allowed': disabled }]"
+      :class="[inputClass, { 'cursor-not-allowed opacity-60': disabled }]"
       :disabled="disabled"
       :error="error"
       :size="size"
@@ -240,7 +242,9 @@ defineExpose({
         </button>
       </template>
     </BaseInput>
-    <div v-if="error" class="mt-1 text-xs text-danger-500">{{ error }}</div>
+    <div v-if="error" class="text-danger-500 mt-1 text-xs">
+      {{ error }}
+    </div>
     <transition name="calendar-popup">
       <div
         v-if="showCalendar"

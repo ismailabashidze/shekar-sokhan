@@ -38,9 +38,13 @@ const getEmotionType = (key: string) => {
     <h1 class="mb-6 text-center text-3xl font-bold">
       Wheel of Emotions
     </h1>
-    <div class="flex justify-center mb-4">
-      <button @click="lang = 'en'" :class="['px-3 py-1 rounded-l border border-gray-300', lang === 'en' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700']">EN</button>
-      <button @click="lang = 'pes'" :class="['px-3 py-1 rounded-r border border-gray-300', lang === 'pes' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700']">FA</button>
+    <div class="mb-4 flex justify-center">
+      <button :class="['rounded-l border border-gray-300 px-3 py-1', lang === 'en' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700']" @click="lang = 'en'">
+        EN
+      </button>
+      <button :class="['rounded-r border border-gray-300 px-3 py-1', lang === 'pes' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700']" @click="lang = 'pes'">
+        FA
+      </button>
     </div>
     <EmotionWheel
       v-model="selectedEmotions"
@@ -51,13 +55,17 @@ const getEmotionType = (key: string) => {
     />
 
     <div v-if="selectedEmotions.length" class="mb-6 rounded-lg bg-white p-4 text-center shadow">
-      <p class="text-xl mb-2">
+      <p class="mb-2 text-xl">
         Selected emotions:
       </p>
       <div class="flex flex-wrap justify-center gap-2">
-        <span v-for="key in selectedEmotions" :key="key" class="inline-block rounded bg-blue-100 px-2 py-1 text-sm font-semibold text-blue-800">
+        <span
+          v-for="key in selectedEmotions"
+          :key="key"
+          class="inline-block rounded bg-blue-100 px-2 py-1 text-sm font-semibold text-blue-800"
+        >
           {{ key.split('|')[1] }} <span class="text-gray-500">({{ key.split('|')[0] }})</span>
-          <span class="ml-2 text-xs rounded px-1 py-0.5" :class="getEmotionType(key) === 'Primary' ? 'bg-gray-200 text-gray-900 border border-gray-400' : 'bg-gray-100 text-gray-600'">
+          <span class="ml-2 rounded px-1 py-0.5 text-xs" :class="getEmotionType(key) === 'Primary' ? 'bg-gray-200 text-gray-900 border border-gray-400' : 'bg-gray-100 text-gray-600'">
             {{ getEmotionType(key) }}
           </span>
         </span>

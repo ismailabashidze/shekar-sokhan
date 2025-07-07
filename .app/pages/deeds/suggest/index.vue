@@ -41,7 +41,7 @@ function onSelectType(type: 'family' | 'society' | 'spiritual' | 'environment' |
         >
           <div class="h-32 w-full overflow-hidden rounded-2xl">
             <img
-              class="h-full w-full object-contain"
+              class="size-full object-contain"
               src="/img/illustrations/wizard/family.png"
               alt="خانواده"
             >
@@ -93,7 +93,7 @@ function onSelectType(type: 'family' | 'society' | 'spiritual' | 'environment' |
         >
           <div class="h-32 w-full overflow-hidden rounded-2xl">
             <img
-              class="h-full w-full object-contain"
+              class="size-full object-contain"
               src="/img/illustrations/wizard/society.png"
               alt="جامعه"
             >
@@ -145,7 +145,7 @@ function onSelectType(type: 'family' | 'society' | 'spiritual' | 'environment' |
         >
           <div class="h-32 w-full overflow-hidden rounded-2xl">
             <img
-              class="h-full w-full object-contain"
+              class="size-full object-contain"
               src="/img/illustrations/wizard/spritual.png"
               alt="معنوی"
             >
@@ -197,7 +197,7 @@ function onSelectType(type: 'family' | 'society' | 'spiritual' | 'environment' |
         >
           <div class="h-32 w-full overflow-hidden rounded-2xl">
             <img
-              class="h-full w-full object-contain"
+              class="size-full object-contain"
               src="/img/illustrations/wizard/environment.svg"
               alt="محیط زیست"
             >
@@ -249,7 +249,7 @@ function onSelectType(type: 'family' | 'society' | 'spiritual' | 'environment' |
         >
           <div class="h-32 w-full overflow-hidden rounded-2xl">
             <img
-              class="h-full w-full object-contain"
+              class="size-full object-contain"
               src="/img/illustrations/wizard/mindfulness.svg"
               alt="ذهن‌آگاهی"
             >
@@ -301,7 +301,7 @@ function onSelectType(type: 'family' | 'society' | 'spiritual' | 'environment' |
         >
           <div class="h-32 w-full overflow-hidden rounded-2xl">
             <img
-              class="h-full w-full object-contain"
+              class="size-full object-contain"
               src="/img/illustrations/wizard/self.svg"
               alt="خودسازی"
             >

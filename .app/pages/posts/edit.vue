@@ -10,12 +10,12 @@ const route = useRoute()
 const router = useRouter()
 const toaster = useToaster()
 
-const { 
-  currentPost, 
-  loading, 
+const {
+  currentPost,
+  loading,
   error,
-  getPost, 
-  updatePost 
+  getPost,
+  updatePost,
 } = usePosts()
 
 const { user } = useUser()
@@ -71,12 +71,12 @@ const loadPost = async () => {
       router.push('/posts/list')
       return
     }
-    
+
     await getPost(postId)
-    
+
     if (currentPost.value) {
       const post = currentPost.value
-      
+
       formData.value = {
         title: post.title || '',
         description: post.description || '',
@@ -97,7 +97,8 @@ const loadPost = async () => {
         seoDescription: post.seoDescription || '',
       }
     }
-  } catch (err) {
+  }
+  catch (err) {
     console.error('Error loading post:', err)
   }
 }
@@ -108,7 +109,7 @@ const submit = async () => {
 
   try {
     const postId = route.query.id as string
-    
+
     const updateData = {
       id: postId,
       ...formData.value,
@@ -117,10 +118,11 @@ const submit = async () => {
 
     await updatePost(updateData)
     router.push('/posts/list')
-
-  } catch (error: any) {
+  }
+  catch (error: any) {
     console.error('Error updating post:', error)
-  } finally {
+  }
+  finally {
     submitting.value = false
   }
 }
@@ -134,7 +136,7 @@ const addTag = () => {
 }
 
 const removeTag = (tag: string) => {
-  formData.value.tags = formData.value.tags.filter((t) => t !== tag)
+  formData.value.tags = formData.value.tags.filter(t => t !== tag)
 }
 
 onMounted(() => {
@@ -256,4 +258,4 @@ onMounted(() => {
       </div>
     </div>
   </div>
-</template> 
+</template>

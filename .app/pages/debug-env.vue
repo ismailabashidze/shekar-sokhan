@@ -29,15 +29,18 @@ const envVars = {
           >
             🔍 Debug Environment Variables
           </BaseHeading>
-          
+
           <div class="space-y-4">
-            <div v-for="(value, key) in envVars" :key="key" 
-                 class="border-muted-200 dark:border-muted-700 flex items-center justify-between rounded-lg border p-4">
+            <div
+              v-for="(value, key) in envVars"
+              :key="key"
+              class="border-muted-200 dark:border-muted-700 flex items-center justify-between rounded-lg border p-4"
+            >
               <div class="flex-1">
                 <div class="text-muted-900 dark:text-muted-100 font-medium">
                   {{ key }}
                 </div>
-                <div class="text-muted-500 dark:text-muted-400 mt-1 text-sm font-mono">
+                <div class="text-muted-500 dark:text-muted-400 mt-1 font-mono text-sm">
                   {{ value || '❌ خالی یا تعریف نشده' }}
                 </div>
               </div>
@@ -53,10 +56,15 @@ const envVars = {
           </div>
 
           <div class="border-muted-200 dark:border-muted-700 mt-8 rounded-lg border p-6">
-            <BaseHeading as="h3" size="md" weight="medium" class="mb-4">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="medium"
+              class="mb-4"
+            >
               📋 چک‌لیست حل مشکل
             </BaseHeading>
-            
+
             <div class="space-y-3">
               <div class="flex items-start gap-3">
                 <Icon name="ph:number-circle-one" class="text-primary-500 mt-1 size-5" />
@@ -69,7 +77,7 @@ const envVars = {
                   </div>
                 </div>
               </div>
-              
+
               <div class="flex items-start gap-3">
                 <Icon name="ph:number-circle-two" class="text-primary-500 mt-1 size-5" />
                 <div>
@@ -82,7 +90,7 @@ const envVars = {
                   </div>
                 </div>
               </div>
-              
+
               <div class="flex items-start gap-3">
                 <Icon name="ph:number-circle-three" class="text-primary-500 mt-1 size-5" />
                 <div>
@@ -106,4 +114,4 @@ const envVars = {
       </BaseCard>
     </div>
   </div>
-</template> 
+</template>

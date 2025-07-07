@@ -10,12 +10,12 @@ const route = useRoute()
 const router = useRouter()
 const toaster = useToaster()
 
-const { 
-  currentPost, 
-  loading, 
+const {
+  currentPost,
+  loading,
   error,
-  getPost, 
-  updatePost 
+  getPost,
+  updatePost,
 } = usePosts()
 
 const { user } = useUser()
@@ -70,10 +70,10 @@ const loadPost = async () => {
   try {
     const postId = route.params.id as string
     await getPost(postId)
-    
+
     if (currentPost.value) {
       const post = currentPost.value
-      
+
       // Populate form data
       formData.value = {
         title: post.title || '',
@@ -95,7 +95,8 @@ const loadPost = async () => {
         seoDescription: post.seoDescription || '',
       }
     }
-  } catch (err) {
+  }
+  catch (err) {
     console.error('Error loading post:', err)
     toaster.show({
       title: 'خطا',
@@ -149,7 +150,7 @@ const submit = async () => {
 
   try {
     const postId = route.params.id as string
-    
+
     // Prepare update data
     const updateData = {
       id: postId,
@@ -186,8 +187,8 @@ const submit = async () => {
     setTimeout(() => {
       router.push('/posts/list')
     }, 1000)
-
-  } catch (error: any) {
+  }
+  catch (error: any) {
     toaster.show({
       title: 'خطا در به‌روزرسانی',
       message: error.message || 'خطای ناشناخته رخ داد',
@@ -195,7 +196,8 @@ const submit = async () => {
       icon: 'ph:warning',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     submitting.value = false
   }
 }
@@ -209,7 +211,7 @@ const addTag = () => {
 }
 
 const removeTag = (tag: string) => {
-  formData.value.tags = formData.value.tags.filter((t) => t !== tag)
+  formData.value.tags = formData.value.tags.filter(t => t !== tag)
 }
 
 // Load post on mount
@@ -246,7 +248,9 @@ onMounted(() => {
         <h3 class="text-muted-800 dark:text-muted-200 mb-2 text-lg font-semibold">
           خطا در بارگیری مقاله
         </h3>
-        <p class="text-muted-500 mb-4">{{ error }}</p>
+        <p class="text-muted-500 mb-4">
+          {{ error }}
+        </p>
         <BaseButton
           color="primary"
           variant="pastel"
@@ -260,7 +264,7 @@ onMounted(() => {
       <BaseCard v-else class="p-6">
         <form class="space-y-6" @submit.prevent="submit">
           <!-- Header Actions -->
-          <div class="flex items-center justify-between border-b border-muted-200 pb-4 dark:border-muted-700">
+          <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b pb-4">
             <div class="flex items-center gap-3">
               <NuxtLink
                 to="/posts/list"
@@ -273,7 +277,7 @@ onMounted(() => {
                 ویرایش: {{ formData.title || 'مقاله' }}
               </h1>
             </div>
-            
+
             <div class="flex items-center gap-3">
               <BaseButton
                 type="button"
@@ -298,7 +302,7 @@ onMounted(() => {
           <!-- Basic Information -->
           <div class="grid gap-6 lg:grid-cols-3">
             <!-- Main Content -->
-            <div class="lg:col-span-2 space-y-6">
+            <div class="space-y-6 lg:col-span-2">
               <!-- Title -->
               <BaseInput
                 v-model="formData.title"
@@ -404,13 +408,15 @@ onMounted(() => {
 
               <!-- Settings -->
               <div class="space-y-4">
-                <h3 class="text-muted-800 text-sm font-medium dark:text-white">تنظیمات</h3>
-                
+                <h3 class="text-muted-800 text-sm font-medium dark:text-white">
+                  تنظیمات
+                </h3>
+
                 <BaseCheckbox
                   v-model="formData.isFeatured"
                   label="مقاله ویژه"
                 />
-                
+
                 <BaseCheckbox
                   v-model="formData.allowComments"
                   label="اجازه نظردهی"
@@ -419,20 +425,22 @@ onMounted(() => {
 
               <!-- SEO -->
               <div class="space-y-4">
-                <h3 class="text-muted-800 text-sm font-medium dark:text-white">سئو</h3>
-                
+                <h3 class="text-muted-800 text-sm font-medium dark:text-white">
+                  سئو
+                </h3>
+
                 <BaseInput
                   v-model="formData.slug"
                   label="آدرس URL"
                   placeholder="url-slug"
                 />
-                
+
                 <BaseInput
                   v-model="formData.seoTitle"
                   label="عنوان سئو"
                   placeholder="عنوان برای موتورهای جستجو"
                 />
-                
+
                 <BaseTextarea
                   v-model="formData.seoDescription"
                   label="توضیح سئو"
@@ -443,14 +451,16 @@ onMounted(() => {
 
               <!-- Publishing -->
               <div class="space-y-4">
-                <h3 class="text-muted-800 text-sm font-medium dark:text-white">انتشار</h3>
-                
+                <h3 class="text-muted-800 text-sm font-medium dark:text-white">
+                  انتشار
+                </h3>
+
                 <BaseInput
                   v-model="formData.publishDate"
                   type="date"
                   label="تاریخ انتشار"
                 />
-                
+
                 <BaseInput
                   v-model="formData.readTime"
                   type="number"
@@ -476,4 +486,4 @@ onMounted(() => {
       </BaseCard>
     </div>
   </div>
-</template> 
+</template>

@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0] (2025-01-30)
+
+### 🚀 Features
+- Implemented advanced admin notification management system with complete CRUD operations
+- Added server-side pagination and infinite scroll for user lists in notification panel
+- Integrated real-time search with debounce functionality for user lookup
+- Created comprehensive notification dashboard with statistics and analytics
+- Added bulk notification sending capabilities with role-based filtering
+- Implemented system notification templates (welcome, reminder, warning, maintenance)
+
+### 🎨 UI Improvements
+- Enhanced notification cards with visual status indicators and modern card design
+- Added user avatars and comprehensive sender/recipient information display
+- Implemented responsive design with mobile-optimized layouts
+- Enhanced visual hierarchy with badges, icons, and color-coded status indicators
+- Added priority levels and read/unread status visualization
+- Improved notification preview functionality with real-time form validation
+
+### 🧰 Technical Improvements
+- Created `useAdminNotifications` composable for centralized notification management
+- Added PocketBase integration with proper relation expansion for user data
+- Implemented efficient pagination system with 20 items per page loading
+- Added proper error handling and loading states throughout the system
+- Created admin middleware for role-based access control
+- Enhanced data transformation utilities for consistent UI data format
+
+### 🐞 Bug Fixes
+- Fixed template syntax errors in Vue components
+- Corrected user count display in dashboard statistics
+- Resolved infinite scroll triggering and load more functionality
+- Fixed responsive layout issues on mobile devices
+
+### 🌐 Localization
+- Full Persian language support for admin notification interface
+- RTL-optimized layout with proper text direction for all components
+- Persian date/time formatting and user-friendly status messages
+
+---
+
 ## [2.5.1] (2025-01-30)
 
 ### 🐞 Bug Fixes

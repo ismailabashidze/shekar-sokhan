@@ -19,12 +19,12 @@
         <span>{{ importanceLevel }}</span>
         <span class="opacity-75">({{ importanceScore }})</span>
       </div>
-      
+
       <!-- Compression indicator -->
       <div
         v-if="summary.isCompressed"
         v-tooltip="'این خلاصه فشرده شده است'"
-        class="bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-400 flex items-center gap-1 rounded-full px-2 py-1 text-xs"
+        class="flex items-center gap-1 rounded-full bg-orange-100 px-2 py-1 text-xs text-orange-600 dark:bg-orange-900 dark:text-orange-400"
       >
         <Icon name="ph:archive-duotone" class="size-3" />
         <span>فشرده</span>
@@ -33,7 +33,7 @@
 
     <!-- Delete button -->
     <button
-      class="text-danger-500 hover:text-danger-600 dark:text-danger-400 dark:hover:text-danger-300 absolute left-2 bottom-2 transition-colors duration-300"
+      class="text-danger-500 hover:text-danger-600 dark:text-danger-400 dark:hover:text-danger-300 absolute bottom-2 left-2 transition-colors duration-300"
       @click.prevent="$emit('delete')"
     >
       <Icon name="ph:trash-duotone" class="size-5" />
@@ -69,8 +69,8 @@
       </div>
 
       <!-- Summary content -->
-      <BaseText 
-        size="sm" 
+      <BaseText
+        size="sm"
         class="text-muted-700 dark:text-muted-300 mb-2 leading-relaxed"
       >
         {{ summary.summary }}
@@ -85,7 +85,7 @@
     </div>
 
     <!-- Importance Details (Expandable) -->
-    <div v-if="showDetails" class="border-muted-200 dark:border-muted-700 border-t pt-3 mt-3">
+    <div v-if="showDetails" class="border-muted-200 dark:border-muted-700 mt-3 border-t pt-3">
       <div class="grid grid-cols-2 gap-3 text-xs">
         <div class="space-y-1">
           <div class="flex justify-between">
@@ -112,8 +112,8 @@
 
     <!-- Toggle details button -->
     <button
-      @click="showDetails = !showDetails"
       class="text-muted-400 hover:text-muted-600 dark:hover:text-muted-300 absolute bottom-2 right-2 transition-colors duration-300"
+      @click="showDetails = !showDetails"
     >
       <Icon :name="showDetails ? 'ph:caret-up-duotone' : 'ph:info-duotone'" class="size-4" />
     </button>
@@ -193,7 +193,7 @@ const recencyDays = computed(() => {
 const recencyText = computed(() => {
   const days = recencyDays.value
   if (days === null) return ''
-  
+
   if (days === 0) return 'امروز'
   if (days === 1) return 'دیروز'
   if (days <= 7) return `${days} روز پیش`
@@ -213,10 +213,10 @@ const compressionRatio = computed(() => {
 function formatDate(dateStr: string) {
   if (!dateStr) return '—'
   const d = new Date(dateStr)
-  return d.toLocaleDateString('fa-IR', { 
+  return d.toLocaleDateString('fa-IR', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 </script>
@@ -245,4 +245,4 @@ function formatDate(dateStr: string) {
 .opacity-75 {
   background: linear-gradient(135deg, transparent 0%, rgba(0,0,0,0.05) 100%);
 }
-</style> 
+</style>

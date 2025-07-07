@@ -71,7 +71,7 @@ const startPayment = async () => {
     console.log('💾 Payment record created:', {
       id: paymentRecord.id,
       amount: paymentRecord.amount,
-      status: paymentRecord.status
+      status: paymentRecord.status,
     })
 
     // Register transaction with Dargah
@@ -92,7 +92,7 @@ const startPayment = async () => {
 
     // Generate a valid factor number (must be a positive integer)
     const factorNumber = Math.floor(Math.random() * 1000000) + Date.now() % 1000000
-    
+
     const transactionData = {
       merchent_id: merchantId,
       price: Number(subscriptionPlan.price), // Ensure it's a number
@@ -116,7 +116,7 @@ const startPayment = async () => {
       ...transactionData,
       factorNumber: transactionData.factor_number,
       price: subscriptionPlan.price,
-      merchantId: transactionData.merchent_id
+      merchantId: transactionData.merchent_id,
     })
 
     const result = await registerTransaction(transactionData, credentials)
@@ -141,9 +141,9 @@ const startPayment = async () => {
     console.error('Full error details:', {
       message: error.message,
       stack: error.stack,
-      name: error.name
+      name: error.name,
     })
-    
+
     toaster.show({
       title: 'خطا در پرداخت',
       message: `خطا: ${error.message}`,
@@ -274,16 +274,16 @@ const pasteCouponCode = () => {
                     color="primary"
                     class="w-full"
                     :loading="isPaymentLoading || isPaymentProcessing"
-                    @click="startPayment"
                     data-tour="payment-button"
+                    @click="startPayment"
                   >
                     پرداخت اشتراک
                   </BaseButton>
                   <BaseButton
                     class="w-full"
                     :loading="isSubmitting"
-                    @click="openModal"
                     data-tour="coupon-button"
+                    @click="openModal"
                   >
                     کد تخفیف دارم
                   </BaseButton>
@@ -510,6 +510,5 @@ const pasteCouponCode = () => {
   </TairoModal>
 
   <!-- Tour Component -->
-      <TourButton
-  />
+  <TourButton />
 </template>

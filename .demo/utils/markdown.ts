@@ -27,8 +27,8 @@ export type ProcessorThemes = Record<
 
 // this is used to cache the markdown processors
 const processors: Map<string, ProcessorThemes> = new Map()
-const processorsPromise: Map<string, Promise<ProcessorThemes> | null> =
-  new Map()
+const processorsPromise: Map<string, Promise<ProcessorThemes> | null>
+  = new Map()
 
 export function getMarkdownProcessors(
   themes: Record<string, IThemeRegistration> = {},
@@ -57,7 +57,8 @@ export function getMarkdownProcessors(
           processors[theme] = processor
         }
         resolve(processors)
-      } catch (error) {
+      }
+      catch (error) {
         reject(error)
       }
     },

@@ -52,10 +52,11 @@ const selectedMessageEmotions = computed(() => {
   if (!selectedMessage.value?.analysisResult?.lastMessage_emotions) {
     return []
   }
-  
+
   try {
     return convertToEmotionWheel(selectedMessage.value.analysisResult.lastMessage_emotions)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error converting emotions:', error)
     return []
   }
@@ -110,18 +111,18 @@ const loadSessionMessages = async (sessionId: string) => {
         try {
           const { role } = useUser()
           const isAdmin = role.value === 'admin'
-          
-          const loadedMessages = isAdmin 
+
+          const loadedMessages = isAdmin
             ? await getMessagesForAdmin(sessionId)
             : await getMessages(sessionId)
-            
+
           console.log('Loaded messages:', loadedMessages)
-          
+
           // Load analysis data for messages that have message_analysis
           const messagesWithAnalysis = await Promise.all(
             loadedMessages.map(async (msg) => {
               let analysisResult = null
-              
+
               // Only try to load analysis for user messages (sent) that have message_analysis field
               if (msg.type === 'sent' && msg.message_analysis) {
                 try {
@@ -133,20 +134,21 @@ const loadSessionMessages = async (sessionId: string) => {
                     // Note: emotionalResponse is not stored in message_analysis collection
                     // It's part of the full analysis result generated dynamically
                   }
-                } catch (analysisError) {
+                }
+                catch (analysisError) {
                   console.error('Error loading analysis for message:', msg.id, analysisError)
                   // Continue without analysis if loading fails
                 }
               }
-              
+
               return {
                 ...msg,
                 timestamp: msg.time,
                 analysisResult,
               }
-            })
+            }),
           )
-          
+
           messages.value = messagesWithAnalysis
           scrollToBottom()
         }
@@ -528,7 +530,8 @@ const filteredMessages = computed(() => {
                               : 'items-start',
                           ]"
                         >
-                          <div class="flex items-start gap-2"
+                          <div
+                            class="flex items-start gap-2"
                             :class="[
                               item.type === 'sent'
                                 ? 'flex-row-reverse'
@@ -749,9 +752,9 @@ const filteredMessages = computed(() => {
           <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
             <div class="mb-2 flex items-center gap-2">
               <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
-              <span class="text-sm font-medium text-muted-600 dark:text-muted-300">محتوای پیام</span>
+              <span class="text-muted-600 dark:text-muted-300 text-sm font-medium">محتوای پیام</span>
             </div>
-            <div class="prose prose-sm max-w-none dark:prose-invert text-right">
+            <div class="prose prose-sm dark:prose-invert max-w-none text-right">
               <AddonMarkdownRemark :source="selectedMessage.text" />
             </div>
           </div>
@@ -762,18 +765,18 @@ const filteredMessages = computed(() => {
             <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
               <div class="mb-2 flex items-center gap-2">
                 <Icon name="ph:hash-duotone" class="text-info-500 size-5" />
-                <span class="text-sm font-medium text-muted-600 dark:text-muted-300">شناسه پیام</span>
+                <span class="text-muted-600 dark:text-muted-300 text-sm font-medium">شناسه پیام</span>
               </div>
-              <span class="text-xs font-mono text-muted-500 dark:text-muted-400">{{ selectedMessage.id }}</span>
+              <span class="text-muted-500 dark:text-muted-400 font-mono text-xs">{{ selectedMessage.id }}</span>
             </div>
 
             <!-- Message time -->
             <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
               <div class="mb-2 flex items-center gap-2">
                 <Icon name="ph:clock-duotone" class="text-warning-500 size-5" />
-                <span class="text-sm font-medium text-muted-600 dark:text-muted-300">زمان ارسال</span>
+                <span class="text-muted-600 dark:text-muted-300 text-sm font-medium">زمان ارسال</span>
               </div>
-              <span class="text-sm text-muted-700 dark:text-muted-300">
+              <span class="text-muted-700 dark:text-muted-300 text-sm">
                 {{ new Date(selectedMessage.time || selectedMessage.timestamp).toLocaleString('fa') }}
               </span>
             </div>
@@ -782,9 +785,9 @@ const filteredMessages = computed(() => {
             <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
               <div class="mb-2 flex items-center gap-2">
                 <Icon name="ph:user-duotone" class="text-success-500 size-5" />
-                <span class="text-sm font-medium text-muted-600 dark:text-muted-300">نوع پیام</span>
+                <span class="text-muted-600 dark:text-muted-300 text-sm font-medium">نوع پیام</span>
               </div>
-              <span class="text-sm text-muted-700 dark:text-muted-300">
+              <span class="text-muted-700 dark:text-muted-300 text-sm">
                 {{ selectedMessage.type === 'sent' ? 'ارسالی (کاربر)' : 'دریافتی (روانشناس)' }}
               </span>
             </div>
@@ -792,10 +795,10 @@ const filteredMessages = computed(() => {
             <!-- Character count -->
             <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
               <div class="mb-2 flex items-center gap-2">
-                <Icon name="ph:text-aa-duotone" class="text-purple-500 size-5" />
-                <span class="text-sm font-medium text-muted-600 dark:text-muted-300">تعداد کاراکتر</span>
+                <Icon name="ph:text-aa-duotone" class="size-5 text-purple-500" />
+                <span class="text-muted-600 dark:text-muted-300 text-sm font-medium">تعداد کاراکتر</span>
               </div>
-              <span class="text-sm text-muted-700 dark:text-muted-300">
+              <span class="text-muted-700 dark:text-muted-300 text-sm">
                 {{ selectedMessage.text?.length || 0 }} کاراکتر
               </span>
             </div>
@@ -804,22 +807,26 @@ const filteredMessages = computed(() => {
           <!-- Emotion Wheel -->
           <div v-if="selectedMessage.analysisResult?.lastMessage_emotions" class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
             <div class="mb-4 flex items-center gap-2">
-              <Icon name="ph:heart-duotone" class="text-pink-500 size-5" />
-              <span class="text-sm font-medium text-muted-600 dark:text-muted-300">حالت احساسی پیام</span>
+              <Icon name="ph:heart-duotone" class="size-5 text-pink-500" />
+              <span class="text-muted-600 dark:text-muted-300 text-sm font-medium">حالت احساسی پیام</span>
             </div>
-            
+
             <!-- Emotions Summary -->
             <div class="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div v-for="emotion in selectedMessage.analysisResult.lastMessage_emotions.filter(e => e.severity !== 'خالی')" 
-                   :key="emotion.emotionName" 
-                   class="flex items-center justify-between rounded-lg bg-white dark:bg-muted-700 p-2">
+              <div
+                v-for="emotion in selectedMessage.analysisResult.lastMessage_emotions.filter(e => e.severity !== 'خالی')"
+                :key="emotion.emotionName"
+                class="dark:bg-muted-700 flex items-center justify-between rounded-lg bg-white p-2"
+              >
                 <span class="text-sm font-medium">{{ emotion.emotionName }}</span>
-                <span class="rounded-full px-2 py-1 text-xs" 
-                      :class="{
-                        'bg-red-100 text-red-800': emotion.severity === 'زیاد',
-                        'bg-orange-100 text-orange-800': emotion.severity === 'متوسط', 
-                        'bg-blue-100 text-blue-800': emotion.severity === 'کم'
-                      }">
+                <span
+                  class="rounded-full px-2 py-1 text-xs"
+                  :class="{
+                    'bg-red-100 text-red-800': emotion.severity === 'زیاد',
+                    'bg-orange-100 text-orange-800': emotion.severity === 'متوسط',
+                    'bg-blue-100 text-blue-800': emotion.severity === 'کم'
+                  }"
+                >
                   {{ emotion.severity }}
                 </span>
               </div>
@@ -827,31 +834,41 @@ const filteredMessages = computed(() => {
 
             <!-- Corresponding Emojis -->
             <div v-if="selectedMessage.analysisResult.correspondingEmojis" class="mb-4 text-center">
-              <div class="mb-2 text-sm font-medium text-muted-600 dark:text-muted-300">ایموجی‌های متناظر</div>
-              <div class="text-2xl">{{ selectedMessage.analysisResult.correspondingEmojis }}</div>
+              <div class="text-muted-600 dark:text-muted-300 mb-2 text-sm font-medium">
+                ایموجی‌های متناظر
+              </div>
+              <div class="text-2xl">
+                {{ selectedMessage.analysisResult.correspondingEmojis }}
+              </div>
             </div>
 
             <!-- Emotion Wheel Visualization -->
             <div class="mb-4">
-              <div class="mb-2 text-sm font-medium text-muted-600 dark:text-muted-300">چرخه احساسات</div>
+              <div class="text-muted-600 dark:text-muted-300 mb-2 text-sm font-medium">
+                چرخه احساسات
+              </div>
               <EmotionWheel :model-value="selectedMessageEmotions" lang="pes" />
             </div>
 
             <!-- Emotional Response -->
-            <div v-if="selectedMessage.analysisResult.emotionalResponse" class="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3">
+            <div v-if="selectedMessage.analysisResult.emotionalResponse" class="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
               <div class="mb-2 flex items-center gap-2">
-                <Icon name="ph:lightbulb-duotone" class="text-blue-500 size-4" />
+                <Icon name="ph:lightbulb-duotone" class="size-4 text-blue-500" />
                 <span class="text-sm font-medium text-blue-700 dark:text-blue-300">پاسخ پیشنهادی</span>
               </div>
-              <p class="text-sm text-blue-600 dark:text-blue-400 text-right">{{ selectedMessage.analysisResult.emotionalResponse }}</p>
+              <p class="text-right text-sm text-blue-600 dark:text-blue-400">
+                {{ selectedMessage.analysisResult.emotionalResponse }}
+              </p>
             </div>
           </div>
 
           <!-- No Analysis Available -->
           <div v-else class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
-            <div class="text-center text-muted-500 dark:text-muted-400">
-              <Icon name="ph:chart-line-duotone" class="size-12 mx-auto mb-2 opacity-50" />
-              <p class="text-sm">تحلیل احساسات برای این پیام در دسترس نیست</p>
+            <div class="text-muted-500 dark:text-muted-400 text-center">
+              <Icon name="ph:chart-line-duotone" class="mx-auto mb-2 size-12 opacity-50" />
+              <p class="text-sm">
+                تحلیل احساسات برای این پیام در دسترس نیست
+              </p>
             </div>
           </div>
         </div>

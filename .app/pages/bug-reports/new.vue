@@ -87,7 +87,7 @@ const isSubmitting = ref(false)
 
 const submitForm = async () => {
   isSubmitting.value = true
-  
+
   try {
     // Get values from the form
     const bugData = {

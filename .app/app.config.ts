@@ -11,6 +11,13 @@
 export default defineAppConfig({
   tairo: {
     title: 'ذهنا',
+    panels: [
+      {
+        name: 'notifications',
+        position: 'right',
+        component: 'NotificationSidebar',
+      },
+    ],
     sidebar: {
       // toolbar: {
       //   tools: [
@@ -93,6 +100,15 @@ export default defineAppConfig({
             icon: { name: 'ph:house-duotone', class: 'w-5 h-5' },
             to: '/dashboard',
             position: 'end',
+          },
+          {
+            title: 'اعلان‌ها',
+            component: 'NotificationIcon',
+            position: 'end',
+            click: () => {
+              const { open } = usePanels()
+              open('notifications')
+            },
           },
           {
             title: 'گزارش باگ',

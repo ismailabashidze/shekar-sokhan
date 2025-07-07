@@ -127,18 +127,30 @@
           label="مرتب‌سازی بر اساس"
           size="sm"
         >
-          <option value="relevance">مرتبط‌ترین</option>
-          <option value="date">تاریخ</option>
-          <option value="importance">اهمیت</option>
-          <option value="length">طول محتوا</option>
+          <option value="relevance">
+            مرتبط‌ترین
+          </option>
+          <option value="date">
+            تاریخ
+          </option>
+          <option value="importance">
+            اهمیت
+          </option>
+          <option value="length">
+            طول محتوا
+          </option>
         </BaseSelect>
         <BaseSelect
           v-model="localFilters.sortOrder"
           label="ترتیب"
           size="sm"
         >
-          <option value="desc">نزولی</option>
-          <option value="asc">صعودی</option>
+          <option value="desc">
+            نزولی
+          </option>
+          <option value="asc">
+            صعودی
+          </option>
         </BaseSelect>
       </div>
     </div>
@@ -205,20 +217,20 @@ const filterStats = computed(() => {
   if (props.totalCount === undefined || props.filteredCount === undefined) return null
   return {
     totalCount: props.totalCount,
-    filteredCount: props.filteredCount
+    filteredCount: props.filteredCount,
   }
 })
 
 // Check if any filters are active
 const hasActiveFilters = computed(() => {
   return (
-    localFilters.value.searchQuery ||
-    localFilters.value.minImportance !== 0 ||
-    localFilters.value.maxImportance !== 100 ||
-    localFilters.value.dateRange?.start ||
-    localFilters.value.dateRange?.end ||
-    localFilters.value.onlyCompressed ||
-    localFilters.value.onlyUncompressed
+    localFilters.value.searchQuery
+    || localFilters.value.minImportance !== 0
+    || localFilters.value.maxImportance !== 100
+    || localFilters.value.dateRange?.start
+    || localFilters.value.dateRange?.end
+    || localFilters.value.onlyCompressed
+    || localFilters.value.onlyUncompressed
   )
 })
 
@@ -229,7 +241,7 @@ function initializeFilters() {
     maxImportance: 100,
     sortBy: 'relevance',
     sortOrder: 'desc',
-    ...props.modelValue
+    ...props.modelValue,
   }
 
   // Set date inputs
@@ -263,7 +275,7 @@ function clearAllFilters() {
     minImportance: 0,
     maxImportance: 100,
     sortBy: 'relevance',
-    sortOrder: 'desc'
+    sortOrder: 'desc',
   }
   startDate.value = ''
   endDate.value = ''
@@ -276,13 +288,15 @@ function clearAllFilters() {
 function updateDateInputs() {
   if (localFilters.value.dateRange?.start) {
     startDate.value = localFilters.value.dateRange.start.toISOString().split('T')[0]
-  } else {
+  }
+  else {
     startDate.value = ''
   }
-  
+
   if (localFilters.value.dateRange?.end) {
     endDate.value = localFilters.value.dateRange.end.toISOString().split('T')[0]
-  } else {
+  }
+  else {
     endDate.value = ''
   }
 }
@@ -290,7 +304,7 @@ function updateDateInputs() {
 // Emit filter changes
 function emitFilters() {
   const filters: FilterOptions = { ...localFilters.value }
-  
+
   // Handle date range
   if (startDate.value || endDate.value) {
     filters.dateRange = {}
@@ -300,7 +314,8 @@ function emitFilters() {
     if (endDate.value) {
       filters.dateRange.end = new Date(endDate.value)
     }
-  } else {
+  }
+  else {
     delete filters.dateRange
   }
 
@@ -308,10 +323,12 @@ function emitFilters() {
   if (showCompressed.value && !showUncompressed.value) {
     filters.onlyCompressed = true
     delete filters.onlyUncompressed
-  } else if (!showCompressed.value && showUncompressed.value) {
+  }
+  else if (!showCompressed.value && showUncompressed.value) {
     filters.onlyUncompressed = true
     delete filters.onlyCompressed
-  } else {
+  }
+  else {
     delete filters.onlyCompressed
     delete filters.onlyUncompressed
   }
@@ -330,7 +347,7 @@ watch(() => [
   localFilters.value.minImportance,
   localFilters.value.maxImportance,
   localFilters.value.sortBy,
-  localFilters.value.sortOrder
+  localFilters.value.sortOrder,
 ], () => {
   activePreset.value = null // Clear preset when manually changing
   emitFilters()
@@ -365,4 +382,4 @@ watch(() => props.modelValue, (newValue) => {
 [dir="rtl"] .grid {
   direction: rtl;
 }
-</style> 
+</style>

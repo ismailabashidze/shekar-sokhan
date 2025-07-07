@@ -5,7 +5,8 @@ export default defineEventHandler(async (event) => {
   try {
     await client.reset()
     return 'success'
-  } catch (e) {
+  }
+  catch (e) {
     throw e
   }
 })

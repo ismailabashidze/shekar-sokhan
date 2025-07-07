@@ -44,7 +44,7 @@
 
       <!-- Critical Sessions -->
       <div class="text-center">
-        <div class="text-red-500 mb-1 text-2xl font-bold">
+        <div class="mb-1 text-2xl font-bold text-red-500">
           {{ analytics.criticalSessionsCount }}
         </div>
         <div class="text-muted-500 text-xs">
@@ -54,7 +54,7 @@
 
       <!-- Compression Rate -->
       <div class="text-center">
-        <div class="text-orange-500 mb-1 text-2xl font-bold">
+        <div class="mb-1 text-2xl font-bold text-orange-500">
           {{ Math.round(analytics.compressionRate) }}%
         </div>
         <div class="text-muted-500 text-xs">
@@ -75,7 +75,7 @@
         </div>
       </div>
       <div class="bg-muted-100 dark:bg-muted-800 h-2 rounded-full">
-        <div 
+        <div
           class="bg-primary-500 h-2 rounded-full transition-all duration-500"
           :style="{ width: `${Math.max(analytics.averageImportance, 5)}%` }"
         />
@@ -109,7 +109,7 @@
               </div>
             </div>
             <div class="bg-muted-200 dark:bg-muted-700 h-1 rounded-full">
-              <div 
+              <div
                 :class="getGroupProgressColor(group.importance)"
                 class="h-1 rounded-full transition-all duration-500"
                 :style="{ width: `${(group.items.length / analytics.totalSessions) * 100}%` }"
@@ -167,7 +167,7 @@
               </div>
               <div class="flex justify-between">
                 <span class="text-muted-600 dark:text-muted-400">صرفه‌جویی فضا:</span>
-                <span class="text-green-600 dark:text-green-400 font-medium">
+                <span class="font-medium text-green-600 dark:text-green-400">
                   {{ compressionStats.spaceSaved }}%
                 </span>
               </div>
@@ -185,11 +185,11 @@
           <div
             v-for="(recommendation, index) in recommendations"
             :key="index"
-            class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/20 rounded-lg p-3"
+            class="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-500/20 dark:bg-blue-900/20"
           >
             <div class="flex items-start gap-3">
-              <Icon name="ph:lightbulb-duotone" class="text-blue-500 mt-0.5 size-4 shrink-0" />
-              <div class="text-blue-700 dark:text-blue-300 text-sm">
+              <Icon name="ph:lightbulb-duotone" class="mt-0.5 size-4 shrink-0 text-blue-500" />
+              <div class="text-sm text-blue-700 dark:text-blue-300">
                 {{ recommendation }}
               </div>
             </div>
@@ -224,7 +224,7 @@ const analytics = computed(() => {
     averageImportance: patterns.averageImportance,
     importanceTrend: patterns.importanceTrend,
     criticalSessionsCount: patterns.criticalSessionsCount,
-    compressionRate: patterns.compressionRate
+    compressionRate: patterns.compressionRate,
   }
 })
 
@@ -279,10 +279,10 @@ const importanceDistribution = computed(() => {
     { label: 'بحرانی', min: 80, max: 100, color: 'text-red-500', count: 0 },
     { label: 'مهم', min: 60, max: 79, color: 'text-orange-500', count: 0 },
     { label: 'متوسط', min: 40, max: 59, color: 'text-yellow-500', count: 0 },
-    { label: 'کم', min: 0, max: 39, color: 'text-gray-500', count: 0 }
+    { label: 'کم', min: 0, max: 39, color: 'text-gray-500', count: 0 },
   ]
 
-  props.summaries.forEach(summary => {
+  props.summaries.forEach((summary) => {
     const importance = summary.importance?.overallImportance || 0
     const level = levels.find(l => importance >= l.min && importance <= l.max)
     if (level) level.count++
@@ -290,7 +290,7 @@ const importanceDistribution = computed(() => {
 
   return levels.map(level => ({
     ...level,
-    percentage: Math.round((level.count / total) * 100)
+    percentage: Math.round((level.count / total) * 100),
   }))
 })
 
@@ -298,22 +298,22 @@ const importanceDistribution = computed(() => {
 const compressionStats = computed(() => {
   const compressed = props.summaries.filter(s => s.isCompressed)
   const protectedSummaries = getProtectedSummaries(props.summaries)
-  
+
   if (compressed.length === 0) return null
 
   const totalOriginalLength = compressed.reduce((sum, s) => sum + (s.originalLength || s.summary.length), 0)
   const totalCurrentLength = compressed.reduce((sum, s) => sum + s.summary.length, 0)
-  
-  const averageCompression = compressed.length > 0 
+
+  const averageCompression = compressed.length > 0
     ? Math.round(compressed.reduce((sum, s) => {
-        if (s.originalLength) {
-          return sum + ((s.originalLength - s.summary.length) / s.originalLength) * 100
-        }
-        return sum
-      }, 0) / compressed.length)
+      if (s.originalLength) {
+        return sum + ((s.originalLength - s.summary.length) / s.originalLength) * 100
+      }
+      return sum
+    }, 0) / compressed.length)
     : 0
 
-  const spaceSaved = totalOriginalLength > 0 
+  const spaceSaved = totalOriginalLength > 0
     ? Math.round(((totalOriginalLength - totalCurrentLength) / totalOriginalLength) * 100)
     : 0
 
@@ -321,7 +321,7 @@ const compressionStats = computed(() => {
     compressedCount: compressed.length,
     protectedCount: protectedSummaries.length,
     averageCompression,
-    spaceSaved
+    spaceSaved,
   }
 })
 
@@ -407,4 +407,4 @@ function getGroupProgressColor(importance: string) {
 .h-2, .h-1 {
   transition: width 0.5s ease-in-out;
 }
-</style> 
+</style>

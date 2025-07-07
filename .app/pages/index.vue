@@ -28,8 +28,8 @@ const toaster = useToaster()
 //   navigateTo('/auth/login', { redirectCode: 401 })
 // }
 // else {
-  // navigateTo('/mana/chat', { redirectCode: 301 })
-  navigateTo('/dashboard', { redirectCode: 301 })
+// navigateTo('/mana/chat', { redirectCode: 301 })
+navigateTo('/dashboard', { redirectCode: 301 })
 // }
 </script>
 

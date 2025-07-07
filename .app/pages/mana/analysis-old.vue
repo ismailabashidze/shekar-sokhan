@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import 'v-calendar/dist/style.css'
 import '~/assets/css/vcalendar.css'
-import { AgentTask } from '~/composables/crew'
-import { BackendMessage } from '~/composables/message'
+import { type AgentTask } from '~/composables/crew'
+import { type BackendMessage } from '~/composables/message'
 
 definePageMeta({
   title: 'پردازش داده',
@@ -51,13 +51,17 @@ onMounted(async () => {
         .replace('\n', '')
       if (temp == 'verylow') {
         label = 0
-      } else if (temp == 'low') {
+      }
+      else if (temp == 'low') {
         label = 1
-      } else if (temp == 'medium') {
+      }
+      else if (temp == 'medium') {
         label = 2
-      } else if (temp == 'high') {
+      }
+      else if (temp == 'high') {
         label = 3
-      } else if (temp == 'veryhigh') {
+      }
+      else if (temp == 'veryhigh') {
         label = 4
       }
       suicideRiskCondition.series[0].data.push(label)
@@ -218,13 +222,13 @@ function useScatterEnergy() {
   function generateDayWiseTimeSeries(
     baseval: number,
     count: number,
-    yrange: { min: number; max: number },
+    yrange: { min: number, max: number },
   ) {
     let i = 0
     const series = []
     while (i < count) {
-      const y =
-        Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min
+      const y
+        = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min
 
       series.push([baseval, y])
       baseval += 86400000
@@ -464,13 +468,13 @@ const generateUserSummary = async () => {
   const res = await ask(
     'PatientSummerizer',
     userMsgs
-      .map((item) => item?.content)
+      .map(item => item?.content)
       .join('|')
       .replace('\n', ''),
   )
   const resFa = await translate(res, 'English', 'Western Persian')
   const save = await saveSummerizedMessages({
-    messages: userMsgs.map((msg) => msg.id),
+    messages: userMsgs.map(msg => msg.id),
     anonymousUser: userMsgs[0].anonymousUser,
     summaryEn: res,
     summaryFa: resFa,
@@ -503,7 +507,8 @@ async function analyzeAllMessages(analyze: AgentTask) {
         console.log('There is perhaps an error, retrying...')
         retryCounter++
         continue
-      } else {
+      }
+      else {
         retryCounter = maxRetries
         const updatedEvaluations = {
           ...(userMsgs[i]?.evaluations ?? {}),
@@ -529,13 +534,17 @@ async function analyzeAllMessages(analyze: AgentTask) {
             .replace('\n', '')
           if (temp == 'verylow') {
             label = 0
-          } else if (temp == 'low') {
+          }
+          else if (temp == 'low') {
             label = 1
-          } else if (temp == 'medium') {
+          }
+          else if (temp == 'medium') {
             label = 2
-          } else if (temp == 'high') {
+          }
+          else if (temp == 'high') {
             label = 3
-          } else if (temp == 'veryhigh') {
+          }
+          else if (temp == 'veryhigh') {
             label = 4
           }
           console.log(label)
@@ -596,12 +605,14 @@ async function generatingHeadlines() {
         }
 
         const record = await nuxtApp.$pb.collection('headlines').create(data)
-      } else {
+      }
+      else {
         console.log('Received non-array response, retrying...')
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error during request:', error)
-      await new Promise((resolve) => setTimeout(resolve, 1000)) // 1 second delay
+      await new Promise(resolve => setTimeout(resolve, 1000)) // 1 second delay
     }
   }
 }
@@ -633,7 +644,7 @@ async function getHeadlines() {
               class="pointer-events-none absolute -start-6 -top-20 sm:-start-10"
               src="/img/illustrations/dashboards/health/doctor.svg"
               alt="Doctor illustration"
-            />
+            >
           </div>
           <div class="mt-6 grow sm:mt-0">
             <div class="text-center sm:text-right">
@@ -723,7 +734,7 @@ async function getHeadlines() {
         <div class="flex flex-col">
           <div class="mb-3 flex items-center gap-2">
             <BaseIconBox size="md" class="bg-primary-500/10">
-              <Icon name="ph:clipboard" class="text-primary-500 h-5 w-5" />
+              <Icon name="ph:clipboard" class="text-primary-500 size-5" />
             </BaseIconBox>
             <div>
               <div class="flex items-center gap-1 font-sans">
@@ -742,8 +753,7 @@ async function getHeadlines() {
               size="sm"
               weight="medium"
               class="text-muted-800 dark:text-muted-100"
-            >
-            </BaseHeading>
+            />
           </div>
         </div>
       </div>
@@ -772,7 +782,7 @@ async function getHeadlines() {
                   </div>
                   <div class="flex justify-between">
                     <BaseParagraph size="xs" class="text-muted-400 max-w-full">
-                      <Icon name="ph:question-duotone" class="h-4 w-4" />
+                      <Icon name="ph:question-duotone" class="size-4" />
                       <span>
                         نمودار وضعیت ریسک خودکشی در واحد زمان را نشان می دهد.
                       </span>
@@ -785,11 +795,12 @@ async function getHeadlines() {
                     </BaseParagraph>
                     <BaseButton
                       color="primary"
-                      @click="genereateRisks()"
                       :loading="isLoading"
                       :disabled="isLoading"
-                      >بروز رسانی</BaseButton
+                      @click="genereateRisks()"
                     >
+                      بروز رسانی
+                    </BaseButton>
                   </div>
                   <AddonApexcharts
                     v-bind="suicideRiskCondition"
@@ -813,7 +824,7 @@ async function getHeadlines() {
                   </div>
                   <div class="flex justify-between">
                     <BaseParagraph size="xs" class="text-muted-400 max-w-full">
-                      <Icon name="ph:question-duotone" class="h-4 w-4" />
+                      <Icon name="ph:question-duotone" class="size-4" />
                       <span>
                         پیام های مراجع به صورت محتوایی بررسی شده و خلاصه سازی
                         گردیده است.
@@ -827,15 +838,16 @@ async function getHeadlines() {
                     </BaseParagraph>
                     <BaseButton
                       color="primary"
-                      @click="generateUserSummary()"
                       :loading="isLoading"
-                      >ایجاد</BaseButton
+                      @click="generateUserSummary()"
                     >
+                      ایجاد
+                    </BaseButton>
                   </div>
                   <div class="mt-5 text-justify">
                     {{
                       userSum?.[0]?.summaryFa ??
-                      `در حال حاضر اطلاعاتی وجود ندارد. از دکمه ی ایجاد استفاده
+                        `در حال حاضر اطلاعاتی وجود ندارد. از دکمه ی ایجاد استفاده
                     نمایید.`
                     }}
                   </div>

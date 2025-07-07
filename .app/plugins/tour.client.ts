@@ -15,12 +15,12 @@ export default defineNuxtPlugin(() => {
     onDestroyed: () => {
       // Clean up when tour is finished
       localStorage.setItem('tour_completed', 'true')
-    }
+    },
   })
 
   return {
     provide: {
-      tour: tourDriver
-    }
+      tour: tourDriver,
+    },
   }
-}) 
+})

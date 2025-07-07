@@ -146,11 +146,13 @@ const generateDetails = async () => {
         if (parsed.choices?.[0]?.message?.content) {
           parsedResponse = JSON.parse(parsed.choices[0].message.content)
         }
-      } catch (e) {
+      }
+      catch (e) {
         console.error('Error parsing response:', e)
         throw new Error('خطا در پردازش پاسخ')
       }
-    } else {
+    }
+    else {
       parsedResponse = response
     }
 

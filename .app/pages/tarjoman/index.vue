@@ -16,7 +16,7 @@ const canNotSend = ref(true)
 const MSG_LIMIT = 1000
 
 const sleep = (time: number): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, time))
+  return new Promise(resolve => setTimeout(resolve, time))
 }
 const back = () => {
   navigateTo('/choose')
@@ -45,26 +45,33 @@ const lengthCheck = () => {
 watch(msg, (newValue: string, oldValue: string) => {
   if (newValue.length > MSG_LIMIT) {
     canNotSend.value = true
-  } else {
+  }
+  else {
     canNotSend.value = false
   }
 })
 </script>
 
 <template>
-  <div class="w-full flex flex-row-reverse mb-5">
-    <BaseButton @click="back">بازگشت</BaseButton>
+  <div class="mb-5 flex w-full flex-row-reverse">
+    <BaseButton @click="back">
+      بازگشت
+    </BaseButton>
   </div>
-  <div class="font-thin mb-5 mt-0">
+  <div class="mb-5 mt-0 font-thin">
     ترجمان اولین نرم افزار توسعه داده شده در این مجموعه، وظیفه ی ترجمه ی فارسی
     به انگلیسی و بالعکس را به عهده دارد. متن وارد شده نباید بیشتر از دویست کلمه
     باشد. پس از نوشتن متن با کلیک روی دکمه ی ترجمه، متن وارد شده پردازش گردیده و
     سپس ترجمه ی آن در بخش «ترجمه» نمایش داده خواهد شد.
   </div>
-  <div v-if="faToEn">ترجمه از فارسی به انگلیسی</div>
-  <div v-else>ترجمه از انگلیسی به فارسی</div>
+  <div v-if="faToEn">
+    ترجمه از فارسی به انگلیسی
+  </div>
+  <div v-else>
+    ترجمه از انگلیسی به فارسی
+  </div>
 
-  <div class="mt-4 w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="mt-4 grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
     <BaseTextarea
       v-model="msg"
       label="متن شما"
@@ -84,16 +91,18 @@ watch(msg, (newValue: string, oldValue: string) => {
   <div class="mt-4 flex">
     <BaseButton
       color="primary"
-      @click="sendToTranslate"
       :loading="isTranslating"
       :disabled="canNotSend"
-      >ترجمه</BaseButton
-    ><BaseButton
+      @click="sendToTranslate"
+    >
+      ترجمه
+    </BaseButton><BaseButton
       color="muted"
       class="mr-4"
-      @click="changeLang"
       :disabled="isTranslating"
-      >جابه جایی زبان ها</BaseButton
+      @click="changeLang"
     >
+      جابه جایی زبان ها
+    </BaseButton>
   </div>
 </template>

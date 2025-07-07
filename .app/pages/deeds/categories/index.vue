@@ -32,8 +32,8 @@
         <div class="dark:border-muted-600 dark:bg-muted-700 rounded-xl border bg-white p-4">
           <div class="flex flex-col gap-2">
             <div class="flex items-center gap-3">
-              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-500/20">
-                <Icon :name="category.icon" class="size-6 text-primary-500" />
+              <div class="bg-primary-100 dark:bg-primary-500/20 flex size-10 items-center justify-center rounded-lg">
+                <Icon :name="category.icon" class="text-primary-500 size-6" />
               </div>
               <span class="text-muted-800 dark:text-muted-100 font-sans text-lg font-medium">
                 {{ category.title }}

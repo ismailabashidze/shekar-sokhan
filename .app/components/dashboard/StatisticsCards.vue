@@ -87,9 +87,9 @@ const dashboardData = ref({
 // Format numbers with Persian digits and commas
 const formatNumber = (num) => {
   if (!num) return '۰'
-  const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹']
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
   // Convert number to string and add standard comma as thousands separator
-  let str = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  let str = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   // Replace English digits with Persian digits
   return str.replace(/[0-9]/g, d => persianDigits[d])
 }

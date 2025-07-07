@@ -296,11 +296,11 @@ const {
               >
                 <div class="flex-1">
                   <div class="flex flex-col gap-1">
-                    <span class="text-xs font-medium text-white/50 flex items-center gap-1">
+                    <span class="flex items-center gap-1 text-xs font-medium text-white/50">
                       <Icon name="ph:play-circle-duotone" class="size-3" />
                       شروع جلسه
                     </span>
-                    <div class="rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm flex items-center gap-2">
+                    <div class="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm">
                       <Icon name="ph:calendar-duotone" class="size-4 text-white/70" />
                       <span class="text-sm font-bold text-white">
                         {{ new Date(analysisData?.expand?.session?.start_time).toLocaleString('fa').split(', ').reverse().join(' - ') }}
@@ -310,11 +310,11 @@ const {
                 </div>
                 <div class="flex-1">
                   <div class="flex flex-col gap-1">
-                    <span class="text-xs font-medium text-white/50 flex items-center gap-1">
+                    <span class="flex items-center gap-1 text-xs font-medium text-white/50">
                       <Icon name="ph:stop-circle-duotone" class="size-3" />
                       پایان جلسه
                     </span>
-                    <div class="rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm flex items-center gap-2">
+                    <div class="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm">
                       <Icon name="ph:calendar-duotone" class="size-4 text-white/70" />
                       <span class="text-sm font-bold text-white">
                         {{ new Date(analysisData?.expand?.session?.end_time).toLocaleString('fa').split(', ').reverse().join(' - ') }}
@@ -324,21 +324,21 @@ const {
                 </div>
                 <div class="flex-1">
                   <div class="flex flex-col gap-1">
-                    <span class="text-xs font-medium text-white/50 flex items-center gap-1">
-                      <Icon 
+                    <span class="flex items-center gap-1 text-xs font-medium text-white/50">
+                      <Icon
                         :name="analysisData?.expand?.session?.status === 'done' ? 'ph:check-circle-duotone' : 'ph:clock-duotone'"
-                        class="size-3" 
+                        class="size-3"
                       />
                       وضعیت
                     </span>
                     <div
-                      class="rounded-xl px-4 py-2 flex items-center gap-2"
+                      class="flex items-center gap-2 rounded-xl px-4 py-2"
                       :class="{
                         'bg-success-500/20 backdrop-blur-sm': analysisData?.expand?.session?.status === 'done',
                         'bg-info-500/20 backdrop-blur-sm': analysisData?.expand?.session?.status !== 'done'
                       }"
                     >
-                      <Icon 
+                      <Icon
                         :name="analysisData?.expand?.session?.status === 'done' ? 'ph:check-circle-fill' : 'ph:clock-fill'"
                         class="size-4"
                         :class="{
@@ -360,12 +360,12 @@ const {
                 </div>
                 <div class="flex-1">
                   <div class="flex flex-col gap-1">
-                    <span class="text-xs font-medium text-white/50 flex items-center gap-1">
+                    <span class="flex items-center gap-1 text-xs font-medium text-white/50">
                       <Icon name="ph:chat-circle-duotone" class="size-3" />
                       تعداد پیام‌ها
                     </span>
-                    <div class="bg-primary-500/20 rounded-xl px-4 py-2 backdrop-blur-sm flex items-center gap-2">
-                      <Icon name="ph:chat-circle-fill" class="size-4 text-primary-400" />
+                    <div class="bg-primary-500/20 flex items-center gap-2 rounded-xl px-4 py-2 backdrop-blur-sm">
+                      <Icon name="ph:chat-circle-fill" class="text-primary-400 size-4" />
                       <span class="text-primary-400 text-sm font-bold">
                         {{ analysisData?.expand?.session?.count_of_total_messages }} پیام
                       </span>

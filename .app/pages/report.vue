@@ -134,14 +134,14 @@
       <!-- Report Content -->
       <div class="col-span-12 mb-8 lg:col-span-8">
         <!-- Smart Analytics -->
-        <ReportAnalytics 
-          :summaries="processedSummaries" 
+        <ReportAnalytics
+          :summaries="processedSummaries"
           :time-groups="timeGroups"
-          class="mb-6" 
+          class="mb-6"
         />
 
         <!-- Smart Filter and View Controls -->
-        <BaseCard class="p-6 mb-6" shape="curved">
+        <BaseCard class="mb-6 p-6" shape="curved">
           <div class="mb-4 flex items-center justify-between">
             <BaseHeading
               as="h3"
@@ -173,8 +173,8 @@
               </BaseButton>
             </div>
           </div>
-          
-          <div class="flex justify-between mb-4">
+
+          <div class="mb-4 flex justify-between">
             <BaseParagraph size="xs" class="text-muted-400 max-w-full">
               <Icon name="ph:brain-duotone" class="size-4" />
               <span>نمایش هوشمند بر اساس اهمیت و تاریخ</span>
@@ -186,16 +186,16 @@
         </BaseCard>
 
         <!-- Filter Component -->
-        <div class="grid grid-cols-12 gap-6 mb-6">
+        <div class="mb-6 grid grid-cols-12 gap-6">
           <div class="col-span-12 lg:col-span-4">
-            <ReportSmartFilter 
-              v-model="currentFilters" 
+            <ReportSmartFilter
+              v-model="currentFilters"
               :total-count="processedSummaries.length"
               :filtered-count="filteredSummaries.length"
               @update:model-value="updateFilters"
             />
           </div>
-          
+
           <!-- Summaries Content -->
           <div class="col-span-12 lg:col-span-8">
             <BaseCard class="p-6" shape="curved">
@@ -208,7 +208,7 @@
                       :key="summary.session"
                       class="mb-6"
                     >
-                      <SessionSummaryCard 
+                      <SessionSummaryCard
                         :summary="summary"
                         @delete="openDeleteModal(idx, summary)"
                       />
@@ -216,9 +216,9 @@
                     <!-- Show More Button -->
                     <div v-if="filteredSummaries.length > visibleCount" class="mt-6 text-center">
                       <BaseButton
-                        @click="showMore"
                         color="primary"
                         class="mx-auto"
+                        @click="showMore"
                       >
                         نمایش بیشتر ({{ filteredSummaries.length - visibleCount }} مورد دیگر)
                       </BaseButton>
@@ -253,7 +253,7 @@
                           :key="summary.session"
                           class="mb-4"
                         >
-                          <SessionSummaryCard 
+                          <SessionSummaryCard
                             :summary="summary"
                             @delete="openDeleteModal(idx, summary)"
                           />
@@ -758,10 +758,10 @@
                 <!-- Show More Button for Deeper Goals -->
                 <div v-if="report.possibleDeeperGoals.length > visibleDeeperGoalsCount" class="mt-4 text-center">
                   <BaseButton
-                    @click="showMoreDeeperGoals"
                     color="primary"
                     size="sm"
                     class="mx-auto"
+                    @click="showMoreDeeperGoals"
                   >
                     نمایش بیشتر ({{ report.possibleDeeperGoals.length - visibleDeeperGoalsCount }} مورد دیگر)
                   </BaseButton>
@@ -816,7 +816,8 @@
                   <div
                     v-for="(risk, j) in group"
                     :key="j"
-                    class="group relative">
+                    class="group relative"
+                  >
                     <BaseCard
                       shape="rounded"
                       class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
@@ -846,10 +847,10 @@
                 <!-- Show More Button for Risk Factors -->
                 <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
                   <BaseButton
-                    @click="showMoreRiskFactors"
                     color="primary"
                     size="sm"
                     class="mx-auto"
+                    @click="showMoreRiskFactors"
                   >
                     نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
                   </BaseButton>
@@ -916,22 +917,22 @@ const nuxtApp = useNuxtApp()
 const { user, role } = useUser()
 
 // Smart filtering and data importance
-const { 
-  calculateImportanceMetrics, 
-  compressSummaries, 
-  defaultCompressionSettings 
+const {
+  calculateImportanceMetrics,
+  compressSummaries,
+  defaultCompressionSettings,
 } = useDataImportance()
 
-const { 
-  filterSummaries, 
-  groupByTimeBasedImportance, 
-  smartSearch 
+const {
+  filterSummaries,
+  groupByTimeBasedImportance,
+  smartSearch,
 } = useSmartFiltering()
 
 // Filter state
 const currentFilters = ref<FilterOptions>({
   sortBy: 'relevance',
-  sortOrder: 'desc'
+  sortOrder: 'desc',
 })
 
 // View mode
@@ -978,10 +979,10 @@ const isDeletingAllRiskFactors = ref(false)
 
 // Process summaries with importance metrics
 const processedSummaries = computed((): SessionSummaryWithImportance[] => {
-  const summaries = (report.value.summaries || []).map(summary => {
+  const summaries = (report.value.summaries || []).map((summary) => {
     const processed: SessionSummaryWithImportance = {
       ...summary,
-      importance: calculateImportanceMetrics(summary as SessionSummaryWithImportance)
+      importance: calculateImportanceMetrics(summary as SessionSummaryWithImportance),
     }
     return processed
   })
@@ -990,14 +991,13 @@ const processedSummaries = computed((): SessionSummaryWithImportance[] => {
   return compressSummaries(summaries, {
     ...defaultCompressionSettings,
     maxAge: 120, // 4 months
-    importanceThreshold: 35
+    importanceThreshold: 35,
   })
 })
 
 // Filtered summaries based on current filters
 const filteredSummaries = computed(() => {
-  const filtered = filterSummaries(processedSummaries.value, currentFilters.value)
-  return filtered
+  return filterSummaries(processedSummaries.value, currentFilters.value)
 })
 
 // Time-based groups

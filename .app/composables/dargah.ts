@@ -109,7 +109,7 @@ export const useDargah = () => {
 
   const config = useRuntimeConfig()
   const baseUrl = config.public.dargahBaseUrl || 'https://dargahno.net'
-  
+
   // Token management
   const authToken = ref<string | null>(null)
   const merchantId = ref<string | null>(null)
@@ -123,14 +123,14 @@ export const useDargah = () => {
   const login = async (credentials: LoginRequest) => {
     isLoading.value = true
     error.value = null
-    
+
     try {
       console.log('🔑 Attempting login to Dargah with form-encoded data:', {
         username: credentials.username,
         passwordLength: credentials.password?.length || 0,
-        baseUrl
+        baseUrl,
       })
-      
+
       // Create form-encoded data as per Dargah documentation
       const formData = new URLSearchParams({
         grant_type: 'password',
@@ -138,52 +138,53 @@ export const useDargah = () => {
         password: credentials.password,
         scope: '',
         client_id: 'string',
-        client_secret: 'string'
+        client_secret: 'string',
       })
-      
+
       const response = await fetch(`${baseUrl}/api/v2/auth/login`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: formData.toString()
+        body: formData.toString(),
       })
-      
+
       const responseData = await response.json()
-      
+
       console.log('🔑 Dargah login response:', {
         status: response.status,
         ok: response.ok,
-        data: responseData
+        data: responseData,
       })
-      
+
       if (!response.ok) {
-        const errorMsg = responseData.detail 
+        const errorMsg = responseData.detail
           ? (Array.isArray(responseData.detail) ? responseData.detail.map(d => d.msg).join(', ') : responseData.detail)
           : 'Login failed'
         throw new Error(errorMsg)
       }
-      
+
       // Store auth data - note the response format from docs
       authToken.value = responseData.access_token
       merchantId.value = responseData.user_info?.merchent_id || responseData.merchent_id
       tokenExpiry.value = Date.now() + ((responseData.expire_time || 30) * 60 * 1000) // Convert minutes to milliseconds
-      
+
       result.login = responseData
       console.log('✅ Login successful, token stored:', {
         tokenType: responseData.token_type,
         expireTime: responseData.expire_time,
-        merchantId: merchantId.value
+        merchantId: merchantId.value,
       })
       return responseData as LoginResponse
-      
-    } catch (err) {
+    }
+    catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed'
       console.error('❌ Login failed:', errorMessage)
       error.value = errorMessage
       throw err
-    } finally {
+    }
+    finally {
       isLoading.value = false
     }
   }
@@ -204,7 +205,7 @@ export const useDargah = () => {
   const registerTransaction = async (data: TransactionCreateRequest, credentials?: LoginRequest) => {
     isLoading.value = true
     error.value = null
-    
+
     try {
       // Check if we need to login first
       if (!isTokenValid()) {
@@ -213,61 +214,63 @@ export const useDargah = () => {
         }
         await login(credentials)
       }
-      
+
       // Add required fields based on documentation
       const completeTransactionData = {
         ...data,
         category: data.category || 'Forwarder', // Default to Forwarder as per docs
         transaction_fee_side: data.transaction_fee_side || 'Seller', // Default fee to seller
-        shop_id: data.shop_id || '37664064' // Can be null for basic usage
+        shop_id: data.shop_id || '37664064', // Can be null for basic usage
       }
-      
+
       console.log('💳 Registering transaction with Dargah:', {
         amount: completeTransactionData.price,
         merchantId: completeTransactionData.merchent_id,
         factorNumber: completeTransactionData.factor_number,
         category: completeTransactionData.category,
-        authTokenPresent: !!authToken.value
+        authTokenPresent: !!authToken.value,
       })
-      
+
       const response = await fetch(`${baseUrl}/api/v2/transaction/register`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
           'Authorization': `Bearer ${authToken.value}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(completeTransactionData)
+        body: JSON.stringify(completeTransactionData),
       })
-      
+
       const responseData = await response.json()
-      
+
       console.log('💳 Transaction register response:', {
         status: response.status,
         ok: response.ok,
-        data: responseData
+        data: responseData,
       })
-      
+
       if (!response.ok) {
-        const errorMsg = responseData.detail 
+        const errorMsg = responseData.detail
           ? (Array.isArray(responseData.detail) ? responseData.detail.map(d => d.msg).join(', ') : responseData.detail)
           : 'Transaction registration failed'
         throw new Error(errorMsg)
       }
-      
+
       result.transaction = responseData
       console.log('✅ Transaction registered successfully:', {
         authority: responseData.authority,
         newPrice: responseData.new_price,
-        shopId: responseData.shop_id
+        shopId: responseData.shop_id,
       })
       return responseData as TransactionResult
-    } catch (err) {
+    }
+    catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to register transaction'
       console.error('❌ Transaction registration failed:', errorMessage)
       error.value = errorMessage
       throw err
-    } finally {
+    }
+    finally {
       isLoading.value = false
     }
   }
@@ -281,50 +284,52 @@ export const useDargah = () => {
   const checkTransactionStatus = async (data: TransactionCheckRequest, credentials?: LoginRequest) => {
     isLoading.value = true
     error.value = null
-    
+
     try {
       console.log('🔍 Checking transaction status:', {
         authority: data.authority,
-        hasCredentials: !!credentials
+        hasCredentials: !!credentials,
       })
-      
+
       const response = await fetch(`${baseUrl}/api/v2/transaction/check`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       })
-      
+
       const responseData = await response.json()
-      
+
       console.log('🔍 Transaction check response:', {
         status: response.status,
         ok: response.ok,
-        data: responseData
+        data: responseData,
       })
-      
+
       if (!response.ok) {
-        const errorMsg = responseData.detail 
+        const errorMsg = responseData.detail
           ? (Array.isArray(responseData.detail) ? responseData.detail.map(d => d.msg).join(', ') : responseData.detail)
           : 'Failed to check transaction status'
         throw new Error(errorMsg)
       }
-      
+
       result.status = responseData
       console.log('✅ Transaction status checked:', {
         status: responseData.status,
         validate: responseData.validate,
-        factorNumber: responseData.factor_number
+        factorNumber: responseData.factor_number,
       })
       return responseData as TransactionStatusResponse
-    } catch (err) {
+    }
+    catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to check transaction status'
       console.error('❌ Transaction status check failed:', errorMessage)
       error.value = errorMessage
       throw err
-    } finally {
+    }
+    finally {
       isLoading.value = false
     }
   }
@@ -370,7 +375,7 @@ export const useDargah = () => {
       const url = new URL(window.location.href)
       const authority = url.searchParams.get('Authority')
       const status = url.searchParams.get('Status')
-      
+
       if (!authority) {
         error.value = 'No authority token found in callback URL'
         return null
@@ -379,7 +384,8 @@ export const useDargah = () => {
       // If Status is OK, verify the payment
       if (status === 'OK') {
         return await checkTransactionStatus({ authority }, credentials)
-      } else {
+      }
+      else {
         error.value = 'Payment was not successful'
         return null
       }
@@ -400,7 +406,7 @@ export const useDargah = () => {
     getPaymentUrl,
     redirectToPayment,
     getAuthorityFromUrl,
-    handleCallback
+    handleCallback,
   }
 }
 

@@ -1,0 +1,203 @@
+[
+  {
+    "id": "notifications_collection",
+    "name": "notifications",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "id": "title",
+        "name": "title",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 255,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "message",
+        "name": "message",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 2000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "type",
+        "name": "type",
+        "type": "select",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "info",
+            "success", 
+            "warning",
+            "error",
+            "system"
+          ]
+        }
+      },
+      {
+        "id": "priority",
+        "name": "priority",
+        "type": "select",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "low",
+            "medium",
+            "high",
+            "urgent"
+          ]
+        }
+      },
+      {
+        "id": "is_read",
+        "name": "is_read",
+        "type": "bool",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      },
+      {
+        "id": "user_id",
+        "name": "user_id",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 50,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "user_name",
+        "name": "user_name",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 100,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "user_avatar",
+        "name": "user_avatar",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 500,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "user_role",
+        "name": "user_role",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 50,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "action_url",
+        "name": "action_url",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 500,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "action_text",
+        "name": "action_text",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 100,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "read_at",
+        "name": "read_at",
+        "type": "date",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "id": "recipient_user_id",
+        "name": "recipient_user_id",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 50,
+          "pattern": ""
+        }
+      }
+    ],
+    "indexes": [],
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"", 
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\" && @request.auth.id = recipient_user_id",
+    "deleteRule": "@request.auth.id != \"\" && @request.auth.id = recipient_user_id",
+    "options": {}
+  }
+] 

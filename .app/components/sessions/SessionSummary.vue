@@ -1,9 +1,9 @@
 <script setup lang="ts">
 defineProps<{
-  summary: string;
-  goals: Array<string>;
-  progress: Array<string>;
-}>();
+  summary: string
+  goals: Array<string>
+  progress: Array<string>
+}>()
 </script>
 
 <template>
@@ -16,7 +16,7 @@ defineProps<{
     >
       خلاصه جلسه
     </BaseHeading>
-    
+
     <!-- Summary box -->
     <div class="bg-info-100 dark:bg-info-500/10 border-info-200 dark:border-info-500/20 mb-4 rounded-lg border p-4">
       <div class="flex items-start gap-3">
@@ -28,7 +28,7 @@ defineProps<{
         </BaseParagraph>
       </div>
     </div>
-    
+
     <!-- Goals and Progress sections -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
       <!-- Goals section -->
@@ -44,8 +44,8 @@ defineProps<{
           </BaseHeading>
         </div>
         <ul class="space-y-2 ps-4">
-          <li 
-            v-for="(goal, index) in goals" 
+          <li
+            v-for="(goal, index) in goals"
             :key="index"
             class="text-muted-600 dark:text-muted-300 text-sm"
           >
@@ -53,7 +53,7 @@ defineProps<{
           </li>
         </ul>
       </div>
-      
+
       <!-- Progress section -->
       <div class="border-muted-200 dark:border-muted-700 rounded-lg border p-4">
         <div class="mb-2 flex items-center gap-2">
@@ -67,8 +67,8 @@ defineProps<{
           </BaseHeading>
         </div>
         <ul class="space-y-2 ps-4">
-          <li 
-            v-for="(item, index) in progress" 
+          <li
+            v-for="(item, index) in progress"
             :key="index"
             class="text-muted-600 dark:text-muted-300 text-sm"
           >

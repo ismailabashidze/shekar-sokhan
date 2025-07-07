@@ -15,17 +15,17 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 // استفاده از کامپوزبل posts
-const { 
-  posts, 
-  loading, 
-  error, 
-  totalPages, 
+const {
+  posts,
+  loading,
+  error,
+  totalPages,
   totalItems,
-  getPosts, 
+  getPosts,
   deletePost,
   searchPosts,
   getPostsByCategory,
-  getUserPosts
+  getUserPosts,
 } = usePosts()
 
 // State for pagination and filtering
@@ -143,7 +143,8 @@ const performSearch = async () => {
       perPage: postsPerPage.value,
       sort: getSortValue(),
     })
-  } else {
+  }
+  else {
     await loadPosts()
   }
 }
@@ -151,10 +152,11 @@ const performSearch = async () => {
 const filterByCategory = async (category: string) => {
   selectedCategory.value = category
   currentPage.value = 1
-  
+
   if (category === 'all') {
     await loadPosts()
-  } else {
+  }
+  else {
     await getPostsByCategory(category, {
       page: currentPage.value,
       perPage: postsPerPage.value,
@@ -184,10 +186,11 @@ const loadPosts = async () => {
       perPage: postsPerPage.value,
       sort: getSortValue(),
       filters: {
-        status: 'published' // فقط مقالات منتشر شده
-      }
+        status: 'published', // فقط مقالات منتشر شده
+      },
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.error('Error loading posts:', err)
   }
 }
@@ -196,9 +199,11 @@ const loadPosts = async () => {
 watch(sortBy, () => {
   if (searchQuery.value.trim()) {
     performSearch()
-  } else if (selectedCategory.value !== 'all') {
+  }
+  else if (selectedCategory.value !== 'all') {
     filterByCategory(selectedCategory.value)
-  } else {
+  }
+  else {
     loadPosts()
   }
 })
@@ -210,7 +215,7 @@ watch(searchQuery, () => {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-  
+
   searchTimeout = setTimeout(() => {
     performSearch()
   }, 500)
@@ -221,9 +226,11 @@ const changePage = (page: number) => {
   currentPage.value = page
   if (searchQuery.value.trim()) {
     performSearch()
-  } else if (selectedCategory.value !== 'all') {
+  }
+  else if (selectedCategory.value !== 'all') {
     filterByCategory(selectedCategory.value)
-  } else {
+  }
+  else {
     loadPosts()
   }
 }
@@ -234,7 +241,8 @@ const handleDeletePost = async (postId: string) => {
     try {
       await deletePost(postId)
       await loadPosts() // Reload after delete
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Error deleting post:', err)
     }
   }
@@ -254,7 +262,7 @@ const formatDate = (dateString: string): string => {
   const now = new Date()
   const diffInMs = now.getTime() - date.getTime()
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
-  
+
   if (diffInDays === 0) return 'امروز'
   if (diffInDays === 1) return 'دیروز'
   if (diffInDays < 7) return `${diffInDays} روز پیش`
@@ -397,7 +405,9 @@ const viewMode = ref('grid')
             <h3 class="text-muted-800 dark:text-muted-200 mb-2 text-lg font-semibold">
               خطا در بارگیری مقالات
             </h3>
-            <p class="text-muted-500 mb-4">{{ error }}</p>
+            <p class="text-muted-500 mb-4">
+              {{ error }}
+            </p>
             <BaseButton
               color="primary"
               variant="pastel"
@@ -422,7 +432,9 @@ const viewMode = ref('grid')
               <h3 class="text-muted-800 dark:text-muted-200 mb-2 text-lg font-semibold">
                 هیچ مقاله‌ای یافت نشد
               </h3>
-              <p class="text-muted-500 mb-4">مقاله‌ای با معیارهای جستجوی شما پیدا نشد.</p>
+              <p class="text-muted-500 mb-4">
+                مقاله‌ای با معیارهای جستجوی شما پیدا نشد.
+              </p>
               <BaseButton
                 color="primary"
                 variant="pastel"
@@ -531,12 +543,12 @@ const viewMode = ref('grid')
                     <div v-if="post.id && typeof post.id === 'string'" class="flex items-center gap-1">
                       <NuxtLink
                         :to="`/posts/edit?id=${post.id}`"
-                        class="flex size-7 items-center justify-center rounded-full bg-primary-500/10 text-primary-500 transition-colors hover:bg-primary-500/20"
+                        class="bg-primary-500/10 text-primary-500 hover:bg-primary-500/20 flex size-7 items-center justify-center rounded-full transition-colors"
                       >
                         <Icon name="ph:pencil" class="size-3" />
                       </NuxtLink>
                       <button
-                        class="flex size-7 items-center justify-center rounded-full bg-danger-500/10 text-danger-500 transition-colors hover:bg-danger-500/20"
+                        class="bg-danger-500/10 text-danger-500 hover:bg-danger-500/20 flex size-7 items-center justify-center rounded-full transition-colors"
                         @click="handleDeletePost(post.id)"
                       >
                         <Icon name="ph:trash" class="size-3" />
@@ -568,7 +580,7 @@ const viewMode = ref('grid')
                     :color="currentPage === page ? 'primary' : 'muted'"
                     :variant="currentPage === page ? 'solid' : 'pastel'"
                     size="sm"
-                    class="min-w-[2rem]"
+                    class="min-w-8"
                     @click="changePage(page)"
                   >
                     {{ page }}
@@ -591,7 +603,7 @@ const viewMode = ref('grid')
             <!-- Create Post Button (Floating Action Button) -->
             <NuxtLink
               to="/posts/create"
-              class="fixed bottom-6 left-6 z-50 flex size-14 items-center justify-center rounded-full bg-primary-500 text-white shadow-lg transition-transform hover:scale-110 hover:bg-primary-600"
+              class="bg-primary-500 hover:bg-primary-600 fixed bottom-6 left-6 z-50 flex size-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110"
             >
               <Icon name="ph:plus-bold" class="size-6" />
             </NuxtLink>
