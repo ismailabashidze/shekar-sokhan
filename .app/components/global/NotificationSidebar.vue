@@ -1,12 +1,13 @@
 <script setup lang="ts">
 const {
-  highPriorityNotifications,
+  filteredNotifications,
   unreadCount,
   isLoading,
   isUpdating,
   markAsRead,
   refreshNotifications,
   initialize,
+  setFilter,
   getRelativeTime,
   getTypeIcon,
   getTypeColor,
@@ -17,6 +18,8 @@ const { close } = usePanels()
 // Initialize notifications when component mounts
 onMounted(async () => {
   await initialize()
+  // Set filter to show unread notifications in sidebar
+  setFilter('unread')
 })
 
 const handleNotificationClick = async (notification: any) => {
@@ -33,48 +36,42 @@ const handleNotificationClick = async (notification: any) => {
   <div class="flex h-full w-80 flex-col bg-white dark:bg-muted-900 shadow-xl">
     <!-- Header -->
     <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-4">
-      <div class="flex-1">
-        <div class="flex items-center gap-2">
-          <h2 class="text-muted-900 font-semibold dark:text-white">
-            اعلان‌ها
-          </h2>
-          <!-- Update indicator -->
-          <div 
-            v-if="isUpdating && !isLoading" 
-            class="bg-blue-500 size-1.5 rounded-full animate-pulse"
-          />
+      <div class="flex items-center gap-3">
+        <div class="bg-primary-100 dark:bg-primary-900/20 flex size-8 items-center justify-center rounded-full">
+          <Icon name="ph:bell" class="text-primary-600 dark:text-primary-400 size-4" />
         </div>
-        <div class="mt-1 flex items-center gap-3">
-          <p v-if="unreadCount > 0" class="text-muted-500 dark:text-muted-400 text-sm">
-            {{ unreadCount }} خوانده نشده
+        <div>
+          <h3 class="text-muted-900 text-sm font-semibold dark:text-white">
+            اعلان‌ها
+          </h3>
+          <p class="text-muted-500 dark:text-muted-400 text-xs">
+            {{ unreadCount }} اعلان خوانده نشده
           </p>
-          <!-- Refresh button -->
-          <button
-            :disabled="isLoading || isUpdating"
-            class="text-muted-400 hover:text-primary-500 transition-colors duration-200"
-            :class="[
-              isUpdating || isLoading 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'hover:scale-110'
-            ]"
-            @click="refreshNotifications"
-          >
-            <Icon 
-              name="ph:arrow-clockwise" 
-              class="size-3 transition-transform duration-300"
-              :class="{ 'animate-spin': isUpdating || isLoading }"
-            />
-          </button>
         </div>
       </div>
-
-      <NuxtLink
-        to="/notifications"
-        class="text-primary-500 hover:text-primary-600 text-sm font-medium transition-colors duration-200 hover:scale-105"
-        @click="close('notifications')"
-      >
-        مشاهده همه
-      </NuxtLink>
+      
+      <div class="flex items-center gap-2">
+        <!-- Refresh Button -->
+        <BaseButtonIcon
+          size="sm"
+          variant="ghost"
+          class="hover:bg-muted-100 dark:hover:bg-muted-700 rounded-lg"
+          :class="isUpdating ? 'animate-spin' : ''"
+          @click="refreshNotifications"
+        >
+          <Icon name="ph:arrow-clockwise" class="size-4" />
+        </BaseButtonIcon>
+        
+        <!-- Close Button -->
+        <BaseButtonIcon
+          size="sm"
+          variant="ghost"
+          class="hover:bg-muted-100 dark:hover:bg-muted-700 rounded-lg"
+          @click="close('notifications')"
+        >
+          <Icon name="ph:x" class="size-4" />
+        </BaseButtonIcon>
+      </div>
     </div>
 
     <!-- Notifications List -->
@@ -99,14 +96,17 @@ const handleNotificationClick = async (notification: any) => {
 
       <!-- No notifications -->
       <div
-        v-else-if="highPriorityNotifications.length === 0"
+        v-else-if="filteredNotifications.length === 0"
         class="flex flex-col items-center justify-center p-8 text-center"
       >
         <div class="bg-muted-100 dark:bg-muted-800 mb-3 flex size-12 items-center justify-center rounded-full">
           <Icon name="ph:bell-slash" class="text-muted-400 size-6" />
         </div>
         <p class="text-muted-500 dark:text-muted-400 text-sm">
-          اعلان جدیدی وجود ندارد
+          اعلان خوانده نشده‌ای وجود ندارد
+        </p>
+        <p class="text-muted-400 dark:text-muted-500 text-xs mt-1">
+          همه اعلان‌های شما خوانده شده‌اند
         </p>
       </div>
 
@@ -119,7 +119,7 @@ const handleNotificationClick = async (notification: any) => {
         appear
       >
         <button
-          v-for="notification in highPriorityNotifications.slice(0, 10)"
+          v-for="notification in filteredNotifications.slice(0, 15)"
           :key="notification.id"
           type="button"
           class="group w-full cursor-pointer p-4 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transform-gpu"
@@ -154,43 +154,48 @@ const handleNotificationClick = async (notification: any) => {
 
             <!-- Content -->
             <div class="min-w-0 flex-1">
-              <h4 
-                class="text-sm"
-                :class="[
-                  notification.isRead 
-                    ? 'text-muted-600 dark:text-muted-300 font-medium' 
-                    : 'text-muted-900 dark:text-white font-bold'
-                ]"
-              >
-                {{ notification.title }}
-              </h4>
+              <!-- Title and time -->
+              <div class="flex items-start justify-between">
+                <h4 
+                  class="text-sm leading-tight line-clamp-2"
+                  :class="[
+                    notification.isRead 
+                      ? 'text-muted-600 dark:text-muted-300 font-medium' 
+                      : 'text-muted-900 dark:text-white font-semibold'
+                  ]"
+                >
+                  {{ notification.title }}
+                </h4>
+              </div>
+              
+              <!-- Message -->
               <p 
-                class="mt-1 line-clamp-2 text-xs"
+                class="mt-1 text-xs leading-relaxed line-clamp-2"
                 :class="[
                   notification.isRead 
                     ? 'text-muted-500 dark:text-muted-400' 
-                    : 'text-muted-700 dark:text-muted-200 font-medium'
+                    : 'text-muted-700 dark:text-muted-200'
                 ]"
               >
                 {{ notification.message }}
               </p>
-              <span 
-                class="mt-1 text-xs"
-                :class="[
-                  notification.isRead 
-                    ? 'text-muted-400 dark:text-muted-500' 
-                    : 'text-muted-500 dark:text-muted-400 font-medium'
-                ]"
-              >
-                {{ getRelativeTime(notification.createdAt) }}
-              </span>
+              
+              <!-- Time and priority -->
+              <div class="mt-2 flex items-center justify-between">
+                <span class="text-muted-400 dark:text-muted-500 text-xs">
+                  {{ getRelativeTime(notification.createdAt) }}
+                </span>
+                
+                <!-- Priority indicator -->
+                <div
+                  v-if="notification.priority === 'urgent' || notification.priority === 'high'"
+                  class="shrink-0 rounded-full"
+                  :class="[
+                    notification.priority === 'urgent' ? 'size-1.5 bg-danger-500 animate-pulse' : 'size-1 bg-warning-500'
+                  ]"
+                />
+              </div>
             </div>
-
-            <!-- Unread indicator -->
-            <div 
-              v-if="!notification.isRead"
-              class="bg-gradient-to-r from-primary-500 to-primary-600 size-2 shrink-0 rounded-full animate-pulse shadow-sm ring-2 ring-primary-200 dark:ring-primary-800" 
-            />
           </div>
         </button>
       </TransitionGroup>

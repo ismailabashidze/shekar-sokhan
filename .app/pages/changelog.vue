@@ -7,6 +7,82 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.7.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.7.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              30 ژانویه 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>پیاده‌سازی سیستم جامع اعلان‌های PWA push با یکپارچه‌سازی کامل</li>
+              <li>افزودن کامپوننت تنظیمات اعلان‌های PWA با مدیریت وضعیت و کنترل‌ها</li>
+              <li>ایجاد composable پیشرفته اعلان‌های PWA با مدیریت push subscription</li>
+              <li>بهبود service worker با مدیریت اعلان‌های push و همگام‌سازی آفلاین</li>
+              <li>افزودن رابط درخواست مجوز اعلان با نشانگرهای بصری وضعیت</li>
+            </ul>
+
+            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های رابط کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود آیکون اعلان با انیمیشن wiggle پویا برای اعلان‌های خوانده نشده</li>
+              <li>افزودن بدج تعداد خوانده نشده با انتقال‌های روان و انیمیشن‌های ping</li>
+              <li>بهبود sidebar اعلان‌ها با initialization و فیلتربندی صحیح</li>
+              <li>بهبود صفحه مدیریت اعلان‌ها با یکپارچه‌سازی تنظیمات PWA</li>
+              <li>افزودن نشانگرهای وضعیت رنگی و انیمیشن‌های بارگذاری روان</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>ایجاد composable <code>usePwaNotifications</code> برای مدیریت متمرکز اعلان‌های PWA</li>
+              <li>بهبود service worker با مدیریت جامع رویدادهای push notification</li>
+              <li>افزودن مدیریت کلید VAPID و lifecycle handling برای push subscription</li>
+              <li>پیاده‌سازی فعال‌سازی خودکار اعلان‌های PWA برای اعلان‌های جدید</li>
+              <li>افزودن پشتیبانی RTL و زبان فارسی در سراسر سیستم PWA</li>
+              <li>بهبود سیستم initialization اعلان‌ها با computed properties</li>
+              <li>رفع مشکلات نمایش بدج و انیمیشن زنگوله اعلان</li>
+            </ul>
+
+            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های سیستم اعلان
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>رفع مشکل خالی بودن sidebar اعلان‌ها با initialization صحیح فیلتربندی</li>
+              <li>بهبود محاسبه و نمایش تعداد اعلان‌های خوانده نشده</li>
+              <li>افزودن به‌روزرسانی خودکار بدج اعلان با همگام‌سازی بلادرنگ</li>
+              <li>پیاده‌سازی مدیریت کلیک اعلان با ناوبری هوشمند</li>
+              <li>افزودن رفتار اعلان مبتنی بر اولویت با نشانگرهای بصری</li>
+            </ul>
+
+            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>رفع مشکل نمایش نادرست بدج آیکون اعلان</li>
+              <li>حل مشکلات انیمیشن زنگوله اعلان</li>
+              <li>رفع خطاهای Vite ناشی از تکرار computed properties</li>
+              <li>اصلاح initialization و فیلتربندی sidebar اعلان‌ها</li>
+              <li>رفع مشکل همگام‌سازی تعداد اعلان در کامپوننت‌ها</li>
+            </ul>
+
+            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
+              بومی‌سازی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود پشتیبانی زبان فارسی برای رابط اعلان‌های PWA</li>
+              <li>بهینه‌سازی چیدمان‌های RTL برای اعلان‌های PWA و انیمیشن‌ها</li>
+              <li>بهبود پیام‌های خطا و متن‌های وضعیت فارسی در سراسر سیستم اعلان</li>
+            </ul>
+          </div>
+
           <!-- Version 2.6.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

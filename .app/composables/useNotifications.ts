@@ -66,7 +66,7 @@ function transformPBRecord(record: PBNotificationRecord): Notification {
     user: record.expand?.user ? {
       id: record.expand.user.id,
       name: record.expand.user.name,
-      avatar: record.expand.user.avatar || '/img/logo.png',
+      avatar: record.expand.user.avatar || '/img/avatars/placeholder.webp',
       role: record.expand.user.role
     } : undefined,
     actionUrl: record.action_url,
@@ -82,6 +82,9 @@ export function useNotifications() {
   const isUpdating = ref(false)
   const lastUpdateTime = ref(Date.now())
   const error = ref<string | null>(null)
+
+  // PWA Notifications integration
+  const pwaNotifications = process.client ? usePwaNotifications() : null
 
   // Get current user ID
   const getCurrentUserId = () => {
@@ -112,6 +115,25 @@ export function useNotifications() {
     return notifications.value.filter(n => !n.isRead && (n.priority === 'high' || n.priority === 'urgent'))
   })
 
+  // PWA notification helper
+  const triggerPwaNotification = async (notification: Notification) => {
+    if (!pwaNotifications || !process.client) return
+
+    try {
+      await pwaNotifications.showLocalNotification({
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        priority: notification.priority,
+        url: notification.actionUrl || '/notifications',
+        actionText: notification.actionText,
+        tag: `notification-${notification.id}`
+      })
+    } catch (err) {
+      console.warn('Failed to show PWA notification:', err)
+    }
+  }
+
   // Methods
   const fetchNotifications = async (page = 1, perPage = 50) => {
     const userId = getCurrentUserId()
@@ -132,6 +154,19 @@ export function useNotifications() {
 
       // Transform PocketBase records to frontend format
       const transformedNotifications = records.items.map(transformPBRecord)
+      
+      // Check for new notifications to trigger PWA notifications
+      if (page === 1 && notifications.value.length > 0) {
+        const newNotifications = transformedNotifications.filter(newNotif => 
+          !notifications.value.some(existing => existing.id === newNotif.id) && 
+          !newNotif.isRead
+        )
+        
+        // Trigger PWA notifications for new unread notifications
+        for (const newNotif of newNotifications) {
+          await triggerPwaNotification(newNotif)
+        }
+      }
       
       if (page === 1) {
         notifications.value = transformedNotifications
@@ -270,6 +305,9 @@ export function useNotifications() {
       if (data.recipient_user_id === currentUserId) {
         const transformedNotification = transformPBRecord(record)
         notifications.value.unshift(transformedNotification)
+
+        // Trigger PWA notification for new notification
+        await triggerPwaNotification(transformedNotification)
       }
 
       return record
@@ -402,5 +440,8 @@ export function useNotifications() {
     getTypeIcon,
     getTypeColor,
     getPriorityColor,
+
+    // PWA Integration
+    triggerPwaNotification,
   }
 }

@@ -40,6 +40,7 @@ const {
 
 // State for smooth transitions
 const showTransition = ref(true)
+const showPwaSettings = ref(false)
 
 onMounted(async () => {
   // Initialize notifications from PocketBase
@@ -152,6 +153,18 @@ const filterOptions = [
               />
             </BaseButtonIcon>
 
+            <!-- PWA Settings Toggle -->
+            <BaseButton
+              size="sm"
+              variant="outline"
+              color="primary"
+              class="transition-all duration-200 hover:scale-105"
+              @click="showPwaSettings = !showPwaSettings"
+            >
+              <Icon name="ph:gear" class="ml-2 size-4" />
+              تنظیمات PWA
+            </BaseButton>
+
             <!-- Mark all as read -->
             <BaseButton
               v-if="unreadCount > 0"
@@ -193,11 +206,78 @@ const filterOptions = [
         </div>
       </div>
 
-      <!-- Notifications List -->
-      <div class="space-y-4">
+      <!-- PWA Notification Settings -->
+      <Transition
+        enter-active-class="transition-all duration-300"
+        enter-from-class="opacity-0 transform -translate-y-4"
+        enter-to-class="opacity-100 transform translate-y-0"
+        leave-active-class="transition-all duration-200"
+        leave-from-class="opacity-100 transform translate-y-0"
+        leave-to-class="opacity-0 transform -translate-y-4"
+      >
+        <div v-if="showPwaSettings" class="mx-auto mb-8 max-w-5xl">
+          <BaseCard class="p-6">
+            <div class="mb-4 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="bg-primary-100 dark:bg-primary-900/20 flex size-10 items-center justify-center rounded-lg">
+                  <Icon name="ph:app-window" class="text-primary-600 dark:text-primary-400 size-5" />
+                </div>
+                <div>
+                  <h3 class="text-muted-900 text-lg font-semibold dark:text-white">
+                    تنظیمات اعلان‌های PWA
+                  </h3>
+                  <p class="text-muted-500 dark:text-muted-400 text-sm">
+                    مدیریت اعلان‌های فوری و آفلاین
+                  </p>
+                </div>
+              </div>
+              
+              <BaseButton
+                size="sm"
+                variant="ghost"
+                @click="showPwaSettings = false"
+              >
+                <Icon name="ph:x" class="size-4" />
+              </BaseButton>
+            </div>
+
+            <PwaNotificationSettings />
+          </BaseCard>
+        </div>
+      </Transition>
+
+      <!-- Error State -->
+      <div v-if="error" class="mx-auto mb-6 max-w-5xl">
+        <BaseMessage 
+          type="danger" 
+          icon="ph:warning-circle"
+          class="mb-4"
+        >
+          {{ error }}
+        </BaseMessage>
+      </div>
+
+      <!-- Main Content -->
+      <div class="mx-auto max-w-5xl">
+        <!-- Loading State -->
+        <div v-if="isLoading && filteredNotifications.length === 0" class="space-y-6">
+          <div v-for="i in 5" :key="i" class="animate-pulse">
+            <BaseCard class="p-6">
+              <div class="flex items-start gap-4">
+                <div class="bg-muted-200 dark:bg-muted-700 size-12 rounded-full" />
+                <div class="flex-1 space-y-3">
+                  <div class="bg-muted-200 dark:bg-muted-700 h-4 w-3/4 rounded" />
+                  <div class="bg-muted-200 dark:bg-muted-700 h-3 w-1/2 rounded" />
+                  <div class="bg-muted-200 dark:bg-muted-700 h-3 w-1/4 rounded" />
+                </div>
+              </div>
+            </BaseCard>
+          </div>
+        </div>
+
         <!-- Empty State -->
         <div
-          v-if="filteredNotifications.length === 0 && !isLoading"
+          v-else-if="filteredNotifications.length === 0 && !isLoading"
           class="flex flex-col items-center justify-center py-16"
         >
           <div class="bg-muted-100 dark:bg-muted-800 mb-4 flex size-16 items-center justify-center rounded-full">
@@ -213,381 +293,236 @@ const filterOptions = [
           </p>
         </div>
 
-        <!-- Loading State -->
-        <div v-if="isLoading" class="space-y-4">
-          <BaseCard
-            v-for="i in 5"
-            :key="i"
-            class="overflow-hidden bg-white dark:bg-muted-800 shadow-sm border border-muted-200 dark:border-muted-700"
+        <!-- Notifications List -->
+        <div v-else class="space-y-4">
+          <!-- Notifications with transitions -->
+          <TransitionGroup
+            name="notification"
+            tag="div"
+            class="space-y-4"
+            appear
           >
-            <div class="animate-pulse p-4 sm:p-6">
-              <div class="flex items-start gap-4">
-                <!-- Priority indicator skeleton -->
-                <div class="bg-muted-200 dark:bg-muted-700 mt-1 size-2 rounded-full" />
+            <BaseCard
+              v-for="notification in filteredNotifications"
+              :key="notification.id"
+              class="group relative cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.01] bg-white dark:bg-muted-800 shadow-sm border border-muted-200 dark:border-muted-700"
+              :class="[
+                'transform-gpu will-change-transform',
+                notification.isRead
+                  ? 'opacity-70 hover:opacity-95'
+                  : 'border-l-4 border-l-primary-500 bg-gradient-to-r from-primary-50/30 to-white dark:from-primary-900/10 dark:to-muted-800 shadow-lg ring-1 ring-primary-200/50 dark:ring-primary-800/50',
+                isUpdating ? 'animate-pulse-subtle' : ''
+              ]"
+              @click="handleNotificationClick(notification)"
+            >
+              <div class="p-4 sm:p-5">
+                <!-- Unread indicator badge -->
+                <div 
+                  v-if="!notification.isRead"
+                  class="absolute -top-1 -right-1 bg-gradient-to-r from-primary-500 to-primary-600 size-3 rounded-full animate-pulse shadow-lg ring-2 ring-white dark:ring-muted-800 z-10"
+                />
                 
-                <div class="min-w-0 flex-1">
-                  <!-- Mobile layout -->
-                  <div class="block sm:hidden">
-                    <div class="flex items-start justify-between gap-2">
-                      <div class="min-w-0 flex-1">
-                        <!-- Title skeleton -->
-                        <div class="bg-muted-200 dark:bg-muted-700 mb-2 h-4 w-4/5 rounded animate-pulse" />
-                        <!-- Message skeleton -->
-                        <div class="space-y-1.5">
-                          <div class="bg-muted-200 dark:bg-muted-700 h-3 w-full rounded animate-pulse" />
-                          <div class="bg-muted-200 dark:bg-muted-700 h-3 w-3/4 rounded animate-pulse" />
-                        </div>
-                      </div>
-                      <!-- Icon skeleton -->
-                      <div class="bg-muted-200 dark:bg-muted-700 size-8 rounded-full animate-pulse" />
-                    </div>
-                    
-                    <!-- User info skeleton -->
-                    <div class="mt-2 flex items-center gap-2">
-                      <div class="bg-muted-200 dark:bg-muted-700 size-4 rounded-full animate-pulse" />
-                      <div class="bg-muted-200 dark:bg-muted-700 h-3 w-16 rounded animate-pulse" />
-                    </div>
-                    
-                    <!-- Footer skeleton -->
-                    <div class="mt-3 flex items-center justify-between">
-                      <div class="bg-muted-200 dark:bg-muted-700 h-3 w-12 rounded animate-pulse" />
-                      <div class="flex gap-1">
-                        <div class="bg-muted-200 dark:bg-muted-700 size-6 rounded animate-pulse" />
-                        <div class="bg-muted-200 dark:bg-muted-700 size-6 rounded animate-pulse" />
-                      </div>
+                <div class="flex items-start gap-3 sm:gap-4">
+                  <!-- Priority indicator -->
+                  <div
+                    class="mt-1 shrink-0 rounded-full shadow-sm transition-all duration-200 group-hover:scale-150"
+                    :class="[
+                      notification.isRead ? 'size-1.5 opacity-50' : 'size-2',
+                      getPriorityColor(notification.priority),
+                      notification.priority === 'urgent' && !notification.isRead ? 'animate-pulse ring-2 ring-danger-200 dark:ring-danger-800' : '',
+                      !notification.isRead ? 'ring-1 ring-white dark:ring-muted-800' : ''
+                    ]"
+                  />
+
+                  <!-- Notification icon -->
+                  <div class="shrink-0">
+                    <div
+                      class="flex size-10 sm:size-11 items-center justify-center rounded-xl shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg"
+                      :class="[
+                        notification.type === 'success' ? 'bg-gradient-to-br from-success-100 to-success-200 dark:from-success-900/20 dark:to-success-800/30' :
+                        notification.type === 'warning' ? 'bg-gradient-to-br from-warning-100 to-warning-200 dark:from-warning-900/20 dark:to-warning-800/30' :
+                        notification.type === 'error' ? 'bg-gradient-to-br from-danger-100 to-danger-200 dark:from-danger-900/20 dark:to-danger-800/30' :
+                        notification.type === 'system' ? 'bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/30' :
+                        'bg-gradient-to-br from-info-100 to-info-200 dark:from-info-900/20 dark:to-info-800/30'
+                      ]"
+                    >
+                      <Icon
+                        :name="getTypeIcon(notification.type)"
+                        class="size-5 transition-transform duration-200 group-hover:scale-110"
+                        :class="getTypeColor(notification.type)"
+                      />
                     </div>
                   </div>
 
-                  <!-- Desktop layout -->
-                  <div class="hidden sm:block">
-                    <div class="flex items-start justify-between gap-6">
-                      <div class="min-w-0 flex-1">
-                        <!-- Title skeleton -->
-                        <div class="bg-muted-200 dark:bg-muted-700 mb-3 h-5 w-3/4 rounded animate-pulse" />
-                        <!-- Message skeleton -->
-                        <div class="space-y-2">
-                          <div class="bg-muted-200 dark:bg-muted-700 h-4 w-full rounded animate-pulse" />
-                          <div class="bg-muted-200 dark:bg-muted-700 h-4 w-5/6 rounded animate-pulse" />
-                          <div class="bg-muted-200 dark:bg-muted-700 h-4 w-2/3 rounded animate-pulse" />
+                  <!-- Content -->
+                  <div class="min-w-0 flex-1">
+                    <!-- Mobile layout: Stack vertically -->
+                    <div class="md:hidden">
+                      <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0 flex-1">
+                          <h3 
+                            class="text-sm leading-tight"
+                            :class="[
+                              notification.isRead 
+                                ? 'text-muted-600 dark:text-muted-300 font-medium' 
+                                : 'text-muted-900 dark:text-white font-bold'
+                            ]"
+                          >
+                            {{ notification.title }}
+                          </h3>
                         </div>
-                        
-                        <!-- User info skeleton -->
-                        <div class="mt-3 flex items-center gap-2">
-                          <div class="bg-muted-200 dark:bg-muted-700 size-5 rounded-full animate-pulse" />
-                          <div class="bg-muted-200 dark:bg-muted-700 h-3 w-20 rounded animate-pulse" />
+                        <!-- Actions for mobile -->
+                        <div class="flex shrink-0 items-start gap-1">
+                          <BaseButtonIcon
+                            v-if="notification.isRead"
+                            size="xs"
+                            variant="ghost"
+                            class="hover:bg-muted-100 dark:hover:bg-muted-700 rounded-lg p-1.5"
+                            @click="handleMarkAsUnread($event, notification.id)"
+                          >
+                            <Icon name="ph:envelope" class="size-3.5" />
+                          </BaseButtonIcon>
+                          <BaseButtonIcon
+                            v-else
+                            size="xs"
+                            variant="ghost"
+                            class="hover:bg-success-50 dark:hover:bg-success-900/10 hover:text-success-600 rounded-lg p-1.5"
+                            @click="handleMarkAsRead($event, notification.id)"
+                          >
+                            <Icon name="ph:envelope-open" class="size-3.5" />
+                          </BaseButtonIcon>
+                          <BaseButtonIcon
+                            size="xs"
+                            variant="ghost"
+                            class="text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-900/10 rounded-lg p-1.5"
+                            @click="handleDelete($event, notification.id)"
+                          >
+                            <Icon name="ph:trash" class="size-3.5" />
+                          </BaseButtonIcon>
                         </div>
                       </div>
                       
-                      <!-- Type icon and actions skeleton -->
-                      <div class="flex flex-col items-center gap-3">
-                        <div class="bg-muted-200 dark:bg-muted-700 size-10 rounded-full animate-pulse" />
-                        <div class="flex gap-1">
-                          <div class="bg-muted-200 dark:bg-muted-700 size-7 rounded animate-pulse" />
-                          <div class="bg-muted-200 dark:bg-muted-700 size-7 rounded animate-pulse" />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <!-- Footer skeleton -->
-                    <div class="mt-4 flex items-center justify-between border-t border-muted-100 dark:border-muted-700 pt-4">
-                      <div class="bg-muted-200 dark:bg-muted-700 h-3 w-16 rounded animate-pulse" />
-                      <div class="bg-muted-200 dark:bg-muted-700 h-6 w-24 rounded animate-pulse" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Shimmer effect -->
-            <div class="animate-shimmer absolute inset-0 -translate-x-full transform bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          </BaseCard>
-        </div>
-
-        <!-- Notifications with transitions -->
-        <TransitionGroup
-          name="notification"
-          tag="div"
-          class="space-y-4"
-          appear
-        >
-          <BaseCard
-            v-for="notification in filteredNotifications"
-            :key="notification.id"
-            class="group relative cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.01] bg-white dark:bg-muted-800 shadow-sm border border-muted-200 dark:border-muted-700"
-            :class="[
-              'transform-gpu will-change-transform',
-              notification.isRead
-                ? 'opacity-70 hover:opacity-95'
-                : 'border-l-4 border-l-primary-500 bg-gradient-to-r from-primary-50/30 to-white dark:from-primary-900/10 dark:to-muted-800 shadow-lg ring-1 ring-primary-200/50 dark:ring-primary-800/50',
-              isUpdating ? 'animate-pulse-subtle' : ''
-            ]"
-            @click="handleNotificationClick(notification)"
-          >
-          <div class="p-4 sm:p-5">
-            <!-- Unread indicator badge -->
-            <div 
-              v-if="!notification.isRead"
-              class="absolute -top-1 -right-1 bg-gradient-to-r from-primary-500 to-primary-600 size-3 rounded-full animate-pulse shadow-lg ring-2 ring-white dark:ring-muted-800 z-10"
-            />
-            
-            <div class="flex items-start gap-3 sm:gap-4">
-              <!-- Priority indicator -->
-              <div
-                class="mt-1 shrink-0 rounded-full shadow-sm transition-all duration-200 group-hover:scale-150"
-                :class="[
-                  notification.isRead ? 'size-1.5 opacity-50' : 'size-2',
-                  getPriorityColor(notification.priority),
-                  notification.priority === 'urgent' && !notification.isRead ? 'animate-pulse ring-2 ring-danger-200 dark:ring-danger-800' : '',
-                  !notification.isRead ? 'ring-1 ring-white dark:ring-muted-800' : ''
-                ]"
-              />
-
-              <!-- Notification icon -->
-              <div class="shrink-0">
-                <div
-                  class="flex size-10 sm:size-11 items-center justify-center rounded-xl shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg"
-                  :class="[
-                    notification.type === 'success' ? 'bg-gradient-to-br from-success-100 to-success-200 dark:from-success-900/20 dark:to-success-800/30' :
-                    notification.type === 'warning' ? 'bg-gradient-to-br from-warning-100 to-warning-200 dark:from-warning-900/20 dark:to-warning-800/30' :
-                    notification.type === 'error' ? 'bg-gradient-to-br from-danger-100 to-danger-200 dark:from-danger-900/20 dark:to-danger-800/30' :
-                    notification.type === 'system' ? 'bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/30' :
-                    'bg-gradient-to-br from-info-100 to-info-200 dark:from-info-900/20 dark:to-info-800/30'
-                  ]"
-                >
-                  <Icon
-                    :name="getTypeIcon(notification.type)"
-                    class="size-5 transition-transform duration-200 group-hover:scale-110"
-                    :class="getTypeColor(notification.type)"
-                  />
-                </div>
-              </div>
-
-              <!-- Content -->
-              <div class="min-w-0 flex-1">
-                <!-- Mobile layout: Stack vertically -->
-                <div class="md:hidden">
-                  <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0 flex-1">
-                      <h3 
-                        class="text-sm leading-tight"
+                      <p 
+                        class="mt-1 text-xs leading-relaxed"
                         :class="[
                           notification.isRead 
-                            ? 'text-muted-600 dark:text-muted-300 font-medium' 
-                            : 'text-muted-900 dark:text-white font-bold'
+                            ? 'text-muted-500 dark:text-muted-400' 
+                            : 'text-muted-700 dark:text-muted-200 font-medium'
                         ]"
                       >
-                        {{ notification.title }}
-                      </h3>
-                    </div>
-                    <!-- Actions for mobile -->
-                    <div class="flex shrink-0 items-start gap-1">
-                      <BaseButtonIcon
-                        v-if="notification.isRead"
-                        size="xs"
-                        variant="ghost"
-                        class="hover:bg-muted-100 dark:hover:bg-muted-700 rounded-lg p-1.5"
-                        @click="handleMarkAsUnread($event, notification.id)"
-                      >
-                        <Icon name="ph:envelope" class="size-3.5" />
-                      </BaseButtonIcon>
-                      <BaseButtonIcon
-                        v-else
-                        size="xs"
-                        variant="ghost"
-                        class="hover:bg-success-50 dark:hover:bg-success-900/10 hover:text-success-600 rounded-lg p-1.5"
-                        @click="handleMarkAsRead($event, notification.id)"
-                      >
-                        <Icon name="ph:envelope-open" class="size-3.5" />
-                      </BaseButtonIcon>
-                      <BaseButtonIcon
-                        size="xs"
-                        variant="ghost"
-                        class="text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-900/10 rounded-lg p-1.5"
-                        @click="handleDelete($event, notification.id)"
-                      >
-                        <Icon name="ph:trash" class="size-3.5" />
-                      </BaseButtonIcon>
-                    </div>
-                  </div>
-                  
-                  <p 
-                    class="mt-1 text-xs leading-relaxed"
-                    :class="[
-                      notification.isRead 
-                        ? 'text-muted-500 dark:text-muted-400' 
-                        : 'text-muted-700 dark:text-muted-200 font-medium'
-                    ]"
-                  >
-                    {{ notification.message }}
-                  </p>
+                        {{ notification.message }}
+                      </p>
 
-                  <!-- User info for mobile -->
-                  <div v-if="notification.user" class="mt-2 flex items-center gap-2">
-                    <BaseAvatar
-                      :src="notification.user.avatar ?? '/img/avatars/1.svg'"
-                      size="xxs"
-                      :alt="notification.user.name"
-                      :class="[
-                        'ring-1',
-                        notification.isRead 
-                          ? 'ring-muted-300 dark:ring-muted-600 opacity-70' 
-                          : 'dark:ring-muted-800 ring-white'
-                      ]"
-                    />
-                    <span 
-                      class="text-xs"
-                      :class="[
-                        notification.isRead 
-                          ? 'text-muted-400 dark:text-muted-500' 
-                          : 'text-muted-600 dark:text-muted-300 font-medium'
-                      ]"
-                    >
-                      {{ notification.user.name }}
-                    </span>
-                  </div>
-
-                  <!-- Footer for mobile -->
-                  <div class="mt-3 flex items-center justify-between">
-                    <span 
-                      class="text-xs"
-                      :class="[
-                        notification.isRead 
-                          ? 'text-muted-400 dark:text-muted-500' 
-                          : 'text-muted-500 dark:text-muted-400 font-medium'
-                      ]"
-                    >
-                      {{ getRelativeTime(notification.createdAt) }}
-                    </span>
-                    <BaseButton
-                      v-if="notification.actionText && notification.actionUrl"
-                      size="xs"
-                      variant="outline"
-                      class="bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-700 px-2 py-1 rounded-lg text-primary-700 dark:text-primary-300 text-xs font-medium"
-                    >
-                      {{ notification.actionText }}
-                    </BaseButton>
-                  </div>
-                </div>
-
-                <!-- Desktop layout: Original layout -->
-                <div class="hidden md:block">
-                                      <div class="flex items-start justify-between gap-6">
-                      <div class="min-w-0 flex-1">
-                        <h3 
-                          class="text-base leading-tight"
-                          :class="[
-                            notification.isRead 
-                              ? 'text-muted-600 dark:text-muted-300 font-medium' 
-                              : 'text-muted-900 dark:text-white font-bold'
-                          ]"
+                      <div class="mt-2 flex items-center justify-between text-xs">
+                        <span class="text-muted-400 dark:text-muted-500">
+                          {{ getRelativeTime(notification.createdAt) }}
+                        </span>
+                        
+                        <BaseButton
+                          v-if="notification.actionText && notification.actionUrl"
+                          size="xs"
+                          variant="outline"
+                          class="text-xs"
                         >
-                          {{ notification.title }}
-                        </h3>
-                        <p 
-                          class="mt-1.5 text-sm leading-relaxed"
-                          :class="[
-                            notification.isRead 
-                              ? 'text-muted-500 dark:text-muted-400' 
-                              : 'text-muted-700 dark:text-muted-200 font-medium'
-                          ]"
-                        >
-                          {{ notification.message }}
-                        </p>
+                          {{ notification.actionText }}
+                        </BaseButton>
+                      </div>
+                    </div>
 
-                                              <!-- User info -->
-                        <div v-if="notification.user" class="mt-3 flex items-center gap-2">
-                          <BaseAvatar
-                            :src="notification.user.avatar ?? '/img/avatars/1.svg'"
-                            size="xs"
-                            :alt="notification.user.name"
-                            :class="[
-                              'ring-2 shadow-sm',
-                              notification.isRead 
-                                ? 'ring-muted-300 dark:ring-muted-600 opacity-70' 
-                                : 'dark:ring-muted-800 ring-white'
-                            ]"
-                          />
-                          <span 
-                            class="text-xs"
+                    <!-- Desktop layout: Side by side -->
+                    <div class="hidden md:block">
+                      <div class="flex items-start justify-between">
+                        <div class="min-w-0 flex-1 pr-4">
+                          <h3 
+                            class="text-base leading-tight"
                             :class="[
                               notification.isRead 
-                                ? 'text-muted-400 dark:text-muted-500 font-normal' 
-                                : 'text-muted-600 dark:text-muted-300 font-medium'
+                                ? 'text-muted-600 dark:text-muted-300 font-medium' 
+                                : 'text-muted-900 dark:text-white font-bold'
                             ]"
                           >
-                            {{ notification.user.name }}
-                          </span>
+                            {{ notification.title }}
+                          </h3>
+                          
+                          <p 
+                            class="mt-1 text-sm leading-relaxed"
+                            :class="[
+                              notification.isRead 
+                                ? 'text-muted-500 dark:text-muted-400' 
+                                : 'text-muted-700 dark:text-muted-200 font-medium'
+                            ]"
+                          >
+                            {{ notification.message }}
+                          </p>
+                          
+                          <div class="mt-2 flex items-center gap-4 text-xs">
+                            <span class="text-muted-400 dark:text-muted-500 flex items-center gap-1">
+                              <Icon name="ph:clock" class="size-3" />
+                              {{ getRelativeTime(notification.createdAt) }}
+                            </span>
+                            
+                            <span 
+                              v-if="notification.priority !== 'low'"
+                              class="flex items-center gap-1"
+                              :class="getPriorityColor(notification.priority)"
+                            >
+                              <Icon name="ph:flag" class="size-3" />
+                              {{ notification.priority === 'urgent' ? 'فوری' : 
+                                 notification.priority === 'high' ? 'مهم' : 
+                                 'متوسط' }}
+                            </span>
+                          </div>
                         </div>
+                        
+                        <!-- Actions for desktop -->
+                        <div class="flex shrink-0 items-start gap-1.5 pt-1">
+                          <BaseButtonIcon
+                            v-if="notification.isRead"
+                            size="sm"
+                            variant="ghost"
+                            class="opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-105 hover:bg-muted-100 dark:hover:bg-muted-700 rounded-xl p-2.5 shadow-sm hover:shadow-md"
+                            @click="handleMarkAsUnread($event, notification.id)"
+                          >
+                            <Icon name="ph:envelope" class="size-4" />
+                          </BaseButtonIcon>
+                          <BaseButtonIcon
+                            v-else
+                            size="sm"
+                            variant="ghost"
+                            class="opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-105 hover:bg-success-50 dark:hover:bg-success-900/10 hover:text-success-600 rounded-xl p-2.5 border border-transparent hover:border-success-200 dark:hover:border-success-800 shadow-sm hover:shadow-md"
+                            @click="handleMarkAsRead($event, notification.id)"
+                          >
+                            <Icon name="ph:envelope-open" class="size-4" />
+                          </BaseButtonIcon>
+                          <BaseButtonIcon
+                            size="sm"
+                            variant="ghost"
+                            class="text-danger-500 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-105 hover:bg-danger-50 dark:hover:bg-danger-900/10 rounded-xl p-2.5 border border-transparent hover:border-danger-200 dark:hover:border-danger-800 shadow-sm hover:shadow-md"
+                            @click="handleDelete($event, notification.id)"
+                          >
+                            <Icon name="ph:trash" class="size-4" />
+                          </BaseButtonIcon>
+                        </div>
+                      </div>
+                      
+                      <div v-if="notification.actionText && notification.actionUrl" class="mt-4 flex justify-end">
+                        <BaseButton
+                          v-if="notification.actionText && notification.actionUrl"
+                          size="sm"
+                          variant="outline"
+                          class="opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/30 hover:from-primary-100 hover:to-primary-200 border-primary-200 dark:border-primary-700 px-4 py-2 rounded-xl text-primary-700 dark:text-primary-300 font-medium shadow-sm"
+                        >
+                          <Icon name="ph:arrow-square-out" class="ml-1.5 size-4" />
+                          {{ notification.actionText }}
+                        </BaseButton>
+                      </div>
                     </div>
-
-                    <!-- Actions for desktop -->
-                    <div class="flex shrink-0 items-start gap-1.5 pt-1">
-                      <BaseButtonIcon
-                        v-if="notification.isRead"
-                        size="sm"
-                        variant="ghost"
-                        class="opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-105 hover:bg-muted-100 dark:hover:bg-muted-700 rounded-xl p-2.5 shadow-sm hover:shadow-md"
-                        @click="handleMarkAsUnread($event, notification.id)"
-                      >
-                        <Icon name="ph:envelope" class="size-4" />
-                      </BaseButtonIcon>
-                      <BaseButtonIcon
-                        v-else
-                        size="sm"
-                        variant="ghost"
-                        class="opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-105 hover:bg-success-50 dark:hover:bg-success-900/10 hover:text-success-600 rounded-xl p-2.5 border border-transparent hover:border-success-200 dark:hover:border-success-800 shadow-sm hover:shadow-md"
-                        @click="handleMarkAsRead($event, notification.id)"
-                      >
-                        <Icon name="ph:envelope-open" class="size-4" />
-                      </BaseButtonIcon>
-
-                      <BaseButtonIcon
-                        size="sm"
-                        variant="ghost"
-                        class="text-danger-500 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-105 hover:bg-danger-50 dark:hover:bg-danger-900/10 rounded-xl p-2.5 border border-transparent hover:border-danger-200 dark:hover:border-danger-800 shadow-sm hover:shadow-md"
-                        @click="handleDelete($event, notification.id)"
-                      >
-                        <Icon name="ph:trash" class="size-4" />
-                      </BaseButtonIcon>
-                    </div>
-                  </div>
-
-                  <!-- Footer for desktop -->
-                  <div 
-                    class="mt-4 flex items-center justify-between pt-4"
-                    :class="[
-                      notification.isRead 
-                        ? 'border-t border-muted-100 dark:border-muted-700' 
-                        : 'border-t border-primary-100 dark:border-primary-800'
-                    ]"
-                  >
-                    <span 
-                      class="text-xs"
-                      :class="[
-                        notification.isRead 
-                          ? 'text-muted-400 dark:text-muted-500 font-normal' 
-                          : 'text-muted-500 dark:text-muted-400 font-medium'
-                      ]"
-                    >
-                      {{ getRelativeTime(notification.createdAt) }}
-                    </span>
-
-                    <BaseButton
-                      v-if="notification.actionText && notification.actionUrl"
-                      size="sm"
-                      variant="outline"
-                      class="opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/30 hover:from-primary-100 hover:to-primary-200 border-primary-200 dark:border-primary-700 px-4 py-2 rounded-xl text-primary-700 dark:text-primary-300 font-medium shadow-sm"
-                    >
-                      <Icon name="ph:arrow-square-out" class="ml-1.5 size-4" />
-                      {{ notification.actionText }}
-                    </BaseButton>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-                  </BaseCard>
-        </TransitionGroup>
+            </BaseCard>
+          </TransitionGroup>
+        </div>
       </div>
     </div>
   </div>

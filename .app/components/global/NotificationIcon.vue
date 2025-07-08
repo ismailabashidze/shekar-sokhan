@@ -1,6 +1,11 @@
 <script setup lang="ts">
-const { unreadCount } = useNotifications()
+const { unreadCount, initialize } = useNotifications()
 const { open } = usePanels()
+
+// Initialize notifications to get correct unread count
+onMounted(async () => {
+  await initialize()
+})
 
 const openNotifications = () => {
   open('notifications')
@@ -16,7 +21,7 @@ const openNotifications = () => {
     <Icon 
       name="ph:bell" 
       class="size-6 transition-transform duration-300 group-hover:rotate-12" 
-      :class="unreadCount > 0 ? 'animate-pulse' : ''"
+      :class="unreadCount > 0 ? 'animate-wiggle text-primary-500' : ''"
     />
 
     <!-- Unread count badge -->
@@ -30,10 +35,39 @@ const openNotifications = () => {
     >
       <div
         v-if="unreadCount > 0"
-        class="bg-gradient-to-r from-danger-500 to-danger-600 absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full text-xs font-bold text-white shadow-lg ring-2 ring-white dark:ring-muted-800"
+        class="bg-gradient-to-r from-danger-500 to-danger-600 absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full text-xs font-bold text-white shadow-lg ring-2 ring-white dark:ring-muted-800 animate-pulse z-10"
       >
         {{ unreadCount > 99 ? '99+' : unreadCount }}
       </div>
     </Transition>
+
+    <!-- Ping animation for new notifications -->
+    <div 
+      v-if="unreadCount > 0"
+      class="absolute -right-1 -top-1 size-5 rounded-full bg-danger-500 animate-ping opacity-30"
+    />
   </button>
 </template>
+
+<style scoped>
+/* Wiggle animation for bell icon */
+@keyframes wiggle {
+  0%, 7% { transform: rotateZ(0); }
+  15% { transform: rotateZ(-15deg); }
+  20% { transform: rotateZ(10deg); }
+  25% { transform: rotateZ(-10deg); }
+  30% { transform: rotateZ(6deg); }
+  35% { transform: rotateZ(-4deg); }
+  40%, 100% { transform: rotateZ(0); }
+}
+
+.animate-wiggle {
+  animation: wiggle 2s ease-in-out infinite;
+  transform-origin: center top;
+}
+
+/* Slight delay for continuous animation */
+.animate-wiggle:hover {
+  animation-duration: 0.5s;
+}
+</style>

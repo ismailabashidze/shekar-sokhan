@@ -2,6 +2,52 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0] (2025-01-30)
+
+### 🚀 Features
+- Implemented comprehensive PWA push notifications system with complete integration
+- Added PWA notification settings component with status management and controls
+- Created advanced PWA notification composable with push subscription management
+- Enhanced service worker with push notification handling and offline sync
+- Added notification permission request UI with visual status indicators
+
+### 🎨 UI Improvements
+- Enhanced notification icon with dynamic wiggle animation for unread notifications
+- Added visual unread count badge with smooth transitions and ping animations
+- Improved notification sidebar with proper initialization and filtering
+- Enhanced notification management page with PWA settings integration
+- Added color-coded status indicators and smooth loading animations
+
+### 🧰 Technical Improvements
+- Created `usePwaNotifications` composable for centralized PWA notification management
+- Enhanced service worker with comprehensive push notification event handling
+- Added VAPID key management and push subscription lifecycle handling
+- Implemented automatic PWA notification triggering for new notifications
+- Added proper RTL and Persian language support throughout PWA system
+- Enhanced notification initialization system with computed properties
+- Fixed notification badge and bell animation display issues
+
+### 🔔 Notification System Enhancements
+- Fixed empty notification sidebar by proper filtering initialization
+- Enhanced unread notification count calculation and display
+- Added automatic notification badge updates with real-time synchronization
+- Implemented notification click handling with smart navigation
+- Added priority-based notification behavior with visual indicators
+
+### 🐞 Bug Fixes
+- Fixed notification icon badge not displaying correctly
+- Resolved notification bell animation issues
+- Fixed computed properties duplication causing Vite errors
+- Corrected notification sidebar initialization and filtering
+- Fixed notification count synchronization across components
+
+### 🌐 Localization
+- Enhanced Persian language support for PWA notification interface
+- Added RTL-optimized PWA notification layouts and animations
+- Improved Persian error messages and status text throughout notification system
+
+---
+
 ## [2.6.0] (2025-01-30)
 
 ### 🚀 Features
