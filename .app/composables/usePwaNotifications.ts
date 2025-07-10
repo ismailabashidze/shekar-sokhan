@@ -21,7 +21,7 @@ export interface PushSubscriptionData {
 
 export function usePwaNotifications() {
   const { $pb } = useNuxtApp()
-  
+
   // State
   const isSupported = ref(false)
   const permission = ref<NotificationPermission>('default')
@@ -33,9 +33,9 @@ export function usePwaNotifications() {
   // Check PWA notification support
   const checkSupport = () => {
     if (process.client) {
-      isSupported.value = 'serviceWorker' in navigator && 
-                          'PushManager' in window && 
-                          'Notification' in window
+      isSupported.value = 'serviceWorker' in navigator
+      && 'PushManager' in window
+      && 'Notification' in window
       permission.value = Notification.permission
     }
   }
@@ -50,16 +50,18 @@ export function usePwaNotifications() {
     try {
       const result = await Notification.requestPermission()
       permission.value = result
-      
+
       if (result === 'granted') {
         await subscribeToPush()
         return true
-      } else if (result === 'denied') {
+      }
+      else if (result === 'denied') {
         error.value = 'دسترسی به اعلان‌ها رد شد. می‌توانید از تنظیمات مرورگر آن را فعال کنید.'
       }
-      
+
       return false
-    } catch (err: any) {
+    }
+    catch (err: any) {
       error.value = err.message || 'خطا در درخواست مجوز اعلان‌ها'
       return false
     }
@@ -76,7 +78,7 @@ export function usePwaNotifications() {
       error.value = null
 
       const registration = await navigator.serviceWorker.ready
-      
+
       // Check if already subscribed
       const existingSubscription = await registration.pushManager.getSubscription()
       if (existingSubscription) {
@@ -90,19 +92,21 @@ export function usePwaNotifications() {
       const vapidPublicKey = await getVapidPublicKey()
       const newSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       })
 
       subscription.value = newSubscription
       isSubscribed.value = true
-      
+
       await saveSubscriptionToBackend(newSubscription)
       return true
-    } catch (err: any) {
+    }
+    catch (err: any) {
       console.error('Error subscribing to push notifications:', err)
       error.value = err.message || 'خطا در فعال‌سازی اعلان‌های فوری'
       return false
-    } finally {
+    }
+    finally {
       isLoading.value = false
     }
   }
@@ -113,13 +117,14 @@ export function usePwaNotifications() {
       if (subscription.value) {
         await subscription.value.unsubscribe()
         await removeSubscriptionFromBackend()
-        
+
         subscription.value = null
         isSubscribed.value = false
         return true
       }
       return false
-    } catch (err: any) {
+    }
+    catch (err: any) {
       error.value = err.message || 'خطا در لغو اشتراک اعلان‌ها'
       return false
     }
@@ -133,7 +138,7 @@ export function usePwaNotifications() {
 
     try {
       const registration = await navigator.serviceWorker.ready
-      
+
       await registration.showNotification(options.title, {
         body: options.message,
         icon: options.icon || '/pwa-192x192.png',
@@ -143,17 +148,18 @@ export function usePwaNotifications() {
         data: {
           url: options.url || '/',
           type: options.type || 'info',
-          timestamp: Date.now()
+          timestamp: Date.now(),
         },
         requireInteraction: options.priority === 'urgent' || options.priority === 'high',
         silent: options.silent || false,
         vibrate: options.priority === 'urgent' ? [200, 100, 200, 100, 200] : [200, 100, 200],
         dir: 'rtl',
-        lang: 'fa'
+        lang: 'fa',
       })
-      
+
       return true
-    } catch (err: any) {
+    }
+    catch (err: any) {
       error.value = err.message || 'خطا در نمایش اعلان محلی'
       return false
     }
@@ -161,20 +167,21 @@ export function usePwaNotifications() {
 
   // Send push notification via backend
   const sendPushNotification = async (
-    recipientIds: string[], 
-    notification: PwaNotificationOptions
+    recipientIds: string[],
+    notification: PwaNotificationOptions,
   ): Promise<boolean> => {
     try {
       const response = await $pb.send('/api/notifications/push', {
         method: 'POST',
         body: {
           recipientIds,
-          notification
-        }
+          notification,
+        },
       })
-      
+
       return response.success
-    } catch (err: any) {
+    }
+    catch (err: any) {
       error.value = err.message || 'خطا در ارسال اعلان فوری'
       return false
     }
@@ -184,11 +191,12 @@ export function usePwaNotifications() {
   const getVapidPublicKey = async (): string => {
     try {
       const response = await $pb.send('/api/notifications/vapid-key', {
-        method: 'GET'
+        method: 'GET',
       })
-      
+
       return response.publicKey || 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NM9f'
-    } catch (err) {
+    }
+    catch (err) {
       // Fallback key for development
       return 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NM9fPNNw6V2SCQvJbLexhqNUe3Z9B3PbQNABJBp4QFG4xZA2EKKhHM'
     }
@@ -201,18 +209,19 @@ export function usePwaNotifications() {
         endpoint: subscription.endpoint,
         keys: {
           p256dh: arrayBufferToBase64(subscription.getKey('p256dh')!),
-          auth: arrayBufferToBase64(subscription.getKey('auth')!)
-        }
+          auth: arrayBufferToBase64(subscription.getKey('auth')!),
+        },
       }
 
       await $pb.send('/api/notifications/subscribe', {
         method: 'POST',
         body: {
           subscription: subscriptionData,
-          userId: $pb.authStore.model?.id
-        }
+          userId: $pb.authStore.model?.id,
+        },
       })
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Error saving subscription to backend:', err)
     }
   }
@@ -223,10 +232,11 @@ export function usePwaNotifications() {
       await $pb.send('/api/notifications/unsubscribe', {
         method: 'POST',
         body: {
-          userId: $pb.authStore.model?.id
-        }
+          userId: $pb.authStore.model?.id,
+        },
       })
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Error removing subscription from backend:', err)
     }
   }
@@ -236,7 +246,7 @@ export function usePwaNotifications() {
     if (process.client && 'serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
         const { type, notificationId } = event.data
-        
+
         if (type === 'NOTIFICATION_CLICKED' && notificationId) {
           // Mark notification as read when clicked from PWA notification
           const { markAsRead } = useNotifications()
@@ -278,31 +288,73 @@ export function usePwaNotifications() {
       message: 'این یک اعلان تستی است. اعلان‌های PWA فعال است! 🎉',
       type: 'success',
       priority: 'medium',
-      url: '/notifications'
+      url: '/notifications',
     })
-    
+
     if (!success) {
       error.value = 'خطا در نمایش اعلان تستی'
     }
-    
+
     return success
   }
 
   // Check subscription status
   const checkSubscriptionStatus = async () => {
     if (!isSupported.value) return
-    
+
     try {
       const registration = await navigator.serviceWorker.ready
       const existingSubscription = await registration.pushManager.getSubscription()
-      
+
       if (existingSubscription) {
         subscription.value = existingSubscription
         isSubscribed.value = true
       }
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Error checking subscription status:', err)
     }
+  }
+
+  // Auto-request permission on first login
+  const autoRequestPermission = async (): Promise<boolean> => {
+    if (!isSupported.value) {
+      return false
+    }
+
+    // Check if we've already asked the user before
+    const hasAskedBefore = localStorage.getItem('pwa-permission-asked')
+    const lastAskTime = localStorage.getItem('pwa-permission-last-ask')
+    const now = Date.now()
+    
+    // Don't auto-request if:
+    // 1. Already granted
+    // 2. Explicitly denied
+    // 3. Already asked recently (within 7 days)
+    if (permission.value === 'granted' || permission.value === 'denied') {
+      return permission.value === 'granted'
+    }
+
+    if (hasAskedBefore && lastAskTime) {
+      const daysSinceLastAsk = (now - parseInt(lastAskTime)) / (1000 * 60 * 60 * 24)
+      if (daysSinceLastAsk < 7) {
+        return false // Don't ask again within 7 days
+      }
+    }
+
+    // Mark that we've asked the user
+    localStorage.setItem('pwa-permission-asked', 'true')
+    localStorage.setItem('pwa-permission-last-ask', now.toString())
+
+    // Request permission
+    return await requestPermission()
+  }
+
+  // Reset permission tracking (for testing or after logout)
+  const resetPermissionTracking = () => {
+    localStorage.removeItem('pwa-permission-asked')
+    localStorage.removeItem('pwa-permission-last-ask')
+    sessionStorage.removeItem('pwa-prompt-dismissed')
   }
 
   // Initialize
@@ -328,8 +380,10 @@ export function usePwaNotifications() {
     sendPushNotification,
     testNotification,
     checkSubscriptionStatus,
+    autoRequestPermission,
+    resetPermissionTracking,
 
     // Utilities
-    checkSupport
+    checkSupport,
   }
-} 
+}

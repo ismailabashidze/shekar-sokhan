@@ -1,18 +1,8 @@
 // patientsMessages.ts
+import type { MessageType, PatientMessage } from '~/types'
 
-export type MessageType = 'sent' | 'received'
-
-export type Message = {
-  id: string
-  patient: string // Relation to patient record
-  user: string // Relation to user record
-  type: MessageType
-  text: string
-  time: string // ISO date string
-  conversation: string // Relation to conversation record
-  created?: string
-  updated?: string
-}
+// Type alias for backward compatibility - use specific name to avoid conflicts
+export type PatientsMessage = PatientMessage
 
 export function usePatientMessages() {
   const nuxtApp = useNuxtApp()
@@ -81,7 +71,7 @@ export function usePatientMessages() {
     }
   }
 
-  const updateMessage = async (messageId: string, data: Partial<Message>) => {
+  const updateMessage = async (messageId: string, data: Partial<PatientMessage>) => {
     if (!nuxtApp.$pb.authStore.isValid) {
       throw new Error('User not authenticated')
     }

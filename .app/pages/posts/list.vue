@@ -28,6 +28,9 @@ const {
   getUserPosts,
 } = usePosts()
 
+// Avatar manager برای مدیریت آواتارها
+const { getUserAvatarUrl } = useAvatarManager()
+
 // State for pagination and filtering
 const currentPage = ref(1)
 const postsPerPage = ref(9)
@@ -512,7 +515,7 @@ const viewMode = ref('grid')
                   <!-- Author -->
                   <div class="flex items-center gap-2">
                     <img
-                      :src="post.author?.avatar || post.author?.meta?.avatarUrl || '/img/avatars/placeholder.svg'"
+                      :src="getUserAvatarUrl(post.author) || '/img/avatars/1.png'"
                       :alt="post.author?.name || post.author?.meta?.name || 'نویسنده'"
                       class="size-8 rounded-full"
                     >

@@ -140,6 +140,9 @@
           class="mb-6"
         />
 
+        <!-- Importance Score Guide -->
+        <ImportanceScoreGuide class="mb-6" />
+
         <!-- Smart Filter and View Controls -->
         <BaseCard class="mb-6 p-6" shape="curved">
           <div class="mb-4 flex items-center justify-between">
@@ -175,10 +178,20 @@
           </div>
 
           <div class="mb-4 flex justify-between">
-            <BaseParagraph size="xs" class="text-muted-400 max-w-full">
-              <Icon name="ph:brain-duotone" class="size-4" />
-              <span>نمایش هوشمند بر اساس اهمیت و تاریخ</span>
-            </BaseParagraph>
+            <div class="max-w-full">
+              <BaseParagraph size="xs" class="text-muted-400 mb-1">
+                <Icon name="ph:brain-duotone" class="size-4" />
+                <span>نمایش هوشمند بر اساس اهمیت و تاریخ</span>
+              </BaseParagraph>
+              <BaseParagraph size="xs" class="text-muted-500">
+                🤖 <strong>سیستم هوش مصنوعی:</strong> هر جلسه بر اساس ۴ معیار علمی امتیازدهی می‌شود:
+                تازگی (۳۰٪)، محتوا (۳۰٪)، طول متن (۲۰٪) و کلمات کلیدی مهم (۴۰٪).
+                امتیاز نهایی از ۰ تا ۱۰۰ محاسبه شده تا بتوانید مهم‌ترین جلسات را سریع شناسایی کنید.
+              </BaseParagraph>
+              <BaseParagraph size="xs" class="text-muted-500 mt-1">
+                💡 <strong>راهنما:</strong> برای درک بهتر نحوه کارکرد امتیازدهی، بخش "راهنمای امتیازدهی جلسات" را مطالعه کنید.
+              </BaseParagraph>
+            </div>
             <div class="text-muted-500 text-xs">
               {{ filteredSummaries.length }} از {{ processedSummaries.length }} جلسه
             </div>
@@ -879,6 +892,7 @@ import type { FilterOptions } from '@/composables/useSmartFiltering'
 import ReportSmartFilter from '@/components/report/ReportSmartFilter.vue'
 import SessionSummaryCard from '@/components/report/SessionSummaryCard.vue'
 import ReportAnalytics from '@/components/report/ReportAnalytics.vue'
+import ImportanceScoreGuide from '@/components/report/ImportanceScoreGuide.vue'
 
 definePageMeta({
   title: 'گزارش نهایی',

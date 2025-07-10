@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!isAuthPage"
-    class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 hidden h-screen w-20 border-r bg-white sm:block"
+    class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 hidden h-screen w-20 border-r bg-white xl:block"
   >
     <div class="flex h-full flex-col justify-between">
       <div class="flex flex-col">

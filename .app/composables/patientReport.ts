@@ -40,7 +40,8 @@ export interface SessionProgress {
   }
 }
 
-export interface EmotionalJourney {
+// Use different names for mock data to avoid conflicts
+export interface MockEmotionalJourney {
   session: string
   emojis: string
   overallMood: OverallMood
@@ -54,7 +55,7 @@ export interface EmotionalJourney {
   }
 }
 
-export interface PersonalGrowth {
+export interface MockPersonalGrowth {
   session: string
   insights: {
     insights: { text: string, icon?: string }[]
@@ -77,7 +78,7 @@ export interface TherapeuticRelationship {
   }
 }
 
-export interface SessionAnalysisForPatient {
+export interface MockSessionAnalysisForPatient {
   session: string
   sessionNumber: number
   mainPoints: { title: string, icon?: string }[]
@@ -193,7 +194,7 @@ export const mockSessionProgress: SessionProgress = {
   },
 }
 
-export const mockEmotionalJourney: EmotionalJourney = {
+export const mockEmotionalJourney: MockEmotionalJourney = {
   session: 'RELATION_RECORD_ID',
   emojis: '😊😌😐😔',
   overallMood: 'good',
@@ -212,7 +213,7 @@ export const mockEmotionalJourney: EmotionalJourney = {
   },
 }
 
-export const mockPersonalGrowth: PersonalGrowth = {
+export const mockPersonalGrowth: MockPersonalGrowth = {
   session: 'RELATION_RECORD_ID',
   insights: {
     insights: [

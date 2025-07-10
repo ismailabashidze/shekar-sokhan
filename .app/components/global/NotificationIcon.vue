@@ -1,11 +1,9 @@
 <script setup lang="ts">
-const { unreadCount, initialize } = useNotifications()
+const { unreadCount } = useNotifications()
 const { open } = usePanels()
 
-// Initialize notifications to get correct unread count
-onMounted(async () => {
-  await initialize()
-})
+// Notifications are initialized globally via plugin
+// No need to initialize here
 
 const openNotifications = () => {
   open('notifications')
@@ -15,12 +13,12 @@ const openNotifications = () => {
 <template>
   <button
     type="button"
-    class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 group relative flex size-12 cursor-pointer items-center justify-center rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+    class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 focus:ring-primary-500/50 group relative flex size-12 cursor-pointer items-center justify-center rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2"
     @click="openNotifications"
   >
-    <Icon 
-      name="ph:bell" 
-      class="size-6 transition-transform duration-300 group-hover:rotate-12" 
+    <Icon
+      name="ph:bell"
+      class="size-6 transition-transform duration-300 group-hover:rotate-12"
       :class="unreadCount > 0 ? 'animate-wiggle text-primary-500' : ''"
     />
 
@@ -35,16 +33,16 @@ const openNotifications = () => {
     >
       <div
         v-if="unreadCount > 0"
-        class="bg-gradient-to-r from-danger-500 to-danger-600 absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full text-xs font-bold text-white shadow-lg ring-2 ring-white dark:ring-muted-800 animate-pulse z-10"
+        class="from-danger-500 to-danger-600 dark:ring-muted-800 absolute -right-1 -top-1 z-10 flex size-5 animate-pulse items-center justify-center rounded-full bg-gradient-to-r text-xs font-bold text-white shadow-lg ring-2 ring-white"
       >
         {{ unreadCount > 99 ? '99+' : unreadCount }}
       </div>
     </Transition>
 
     <!-- Ping animation for new notifications -->
-    <div 
+    <div
       v-if="unreadCount > 0"
-      class="absolute -right-1 -top-1 size-5 rounded-full bg-danger-500 animate-ping opacity-30"
+      class="bg-danger-500 absolute -right-1 -top-1 size-5 animate-ping rounded-full opacity-30"
     />
   </button>
 </template>

@@ -16,6 +16,7 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 
 // Import user composable
 const { user } = useUser()
+const { getUserAvatarUrl } = useAvatarManager()
 
 const activePosts = ref('recent')
 const showFeatures = ref(true)
@@ -263,7 +264,7 @@ const closeAlphaModal = () => {
                       <span class="flex items-center justify-center gap-2 sm:justify-start">
                         سلام،
                         <BaseAvatar
-                          :src="user?.meta?.avatarUrl || '/img/avatars/default-male.jpg'"
+                          :src="getUserAvatarUrl(user) || '/img/avatars/default-male.jpg'"
                           :text="user?.meta?.name?.substring(0, 2) || 'کا'"
                           size="xs"
                           class="inline-block align-middle"

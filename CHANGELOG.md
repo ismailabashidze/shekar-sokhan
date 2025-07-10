@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0] (2025-02-01)
+
+### 🚀 Features
+- Enhanced responsive navigation system with improved horizontal sidebar functionality
+- Extended horizontal sidebar display range to support tablets and medium-sized screens
+- Improved mobile navigation experience with proper responsive breakpoints
+
+### 🎨 UI Improvements
+- Fixed horizontal sidebar not displaying on mobile devices and tablets
+- Adjusted horizontal sidebar to show up to 1280px width (XL breakpoint)
+- Enhanced vertical sidebar to display from 1280px width and above
+- Added proper spacing and padding for content when horizontal sidebar is visible
+
+### 🧰 Technical Improvements
+- Updated responsive breakpoints from `sm:hidden` to `xl:hidden` for horizontal sidebar
+- Modified vertical sidebar from `sm:block` to `xl:block` for consistent responsive behavior
+- Added padding-top to content area (pt-16 xl:pt-0) to prevent overlap with horizontal sidebar
+- Integrated HorizontalSideBar component into TairoSidebarLayout for proper layout management
+
+### 🐞 Bug Fixes
+- Fixed horizontal sidebar not appearing on mobile and tablet devices
+- Resolved content overlapping with horizontal sidebar
+- Fixed responsive navigation switching between horizontal and vertical sidebars
+
+---
+
+## [2.8.0] (2025-01-31)
+
+### 🚀 Features
+- Version bump to 2.8.0 with updated PWA cache management
+- Enhanced version display and changelog management
+- Improved deployment pipeline and build process
+
+### 🧰 Technical Improvements
+- Updated all package.json files to version 2.8.0
+- Synchronized version display component with new version
+- Updated PWA service worker cache version to v2.8.0
+- Enhanced changelog management with bilingual support
+
+### 🐞 Bug Fixes
+- Fixed version synchronization across all components
+- Resolved deployment script compatibility issues
+
+---
+
 ## [2.7.0] (2025-01-30)
 
 ### 🚀 Features

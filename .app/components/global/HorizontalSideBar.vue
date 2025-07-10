@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!isAuthPage"
-    class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 fixed inset-x-0 top-0 z-50 block w-full border-b bg-white/90 backdrop-blur-md sm:hidden"
+    class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 fixed inset-x-0 top-0 z-50 block w-full border-b bg-white/90 backdrop-blur-md xl:hidden"
   >
     <div class="flex w-full flex-row justify-between">
       <div class="flex flex-row">
@@ -43,24 +43,24 @@
           </NuxtLink> -->
         </div>
         <div class="flex h-16 w-full items-center justify-center">
+          <!-- Notifications Button -->
           <NuxtLink
-            to="/darmana/therapists/sessions"
-            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="Settings"
+            to="/notifications"
+            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 relative flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+            title="اعلان‌ها"
           >
-            <Icon name="ph:robot-duotone" class="size-5" />
-          </NuxtLink>
-          <NuxtLink
-            to="/deeds/start"
-            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="Settings"
-          >
-            <Icon name="ph:hands-praying" class="size-5" />
+            <Icon name="ph:bell" class="size-5" />
+            <span
+              v-if="unreadCount > 0"
+              class="absolute -right-1 -top-1 flex size-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
+            >
+              {{ unreadCount > 99 ? '99+' : unreadCount }}
+            </span>
           </NuxtLink>
           <NuxtLink
             to="/dashboard"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="Settings"
+            title="خانه"
           >
             <Icon name="ph:house-line" class="size-5" />
           </NuxtLink>
@@ -77,6 +77,7 @@
                     :src="avatarUrl"
                     class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
                     alt=""
+                    @error="$event.target.src = '/img/avatars/1.png'"
                   >
                 </div>
               </template>
@@ -133,9 +134,11 @@ const isAuthPage = computed(() => route.path.startsWith('/auth'))
 console.log(isAuthPage.value)
 
 const { user } = useUser()
-console.log(user.value)
-// Computed avatar and name from user.meta
-const avatarUrl = computed(() => user.value.meta?.avatarUrl || '/img/avatars/1.png')
+const { getUserAvatarUrl } = useAvatarManager()
+const { unreadCount } = useNotifications()
+
+// Computed avatar and name from user
+const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png')
 const displayName = computed(() => user.value.meta?.name || 'کاربر جدید')
 </script>
 

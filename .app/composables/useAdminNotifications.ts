@@ -3,11 +3,13 @@ import type { Ref } from 'vue'
 export interface AdminNotificationForm {
   title: string
   message: string
+  complete_message?: string // فیلد جدید برای محتوای کامل rich editor
   type: 'info' | 'success' | 'warning' | 'error' | 'system'
   priority: 'low' | 'medium' | 'high' | 'urgent'
   action_url?: string
   action_text?: string
   user_id?: string
+  announce_time?: string // زمان اعلان - اختیاری
 }
 
 export interface BulkSendOptions {
@@ -26,13 +28,17 @@ export function useAdminNotifications() {
   const allNotifications = ref([])
   const users = ref([])
   const userRoles = ref(['user', 'therapist', 'admin'])
-  
+
+  // Realtime subscription for admin
+  const adminRealtimeSubscription = ref<any>(null)
+  const isAdminRealtimeConnected = ref(false)
+
   // Pagination state
   const currentPage = ref(1)
   const hasMoreUsers = ref(true)
   const isLoadingMore = ref(false)
   const totalUsers = ref(0)
-  
+
   // Search state
   const isSearching = ref(false)
   const searchQuery = ref('')
@@ -43,20 +49,22 @@ export function useAdminNotifications() {
     try {
       if (reset) {
         isLoading.value = true
-      } else {
+      }
+      else {
         isLoadingMore.value = true
       }
-      
+
       const filter = role ? `role = "${role}"` : ''
       const resultList = await $pb.collection('users').getList(page, perPage, {
         filter,
         sort: '-created',
       })
-      
+
       // Transform data similar to users.vue
+      const { getUserAvatarUrl } = useAvatarManager()
       const transformedUsers = resultList.items.map(item => ({
         id: item.id,
-        avatarUrl: item.meta?.avatarUrl,
+        avatarUrl: getUserAvatarUrl(item), // Helper function برای تعیین بهترین avatar
         name: item.meta?.name,
         username: item.username,
         email: item.meta?.email,
@@ -68,26 +76,29 @@ export function useAdminNotifications() {
         created: item.created,
         initials: item.meta?.name?.substring(0, 2) || 'کا',
         isNew: item.meta?.isNew,
-        // Add avatar fallback
-        avatar: item.meta?.avatarUrl || '/img/logo.png'
+        // Use the same helper for avatar fallback
+        avatar: getUserAvatarUrl(item),
       }))
-      
+
       if (reset || page === 1) {
         users.value = transformedUsers
         currentPage.value = 1
-      } else {
+      }
+      else {
         users.value.push(...transformedUsers)
       }
-      
+
       currentPage.value = page
       totalUsers.value = resultList.totalItems
       hasMoreUsers.value = users.value.length < resultList.totalItems
-      
+
       return { items: transformedUsers, totalItems: resultList.totalItems }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('خطا در دریافت کاربران:', error)
       throw error
-    } finally {
+    }
+    finally {
       isLoading.value = false
       isLoadingMore.value = false
     }
@@ -96,7 +107,7 @@ export function useAdminNotifications() {
   // Load more users (infinite scroll)
   const loadMoreUsers = async (role?: string) => {
     if (!hasMoreUsers.value || isLoadingMore.value) return
-    
+
     const nextPage = currentPage.value + 1
     await fetchUsers(nextPage, 20, role, false)
   }
@@ -110,39 +121,98 @@ export function useAdminNotifications() {
         expand: 'user,recipient_user_id',
         // Admin can see all notifications
       })
-      
+
       if (page === 1) {
         allNotifications.value = records.items
-      } else {
+      }
+      else {
         allNotifications.value.push(...records.items)
       }
-      
+
       return records
-    } catch (error) {
+    }
+    catch (error) {
       console.error('خطا در دریافت اعلان‌ها:', error)
       throw error
-    } finally {
+    }
+    finally {
       isLoading.value = false
+    }
+  }
+
+  // Admin realtime subscription for all notifications
+  const subscribeToAllNotifications = async () => {
+    try {
+      adminRealtimeSubscription.value = await $pb.collection('notifications').subscribe('*', async (e) => {
+        console.log('Admin realtime notification event:', e.action, e.record)
+        
+        const record = e.record
+
+        switch (e.action) {
+          case 'create':
+            // Add new notification to the beginning of the list
+            allNotifications.value.unshift(record)
+            break
+
+          case 'update':
+            // Update existing notification
+            const updateIndex = allNotifications.value.findIndex(n => n.id === record.id)
+            if (updateIndex > -1) {
+              allNotifications.value[updateIndex] = record
+            }
+            break
+
+          case 'delete':
+            // Remove notification from list
+            const deleteIndex = allNotifications.value.findIndex(n => n.id === record.id)
+            if (deleteIndex > -1) {
+              allNotifications.value.splice(deleteIndex, 1)
+            }
+            break
+        }
+      })
+
+      isAdminRealtimeConnected.value = true
+      console.log('Admin successfully subscribed to all notifications realtime updates')
+    }
+    catch (err: any) {
+      console.error('Error subscribing to admin notifications:', err)
+      isAdminRealtimeConnected.value = false
+    }
+  }
+
+  const unsubscribeFromAllNotifications = async () => {
+    if (adminRealtimeSubscription.value) {
+      try {
+        await $pb.collection('notifications').unsubscribe(adminRealtimeSubscription.value)
+        adminRealtimeSubscription.value = null
+        isAdminRealtimeConnected.value = false
+        console.log('Admin unsubscribed from all notifications realtime updates')
+      }
+      catch (err) {
+        console.error('Error unsubscribing from admin notifications:', err)
+      }
     }
   }
 
   // Send notification to multiple recipients
   const sendBulkNotification = async (
     formData: AdminNotificationForm,
-    options: BulkSendOptions
+    options: BulkSendOptions,
   ) => {
     try {
       isSending.value = true
-      
+
       let recipients: string[] = []
 
       if (options.sendToAll) {
         // Get all users or users with specific role
-        const allUsers = options.userRole 
+        const allUsers = options.userRole
           ? users.value.filter(u => u.role === options.userRole)
           : users.value
         recipients = allUsers.map(u => u.id)
-      } else {
+      }
+      else {
         recipients = options.selectedRecipients
       }
 
@@ -155,21 +225,25 @@ export function useAdminNotifications() {
         createNotification({
           title: formData.title,
           message: formData.message,
+          complete_message: formData.complete_message,
           type: formData.type,
           priority: formData.priority,
           recipient_user_id: recipientId,
           user: formData.user_id,
           action_url: formData.action_url,
           action_text: formData.action_text,
-        })
+          announce_time: formData.announce_time,
+        }),
       )
 
       await Promise.all(promises)
       return recipients.length
-    } catch (error) {
+    }
+    catch (error) {
       console.error('خطا در ارسال گروهی اعلان:', error)
       throw error
-    } finally {
+    }
+    finally {
       isSending.value = false
     }
   }
@@ -178,12 +252,13 @@ export function useAdminNotifications() {
   const deleteNotificationAdmin = async (notificationId: string) => {
     try {
       await $pb.collection('notifications').delete(notificationId)
-      
+
       // Remove from local state
       allNotifications.value = allNotifications.value.filter(
-        n => n.id !== notificationId
+        n => n.id !== notificationId,
       )
-    } catch (error) {
+    }
+    catch (error) {
       console.error('خطا در حذف اعلان:', error)
       throw error
     }
@@ -191,8 +266,8 @@ export function useAdminNotifications() {
 
   // Update notification (admin only)
   const updateNotification = async (
-    notificationId: string, 
-    data: Partial<AdminNotificationForm>
+    notificationId: string,
+    data: Partial<AdminNotificationForm>,
   ) => {
     try {
       const updated = await $pb.collection('notifications').update(notificationId, {
@@ -200,15 +275,16 @@ export function useAdminNotifications() {
         // Convert to PocketBase field names
         is_read: data.type ? undefined : undefined, // Don't change read status
       })
-      
+
       // Update local state
       const index = allNotifications.value.findIndex(n => n.id === notificationId)
       if (index > -1) {
         allNotifications.value[index] = { ...allNotifications.value[index], ...updated }
       }
-      
+
       return updated
-    } catch (error) {
+    }
+    catch (error) {
       console.error('خطا در بروزرسانی اعلان:', error)
       throw error
     }
@@ -219,12 +295,12 @@ export function useAdminNotifications() {
     const total = allNotifications.value.length
     const unread = allNotifications.value.filter(n => !n.is_read).length
     const read = total - unread
-    
+
     const byType = allNotifications.value.reduce((acc, n) => {
       acc[n.type] = (acc[n.type] || 0) + 1
       return acc
     }, {} as Record<string, number>)
-    
+
     const byPriority = allNotifications.value.reduce((acc, n) => {
       acc[n.priority] = (acc[n.priority] || 0) + 1
       return acc
@@ -236,7 +312,7 @@ export function useAdminNotifications() {
       read,
       readPercentage: total > 0 ? Math.round((read / total) * 100) : 0,
       byType,
-      byPriority
+      byPriority,
     }
   })
 
@@ -247,35 +323,36 @@ export function useAdminNotifications() {
 
   // Search users with debounce
   let searchTimeout: NodeJS.Timeout | null = null
-  
+
   const searchUsers = async (query: string, role?: string, page = 1, perPage = 20) => {
     try {
       isSearching.value = true
-      
+
       if (!query.trim()) {
         searchResults.value = []
         searchQuery.value = ''
         return []
       }
-      
+
       const filter = [
         `meta.name ~ "${query}"`,
         `meta.email ~ "${query}"`,
-        `username ~ "${query}"`
+        `username ~ "${query}"`,
       ].join(' || ')
-      
+
       const roleFilter = role ? ` && role = "${role}"` : ''
       const finalFilter = filter + roleFilter
 
       const resultList = await $pb.collection('users').getList(page, perPage, {
         sort: '-created',
-        filter: finalFilter
+        filter: finalFilter,
       })
-      
+
       // Transform search results
+      const { getUserAvatarUrl } = useAvatarManager()
       const transformedResults = resultList.items.map(item => ({
         id: item.id,
-        avatarUrl: item.meta?.avatarUrl,
+        avatarUrl: getUserAvatarUrl(item),
         name: item.meta?.name,
         username: item.username,
         email: item.meta?.email,
@@ -287,41 +364,45 @@ export function useAdminNotifications() {
         created: item.created,
         initials: item.meta?.name?.substring(0, 2) || 'کا',
         isNew: item.meta?.isNew,
-        avatar: item.meta?.avatarUrl || '/img/logo.png'
+        avatar: getUserAvatarUrl(item),
       }))
-      
+
       if (page === 1) {
         searchResults.value = transformedResults
-      } else {
+      }
+      else {
         searchResults.value.push(...transformedResults)
       }
-      
+
       return transformedResults
-    } catch (error) {
+    }
+    catch (error) {
       console.error('خطا در جستجوی کاربران:', error)
       return []
-    } finally {
+    }
+    finally {
       isSearching.value = false
     }
   }
-  
+
   // Debounced search
   const debouncedSearch = (query: string, role?: string, delay = 500) => {
     if (searchTimeout) {
       clearTimeout(searchTimeout)
     }
-    
+
     searchTimeout = setTimeout(() => {
       searchQuery.value = query
       if (query.trim()) {
         searchUsers(query, role)
-      } else {
+      }
+      else {
         searchResults.value = []
         searchQuery.value = ''
       }
     }, delay)
   }
-  
+
   // Clear search
   const clearSearch = () => {
     searchQuery.value = ''
@@ -335,7 +416,7 @@ export function useAdminNotifications() {
   const sendSystemNotification = async (
     template: 'welcome' | 'reminder' | 'warning' | 'maintenance',
     recipientIds: string[],
-    customData?: Record<string, any>
+    customData?: Record<string, any>,
   ) => {
     const templates = {
       welcome: {
@@ -344,7 +425,7 @@ export function useAdminNotifications() {
         type: 'success' as const,
         priority: 'medium' as const,
         action_url: '/profile',
-        action_text: 'تکمیل پروفایل'
+        action_text: 'تکمیل پروفایل',
       },
       reminder: {
         title: 'یادآوری',
@@ -352,7 +433,7 @@ export function useAdminNotifications() {
         type: 'warning' as const,
         priority: 'high' as const,
         action_url: '/sessions',
-        action_text: 'مشاهده جلسات'
+        action_text: 'مشاهده جلسات',
       },
       warning: {
         title: 'هشدار سیستم',
@@ -360,21 +441,21 @@ export function useAdminNotifications() {
         type: 'warning' as const,
         priority: 'high' as const,
         action_url: '/settings',
-        action_text: 'بررسی حساب'
+        action_text: 'بررسی حساب',
       },
       maintenance: {
         title: 'تعمیرات سیستم',
         message: 'سیستم به زودی وارد حالت تعمیرات خواهد شد.',
         type: 'info' as const,
         priority: 'urgent' as const,
-      }
+      },
     }
 
     const templateData = { ...templates[template], ...customData }
-    
+
     return await sendBulkNotification(templateData, {
       sendToAll: false,
-      selectedRecipients: recipientIds
+      selectedRecipients: recipientIds,
     })
   }
 
@@ -385,13 +466,17 @@ export function useAdminNotifications() {
     allNotifications,
     users,
     userRoles,
-    
+
+    // Realtime subscription for admin
+    adminRealtimeSubscription,
+    isAdminRealtimeConnected,
+
     // Pagination state
     currentPage,
     hasMoreUsers,
     isLoadingMore,
     totalUsers,
-    
+
     // Search state
     isSearching,
     searchQuery,
@@ -412,5 +497,9 @@ export function useAdminNotifications() {
     debouncedSearch,
     clearSearch,
     sendSystemNotification,
+
+    // Realtime
+    subscribeToAllNotifications,
+    unsubscribeFromAllNotifications,
   }
-} 
+}

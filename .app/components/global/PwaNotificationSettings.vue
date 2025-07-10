@@ -9,7 +9,7 @@ const {
   subscribeToPush,
   unsubscribeFromPush,
   testNotification,
-  checkSubscriptionStatus
+  checkSubscriptionStatus,
 } = usePwaNotifications()
 
 // Local state
@@ -25,7 +25,7 @@ const notificationStatusText = computed(() => {
   if (!isSupported.value) {
     return 'مرورگر شما از اعلان‌های فوری پشتیبانی نمی‌کند'
   }
-  
+
   switch (permission.value) {
     case 'granted':
       return isSubscribed.value ? 'اعلان‌های فوری فعال است' : 'مجوز داده شده، در حال فعال‌سازی...'
@@ -62,7 +62,8 @@ const handleTestNotification = async () => {
   isTestingNotification.value = true
   try {
     await testNotification()
-  } finally {
+  }
+  finally {
     isTestingNotification.value = false
   }
 }
@@ -83,9 +84,9 @@ onMounted(() => {
           <div
             class="flex size-10 items-center justify-center rounded-lg shadow-sm"
             :class="[
-              statusColor === 'success' ? 'bg-gradient-to-br from-success-100 to-success-200 dark:from-success-900/20 dark:to-success-800/30' :
-              statusColor === 'warning' ? 'bg-gradient-to-br from-warning-100 to-warning-200 dark:from-warning-900/20 dark:to-warning-800/30' :
-              'bg-gradient-to-br from-danger-100 to-danger-200 dark:from-danger-900/20 dark:to-danger-800/30'
+              statusColor === 'success' ? 'from-success-100 to-success-200 dark:from-success-900/20 dark:to-success-800/30 bg-gradient-to-br' :
+              statusColor === 'warning' ? 'from-warning-100 to-warning-200 dark:from-warning-900/20 dark:to-warning-800/30 bg-gradient-to-br' :
+              'from-danger-100 to-danger-200 dark:from-danger-900/20 dark:to-danger-800/30 bg-gradient-to-br'
             ]"
           >
             <Icon
@@ -109,7 +110,7 @@ onMounted(() => {
           <h3 class="text-muted-900 text-sm font-semibold dark:text-white">
             اعلان‌های فوری (PWA)
           </h3>
-          <p 
+          <p
             class="mt-1 text-sm"
             :class="
               statusColor === 'success' ? 'text-success-600 dark:text-success-400' :
@@ -119,7 +120,7 @@ onMounted(() => {
           >
             {{ notificationStatusText }}
           </p>
-          
+
           <!-- Error Message -->
           <p v-if="error" class="text-danger-600 dark:text-danger-400 mt-2 text-xs">
             {{ error }}
@@ -136,7 +137,7 @@ onMounted(() => {
             :loading="isLoading"
             @click="handleEnableNotifications"
           >
-            <Icon name="ph:bell-plus" class="size-4" />
+            <Icon name="ph:bell" class="ml-2 size-5" />
             فعال‌سازی
           </BaseButton>
 
@@ -183,7 +184,7 @@ onMounted(() => {
             برای اطمینان از کارکرد، یک اعلان تستی ارسال کنید
           </p>
         </div>
-        
+
         <BaseButton
           size="sm"
           variant="outline"
@@ -203,21 +204,27 @@ onMounted(() => {
         <h4 class="text-muted-900 text-sm font-medium dark:text-white">
           تنظیمات اعلان‌ها
         </h4>
-        
-        <div class="space-y-2 text-xs text-muted-500 dark:text-muted-400">
+
+        <div class="text-muted-500 dark:text-muted-400 space-y-2 text-xs">
           <div class="flex items-center justify-between">
             <span>اعلان‌های فوری:</span>
-            <BaseBadge color="success" size="xs">فعال</BaseBadge>
+            <BaseBadge color="success" size="xs">
+              فعال
+            </BaseBadge>
           </div>
-          
+
           <div class="flex items-center justify-between">
             <span>اعلان‌های آفلاین:</span>
-            <BaseBadge color="success" size="xs">فعال</BaseBadge>
+            <BaseBadge color="success" size="xs">
+              فعال
+            </BaseBadge>
           </div>
-          
+
           <div class="flex items-center justify-between">
             <span>لرزش:</span>
-            <BaseBadge color="primary" size="xs">بر اساس اولویت</BaseBadge>
+            <BaseBadge color="primary" size="xs">
+              بر اساس اولویت
+            </BaseBadge>
           </div>
         </div>
 
@@ -229,4 +236,4 @@ onMounted(() => {
       </div>
     </BaseCard>
   </div>
-</template> 
+</template>

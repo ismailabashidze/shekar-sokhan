@@ -1,66 +1,294 @@
-const CACHE_NAME = 'zehna-pwa-v1'
-const urlsToCache = [
+const CACHE_VERSION = 'v2.9.1' // این ورژن باید با package.json همخوانی داشته باشد
+const STATIC_CACHE = `zehna-static-${CACHE_VERSION}`
+const IMAGES_CACHE = `zehna-images-${CACHE_VERSION}`
+const ICONS_CACHE = `zehna-icons-${CACHE_VERSION}`
+const RUNTIME_CACHE = `zehna-runtime-${CACHE_VERSION}`
+
+// Critical assets to cache immediately
+const CRITICAL_ASSETS = [
   '/manifest.json',
   '/pwa-192x192.png',
-  '/pwa-512x512.png'
+  '/pwa-512x512.png',
+  '/img/logo.png',
+  '/img/logo-no-bg.png',
+  '/img/favicon.png',
+  '/img/avatars/1.png'
 ]
 
-// Install event
+// Icon patterns to cache aggressively
+const ICON_PATTERNS = [
+  /\/img\/icons\//,
+  /\/img\/avatars\//,
+  /\/img\/logos\//,
+  /\.svg$/,
+  /\.png$/,
+  /\.jpg$/,
+  /\.jpeg$/,
+  /\.webp$/
+]
+
+// Install event - Precache critical assets
 self.addEventListener('install', event => {
+  console.log('[SW] Installing version:', CACHE_VERSION)
+  
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache)
-      })
-      .then(() => {
-        return self.skipWaiting()
-      })
+    Promise.all([
+      // Cache critical assets
+      caches.open(STATIC_CACHE).then(cache => {
+        console.log('[SW] Caching critical assets')
+        return cache.addAll(CRITICAL_ASSETS.map(url => new Request(url, { cache: 'no-cache' })))
+      }),
+      // Initialize other caches
+      caches.open(IMAGES_CACHE),
+      caches.open(ICONS_CACHE),
+      caches.open(RUNTIME_CACHE)
+    ]).then(() => {
+      console.log('[SW] Installation complete')
+      return self.skipWaiting()
+    }).catch(error => {
+      console.error('[SW] Installation failed:', error)
+    })
   )
 })
 
-// Activate event
+// Activate event - Clean up old caches
 self.addEventListener('activate', event => {
+  console.log('[SW] Activating version:', CACHE_VERSION)
+  
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
+          // Delete old version caches
+          if (cacheName.startsWith('zehna-') && 
+              !cacheName.includes(CACHE_VERSION)) {
+            console.log('[SW] Deleting old cache:', cacheName)
             return caches.delete(cacheName)
           }
         })
       )
     }).then(() => {
+      console.log('[SW] Activation complete')
       return self.clients.claim()
     })
   )
 })
 
-// Fetch event
-self.addEventListener('fetch', event => {
-  // Skip navigation requests to allow redirects to work properly
-  if (event.request.mode === 'navigate') {
-    return
-  }
-  
-  // Only cache static assets, not HTML pages
-  if (event.request.destination === 'image' || 
-      event.request.destination === 'script' || 
-      event.request.destination === 'style' ||
-      event.request.url.includes('/manifest.json')) {
-    event.respondWith(
-      caches.match(event.request)
-        .then(response => {
-          return response || fetch(event.request)
-        })
+// Message handler for manual cache management
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'CLEAR_ALL_CACHES') {
+    console.log('[SW] Clearing all caches manually')
+    event.waitUntil(
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            console.log('[SW] Deleting cache:', cacheName)
+            return caches.delete(cacheName)
+          })
+        )
+      }).then(() => {
+        console.log('[SW] All caches cleared')
+        event.ports[0].postMessage({ success: true })
+      }).catch(error => {
+        console.error('[SW] Failed to clear caches:', error)
+        event.ports[0].postMessage({ success: false, error: error.message })
+      })
     )
   }
 })
 
-// Push notification event
-self.addEventListener('push', event => {
-  if (!event.data) {
+// Fetch event - Advanced caching strategies
+self.addEventListener('fetch', event => {
+  const { request } = event
+  const url = new URL(request.url)
+  
+  // Skip non-GET requests
+  if (request.method !== 'GET') return
+  
+  // Skip navigation requests (allow redirects)
+  if (request.mode === 'navigate') return
+  
+  // Skip external requests
+  if (url.origin !== location.origin) return
+  
+  // Skip API requests - Always fetch from network for fresh data
+  if (isApiRequest(request)) {
+    console.log('[SW] Skipping API request for fresh data:', request.url)
     return
   }
+  
+  // Route to appropriate caching strategy
+  if (isIconRequest(request)) {
+    event.respondWith(handleIconRequest(request))
+  } else if (isImageRequest(request)) {
+    event.respondWith(handleImageRequest(request))
+  } else if (isStaticAsset(request)) {
+    event.respondWith(handleStaticAsset(request))
+  } else {
+    event.respondWith(handleRuntimeRequest(request))
+  }
+})
+
+// Icon caching strategy - Cache First with long expiration
+async function handleIconRequest(request) {
+  const cache = await caches.open(ICONS_CACHE)
+  const cached = await cache.match(request)
+  
+  if (cached) {
+    console.log('[SW] Icon served from cache:', request.url)
+    return cached
+  }
+  
+  try {
+    console.log('[SW] Fetching and caching icon:', request.url)
+    const response = await fetch(request)
+    
+    if (response.ok) {
+      // Cache successful responses
+      const responseClone = response.clone()
+      await cache.put(request, responseClone)
+      
+      // Manage cache size for icons
+      await manageCacheSize(ICONS_CACHE, 200) // Keep max 200 icons
+    }
+    
+    return response
+  } catch (error) {
+    console.log('[SW] Icon fetch failed, trying fallback:', error)
+    
+    // Try to serve a fallback icon
+    const fallbackIcon = await cache.match('/img/avatars/1.png')
+    return fallbackIcon || new Response('', { status: 404 })
+  }
+}
+
+// Image caching strategy - Stale While Revalidate
+async function handleImageRequest(request) {
+  const cache = await caches.open(IMAGES_CACHE)
+  const cached = await cache.match(request)
+  
+  // Serve from cache immediately if available
+  const fetchPromise = fetch(request).then(response => {
+    if (response.ok) {
+      const responseClone = response.clone()
+      cache.put(request, responseClone)
+      manageCacheSize(IMAGES_CACHE, 300) // Keep max 300 images
+    }
+    return response
+  }).catch(() => cached) // Fallback to cache on network failure
+  
+  if (cached) {
+    console.log('[SW] Image served from cache:', request.url)
+    return cached
+  }
+  
+  return fetchPromise
+}
+
+// Static asset caching - Cache First
+async function handleStaticAsset(request) {
+  const cache = await caches.open(STATIC_CACHE)
+  const cached = await cache.match(request)
+  
+  if (cached) {
+    return cached
+  }
+  
+  try {
+    const response = await fetch(request)
+    if (response.ok) {
+      cache.put(request, response.clone())
+    }
+    return response
+  } catch (error) {
+    return new Response('', { status: 404 })
+  }
+}
+
+// Runtime request handling - Network First
+async function handleRuntimeRequest(request) {
+  const cache = await caches.open(RUNTIME_CACHE)
+  
+  try {
+    const response = await fetch(request)
+    if (response.ok) {
+      cache.put(request, response.clone())
+      manageCacheSize(RUNTIME_CACHE, 100) // Keep max 100 runtime entries
+    }
+    return response
+  } catch (error) {
+    const cached = await cache.match(request)
+    return cached || new Response('', { status: 504 })
+  }
+}
+
+// Helper functions
+function isApiRequest(request) {
+  const url = new URL(request.url)
+  // Skip all API, auth, and dynamic data requests
+  return (
+    url.pathname.includes('/api/') ||
+    url.pathname.includes('/auth/') ||
+    url.pathname.includes('/pb/') ||
+    url.pathname.includes('/_nuxt/') ||
+    url.searchParams.has('_data') ||
+    request.url.includes('localhost:8090') || // PocketBase default port
+    request.headers.get('content-type')?.includes('application/json') ||
+    request.headers.get('accept')?.includes('application/json')
+  )
+}
+
+function isIconRequest(request) {
+  return ICON_PATTERNS.some(pattern => pattern.test(request.url)) ||
+         request.url.includes('/img/icons/') ||
+         request.url.includes('/img/avatars/') ||
+         request.url.includes('/img/logos/')
+}
+
+function isImageRequest(request) {
+  return request.destination === 'image' ||
+         /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(request.url)
+}
+
+function isStaticAsset(request) {
+  return request.destination === 'script' ||
+         request.destination === 'style' ||
+         request.url.includes('/manifest.json') ||
+         /\.(js|css|woff|woff2|ttf|eot)$/i.test(request.url)
+}
+
+// Cache size management
+async function manageCacheSize(cacheName, maxEntries) {
+  const cache = await caches.open(cacheName)
+  const keys = await cache.keys()
+  
+  if (keys.length > maxEntries) {
+    // Remove oldest entries (simple FIFO approach)
+    const entriesToDelete = keys.slice(0, keys.length - maxEntries)
+    await Promise.all(entriesToDelete.map(key => cache.delete(key)))
+    console.log(`[SW] Cleaned ${entriesToDelete.length} entries from ${cacheName}`)
+  }
+}
+
+// Cache statistics
+async function getCacheStats() {
+  const cacheNames = await caches.keys()
+  const stats = {}
+  
+  for (const cacheName of cacheNames) {
+    if (cacheName.startsWith('zehna-')) {
+      const cache = await caches.open(cacheName)
+      const keys = await cache.keys()
+      stats[cacheName] = keys.length
+    }
+  }
+  
+  return stats
+}
+
+// Push notification event
+self.addEventListener('push', event => {
+  if (!event.data) return
 
   let data
   try {
@@ -112,7 +340,6 @@ self.addEventListener('notificationclick', event => {
   notification.close()
 
   if (action === 'open' || !action) {
-    // Open the app or navigate to specific URL
     const urlToOpen = data.url || '/'
     
     event.waitUntil(
@@ -120,10 +347,8 @@ self.addEventListener('notificationclick', event => {
         type: 'window',
         includeUncontrolled: true
       }).then(clientList => {
-        // Check if app is already open
         for (const client of clientList) {
           if (client.url.includes(self.location.origin)) {
-            // Focus existing window and navigate if needed
             return client.focus().then(() => {
               if (data.url && client.url !== data.url) {
                 return client.navigate(data.url)
@@ -131,11 +356,8 @@ self.addEventListener('notificationclick', event => {
             })
           }
         }
-        
-        // Open new window
         return clients.openWindow(urlToOpen)
       }).then(client => {
-        // Mark notification as read if we have the notification ID
         if (data.notificationId && client) {
           client.postMessage({
             type: 'NOTIFICATION_CLICKED',
@@ -148,13 +370,12 @@ self.addEventListener('notificationclick', event => {
   }
 })
 
-// Background sync for offline notification handling
+// Background sync for offline handling
 self.addEventListener('sync', event => {
   if (event.tag === 'notification-sync') {
-    event.waitUntil(
-      // Sync notifications when back online
-      syncNotifications()
-    )
+    event.waitUntil(syncNotifications())
+  } else if (event.tag === 'cache-assets') {
+    event.waitUntil(precacheAssets())
   }
 })
 
@@ -168,12 +389,33 @@ self.addEventListener('message', event => {
       break
     
     case 'GET_VERSION':
-      event.ports[0].postMessage({ version: CACHE_NAME })
+      event.ports[0].postMessage({ version: CACHE_VERSION })
       break
       
     case 'CLEAR_CACHE':
       event.waitUntil(
-        caches.delete(CACHE_NAME).then(() => {
+        Promise.all([
+          caches.delete(STATIC_CACHE),
+          caches.delete(IMAGES_CACHE),
+          caches.delete(ICONS_CACHE),
+          caches.delete(RUNTIME_CACHE)
+        ]).then(() => {
+          event.ports[0].postMessage({ success: true })
+        })
+      )
+      break
+      
+    case 'GET_CACHE_STATS':
+      event.waitUntil(
+        getCacheStats().then(stats => {
+          event.ports[0].postMessage({ stats })
+        })
+      )
+      break
+      
+    case 'PRECACHE_ASSETS':
+      event.waitUntil(
+        precacheAssets().then(() => {
           event.ports[0].postMessage({ success: true })
         })
       )
@@ -181,22 +423,51 @@ self.addEventListener('message', event => {
   }
 })
 
-// Helper function to sync notifications
+// Helper functions
 async function syncNotifications() {
   try {
-    // This would sync with your backend when back online
-    // Implementation depends on your notification API
     const response = await fetch('/api/notifications/sync', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     })
     
     if (response.ok) {
-      console.log('Notifications synced successfully')
+      console.log('[SW] Notifications synced successfully')
     }
   } catch (error) {
-    console.log('Failed to sync notifications:', error)
+    console.log('[SW] Failed to sync notifications:', error)
+  }
+}
+
+async function precacheAssets() {
+  try {
+    const cache = await caches.open(ICONS_CACHE)
+    
+    // Precache commonly used icons and avatars
+    const commonAssets = [
+      '/img/avatars/1.svg',
+      '/img/avatars/2.svg',
+      '/img/avatars/3.svg',
+      '/img/avatars/4.svg',
+      '/img/avatars/5.svg',
+      '/img/avatars/1.png'
+    ]
+    
+    await Promise.all(
+      commonAssets.map(async (url) => {
+        try {
+          const response = await fetch(url)
+          if (response.ok) {
+            await cache.put(url, response)
+          }
+        } catch (error) {
+          console.log(`[SW] Failed to precache ${url}:`, error)
+        }
+      })
+    )
+    
+    console.log('[SW] Asset precaching complete')
+  } catch (error) {
+    console.log('[SW] Asset precaching failed:', error)
   }
 }

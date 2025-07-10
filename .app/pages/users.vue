@@ -5,6 +5,7 @@ definePageMeta({
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const nuxtApp = useNuxtApp()
+const { getUserAvatarUrl } = useAvatarManager()
 
 const query = reactive({
   page: 1,
@@ -27,7 +28,7 @@ const { data, pending, error, refresh } = await useAsyncData(
       return {
         data: resultList.items.map(item => ({
           id: item.id,
-          avatarUrl: item.meta?.avatarUrl,
+          avatarUrl: getUserAvatarUrl(item),
           name: item.meta?.name,
           username: item.username,
           email: item.meta?.email,

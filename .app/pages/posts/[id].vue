@@ -29,6 +29,8 @@ const {
   toggleLike,
 } = usePosts()
 
+const { getUserAvatarUrl } = useAvatarManager()
+
 const postId = route.params.id as string
 
 // State for related posts and comments
@@ -100,7 +102,7 @@ const displayAuthor = computed(() => {
     return {
       name: 'نویسنده',
       role: '',
-      avatar: '/img/avatars/placeholder.svg',
+      avatar: '/img/avatars/1.png',
       bio: '',
     }
   }
@@ -108,7 +110,7 @@ const displayAuthor = computed(() => {
   return {
     name: post.value.author.name || post.value.author.meta?.name || 'نویسنده',
     role: 'نویسنده مقاله',
-    avatar: post.value.author.avatar || post.value.author.meta?.avatarUrl || '/img/avatars/placeholder.svg',
+    avatar: getUserAvatarUrl(post.value.author) || '/img/avatars/1.png',
     bio: post.value.author.bio || 'نویسنده محترم این مقاله',
   }
 })
@@ -404,7 +406,7 @@ watchEffect(() => {
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                       <img
-                        :src="relatedPost.author?.avatar || relatedPost.author?.meta?.avatarUrl || '/img/avatars/placeholder.svg'"
+                        :src="getUserAvatarUrl(relatedPost.author) || '/img/avatars/1.png'"
                         :alt="relatedPost.author?.name || 'نویسنده'"
                         class="size-8 rounded-full"
                       >
@@ -439,7 +441,7 @@ watchEffect(() => {
                 <div class="mb-2 flex items-center justify-between">
                   <div class="flex items-center gap-2">
                     <img
-                      :src="comment.avatar || '/img/avatars/placeholder.svg'"
+                      :src="comment.avatar || '/img/avatars/1.png'"
                       :alt="comment.user || 'کاربر'"
                       class="size-8 rounded-full"
                     >

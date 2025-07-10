@@ -1,11 +1,11 @@
 export default defineNuxtRouteMiddleware((to, from) => {
   const { $pb } = useNuxtApp()
-  
+
   // Check if user is authenticated
   if (!$pb.authStore.isValid) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'برای دسترسی به این صفحه باید وارد شوید'
+      statusMessage: 'برای دسترسی به این صفحه باید وارد شوید',
     })
   }
 
@@ -17,4 +17,4 @@ export default defineNuxtRouteMiddleware((to, from) => {
   //     statusMessage: 'شما مجوز دسترسی به این صفحه را ندارید'
   //   })
   // }
-}) 
+})

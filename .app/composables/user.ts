@@ -6,12 +6,14 @@ export type MetaObj = {
   name: string
 }
 export type User = {
+  id?: string
   username: string
   email: string
   hasCharge: boolean
   startChargeTime: string
   expireChargeTime: string
   role: string
+  avatar?: string // فیلد آواتار محلی
   meta: MetaObj
 }
 

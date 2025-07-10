@@ -24,6 +24,7 @@ const toaster = useToaster()
 const analysisId = computed(() => route.query.analysis_id as string)
 const analysisData = ref<any>({ expireChargeTime: new Date() })
 const { getAnalysisById } = useSessionAnalysis()
+const { getUserAvatarUrl } = useAvatarManager()
 
 const formatEmoji = (trustLevel: number): string => {
   if (trustLevel >= 80) return '😍' // Heart eyes for 100
@@ -45,6 +46,176 @@ const trustLevelComputed = computed(() => {
 })
 
 const headlinesComputed = computed(() => analysisData.value?.headlines || [])
+
+// Enhanced next steps with AI-generated caring messages and scheduling
+const enhancedNextSteps = ref<any[]>([])
+const generatingMessages = ref(false)
+
+// Generate caring messages using AI
+const generateCaringMessage = async (
+  userName: string,
+  stepTitle: string,
+  stepDescription: string,
+  therapistName: string,
+): Promise<string> => {
+  const { streamChat } = useOpenRouter()
+
+  const prompt = `تو یک روانشناس با نام "${therapistName}" هستی. می‌خوای برای مراجعت به نام "${userName}" یک پیام مهربان و حرفه‌ای بنویسی که اون رو برای ادامه صحبت در جلسه بعدی دعوت کنی.
+
+موضوع پیگیری: ${stepTitle}
+جزئیات: ${stepDescription}
+
+پیام باید:
+- مهربان و صمیمی باشه
+- حرفه‌ای و مناسب رابطه درمانگر-مراجع باشه
+- کوتاه و مؤثر باشه (حداکثر 2-3 جمله)
+- از نام مراجع استفاده کنه
+- موضوع رو به طور طبیعی مطرح کنه
+- از لفظ جلسه ی بعدی استفاده نکنه
+- ایموجی های خوب و جذاب استفاده کنه
+فقط متن پیام رو بنویس، بدون توضیح اضافی.`
+
+  const messages = [
+    { role: 'system', content: 'تو یک دستیار روانشناس هستی که در نوشتن پیام‌های مهربان و حرفه‌ای تخصص داری.' },
+    { role: 'user', content: prompt },
+  ]
+
+  let result = ''
+  await streamChat(messages as any[], {}, (chunk) => {
+    result += chunk
+  })
+
+  return result.trim()
+}
+
+// Save enhanced next steps to database
+const saveEnhancedNextSteps = async (steps: any[]) => {
+  try {
+    // Use the same composable that loads the analysis data
+    const { updateAnalysis } = useSessionAnalysis()
+
+    await updateAnalysis(analysisId.value, {
+      suggestedNextStepsForTherapistForNextSession: steps,
+    })
+  }
+  catch (error) {
+    console.error('Error saving enhanced next steps:', error)
+  }
+}
+
+// Process enhanced next steps
+const processEnhancedNextSteps = async () => {
+  if (!analysisData.value?.suggestedNextStepsForTherapistForNextSession?.length) {
+    enhancedNextSteps.value = []
+    return
+  }
+
+  // Check if messages are already generated (have suggestedMessage field)
+  const hasGeneratedMessages = analysisData.value.suggestedNextStepsForTherapistForNextSession.some(
+    (step: any) => step.suggestedMessage,
+  )
+
+  if (hasGeneratedMessages) {
+    // Use existing data from database
+    enhancedNextSteps.value = analysisData.value.suggestedNextStepsForTherapistForNextSession.map((step: any, index: number) => {
+      const scheduleOptions = [
+        { label: '۲ ساعت دیگر', hours: 2 },
+        { label: '۶ ساعت دیگر', hours: 6 },
+        { label: 'فردا', hours: 24 },
+        { label: '۲ روز دیگر', hours: 48 },
+        { label: '۳ روز دیگر', hours: 72 },
+        { label: 'یک هفته دیگر', hours: 168 },
+      ]
+
+      const schedule = step.schedule || scheduleOptions[index % scheduleOptions.length]
+      const scheduledDate = step.scheduledDate ? new Date(step.scheduledDate) : new Date(Date.now() + schedule.hours * 60 * 60 * 1000)
+
+      return {
+        ...step,
+        schedule,
+        scheduledDate,
+        status: step.status || 'planned',
+      }
+    })
+    return
+  }
+
+  // Generate new messages
+  generatingMessages.value = true
+
+  const scheduleOptions = [
+    { label: '۲ ساعت دیگر', hours: 2 },
+    { label: '۶ ساعت دیگر', hours: 6 },
+    { label: 'فردا', hours: 24 },
+    { label: '۲ روز دیگر', hours: 48 },
+    { label: '۳ روز دیگر', hours: 72 },
+    { label: 'یک هفته دیگر', hours: 168 },
+  ]
+
+  const userName = analysisData.value?.expand?.session?.expand?.user?.meta?.name || 'عزیز'
+  const therapistName = analysisData.value?.expand?.session?.expand?.therapist?.name || 'روانشناس'
+
+  try {
+    const processedSteps = await Promise.all(
+      analysisData.value.suggestedNextStepsForTherapistForNextSession.map(async (step: any, index: number) => {
+        const schedule = scheduleOptions[index % scheduleOptions.length]
+        const scheduledDate = new Date(Date.now() + schedule.hours * 60 * 60 * 1000)
+
+        // Generate AI message
+        const suggestedMessage = await generateCaringMessage(
+          userName,
+          step.title,
+          step.description,
+          therapistName,
+        )
+
+        // Determine status based on scheduled date
+        const now = new Date()
+        const timeDiff = scheduledDate.getTime() - now.getTime()
+
+        let status = 'planned' // Default status
+        if (step.status) {
+          status = step.status
+        }
+        else if (timeDiff < 0) {
+          status = 'sent'
+        }
+        else if (timeDiff < 24 * 60 * 60 * 1000) { // Less than 24 hours
+          status = 'scheduled'
+        }
+
+        return {
+          ...step,
+          suggestedMessage,
+          schedule,
+          scheduledDate,
+          status, // planned, scheduled, sent, converted_to_session
+        }
+      }),
+    )
+
+    enhancedNextSteps.value = processedSteps
+
+    // Save to database
+    await saveEnhancedNextSteps(processedSteps)
+
+    // Update local analysis data
+    analysisData.value.suggestedNextStepsForTherapistForNextSession = processedSteps
+  }
+  catch (error) {
+    console.error('Error generating messages:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'مشکلی در تولید پیام‌ها به وجود آمد',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  }
+  finally {
+    generatingMessages.value = false
+  }
+}
 
 const headlines = ref([
   {
@@ -74,7 +245,7 @@ onMounted(async () => {
     toaster.clearAll()
     toaster.show({
       title: 'مشکل در بارگزاری داده',
-      message: `تحلیل با این شناسه یافت نشد`,
+      message: 'تحلیل با این شناسه یافت نشد',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
@@ -84,171 +255,68 @@ onMounted(async () => {
   }
   analysisData.value = await getAnalysisById(analysisId.value)
   console.log(analysisData.value)
+
+  // Process enhanced next steps after data is loaded
+  await processEnhancedNextSteps()
 })
 
 const isLoading = ref(false)
-// here from edit profile
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useFieldError, useForm } from 'vee-validate'
-import { z } from 'zod'
 
-// This is the object that will contain the validation messages
-const ONE_MB = 1000000
-const VALIDATION_TEXT = {
-  FIRST_REQUIRED: 'Your first name can\'t be empty',
-  LASTNAME_REQUIRED: 'Your last name can\'t be empty',
-  OPTION_REQUIRED: 'Please select an option',
-  AVATAR_TOO_BIG: `Avatar size must be less than 1MB`,
+// Function to get status info
+const getStatusInfo = (status: string) => {
+  switch (status) {
+    case 'planned':
+      return {
+        label: 'برنامه‌ریزی شده',
+        color: 'info',
+        icon: 'ph:calendar-plus-duotone',
+        bgClass: 'bg-gradient-to-r from-blue-500/15 to-blue-600/20 dark:from-blue-400/20 dark:to-blue-500/25 border border-blue-200/30 dark:border-blue-400/20',
+        textClass: 'text-blue-600 dark:text-blue-400',
+        iconClass: 'text-blue-500 dark:text-blue-400',
+        pulseClass: 'animate-pulse',
+      }
+    case 'scheduled':
+      return {
+        label: 'آماده ارسال',
+        color: 'warning',
+        icon: 'ph:clock-countdown-duotone',
+        bgClass: 'bg-gradient-to-r from-amber-500/15 to-orange-500/20 dark:from-amber-400/20 dark:to-orange-400/25 border border-amber-200/40 dark:border-amber-400/30 shadow-amber-100/50 dark:shadow-amber-900/20',
+        textClass: 'text-amber-700 dark:text-amber-300',
+        iconClass: 'text-amber-600 dark:text-amber-400',
+        pulseClass: 'animate-pulse',
+      }
+    case 'sent':
+      return {
+        label: 'ارسال شده',
+        color: 'success',
+        icon: 'ph:check-circle-duotone',
+        bgClass: 'bg-gradient-to-r from-emerald-500/15 to-green-500/20 dark:from-emerald-400/20 dark:to-green-400/25 border border-emerald-200/40 dark:border-emerald-400/30',
+        textClass: 'text-emerald-700 dark:text-emerald-300',
+        iconClass: 'text-emerald-600 dark:text-emerald-400',
+        pulseClass: '',
+      }
+    case 'converted_to_session':
+      return {
+        label: 'تبدیل به جلسه',
+        color: 'primary',
+        icon: 'ph:video-camera-duotone',
+        bgClass: 'bg-gradient-to-r from-purple-500/15 to-indigo-500/20 dark:from-purple-400/20 dark:to-indigo-400/25 border border-purple-200/40 dark:border-purple-400/30',
+        textClass: 'text-purple-700 dark:text-purple-300',
+        iconClass: 'text-purple-600 dark:text-purple-400',
+        pulseClass: '',
+      }
+    default:
+      return {
+        label: 'نامشخص',
+        color: 'muted',
+        icon: 'ph:question-duotone',
+        bgClass: 'bg-gradient-to-r from-gray-500/15 to-slate-500/20 dark:from-gray-400/20 dark:to-slate-400/25 border border-gray-200/40 dark:border-gray-400/30',
+        textClass: 'text-gray-700 dark:text-gray-300',
+        iconClass: 'text-gray-600 dark:text-gray-400',
+        pulseClass: '',
+      }
+  }
 }
-
-// This is the Zod schema for the form input
-// It's used to define the shape that the form data will have
-const zodSchema = z
-  .object({
-    avatar: z.custom<File>(v => v instanceof File).nullable(),
-    profile: z.object({
-      firstName: z.string().min(1, VALIDATION_TEXT.FIRST_REQUIRED),
-      lastName: z.string().min(1, VALIDATION_TEXT.LASTNAME_REQUIRED),
-      role: z.string().optional(),
-      location: z.string(),
-      bio: z.string(),
-    }),
-    info: z.object({
-      experience: z
-        .union([
-          z.literal('0-2 years'),
-          z.literal('2-5 years'),
-          z.literal('5-10 years'),
-          z.literal('10+ years'),
-        ])
-        .nullable(),
-      firstJob: z
-        .object({
-          label: z.string(),
-          value: z.boolean(),
-        })
-        .nullable(),
-      flexible: z
-        .object({
-          label: z.string(),
-          value: z.boolean(),
-        })
-        .nullable(),
-      remote: z
-        .object({
-          label: z.string(),
-          value: z.boolean(),
-        })
-        .nullable(),
-    }),
-    social: z.object({
-      facebook: z.string(),
-      twitter: z.string(),
-      dribbble: z.string(),
-      instagram: z.string(),
-      github: z.string(),
-      gitlab: z.string(),
-    }),
-  })
-  .superRefine((data, ctx) => {
-    // This is a custom validation function that will be called
-    // before the form is submitted
-    if (!data.info.experience) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: VALIDATION_TEXT.OPTION_REQUIRED,
-        path: ['info.experience'],
-      })
-    }
-    if (!data.info.firstJob) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: VALIDATION_TEXT.OPTION_REQUIRED,
-        path: ['info.firstJob'],
-      })
-    }
-    if (!data.info.flexible) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: VALIDATION_TEXT.OPTION_REQUIRED,
-        path: ['info.flexible'],
-      })
-    }
-    if (!data.info.remote) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: VALIDATION_TEXT.OPTION_REQUIRED,
-        path: ['info.remote'],
-      })
-    }
-    if (data.avatar && data.avatar.size > ONE_MB) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: VALIDATION_TEXT.AVATAR_TOO_BIG,
-        path: ['avatar'],
-      })
-    }
-  })
-
-// Zod has a great infer method that will
-// infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
-
-const { data, pending, error, refresh } = await useFetch('/api/profile')
-
-const validationSchema = toTypedSchema(zodSchema)
-const initialValues = computed<FormInput>(() => ({
-  avatar: null,
-  profile: {
-    firstName: data.value?.personalInfo?.firstName || '',
-    lastName: data.value?.personalInfo?.lastName || '',
-    role: data.value?.personalInfo?.role || '',
-    location: '',
-    bio: '',
-  },
-  info: {
-    experience: null,
-    firstJob: null,
-    flexible: null,
-    remote: null,
-  },
-  social: {
-    facebook: '',
-    twitter: '',
-    dribbble: '',
-    instagram: '',
-    github: '',
-    gitlab: '',
-  },
-}))
-
-// This is the list of options for the select inputs
-const experience = ['0-2 years', '2-5 years', '5-10 years', '10+ years']
-const answers = [
-  {
-    label: 'Yes',
-    value: true,
-  },
-  {
-    label: 'No',
-    value: false,
-  },
-]
-
-const {
-  handleSubmit,
-  isSubmitting,
-  setFieldError,
-  meta,
-  values,
-  errors,
-  resetForm,
-  setFieldValue,
-  setErrors,
-} = useForm({
-  validationSchema,
-  initialValues,
-})
 
 </script>
 
@@ -277,7 +345,7 @@ const {
                 <span class="mt-2 flex items-center justify-center gap-2 sm:justify-start">
                   <span class="text-white/80">گزارش تحلیلی جلسه درمانی</span>
                   <BaseAvatar
-                    :src="analysisData?.expand?.session?.expand?.user.meta.avatarUrl || '/img/avatars/default-male.jpg'"
+                    :src="getUserAvatarUrl(analysisData?.expand?.session?.expand?.user) || '/img/avatars/default-male.jpg'"
                     :text="analysisData?.expand?.session?.expand?.user.meta.name?.substring(0, 2) || 'کا'"
                     size="xs"
                     class="inline-block align-middle"
@@ -409,7 +477,11 @@ const {
       </div>
 
       <!-- Icon box -->
-      <div v-for="headline in headlinesComputed" class="col-span-6 sm:col-span-3">
+      <div
+        v-for="(headline, index) in headlinesComputed"
+        :key="index"
+        class="col-span-6 sm:col-span-3"
+      >
         <div class="flex h-full flex-col">
           <div class="mb-3 flex items-center gap-2">
             <BaseIconBox size="md" class="bg-primary-500/10">
@@ -543,7 +615,7 @@ const {
                               <span class="text-primary-400 text-xl font-medium">100/</span>
                               <span class="text-primary-500 text-7xl font-bold leading-none tracking-tight">
                                 {{
-                                  100 - (analysisData.negativeScoresList?.reduce((total, item) => total + item.points, 0) || 0)
+                                  100 - (analysisData.negativeScoresList?.reduce((total: number, item: any) => total + (item.points || 0), 0) || 0)
                                 }}
                               </span>
                             </div>
@@ -1401,75 +1473,168 @@ const {
               </div>
               <!-- Suggested Next Steps for Therapist -->
               <div class="col-span-12 mb-8">
-                <BaseCard shape="curved" class="p-6">
-                  <div class="mb-2 flex items-center justify-between">
-                    <BaseHeading
-                      as="h3"
-                      size="md"
-                      weight="semibold"
-                      lead="tight"
-                      class="text-muted-800 dark:text-white"
-                    >
-                      <span>پیشنهادات برای جلسه بعدی</span>
-                    </BaseHeading>
-                  </div>
-                  <div class="flex justify-between">
-                    <BaseParagraph size="xs" class="text-muted-400 max-w-full">
-                      <Icon name="ph:question-duotone" class="size-4" />
-                      <span>
-                        پیشنهادات و راهکارهای مفید برای درمانگر جهت استفاده در جلسه بعدی با مراجع
-                      </span>
-                    </BaseParagraph>
-                  </div>
-
-                  <!-- Next Steps List -->
-                  <div v-if="analysisData.suggestedNextStepsForTherapistForNextSession?.length > 0" class="mt-6">
-                    <div class="grid gap-4">
-                      <div
-                        v-for="(step, index) in analysisData.suggestedNextStepsForTherapistForNextSession"
-                        :key="index"
-                        class="group relative"
-                      >
-                        <BaseCard
-                          shape="rounded"
-                          class="border-primary-100 dark:border-primary-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
-                        >
-                          <div class="flex w-full items-start gap-3">
-                            <div
-                              class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-2"
-                            >
-                              <Icon
-                                name="ph:arrow-circle-right-duotone"
-                                class="text-primary-500 size-5"
-                              />
-                            </div>
-                            <div class="flex-1">
-                              <BaseHeading
-                                as="h4"
-                                size="sm"
-                                weight="medium"
-                                lead="none"
-                                class="mb-3"
-                              >
-                                {{ step.title }}
-                              </BaseHeading>
-                              <BaseText size="xs" class="text-muted-400">
-                                {{ step.description }}
-                              </BaseText>
-                            </div>
-                          </div>
-                        </BaseCard>
+                <BaseCard shape="curved" class="border-primary-100/30 dark:border-primary-500/20 overflow-hidden border-2 p-0">
+                  <!-- Header Section with Gradient -->
+                  <div class="from-primary-500/10 via-primary-400/5 dark:from-primary-600/20 dark:via-primary-500/10 border-primary-100/30 dark:border-primary-500/20 border-b bg-gradient-to-r to-orange-400/10 p-6 dark:to-orange-500/15">
+                    <div class="mb-2 flex items-center justify-between">
+                      <div class="flex items-center gap-4">
+                        <div class="from-primary-500 dark:from-primary-400 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br to-orange-500 shadow-lg dark:to-orange-400">
+                          <Icon name="ph:magic-wand-duotone" class="size-7 text-white" />
+                        </div>
+                        <div>
+                          <BaseHeading
+                            as="h3"
+                            size="xl"
+                            weight="bold"
+                            lead="tight"
+                            class="text-muted-800 mb-1 dark:text-white"
+                          >
+                            <span>پیشنهادات برای جلسه بعدی</span>
+                          </BaseHeading>
+                          <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300">
+                            <Icon name="ph:heart-duotone" class="ml-1 inline size-4" />
+                            <span>
+                              پیشنهادات مهربانانه و زمان‌بندی مناسب برای ادامه ارتباط با مراجع
+                            </span>
+                          </BaseParagraph>
+                        </div>
+                      </div>
+                      <div class="dark:bg-muted-800/60 rounded-xl bg-white/60 px-4 py-2 backdrop-blur-sm">
+                        <span class="text-primary-600 dark:text-primary-400 text-sm font-semibold">
+                          تولید شده با هوش مصنوعی
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <div v-else class="mt-6 text-center">
-                    <Icon
-                      name="ph:clipboard-text-duotone"
-                      class="text-muted-400 mb-2 size-12"
-                    />
-                    <BaseText size="sm" class="text-muted-400">
-                      در حال حاضر پیشنهادی برای جلسه بعدی وجود ندارد.
-                    </BaseText>
+
+                  <!-- Content Section -->
+                  <div class="p-6">
+                    <!-- Enhanced Next Steps List -->
+                    <div v-if="generatingMessages" class="mt-6 text-center">
+                      <div class="flex items-center justify-center gap-3">
+                        <div class="bg-primary-500/10 dark:bg-primary-500/20 rounded-lg p-3">
+                          <Icon name="ph:spinner-duotone" class="text-primary-500 size-6 animate-spin" />
+                        </div>
+                        <div>
+                          <p class="text-muted-800 dark:text-muted-200 font-medium">
+                            در حال تولید پیام‌های مهربان...
+                          </p>
+                          <p class="text-muted-500 text-sm">
+                            لطفاً کمی صبر کنید
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-else-if="enhancedNextSteps.length > 0" class="mt-6">
+                      <div class="grid gap-6">
+                        <div
+                          v-for="(step, index) in enhancedNextSteps"
+                          :key="index"
+                          class="group relative"
+                        >
+                          <BaseCard
+                            shape="rounded"
+                            class="border-primary-100/50 dark:border-primary-500/20 hover:border-primary-200 dark:hover:border-primary-400/30 hover:shadow-primary-100/20 dark:hover:shadow-primary-900/20 group relative overflow-hidden border-2 p-0 transition-all duration-500 hover:shadow-xl"
+                          >
+                            <!-- Gradient Background -->
+                            <div class="from-primary-50/50 to-primary-50/30 dark:from-primary-900/20 dark:via-muted-900 dark:to-primary-800/10 absolute inset-0 bg-gradient-to-br via-white opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+
+                            <!-- Content -->
+                            <div class="relative z-10 p-6">
+                              <!-- Header with title and status -->
+                              <div class="mb-6 flex items-start justify-between">
+                                <div class="flex items-start gap-4">
+                                  <div class="from-primary-500 to-primary-600 dark:from-primary-400 dark:to-primary-500 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg transition-transform duration-300 group-hover:rotate-3 group-hover:scale-110">
+                                    <Icon name="ph:chat-circle-duotone" class="size-6 text-white" />
+                                  </div>
+                                  <div class="flex-1">
+                                    <BaseHeading
+                                      as="h4"
+                                      size="lg"
+                                      weight="bold"
+                                      lead="tight"
+                                      class="text-muted-800 group-hover:text-primary-700 dark:group-hover:text-primary-300 mb-2 transition-colors duration-300 dark:text-white"
+                                    >
+                                      {{ step.title }}
+                                    </BaseHeading>
+                                    <BaseText size="sm" class="text-muted-600 dark:text-muted-300 leading-relaxed">
+                                      {{ step.description }}
+                                    </BaseText>
+                                  </div>
+                                </div>
+
+                                <div class="text-right">
+                                  <!-- Status Badge -->
+                                  <div
+                                    :class="[
+                                      getStatusInfo(step.status).bgClass,
+                                      getStatusInfo(step.status).pulseClass,
+                                      'flex items-center gap-2 rounded-xl px-4 py-2 shadow-sm transition-all duration-300 hover:scale-105 hover:shadow-md'
+                                    ]"
+                                  >
+                                    <Icon
+                                      :name="getStatusInfo(step.status).icon"
+                                      :class="getStatusInfo(step.status).iconClass"
+                                      class="size-4 transition-transform duration-300 hover:scale-110"
+                                    />
+                                    <span
+                                      :class="getStatusInfo(step.status).textClass"
+                                      class="text-sm font-bold tracking-wide"
+                                    >
+                                      {{ getStatusInfo(step.status).label }}
+                                    </span>
+                                  </div>
+
+                                  <!-- Schedule Info -->
+                                  <div class="text-muted-500 dark:text-muted-400 mt-2 text-xs font-medium">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                      <Icon name="ph:calendar-check-duotone" class="size-3 opacity-70" />
+                                      <span>{{ step.schedule.label }}</span>
+                                    </div>
+                                    <div class="mt-1 text-right text-xs opacity-80">
+                                      {{ new Intl.DateTimeFormat('fa-IR', {
+                                        weekday: 'short',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      }).format(step.scheduledDate) }}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- Caring Message Section -->
+                              <div class="from-muted-50/80 to-muted-100/60 dark:from-muted-800/40 dark:to-muted-800/60 dark:border-muted-700/30 rounded-2xl border border-white/50 bg-gradient-to-r p-5 backdrop-blur-sm">
+                                <div class="mb-4 flex items-center gap-3">
+                                  <div class="rounded-lg bg-gradient-to-r from-pink-500/10 to-rose-500/10 p-2 dark:from-pink-400/20 dark:to-rose-400/20">
+                                    <Icon name="ph:heart-duotone" class="size-5 text-pink-600 dark:text-pink-400" />
+                                  </div>
+                                  <span class="text-muted-700 dark:text-muted-200 text-base font-semibold">
+                                    پیام پیشنهادی
+                                  </span>
+                                </div>
+                                <div class="dark:border-muted-700 dark:bg-muted-900/80 rounded-xl border border-white bg-white/80 p-5 shadow-sm backdrop-blur-sm">
+                                  <p class="text-muted-800 dark:text-muted-100 text-base leading-relaxed">
+                                    {{ step.suggestedMessage }}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </BaseCard>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-else class="mt-6 text-center">
+                      <Icon
+                        name="ph:clipboard-text-duotone"
+                        class="text-muted-400 mb-2 size-12"
+                      />
+                      <BaseText size="sm" class="text-muted-400">
+                        در حال حاضر پیشنهادی برای جلسه بعدی وجود ندارد.
+                      </BaseText>
+                    </div>
                   </div>
                 </BaseCard>
               </div>

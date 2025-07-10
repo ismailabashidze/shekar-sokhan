@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import HorizontalSideBar from '../../.app/components/global/HorizontalSideBar.vue'
+
 const route = useRoute()
 const app = useAppConfig()
 

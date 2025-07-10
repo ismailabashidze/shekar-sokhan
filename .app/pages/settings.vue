@@ -14,7 +14,8 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const { user } = useUser()
-const avatarUrl = computed(() => user.value?.meta?.avatarUrl || '/img/avatars/1.png')
+const { getUserAvatarUrl } = useAvatarManager()
+const avatarUrl = computed(() => getUserAvatarUrl(user.value))
 
 // Rest of the code remains the same
 </script>
@@ -57,7 +58,7 @@ const avatarUrl = computed(() => user.value?.meta?.avatarUrl || '/img/avatars/1.
       <div class="flex w-full flex-col">
         <BaseAvatar
           v-if="user"
-          :src="user.meta?.avatarUrl || '/img/avatars/1.png'"
+          :src="avatarUrl || '/img/avatars/1.png'"
           badge-src="/img/logo.png"
           size="2xl"
           class="mx-auto"
@@ -361,6 +362,11 @@ const avatarUrl = computed(() => user.value?.meta?.avatarUrl || '/img/avatars/1.
             </div>
           </NuxtLink>
         </BaseCard>
+      </div>
+
+      <!-- PWA Cache Management Section -->
+      <div class="mx-auto mt-8 max-w-4xl">
+        <PwaCacheManager />
       </div>
     </div>
   </div>

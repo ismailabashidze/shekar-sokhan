@@ -7,6 +7,91 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.9.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.9.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              1 فوریه 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود سیستم ناوبری واکنش‌گرا با قابلیت نوار جانبی افقی بهبود یافته</li>
+              <li>گسترش محدوده نمایش نوار جانبی افقی برای پشتیبانی از تبلت‌ها و صفحه‌های متوسط</li>
+              <li>بهبود تجربه ناوبری موبایل با نقاط شکست واکنش‌گرا مناسب</li>
+            </ul>
+
+            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های رابط کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>رفع مشکل عدم نمایش نوار جانبی افقی در دستگاه‌های موبایل و تبلت</li>
+              <li>تنظیم نوار جانبی افقی برای نمایش تا عرض 1280 پیکسل (نقطه شکست XL)</li>
+              <li>بهبود نوار جانبی عمودی برای نمایش از عرض 1280 پیکسل به بالا</li>
+              <li>افزودن فاصله‌گذاری و padding مناسب برای محتوا هنگام نمایش نوار جانبی افقی</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>به‌روزرسانی نقاط شکست واکنش‌گرا از <code>sm:hidden</code> به <code>xl:hidden</code> برای نوار جانبی افقی</li>
+              <li>اصلاح نوار جانبی عمودی از <code>sm:block</code> به <code>xl:block</code> برای رفتار واکنش‌گرا یکپارچه</li>
+              <li>افزودن padding-top به ناحیه محتوا (pt-16 xl:pt-0) برای جلوگیری از تداخل با نوار جانبی افقی</li>
+              <li>یکپارچه‌سازی کامپوننت HorizontalSideBar در TairoSidebarLayout برای مدیریت صحیح چیدمان</li>
+            </ul>
+
+            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>رفع مشکل عدم نمایش نوار جانبی افقی در دستگاه‌های موبایل و تبلت</li>
+              <li>حل مشکل تداخل محتوا با نوار جانبی افقی</li>
+              <li>رفع مشکل تعویض ناوبری واکنش‌گرا بین نوارهای جانبی افقی و عمودی</li>
+            </ul>
+          </div>
+
+          <!-- Version 2.8.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.8.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              31 ژانویه 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>ارتقاء نسخه به 2.8.0 با مدیریت بهبود یافته کش PWA</li>
+              <li>بهبود نمایش نسخه و مدیریت تاریخچه تغییرات</li>
+              <li>بهبود پایپ‌لاین استقرار و فرآیند ساخت</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>به‌روزرسانی تمام فایل‌های package.json به نسخه 2.8.0</li>
+              <li>همگام‌سازی کامپوننت نمایش نسخه با ورژن جدید</li>
+              <li>به‌روزرسانی نسخه کش service worker PWA به v2.8.0</li>
+              <li>بهبود مدیریت تاریخچه تغییرات با پشتیبانی دوزبانه</li>
+            </ul>
+
+            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
+              رفع اشکالات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>رفع مشکل همگام‌سازی نسخه در تمام کامپوننت‌ها</li>
+              <li>حل مشکلات سازگاری اسکریپت استقرار</li>
+            </ul>
+          </div>
+
           <!-- Version 2.7.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

@@ -59,42 +59,112 @@ const onSubmit = handleSubmit(async (values) => {
 })
 const nuxtApp = useNuxtApp()
 const { setUser } = useUser()
-const loginWithGoogle = async () => {
-  const authData = await nuxtApp.$pb
-    .collection('users')
-    .authWithOAuth2({ provider: 'google' })
-  await nuxtApp.$pb.collection('users').update(authData.record.id, { meta: authData.meta })
-  const record = authData.record
-  // Build MetaObj explicitly with defaults
-  const pbMeta = authData.meta as Partial<MetaObj> || {}
-  const appUser: User = {
-    username: record.username,
-    email: record.email,
-    hasCharge: record.hasCharge as boolean,
-    startChargeTime: record.startChargeTime as string,
-    expireChargeTime: record.expireChargeTime as string,
-    role: record.role as string,
-    meta: {
-      avatarUrl: pbMeta.avatarUrl ?? '',
-      expiry: pbMeta.expiry ?? '',
-      isNew: pbMeta.isNew ?? false,
-      email: pbMeta.email ?? record.email,
-      name: pbMeta.name ?? '',
-    } as MetaObj,
-  }
-  await setUser(appUser, 'user')
+const { downloadAndSaveAvatar } = useAvatarManager()
+const isGoogleLogin = ref(false)
 
-  toaster.clearAll()
-  toaster.show({
-    title: 'ورود موفق',
-    message: `خوش آمدید`,
-    color: 'success',
-    icon: 'ph:user-circle-fill',
-    closable: true,
-  })
-  setTimeout(() => {
-    router.push('/dashboard')
-  }, 1000)
+const loginWithGoogle = async () => {
+  console.log('🔄 Google login button clicked!')
+  try {
+    isGoogleLogin.value = true
+    
+    // Debug: Check PocketBase instance
+    console.log('📱 PocketBase instance:', nuxtApp.$pb)
+    console.log('🌐 PocketBase URL:', nuxtApp.$pb.baseUrl)
+    
+    // Debug: Check OAuth providers
+    console.log('🔍 Checking available OAuth providers...')
+    
+    const authData = await nuxtApp.$pb
+      .collection('users')
+      .authWithOAuth2({ provider: 'google' })
+
+    console.log('✅ Google OAuth successful:', {
+      userId: authData.record.id,
+      email: authData.record.email,
+      hasMeta: !!authData.meta
+    })
+
+    // ذخیره meta در PocketBase
+    await nuxtApp.$pb.collection('users').update(authData.record.id, { meta: authData.meta })
+
+    const record = authData.record
+    const pbMeta = authData.meta as Partial<MetaObj> || {}
+
+    // دانلود و ذخیره آواتار اگر وجود دارد و کاربر آواتار محلی ندارد
+    let avatarFileName = record.avatar
+    if (!avatarFileName && pbMeta.avatarUrl) {
+      console.log('🔄 Downloading avatar from Google...')
+      avatarFileName = await downloadAndSaveAvatar(record.id, pbMeta.avatarUrl)
+    }
+
+    // ساخت object کاربر
+    const appUser: User = {
+      id: record.id,
+      username: record.username,
+      email: record.email,
+      hasCharge: record.hasCharge as boolean,
+      startChargeTime: record.startChargeTime as string,
+      expireChargeTime: record.expireChargeTime as string,
+      role: record.role as string,
+      avatar: avatarFileName || undefined,
+      meta: {
+        avatarUrl: pbMeta.avatarUrl ?? '',
+        expiry: pbMeta.expiry ?? '',
+        isNew: pbMeta.isNew ?? false,
+        email: pbMeta.email ?? record.email,
+        name: pbMeta.name ?? '',
+      } as MetaObj,
+    }
+
+    await setUser(appUser, 'user')
+
+    toaster.clearAll()
+    toaster.show({
+      title: 'ورود موفق',
+      message: `خوش آمدید`,
+      color: 'success',
+      icon: 'ph:user-circle-fill',
+      closable: true,
+    })
+
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 1000)
+  }
+  catch (error) {
+    console.error('❌ Google Login Error Details:', {
+      error,
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name,
+      response: error?.response,
+      status: error?.status
+    })
+    
+    // More specific error handling
+    let errorMessage = 'متاسفانه مشکلی در ورود پیش آمد. لطفا دوباره تلاش کنید.'
+    
+    if (error?.message?.includes('OAuth2')) {
+      errorMessage = 'مشکل در تنظیمات OAuth. لطفا با پشتیبانی تماس بگیرید.'
+    } else if (error?.message?.includes('network')) {
+      errorMessage = 'مشکل در اتصال به اینترنت. لطفا اتصالتان را بررسی کنید.'
+    } else if (error?.status === 400) {
+      errorMessage = 'درخواست نامعتبر. لطفا صفحه را رفرش کنید.'
+    } else if (error?.status === 500) {
+      errorMessage = 'مشکل سرور. لطفا چند دقیقه بعد تلاش کنید.'
+    }
+    
+    toaster.show({
+      title: 'خطا در ورود',
+      message: errorMessage,
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
+  }
+  finally {
+    isGoogleLogin.value = false
+  }
 }
 
 if (nuxtApp.$pb.authStore.isValid) {
@@ -167,11 +237,23 @@ if (nuxtApp.$pb.authStore.isValid) {
           <div class="flex flex-wrap justify-between gap-4">
             <!--Google button-->
             <button
-              class="dark:bg-muted-700 text-muted-800 border-muted-300 dark:border-muted-600 nui-focus relative inline-flex grow items-center justify-center gap-2 rounded-xl border bg-white px-6 py-4 dark:text-white"
+              class="dark:bg-muted-700 text-muted-800 border-muted-300 dark:border-muted-600 nui-focus relative inline-flex grow items-center justify-center gap-2 rounded-xl border bg-white px-6 py-4 transition-all duration-200 disabled:opacity-50 dark:text-white"
+              :disabled="isGoogleLogin"
               @click="loginWithGoogle"
             >
-              <Icon name="logos:google-icon" class="size-5" />
-              <div>ورود با گوگل</div>
+              <Icon
+                v-if="!isGoogleLogin"
+                name="logos:google-icon"
+                class="size-5"
+              />
+              <Icon
+                v-else
+                name="line-md:loading-twotone-loop"
+                class="size-5"
+              />
+              <div>
+                {{ isGoogleLogin ? 'در حال ورود...' : 'ورود با گوگل' }}
+              </div>
             </button>
             <!--Twitter button-->
             <button

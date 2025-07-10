@@ -86,25 +86,138 @@
 
     <!-- Importance Details (Expandable) -->
     <div v-if="showDetails" class="border-muted-200 dark:border-muted-700 mt-3 border-t pt-3">
-      <div class="grid grid-cols-2 gap-3 text-xs">
-        <div class="space-y-1">
-          <div class="flex justify-between">
-            <span class="text-muted-500">تازگی:</span>
-            <span class="font-medium">{{ summary.importance?.recency || 0 }}/100</span>
+      <div class="mb-3">
+        <BaseText size="xs" class="text-muted-600 dark:text-muted-400 font-medium">
+          <Icon name="ph:calculator-duotone" class="me-1 size-3" />
+          جزئیات محاسبه امتیاز نهایی: {{ importanceScore }}
+        </BaseText>
+        <BaseText size="xs" class="text-muted-500 mt-1">
+          امتیاز بر اساس فرمول علمی: (تازگی×۰.۳) + (محتوا×۰.۳) + (طول×۰.۲) + (کلیدی×۰.۴)
+        </BaseText>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <!-- Recency Score with explanation -->
+        <div class="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-500/20 dark:bg-blue-900/20">
+          <div class="mb-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <Icon name="ph:clock-duotone" class="size-4 text-blue-500" />
+              <span class="text-xs font-medium text-blue-700 dark:text-blue-300">تازگی (وزن: ۳۰٪)</span>
+            </div>
+            <span class="text-xs font-semibold text-blue-700 dark:text-blue-300">
+              {{ summary.importance?.recency || 0 }}/100
+            </span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-muted-500">محتوا:</span>
-            <span class="font-medium">{{ summary.importance?.contentScore || 0 }}/100</span>
+          <div class="text-xs text-blue-600 dark:text-blue-400">
+            <div class="mb-1 font-medium">
+              {{ recencyExplanation }}
+            </div>
+            <div class="opacity-75">
+              {{ recencyDetailsExplanation }}
+            </div>
           </div>
         </div>
-        <div class="space-y-1">
-          <div class="flex justify-between">
-            <span class="text-muted-500">طول:</span>
-            <span class="font-medium">{{ summary.importance?.lengthScore || 0 }}/100</span>
+
+        <!-- Content Score with explanation -->
+        <div class="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-500/20 dark:bg-green-900/20">
+          <div class="mb-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <Icon name="ph:text-aa-duotone" class="size-4 text-green-500" />
+              <span class="text-xs font-medium text-green-700 dark:text-green-300">محتوا (وزن: ۳۰٪)</span>
+            </div>
+            <span class="text-xs font-semibold text-green-700 dark:text-green-300">
+              {{ summary.importance?.contentScore || 0 }}/100
+            </span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-muted-500">کلمات کلیدی:</span>
-            <span class="font-medium">{{ summary.importance?.keywordScore || 0 }}/100</span>
+          <div class="text-xs text-green-600 dark:text-green-400">
+            <div class="mb-1 font-medium">
+              {{ contentExplanation }}
+            </div>
+            <div class="opacity-75">
+              {{ contentDetailsExplanation }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Length Score with explanation -->
+        <div class="rounded-lg border border-purple-200 bg-purple-50 p-3 dark:border-purple-500/20 dark:bg-purple-900/20">
+          <div class="mb-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <Icon name="ph:ruler-duotone" class="size-4 text-purple-500" />
+              <span class="text-xs font-medium text-purple-700 dark:text-purple-300">طول (وزن: ۲۰٪)</span>
+            </div>
+            <span class="text-xs font-semibold text-purple-700 dark:text-purple-300">
+              {{ summary.importance?.lengthScore || 0 }}/100
+            </span>
+          </div>
+          <div class="text-xs text-purple-600 dark:text-purple-400">
+            <div class="mb-1 font-medium">
+              {{ lengthExplanation }}
+            </div>
+            <div class="opacity-75">
+              {{ lengthDetailsExplanation }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Keyword Score with explanation -->
+        <div class="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-500/20 dark:bg-red-900/20">
+          <div class="mb-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <Icon name="ph:key-duotone" class="size-4 text-red-500" />
+              <span class="text-xs font-medium text-red-700 dark:text-red-300">کلمات کلیدی (وزن: ۴۰٪)</span>
+            </div>
+            <span class="text-xs font-semibold text-red-700 dark:text-red-300">
+              {{ summary.importance?.keywordScore || 0 }}/100
+            </span>
+          </div>
+          <div class="text-xs text-red-600 dark:text-red-400">
+            <div class="mb-1 font-medium">
+              {{ keywordExplanation }}
+            </div>
+            <div class="opacity-75">
+              {{ keywordDetailsExplanation }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Calculation -->
+      <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-500/20 dark:bg-gray-900/20">
+        <div class="text-xs text-gray-600 dark:text-gray-400">
+          <div class="mb-2 flex items-center gap-2 font-medium">
+            <Icon name="ph:equals-duotone" class="size-3" />
+            محاسبه نهایی با میانگین وزنی:
+          </div>
+          <div class="rounded bg-gray-100 p-2 font-mono dark:bg-gray-800">
+            ({{ summary.importance?.recency || 0 }} × ۰.۳) +
+            ({{ summary.importance?.contentScore || 0 }} × ۰.۳) +
+            ({{ summary.importance?.lengthScore || 0 }} × ۰.۲) +
+            ({{ summary.importance?.keywordScore || 0 }} × ۰.۴) =
+            <span class="font-bold text-gray-800 dark:text-gray-200">{{ importanceScore }}</span>
+          </div>
+          <div class="mt-2 text-xs opacity-75">
+            نتیجه: این جلسه در دسته <strong class="text-gray-700 dark:text-gray-300">{{ importanceLevel }}</strong> قرار می‌گیرد.
+          </div>
+        </div>
+      </div>
+
+      <!-- Actionable Insights -->
+      <div v-if="actionableInsights.length > 0" class="mt-4">
+        <div class="mb-2 flex items-center gap-2">
+          <Icon name="ph:brain-duotone" class="size-3 text-indigo-500" />
+          <BaseText size="xs" class="font-medium text-indigo-600 dark:text-indigo-400">
+            بینش‌های عملی برای این جلسه:
+          </BaseText>
+        </div>
+        <div class="space-y-1">
+          <div
+            v-for="(insight, index) in actionableInsights"
+            :key="index"
+            class="flex items-start gap-1 text-xs text-indigo-600 dark:text-indigo-400"
+          >
+            <Icon name="ph:arrow-circle-right-duotone" class="mt-0.5 size-3 shrink-0" />
+            <span>{{ insight }}</span>
           </div>
         </div>
       </div>
@@ -112,6 +225,7 @@
 
     <!-- Toggle details button -->
     <button
+      v-tooltip="showDetails ? 'مخفی کردن جزئیات امتیازدهی' : 'نمایش جزئیات امتیازدهی'"
       class="text-muted-400 hover:text-muted-600 dark:hover:text-muted-300 absolute bottom-2 right-2 transition-colors duration-300"
       @click="showDetails = !showDetails"
     >
@@ -207,6 +321,165 @@ const compressionRatio = computed(() => {
   if (!props.summary.isCompressed || !props.summary.originalLength) return 0
   const ratio = ((props.summary.originalLength - props.summary.summary.length) / props.summary.originalLength) * 100
   return Math.round(ratio)
+})
+
+// Detailed explanations for importance scores
+const recencyExplanation = computed(() => {
+  const days = recencyDays.value
+  if (days === null) return 'تاریخ جلسه مشخص نیست'
+
+  if (days <= 7) return `جلسه جدید (${days} روز پیش) - امتیاز کامل`
+  if (days <= 30) return `جلسه اخیر (${days} روز پیش) - امتیاز بالا`
+  if (days <= 90) return `جلسه متوسط (${days} روز پیش) - امتیاز متوسط`
+  if (days <= 180) return `جلسه قدیمی (${days} روز پیش) - امتیاز کم`
+  return `جلسه خیلی قدیمی (${days} روز پیش) - امتیاز پایین`
+})
+
+const contentExplanation = computed(() => {
+  const score = props.summary.importance?.contentScore || 0
+  const text = props.summary.summary.toLowerCase()
+
+  // Count important keywords
+  const importantKeywords = ['افسردگی', 'اضطراب', 'استرس', 'ترس', 'خشم', 'نگرانی', 'خانواده', 'ازدواج', 'طلاق', 'فرزند']
+  const keywordCount = importantKeywords.filter(keyword => text.includes(keyword)).length
+
+  if (score >= 80) return `محتوای غنی با ${keywordCount} کلمه کلیدی مهم`
+  if (score >= 60) return `محتوای خوب با ${keywordCount} کلمه کلیدی`
+  if (score >= 40) return `محتوای متوسط با ${keywordCount} کلمه کلیدی`
+  return `محتوای محدود - ${keywordCount} کلمه کلیدی یافت شد`
+})
+
+const lengthExplanation = computed(() => {
+  const length = props.summary.summary.length
+  const score = props.summary.importance?.lengthScore || 0
+
+  if (length < 50) return `متن کوتاه (${length} کاراکتر) - جزئیات محدود`
+  if (length <= 200) return `متن متوسط (${length} کاراکتر) - اطلاعات مناسب`
+  if (length <= 500) return `متن مفصل (${length} کاراکتر) - اطلاعات کامل`
+  return `متن جامع (${length} کاراکتر) - اطلاعات کامل`
+})
+
+const keywordExplanation = computed(() => {
+  const score = props.summary.importance?.keywordScore || 0
+  const text = props.summary.summary.toLowerCase()
+
+  // Check for critical keywords
+  const criticalKeywords = ['خودکشی', 'آسیب', 'خشونت', 'بحران', 'فوری']
+  const criticalFound = criticalKeywords.filter(keyword => text.includes(keyword))
+
+  // Check for important keywords
+  const importantKeywords = ['افسردگی', 'اضطراب', 'اعتیاد', 'خانواده']
+  const importantFound = importantKeywords.filter(keyword => text.includes(keyword))
+
+  if (criticalFound.length > 0) {
+    return `کلمات بحرانی یافت شد: ${criticalFound.join('، ')}`
+  }
+  if (importantFound.length > 0) {
+    return `کلمات مهم یافت شد: ${importantFound.join('، ')}`
+  }
+  if (score > 0) {
+    return 'کلمات کلیدی عمومی مشاوره یافت شد'
+  }
+  return 'هیچ کلمه کلیدی خاصی یافت نشد'
+})
+
+// Actionable insights
+const actionableInsights = computed(() => {
+  const insights: string[] = []
+  const score = importanceScore.value
+
+  if (score >= 80) {
+    insights.push('این جلسه بسیار مهم و بحرانی است. باید به سراغ جلسات آینده بروید.')
+  }
+  else if (score >= 60) {
+    insights.push('این جلسه مهم است. باید به سراغ جلسات آینده بروید.')
+  }
+  else if (score >= 40) {
+    insights.push('این جلسه متوسط است. باید به سراغ جلسات آینده بروید.')
+  }
+  else {
+    insights.push('این جلسه کم اهمیت است. باید به سراغ جلسات آینده بروید.')
+  }
+
+  if (summary.isCompressed) {
+    insights.push('این خلاصه فشرده شده است. برای بهبود حافظه، می‌توانید محتوای جلسه را کاهش دهید.')
+  }
+
+  if (recencyDays.value === 0) {
+    insights.push('این جلسه امروز رخ داده است. باید به سراغ جلسات آینده بروید.')
+  }
+  else if (recencyDays.value === 1) {
+    insights.push('این جلسه دیروز رخ داده است. باید به سراغ جلسات آینده بروید.')
+  }
+  else if (recencyDays.value > 7) {
+    insights.push('این جلسه چند روز پیش رخ داده است. باید به سراغ جلسات آینده بروید.')
+  }
+
+  if (keywordExplanation.value.includes('بحرانی')) {
+    insights.push('این جلسه شامل کلمات بحرانی یافت. باید به سراغ جلسات آینده بروید.')
+  }
+
+  return insights
+})
+
+// Detailed explanations for importance scores (expanded)
+const recencyDetailsExplanation = computed(() => {
+  const days = recencyDays.value
+  if (days === null) return 'تاریخ جلسه مشخص نیست'
+
+  if (days <= 7) return 'جلسه جدید - امتیاز کامل'
+  if (days <= 30) return 'جلسه اخیر - امتیاز بالا'
+  if (days <= 90) return 'جلسه متوسط - امتیاز متوسط'
+  if (days <= 180) return 'جلسه قدیمی - امتیاز کم'
+  return 'جلسه خیلی قدیمی - امتیاز پایین'
+})
+
+const contentDetailsExplanation = computed(() => {
+  const score = props.summary.importance?.contentScore || 0
+  const text = props.summary.summary.toLowerCase()
+
+  // Count important keywords
+  const importantKeywords = ['افسردگی', 'اضطراب', 'استرس', 'ترس', 'خشم', 'نگرانی', 'خانواده', 'ازدواج', 'طلاق', 'فرزند']
+  const keywordCount = importantKeywords.filter(keyword => text.includes(keyword)).length
+
+  if (score >= 80) return `محتوای غنی با ${keywordCount} کلمه کلیدی مهم`
+  if (score >= 60) return `محتوای خوب با ${keywordCount} کلمه کلیدی`
+  if (score >= 40) return `محتوای متوسط با ${keywordCount} کلمه کلیدی`
+  return `محتوای محدود - ${keywordCount} کلمه کلیدی یافت شد`
+})
+
+const lengthDetailsExplanation = computed(() => {
+  const length = props.summary.summary.length
+  const score = props.summary.importance?.lengthScore || 0
+
+  if (length < 50) return 'متن کوتاه - جزئیات محدود'
+  if (length <= 200) return 'متن متوسط - اطلاعات مناسب'
+  if (length <= 500) return 'متن مفصل - اطلاعات کامل'
+  return 'متن جامع - اطلاعات کامل'
+})
+
+const keywordDetailsExplanation = computed(() => {
+  const score = props.summary.importance?.keywordScore || 0
+  const text = props.summary.summary.toLowerCase()
+
+  // Check for critical keywords
+  const criticalKeywords = ['خودکشی', 'آسیب', 'خشونت', 'بحران', 'فوری']
+  const criticalFound = criticalKeywords.filter(keyword => text.includes(keyword))
+
+  // Check for important keywords
+  const importantKeywords = ['افسردگی', 'اضطراب', 'اعتیاد', 'خانواده']
+  const importantFound = importantKeywords.filter(keyword => text.includes(keyword))
+
+  if (criticalFound.length > 0) {
+    return `کلمات بحرانی یافت شد: ${criticalFound.join('، ')}`
+  }
+  if (importantFound.length > 0) {
+    return `کلمات مهم یافت شد: ${importantFound.join('، ')}`
+  }
+  if (score > 0) {
+    return 'کلمات کلیدی عمومی مشاوره یافت شد'
+  }
+  return 'هیچ کلمه کلیدی خاصی یافت نشد'
 })
 
 // Format date function

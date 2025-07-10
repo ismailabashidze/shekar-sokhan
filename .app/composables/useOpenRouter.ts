@@ -60,21 +60,7 @@ export interface PatientGenerateOutput {
   moodAndCurrentEmotions: string
 }
 
-export interface TherapistGenerateInput {
-  name: string
-  specialty: string
-  shortDescription: string
-}
-
-export interface TherapistGenerateOutput {
-  longDescription: string
-  definingTraits: string
-  backStory: string
-  personality: string
-  appearance: string
-  approach: string
-  expertise: string
-}
+import type { TherapistGenerateInput, TherapistGenerateOutput } from '~/types'
 
 export function useOpenRouter() {
   const config = useRuntimeConfig()

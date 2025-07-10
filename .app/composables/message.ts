@@ -1,9 +1,4 @@
-export type Content = {
-  message?: string
-  thoughts?: string
-  action?: string
-  nextSteps?: string
-}
+import type { Content } from '~/types'
 // export type BackendMessage = {
 //   role: 'system' | 'user' | 'assistant' | 'separator'
 //   content: Content

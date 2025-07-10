@@ -1,3 +1,16 @@
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
+
+// خواندن ورژن از package.json
+let appVersion = '2.8.0'
+try {
+  const packagePath = resolve(__dirname, './package.json')
+  const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'))
+  appVersion = packageJson.version || '2.8.0'
+} catch (error) {
+  console.warn('Could not read version from package.json, using fallback:', appVersion)
+}
+
 export default defineNuxtConfig({
   extends: [
     /**
@@ -21,6 +34,22 @@ export default defineNuxtConfig({
     '../layers/tairo-layout-sidebar',
     '../layers/tairo',
   ],
+
+  // Disable devtools in production
+  devtools: { enabled: process.env.NODE_ENV === 'development' },
+
+  // Runtime environment variables
+  runtimeConfig: {
+    public: {
+      appVersion,
+      appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:3000',
+      openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
+      dargahMerchantId: process.env.DARGAH_MERCHANT_ID || '',
+      dargahBaseUrl: process.env.DARGAH_BASE_URL || 'https://dargahno.net',
+      dargahUsername: process.env.DARGAH_USERNAME || '',
+      dargahPassword: process.env.DARGAH_PASSWORD || '',
+    }
+  },
 
   app: {
     head: {
@@ -60,16 +89,78 @@ export default defineNuxtConfig({
         prependPath: false,
       },
     },
+    // External heavy server-side dependencies to prevent client bundling
+    experimental: {
+      wasm: false,
+    },
+    // Bundle server dependencies separately
+    bundledStorage: ['redis'],
+    // Minify output for production
+    minify: process.env.NODE_ENV === 'production',
+    // Use esbuild for faster builds
+    esbuild: {
+      options: {
+        target: 'es2022',
+        minify: process.env.NODE_ENV === 'production',
+      },
+    },
   },
 
-  runtimeConfig: {
-    public: {
-      appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:3000',
-      openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
-      dargahMerchantId: process.env.DARGAH_MERCHANT_ID || '',
-      dargahBaseUrl: process.env.DARGAH_BASE_URL || 'https://dargahno.net',
-      dargahUsername: process.env.DARGAH_USERNAME || '',
-      dargahPassword: process.env.DARGAH_PASSWORD || '',
+  // Server-side rendering optimizations
+  ssr: true,
+
+  // Vite build optimizations
+  vite: {
+    build: {
+      target: 'es2022',
+      minify: process.env.NODE_ENV === 'production' ? 'esbuild' : false,
+      sourcemap: process.env.NODE_ENV === 'development',
+      // External heavy dependencies for production builds
+      rollupOptions: {
+        external: process.env.NODE_ENV === 'production'
+          ? [
+              'chromadb',
+              '@anthropic-ai/sdk',
+              '@gradio/client',
+            ]
+          : [],
+      },
     },
+    // Optimize deps for faster builds
+    optimizeDeps: {
+      exclude: [
+        'chromadb',
+        '@anthropic-ai/sdk',
+        '@gradio/client',
+      ],
+    },
+    // Enable faster builds
+    define: {
+      __VUE_OPTIONS_API__: false,
+      __VUE_PROD_DEVTOOLS__: false,
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+    },
+    // Server-side externals
+    ssr: {
+      external: ['chromadb', '@anthropic-ai/sdk', '@gradio/client'],
+    },
+  },
+
+  // Build optimizations
+  build: {
+    transpile: process.env.NODE_ENV === 'production' ? [] : ['@iconify/vue'],
+  },
+
+  // Experimental features for faster builds
+  experimental: {
+    payloadExtraction: false,
+    inlineSSRStyles: false,
+    renderJsonPayloads: true,
+    typedPages: false,
+  },
+
+  // TypeScript optimizations
+  typescript: {
+    typeCheck: false,
   },
 })

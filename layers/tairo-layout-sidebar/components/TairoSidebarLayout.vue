@@ -40,11 +40,11 @@ const circularMenuEnabled = computed(() => {
 
 const wrapperClass = computed(() => {
   if (!sidebarEnabled.value) {
-    return 'bg-muted-100 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10'
+    return 'bg-muted-100 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 pt-16 xl:pt-0 transition-all duration-300 xl:px-10'
   }
 
   const list = [
-    'bg-muted-100 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10',
+    'bg-muted-100 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 pt-16 xl:pt-0 transition-all duration-300 xl:px-10',
   ]
 
   if (isOpen.value) {
@@ -70,6 +70,7 @@ const wrapperClass = computed(() => {
       !props.horizontalScroll && 'overflow-x-hidden',
     ]"
   >
+    <HorizontalSideBar />
     <BetaRibbon />
     <div class="bg-muted-100 dark:bg-muted-900">
       <slot name="sidebar">

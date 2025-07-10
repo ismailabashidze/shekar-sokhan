@@ -6,8 +6,9 @@ const props = defineProps<{
   horizontal?: boolean
 }>()
 const { user } = useUser()
+const { getUserAvatarUrl } = useAvatarManager()
 
-const avatarUrl = computed(() => user.value.meta?.avatarUrl || '/img/avatars/1.png')
+const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png')
 const displayName = computed(() => user.value.meta?.name || 'کاربر جدید')
 </script>
 
@@ -30,6 +31,7 @@ const displayName = computed(() => user.value.meta?.name || 'کاربر جدید
               :src="avatarUrl"
               class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
               alt=""
+              @error="$event.target.src = '/img/avatars/1.png'"
             >
           </div>
         </button>
@@ -56,6 +58,7 @@ const displayName = computed(() => user.value.meta?.name || 'کاربر جدید
                   :src="avatarUrl"
                   class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
                   alt=""
+                  @error="$event.target.src = '/img/avatars/1.png'"
                 >
               </div>
               <div class="ms-3 text-right leading-6">

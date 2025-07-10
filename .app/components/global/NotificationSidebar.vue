@@ -6,7 +6,6 @@ const {
   isUpdating,
   markAsRead,
   refreshNotifications,
-  initialize,
   setFilter,
   getRelativeTime,
   getTypeIcon,
@@ -15,10 +14,9 @@ const {
 
 const { close } = usePanels()
 
-// Initialize notifications when component mounts
-onMounted(async () => {
-  await initialize()
-  // Set filter to show unread notifications in sidebar
+// Notifications are initialized globally via plugin
+// Just set filter to show unread notifications in sidebar
+onMounted(() => {
   setFilter('unread')
 })
 
@@ -33,7 +31,7 @@ const handleNotificationClick = async (notification: any) => {
 </script>
 
 <template>
-  <div class="flex h-full w-80 flex-col bg-white dark:bg-muted-900 shadow-xl">
+  <div class="dark:bg-muted-900 flex h-full w-80 flex-col bg-white shadow-xl">
     <!-- Header -->
     <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-4">
       <div class="flex items-center gap-3">
@@ -49,7 +47,7 @@ const handleNotificationClick = async (notification: any) => {
           </p>
         </div>
       </div>
-      
+
       <div class="flex items-center gap-2">
         <!-- Refresh Button -->
         <BaseButtonIcon
@@ -61,7 +59,7 @@ const handleNotificationClick = async (notification: any) => {
         >
           <Icon name="ph:arrow-clockwise" class="size-4" />
         </BaseButtonIcon>
-        
+
         <!-- Close Button -->
         <BaseButtonIcon
           size="sm"
@@ -77,7 +75,7 @@ const handleNotificationClick = async (notification: any) => {
     <!-- Notifications List -->
     <div class="flex-1 overflow-y-auto">
       <!-- Loading State -->
-      <div v-if="isLoading" class="p-4 space-y-3">
+      <div v-if="isLoading" class="space-y-3 p-4">
         <div
           v-for="i in 3"
           :key="i"
@@ -105,7 +103,7 @@ const handleNotificationClick = async (notification: any) => {
         <p class="text-muted-500 dark:text-muted-400 text-sm">
           اعلان خوانده نشده‌ای وجود ندارد
         </p>
-        <p class="text-muted-400 dark:text-muted-500 text-xs mt-1">
+        <p class="text-muted-400 dark:text-muted-500 mt-1 text-xs">
           همه اعلان‌های شما خوانده شده‌اند
         </p>
       </div>
@@ -122,11 +120,11 @@ const handleNotificationClick = async (notification: any) => {
           v-for="notification in filteredNotifications.slice(0, 15)"
           :key="notification.id"
           type="button"
-          class="group w-full cursor-pointer p-4 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 transform-gpu"
+          class="focus:ring-primary-500/20 group w-full transform-gpu cursor-pointer p-4 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-sm focus:outline-none focus:ring-2"
           :class="[
-            notification.isRead 
-              ? 'hover:bg-muted-50 dark:hover:bg-muted-800/50 opacity-60 hover:opacity-90' 
-              : 'hover:bg-primary-50 dark:hover:bg-primary-900/20 focus:bg-primary-50 dark:focus:bg-primary-900/20 border-l-2 border-l-primary-500',
+            notification.isRead
+              ? 'hover:bg-muted-50 dark:hover:bg-muted-800/50 opacity-60 hover:opacity-90'
+              : 'hover:bg-primary-50 dark:hover:bg-primary-900/20 focus:bg-primary-50 dark:focus:bg-primary-900/20 border-l-primary-500 border-l-2',
             isUpdating ? 'animate-pulse-subtle' : ''
           ]"
           @click="handleNotificationClick(notification)"
@@ -137,11 +135,11 @@ const handleNotificationClick = async (notification: any) => {
               <div
                 class="flex size-8 items-center justify-center rounded-full transition-all duration-200 group-hover:scale-110 group-hover:shadow-md"
                 :class="[
-                  notification.type === 'success' ? 'bg-gradient-to-br from-success-100 to-success-200 dark:from-success-900/20 dark:to-success-800/30' :
-                  notification.type === 'warning' ? 'bg-gradient-to-br from-warning-100 to-warning-200 dark:from-warning-900/20 dark:to-warning-800/30' :
-                  notification.type === 'error' ? 'bg-gradient-to-br from-danger-100 to-danger-200 dark:from-danger-900/20 dark:to-danger-800/30' :
-                  notification.type === 'system' ? 'bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/30' :
-                  'bg-gradient-to-br from-info-100 to-info-200 dark:from-info-900/20 dark:to-info-800/30'
+                  notification.type === 'success' ? 'from-success-100 to-success-200 dark:from-success-900/20 dark:to-success-800/30 bg-gradient-to-br' :
+                  notification.type === 'warning' ? 'from-warning-100 to-warning-200 dark:from-warning-900/20 dark:to-warning-800/30 bg-gradient-to-br' :
+                  notification.type === 'error' ? 'from-danger-100 to-danger-200 dark:from-danger-900/20 dark:to-danger-800/30 bg-gradient-to-br' :
+                  notification.type === 'system' ? 'from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/30 bg-gradient-to-br' :
+                  'from-info-100 to-info-200 dark:from-info-900/20 dark:to-info-800/30 bg-gradient-to-br'
                 ]"
               >
                 <Icon
@@ -156,42 +154,42 @@ const handleNotificationClick = async (notification: any) => {
             <div class="min-w-0 flex-1">
               <!-- Title and time -->
               <div class="flex items-start justify-between">
-                <h4 
-                  class="text-sm leading-tight line-clamp-2"
+                <h4
+                  class="line-clamp-2 text-sm leading-tight"
                   :class="[
-                    notification.isRead 
-                      ? 'text-muted-600 dark:text-muted-300 font-medium' 
-                      : 'text-muted-900 dark:text-white font-semibold'
+                    notification.isRead
+                      ? 'text-muted-600 dark:text-muted-300 font-medium'
+                      : 'text-muted-900 font-semibold dark:text-white'
                   ]"
                 >
                   {{ notification.title }}
                 </h4>
               </div>
-              
+
               <!-- Message -->
-              <p 
-                class="mt-1 text-xs leading-relaxed line-clamp-2"
+              <p
+                class="mt-1 line-clamp-2 text-xs leading-relaxed"
                 :class="[
-                  notification.isRead 
-                    ? 'text-muted-500 dark:text-muted-400' 
+                  notification.isRead
+                    ? 'text-muted-500 dark:text-muted-400'
                     : 'text-muted-700 dark:text-muted-200'
                 ]"
               >
                 {{ notification.message }}
               </p>
-              
+
               <!-- Time and priority -->
               <div class="mt-2 flex items-center justify-between">
                 <span class="text-muted-400 dark:text-muted-500 text-xs">
                   {{ getRelativeTime(notification.createdAt) }}
                 </span>
-                
+
                 <!-- Priority indicator -->
                 <div
                   v-if="notification.priority === 'urgent' || notification.priority === 'high'"
                   class="shrink-0 rounded-full"
                   :class="[
-                    notification.priority === 'urgent' ? 'size-1.5 bg-danger-500 animate-pulse' : 'size-1 bg-warning-500'
+                    notification.priority === 'urgent' ? 'bg-danger-500 size-1.5 animate-pulse' : 'bg-warning-500 size-1'
                   ]"
                 />
               </div>
@@ -205,7 +203,7 @@ const handleNotificationClick = async (notification: any) => {
     <div class="border-muted-200 dark:border-muted-700 border-t p-4">
       <NuxtLink
         to="/notifications"
-        class="hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 dark:text-primary-400 flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500/50 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/10 dark:to-primary-800/20"
+        class="hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 dark:text-primary-400 focus:ring-primary-500/50 from-primary-50 to-primary-100 dark:from-primary-900/10 dark:to-primary-800/20 flex w-full items-center justify-center rounded-lg bg-gradient-to-r px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2"
         @click="close('notifications')"
       >
         <Icon name="ph:arrow-left" class="mr-2 size-4" />

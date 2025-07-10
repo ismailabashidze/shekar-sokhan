@@ -1,20 +1,21 @@
 import { useNuxtApp } from '#app'
 import { ref } from 'vue'
+import type {
+  EmotionalJourney,
+  PersonalGrowth,
+  SessionProgress,
+  SessionAnalysisForPatient,
+} from '~/types'
 
-export interface EmotionalJourney {
+// PocketBase specific interfaces (extend base types with DB fields)
+export interface PBEmotionalJourney extends EmotionalJourney {
   id: string
-  session: string
-  emojis: string[]
-  overallMood: 'very_good' | 'good' | 'neutral' | 'challe'
-  moodDescription: string
-  keyEmotions: string[]
-  copingStrategies: string[]
   created: string
   updated: string
   expand?: any
 }
 
-export interface MainPoints {
+export interface PBMainPoints {
   id: string
   session: string
   title: string
@@ -26,9 +27,8 @@ export interface MainPoints {
   expand?: any
 }
 
-export interface PersonalGrowth {
+export interface PBPersonalGrowth extends Omit<PersonalGrowth, 'insights' | 'achievements' | 'challenges' | 'recommendations'> {
   id: string
-  session: string
   insights: string[]
   learnings: string[]
   toolsAndTechniques: string[]
@@ -37,9 +37,8 @@ export interface PersonalGrowth {
   expand?: any
 }
 
-export interface SessionProgress {
+export interface PBSessionProgress extends Omit<SessionProgress, 'goals' | 'achievements' | 'challenges' | 'nextSteps'> {
   id: string
-  session: string
   strengthsIdentified: string[]
   areasForGrowth: string[]
   achievements: string[]
@@ -49,14 +48,12 @@ export interface SessionProgress {
   expand?: any
 }
 
-export interface SessionAnalysisForPatient {
+export interface PBSessionAnalysisForPatient extends Omit<SessionAnalysisForPatient, 'emotionalJourney' | 'personalGrowth' | 'sessionProgress'> {
   id: string
-  session: string
-  sessionNumber: number
-  mainPoints: MainPoints[]
-  sessionProgress: SessionProgress
-  emotionalJourney: EmotionalJourney
-  personalGrowth: PersonalGrowth
+  mainPoints: PBMainPoints[]
+  sessionProgress: PBSessionProgress
+  emotionalJourney: PBEmotionalJourney
+  personalGrowth: PBPersonalGrowth
   therapeuticRelationship: string
   created: string
   updated: string
@@ -69,7 +66,7 @@ export const useSessionPatientAnalysis = () => {
   const error = ref<string | null>(null)
   const processing = ref(false)
 
-  const createAnalysis = async (data: Partial<SessionAnalysisForPatient>) => {
+  const createAnalysis = async (data: Partial<PBSessionAnalysisForPatient>) => {
     try {
       return await pb.collection('session_analysis_for_patient').create(data)
     }
@@ -105,7 +102,7 @@ export const useSessionPatientAnalysis = () => {
     }
   }
 
-  const updateAnalysis = async (id: string, data: Partial<SessionAnalysisForPatient>) => {
+  const updateAnalysis = async (id: string, data: Partial<PBSessionAnalysisForPatient>) => {
     try {
       return await pb.collection('session_analysis_for_patient').update(id, data)
     }
@@ -125,7 +122,7 @@ export const useSessionPatientAnalysis = () => {
     }
   }
 
-  const getAnalysisForSession = async (sessionId: string): Promise<SessionAnalysisForPatient | null> => {
+  const getAnalysisForSession = async (sessionId: string): Promise<PBSessionAnalysisForPatient | null> => {
     try {
       const records = await pb.collection('session_analysis_for_patient').getList(1, 1, {
         filter: `session="${sessionId}"`,
@@ -134,7 +131,7 @@ export const useSessionPatientAnalysis = () => {
       })
 
       if (records.items.length > 0) {
-        return records.items[0] as unknown as SessionAnalysisForPatient
+        return records.items[0] as unknown as PBSessionAnalysisForPatient
       }
       return null
     }
@@ -144,7 +141,7 @@ export const useSessionPatientAnalysis = () => {
     }
   }
 
-  const createEmotionalJourney = async (data: Partial<EmotionalJourney>) => {
+  const createEmotionalJourney = async (data: Partial<PBEmotionalJourney>) => {
     try {
       return await pb.collection('emotional_journey').create(data)
     }
@@ -154,7 +151,7 @@ export const useSessionPatientAnalysis = () => {
     }
   }
 
-  const createMainPoints = async (data: Partial<MainPoints>) => {
+  const createMainPoints = async (data: Partial<PBMainPoints>) => {
     try {
       return await pb.collection('main_points').create(data)
     }
@@ -164,7 +161,7 @@ export const useSessionPatientAnalysis = () => {
     }
   }
 
-  const createPersonalGrowth = async (data: Partial<PersonalGrowth>) => {
+  const createPersonalGrowth = async (data: Partial<PBPersonalGrowth>) => {
     try {
       return await pb.collection('personal_growth').create(data)
     }
@@ -174,7 +171,7 @@ export const useSessionPatientAnalysis = () => {
     }
   }
 
-  const createSessionProgress = async (data: Partial<SessionProgress>) => {
+  const createSessionProgress = async (data: Partial<PBSessionProgress>) => {
     try {
       return await pb.collection('session_progress').create(data)
     }
