@@ -364,6 +364,16 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         </BaseCard>
       </div>
 
+      <!-- PWA Permissions Status Section -->
+      <div class="mx-auto mt-8 max-w-4xl">
+        <PwaPermissionsStatus />
+      </div>
+
+      <!-- PWA Notification Settings Section -->
+      <div class="mx-auto mt-8 max-w-4xl">
+        <PwaNotificationSettings />
+      </div>
+
       <!-- PWA Cache Management Section -->
       <div class="mx-auto mt-8 max-w-4xl">
         <PwaCacheManager />

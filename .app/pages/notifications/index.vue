@@ -627,14 +627,14 @@ const filterOptions = [
                           >
                             <Icon name="ph:envelope-open" class="size-4" />
                           </BaseButtonIcon>
-                          <BaseButtonIcon
+                          <!-- <BaseButtonIcon
                             size="sm"
                             variant="ghost"
                             class="text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-900/10 rounded-lg p-2 min-h-[40px] min-w-[40px]"
                             @click="handleDelete($event, notification.id)"
                           >
                             <Icon name="ph:trash" class="size-4" />
-                          </BaseButtonIcon>
+                          </BaseButtonIcon> -->
                         </div>
                       </div>
 
@@ -761,14 +761,14 @@ const filterOptions = [
                           >
                             <Icon name="ph:envelope-open" class="size-4" />
                           </BaseButtonIcon>
-                          <BaseButtonIcon
+                          <!-- <BaseButtonIcon
                             size="sm"
                             variant="ghost"
                             class="text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-900/10 hover:border-danger-200 dark:hover:border-danger-800 rounded-xl border border-transparent p-2.5 opacity-0 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md group-hover:opacity-100"
                             @click="handleDelete($event, notification.id)"
                           >
                             <Icon name="ph:trash" class="size-4" />
-                          </BaseButtonIcon>
+                          </BaseButtonIcon> -->
                         </div>
                       </div>
 

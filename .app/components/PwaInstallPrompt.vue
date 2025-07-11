@@ -44,42 +44,219 @@ interface BeforeInstallPromptEvent extends Event {
 const showInstallPrompt = ref(false)
 const deferredPrompt = ref<BeforeInstallPromptEvent | null>(null)
 
-onMounted(() => {
-  // Check if app is already installed
+// بررسی جامع برای تشخیص نصب PWA
+const isPwaInstalled = (): boolean => {
+  if (typeof window === 'undefined') return false
+
+  // بررسی standalone mode (اصلی‌ترین روش)
   if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('PWA detected: display-mode standalone')
+    return true
+  }
+
+  // بررسی navigator.standalone برای iOS Safari
+  if ((navigator as any).standalone === true) {
+    console.log('PWA detected: iOS standalone mode')
+    return true
+  }
+
+  // بررسی window.navigator.standalone برای iOS
+  if ('standalone' in window.navigator && (window.navigator as any).standalone) {
+    console.log('PWA detected: iOS navigator standalone')
+    return true
+  }
+
+  // بررسی referrer برای installed PWA
+  if (document.referrer.includes('android-app://')) {
+    console.log('PWA detected: Android app referrer')
+    return true
+  }
+
+  // بررسی sessionStorage فقط اگر قبلاً به صورت دستی set شده باشد
+  try {
+    const manualFlag = sessionStorage.getItem('isPWA-manual')
+    if (manualFlag === 'true') {
+      console.log('PWA detected: manual sessionStorage flag')
+      return true
+    }
+  }
+  catch (e) {
+    // sessionStorage may not be available
+  }
+
+  // بررسی localStorage برای نصب دستی
+  try {
+    const manualInstall = localStorage.getItem('pwa-manually-installed')
+    if (manualInstall === 'true') {
+      console.log('PWA detected: manual localStorage flag')
+      return true
+    }
+  }
+  catch (e) {
+    // localStorage may not be available
+  }
+
+  console.log('PWA not detected - showing install prompt')
+  return false
+}
+
+// دریافت prompt از global state
+const getGlobalPrompt = (): BeforeInstallPromptEvent | null => {
+  if (typeof window !== 'undefined' && window._pwaInstallPrompt) {
+    return window._pwaInstallPrompt as BeforeInstallPromptEvent
+  }
+  return null
+}
+
+onMounted(() => {
+  // اگر PWA قبلاً نصب شده باشد، پرامپت رو نشون نده
+  if (isPwaInstalled()) {
+    console.log('PWA is already installed - hiding prompt')
+    showInstallPrompt.value = false
     return
+  }
+
+  console.log('PWA not installed - initializing prompt logic')
+
+  // بررسی اولیه برای global prompt
+  const globalPrompt = getGlobalPrompt()
+  if (globalPrompt) {
+    deferredPrompt.value = globalPrompt
+    console.log('Found existing global prompt')
   }
 
   // Listen for the beforeinstallprompt event
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault()
     deferredPrompt.value = e as BeforeInstallPromptEvent
-
-    // Show install prompt after a delay
-    setTimeout(() => {
-      if (!localStorage.getItem('pwa-install-dismissed')) {
-        showInstallPrompt.value = true
-      }
-    }, 3000)
+    console.log('Captured new beforeinstallprompt event')
   })
 
   // Listen for app installation
   window.addEventListener('appinstalled', () => {
+    console.log('PWA has been installed')
     showInstallPrompt.value = false
     deferredPrompt.value = null
     localStorage.removeItem('pwa-install-dismissed')
+    // Set sessionStorage flag for manual detection
+    try {
+      sessionStorage.setItem('isPWA-manual', 'true')
+      localStorage.setItem('pwa-manually-installed', 'true')
+    }
+    catch (e) {
+      // ignore
+    }
+  })
+
+  // نمایش پرامپت بعد از delay (اگر شرایط مناسب باشد)
+  setTimeout(() => {
+    if (!isPwaInstalled() && !localStorage.getItem('pwa-install-dismissed') && (getGlobalPrompt() || deferredPrompt.value || isPwaSupported())) {
+      showInstallPrompt.value = true
+      console.log('Showing PWA install prompt')
+    }
+  }, 3000)
+
+  // بررسی دوره‌ای برای تشخیص تغییرات وضعیت نصب
+  const checkInstallStatus = () => {
+    if (isPwaInstalled() && showInstallPrompt.value) {
+      console.log('PWA detected as installed, hiding prompt')
+      showInstallPrompt.value = false
+    }
+
+    // بررسی برای prompt جدید
+    const globalPrompt = getGlobalPrompt()
+    if (globalPrompt && !deferredPrompt.value) {
+      deferredPrompt.value = globalPrompt
+    }
+  }
+
+  // بررسی هر 3 ثانیه (کمتر از قبل برای واکنش سریع‌تر)
+  const intervalId = setInterval(checkInstallStatus, 3000)
+
+  // پاک کردن interval هنگام unmount
+  onUnmounted(() => {
+    clearInterval(intervalId)
   })
 })
 
+// بررسی پشتیبانی PWA
+const isPwaSupported = (): boolean => {
+  return 'serviceWorker' in navigator && 'PushManager' in window
+}
+
+// راهنمایی نصب دستی
+const showManualInstallGuidance = () => {
+  const userAgent = navigator.userAgent.toLowerCase()
+  let instructions = ''
+
+  if (userAgent.includes('chrome') || userAgent.includes('chromium')) {
+    instructions = `در Chrome:
+1. روی آیکون نصب (⬇️) در نوار آدرس کلیک کنید
+2. یا از منوی سه نقطه، گزینه "Install app" را انتخاب کنید`
+  }
+  else if (userAgent.includes('firefox')) {
+    instructions = `در Firefox:
+1. از منوی hamburger، گزینه "Install this site as an app" را انتخاب کنید`
+  }
+  else if (userAgent.includes('edge')) {
+    instructions = `در Edge:
+1. روی آیکون نصب در نوار آدرس کلیک کنید
+2. یا از منوی سه نقطه، گزینه "Apps" > "Install this site as an app" را انتخاب کنید`
+  }
+  else if (userAgent.includes('safari')) {
+    instructions = `در Safari (iOS):
+1. روی آیکون Share (📤) کلیک کنید
+2. گزینه "Add to Home Screen" را انتخاب کنید`
+  }
+  else {
+    instructions = `راهنمای عمومی:
+1. در منوی مرورگر دنبال گزینه "Install app" یا "Add to home screen" بگردید
+2. یا از آیکون + در نوار آدرس استفاده کنید
+3. در صورت عدم وجود، از مرورگر Chrome یا Edge استفاده کنید`
+  }
+
+  alert(`🚀 راهنمای نصب PWA\n\n${instructions}`)
+}
+
 const installPwa = async () => {
-  if (!deferredPrompt.value) return
+  // بررسی برای prompt جدید از global state
+  if (!deferredPrompt.value) {
+    const globalPrompt = getGlobalPrompt()
+    if (globalPrompt) {
+      deferredPrompt.value = globalPrompt
+    }
+  }
+
+  if (!deferredPrompt.value) {
+    console.log('No deferred prompt available, showing manual guidance')
+    showManualInstallGuidance()
+    return
+  }
 
   try {
     await deferredPrompt.value.prompt()
     const { outcome } = await deferredPrompt.value.userChoice
 
     if (outcome === 'accepted') {
-      console.log('PWA installed successfully')
+      console.log('User accepted PWA installation')
+      // بررسی که آیا واقعاً نصب شده یا نه
+      setTimeout(() => {
+        if (isPwaInstalled()) {
+          console.log('PWA installed successfully')
+          showInstallPrompt.value = false
+          localStorage.removeItem('pwa-install-dismissed')
+          try {
+            sessionStorage.setItem('isPWA-manual', 'true')
+            localStorage.setItem('pwa-manually-installed', 'true')
+          }
+          catch (e) {
+            // ignore
+          }
+        }
+      }, 1000)
+    }
+    else {
+      console.log('User dismissed PWA installation')
     }
 
     showInstallPrompt.value = false
@@ -87,16 +264,22 @@ const installPwa = async () => {
   }
   catch (error) {
     console.error('Error installing PWA:', error)
+    // Fallback to manual guidance
+    showManualInstallGuidance()
   }
 }
 
 const dismissPrompt = () => {
+  console.log('User dismissed PWA install prompt')
   showInstallPrompt.value = false
   localStorage.setItem('pwa-install-dismissed', Date.now().toString())
 
-  // Show again after 7 days
+  // نمایش مجدد بعد از 7 روز (فقط اگر PWA نصب نشده باشد)
   setTimeout(() => {
-    localStorage.removeItem('pwa-install-dismissed')
+    if (!isPwaInstalled()) {
+      localStorage.removeItem('pwa-install-dismissed')
+      console.log('PWA install prompt dismiss period expired')
+    }
   }, 7 * 24 * 60 * 60 * 1000)
 }
 </script>

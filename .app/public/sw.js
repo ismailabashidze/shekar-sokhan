@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2.9.1' // این ورژن باید با package.json همخوانی داشته باشد
+const CACHE_VERSION = 'v2.9.2' // این ورژن باید با package.json همخوانی داشته باشد
 const STATIC_CACHE = `zehna-static-${CACHE_VERSION}`
 const IMAGES_CACHE = `zehna-images-${CACHE_VERSION}`
 const ICONS_CACHE = `zehna-icons-${CACHE_VERSION}`
@@ -113,7 +113,7 @@ self.addEventListener('fetch', event => {
   
   // Skip API requests - Always fetch from network for fresh data
   if (isApiRequest(request)) {
-    console.log('[SW] Skipping API request for fresh data:', request.url)
+    // console.log('[SW] Skipping API request for fresh data:', request.url)
     return
   }
   
@@ -135,12 +135,12 @@ async function handleIconRequest(request) {
   const cached = await cache.match(request)
   
   if (cached) {
-    console.log('[SW] Icon served from cache:', request.url)
+    // console.log('[SW] Icon served from cache:', request.url)
     return cached
   }
   
   try {
-    console.log('[SW] Fetching and caching icon:', request.url)
+    // console.log('[SW] Fetching and caching icon:', request.url)
     const response = await fetch(request)
     
     if (response.ok) {
@@ -178,7 +178,7 @@ async function handleImageRequest(request) {
   }).catch(() => cached) // Fallback to cache on network failure
   
   if (cached) {
-    console.log('[SW] Image served from cache:', request.url)
+    // console.log('[SW] Image served from cache:', request.url)
     return cached
   }
   
@@ -266,7 +266,7 @@ async function manageCacheSize(cacheName, maxEntries) {
     // Remove oldest entries (simple FIFO approach)
     const entriesToDelete = keys.slice(0, keys.length - maxEntries)
     await Promise.all(entriesToDelete.map(key => cache.delete(key)))
-    console.log(`[SW] Cleaned ${entriesToDelete.length} entries from ${cacheName}`)
+    // console.log(`[SW] Cleaned ${entriesToDelete.length} entries from ${cacheName}`)
   }
 }
 
@@ -432,10 +432,10 @@ async function syncNotifications() {
     })
     
     if (response.ok) {
-      console.log('[SW] Notifications synced successfully')
+      // console.log('[SW] Notifications synced successfully')
     }
   } catch (error) {
-    console.log('[SW] Failed to sync notifications:', error)
+    // console.log('[SW] Failed to sync notifications:', error)
   }
 }
 
@@ -466,7 +466,7 @@ async function precacheAssets() {
       })
     )
     
-    console.log('[SW] Asset precaching complete')
+    // console.log('[SW] Asset precaching complete')
   } catch (error) {
     console.log('[SW] Asset precaching failed:', error)
   }

@@ -2,35 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [2.9.0] (2025-02-01)
-
-### 🚀 Features
-- Enhanced responsive navigation system with improved horizontal sidebar functionality
-- Extended horizontal sidebar display range to support tablets and medium-sized screens
-- Improved mobile navigation experience with proper responsive breakpoints
-
-### 🎨 UI Improvements
-- Fixed horizontal sidebar not displaying on mobile devices and tablets
-- Adjusted horizontal sidebar to show up to 1280px width (XL breakpoint)
-- Enhanced vertical sidebar to display from 1280px width and above
-- Added proper spacing and padding for content when horizontal sidebar is visible
-
-### 🧰 Technical Improvements
-- Updated responsive breakpoints from `sm:hidden` to `xl:hidden` for horizontal sidebar
-- Modified vertical sidebar from `sm:block` to `xl:block` for consistent responsive behavior
-- Added padding-top to content area (pt-16 xl:pt-0) to prevent overlap with horizontal sidebar
-- Integrated HorizontalSideBar component into TairoSidebarLayout for proper layout management
+## [2.9.2] (2025-01-30)
 
 ### 🐞 Bug Fixes
-- Fixed horizontal sidebar not appearing on mobile and tablet devices
-- Resolved content overlapping with horizontal sidebar
-- Fixed responsive navigation switching between horizontal and vertical sidebars
+- Fixed PWA installation detection logic to prevent false positive detection
+- Improved PWA install prompt visibility when app is not actually installed
+- Removed unreliable window dimension checks for PWA installation status
+- Enhanced PWA detection with manual flag support for better accuracy
+
+### 🧰 Technical Improvements
+- Added global PWA install prompt management to prevent event timing issues
+- Improved error handling in PWA installation flow with fallback guidance
+- Enhanced console logging for PWA installation debugging
+- Fixed TypeScript definitions for global PWA prompt state
+- Optimized PWA detection polling interval for faster response
+
+### 🎨 UI Improvements
+- Better manual installation guidance based on browser type
+- Improved user experience when PWA install prompt is not available
 
 ---
 
-## [2.8.0] (2025-01-31)
+## [2.9.1] (2025-01-30)
 
-### 🚀 Features
+### �� Features
 - Version bump to 2.8.0 with updated PWA cache management
 - Enhanced version display and changelog management
 - Improved deployment pipeline and build process

@@ -57,4 +57,38 @@ export default defineNuxtPlugin(async () => {
   } else {
     console.warn('[PWA] Service worker not supported in this browser')
   }
+
+  // Global PWA install prompt management
+  if (process.client) {
+    // Create global state for deferred prompt
+    const globalDeferredPrompt = ref(null)
+    
+    // Listen for beforeinstallprompt event globally
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('[PWA] beforeinstallprompt event captured globally')
+      e.preventDefault()
+      globalDeferredPrompt.value = e
+      
+      // Store in global state that components can access
+      if (window) {
+        window._pwaInstallPrompt = e
+      }
+    })
+
+    // Listen for app installation
+    window.addEventListener('appinstalled', () => {
+      console.log('[PWA] App installed - clearing global prompt')
+      globalDeferredPrompt.value = null
+      if (window) {
+        window._pwaInstallPrompt = null
+      }
+    })
+
+    // Make the prompt available globally
+    return {
+      provide: {
+        pwaInstallPrompt: globalDeferredPrompt
+      }
+    }
+  }
 })
