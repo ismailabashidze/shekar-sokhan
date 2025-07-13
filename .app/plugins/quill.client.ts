@@ -42,4 +42,4 @@ export default defineNuxtPlugin(() => {
     `
     document.head.appendChild(style)
   }
-}) 
+})

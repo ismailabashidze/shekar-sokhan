@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { AdminNotificationForm, BulkSendOptions } from '~/composables/useAdminNotifications'
+import { persianDateTimeToISO, isoToPersianDateTime, getRelativeTimeToAnnounce, formatPersianDate } from '~/utils/persian-date'
+import PersianCalendar from '~/components/PersianCalendar.vue'
 
 definePageMeta({
   title: 'مدیریت اعلان‌ها',
@@ -15,23 +17,16 @@ useHead({
 const {
   fetchUsers,
   loadMoreUsers,
-  fetchAllNotifications,
   sendBulkNotification,
-  sendSystemNotification,
-  deleteNotificationAdmin,
   getNotificationStats,
   getUsersByRole,
   searchUsers,
   debouncedSearch,
   clearSearch,
-  subscribeToAllNotifications,
-  unsubscribeFromAllNotifications,
   isLoading,
   isSending,
   isLoadingMore,
   isSearching,
-  isAdminRealtimeConnected,
-  allNotifications,
   users,
   searchResults,
   searchQuery,
@@ -54,6 +49,47 @@ const formData = ref<AdminNotificationForm>({
   user_id: '',
   announce_time: '',
 })
+
+// Persian calendar state
+const announcePersianDate = ref('')
+const announceTime = ref('')
+
+// Computed property to sync Persian date/time with ISO announce_time
+const announceTimeISO = computed({
+  get: () => formData.value.announce_time || '',
+  set: (value: string) => {
+    formData.value.announce_time = value
+  },
+})
+
+// Watch for changes in Persian date/time and update ISO format
+watch([announcePersianDate, announceTime], ([persianDate, time]) => {
+  if (persianDate && time) {
+    formData.value.announce_time = persianDateTimeToISO(persianDate, time)
+  }
+  else if (persianDate) {
+    // Default to current time if no time is provided
+    const now = new Date()
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+    formData.value.announce_time = persianDateTimeToISO(persianDate, currentTime)
+  }
+  else {
+    formData.value.announce_time = ''
+  }
+})
+
+// Watch for changes in ISO announce_time and update Persian date/time
+watch(() => formData.value.announce_time, (isoString) => {
+  if (isoString) {
+    const { persianDate, time } = isoToPersianDateTime(isoString)
+    announcePersianDate.value = persianDate
+    announceTime.value = time
+  }
+  else {
+    announcePersianDate.value = ''
+    announceTime.value = ''
+  }
+}, { immediate: true })
 
 const bulkOptions = ref<BulkSendOptions>({
   sendToAll: false,
@@ -98,13 +134,13 @@ const systemTemplates = {
 const filteredUsers = computed(() => {
   // If searching, use search results
   if (localSearchQuery.value.trim()) {
-    return searchResults.value.filter(u =>
+    return searchResults.value.filter((u: any) =>
       selectedRole.value ? u.role === selectedRole.value : true,
     )
   }
 
   // Otherwise use regular users list with role filter
-  return users.value.filter(u =>
+  return users.value.filter((u: any) =>
     selectedRole.value ? u.role === selectedRole.value : true,
   )
 })
@@ -128,6 +164,8 @@ const selectedUsersCount = computed(() => {
   }
   return bulkOptions.value.selectedRecipients.length
 })
+
+
 
 // Methods
 const loadTemplate = (templateKey: keyof typeof systemTemplates) => {
@@ -155,15 +193,16 @@ const selectAllUsers = () => {
   }
   else {
     // Select all displayed users
-    bulkOptions.value.selectedRecipients = displayedUsers.value.map(u => u.id)
+    bulkOptions.value.selectedRecipients = displayedUsers.value.map((u: any) => u.id)
   }
 }
 
 // Search handling
-const handleSearch = (query: string) => {
-  localSearchQuery.value = query
-  if (query.trim()) {
-    debouncedSearch(query, selectedRole.value)
+const handleSearch = (query: string | number | undefined) => {
+  const queryValue = String(query || '')
+  localSearchQuery.value = queryValue
+  if (queryValue.trim()) {
+    debouncedSearch(queryValue, selectedRole.value)
   }
   else {
     clearSearch()
@@ -175,28 +214,27 @@ const handleScroll = (event: Event) => {
   const target = event.target as HTMLElement
   const { scrollTop, scrollHeight, clientHeight } = target
 
-  // Check if scrolled to bottom
-  if (scrollTop + clientHeight >= scrollHeight - 10) {
-    if (!localSearchQuery.value.trim()) {
-      // Load more regular users
-      loadMoreUsers(selectedRole.value)
-    }
+  // Check if scrolled to bottom and load more regular users (not search results)
+  if (scrollTop + clientHeight >= scrollHeight - 10 && !localSearchQuery.value.trim()) {
+    // Load more regular users
+    loadMoreUsers(selectedRole.value)
     // Note: For search results, we could implement search pagination if needed
   }
 }
 
 // Handle role change
-const handleRoleChange = async (role: string) => {
-  selectedRole.value = role
+const handleRoleChange = async (role: string | string[] | undefined) => {
+  const roleValue = Array.isArray(role) ? role[0] : role || ''
+  selectedRole.value = roleValue
   bulkOptions.value.selectedRecipients = []
 
   if (localSearchQuery.value.trim()) {
     // Re-search with new role filter
-    debouncedSearch(localSearchQuery.value, role)
+    debouncedSearch(localSearchQuery.value, roleValue)
   }
   else {
     // Reload users with role filter
-    await fetchUsers(1, 20, role, true)
+    await fetchUsers(1, 20, roleValue, true)
   }
 }
 
@@ -222,6 +260,10 @@ const sendNotification = async () => {
       user_id: '',
       announce_time: '',
     }
+
+    // Reset Persian calendar state
+    announcePersianDate.value = ''
+    announceTime.value = ''
     bulkOptions.value = {
       sendToAll: false,
       selectedRecipients: [],
@@ -231,9 +273,6 @@ const sendNotification = async () => {
     localSearchQuery.value = ''
     clearSearch()
 
-    // Refresh notifications list
-    await fetchAllNotifications()
-
     // Show success message
     console.log(`اعلان با موفقیت برای ${sentCount} کاربر ارسال شد`)
   }
@@ -242,26 +281,10 @@ const sendNotification = async () => {
   }
 }
 
-const deleteNotification = async (notificationId: string) => {
-  if (confirm('آیا از حذف این اعلان اطمینان دارید؟')) {
-    try {
-      await deleteNotificationAdmin(notificationId)
-      console.log('اعلان با موفقیت حذف شد')
-    }
-    catch (error) {
-      console.error('خطا در حذف اعلان:', error)
-    }
-  }
-}
-
 // Initialize
 onMounted(async () => {
   try {
-    await Promise.all([
-      fetchUsers(1, 20, '', true),
-      fetchAllNotifications(),
-      subscribeToAllNotifications(),
-    ])
+    await fetchUsers(1, 20, '', true)
   }
   catch (error) {
     console.error('خطا در بارگذاری داده‌ها:', error)
@@ -271,8 +294,44 @@ onMounted(async () => {
 // Cleanup
 onBeforeUnmount(() => {
   clearSearch()
-  unsubscribeFromAllNotifications()
 })
+
+interface NotificationTypeOption {
+  label: string
+  value: 'info' | 'success' | 'warning' | 'error' | 'system'
+}
+
+interface NotificationPriorityOption {
+  label: string
+  value: 'low' | 'medium' | 'high' | 'urgent'
+}
+
+interface RoleOption {
+  label: string
+  value: string
+}
+
+const notificationTypeOptions: NotificationTypeOption[] = [
+  { label: 'اطلاعات', value: 'info' },
+  { label: 'موفقیت', value: 'success' },
+  { label: 'هشدار', value: 'warning' },
+  { label: 'خطا', value: 'error' },
+  { label: 'سیستم', value: 'system' }
+]
+
+const notificationPriorityOptions: NotificationPriorityOption[] = [
+  { label: 'کم', value: 'low' },
+  { label: 'متوسط', value: 'medium' },
+  { label: 'زیاد', value: 'high' },
+  { label: 'فوری', value: 'urgent' }
+]
+
+const roleOptions: RoleOption[] = [
+  { label: 'همه نقش‌ها', value: '' },
+  { label: 'کاربر عادی', value: 'user' },
+  { label: 'درمانگر', value: 'therapist' },
+  { label: 'ادمین', value: 'admin' }
+]
 </script>
 
 <template>
@@ -297,19 +356,16 @@ onBeforeUnmount(() => {
                 کل اعلان‌ها
               </p>
               <p class="text-muted-900 text-2xl font-bold dark:text-white">
-                {{ getNotificationStats.total }}
+                {{ getNotificationStats?.total || 0 }}
               </p>
               <!-- Realtime status indicator -->
               <div class="mt-2 flex items-center gap-2">
                 <div
                   class="size-1.5 rounded-full transition-all duration-300"
-                  :class="isAdminRealtimeConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'"
+                  :class="'bg-muted-500'"
                 />
-                <span
-                  class="text-xs"
-                  :class="isAdminRealtimeConnected ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
-                >
-                  {{ isAdminRealtimeConnected ? 'آنلاین' : 'آفلاین' }}
+                <span class="text-xs text-muted-600 dark:text-muted-400">
+                  محلی
                 </span>
               </div>
             </div>
@@ -326,7 +382,7 @@ onBeforeUnmount(() => {
                 خوانده نشده
               </p>
               <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                {{ getNotificationStats.unread }}
+                {{ getNotificationStats?.unread || 0 }}
               </p>
             </div>
             <div class="flex size-12 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900">
@@ -342,7 +398,7 @@ onBeforeUnmount(() => {
                 نرخ خوانده شده
               </p>
               <p class="text-2xl font-bold text-green-600 dark:text-green-400">
-                {{ getNotificationStats.readPercentage }}%
+                {{ getNotificationStats?.readPercentage || 0 }}%
               </p>
             </div>
             <div class="flex size-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900">
@@ -369,9 +425,9 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Main Content -->
-      <div class="grid grid-cols-1 gap-8 xl:grid-cols-5">
+      <div class="grid grid-cols-1 gap-8">
         <!-- Send Notification Form -->
-        <div class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 rounded-xl border bg-white xl:col-span-3">
+        <div class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 rounded-xl border bg-white">
           <div class="border-muted-200 dark:border-muted-700 border-b p-6">
             <h2 class="text-muted-900 text-xl font-semibold dark:text-white">
               ارسال اعلان جدید
@@ -409,24 +465,13 @@ onBeforeUnmount(() => {
                 <BaseListbox
                   v-model="formData.type"
                   label="نوع"
-                  :items="[
-                    { label: 'اطلاعات', value: 'info' },
-                    { label: 'موفقیت', value: 'success' },
-                    { label: 'هشدار', value: 'warning' },
-                    { label: 'خطا', value: 'error' },
-                    { label: 'سیستم', value: 'system' }
-                  ]"
+                  :items="notificationTypeOptions"
                 />
 
                 <BaseListbox
                   v-model="formData.priority"
                   label="اولویت"
-                  :items="[
-                    { label: 'کم', value: 'low' },
-                    { label: 'متوسط', value: 'medium' },
-                    { label: 'زیاد', value: 'high' },
-                    { label: 'فوری', value: 'urgent' }
-                  ]"
+                  :items="notificationPriorityOptions"
                 />
               </div>
             </div>
@@ -446,7 +491,7 @@ onBeforeUnmount(() => {
               height="250px"
             >
               <template #help>
-                <p class="mt-1 text-xs text-muted-500 dark:text-muted-400">
+                <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs">
                   از toolbar بالا برای فرمت‌دهی متن استفاده کنید. این محتوا در صفحه جزئیات اعلان نمایش داده می‌شود.
                 </p>
               </template>
@@ -472,16 +517,27 @@ onBeforeUnmount(() => {
               <label class="text-muted-700 dark:text-muted-300 block text-sm font-medium">
                 زمان‌بندی اعلان
               </label>
-              
+
               <div class="bg-muted-50 dark:bg-muted-800 border-muted-200 dark:border-muted-700 rounded-lg border p-4">
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <BaseInput
-                    v-model="formData.announce_time"
-                    type="datetime-local"
-                    label="زمان اعلان (اختیاری)"
-                    placeholder="انتخاب زمان اعلان"
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <!-- Persian Date Picker -->
+                  <PersianCalendar
+                    v-model="announcePersianDate"
+                    label="تاریخ اعلان (اختیاری)"
+                    placeholder="انتخاب تاریخ"
+                    clearable
                   />
-                  
+
+                  <!-- Time Picker -->
+                  <BaseInput
+                    v-model="announceTime"
+                    type="time"
+                    label="ساعت اعلان"
+                    placeholder="00:00"
+                    :disabled="!announcePersianDate"
+                  />
+
+                  <!-- Clear Button -->
                   <div class="flex items-end">
                     <BaseButton
                       v-if="formData.announce_time"
@@ -489,22 +545,53 @@ onBeforeUnmount(() => {
                       size="sm"
                       color="warning"
                       class="w-full"
-                      @click="formData.announce_time = ''"
+                      @click="() => {
+                        formData.announce_time = '';
+                        announcePersianDate = '';
+                        announceTime = '';
+                      }"
                     >
                       <Icon name="ph:x" class="ml-2 size-4" />
                       حذف زمان‌بندی
                     </BaseButton>
                   </div>
                 </div>
-                
-                <div class="mt-3">
-                  <p class="text-muted-500 dark:text-muted-400 text-xs">
+
+                <!-- Schedule Info -->
+                <div class="mt-4 space-y-2">
+                  <div v-if="formData.announce_time" class="text-xs">
+                    <div class="text-muted-600 dark:text-muted-300 mb-2">
+                      <Icon name="ph:info" class="ml-1 inline size-3" />
+                      زمان‌بندی اعلان:
+                    </div>
+
+                    <div class="bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 rounded-lg border p-3">
+                      <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                          <div class="text-primary-700 dark:text-primary-300 font-medium">
+                            📅 {{ formatPersianDate(announcePersianDate) }}
+                          </div>
+                          <div class="text-primary-600 dark:text-primary-400">
+                            🕐 ساعت {{ announceTime || '00:00' }}
+                          </div>
+                        </div>
+
+                        <div class="text-left">
+                          <div class="text-primary-700 dark:text-primary-300 font-semibold">
+                            {{ getRelativeTimeToAnnounce(formData.announce_time) }}
+                          </div>
+                          <div class="text-primary-500 dark:text-primary-400 text-xs">
+                            {{ new Date(formData.announce_time).toLocaleString('fa-IR') }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-else class="text-muted-500 dark:text-muted-400 text-xs">
                     <Icon name="ph:info" class="ml-1 inline size-3" />
-                    {{ formData.announce_time 
-                      ? `اعلان در ${new Date(formData.announce_time).toLocaleString('fa-IR')} ارسال خواهد شد` 
-                      : 'اگر زمان تعیین نکنید، اعلان بلافاصله ارسال می‌شود' 
-                    }}
-                  </p>
+                    اگر زمان تعیین نکنید، اعلان بلافاصله ارسال می‌شود
+                  </div>
                 </div>
               </div>
             </div>
@@ -524,12 +611,7 @@ onBeforeUnmount(() => {
                 <BaseListbox
                   v-model="selectedRole"
                   placeholder="فیلتر بر اساس نقش"
-                  :items="[
-                    { label: 'همه نقش‌ها', value: '' },
-                    { label: 'کاربر عادی', value: 'user' },
-                    { label: 'درمانگر', value: 'therapist' },
-                    { label: 'ادمین', value: 'admin' }
-                  ]"
+                  :items="roleOptions"
                   class="w-40"
                   @update:model-value="handleRoleChange"
                 />
@@ -581,37 +663,37 @@ onBeforeUnmount(() => {
                   <template v-else>
                     <div
                       v-for="user in displayedUsers"
-                      :key="user.id"
+                      :key="(user as any).id"
                       class="border-muted-100 dark:border-muted-700 flex items-center justify-between border-b p-3 last:border-b-0"
                     >
                       <div class="flex items-center space-x-3 space-x-reverse">
                         <BaseCheckbox
-                          :model-value="bulkOptions.selectedRecipients.includes(user.id)"
-                          @update:model-value="toggleUserSelection(user.id)"
+                          :model-value="bulkOptions.selectedRecipients.includes((user as any).id)"
+                          @update:model-value="toggleUserSelection((user as any).id)"
                         />
                         <BaseAvatar
-                          :src="getUserAvatarUrl(user)"
-                          :text="user.initials"
+                          :src="getUserAvatarUrl(user as any)"
+                          :text="(user as any).initials"
                           size="sm"
                         />
                         <div>
                           <p class="text-muted-900 text-sm font-medium dark:text-white">
-                            {{ user.name || user.username || 'کاربر بدون نام' }}
+                            {{ (user as any).name || (user as any).username || 'کاربر بدون نام' }}
                           </p>
                           <p class="text-muted-500 dark:text-muted-400 text-xs">
-                            {{ user.email || 'ایمیل موجود نیست' }}
+                            {{ (user as any).email || 'ایمیل موجود نیست' }}
                           </p>
                           <p class="text-muted-400 dark:text-muted-500 text-xs">
-                            @{{ user.username }}
+                            @{{ (user as any).username }}
                           </p>
                         </div>
                       </div>
                       <BaseBadge
-                        v-if="user.role"
-                        :color="user.role === 'admin' ? 'primary' : user.role === 'therapist' ? 'success' : 'muted'"
+                        v-if="(user as any).role"
+                        :color="(user as any).role === 'admin' ? 'primary' : (user as any).role === 'therapist' ? 'success' : 'muted'"
                         size="sm"
                       >
-                        {{ user.role }}
+                        {{ (user as any).role }}
                       </BaseBadge>
                     </div>
 
@@ -653,15 +735,18 @@ onBeforeUnmount(() => {
                     <p class="text-muted-600 dark:text-muted-300 mb-3 text-sm">
                       {{ formData.message }}
                     </p>
-                    
+
                     <div v-if="formData.complete_message" class="mb-3">
-                      <p class="text-muted-700 dark:text-muted-200 text-xs font-medium mb-2">محتوای کامل:</p>
-                      <div 
-                        class="bg-white dark:bg-muted-800 border border-muted-200 dark:border-muted-600 rounded-lg p-3 text-sm text-muted-600 dark:text-muted-300 leading-relaxed prose prose-sm max-w-none"
+                      <p class="text-muted-700 dark:text-muted-200 mb-2 text-xs font-medium">
+                        محتوای کامل:
+                      </p>
+                      <div
+                        class="dark:bg-muted-800 border-muted-200 dark:border-muted-600 text-muted-600 dark:text-muted-300 prose prose-sm max-w-none rounded-lg border bg-white p-3 text-sm leading-relaxed"
                         v-html="formData.complete_message"
                       />
+                      <!-- v-html is safe here as it's coming from controlled rich editor input -->
                     </div>
-                    
+
                     <div class="flex flex-wrap items-center gap-2">
                       <button v-if="formData.complete_message" class="bg-info-100 dark:bg-info-900 text-info-700 dark:text-info-300 rounded px-2 py-1 text-xs">
                         بیشتر بخوانید
@@ -692,153 +777,22 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- Recent Notifications -->
-        <div class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 rounded-xl border bg-white xl:col-span-2">
-          <div class="border-muted-200 dark:border-muted-700 border-b p-6">
-            <h2 class="text-muted-900 text-xl font-semibold dark:text-white">
-              اعلان‌های ارسال شده
-            </h2>
-          </div>
-
-          <div class="h-[500px] overflow-y-auto xl:h-[600px]">
-            <div v-if="isLoading" class="p-6">
-              <div class="animate-pulse space-y-3">
-                <div
-                  v-for="i in 5"
-                  :key="i"
-                  class="bg-muted-100 dark:bg-muted-700 h-16 rounded"
-                />
-              </div>
+        <!-- Actions -->
+        <div class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 rounded-xl border bg-white p-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3 space-x-reverse">
+              <Icon name="ph:list" class="text-muted-500 size-5" />
+              <h3 class="text-muted-900 text-lg font-semibold dark:text-white">
+                مدیریت اعلان‌ها
+              </h3>
             </div>
-
-            <div v-else-if="allNotifications.length === 0" class="p-6 text-center">
-              <Icon name="ph:bell-slash" class="text-muted-400 mx-auto mb-3 size-12" />
-              <p class="text-muted-500 dark:text-muted-400">
-                هیچ اعلانی ارسال نشده است
-              </p>
-            </div>
-
-            <div v-else class="space-y-2 p-1 sm:space-y-3">
-              <div
-                v-for="notification in allNotifications.slice(0, 10)"
-                :key="notification.id"
-                class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 rounded-lg border bg-white p-3 transition-all duration-200 hover:shadow-md sm:p-4"
-              >
-                <!-- Header: Title, Type and Status -->
-                <div class="mb-3 flex items-start justify-between">
-                  <div class="flex-1">
-                    <div class="mb-2 flex items-center space-x-3 space-x-reverse">
-                      <!-- Status Indicator -->
-                      <div :class="`w-3 h-3 rounded-full ${notification.is_read ? 'bg-green-500' : 'bg-orange-500'}`" />
-
-                      <!-- Title -->
-                      <h4 class="text-muted-900 text-sm font-semibold dark:text-white">
-                        {{ notification.title }}
-                      </h4>
-
-                      <!-- Type Badge -->
-                      <!-- <BaseBadge
-                        :color="notification.type === 'info' ? 'primary' : notification.type === 'success' ? 'success' : notification.type === 'warning' ? 'warning' : 'danger'"
-                        size="xs"
-                      >
-                        {{ notification.type }}
-                      </BaseBadge> -->
-                    </div>
-
-                    <!-- Status Text -->
-                    <p class="text-xs" :class="notification.is_read ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'">
-                      {{ notification.is_read ? 'خوانده شده' : 'خوانده نشده' }}
-                    </p>
-                  </div>
-
-                  <!-- Actions -->
-                  <div class="flex items-center space-x-2 space-x-reverse">
-                    <!-- Priority Badge -->
-                    <BaseBadge
-                      :color="notification.priority === 'urgent' ? 'danger' : notification.priority === 'high' ? 'warning' : 'muted'"
-                      size="xs"
-                      variant="pastel"
-                    >
-                      {{ notification.priority === 'urgent' ? 'فوری' : notification.priority === 'high' ? 'بالا' : notification.priority === 'medium' ? 'متوسط' : 'کم' }}
-                    </BaseBadge>
-
-                    <!-- Delete Button -->
-                    <button
-                      class="text-muted-400 rounded-md p-1 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                      @click="deleteNotification(notification.id)"
-                    >
-                      <Icon name="ph:trash" class="size-4" />
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Message -->
-                <div class="mb-4">
-                  <p class="text-muted-600 dark:text-muted-300 text-sm leading-relaxed">
-                    {{ notification.message }}
-                  </p>
-                </div>
-
-                <!-- Sender and Recipient -->
-                <div class="flex flex-col items-center justify-between gap-3 md:flex-row md:gap-0">
-                  <!-- Sender -->
-                  <div class="flex items-center space-x-2 space-x-reverse">
-                    <BaseAvatar
-                      :src="getUserAvatarUrl(notification.expand?.user)"
-                      :text="notification.expand?.user?.meta?.name?.substring(0, 2) || 'س'"
-                      size="xs"
-                    />
-                    <div>
-                      <p class="text-muted-500 dark:text-muted-400 text-xs">
-                        فرستنده:
-                      </p>
-                      <p class="text-muted-700 dark:text-muted-200 max-w-24 truncate text-xs font-medium sm:max-w-none">
-                        {{ notification.expand?.user?.meta?.name || notification.expand?.user?.username || 'سیستم' }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <!-- Arrow -->
-                  <Icon name="ph:arrow-left" class="text-muted-400 hidden size-4 md:block" />
-                  <Icon name="ph:arrow-down" class="text-muted-400 block size-4 md:hidden" />
-
-                  <!-- Recipient -->
-                  <div class="flex items-center space-x-2 space-x-reverse">
-                    <BaseAvatar
-                      :src="getUserAvatarUrl(notification.expand?.recipient_user_id)"
-                      :text="notification.expand?.recipient_user_id?.meta?.name?.substring(0, 2) || 'ک'"
-                      size="xs"
-                    />
-                    <div>
-                      <p class="text-muted-500 dark:text-muted-400 text-xs">
-                        گیرنده:
-                      </p>
-                      <p class="text-muted-700 dark:text-muted-200 max-w-24 truncate text-xs font-medium sm:max-w-none">
-                        {{ notification.expand?.recipient_user_id?.meta?.name || notification.expand?.recipient_user_id?.username || 'نامعلوم' }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Footer: Date -->
-                <div class="border-muted-100 dark:border-muted-700 mt-3 border-t pt-3">
-                  <div class="text-muted-400 flex items-center justify-between text-xs">
-                    <div class="flex items-center space-x-2 space-x-reverse">
-                      <Icon name="ph:calendar" class="size-3" />
-                      <span>{{ new Date(notification.created).toLocaleDateString('fa-IR') }}</span>
-                      <span class="mx-1">•</span>
-                      <span>{{ new Date(notification.created).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }) }}</span>
-                    </div>
-
-                    <!-- Action Button if exists -->
-                    <div v-if="notification.action_text && notification.action_url" class="flex items-center space-x-1 space-x-reverse">
-                      <Icon name="ph:link" class="size-3" />
-                      <span>{{ notification.action_text }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <NuxtLink
+              to="/admin/sent"
+              class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 flex items-center space-x-2 space-x-reverse transition-colors"
+            >
+              <Icon name="ph:arrow-left" class="size-4" />
+              <span>مشاهده اعلان‌های ارسال شده</span>
+            </NuxtLink>
           </div>
         </div>
       </div>

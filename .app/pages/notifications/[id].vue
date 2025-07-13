@@ -35,7 +35,7 @@ onMounted(async () => {
       // If notification not found in current list, fetch all notifications
       await fetchNotifications()
     }
-    
+
     if (!notification.value) {
       error.value = 'اعلان یافت نشد'
       return
@@ -45,9 +45,11 @@ onMounted(async () => {
     if (!notification.value.isRead) {
       await markAsRead(notificationId)
     }
-  } catch (err: any) {
+  }
+  catch (err: any) {
     error.value = err.message || 'خطا در بارگذاری اعلان'
-  } finally {
+  }
+  finally {
     isLoading.value = false
   }
 })
@@ -89,12 +91,14 @@ const handleAction = () => {
 
 <template>
   <div class="notification-detail-page bg-muted-50 dark:bg-muted-900 min-h-screen">
-    <div class="container-wrapper mx-auto w-full max-w-4xl px-3 sm:px-4 py-4 sm:py-8">
+    <div class="container-wrapper mx-auto w-full max-w-4xl px-3 py-4 sm:px-4 sm:py-8">
       <!-- Loading State -->
       <div v-if="isLoading" class="flex items-center justify-center py-12">
         <div class="flex flex-col items-center gap-4">
-          <div class="size-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
-          <p class="text-muted-500 dark:text-muted-400">در حال بارگذاری...</p>
+          <div class="border-primary-500 size-8 animate-spin rounded-full border-2 border-t-transparent" />
+          <p class="text-muted-500 dark:text-muted-400">
+            در حال بارگذاری...
+          </p>
         </div>
       </div>
 
@@ -102,9 +106,17 @@ const handleAction = () => {
       <div v-else-if="error" class="flex items-center justify-center py-12">
         <div class="text-center">
           <Icon name="lucide:alert-circle" class="mx-auto mb-4 size-12 text-red-500" />
-          <h2 class="mb-2 text-xl font-semibold text-muted-900 dark:text-white">خطا در بارگذاری</h2>
-          <p class="mb-4 text-muted-500 dark:text-muted-400">{{ error }}</p>
-          <BaseButton @click="handleBack" color="primary" variant="outline">
+          <h2 class="text-muted-900 mb-2 text-xl font-semibold dark:text-white">
+            خطا در بارگذاری
+          </h2>
+          <p class="text-muted-500 dark:text-muted-400 mb-4">
+            {{ error }}
+          </p>
+          <BaseButton
+            color="primary"
+            variant="outline"
+            @click="handleBack"
+          >
             بازگشت
           </BaseButton>
         </div>
@@ -115,10 +127,10 @@ const handleAction = () => {
         <!-- Header -->
         <div class="flex items-center justify-between">
           <BaseButton
-            @click="handleBack"
             variant="pastel"
             color="muted"
             class="shrink-0"
+            @click="handleBack"
           >
             <Icon name="lucide:arrow-right" class="size-4" />
             <span class="mr-2">بازگشت</span>
@@ -129,21 +141,21 @@ const handleAction = () => {
             <!-- Mark as read/unread -->
             <BaseButton
               v-if="!notification.isRead"
-              @click="handleMarkAsRead"
               variant="pastel"
               color="success"
               size="sm"
+              @click="handleMarkAsRead"
             >
               <Icon name="lucide:check" class="size-4" />
               <span class="mr-1 hidden sm:inline">علامت‌گذاری به عنوان خوانده شده</span>
             </BaseButton>
-            
+
             <BaseButton
               v-else
-              @click="handleMarkAsUnread"
               variant="pastel"
               color="muted"
               size="sm"
+              @click="handleMarkAsUnread"
             >
               <Icon name="lucide:mail" class="size-4" />
               <span class="mr-1 hidden sm:inline">علامت‌گذاری به عنوان خوانده نشده</span>
@@ -151,10 +163,10 @@ const handleAction = () => {
 
             <!-- Delete -->
             <BaseButton
-              @click="handleDelete"
               variant="pastel"
               color="danger"
               size="sm"
+              @click="handleDelete"
             >
               <Icon name="lucide:trash-2" class="size-4" />
               <span class="mr-1 hidden sm:inline">حذف</span>
@@ -163,9 +175,9 @@ const handleAction = () => {
         </div>
 
         <!-- Notification Card -->
-        <div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-muted-800">
+        <div class="dark:bg-muted-800 overflow-hidden rounded-xl bg-white shadow-sm">
           <!-- Header -->
-          <div class="border-b border-muted-200 p-6 dark:border-muted-700">
+          <div class="border-muted-200 dark:border-muted-700 border-b p-6">
             <div class="flex items-start gap-4">
               <!-- Type Icon -->
               <div
@@ -179,43 +191,43 @@ const handleAction = () => {
                 />
               </div>
 
-              <div class="flex-1 min-w-0">
+              <div class="min-w-0 flex-1">
                 <!-- Title and Priority -->
-                <div class="flex items-center gap-3 mb-2">
-                  <h1 class="text-xl font-semibold text-muted-900 dark:text-white">
+                <div class="mb-2 flex items-center gap-3">
+                  <h1 class="text-muted-900 text-xl font-semibold dark:text-white">
                     {{ notification.title }}
                   </h1>
-                  
+
                   <!-- Priority Badge -->
                   <div
                     class="rounded-full px-2 py-1 text-xs font-medium"
                     :class="`bg-${getPriorityColor(notification.priority)}-100 text-${getPriorityColor(notification.priority)}-600 dark:bg-${getPriorityColor(notification.priority)}-900/20 dark:text-${getPriorityColor(notification.priority)}-400`"
                   >
-                    {{ notification.priority === 'urgent' ? 'فوری' : 
-                       notification.priority === 'high' ? 'بالا' :
-                       notification.priority === 'medium' ? 'متوسط' : 'پایین' }}
+                    {{ notification.priority === 'urgent' ? 'فوری' :
+                      notification.priority === 'high' ? 'بالا' :
+                      notification.priority === 'medium' ? 'متوسط' : 'پایین' }}
                   </div>
 
                   <!-- Read Status -->
                   <div
                     v-if="!notification.isRead"
-                    class="size-3 rounded-full bg-primary-500"
+                    class="bg-primary-500 size-3 rounded-full"
                   />
                 </div>
 
                 <!-- Meta Information -->
-                <div class="flex flex-wrap items-center gap-4 text-sm text-muted-500 dark:text-muted-400">
+                <div class="text-muted-500 dark:text-muted-400 flex flex-wrap items-center gap-4 text-sm">
                   <div class="flex items-center gap-1">
                     <Icon name="lucide:clock" class="size-4" />
                     <span>{{ getRelativeTime(notification.createdAt) }}</span>
                   </div>
-                  
+
                   <div class="flex items-center gap-1">
                     <Icon name="lucide:tag" class="size-4" />
                     <span>{{ notification.type === 'info' ? 'اطلاعیه' :
-                             notification.type === 'success' ? 'موفقیت' :
-                             notification.type === 'warning' ? 'هشدار' :
-                             notification.type === 'error' ? 'خطا' : 'سیستمی' }}</span>
+                      notification.type === 'success' ? 'موفقیت' :
+                      notification.type === 'warning' ? 'هشدار' :
+                      notification.type === 'error' ? 'خطا' : 'سیستمی' }}</span>
                   </div>
 
                   <div v-if="notification.user" class="flex items-center gap-1">
@@ -231,7 +243,7 @@ const handleAction = () => {
           <div class="p-6">
             <!-- Short Message -->
             <div class="mb-6">
-              <h2 class="mb-3 text-lg font-medium text-muted-900 dark:text-white">
+              <h2 class="text-muted-900 mb-3 text-lg font-medium dark:text-white">
                 خلاصه پیام
               </h2>
               <p class="text-muted-600 dark:text-muted-300 leading-relaxed">
@@ -241,11 +253,11 @@ const handleAction = () => {
 
             <!-- Complete Message (Rich Content) -->
             <div v-if="notification.completeMessage" class="mb-6">
-              <h2 class="mb-3 text-lg font-medium text-muted-900 dark:text-white">
+              <h2 class="text-muted-900 mb-3 text-lg font-medium dark:text-white">
                 محتوای کامل
               </h2>
-              <div 
-                class="prose prose-sm max-w-none dark:prose-invert"
+              <div
+                class="prose prose-sm dark:prose-invert max-w-none"
                 v-html="notification.completeMessage"
               />
             </div>
@@ -253,9 +265,9 @@ const handleAction = () => {
             <!-- Action Button -->
             <div v-if="notification.actionUrl && notification.actionText" class="pt-4">
               <BaseButton
-                @click="handleAction"
                 color="primary"
                 class="w-full sm:w-auto"
+                @click="handleAction"
               >
                 <Icon name="lucide:external-link" class="size-4" />
                 <span class="mr-2">{{ notification.actionText }}</span>
@@ -268,10 +280,18 @@ const handleAction = () => {
       <!-- Not Found State -->
       <div v-else class="flex items-center justify-center py-12">
         <div class="text-center">
-          <Icon name="lucide:search-x" class="mx-auto mb-4 size-12 text-muted-400" />
-          <h2 class="mb-2 text-xl font-semibold text-muted-900 dark:text-white">اعلان یافت نشد</h2>
-          <p class="mb-4 text-muted-500 dark:text-muted-400">اعلان مورد نظر یافت نشد یا ممکن است حذف شده باشد.</p>
-          <BaseButton @click="handleBack" color="primary" variant="outline">
+          <Icon name="lucide:search-x" class="text-muted-400 mx-auto mb-4 size-12" />
+          <h2 class="text-muted-900 mb-2 text-xl font-semibold dark:text-white">
+            اعلان یافت نشد
+          </h2>
+          <p class="text-muted-500 dark:text-muted-400 mb-4">
+            اعلان مورد نظر یافت نشد یا ممکن است حذف شده باشد.
+          </p>
+          <BaseButton
+            color="primary"
+            variant="outline"
+            @click="handleBack"
+          >
             بازگشت به صفحه اعلان‌ها
           </BaseButton>
         </div>
@@ -332,4 +352,4 @@ const handleAction = () => {
 .dark .prose a:hover {
   color: rgb(147, 197, 253);
 }
-</style> 
+</style>

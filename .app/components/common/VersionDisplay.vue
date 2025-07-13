@@ -5,7 +5,7 @@
   >
     v{{ version || 'loading...' }}
     <!-- Debug info (remove in production) -->
-    <div v-if="!version" class="text-red-500 text-xs mt-1">
+    <div v-if="!version" class="mt-1 text-xs text-red-500">
       Debug: version undefined
     </div>
   </div>

@@ -5,16 +5,19 @@ export interface PBNotificationRecord {
   id: string
   title: string
   message: string
-  complete_message?: string // فیلد جدید برای محتوای کامل rich editor
+  complete_message?: string
   type: 'info' | 'success' | 'warning' | 'error' | 'system'
   priority: 'low' | 'medium' | 'high' | 'urgent'
   is_read: boolean
-  user?: string // relation to users collection
+  user_id?: string
+  user_name?: string
+  user_avatar?: string
+  user_role?: string
   action_url?: string
   action_text?: string
   read_at?: string
-  recipient_user_id?: string // relation to users collection
-  announce_time?: string // زمان اعلان - اختیاری
+  recipient_user_id?: string
+  announce_time?: string
   created: string
   updated: string
   expand?: {
@@ -69,14 +72,21 @@ function transformPBRecord(record: PBNotificationRecord): Notification {
     createdAt: record.created,
     readAt: record.read_at,
     announceTime: record.announce_time,
-    user: record.expand?.user
+    user: record.user_id
       ? {
-          id: record.expand.user.id,
-          name: record.expand.user.name,
-          avatar: record.expand.user.avatar || '/img/avatars/placeholder.webp',
-          role: record.expand.user.role,
+          id: record.user_id,
+          name: record.user_name || 'نامشخص',
+          avatar: record.user_avatar || '/img/avatars/placeholder.webp',
+          role: record.user_role,
         }
-      : undefined,
+      : record.expand?.user
+        ? {
+            id: record.expand.user.id,
+            name: record.expand.user.name,
+            avatar: record.expand.user.avatar || '/img/avatars/placeholder.webp',
+            role: record.expand.user.role,
+          }
+        : undefined,
     actionUrl: record.action_url,
     actionText: record.action_text,
   }
@@ -112,7 +122,8 @@ export function useNotifications() {
     if (!process.client) return null
     try {
       return usePwaNotifications()
-    } catch (err) {
+    }
+    catch (err) {
       console.warn('PWA notifications not available:', err)
       return null
     }
@@ -138,21 +149,60 @@ export function useNotifications() {
   // اعلانات زمان‌بندی شده که هنوز زمان‌شان نرسیده
   const scheduledNotifications = computed(() => {
     const now = new Date()
-    return notifications.value.filter(n => {
-      return n.announceTime && new Date(n.announceTime) > now
+    const scheduled = notifications.value.filter((n) => {
+      // بررسی وجود و اعتبار announce_time
+      const hasValidAnnounceTime = n.announceTime && 
+        n.announceTime.trim() !== '' && 
+        n.announceTime !== 'null' && 
+        n.announceTime !== 'undefined'
+      
+      if (!hasValidAnnounceTime) return false
+      
+      const announceTime = new Date(n.announceTime)
+      
+      // بررسی معتبر بودن تاریخ parsed شده
+      if (isNaN(announceTime.getTime())) {
+        return false
+      }
+      
+      const isScheduled = announceTime > now
+      
+      return isScheduled
     })
+
+    return scheduled
   })
 
   // اعلانات قابل نمایش (فقط اعلاناتی که زمان‌شان رسیده)
   const visibleNotifications = computed(() => {
     const now = new Date()
-    return notifications.value.filter(n => {
-      // اگر زمان اعلان تنظیم نشده، همیشه نمایش داده شود
-      if (!n.announceTime) return true
+    const filtered = notifications.value.filter((n) => {
+      // بررسی وجود و اعتبار announce_time
+      const hasValidAnnounceTime = n.announceTime && 
+        n.announceTime.trim() !== '' && 
+        n.announceTime !== 'null' && 
+        n.announceTime !== 'undefined'
       
+      // اگر زمان اعلان تنظیم نشده یا نامعتبر است، همیشه نمایش داده شود
+      if (!hasValidAnnounceTime) {
+        return true
+      }
+
+      // Parse announce time
+      const announceTime = new Date(n.announceTime)
+      
+      // بررسی معتبر بودن تاریخ parsed شده
+      if (isNaN(announceTime.getTime())) {
+        return true
+      }
+      
+      const shouldShow = announceTime <= now
+
       // اگر زمان اعلان رسیده، نمایش داده شود
-      return new Date(n.announceTime) <= now
+      return shouldShow
     })
+
+    return filtered
   })
 
   // بروزرسانی filteredNotifications برای استفاده از visibleNotifications
@@ -180,6 +230,17 @@ export function useNotifications() {
     if (!pwa) return
 
     try {
+      // Check if permission is granted, if not request it immediately
+      if (Notification.permission !== 'granted') {
+        console.log('PWA permission not granted, requesting now...')
+        const granted = await pwa.autoRequestPermission()
+        if (!granted) {
+          console.warn('PWA notification permission denied, cannot show notification')
+          return
+        }
+      }
+
+      // Show the notification
       await pwa.showLocalNotification({
         title: notification.title,
         message: notification.message,
@@ -189,6 +250,8 @@ export function useNotifications() {
         actionText: notification.actionText,
         tag: `notification-${notification.id}`,
       })
+
+      console.log('PWA notification shown successfully:', notification.title)
     }
     catch (err) {
       console.warn('Failed to show PWA notification:', err)
@@ -198,7 +261,7 @@ export function useNotifications() {
   // Realtime subscription management
   const subscribeToNotifications = async () => {
     if (!process.client) return
-    
+
     const userId = getCurrentUserId()
     if (!userId || !$pb.authStore.isValid) {
       console.warn('Cannot subscribe to notifications: user not authenticated')
@@ -210,11 +273,11 @@ export function useNotifications() {
 
     try {
       console.log('Attempting to subscribe to realtime notifications...')
-      
+
       // Subscribe to notifications with filter for current user
       realtimeSubscription.value = await $pb.collection('notifications').subscribe('*', async (e) => {
         console.log('Realtime notification event:', e.action, e.record)
-        
+
         // Only process notifications for current user
         const record = e.record as PBNotificationRecord
         if (record.recipient_user_id !== userId) return
@@ -226,11 +289,11 @@ export function useNotifications() {
             // Add new notification to the beginning of the list
             notifications.value.unshift(transformedNotification)
             console.debug('Realtime: Added new notification', transformedNotification.id, 'Total notifications:', notifications.value.length)
-            
-            // Trigger PWA notification for new unread notifications
-            if (!transformedNotification.isRead) {
-              await triggerPwaNotification(transformedNotification)
-            }
+
+            // Always trigger PWA notification for new notifications (even if read)
+            // This ensures the user sees the notification immediately
+            console.log('Triggering PWA notification for new realtime notification:', transformedNotification.title)
+            await triggerPwaNotification(transformedNotification)
             break
 
           case 'update':
@@ -261,13 +324,13 @@ export function useNotifications() {
     catch (err: any) {
       console.error('Error subscribing to notifications:', err)
       isRealtimeConnected.value = false
-      
+
       // Don't show error for network issues - just log it
-      if (err.message?.includes('INCOMPLETE_CHUNKED_ENCODING') || 
-          err.message?.includes('net::ERR_') ||
-          err.name === 'TypeError') {
+      if (err.message?.includes('INCOMPLETE_CHUNKED_ENCODING')
+        || err.message?.includes('net::ERR_')
+        || err.name === 'TypeError') {
         console.warn('Realtime connection failed, will retry later:', err.message)
-        
+
         // Retry connection after a delay
         setTimeout(() => {
           if (process.client && $pb.authStore.isValid) {
@@ -275,7 +338,8 @@ export function useNotifications() {
             subscribeToNotifications()
           }
         }, 5000) // Retry after 5 seconds
-      } else {
+      }
+      else {
         error.value = 'خطا در اتصال به سیستم اعلانات فوری'
       }
     }
@@ -302,16 +366,16 @@ export function useNotifications() {
   // Methods
   const fetchNotifications = async (page = 1, perPage = 50) => {
     if (!process.client) return
-    
+
     const userId = getCurrentUserId()
     console.log('Fetch notifications called:', {
       page,
       perPage,
       userId,
       authValid: $pb?.authStore?.isValid,
-      authModel: $pb?.authStore?.model?.id
+      authModel: $pb?.authStore?.model?.id,
     })
-    
+
     if (!userId) {
       console.warn('Cannot fetch notifications: user not authenticated')
       error.value = 'User not authenticated'
@@ -348,11 +412,13 @@ export function useNotifications() {
       if (page === 1 && notifications.value.length > 0) {
         const newNotifications = transformedNotifications.filter(newNotif =>
           !notifications.value.some(existing => existing.id === newNotif.id)
-          && !newNotif.isRead,
         )
 
-        // Trigger PWA notifications for new unread notifications
+        console.log('Found', newNotifications.length, 'new notifications to trigger PWA notifications')
+
+        // Trigger PWA notifications for all new notifications
         for (const newNotif of newNotifications) {
+          console.log('Triggering PWA notification for fetched notification:', newNotif.title)
           await triggerPwaNotification(newNotif)
         }
       }
@@ -372,7 +438,7 @@ export function useNotifications() {
         console.log('Fetch request was cancelled - this is normal')
         return
       }
-      
+
       console.error('Error fetching notifications:', err)
       error.value = err.message || 'خطا در دریافت اعلان‌ها'
     }
@@ -489,7 +555,7 @@ export function useNotifications() {
       console.log('Refresh already in progress, skipping')
       return
     }
-    
+
     isUpdating.value = true
     try {
       await fetchNotifications()
@@ -503,18 +569,33 @@ export function useNotifications() {
   const createNotification = async (data: {
     title: string
     message: string
-    complete_message?: string // فیلد جدید برای محتوای کامل rich editor
+    complete_message?: string
     type: 'info' | 'success' | 'warning' | 'error' | 'system'
     priority: 'low' | 'medium' | 'high' | 'urgent'
     recipient_user_id: string
-    user?: string
+    user_id?: string
+    user_name?: string
+    user_avatar?: string
+    user_role?: string
     action_url?: string
     action_text?: string
-    announce_time?: string // زمان اعلان - اختیاری
+    announce_time?: string
   }) => {
     try {
       const record = await $pb.collection('notifications').create<PBNotificationRecord>({
-        ...data,
+        title: data.title,
+        message: data.message,
+        complete_message: data.complete_message,
+        type: data.type,
+        priority: data.priority,
+        recipient_user_id: data.recipient_user_id,
+        user_id: data.user_id,
+        user_name: data.user_name,
+        user_avatar: data.user_avatar,
+        user_role: data.user_role,
+        action_url: data.action_url,
+        action_text: data.action_text,
+        announce_time: data.announce_time,
         is_read: false,
       })
 
@@ -524,7 +605,8 @@ export function useNotifications() {
         const transformedNotification = transformPBRecord(record)
         notifications.value.unshift(transformedNotification)
 
-        // Trigger PWA notification for new notification
+        // Always trigger PWA notification for new notification
+        console.log('Triggering PWA notification for created notification:', transformedNotification.title)
         await triggerPwaNotification(transformedNotification)
       }
 
@@ -625,31 +707,35 @@ export function useNotifications() {
       globalCleanup()
     }
     window.addEventListener('beforeunload', cleanupHandler)
-    
+
     // Check if user is already authenticated and initialize if needed
     console.log('Auth state check:', {
       isValid: $pb.authStore.isValid,
       isInitialized,
       hasInitPromise: !!initPromise,
-      userId: $pb.authStore.model?.id
+      userId: $pb.authStore.model?.id,
     })
-    
+
     if ($pb.authStore.isValid && !isInitialized && !initPromise) {
       console.log('User already authenticated, initializing notifications for user:', $pb.authStore.model?.id)
       try {
         await initialize()
         console.log('Notifications initialized successfully from auth management')
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Failed to initialize notifications for authenticated user:', error)
       }
-    } else {
+    }
+    else {
       console.log('Skipping auto-initialization:', {
-        reason: !$pb.authStore.isValid ? 'not authenticated' : 
-                isInitialized ? 'already initialized' : 
-                initPromise ? 'initialization in progress' : 'unknown'
+        reason: !$pb.authStore.isValid
+          ? 'not authenticated'
+          : isInitialized
+            ? 'already initialized'
+            : initPromise ? 'initialization in progress' : 'unknown',
       })
     }
-    
+
     // Handle auth state changes
     $pb.authStore.onChange(async (token, model) => {
       if (!token || !model) {
@@ -658,14 +744,16 @@ export function useNotifications() {
         globalCleanup()
         isInitialized = false
         initPromise = null
-      } else if (!isInitialized) {
+      }
+      else if (!isInitialized) {
         // User logged in, reinitialize
         console.log('User authenticated, reinitializing notifications for:', model.id)
-        
+
         try {
           await reinitialize()
           isInitialized = true
-        } catch (error) {
+        }
+        catch (error) {
           console.error('Failed to reinitialize notifications:', error)
           isInitialized = false
           initPromise = null
@@ -682,7 +770,7 @@ export function useNotifications() {
       isInitialized,
       hasInitPromise: !!initPromise,
       authValid: $pb?.authStore?.isValid,
-      userId: $pb?.authStore?.model?.id
+      userId: $pb?.authStore?.model?.id,
     })
 
     if (!process.client) {
@@ -713,16 +801,18 @@ export function useNotifications() {
         if (process.client) {
           const pwa = pwaNotifications.value
           if (pwa) {
-            setTimeout(async () => {
-              try {
-                const granted = await pwa.autoRequestPermission()
-                if (granted) {
-                  console.log('PWA notifications enabled automatically')
-                }
-              } catch (err) {
-                console.warn('Failed to auto-request PWA permission:', err)
+            // Request permission immediately without delay
+            try {
+              const granted = await pwa.autoRequestPermission()
+              if (granted) {
+                console.log('PWA notifications enabled automatically')
+              } else {
+                console.log('PWA notifications not enabled - user may need to manually enable')
               }
-            }, 1000) // Delay 1 second to avoid overwhelming the user
+            }
+            catch (err) {
+              console.warn('Failed to auto-request PWA permission:', err)
+            }
           }
         }
 
@@ -749,10 +839,10 @@ export function useNotifications() {
     notifications.value = []
     currentFilter.value = 'unread'
     error.value = null
-    
+
     // Unsubscribe from previous realtime connection
     await unsubscribeFromNotifications()
-    
+
     // Initialize fresh
     await initialize()
   }
@@ -761,13 +851,13 @@ export function useNotifications() {
   const globalCleanup = () => {
     stopAutoRefresh()
     unsubscribeFromNotifications()
-    
+
     // Cancel any pending fetch requests
     if (currentFetchController) {
       currentFetchController.abort()
       currentFetchController = null
     }
-    
+
     // Reset PWA permission tracking on logout
     if (process.client) {
       const pwa = pwaNotifications.value
@@ -775,13 +865,13 @@ export function useNotifications() {
         pwa.resetPermissionTracking()
       }
     }
-    
+
     // Remove window event listener if exists
     if (process.client && cleanupHandler) {
       window.removeEventListener('beforeunload', cleanupHandler)
       cleanupHandler = null
     }
-    
+
     notificationsInstance = null
     isInitialized = false
     initPromise = null

@@ -286,14 +286,32 @@ async function getCacheStats() {
   return stats
 }
 
-// Push notification event
+// Push notification event - Enhanced for better reliability
 self.addEventListener('push', event => {
-  if (!event.data) return
+  console.log('[SW] Push event received:', event)
+
+  if (!event.data) {
+    console.log('[SW] No data in push event, showing default notification')
+    event.waitUntil(
+      self.registration.showNotification('اعلان جدید', {
+        body: 'پیام جدیدی دریافت کردید',
+        icon: '/pwa-192x192.png',
+        badge: '/pwa-192x192.png',
+        tag: 'default-zehna-notification',
+        requireInteraction: true,
+        dir: 'rtl',
+        lang: 'fa'
+      })
+    )
+    return
+  }
 
   let data
   try {
     data = event.data.json()
+    console.log('[SW] Push notification data:', data)
   } catch (e) {
+    console.log('[SW] Failed to parse push data as JSON, using text')
     data = {
       title: 'اعلان جدید',
       message: event.data.text() || 'پیام جدیدی دریافت کردید',
@@ -301,15 +319,19 @@ self.addEventListener('push', event => {
     }
   }
 
+  // Ensure we have minimum required data
+  const title = data.title || 'اعلان جدید'
+  const body = data.message || data.body || 'پیام جدیدی دریافت کردید'
+  
   const options = {
-    body: data.message || data.body,
+    body: body,
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
     image: data.image,
-    tag: data.tag || 'zehna-notification',
+    tag: data.tag || `zehna-notification-${Date.now()}`,
     data: {
-      url: data.url || data.action_url || '/',
-      notificationId: data.id,
+      url: data.url || data.action_url || '/notifications',
+      notificationId: data.id || `notification-${Date.now()}`,
       type: data.type || 'info',
       timestamp: Date.now()
     },
@@ -323,48 +345,76 @@ self.addEventListener('push', event => {
     vibrate: data.priority === 'urgent' ? [200, 100, 200, 100, 200] : [200, 100, 200],
     timestamp: Date.now(),
     dir: 'rtl',
-    lang: 'fa'
+    lang: 'fa',
+    renotify: true // Force re-notification even if same tag
   }
 
+  console.log('[SW] Showing notification with options:', options)
+
   event.waitUntil(
-    self.registration.showNotification(data.title || 'اعلان جدید', options)
+    self.registration.showNotification(title, options)
+      .then(() => {
+        console.log('[SW] Notification shown successfully')
+      })
+      .catch(error => {
+        console.error('[SW] Failed to show notification:', error)
+      })
   )
 })
 
-// Notification click event
+// Notification click event - Enhanced for better navigation
 self.addEventListener('notificationclick', event => {
+  console.log('[SW] Notification clicked:', event.notification.tag)
+  
   const notification = event.notification
   const action = event.action
-  const data = notification.data
+  const data = notification.data || {}
 
+  // Close the notification
   notification.close()
 
+  // Handle different actions
   if (action === 'open' || !action) {
-    const urlToOpen = data.url || '/'
+    const urlToOpen = data.url || '/notifications'
+    console.log('[SW] Opening URL:', urlToOpen)
     
     event.waitUntil(
       clients.matchAll({
         type: 'window',
         includeUncontrolled: true
       }).then(clientList => {
+        console.log('[SW] Found', clientList.length, 'client windows')
+        
+        // Look for an existing window to focus
         for (const client of clientList) {
           if (client.url.includes(self.location.origin)) {
+            console.log('[SW] Focusing existing window and navigating to:', urlToOpen)
             return client.focus().then(() => {
-              if (data.url && client.url !== data.url) {
-                return client.navigate(data.url)
+              // Navigate to the notification URL if different from current
+              if (urlToOpen !== '/' && client.url !== urlToOpen) {
+                return client.navigate(urlToOpen)
               }
+              return client
             })
           }
         }
+        
+        // No existing window found, open new one
+        console.log('[SW] Opening new window:', urlToOpen)
         return clients.openWindow(urlToOpen)
       }).then(client => {
-        if (data.notificationId && client) {
+        // Send message to the client about the notification click
+        if (client && data.notificationId) {
+          console.log('[SW] Sending notification click message to client')
           client.postMessage({
             type: 'NOTIFICATION_CLICKED',
             notificationId: data.notificationId,
-            timestamp: data.timestamp
+            timestamp: data.timestamp,
+            url: data.url
           })
         }
+      }).catch(error => {
+        console.error('[SW] Error handling notification click:', error)
       })
     )
   }

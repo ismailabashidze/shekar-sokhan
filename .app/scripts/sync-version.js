@@ -12,7 +12,7 @@ try {
   // خواندن ورژن از package.json
   const packagePath = resolve(__dirname, '../package.json')
   console.log(`📂 Reading package.json from: ${packagePath}`)
-  
+
   const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'))
   const version = packageJson.version
 
@@ -21,14 +21,15 @@ try {
   // بروزرسانی service worker
   const swPath = resolve(__dirname, '../public/sw.js')
   console.log(`📂 Reading service worker from: ${swPath}`)
-  
+
   let swContent = readFileSync(swPath, 'utf-8')
 
   // پیدا کردن خط فعلی ورژن
   const currentVersionMatch = swContent.match(/const CACHE_VERSION = '[^']+'/g)
   if (currentVersionMatch) {
     console.log(`🔍 Found current version line: ${currentVersionMatch[0]}`)
-  } else {
+  }
+  else {
     console.warn('⚠️ Could not find CACHE_VERSION line')
   }
 
@@ -41,7 +42,8 @@ try {
     swContent = swContent.replace(versionRegex, newVersionLine)
     writeFileSync(swPath, swContent, 'utf-8')
     console.log(`✅ Service Worker version updated to v${version}`)
-  } else {
+  }
+  else {
     console.warn('⚠️ Could not find CACHE_VERSION in service worker')
     console.log('📝 First 10 lines of service worker:')
     const firstLines = swContent.split('\n').slice(0, 10)
@@ -51,9 +53,9 @@ try {
   }
 
   console.log('🎉 Version sync completed!')
-
-} catch (error) {
+}
+catch (error) {
   console.error('❌ Error syncing version:', error.message)
   console.error('📍 Stack trace:', error.stack)
   process.exit(1)
-} 
+}

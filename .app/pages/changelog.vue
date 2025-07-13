@@ -7,6 +7,13 @@
         </h1>
 
         <div class="space-y-8">
+          <h1>تغییرات نسخه 2.10.0</h1>
+          <ul>
+            <li>بهبود کامل سیستم PWA notifications برای نمایش native در اندروید و ویندوز حتی در حالت بسته بودن اپ</li>
+            <li>تست و راهنمای کامل برای نوتیفیکیشن‌ها در صفحه /test-notifications</li>
+            <li>رفع مشکل auto-cancellation در تست‌های PocketBase</li>
+            <li>بهبود واکنش‌پذیری permission و subscription</li>
+          </ul>
           <!-- Version 2.9.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

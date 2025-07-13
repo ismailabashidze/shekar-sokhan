@@ -34,13 +34,19 @@ const { getUserAvatarUrl } = useAvatarManager()
 const postId = route.params.id as string
 
 // State for related posts and comments
-const relatedPosts = ref([])
-const comments = ref([])
+const relatedPosts = ref<any[]>([])
+const comments = ref<any[]>([])
 
 // Load post and related data
 const loadPost = async () => {
   try {
+    console.log('Loading post with ID:', postId)
+    console.log('PocketBase instance:', useNuxtApp().$pb)
+    console.log('Auth store valid:', useNuxtApp().$pb.authStore.isValid)
+    console.log('Current user:', useNuxtApp().$pb.authStore.model)
+    
     await getPost(postId)
+    console.log('Post loaded:', currentPost.value)
 
     if (currentPost.value) {
       // Increment view count
@@ -58,8 +64,14 @@ const loadPost = async () => {
       }
     }
   }
-  catch (err) {
+  catch (err: any) {
     console.error('Error loading post:', err)
+    console.error('Error details:', {
+      message: err.message,
+      status: err.status,
+      response: err.response,
+      data: err.data,
+    })
     if (err?.message?.includes('404') || err?.message?.includes('not found')) {
       // Post not found, redirect to 404 or posts list
       router.push('/posts/list')
@@ -101,17 +113,17 @@ const displayAuthor = computed(() => {
   if (typeof post.value.author === 'string') {
     return {
       name: 'نویسنده',
-      role: '',
+      role: 'نویسنده مقاله',
       avatar: '/img/avatars/1.png',
-      bio: '',
+      bio: 'نویسنده محترم این مقاله',
     }
   }
 
   return {
-    name: post.value.author.name || post.value.author.meta?.name || 'نویسنده',
+    name: (post.value.author as any)?.name || (post.value.author as any)?.meta?.name || 'نویسنده',
     role: 'نویسنده مقاله',
-    avatar: getUserAvatarUrl(post.value.author) || '/img/avatars/1.png',
-    bio: post.value.author.bio || 'نویسنده محترم این مقاله',
+    avatar: getUserAvatarUrl(post.value.author as any) || '/img/avatars/1.png',
+    bio: (post.value.author as any)?.bio || 'نویسنده محترم این مقاله',
   }
 })
 
@@ -164,7 +176,7 @@ watchEffect(() => {
         { name: 'description', content: post.value.description || post.value.excerpt },
         { property: 'og:title', content: post.value.title },
         { property: 'og:description', content: post.value.description || post.value.excerpt },
-        { property: 'og:image', content: post.value.featuredImage || '/img/og-default.jpg' },
+        { property: 'og:image', content: typeof post.value.featuredImage === 'string' ? post.value.featuredImage : '/img/og-default.jpg' },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'keywords', content: post.value.tags?.join(', ') || '' },
       ],
@@ -277,8 +289,8 @@ watchEffect(() => {
 
             <!-- Featured Image -->
             <img
-              v-if="post.featuredImage || post.image"
-              :src="post.featuredImage || post.image"
+              v-if="post.featuredImage"
+              :src="post.featuredImage"
               :alt="post.title"
               class="mb-6 w-full rounded-xl object-cover"
               style="max-height: 400px;"
@@ -300,7 +312,7 @@ watchEffect(() => {
           <div class="mb-10">
             <AddonMarkdownRemark
               v-if="post.contentLong"
-              :value="post.contentLong"
+              :source="post.contentLong"
               class="prose prose-lg dark:prose-invert markdown-content max-w-none"
             />
             <div v-else class="text-muted-500 py-8 text-center">
@@ -372,7 +384,7 @@ watchEffect(() => {
               >
                 <div class="bg-muted-200 dark:bg-muted-700 relative aspect-video overflow-hidden">
                   <img
-                    :src="relatedPost.featuredImage || relatedPost.image || '/img/placeholder.jpg'"
+                    :src="relatedPost.featuredImage || '/img/placeholder.jpg'"
                     :alt="relatedPost.title"
                     class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
                   >
@@ -406,12 +418,12 @@ watchEffect(() => {
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                       <img
-                        :src="getUserAvatarUrl(relatedPost.author) || '/img/avatars/1.png'"
-                        :alt="relatedPost.author?.name || 'نویسنده'"
+                        :src="getUserAvatarUrl(relatedPost.author as any) || '/img/avatars/1.png'"
+                        :alt="(relatedPost.author as any)?.name || 'نویسنده'"
                         class="size-8 rounded-full"
                       >
                       <span class="text-muted-400 text-xs">
-                        {{ relatedPost.author?.name || relatedPost.author?.meta?.name || 'نویسنده' }}
+                        {{ (relatedPost.author as any)?.name || (relatedPost.author as any)?.meta?.name || 'نویسنده' }}
                       </span>
                     </div>
 

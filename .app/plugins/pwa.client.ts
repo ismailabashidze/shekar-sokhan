@@ -23,10 +23,11 @@ export default defineNuxtPlugin(async () => {
             console.log('[PWA] Service worker state changed:', newWorker.state)
             if (newWorker.state === 'installed') {
               console.log('[PWA] Content has been cached for offline use')
-              
+
               if (navigator.serviceWorker.controller) {
                 console.log('[PWA] New content is available; please refresh')
-              } else {
+              }
+              else {
                 console.log('[PWA] Content is cached for offline use')
               }
             }
@@ -43,18 +44,18 @@ export default defineNuxtPlugin(async () => {
       if (registration.waiting) {
         console.log('[PWA] Service worker is waiting for activation')
       }
-
     }
     catch (error) {
       console.error('[PWA] Service worker registration failed:', error)
-      
+
       // More detailed error info
       if (error instanceof Error) {
         console.error('[PWA] Error message:', error.message)
         console.error('[PWA] Error stack:', error.stack)
       }
     }
-  } else {
+  }
+  else {
     console.warn('[PWA] Service worker not supported in this browser')
   }
 
@@ -62,13 +63,13 @@ export default defineNuxtPlugin(async () => {
   if (process.client) {
     // Create global state for deferred prompt
     const globalDeferredPrompt = ref(null)
-    
+
     // Listen for beforeinstallprompt event globally
     window.addEventListener('beforeinstallprompt', (e) => {
       console.log('[PWA] beforeinstallprompt event captured globally')
       e.preventDefault()
       globalDeferredPrompt.value = e
-      
+
       // Store in global state that components can access
       if (window) {
         window._pwaInstallPrompt = e
@@ -87,8 +88,8 @@ export default defineNuxtPlugin(async () => {
     // Make the prompt available globally
     return {
       provide: {
-        pwaInstallPrompt: globalDeferredPrompt
-      }
+        pwaInstallPrompt: globalDeferredPrompt,
+      },
     }
   }
 })

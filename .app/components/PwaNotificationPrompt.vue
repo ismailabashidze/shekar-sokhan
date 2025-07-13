@@ -2,16 +2,16 @@
   <Transition name="slide-up">
     <div
       v-if="shouldShowPrompt"
-      class="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm"
+      class="fixed inset-x-4 bottom-4 z-50 md:left-auto md:right-4 md:max-w-sm"
     >
-      <BaseCard class="border border-muted-200 bg-white p-4 shadow-xl dark:border-muted-700 dark:bg-muted-900">
+      <BaseCard class="border-muted-200 dark:border-muted-700 dark:bg-muted-900 border bg-white p-4 shadow-xl">
         <div class="flex items-start gap-3">
           <div class="shrink-0">
             <div class="bg-primary-500 flex size-10 items-center justify-center rounded-lg">
               <Icon name="ph:bell" class="size-5 text-white" />
             </div>
           </div>
-          
+
           <div class="min-w-0 flex-1">
             <h3 class="text-muted-900 text-sm font-semibold dark:text-white">
               فعال‌سازی اعلان‌های فوری
@@ -19,13 +19,13 @@
             <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs leading-relaxed">
               برای دریافت اعلان‌های مهم حتی زمانی که مرورگر بسته است، اعلان‌های فوری را فعال کنید.
             </p>
-            
+
             <!-- Error Message -->
             <p v-if="error" class="text-danger-600 dark:text-danger-400 mt-2 text-xs">
               {{ error }}
             </p>
           </div>
-          
+
           <!-- Close button -->
           <button
             class="text-muted-400 hover:text-muted-600 dark:hover:text-muted-300 shrink-0 transition-colors"
@@ -48,7 +48,7 @@
             <Icon name="ph:bell" class="ml-2 size-4" />
             فعال‌سازی
           </BaseButton>
-          
+
           <BaseButton
             v-else
             size="sm"
@@ -90,10 +90,10 @@ const isDismissed = ref(false)
 
 // Show prompt conditions
 const shouldShowPrompt = computed(() => {
-  return showPrompt.value 
+  return showPrompt.value
     && !isDismissed.value
-    && isSupported.value 
-    && permission.value !== 'granted' 
+    && isSupported.value
+    && permission.value !== 'granted'
     && !isSubscribed.value
 })
 
@@ -109,7 +109,7 @@ const handleEnableNotifications = async () => {
 const dismissPrompt = () => {
   showPrompt.value = false
   isDismissed.value = true
-  
+
   // Remember dismissal for this session
   sessionStorage.setItem('pwa-prompt-dismissed', 'true')
 }
@@ -174,4 +174,4 @@ watch(isSubscribed, (newSubscribed) => {
   opacity: 0;
   transform: translateY(100%);
 }
-</style> 
+</style>

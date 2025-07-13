@@ -145,7 +145,7 @@ export function useAdminNotifications() {
     try {
       adminRealtimeSubscription.value = await $pb.collection('notifications').subscribe('*', async (e) => {
         console.log('Admin realtime notification event:', e.action, e.record)
-        
+
         const record = e.record
 
         switch (e.action) {

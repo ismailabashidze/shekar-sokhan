@@ -7,7 +7,8 @@ try {
   const packagePath = resolve(__dirname, './package.json')
   const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'))
   appVersion = packageJson.version || '2.8.0'
-} catch (error) {
+}
+catch (error) {
   console.warn('Could not read version from package.json, using fallback:', appVersion)
 }
 
@@ -48,7 +49,7 @@ export default defineNuxtConfig({
       dargahBaseUrl: process.env.DARGAH_BASE_URL || 'https://dargahno.net',
       dargahUsername: process.env.DARGAH_USERNAME || '',
       dargahPassword: process.env.DARGAH_PASSWORD || '',
-    }
+    },
   },
 
   app: {

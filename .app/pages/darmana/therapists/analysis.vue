@@ -25,6 +25,11 @@ const analysisId = computed(() => route.query.analysis_id as string)
 const analysisData = ref<any>({ expireChargeTime: new Date() })
 const { getAnalysisById } = useSessionAnalysis()
 const { getUserAvatarUrl } = useAvatarManager()
+const { createNotification } = useNotifications()
+
+// State for notification status checking
+const userNotifications = ref<any[]>([])
+const notificationStatusChecked = ref(false)
 
 const formatEmoji = (trustLevel: number): string => {
   if (trustLevel >= 80) return '😍' // Heart eyes for 100
@@ -50,6 +55,7 @@ const headlinesComputed = computed(() => analysisData.value?.headlines || [])
 // Enhanced next steps with AI-generated caring messages and scheduling
 const enhancedNextSteps = ref<any[]>([])
 const generatingMessages = ref(false)
+const notificationsCreated = ref(false)
 
 // Generate caring messages using AI
 const generateCaringMessage = async (
@@ -57,26 +63,65 @@ const generateCaringMessage = async (
   stepTitle: string,
   stepDescription: string,
   therapistName: string,
+  sessionTitle: string,
+  sessionSummary: string,
+  deeperGoals: string,
+  demographicData: any,
+  psychoAnalysis: string,
+  riskFactors: any[],
+  defenceMechanisms: any[],
 ): Promise<string> => {
   const { streamChat } = useOpenRouter()
 
-  const prompt = `تو یک روانشناس با نام "${therapistName}" هستی. می‌خوای برای مراجعت به نام "${userName}" یک پیام مهربان و حرفه‌ای بنویسی که اون رو برای ادامه صحبت در جلسه بعدی دعوت کنی.
+  // Prepare demographic info
+  const demographicInfo = demographicData
+    ? [
+        demographicData.age && `سن: ${demographicData.age}`,
+        demographicData.gender && `جنسیت: ${demographicData.gender === 'male' ? 'مرد' : demographicData.gender === 'female' ? 'زن' : 'دیگر'}`,
+        demographicData.education && `تحصیلات: ${demographicData.education}`,
+        demographicData.occupation && `شغل: ${demographicData.occupation}`,
+        demographicData.maritalStatus && `وضعیت تأهل: ${demographicData.maritalStatus}`,
+      ].filter(Boolean).join('، ')
+    : ''
 
-موضوع پیگیری: ${stepTitle}
+  // Prepare psychological insights
+  const psychoInsights = [
+    psychoAnalysis && `تحلیل روانی: ${psychoAnalysis}`,
+    riskFactors.length > 0 && `عوامل خطر: ${riskFactors.map(r => r.title).join('، ')}`,
+    defenceMechanisms.length > 0 && `مکانیزم‌های دفاعی: ${defenceMechanisms.map(m => m.name).join('، ')}`,
+  ].filter(Boolean).join(' | ')
+
+  const prompt = `تو یک روانشناس باتجربه با نام "${therapistName}" هستی. بر اساس جلسه درمانی اخیر، می‌خوای برای مراجعت به نام "${userName}" یک پیام مهربان و هدفمند بنویسی.
+
+اطلاعات جلسه:
+موضوع جلسه: ${sessionTitle}
+خلاصه جلسه: ${sessionSummary}
+اهداف عمیق‌تر مراجع: ${deeperGoals}
+
+اطلاعات دموگرافیک مراجع:
+${demographicInfo || 'اطلاعات دموگرافیک در دسترس نیست'}
+
+تحلیل‌های روانشناختی:
+${psychoInsights || 'تحلیل‌های تکمیلی در دسترس نیست'}
+
+موضوع پیگیری خاص: ${stepTitle}
 جزئیات: ${stepDescription}
 
 پیام باید:
-- مهربان و صمیمی باشه
-- حرفه‌ای و مناسب رابطه درمانگر-مراجع باشه
+- مستقیماً به موضوع جلسه، اطلاعات دموگرافیک، و تحلیل‌های روانشناختی مرتبط باشه
+- از نکات مطرح شده در جلسه و تحلیل‌های روانی استفاده کنه
+- با توجه به سن، جنسیت، شغل و وضعیت تأهل مراجع شخصی‌سازی بشه
+- مهربان و صمیمی باشه ولی حرفه‌ای باقی بمونه
+- انگیزه‌بخش و امیدوارکننده باشه
 - کوتاه و مؤثر باشه (حداکثر 2-3 جمله)
 - از نام مراجع استفاده کنه
-- موضوع رو به طور طبیعی مطرح کنه
-- از لفظ جلسه ی بعدی استفاده نکنه
-- ایموجی های خوب و جذاب استفاده کنه
+- ارتباط منطقی بین جلسه قبل و موضوع پیگیری داشته باشه
+- ایموجی‌های مناسب و معنادار استفاده کنه
+
 فقط متن پیام رو بنویس، بدون توضیح اضافی.`
 
   const messages = [
-    { role: 'system', content: 'تو یک دستیار روانشناس هستی که در نوشتن پیام‌های مهربان و حرفه‌ای تخصص داری.' },
+    { role: 'system', content: 'تو یک دستیار روانشناس متخصص هستی که در تجزیه و تحلیل جلسات درمانی و نوشتن پیام‌های هدفمند و شخصی‌سازی شده با در نظر گیری اطلاعات دموگرافیک و تحلیل‌های روانشناختی تخصص داری.' },
     { role: 'user', content: prompt },
   ]
 
@@ -103,11 +148,172 @@ const saveEnhancedNextSteps = async (steps: any[]) => {
   }
 }
 
+// Create notifications for enhanced next steps
+const createCaringNotifications = async (steps: any[]) => {
+  try {
+    if (!analysisData.value?.expand?.session?.expand?.user?.id) {
+      console.warn('Cannot create notifications: user ID not found')
+      return
+    }
+
+    // Check if notifications have already been created
+    if (notificationsCreated.value) {
+      console.log('Notifications already created for this analysis')
+      return
+    }
+
+    const userId = analysisData.value.expand.session.expand.user.id
+    const therapistName = analysisData.value.expand.session.expand.therapist?.name || 'مشاور'
+    const therapistId = analysisData.value.expand.session.expand.therapist?.id
+
+    const notifications = await Promise.all(
+      steps.map(async (step, index) => {
+        // Create notification for each step
+        const notificationData = {
+          title: `💝 پیام مهربان از ${therapistName}`,
+          message: step.suggestedMessage,
+          complete_message: `<div class="space-y-4">
+            <div class="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg p-4">
+              <h3 class="font-semibold text-lg mb-2 text-pink-800 dark:text-pink-200">🌟 ${step.title}</h3>
+              <p class="text-pink-700 dark:text-pink-300 mb-3">${step.description}</p>
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-pink-200 dark:border-pink-700">
+                <p class="text-gray-800 dark:text-gray-200 leading-relaxed">${step.suggestedMessage}</p>
+              </div>
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              <p>💕 این پیام با مهربانی و توجه ویژه برای شما تهیه شده است.</p>
+              <p>🕐 زمان‌بندی: ${step.schedule.label}</p>
+            </div>
+          </div>`,
+          type: 'info' as const,
+          priority: 'medium' as const,
+          recipient_user_id: userId,
+          user_id: therapistId,
+          user_name: therapistName,
+          user_role: 'therapist',
+          action_url: `/darmana/therapists/sessions?session_id=${analysisData.value.expand.session.id}`,
+          action_text: 'ادامه گفتگو',
+          announce_time: step.scheduledDate.toISOString(),
+        }
+
+        return await createNotification(notificationData)
+      }),
+    )
+
+    // Mark notifications as created
+    notificationsCreated.value = true
+
+    return notifications
+  }
+  catch (error) {
+    console.error('Error creating caring notifications:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'مشکلی در ایجاد اعلان‌ها به وجود آمد',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  }
+}
+
+// Fetch user notifications to check status
+const fetchUserNotifications = async (userId: string) => {
+  try {
+    const { $pb } = useNuxtApp()
+
+    // Get notifications for this specific user from PocketBase
+    const notifications = await $pb.collection('notifications').getList(1, 50, {
+      filter: `recipient_user_id = "${userId}"`,
+      sort: '-created',
+    })
+
+    userNotifications.value = notifications.items
+    notificationStatusChecked.value = true
+
+    return notifications.items
+  }
+  catch (error) {
+    console.error('Error fetching user notifications:', error)
+    return []
+  }
+}
+
+// Check notification status for each step
+const checkNotificationStatus = (step: any) => {
+  if (!notificationStatusChecked.value || !step.suggestedMessage) {
+    return {
+      status: 'planned',
+      notificationExists: false,
+      notificationId: null,
+      actualStatus: 'not_checked',
+    }
+  }
+
+  // Enhanced matching logic for better consistency
+  const matchingNotification = userNotifications.value.find((notification) => {
+    // Primary match: message content similarity
+    const messageMatch = notification.message.includes(step.suggestedMessage.substring(0, 50))
+      || step.suggestedMessage.includes(notification.message.substring(0, 50))
+    
+    // Secondary match: title pattern
+    const titleMatch = notification.title.includes('پیام مهربان')
+      && (notification.title.includes(step.title.substring(0, 20)) || step.title.includes(notification.title.substring(0, 20)))
+    
+    // Time-based match: scheduled time proximity (within 5 minutes)
+    const timeMatch = notification.announce_time
+      && Math.abs(new Date(notification.announce_time).getTime() - step.scheduledDate.getTime()) < 300000 // Within 5 minutes
+    
+    return messageMatch || titleMatch || timeMatch
+  })
+
+  if (!matchingNotification) {
+    return {
+      status: 'planned',
+      notificationExists: false,
+      notificationId: null,
+      actualStatus: 'not_created',
+    }
+  }
+
+  // Check actual status based on announce_time and current time
+  const now = new Date()
+  const announceTime = matchingNotification.announce_time ? new Date(matchingNotification.announce_time) : null
+
+  let actualStatus = 'created'
+  if (announceTime) {
+    if (announceTime > now) {
+      actualStatus = 'scheduled' // In queue, waiting to be sent
+    }
+    else {
+      actualStatus = 'sent' // Time has passed, should be sent
+    }
+  }
+  else {
+    actualStatus = 'sent' // No announce_time means sent immediately
+  }
+
+  return {
+    status: actualStatus,
+    notificationExists: true,
+    notificationId: matchingNotification.id,
+    actualStatus,
+    announceTime: matchingNotification.announce_time,
+    isRead: matchingNotification.is_read,
+  }
+}
+
 // Process enhanced next steps
 const processEnhancedNextSteps = async () => {
   if (!analysisData.value?.suggestedNextStepsForTherapistForNextSession?.length) {
     enhancedNextSteps.value = []
     return
+  }
+
+  // Fetch user notifications to check status
+  const userId = analysisData.value?.expand?.session?.expand?.user?.id
+  if (userId) {
+    await fetchUserNotifications(userId)
   }
 
   // Check if messages are already generated (have suggestedMessage field)
@@ -120,10 +326,12 @@ const processEnhancedNextSteps = async () => {
     enhancedNextSteps.value = analysisData.value.suggestedNextStepsForTherapistForNextSession.map((step: any, index: number) => {
       const scheduleOptions = [
         { label: '۲ ساعت دیگر', hours: 2 },
-        { label: '۶ ساعت دیگر', hours: 6 },
+        { label: '۴ ساعت دیگر', hours: 4 },
+        { label: '۸ ساعت دیگر', hours: 8 },
         { label: 'فردا', hours: 24 },
         { label: '۲ روز دیگر', hours: 48 },
         { label: '۳ روز دیگر', hours: 72 },
+        { label: '۴ روز دیگر', hours: 96 },
         { label: 'یک هفته دیگر', hours: 168 },
       ]
 
@@ -137,6 +345,10 @@ const processEnhancedNextSteps = async () => {
         status: step.status || 'planned',
       }
     })
+
+    // Check if notifications were already created
+    notificationsCreated.value = analysisData.value.notificationsCreated || false
+
     return
   }
 
@@ -145,28 +357,56 @@ const processEnhancedNextSteps = async () => {
 
   const scheduleOptions = [
     { label: '۲ ساعت دیگر', hours: 2 },
-    { label: '۶ ساعت دیگر', hours: 6 },
+    { label: '۴ ساعت دیگر', hours: 4 },
+    { label: '۸ ساعت دیگر', hours: 8 },
     { label: 'فردا', hours: 24 },
     { label: '۲ روز دیگر', hours: 48 },
     { label: '۳ روز دیگر', hours: 72 },
+    { label: '۴ روز دیگر', hours: 96 },
     { label: 'یک هفته دیگر', hours: 168 },
   ]
 
   const userName = analysisData.value?.expand?.session?.expand?.user?.meta?.name || 'عزیز'
   const therapistName = analysisData.value?.expand?.session?.expand?.therapist?.name || 'روانشناس'
+  const sessionTitle = analysisData.value?.title || 'جلسه درمانی'
+  const sessionSummary = analysisData.value?.summaryOfSession || 'بررسی موضوعات روانشناختی'
+  const deeperGoals = analysisData.value?.possibleDeeperGoalsOfPatient || 'بهبود وضعیت روانی و دستیابی به آرامش درونی'
+  const demographicData = analysisData.value?.demographicData || {}
+  const psychoAnalysis = analysisData.value?.psychoAnalysis || ''
+  const riskFactors = analysisData.value?.possibleRiskFactorsExtracted || []
+  const defenceMechanisms = analysisData.value?.detectedDefenceMechanisms || []
 
   try {
+    // Generate up to 5 messages from the existing steps, repeating if necessary
+    const stepsToProcess = []
+    const originalSteps = analysisData.value.suggestedNextStepsForTherapistForNextSession
+
+    for (let i = 0; i < 5; i++) {
+      const originalStep = originalSteps[i % originalSteps.length]
+      stepsToProcess.push({
+        ...originalStep,
+        title: i >= originalSteps.length ? `${originalStep.title} (ادامه ${i - originalSteps.length + 2})` : originalStep.title,
+      })
+    }
+
     const processedSteps = await Promise.all(
-      analysisData.value.suggestedNextStepsForTherapistForNextSession.map(async (step: any, index: number) => {
+      stepsToProcess.map(async (step: any, index: number) => {
         const schedule = scheduleOptions[index % scheduleOptions.length]
         const scheduledDate = new Date(Date.now() + schedule.hours * 60 * 60 * 1000)
 
-        // Generate AI message
+        // Generate AI message with comprehensive context
         const suggestedMessage = await generateCaringMessage(
           userName,
           step.title,
           step.description,
           therapistName,
+          sessionTitle,
+          sessionSummary,
+          deeperGoals,
+          demographicData,
+          psychoAnalysis,
+          riskFactors,
+          defenceMechanisms,
         )
 
         // Determine status based on scheduled date
@@ -199,8 +439,31 @@ const processEnhancedNextSteps = async () => {
     // Save to database
     await saveEnhancedNextSteps(processedSteps)
 
+    // Create notifications for caring messages
+    const createdNotifications = await createCaringNotifications(processedSteps)
+
+    // Save notification status to database only if notifications were created
+    if (createdNotifications && createdNotifications.length > 0) {
+      const { updateAnalysis } = useSessionAnalysis()
+      await updateAnalysis(analysisId.value, {
+        notificationsCreated: true,
+      })
+
+      // Update local analysis data
+      analysisData.value.notificationsCreated = true
+    }
+
     // Update local analysis data
     analysisData.value.suggestedNextStepsForTherapistForNextSession = processedSteps
+
+    // Show success message
+    toaster.show({
+      title: 'موفقیت',
+      message: `${processedSteps.length} پیام مهربان تولید و زمان‌بندی شد`,
+      color: 'success',
+      icon: 'ph:check-circle-fill',
+      closable: true,
+    })
   }
   catch (error) {
     console.error('Error generating messages:', error)
@@ -262,58 +525,147 @@ onMounted(async () => {
 
 const isLoading = ref(false)
 
-// Function to get status info
-const getStatusInfo = (status: string) => {
+// Detect and resolve data conflicts
+const detectDataConflicts = (step: any) => {
+  const notificationStatus = checkNotificationStatus(step)
+  const conflicts = []
+
+  // Check for time conflicts
+  if (notificationStatus.notificationExists && notificationStatus.announceTime) {
+    const dbTime = new Date(notificationStatus.announceTime)
+    const stepTime = new Date(step.scheduledDate)
+    const timeDiff = Math.abs(dbTime.getTime() - stepTime.getTime())
+    
+    if (timeDiff > 300000) { // More than 5 minutes difference
+      conflicts.push({
+        type: 'time_mismatch',
+        message: 'زمان‌بندی در پایگاه داده با زمان محاسبه شده متفاوت است',
+        dbTime: dbTime.toLocaleString('fa-IR'),
+        stepTime: stepTime.toLocaleString('fa-IR'),
+      })
+    }
+  }
+
+  // Check for status conflicts
+  if (notificationStatus.notificationExists) {
+    const now = new Date()
+    const announceTime = notificationStatus.announceTime ? new Date(notificationStatus.announceTime) : null
+    
+    if (announceTime && announceTime > now && notificationStatus.actualStatus !== 'scheduled') {
+      conflicts.push({
+        type: 'status_mismatch',
+        message: 'وضعیت اعلان با زمان‌بندی آن مطابقت ندارد',
+        expectedStatus: 'scheduled',
+        actualStatus: notificationStatus.actualStatus,
+      })
+    }
+  }
+
+  return {
+    hasConflicts: conflicts.length > 0,
+    conflicts,
+    notificationStatus,
+  }
+}
+
+// Function to get status info with conflict detection
+const getStatusInfo = (step: any) => {
+  const conflictInfo = detectDataConflicts(step)
+  const notificationStatus = conflictInfo.notificationStatus
+  const status = notificationStatus.actualStatus
+
+  // Add conflict indicator to the status if there are conflicts
+  const conflictIndicator = conflictInfo.hasConflicts ? ' ⚠️' : ''
+
   switch (status) {
-    case 'planned':
+    case 'not_checked':
       return {
-        label: 'برنامه‌ریزی شده',
+        label: 'در حال بررسی...',
+        color: 'muted',
+        icon: 'ph:spinner-duotone',
+        bgClass: 'bg-gradient-to-r from-gray-500/15 to-slate-500/20 dark:from-gray-400/20 dark:to-slate-400/25 border border-gray-200/40 dark:border-gray-400/30',
+        textClass: 'text-gray-700 dark:text-gray-300',
+        iconClass: 'text-gray-600 dark:text-gray-400',
+        pulseClass: 'animate-spin',
+        conflicts: conflictInfo.conflicts,
+      }
+    case 'not_created':
+      return {
+        label: `پیام تولید شده${conflictIndicator}`,
         color: 'info',
-        icon: 'ph:calendar-plus-duotone',
+        icon: 'ph:lightbulb-duotone',
         bgClass: 'bg-gradient-to-r from-blue-500/15 to-blue-600/20 dark:from-blue-400/20 dark:to-blue-500/25 border border-blue-200/30 dark:border-blue-400/20',
         textClass: 'text-blue-600 dark:text-blue-400',
         iconClass: 'text-blue-500 dark:text-blue-400',
-        pulseClass: 'animate-pulse',
+        pulseClass: '',
+        conflicts: conflictInfo.conflicts,
+      }
+    case 'created':
+      return {
+        label: `پیام ایجاد شده${conflictIndicator}`,
+        color: 'info',
+        icon: 'ph:check-square-duotone',
+        bgClass: 'bg-gradient-to-r from-blue-500/15 to-blue-600/20 dark:from-blue-400/20 dark:to-blue-500/25 border border-blue-200/30 dark:border-blue-400/20',
+        textClass: 'text-blue-600 dark:text-blue-400',
+        iconClass: 'text-blue-500 dark:text-blue-400',
+        pulseClass: '',
+        conflicts: conflictInfo.conflicts,
       }
     case 'scheduled':
       return {
-        label: 'آماده ارسال',
+        label: `در صف ارسال${conflictIndicator}`,
         color: 'warning',
         icon: 'ph:clock-countdown-duotone',
-        bgClass: 'bg-gradient-to-r from-amber-500/15 to-orange-500/20 dark:from-amber-400/20 dark:to-orange-400/25 border border-amber-200/40 dark:border-amber-400/30 shadow-amber-100/50 dark:shadow-amber-900/20',
-        textClass: 'text-amber-700 dark:text-amber-300',
-        iconClass: 'text-amber-600 dark:text-amber-400',
+        bgClass: conflictInfo.hasConflicts 
+          ? 'bg-gradient-to-r from-red-500/15 to-orange-500/20 dark:from-red-400/20 dark:to-orange-400/25 border border-red-200/40 dark:border-red-400/30'
+          : 'bg-gradient-to-r from-amber-500/15 to-orange-500/20 dark:from-amber-400/20 dark:to-orange-400/25 border border-amber-200/40 dark:border-amber-400/30 shadow-amber-100/50 dark:shadow-amber-900/20',
+        textClass: conflictInfo.hasConflicts 
+          ? 'text-red-700 dark:text-red-300'
+          : 'text-amber-700 dark:text-amber-300',
+        iconClass: conflictInfo.hasConflicts 
+          ? 'text-red-600 dark:text-red-400'
+          : 'text-amber-600 dark:text-amber-400',
         pulseClass: 'animate-pulse',
+        conflicts: conflictInfo.conflicts,
       }
     case 'sent':
       return {
-        label: 'ارسال شده',
-        color: 'success',
-        icon: 'ph:check-circle-duotone',
-        bgClass: 'bg-gradient-to-r from-emerald-500/15 to-green-500/20 dark:from-emerald-400/20 dark:to-green-400/25 border border-emerald-200/40 dark:border-emerald-400/30',
-        textClass: 'text-emerald-700 dark:text-emerald-300',
-        iconClass: 'text-emerald-600 dark:text-emerald-400',
+        label: notificationStatus.isRead ? `ارسال و خوانده شده${conflictIndicator}` : `ارسال شده${conflictIndicator}`,
+        color: notificationStatus.isRead ? 'success' : 'primary',
+        icon: notificationStatus.isRead ? 'ph:check-circle-duotone' : 'ph:paper-plane-duotone',
+        bgClass: notificationStatus.isRead
+          ? 'bg-gradient-to-r from-emerald-500/15 to-green-500/20 dark:from-emerald-400/20 dark:to-green-400/25 border border-emerald-200/40 dark:border-emerald-400/30'
+          : 'bg-gradient-to-r from-purple-500/15 to-indigo-500/20 dark:from-purple-400/20 dark:to-indigo-400/25 border border-purple-200/40 dark:border-purple-400/30',
+        textClass: notificationStatus.isRead
+          ? 'text-emerald-700 dark:text-emerald-300'
+          : 'text-purple-700 dark:text-purple-300',
+        iconClass: notificationStatus.isRead
+          ? 'text-emerald-600 dark:text-emerald-400'
+          : 'text-purple-600 dark:text-purple-400',
         pulseClass: '',
+        conflicts: conflictInfo.conflicts,
       }
     case 'converted_to_session':
       return {
-        label: 'تبدیل به جلسه',
+        label: `تبدیل به جلسه${conflictIndicator}`,
         color: 'primary',
         icon: 'ph:video-camera-duotone',
         bgClass: 'bg-gradient-to-r from-purple-500/15 to-indigo-500/20 dark:from-purple-400/20 dark:to-indigo-400/25 border border-purple-200/40 dark:border-purple-400/30',
         textClass: 'text-purple-700 dark:text-purple-300',
         iconClass: 'text-purple-600 dark:text-purple-400',
         pulseClass: '',
+        conflicts: conflictInfo.conflicts,
       }
     default:
       return {
-        label: 'نامشخص',
+        label: `نامشخص${conflictIndicator}`,
         color: 'muted',
         icon: 'ph:question-duotone',
         bgClass: 'bg-gradient-to-r from-gray-500/15 to-slate-500/20 dark:from-gray-400/20 dark:to-slate-400/25 border border-gray-200/40 dark:border-gray-400/30',
         textClass: 'text-gray-700 dark:text-gray-300',
         iconClass: 'text-gray-600 dark:text-gray-400',
         pulseClass: '',
+        conflicts: conflictInfo.conflicts,
       }
   }
 }
@@ -1509,6 +1861,45 @@ const getStatusInfo = (status: string) => {
 
                   <!-- Content Section -->
                   <div class="p-6">
+                    <!-- Notifications Status -->
+                    <div v-if="notificationsCreated || enhancedNextSteps.length > 0" class="mb-6">
+                      <div class="rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 dark:border-emerald-700 dark:from-emerald-900/20 dark:to-teal-900/20">
+                        <div class="flex items-center gap-3">
+                          <div class="rounded-lg bg-emerald-500/10 p-2 dark:bg-emerald-500/20">
+                            <Icon name="ph:bell-simple-duotone" class="size-5 text-emerald-600 dark:text-emerald-400" />
+                          </div>
+                          <div class="flex-1">
+                            <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">
+                              وضعیت اعلان‌ها
+                            </h4>
+                            <p class="text-sm text-emerald-700 dark:text-emerald-300">
+                              {{ notificationsCreated ?
+                                `${enhancedNextSteps.length} اعلان زمان‌بندی شده ایجاد و برنامه‌ریزی شد` :
+                                `${enhancedNextSteps.length} پیام آماده زمان‌بندی هستند`
+                              }}
+                            </p>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <div
+                              :class="[
+                                'flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium',
+                                notificationsCreated
+                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300'
+                                  : 'bg-amber-100 text-amber-700 dark:bg-amber-800/50 dark:text-amber-300'
+                              ]"
+                            >
+                              <Icon
+                                :name="notificationsCreated ? 'ph:check-circle-fill' : 'ph:clock-fill'"
+                                class="size-3"
+                              />
+                              <span>{{ notificationsCreated ? 'زمان‌بندی شده' : 'آماده زمان‌بندی' }}</span>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <!-- Enhanced Next Steps List -->
                     <div v-if="generatingMessages" class="mt-6 text-center">
                       <div class="flex items-center justify-center gap-3">
@@ -1568,21 +1959,21 @@ const getStatusInfo = (status: string) => {
                                   <!-- Status Badge -->
                                   <div
                                     :class="[
-                                      getStatusInfo(step.status).bgClass,
-                                      getStatusInfo(step.status).pulseClass,
+                                      getStatusInfo(step).bgClass,
+                                      getStatusInfo(step).pulseClass,
                                       'flex items-center gap-2 rounded-xl px-4 py-2 shadow-sm transition-all duration-300 hover:scale-105 hover:shadow-md'
                                     ]"
                                   >
                                     <Icon
-                                      :name="getStatusInfo(step.status).icon"
-                                      :class="getStatusInfo(step.status).iconClass"
+                                      :name="getStatusInfo(step).icon"
+                                      :class="getStatusInfo(step).iconClass"
                                       class="size-4 transition-transform duration-300 hover:scale-110"
                                     />
                                     <span
-                                      :class="getStatusInfo(step.status).textClass"
+                                      :class="getStatusInfo(step).textClass"
                                       class="text-sm font-bold tracking-wide"
                                     >
-                                      {{ getStatusInfo(step.status).label }}
+                                      {{ getStatusInfo(step).label }}
                                     </span>
                                   </div>
 
@@ -1601,24 +1992,166 @@ const getStatusInfo = (status: string) => {
                                         minute: '2-digit',
                                       }).format(step.scheduledDate) }}
                                     </div>
+                                    <!-- Notification Status -->
+                                    <div class="mt-2 flex items-center justify-end gap-1">
+                                      <div
+                                        :class="[
+                                          'flex items-center gap-1 rounded-full px-2 py-0.5 text-xs',
+                                          checkNotificationStatus(step).notificationExists
+                                            ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-800/50 dark:text-amber-300'
+                                              : checkNotificationStatus(step).actualStatus === 'sent'
+                                                ? checkNotificationStatus(step).isRead
+                                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300'
+                                                  : 'bg-purple-100 text-purple-700 dark:bg-purple-800/50 dark:text-purple-300'
+                                                : 'bg-blue-100 text-blue-700 dark:bg-blue-800/50 dark:text-blue-300'
+                                            : 'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-300'
+                                        ]"
+                                      >
+                                        <Icon
+                                          :name="checkNotificationStatus(step).notificationExists
+                                            ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                              ? 'ph:clock-countdown-duotone'
+                                              : checkNotificationStatus(step).actualStatus === 'sent'
+                                                ? checkNotificationStatus(step).isRead
+                                                  ? 'ph:check-circle-fill'
+                                                  : 'ph:paper-plane-duotone'
+                                                : 'ph:check-square-duotone'
+                                            : 'ph:lightbulb-duotone'"
+                                          class="size-3"
+                                        />
+                                        <span>{{
+                                          checkNotificationStatus(step).notificationExists
+                                            ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                              ? 'در صف ارسال'
+                                              : checkNotificationStatus(step).actualStatus === 'sent'
+                                                ? checkNotificationStatus(step).isRead
+                                                  ? 'ارسال و خوانده شده'
+                                                  : 'ارسال شده'
+                                                : 'ایجاد شده'
+                                            : 'آماده ایجاد'
+                                        }}</span>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
 
                               <!-- Caring Message Section -->
                               <div class="from-muted-50/80 to-muted-100/60 dark:from-muted-800/40 dark:to-muted-800/60 dark:border-muted-700/30 rounded-2xl border border-white/50 bg-gradient-to-r p-5 backdrop-blur-sm">
-                                <div class="mb-4 flex items-center gap-3">
-                                  <div class="rounded-lg bg-gradient-to-r from-pink-500/10 to-rose-500/10 p-2 dark:from-pink-400/20 dark:to-rose-400/20">
-                                    <Icon name="ph:heart-duotone" class="size-5 text-pink-600 dark:text-pink-400" />
+                                <div class="mb-4 flex items-center justify-between">
+                                  <div class="flex items-center gap-3">
+                                    <div class="rounded-lg bg-gradient-to-r from-pink-500/10 to-rose-500/10 p-2 dark:from-pink-400/20 dark:to-rose-400/20">
+                                      <Icon name="ph:heart-duotone" class="size-5 text-pink-600 dark:text-pink-400" />
+                                    </div>
+                                    <span class="text-muted-700 dark:text-muted-200 text-base font-semibold">
+                                      پیام پیشنهادی
+                                    </span>
                                   </div>
-                                  <span class="text-muted-700 dark:text-muted-200 text-base font-semibold">
-                                    پیام پیشنهادی
-                                  </span>
+                                  <div class="flex items-center gap-2">
+                                    <div
+                                      :class="[
+                                        'flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium',
+                                        checkNotificationStatus(step).notificationExists
+                                          ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-800/50 dark:text-amber-300'
+                                            : checkNotificationStatus(step).actualStatus === 'sent'
+                                              ? checkNotificationStatus(step).isRead
+                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300'
+                                                : 'bg-purple-100 text-purple-700 dark:bg-purple-800/50 dark:text-purple-300'
+                                              : 'bg-blue-100 text-blue-700 dark:bg-blue-800/50 dark:text-blue-300'
+                                          : 'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-300'
+                                      ]"
+                                    >
+                                      <Icon
+                                        :name="checkNotificationStatus(step).notificationExists
+                                          ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                            ? 'ph:clock-countdown-fill'
+                                            : checkNotificationStatus(step).actualStatus === 'sent'
+                                              ? checkNotificationStatus(step).isRead
+                                                ? 'ph:check-circle-fill'
+                                                : 'ph:paper-plane-fill'
+                                              : 'ph:check-square-fill'
+                                          : 'ph:lightbulb-fill'"
+                                        class="size-3"
+                                      />
+                                      <span>{{
+                                        checkNotificationStatus(step).notificationExists
+                                          ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                            ? 'در صف ارسال'
+                                            : checkNotificationStatus(step).actualStatus === 'sent'
+                                              ? checkNotificationStatus(step).isRead
+                                                ? 'ارسال و مطالعه شده'
+                                                : 'ارسال شده'
+                                              : 'اعلان ایجاد شده'
+                                          : 'آماده ایجاد اعلان'
+                                      }}</span>
+                                    </div>
+                                  </div>
                                 </div>
                                 <div class="dark:border-muted-700 dark:bg-muted-900/80 rounded-xl border border-white bg-white/80 p-5 shadow-sm backdrop-blur-sm">
                                   <p class="text-muted-800 dark:text-muted-100 text-base leading-relaxed">
                                     {{ step.suggestedMessage }}
                                   </p>
+                                </div>
+                                <!-- Notification Info -->
+                                <div
+                                  class="mt-4 rounded-lg p-3"
+                                  :class="[
+                                    checkNotificationStatus(step).notificationExists
+                                      ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                        ? 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20'
+                                        : checkNotificationStatus(step).actualStatus === 'sent'
+                                          ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20'
+                                          : 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20'
+                                      : 'bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20'
+                                  ]"
+                                >
+                                  <div class="flex items-center gap-2">
+                                    <Icon
+                                      :name="checkNotificationStatus(step).notificationExists
+                                        ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                          ? 'ph:clock-duotone'
+                                          : checkNotificationStatus(step).actualStatus === 'sent'
+                                            ? 'ph:check-circle-duotone'
+                                            : 'ph:bell-duotone'
+                                        : 'ph:info-duotone'"
+                                      class="size-4"
+                                      :class="[
+                                        checkNotificationStatus(step).notificationExists
+                                          ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                            ? 'text-amber-600 dark:text-amber-400'
+                                            : checkNotificationStatus(step).actualStatus === 'sent'
+                                              ? 'text-green-600 dark:text-green-400'
+                                              : 'text-blue-600 dark:text-blue-400'
+                                          : 'text-gray-600 dark:text-gray-400'
+                                      ]"
+                                    />
+                                    <span
+                                      class="text-sm font-medium"
+                                      :class="[
+                                        checkNotificationStatus(step).notificationExists
+                                          ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                            ? 'text-amber-700 dark:text-amber-300'
+                                            : checkNotificationStatus(step).actualStatus === 'sent'
+                                              ? 'text-green-700 dark:text-green-300'
+                                              : 'text-blue-700 dark:text-blue-300'
+                                          : 'text-gray-700 dark:text-gray-300'
+                                      ]"
+                                    >
+                                      {{
+                                        checkNotificationStatus(step).notificationExists
+                                          ? checkNotificationStatus(step).actualStatus === 'scheduled'
+                                            ? `این پیام در صف ارسال قرار دارد و در ${new Date(checkNotificationStatus(step).announceTime).toLocaleDateString('fa-IR')} ساعت ${new Date(checkNotificationStatus(step).announceTime).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })} ارسال خواهد شد`
+                                            : checkNotificationStatus(step).actualStatus === 'sent'
+                                              ? checkNotificationStatus(step).isRead
+                                                ? 'این پیام ارسال شده و توسط کاربر مطالعه شده است'
+                                                : 'این پیام ارسال شده اما هنوز توسط کاربر مطالعه نشده است'
+                                              : 'این پیام در سیستم ثبت شده و آماده ارسال است'
+                                          : 'این پیام آماده ایجاد اعلان زمان‌بندی شده است'
+                                      }}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
                             </div>

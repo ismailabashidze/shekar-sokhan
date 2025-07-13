@@ -48,11 +48,19 @@ export interface SessionAnalysis {
   suggestedNextStepsForTherapistForNextSession: Array<{
     title: string
     description: string
+    suggestedMessage?: string
+    schedule?: {
+      label: string
+      hours: number
+    }
+    scheduledDate?: Date
+    status?: string
   }>
   possibleRiskFactorsExtracted: Array<{
     title: string
     description: string
   }>
+  notificationsCreated?: boolean
   created: string
   updated: string
   expand: any

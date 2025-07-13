@@ -37,6 +37,24 @@ export function usePwaNotifications() {
       && 'PushManager' in window
       && 'Notification' in window
       permission.value = Notification.permission
+      
+      // Listen for permission changes
+      if ('permissions' in navigator) {
+        navigator.permissions.query({ name: 'notifications' }).then(permissionStatus => {
+          permission.value = permissionStatus.state as NotificationPermission
+          permissionStatus.onchange = () => {
+            permission.value = permissionStatus.state as NotificationPermission
+          }
+        }).catch(() => {
+          // Fallback to polling for permission changes
+          const checkPermissionChange = () => {
+            if (permission.value !== Notification.permission) {
+              permission.value = Notification.permission
+            }
+          }
+          setInterval(checkPermissionChange, 1000)
+        })
+      }
     }
   }
 
@@ -133,11 +151,13 @@ export function usePwaNotifications() {
   // Show local notification
   const showLocalNotification = async (options: PwaNotificationOptions): Promise<boolean> => {
     if (!isSupported.value || permission.value !== 'granted') {
+      console.warn('PWA notifications not supported or permission not granted')
       return false
     }
 
     try {
       const registration = await navigator.serviceWorker.ready
+      console.log('Service worker ready, showing notification:', options.title)
 
       await registration.showNotification(options.title, {
         body: options.message,
@@ -146,22 +166,46 @@ export function usePwaNotifications() {
         image: options.image,
         tag: options.tag || `local-${Date.now()}`,
         data: {
-          url: options.url || '/',
+          url: options.url || '/notifications',
           type: options.type || 'info',
           timestamp: Date.now(),
+          notificationId: options.tag || `local-${Date.now()}`,
         },
+        actions: options.actionText ? [{
+          action: 'open',
+          title: options.actionText,
+          icon: '/pwa-192x192.png'
+        }] : [],
         requireInteraction: options.priority === 'urgent' || options.priority === 'high',
         silent: options.silent || false,
-        vibrate: options.priority === 'urgent' ? [200, 100, 200, 100, 200] : [200, 100, 200],
+        vibrate: getVibrationPattern(options.priority),
         dir: 'rtl',
         lang: 'fa',
+        renotify: true, // Always show notification even if tag exists
+        timestamp: Date.now()
       })
 
+      console.log('PWA notification shown successfully')
       return true
     }
     catch (err: any) {
+      console.error('Error showing PWA notification:', err)
       error.value = err.message || 'خطا در نمایش اعلان محلی'
       return false
+    }
+  }
+
+  // Helper function for vibration patterns
+  const getVibrationPattern = (priority?: string): number[] => {
+    switch (priority) {
+      case 'urgent':
+        return [200, 100, 200, 100, 200, 100, 200]
+      case 'high':
+        return [300, 100, 300]
+      case 'medium':
+        return [200, 100, 200]
+      default:
+        return [100]
     }
   }
 
@@ -316,38 +360,57 @@ export function usePwaNotifications() {
     }
   }
 
-  // Auto-request permission on first login
+  // Auto-request permission on user interaction
   const autoRequestPermission = async (): Promise<boolean> => {
     if (!isSupported.value) {
+      console.warn('PWA notifications not supported')
       return false
     }
 
-    // Check if we've already asked the user before
-    const hasAskedBefore = localStorage.getItem('pwa-permission-asked')
-    const lastAskTime = localStorage.getItem('pwa-permission-last-ask')
-    const now = Date.now()
+    // Reset tracking if permission was previously denied
+    if (permission.value === 'denied') {
+      resetPermissionTracking()
+    }
+
+    // Skip if already granted
+    if (permission.value === 'granted') {
+      console.log('PWA notifications already granted')
+      await subscribeToPush()
+      return true
+    }
+
+    // Check local storage for previous decision
+    const userDecision = localStorage.getItem('pwa-notification-decision')
     
-    // Don't auto-request if:
-    // 1. Already granted
-    // 2. Explicitly denied
-    // 3. Already asked recently (within 7 days)
-    if (permission.value === 'granted' || permission.value === 'denied') {
-      return permission.value === 'granted'
+    // If user previously denied, don't ask again unless they reset
+    if (userDecision === 'denied' && permission.value === 'default') {
+      console.log('User previously denied PWA notifications')
+      return false
     }
 
-    if (hasAskedBefore && lastAskTime) {
-      const daysSinceLastAsk = (now - parseInt(lastAskTime)) / (1000 * 60 * 60 * 24)
-      if (daysSinceLastAsk < 7) {
-        return false // Don't ask again within 7 days
+    // Request permission immediately without delay
+    try {
+      console.log('Requesting PWA notification permission immediately...')
+      const result = await Notification.requestPermission()
+      permission.value = result
+
+      // Store user decision
+      localStorage.setItem('pwa-notification-decision', result)
+      localStorage.setItem('pwa-permission-timestamp', Date.now().toString())
+
+      if (result === 'granted') {
+        console.log('PWA notifications granted - subscribing to push...')
+        await subscribeToPush()
+        return true
+      } else {
+        console.log('PWA notifications denied or dismissed')
+        return false
       }
+    } catch (err: any) {
+      console.error('Error requesting PWA notification permission:', err)
+      error.value = err.message || 'خطا در درخواست مجوز اعلان‌ها'
+      return false
     }
-
-    // Mark that we've asked the user
-    localStorage.setItem('pwa-permission-asked', 'true')
-    localStorage.setItem('pwa-permission-last-ask', now.toString())
-
-    // Request permission
-    return await requestPermission()
   }
 
   // Reset permission tracking (for testing or after logout)
@@ -357,9 +420,13 @@ export function usePwaNotifications() {
     sessionStorage.removeItem('pwa-prompt-dismissed')
   }
 
+  // Initialize on client
+  if (process.client) {
+    checkSupport()
+  }
+
   // Initialize
   onMounted(() => {
-    checkSupport()
     setupServiceWorkerListener()
     checkSubscriptionStatus()
   })

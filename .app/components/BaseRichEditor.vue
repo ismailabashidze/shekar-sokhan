@@ -15,7 +15,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   height: '200px',
-  placeholder: 'متن خود را وارد کنید...'
+  placeholder: 'متن خود را وارد کنید...',
 })
 
 const emits = defineEmits<{
@@ -27,26 +27,26 @@ const id = `rich-editor-${Math.random().toString(36).substr(2, 9)}`
 
 // Quill toolbar options with RTL support
 const toolbarOptions = [
-  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-  [{ 'size': ['small', false, 'large', 'huge'] }],
+  [{ header: [1, 2, 3, 4, 5, 6, false] }],
+  [{ size: ['small', false, 'large', 'huge'] }],
   ['bold', 'italic', 'underline', 'strike'],
-  [{ 'color': [] }, { 'background': [] }],
-  [{ 'align': [] }],
-  [{ 'direction': 'rtl' }],
-  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-  [{ 'indent': '-1'}, { 'indent': '+1' }],
+  [{ color: [] }, { background: [] }],
+  [{ align: [] }],
+  [{ direction: 'rtl' }],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ indent: '-1' }, { indent: '+1' }],
   ['blockquote', 'code-block'],
   ['link', 'image', 'video'],
-  ['clean']
+  ['clean'],
 ]
 
 const editorOptions = {
   theme: 'snow',
   modules: {
-    toolbar: toolbarOptions
+    toolbar: toolbarOptions,
   },
   placeholder: props.placeholder,
-  readOnly: props.readonly || props.disabled
+  readOnly: props.readonly || props.disabled,
 }
 
 // Handle content change
@@ -58,22 +58,22 @@ const handleTextChange = (content: string) => {
 <template>
   <div class="base-rich-editor">
     <!-- Label -->
-    <label 
-      v-if="label" 
+    <label
+      v-if="label"
       :for="id"
-      class="nui-label w-full text-[0.825rem] text-muted-500 dark:text-muted-400"
+      class="nui-label text-muted-500 dark:text-muted-400 w-full text-[0.825rem]"
     >
       {{ label }}
       <span v-if="required" class="text-danger-500 font-medium">*</span>
     </label>
 
     <!-- Editor Container -->
-    <div 
+    <div
       class="rich-editor-wrapper"
       :class="[
-        'border border-muted-300 dark:border-muted-600 rounded-lg overflow-hidden',
-        'focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500/20',
-        { 'opacity-50 cursor-not-allowed': disabled },
+        'border-muted-300 dark:border-muted-600 overflow-hidden rounded-lg border',
+        'focus-within:border-primary-500 focus-within:ring-primary-500/20 focus-within:ring-1',
+        { 'cursor-not-allowed opacity-50': disabled },
         { 'bg-muted-100 dark:bg-muted-800': readonly }
       ]"
     >
@@ -87,14 +87,16 @@ const handleTextChange = (content: string) => {
           @update:content="handleTextChange"
         />
         <template #fallback>
-          <div 
-            class="w-full bg-white dark:bg-muted-900 border border-muted-300 dark:border-muted-600 rounded-lg p-4"
+          <div
+            class="dark:bg-muted-900 border-muted-300 dark:border-muted-600 w-full rounded-lg border bg-white p-4"
             :style="{ height: height }"
           >
-            <div class="flex items-center justify-center h-full">
+            <div class="flex h-full items-center justify-center">
               <div class="text-center">
-                <div class="size-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent mx-auto mb-2" />
-                <p class="text-sm text-muted-500 dark:text-muted-400">در حال بارگذاری ویرایشگر...</p>
+                <div class="border-primary-500 mx-auto mb-2 size-8 animate-spin rounded-full border-2 border-t-transparent" />
+                <p class="text-muted-500 dark:text-muted-400 text-sm">
+                  در حال بارگذاری ویرایشگر...
+                </p>
               </div>
             </div>
           </div>
@@ -104,7 +106,7 @@ const handleTextChange = (content: string) => {
 
     <!-- Help Text -->
     <slot name="help">
-      <p class="mt-1 text-xs text-muted-500 dark:text-muted-400">
+      <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs">
         از toolbar بالا برای فرمت‌دهی متن استفاده کنید
       </p>
     </slot>
@@ -256,15 +258,15 @@ const handleTextChange = (content: string) => {
   .rich-editor-wrapper :deep(.ql-toolbar) {
     padding: 0.375rem;
   }
-  
+
   .rich-editor-wrapper :deep(.ql-toolbar button) {
     padding: 0.125rem;
     margin: 0 0.0625rem;
   }
-  
+
   .rich-editor-wrapper :deep(.ql-editor) {
     padding: 0.75rem !important;
     min-height: 100px;
   }
 }
-</style> 
+</style>

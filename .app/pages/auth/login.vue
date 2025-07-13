@@ -66,14 +66,14 @@ const loginWithGoogle = async () => {
   console.log('🔄 Google login button clicked!')
   try {
     isGoogleLogin.value = true
-    
+
     // Debug: Check PocketBase instance
     console.log('📱 PocketBase instance:', nuxtApp.$pb)
     console.log('🌐 PocketBase URL:', nuxtApp.$pb.baseUrl)
-    
+
     // Debug: Check OAuth providers
     console.log('🔍 Checking available OAuth providers...')
-    
+
     const authData = await nuxtApp.$pb
       .collection('users')
       .authWithOAuth2({ provider: 'google' })
@@ -81,7 +81,7 @@ const loginWithGoogle = async () => {
     console.log('✅ Google OAuth successful:', {
       userId: authData.record.id,
       email: authData.record.email,
-      hasMeta: !!authData.meta
+      hasMeta: !!authData.meta,
     })
 
     // ذخیره meta در PocketBase
@@ -138,22 +138,25 @@ const loginWithGoogle = async () => {
       stack: error?.stack,
       name: error?.name,
       response: error?.response,
-      status: error?.status
+      status: error?.status,
     })
-    
+
     // More specific error handling
     let errorMessage = 'متاسفانه مشکلی در ورود پیش آمد. لطفا دوباره تلاش کنید.'
-    
+
     if (error?.message?.includes('OAuth2')) {
       errorMessage = 'مشکل در تنظیمات OAuth. لطفا با پشتیبانی تماس بگیرید.'
-    } else if (error?.message?.includes('network')) {
+    }
+    else if (error?.message?.includes('network')) {
       errorMessage = 'مشکل در اتصال به اینترنت. لطفا اتصالتان را بررسی کنید.'
-    } else if (error?.status === 400) {
+    }
+    else if (error?.status === 400) {
       errorMessage = 'درخواست نامعتبر. لطفا صفحه را رفرش کنید.'
-    } else if (error?.status === 500) {
+    }
+    else if (error?.status === 500) {
       errorMessage = 'مشکل سرور. لطفا چند دقیقه بعد تلاش کنید.'
     }
-    
+
     toaster.show({
       title: 'خطا در ورود',
       message: errorMessage,

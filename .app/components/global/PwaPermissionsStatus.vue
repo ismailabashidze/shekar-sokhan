@@ -14,7 +14,7 @@ interface BeforeInstallPromptEvent extends Event {
 // PWA Installation Status
 const isPwaInstalled = (): boolean => {
   if (typeof window === 'undefined') return false
-  
+
   // بررسی standalone mode (اصلی‌ترین روش)
   if (window.matchMedia('(display-mode: standalone)').matches) {
     return true
@@ -40,7 +40,7 @@ const getNotificationStatus = (): PermissionStatus => {
       granted: false,
       text: 'در حال بررسی...',
       color: 'warning',
-      icon: 'ph:bell-slash'
+      icon: 'ph:bell-slash',
     }
   }
 
@@ -49,7 +49,7 @@ const getNotificationStatus = (): PermissionStatus => {
       granted: false,
       text: 'مرورگر شما از اعلانات پشتیبانی نمی‌کند',
       color: 'danger',
-      icon: 'ph:bell-simple-slash'
+      icon: 'ph:bell-simple-slash',
     }
   }
 
@@ -59,21 +59,21 @@ const getNotificationStatus = (): PermissionStatus => {
         granted: true,
         text: 'دسترسی اعلانات داده شده',
         color: 'success',
-        icon: 'ph:bell'
+        icon: 'ph:bell',
       }
     case 'denied':
       return {
         granted: false,
         text: 'دسترسی اعلانات رد شده',
         color: 'danger',
-        icon: 'ph:bell-slash'
+        icon: 'ph:bell-slash',
       }
     default:
       return {
         granted: false,
         text: 'دسترسی اعلانات خواسته نشده',
         color: 'warning',
-        icon: 'ph:bell-slash'
+        icon: 'ph:bell-slash',
       }
   }
 }
@@ -83,7 +83,7 @@ const microphoneStatus = ref<PermissionStatus>({
   granted: false,
   text: 'در حال بررسی...',
   color: 'warning',
-  icon: 'ph:microphone-slash'
+  icon: 'ph:microphone-slash',
 })
 
 const checkMicrophonePermission = async () => {
@@ -92,21 +92,21 @@ const checkMicrophonePermission = async () => {
       granted: false,
       text: 'بررسی دسترسی میکروفون امکان‌پذیر نیست',
       color: 'danger',
-      icon: 'ph:microphone-slash'
+      icon: 'ph:microphone-slash',
     }
     return
   }
 
   try {
     const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-    
+
     switch (permission.state) {
       case 'granted':
         microphoneStatus.value = {
           granted: true,
           text: 'دسترسی میکروفون داده شده',
           color: 'success',
-          icon: 'ph:microphone'
+          icon: 'ph:microphone',
         }
         break
       case 'denied':
@@ -114,7 +114,7 @@ const checkMicrophonePermission = async () => {
           granted: false,
           text: 'دسترسی میکروفون رد شده',
           color: 'danger',
-          icon: 'ph:microphone-slash'
+          icon: 'ph:microphone-slash',
         }
         break
       default:
@@ -122,7 +122,7 @@ const checkMicrophonePermission = async () => {
           granted: false,
           text: 'دسترسی میکروفون خواسته نشده',
           color: 'warning',
-          icon: 'ph:microphone-slash'
+          icon: 'ph:microphone-slash',
         }
     }
 
@@ -136,7 +136,7 @@ const checkMicrophonePermission = async () => {
       granted: false,
       text: 'خطا در بررسی دسترسی میکروفون',
       color: 'danger',
-      icon: 'ph:microphone-slash'
+      icon: 'ph:microphone-slash',
     }
   }
 }
@@ -147,7 +147,7 @@ const notificationStatus = ref<PermissionStatus>({
   granted: false,
   text: 'در حال بررسی...',
   color: 'warning',
-  icon: 'ph:bell-slash'
+  icon: 'ph:bell-slash',
 })
 
 // PWA Status computed
@@ -156,7 +156,7 @@ const pwaStatus = computed((): PermissionStatus => {
     granted: pwaInstalled.value,
     text: pwaInstalled.value ? 'اپلیکیشن نصب شده' : 'اپلیکیشن نصب نشده',
     color: pwaInstalled.value ? 'success' : 'warning',
-    icon: pwaInstalled.value ? 'ph:device-mobile' : 'ph:device-mobile-slash'
+    icon: pwaInstalled.value ? 'ph:device-mobile' : 'ph:device-mobile-slash',
   }
 })
 
@@ -214,12 +214,12 @@ const requestNotificationPermission = async () => {
   try {
     const permission = await Notification.requestPermission()
     notificationStatus.value = getNotificationStatus()
-    
+
     if (permission === 'granted') {
       // Show test notification
       new Notification('مجوز اعلان‌ها', {
         body: 'اعلان‌های فوری با موفقیت فعال شد!',
-        icon: '/favicon.ico'
+        icon: '/favicon.ico',
       })
     }
   }
@@ -231,10 +231,10 @@ const requestNotificationPermission = async () => {
 const requestMicrophonePermission = async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    
+
     // Stop the stream immediately since we only want permission
     stream.getTracks().forEach(track => track.stop())
-    
+
     // Recheck permission status
     await checkMicrophonePermission()
   }
@@ -253,22 +253,26 @@ const showInstallInstructions = () => {
 1. روی آیکون سه نقطه (⋮) در گوشه بالا سمت راست کلیک کنید
 2. گزینه "Install app" یا "نصب اپلیکیشن" را انتخاب کنید
 3. در پنجره باز شده روی "Install" کلیک کنید`
-  } else if (userAgent.includes('firefox')) {
+  }
+  else if (userAgent.includes('firefox')) {
     instructions = `نصب در Firefox:
 1. روی آیکون خانه (🏠) در نوار آدرس کلیک کنید
 2. گزینه "Install this site as an app" را انتخاب کنید
 3. نام اپلیکیشن را وارد کنید و "Install" را بزنید`
-  } else if (userAgent.includes('edg')) {
+  }
+  else if (userAgent.includes('edg')) {
     instructions = `نصب در Edge:
 1. روی آیکون سه نقطه (⋯) کلیک کنید
 2. گزینه "Apps" > "Install this site as an app" را انتخاب کنید
 3. روی "Install" کلیک کنید`
-  } else if (userAgent.includes('safari')) {
+  }
+  else if (userAgent.includes('safari')) {
     instructions = `نصب در Safari (iOS):
 1. روی آیکون Share (↗️) کلیک کنید
 2. گزینه "Add to Home Screen" را انتخاب کنید
 3. نام اپلیکیشن را تایید کنید و "Add" بزنید`
-  } else {
+  }
+  else {
     instructions = `راهنمای عمومی:
 1. در منوی مرورگر دنبال گزینه "Install app" یا "Add to home screen" بگردید
 2. یا از آیکون + در نوار آدرس استفاده کنید
@@ -318,7 +322,7 @@ onMounted(async () => {
   }
 
   const intervalId = setInterval(checkPwaStatus, 3000)
-  
+
   onUnmounted(() => {
     clearInterval(intervalId)
   })
@@ -379,10 +383,10 @@ onMounted(async () => {
               :loading="isInstallingPwa"
               @click="installPwa"
             >
-              <Icon name="ph:download" class="size-3 mr-1.5" />
+              <Icon name="ph:download" class="mr-1.5 size-3" />
               نصب اپلیکیشن
             </BaseButton>
-            
+
             <!-- راهنمای نصب دستی -->
             <BaseButton
               v-else-if="showInstallGuidance"
@@ -392,7 +396,7 @@ onMounted(async () => {
               class="mt-3 px-3 py-1.5"
               @click="showInstallInstructions"
             >
-              <Icon name="ph:info" class="size-3 mr-1.5" />
+              <Icon name="ph:info" class="mr-1.5 size-3" />
               راهنمای نصب
             </BaseButton>
           </div>
@@ -442,7 +446,7 @@ onMounted(async () => {
               class="mt-3 px-3 py-1.5"
               @click="requestNotificationPermission"
             >
-              <Icon name="ph:bell" class="size-3 mr-1.5" />
+              <Icon name="ph:bell" class="mr-1.5 size-3" />
               درخواست مجوز
             </BaseButton>
           </div>
@@ -492,7 +496,7 @@ onMounted(async () => {
               class="mt-3 px-3 py-1.5"
               @click="requestMicrophonePermission"
             >
-              <Icon name="ph:microphone" class="size-3 mr-1.5" />
+              <Icon name="ph:microphone" class="mr-1.5 size-3" />
               درخواست مجوز
             </BaseButton>
           </div>
@@ -506,18 +510,18 @@ onMounted(async () => {
         <h4 class="text-muted-900 text-sm font-medium dark:text-white">
           💡 اطلاعات مفید
         </h4>
-        
+
         <div class="text-muted-500 dark:text-muted-400 space-y-2 text-xs leading-relaxed">
           <div class="flex items-start gap-2">
             <Icon name="ph:device-mobile" class="mt-0.5 size-3 shrink-0" />
             <span><strong>PWA:</strong> نصب اپلیکیشن روی دستگاه برای دسترسی سریع‌تر و تجربه بهتر</span>
           </div>
-          
+
           <div class="flex items-start gap-2">
             <Icon name="ph:bell" class="mt-0.5 size-3 shrink-0" />
             <span><strong>اعلانات:</strong> دریافت اطلاع‌رسانی‌های مهم حتی زمانی که مرورگر بسته است</span>
           </div>
-          
+
           <div class="flex items-start gap-2">
             <Icon name="ph:microphone" class="mt-0.5 size-3 shrink-0" />
             <span><strong>میکروفون:</strong> استفاده از قابلیت‌های صوتی مانند ضبط صدا و تماس صوتی</span>
@@ -532,4 +536,4 @@ onMounted(async () => {
       </div>
     </BaseCard>
   </div>
-</template> 
+</template>
