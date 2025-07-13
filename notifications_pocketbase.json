@@ -190,6 +190,33 @@
           "max": 50,
           "pattern": ""
         }
+      },
+      {
+        "id": "complete_message",
+        "name": "complete_message",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 10000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "announce_time",
+        "name": "announce_time",
+        "type": "date",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
       }
     ],
     "indexes": [],

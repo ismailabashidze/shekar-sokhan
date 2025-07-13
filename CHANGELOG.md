@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0] - 2024-07-13
+### Added
+- بهبود کامل سیستم PWA notifications برای نمایش native در اندروید و ویندوز حتی در حالت بسته بودن اپ
+- تست و راهنمای کامل برای نوتیفیکیشن‌ها در صفحه /test-notifications
+
+### Fixed
+- رفع مشکل auto-cancellation در تست‌های PocketBase
+- بهبود واکنش‌پذیری permission و subscription
+
 ## [2.9.2] (2025-01-30)
 
 ### 🐞 Bug Fixes

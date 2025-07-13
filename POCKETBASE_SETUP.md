@@ -7,6 +7,29 @@
 3. "Import collections" را انتخاب کنید
 4. فایل `notifications_pocketbase.json` را آپلود کنید
 
+## ⚠️ مرحله ۱.۵: به‌روزرسانی Schema (ضروری)
+
+اگر collection notifications قبلاً موجود است، باید فیلدهای جدید را اضافه کنید:
+
+1. وارد collection "notifications" شوید
+2. به تب "Fields" بروید
+3. فیلدهای زیر را اضافه کنید:
+
+### فیلد complete_message
+- **Name**: `complete_message`
+- **Type**: Text
+- **Required**: ❌ (غیرضروری)
+- **Max length**: 10000
+- **توضیح**: برای محتوای HTML کامل اعلان
+
+### فیلد announce_time
+- **Name**: `announce_time`
+- **Type**: Date
+- **Required**: ❌ (غیرضروری)
+- **توضیح**: زمان اعلان برای notifications زمان‌بندی شده
+
+4. روی "Save" کلیک کنید
+
 ## مرحله ۲: ورود داده‌های نمونه
 
 ### روش اول: Import Records
@@ -66,11 +89,12 @@ await pb.collection('notifications').update(id, {
 });
 ```
 
-### Create New Notification
+### Create New Notification with Scheduling
 ```javascript
 await pb.collection('notifications').create({
   title: "عنوان نوتیفیکیشن",
   message: "متن پیام",
+  complete_message: "<div class='rich-content'>محتوای HTML کامل</div>",
   type: "info", // info, success, warning, error, system
   priority: "medium", // low, medium, high, urgent
   is_read: false,
@@ -80,7 +104,8 @@ await pb.collection('notifications').create({
   user_role: "therapist", // therapist, system, user
   action_url: "/path/to/action",
   action_text: "متن دکمه عمل",
-  recipient_user_id: "receiver_id"
+  recipient_user_id: "receiver_id",
+  announce_time: "2024-01-20T10:00:00.000Z" // زمان اعلان (اختیاری)
 });
 ```
 
@@ -90,6 +115,7 @@ await pb.collection('notifications').create({
 |-------|------|----------|-------------|
 | title | text | Yes | عنوان نوتیفیکیشن |
 | message | text | Yes | متن پیام |
+| complete_message | text | No | محتوای HTML کامل (جدید) |
 | type | select | Yes | نوع: info, success, warning, error, system |
 | priority | select | Yes | اولویت: low, medium, high, urgent |
 | is_read | bool | No | خوانده شده یا نه |
@@ -101,6 +127,24 @@ await pb.collection('notifications').create({
 | action_text | text | No | متن دکمه عمل |
 | read_at | date | No | زمان خوانده شدن |
 | recipient_user_id | text | No | شناسه گیرنده |
+| announce_time | date | No | زمان اعلان (جدید) |
 
 ## Auto-timestamps
-PocketBase به صورت خودکار فیلدهای `created` و `updated` را اضافه می‌کند. 
+PocketBase به صورت خودکار فیلدهای `created` و `updated` را اضافه می‌کند.
+
+## 🔥 ویژگی‌های جدید v2.0
+
+### 📅 زمان‌بندی اعلان‌ها
+- فیلد `announce_time` برای زمان‌بندی دقیق اعلان‌ها
+- اعلان‌ها تا رسیدن زمان‌شان نمایش داده نمی‌شوند
+- مناسب برای پیام‌های مهربان درمانگران
+
+### 🎨 محتوای غنی
+- فیلد `complete_message` برای HTML content
+- پشتیبانی از styling و formatting پیشرفته
+- دکمه "بیشتر بخوانید" در UI
+
+### 👥 اطلاعات فرستنده
+- ذخیره مستقل اطلاعات فرستنده
+- عدم وابستگی به relation برای عملکرد بهتر
+- حفظ اطلاعات حتی در صورت تغییر user 

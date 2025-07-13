@@ -143,4 +143,4 @@ const displayName = computed(() => user.value.meta?.name || 'کاربر جدید
 
 <style scoped>
 /* Add any component-specific styles here */
-</style> 
+</style>

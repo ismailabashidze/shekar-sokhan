@@ -1,0 +1,338 @@
+[
+  {
+    "id": "posts_collection",
+    "name": "posts",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "id": "title",
+        "name": "title",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 255,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "description",
+        "name": "description",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 1000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "secretMessage",
+        "name": "secretMessage",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 500,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "goals",
+        "name": "goals",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 1000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "excerpt",
+        "name": "excerpt",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 500,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "contentLong",
+        "name": "contentLong",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 50000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "category",
+        "name": "category",
+        "type": "select",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "meditation",
+            "yoga",
+            "mental-health",
+            "self-help",
+            "motivation",
+            "relationship",
+            "stress-management",
+            "mindfulness",
+            "psychology"
+          ]
+        }
+      },
+      {
+        "id": "tags",
+        "name": "tags",
+        "type": "json",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 1000
+        }
+      },
+      {
+        "id": "slug",
+        "name": "slug",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": true,
+        "options": {
+          "min": 0,
+          "max": 255,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "publishDate",
+        "name": "publishDate",
+        "type": "date",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "id": "readTime",
+        "name": "readTime",
+        "type": "number",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 120,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "featuredImage",
+        "name": "featuredImage",
+        "type": "file",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "mimeTypes": [
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp"
+          ],
+          "thumbs": [
+            "300x200",
+            "600x400",
+            "1200x800"
+          ],
+          "maxSelect": 1,
+          "maxSize": 5242880,
+          "protected": false
+        }
+      },
+      {
+        "id": "isFeatured",
+        "name": "isFeatured",
+        "type": "bool",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      },
+      {
+        "id": "allowComments",
+        "name": "allowComments",
+        "type": "bool",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      },
+      {
+        "id": "status",
+        "name": "status",
+        "type": "select",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "draft",
+            "published",
+            "archived",
+            "scheduled"
+          ]
+        }
+      },
+      {
+        "id": "contentLengthTarget",
+        "name": "contentLengthTarget",
+        "type": "number",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 100,
+          "max": 50000,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "seoTitle",
+        "name": "seoTitle",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 255,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "seoDescription",
+        "name": "seoDescription",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 500,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "keywords",
+        "name": "keywords",
+        "type": "json",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 1000
+        }
+      },
+      {
+        "id": "viewCount",
+        "name": "viewCount",
+        "type": "number",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": null,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "likeCount",
+        "name": "likeCount",
+        "type": "number",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": null,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "author",
+        "name": "author",
+        "type": "relation",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "cascadeDelete": false,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": ["name", "email", "username"]
+        }
+      }
+    ],
+    "indexes": [],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\" && @request.auth.id = author",
+    "deleteRule": "@request.auth.id != \"\" && @request.auth.id = author",
+    "options": {}
+  }
+] 
