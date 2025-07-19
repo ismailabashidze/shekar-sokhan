@@ -201,6 +201,7 @@ export interface Invite {
   description: string
 }
 export interface PsychoReg {
+  // Step 1: Personal Information
   firstName: string
   lastName: string
   gender: string
@@ -208,6 +209,79 @@ export interface PsychoReg {
   phoneNumber: string
   email: string
   maritalStatus: string
+  
+  // Step 2: Professional Information  
   licenseStatus: string
+  educationLevel: string
+  specialization: string[]
+  yearsOfExperience: number
+  workplace: string
+  
+  // Step 3: Expertise & Qualifications
+  therapyApproaches: string[]
+  targetAgeGroups: string[]
+  languages: string[]
+  certifications: string[]
+  
+  // Step 4: Availability & Preferences
+  availableDays: string[]
+  workingHours: {
+    start: string
+    end: string
+  }
+  sessionTypes: string[]
+  onlineConsultation: boolean
+  
+  // Step 5: Documents & Agreement
+  profilePhoto?: File | null
+  licenseDocument?: File | null
+  cvDocument?: File | null
+  agreementAccepted: boolean
+  privacyPolicyAccepted: boolean
+}
 
+export interface Clinic {
+  id: string
+  name: string
+  address: string
+  phone: string
+  email: string
+  license: string
+  description?: string
+  owner: string
+  created: string
+  updated: string
+  status: 'active' | 'inactive' | 'pending' | 'banned' | 'verified'
+  verificationStatus: 'pending' | 'approved' | 'rejected' | 'under_review'
+  verificationNotes?: string
+  verifiedBy?: string
+  verifiedAt?: string
+  bannedReason?: string
+  bannedBy?: string
+  bannedAt?: string
+}
+
+export interface ClinicPsychologist {
+  id: string
+  clinic: string
+  psychologist: string
+  role: 'owner' | 'member'
+  created: string
+  updated: string
+  status: 'active' | 'inactive'
+}
+
+export interface ClinicRegistration {
+  name: string
+  address: string
+  phone: string
+  email: string
+  license: string
+  description?: string
+  logo?: File | null
+  owner?: string // For admin use - user ID
+  ownerFirstName: string
+  ownerLastName: string
+  ownerEmail: string
+  ownerPhone: string
 }

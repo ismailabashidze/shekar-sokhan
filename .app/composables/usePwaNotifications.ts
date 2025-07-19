@@ -215,7 +215,7 @@ export function usePwaNotifications() {
     notification: PwaNotificationOptions,
   ): Promise<boolean> => {
     try {
-      const response = await $pb.send('/api/notifications/push', {
+      const response = await $pb.send('/api/notifications/send', {
         method: 'POST',
         body: {
           recipientIds,
@@ -262,6 +262,10 @@ export function usePwaNotifications() {
         body: {
           subscription: subscriptionData,
           userId: $pb.authStore.model?.id,
+          deviceInfo: {
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+          }
         },
       })
     }
@@ -276,6 +280,7 @@ export function usePwaNotifications() {
       await $pb.send('/api/notifications/unsubscribe', {
         method: 'POST',
         body: {
+          endpoint: subscription.value?.endpoint,
           userId: $pb.authStore.model?.id,
         },
       })

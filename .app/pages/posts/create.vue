@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ImageSource, ImageSearchOptions } from '~/composables/useImageSources'
+
 // --- راهنمای جامع مارک‌داون برای ایجاد محتوای متنوع و تأثیرگذار ---
 const markdownGuide = `# راهنمای کامل نگارش مارک‌داون
 
@@ -179,7 +181,7 @@ const syncAllFieldsLoading = ref(false)
 
 // کنترل طول متن
 const contentLengthTarget = ref(5000) // طول پیش‌فرض ۵۰۰۰ کلمه
-const minContentLength = 1000
+const minContentLength = 250
 const maxContentLength = 15000
 
 // تولید و افزودن تصویر
@@ -189,46 +191,95 @@ const selectedTextForImage = ref('')
 const imageCaption = ref('')
 const imagePrompt = ref('')
 
+// Image browser functionality
+const showImageBrowser = ref(false)
+const imageSearchQuery = ref('')
+const imageSearchLoading = ref(false)
+const selectedImageSource = ref<'unsplash' | 'pexels' | 'pixabay' | 'picsum'>('unsplash')
+const imageSearchResults = ref<{
+  unsplash: ImageSource[]
+  pexels: ImageSource[]
+  pixabay: ImageSource[]
+  picsum: ImageSource[]
+}>({
+  unsplash: [],
+  pexels: [],
+  pixabay: [],
+  picsum: []
+})
+const selectedImage = ref<ImageSource | null>(null)
+const imageOrientation = ref<'landscape' | 'portrait' | 'squarish'>('landscape')
+
+const { searchAllSources, generateSearchTerms } = useImageSources()
+
+// Computed property for selected category
+const selectedCategory = computed(() => {
+  return categories.find(c => c.value === category.value) || null
+})
+
 const errors = ref({})
 const loading = ref(false)
 const success = ref(false)
 
 const categories = [
-  { value: 'meditation', label: 'مدیتیشن', icon: 'ph:person-simple-duotone' },
-  { value: 'yoga', label: 'یوگا', icon: 'ph:person-simple-walk-duotone' },
-  { value: 'mental-health', label: 'سلامت روان', icon: 'ph:heartbeat-duotone' },
-  { value: 'self-help', label: 'خودیاری', icon: 'ph:hand-heart-duotone' },
-  { value: 'motivation', label: 'انگیزشی', icon: 'ph:star-duotone' },
-  { value: 'relationship', label: 'روابط', icon: 'ph:users-duotone' },
-  { value: 'parenting', label: 'فرزندپروری', icon: 'ph:baby-duotone' },
-  { value: 'counseling', label: 'مشاوره', icon: 'ph:chat-circle-dots-duotone' },
-  { value: 'stress', label: 'مدیریت استرس', icon: 'ph:activity-duotone' },
-  { value: 'anxiety', label: 'اضطراب', icon: 'ph:cloud-warning-duotone' },
-  { value: 'depression', label: 'افسردگی', icon: 'ph:cloud-rain-duotone' },
-  { value: 'happiness', label: 'شادکامی', icon: 'ph:smiley-duotone' },
-  { value: 'addiction', label: 'اعتیاد', icon: 'ph:beer-bottle-duotone' },
-  { value: 'trauma', label: 'تروما و آسیب', icon: 'ph:heartbeat-duotone' },
-  {
-    value: 'sexuality',
-    label: 'مسائل جنسی',
-    icon: 'ph:gender-intersex-duotone',
-  },
-  { value: 'sleep', label: 'خواب و استراحت', icon: 'ph:bed-duotone' },
-  {
-    value: 'nutrition',
-    label: 'تغذیه و سبک زندگی',
-    icon: 'ph:apple-logo-duotone',
-  },
-  { value: 'mindfulness', label: 'ذهن‌آگاهی', icon: 'ph:eye-duotone' },
+  // Content Themes & Styles
+  { value: 'educational', label: 'آموزشی', icon: 'ph:graduation-cap', description: 'محتوای آموزشی و علمی' },
+  { value: 'motivational', label: 'انگیزشی', icon: 'ph:star', description: 'محتوای الهام‌بخش و انگیزه‌دهنده' },
+  { value: 'social-media', label: 'شبکه‌های اجتماعی', icon: 'ph:share-network', description: 'محتوای مناسب پلتفرم‌های اجتماعی' },
+  { value: 'professional', label: 'حرفه‌ای', icon: 'ph:briefcase', description: 'محتوای کسب‌وکار و شغلی' },
+  { value: 'personal-development', label: 'توسعه فردی', icon: 'ph:trend-up', description: 'رشد شخصی و خودسازی' },
+  { value: 'storytelling', label: 'داستان‌گویی', icon: 'ph:book-open', description: 'محتوای روایی و داستان' },
+  { value: 'informative', label: 'اطلاع‌رسانی', icon: 'ph:info', description: 'اخبار و اطلاعات مفید' },
+  { value: 'entertainment', label: 'سرگرمی', icon: 'ph:smiley', description: 'محتوای سرگرم‌کننده و شاد' },
+  
+  // Specialized Topics
+  { value: 'technology', label: 'فناوری', icon: 'ph:gear', description: 'تکنولوژی و نوآوری' },
+  { value: 'health-wellness', label: 'سلامت و تندرستی', icon: 'ph:heart', description: 'سلامت جسمی و روحی' },
+  { value: 'lifestyle', label: 'سبک زندگی', icon: 'ph:house', description: 'زندگی روزمره و عادات' },
+  { value: 'financial', label: 'مالی', icon: 'ph:coins', description: 'مالی و سرمایه‌گذاری' },
+  { value: 'travel', label: 'سفر', icon: 'ph:airplane', description: 'سفر و گردشگری' },
+  { value: 'food-cooking', label: 'غذا و آشپزی', icon: 'ph:cooking-pot', description: 'آشپزی و تغذیه' },
+  { value: 'art-culture', label: 'هنر و فرهنگ', icon: 'ph:palette', description: 'هنر، موسیقی و فرهنگ' },
+  { value: 'science', label: 'علمی', icon: 'ph:atom', description: 'علوم و تحقیقات' },
+  
+  // Mental Health & Psychology (Original categories preserved)
+  { value: 'mental-health', label: 'سلامت روان', icon: 'ph:heartbeat', description: 'روانشناسی و سلامت ذهن' },
+  { value: 'relationship', label: 'روابط', icon: 'ph:users', description: 'روابط انسانی و عاطفی' },
+  { value: 'parenting', label: 'فرزندپروری', icon: 'ph:baby', description: 'تربیت فرزند و خانواده' },
+  { value: 'counseling', label: 'مشاوره', icon: 'ph:chat-circle-dots', description: 'مشاوره و راهنمایی' },
+  { value: 'meditation', label: 'مدیتیشن', icon: 'ph:person-simple', description: 'مدیتیشن و آرامش' },
+  { value: 'self-help', label: 'خودیاری', icon: 'ph:hand-heart', description: 'خودیاری و بهبود شخصی' },
+  { value: 'stress', label: 'مدیریت استرس', icon: 'ph:activity', description: 'کنترل و مدیریت استرس' },
+  { value: 'anxiety', label: 'اضطراب', icon: 'ph:cloud-warning', description: 'کنترل اضطراب و نگرانی' },
+  { value: 'mindfulness', label: 'ذهن‌آگاهی', icon: 'ph:eye', description: 'حضور ذهن و آگاهی' }
 ]
 const availableTags = [
-  'خودآگاهی',
-  'رشد فردی',
-  'سلامت روان',
-  'استرس',
-  'آرامش',
-  'مدیتیشن',
-  'یوگا',
+  // General themes
+  'آموزشی', 'تعلیم', 'یادگیری',
+  'انگیزشی', 'الهام‌بخش', 'موفقیت',
+  'شبکه‌های اجتماعی', 'اینستاگرام', 'لینکدین',
+  'حرفه‌ای', 'کسب‌وکار', 'کارآفرینی',
+  'رشد فردی', 'خودسازی', 'توسعه شخصی',
+  'داستان‌گویی', 'روایت', 'تجربه',
+  'اطلاع‌رسانی', 'خبری', 'راهنما',
+  'سرگرمی', 'طنز', 'شاد',
+  
+  // Specialized topics
+  'فناوری', 'هوش مصنوعی', 'دیجیتال',
+  'سلامت', 'ورزش', 'تناسب اندام',
+  'سبک زندگی', 'روتین', 'عادت',
+  'مالی', 'سرمایه‌گذاری', 'پول',
+  'سفر', 'گردشگری', 'ماجراجویی',
+  'آشپزی', 'غذا', 'رژیم غذایی',
+  'هنر', 'خلاقیت', 'طراحی',
+  'علمی', 'تحقیق', 'دانش',
+  
+  // Mental health (original)
+  'خودآگاهی', 'سلامت روان', 'استرس',
+  'آرامش', 'مدیتیشن', 'ذهن‌آگاهی',
+  'روابط', 'عشق', 'دوستی',
+  'فرزندپروری', 'خانواده', 'تربیت',
+  'مشاوره', 'درمان', 'کمک'
 ]
 
 const previewImage = computed(() => {
@@ -1444,6 +1495,77 @@ const insertImageMarkdown = () => {
   })
 }
 
+// Image browser functions
+const openImageBrowser = () => {
+  // Generate search terms from selected text or title, with theme context
+  const searchText = selectedTextForImage.value || title.value || ''
+  const suggestions = generateSearchTerms(searchText, category.value)
+  
+  if (suggestions.length > 0) {
+    imageSearchQuery.value = suggestions[0]
+    searchImages()
+  }
+  
+  showImageBrowser.value = true
+}
+
+const searchImages = async () => {
+  if (!imageSearchQuery.value.trim()) return
+  
+  imageSearchLoading.value = true
+  
+  try {
+    const results = await searchAllSources({
+      query: imageSearchQuery.value,
+      orientation: imageOrientation.value,
+      perPage: 8
+    })
+    
+    imageSearchResults.value = results
+  } catch (error) {
+    console.error('Image search error:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در جستجوی تصاویر. لطفاً دوباره امتحان کنید.',
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
+  } finally {
+    imageSearchLoading.value = false
+  }
+}
+
+const selectImageFromBrowser = (image: ImageSource) => {
+  selectedImage.value = image
+  imageCaption.value = image.alt || ''
+  
+  const imageMarkdown = `\n\n![${image.alt}](${image.url})\n*${image.alt}*\n\n`
+  
+  // افزودن به محل انتخاب یا انتهای متن
+  const textarea = markdownTextarea.value?.$el?.querySelector('textarea')
+  if (textarea && selectedTextRange.value && selectedTextRange.value.end > 0) {
+    const currentValue = textarea.value
+    const beforeText = currentValue.substring(0, selectedTextRange.value.end)
+    const afterText = currentValue.substring(selectedTextRange.value.end)
+    contentLong.value = beforeText + imageMarkdown + afterText
+  } else {
+    contentLong.value += imageMarkdown
+  }
+  
+  showImageBrowser.value = false
+  selectedTextForImage.value = ''
+  selectedImage.value = null
+  
+  toaster.show({
+    title: 'موفقیت',
+    message: 'تصویر با موفقیت به متن اضافه شد.',
+    color: 'success',
+    icon: 'ph:check-circle',
+    closable: true,
+  })
+}
+
 const generateGoalsListAI = async () => {
   generateGoalsAiLoading.value = true
 
@@ -1703,30 +1825,123 @@ ${contextString}
                       />
                     </button>
                   </div>
-                  <div
-                    class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
-                  >
-                    <BaseRadioHeadless
-                      v-for="cat in categories"
-                      :key="cat.value"
-                      v-model="category"
-                      :name="'category'"
-                      :value="cat.value"
-                    >
-                      <BaseCard
-                        rounded="lg"
-                        class="flex cursor-pointer items-center gap-2 border-2 p-3 transition-all duration-150 peer-checked:!border-[#9C6ADE] peer-checked:!bg-[#F6F0FF]"
-                      >
-                        <Icon :name="cat.icon" class="size-5 text-[#9C6ADE]" />
-                        <span class="font-medium">{{ cat.label }}</span>
-                      </BaseCard>
-                    </BaseRadioHeadless>
+                  <!-- Theme Categories with Grouping -->
+                  <div class="mt-3 space-y-4">
+                    <!-- Content Themes & Styles -->
+                    <div class="space-y-2">
+                      <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <Icon name="ph:palette" class="size-4" />
+                        تم و سبک محتوا
+                      </h4>
+                      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                        <BaseRadioHeadless
+                          v-for="cat in categories.slice(0, 8)"
+                          :key="cat.value"
+                          v-model="category"
+                          :name="'category'"
+                          :value="cat.value"
+                        >
+                          <BaseCard
+                            rounded="lg"
+                            class="flex cursor-pointer flex-col border-2 p-3 transition-all duration-150 hover:shadow-md peer-checked:!border-[#9C6ADE] peer-checked:!bg-[#F6F0FF] group"
+                            :title="cat.description"
+                          >
+                            <div class="flex items-center gap-2 mb-1">
+                              <Icon :name="cat.icon" class="size-5 text-[#9C6ADE] group-hover:scale-110 transition-transform" />
+                              <span class="font-medium text-sm">{{ cat.label }}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-tight">{{ cat.description }}</p>
+                          </BaseCard>
+                        </BaseRadioHeadless>
+                      </div>
+                    </div>
+
+                    <!-- Specialized Topics -->
+                    <div class="space-y-2">
+                      <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <Icon name="ph:graduation-cap" class="size-4" />
+                        موضوعات تخصصی
+                      </h4>
+                      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                        <BaseRadioHeadless
+                          v-for="cat in categories.slice(8, 16)"
+                          :key="cat.value"
+                          v-model="category"
+                          :name="'category'"
+                          :value="cat.value"
+                        >
+                          <BaseCard
+                            rounded="lg"
+                            class="flex cursor-pointer flex-col border-2 p-3 transition-all duration-150 hover:shadow-md peer-checked:!border-[#9C6ADE] peer-checked:!bg-[#F6F0FF] group"
+                            :title="cat.description"
+                          >
+                            <div class="flex items-center gap-2 mb-1">
+                              <Icon :name="cat.icon" class="size-5 text-[#9C6ADE] group-hover:scale-110 transition-transform" />
+                              <span class="font-medium text-sm">{{ cat.label }}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-tight">{{ cat.description }}</p>
+                          </BaseCard>
+                        </BaseRadioHeadless>
+                      </div>
+                    </div>
+
+                    <!-- Mental Health & Psychology -->
+                    <div class="space-y-2">
+                      <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <Icon name="ph:heart" class="size-4" />
+                        سلامت روان و روانشناسی
+                      </h4>
+                      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                        <BaseRadioHeadless
+                          v-for="cat in categories.slice(16)"
+                          :key="cat.value"
+                          v-model="category"
+                          :name="'category'"
+                          :value="cat.value"
+                        >
+                          <BaseCard
+                            rounded="lg"
+                            class="flex cursor-pointer flex-col border-2 p-3 transition-all duration-150 hover:shadow-md peer-checked:!border-[#9C6ADE] peer-checked:!bg-[#F6F0FF] group"
+                            :title="cat.description"
+                          >
+                            <div class="flex items-center gap-2 mb-1">
+                              <Icon :name="cat.icon" class="size-5 text-[#9C6ADE] group-hover:scale-110 transition-transform" />
+                              <span class="font-medium text-sm">{{ cat.label }}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-tight">{{ cat.description }}</p>
+                          </BaseCard>
+                        </BaseRadioHeadless>
+                      </div>
+                    </div>
                   </div>
                   <div
                     v-if="errors.category"
                     class="text-danger-500 mt-1 text-sm"
                   >
                     {{ errors.category }}
+                  </div>
+                  
+                  <!-- Selected Theme Preview -->
+                  <div v-if="selectedCategory" class="mt-4 p-4 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-lg border border-primary-200 dark:border-primary-700">
+                    <div class="flex items-center gap-3 mb-2">
+                      <div class="flex items-center gap-2">
+                        <Icon :name="selectedCategory.icon || 'ph:circle'" class="size-5 text-primary-600 dark:text-primary-400" />
+                        <span class="font-medium text-primary-800 dark:text-primary-200">
+                          تم انتخاب شده: {{ selectedCategory.label }}
+                        </span>
+                      </div>
+                      <div class="flex-1"></div>
+                      <span class="text-xs px-2 py-1 bg-primary-200 dark:bg-primary-700 text-primary-800 dark:text-primary-200 rounded-full">
+                        {{ selectedCategory.value }}
+                      </span>
+                    </div>
+                    <p class="text-sm text-primary-700 dark:text-primary-300 mb-3">
+                      {{ selectedCategory.description }}
+                    </p>
+                    <div class="flex items-center gap-2 text-xs text-primary-600 dark:text-primary-400">
+                      <Icon name="ph:lightbulb" class="size-4" />
+                      <span>این تم بر روی پیشنهادات هوش مصنوعی و انتخاب تصاویر تأثیر می‌گذارد</span>
+                    </div>
                   </div>
                 </div>
 
@@ -2054,24 +2269,65 @@ ${contextString}
                         type="range"
                         :min="minContentLength"
                         :max="maxContentLength"
-                        :step="500"
+                        :step="250"
                         class="content-length-slider h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700"
                       >
                       <div class="mt-2 flex justify-between px-1 text-xs text-gray-500">
+                        <span class="rounded border bg-white px-2 py-1 dark:bg-gray-700">خیلی کوتاه</span>
                         <span class="rounded border bg-white px-2 py-1 dark:bg-gray-700">کوتاه</span>
                         <span class="rounded border bg-white px-2 py-1 dark:bg-gray-700">متوسط</span>
                         <span class="rounded border bg-white px-2 py-1 dark:bg-gray-700">بلند</span>
                       </div>
                     </div>
 
+                    <!-- Quick Preset Buttons -->
+                    <div class="mb-3 flex gap-2 flex-wrap">
+                      <button 
+                        @click="contentLengthTarget = 250"
+                        type="button"
+                        class="rounded-md bg-purple-100 px-3 py-1 text-xs font-medium text-purple-600 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-800"
+                      >
+                        خیلی کوتاه (۲۵۰ کلمه)
+                      </button>
+                      <button 
+                        @click="contentLengthTarget = 500"
+                        type="button"
+                        class="rounded-md bg-pink-100 px-3 py-1 text-xs font-medium text-pink-600 hover:bg-pink-200 dark:bg-pink-900 dark:text-pink-300 dark:hover:bg-pink-800"
+                      >
+                        کوتاه (۵۰۰ کلمه)
+                      </button>
+                      <button 
+                        @click="contentLengthTarget = 2000"
+                        type="button"
+                        class="rounded-md bg-orange-100 px-3 py-1 text-xs font-medium text-orange-600 hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-300 dark:hover:bg-orange-800"
+                      >
+                        متوسط (۲,۰۰۰ کلمه)
+                      </button>
+                      <button 
+                        @click="contentLengthTarget = 5000"
+                        type="button"
+                        class="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800"
+                      >
+                        پیش‌فرض (۵,۰۰۰ کلمه)
+                      </button>
+                    </div>
+
                     <!-- Length Indicators -->
-                    <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div class="grid grid-cols-4 gap-2 text-xs">
                       <div class="rounded border bg-white p-2 text-center dark:bg-gray-700">
-                        <div class="font-semibold text-orange-500">
+                        <div class="font-semibold text-purple-500">
+                          خیلی کوتاه
+                        </div>
+                        <div class="text-gray-500">
+                          ۲۵۰ - ۷۵۰
+                        </div>
+                      </div>
+                      <div class="rounded border bg-white p-2 text-center dark:bg-gray-700">
+                        <div class="font-semibold text-pink-500">
                           کوتاه
                         </div>
                         <div class="text-gray-500">
-                          ۱,۰۰۰ - ۳,۰۰۰
+                          ۵۰۰ - ۲,۰۰۰
                         </div>
                       </div>
                       <div class="rounded border bg-white p-2 text-center dark:bg-gray-700">
@@ -2079,7 +2335,7 @@ ${contextString}
                           متوسط
                         </div>
                         <div class="text-gray-500">
-                          ۳,۰۰۰ - ۸,۰۰۰
+                          ۲,۰۰۰ - ۸,۰۰۰
                         </div>
                       </div>
                       <div class="rounded border bg-white p-2 text-center dark:bg-gray-700">
@@ -2141,28 +2397,52 @@ ${contextString}
                           <span>{{ action.title }}</span>
                         </button>
 
-                        <!-- دکمه تولید تصویر -->
-                        <button
-                          :disabled="imageGenerationLoading || !selectedTextForImage"
-                          :class="[
-                            'flex items-center gap-1 rounded-md border px-2 py-1 text-right text-xs transition-colors',
-                            'border-green-200 hover:bg-green-100 dark:border-green-600 dark:hover:bg-green-700',
-                          ]"
-                          title="تولید تصویر متناسب"
-                          @click="generateImageForText"
-                        >
-                          <Icon
-                            v-if="imageGenerationLoading"
-                            name="svg-spinners:90-ring-with-bg"
-                            class="size-3 shrink-0"
-                          />
-                          <Icon
-                            v-else
-                            name="ph:image"
-                            class="size-3 shrink-0 text-green-500"
-                          />
-                          <span>افزودن تصویر</span>
-                        </button>
+                        <!-- دکمه‌های تصویر -->
+                        <div class="flex gap-1">
+                          <button
+                            :disabled="imageGenerationLoading || !selectedTextForImage"
+                            :class="[
+                              'flex items-center gap-1 rounded-md border px-2 py-1 text-right text-xs transition-colors',
+                              'border-green-200 hover:bg-green-100 dark:border-green-600 dark:hover:bg-green-700',
+                            ]"
+                            title="تولید تصویر متناسب"
+                            @click="generateImageForText"
+                          >
+                            <Icon
+                              v-if="imageGenerationLoading"
+                              name="svg-spinners:90-ring-with-bg"
+                              class="size-3 shrink-0"
+                            />
+                            <Icon
+                              v-else
+                              name="ph:sparkle"
+                              class="size-3 shrink-0 text-green-500"
+                            />
+                            <span>تولید تصویر</span>
+                          </button>
+                          
+                          <button
+                            :disabled="imageSearchLoading"
+                            :class="[
+                              'flex items-center gap-1 rounded-md border px-2 py-1 text-right text-xs transition-colors',
+                              'border-blue-200 hover:bg-blue-100 dark:border-blue-600 dark:hover:bg-blue-700',
+                            ]"
+                            title="جستجوی تصاویر رایگان"
+                            @click="openImageBrowser"
+                          >
+                            <Icon
+                              v-if="imageSearchLoading"
+                              name="svg-spinners:90-ring-with-bg"
+                              class="size-3 shrink-0"
+                            />
+                            <Icon
+                              v-else
+                              name="ph:image"
+                              class="size-3 shrink-0 text-blue-500"
+                            />
+                            <span>جستجوی تصاویر</span>
+                          </button>
+                        </div>
                       </div>
                     </template>
                   </BaseTextarea>
@@ -2287,7 +2567,8 @@ ${contextString}
                   <li><strong>پیام مخفی</strong> باید در کل متن منعکس شود</li>
                   <li><strong>همگام‌سازی هوشمند</strong> تمام فیلدها را هماهنگ می‌کند</li>
                   <li><strong>کنترل طول متن</strong> با slider قابل تنظیم است</li>
-                  <li><strong>تولید تصویر:</strong> متن را انتخاب کنید و "افزودن تصویر" کلیک کنید</li>
+                  <li><strong>تولید تصویر:</strong> متن را انتخاب کنید و "تولید تصویر" کلیک کنید</li>
+                  <li><strong>جستجوی تصاویر:</strong> از تصاویر رایگان Unsplash، Pexels و Pixabay استفاده کنید</li>
                   <li>متن کامل باید با اهداف آموزشی همخوان باشد</li>
                   <li>برچسب‌ها باید با دسته‌بندی مرتبط باشند</li>
                 </ul>
@@ -2444,6 +2725,148 @@ ${contextString}
           <Icon name="ph:plus-circle" class="ml-1.5 size-4" />
           افزودن تصویر به متن
         </BaseButton>
+      </div>
+    </div>
+  </TairoModal>
+
+  <!-- Image Browser Modal -->
+  <TairoModal
+    :open="showImageBrowser"
+    size="6xl"
+    rounded="lg"
+    @close="showImageBrowser = false"
+  >
+    <template #header>
+      <div class="flex w-full items-center justify-between p-4">
+        <h2 class="text-primary-500 text-lg font-bold">
+          <Icon name="ph:image" class="mr-2 inline-block size-5" />
+          جستجوی تصاویر رایگان
+        </h2>
+        <button
+          type="button"
+          class="text-muted-400 hover:text-muted-500 dark:hover:text-muted-300 transition-colors"
+          @click="showImageBrowser = false"
+        >
+          <Icon name="ph:x" class="size-5" />
+        </button>
+      </div>
+    </template>
+
+    <div class="space-y-4 px-6 pb-6">
+      <!-- Search Controls -->
+      <div class="flex gap-4 items-end">
+        <div class="flex-1">
+          <BaseInput
+            v-model="imageSearchQuery"
+            label="جستجوی تصاویر"
+            placeholder="کلیدواژه‌ها را وارد کنید..."
+            @keyup.enter="searchImages"
+          />
+        </div>
+        <div class="w-40">
+          <BaseSelect
+            v-model="imageOrientation"
+            label="جهت تصویر"
+            :items="[
+              { label: 'افقی', value: 'landscape' },
+              { label: 'عمودی', value: 'portrait' },
+              { label: 'مربعی', value: 'squarish' }
+            ]"
+            @change="searchImages"
+          />
+        </div>
+        <BaseButton
+          color="primary"
+          :disabled="imageSearchLoading || !imageSearchQuery.trim()"
+          @click="searchImages"
+        >
+          <Icon 
+            v-if="imageSearchLoading"
+            name="svg-spinners:90-ring-with-bg" 
+            class="ml-1.5 size-4" 
+          />
+          <Icon 
+            v-else
+            name="ph:magnifying-glass" 
+            class="ml-1.5 size-4" 
+          />
+          جستجو
+        </BaseButton>
+      </div>
+
+      <!-- Source Tabs -->
+      <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+        <button
+          v-for="source in ['unsplash', 'pexels', 'pixabay', 'picsum']"
+          :key="source"
+          :class="[
+            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+            selectedImageSource === source
+              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+          ]"
+          @click="selectedImageSource = source"
+        >
+          {{ {
+            unsplash: 'Unsplash',
+            pexels: 'Pexels', 
+            pixabay: 'Pixabay',
+            picsum: 'Lorem Picsum'
+          }[source] }}
+        </button>
+      </div>
+
+      <!-- Image Results -->
+      <div v-if="imageSearchLoading" class="flex justify-center py-8">
+        <Icon name="svg-spinners:90-ring-with-bg" class="size-8 text-primary-500" />
+      </div>
+
+      <div 
+        v-else-if="imageSearchResults[selectedImageSource]?.length"
+        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+      >
+        <div
+          v-for="image in imageSearchResults[selectedImageSource]"
+          :key="image.id"
+          class="group relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all cursor-pointer"
+          @click="selectImageFromBrowser(image)"
+        >
+          <div class="aspect-square">
+            <img
+              :src="image.thumbnail"
+              :alt="image.alt"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+              loading="lazy"
+            />
+          </div>
+          
+          <!-- Image Overlay -->
+          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+              <Icon name="ph:plus-circle" class="size-8 text-white" />
+            </div>
+          </div>
+          
+          <!-- Image Info -->
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+            <p class="text-white text-xs font-medium truncate">
+              {{ image.alt }}
+            </p>
+            <p v-if="image.attribution" class="text-white text-xs opacity-75 truncate">
+              {{ image.attribution.author }} - {{ image.attribution.source }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div v-else-if="imageSearchQuery && !imageSearchLoading" class="text-center py-8">
+        <Icon name="ph:image-broken" class="size-12 text-gray-400 mx-auto mb-3" />
+        <p class="text-gray-500">هیچ تصویری پیدا نشد. کلیدواژه‌های دیگری امتحان کنید.</p>
+      </div>
+
+      <div v-else class="text-center py-8">
+        <Icon name="ph:image" class="size-12 text-gray-400 mx-auto mb-3" />
+        <p class="text-gray-500">برای جستجوی تصاویر، کلیدواژه‌ای وارد کنید.</p>
       </div>
     </div>
   </TairoModal>

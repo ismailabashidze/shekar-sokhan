@@ -7,13 +7,53 @@
         </h1>
 
         <div class="space-y-8">
-          <h1>تغییرات نسخه 2.10.0</h1>
-          <ul>
-            <li>بهبود کامل سیستم PWA notifications برای نمایش native در اندروید و ویندوز حتی در حالت بسته بودن اپ</li>
-            <li>تست و راهنمای کامل برای نوتیفیکیشن‌ها در صفحه /test-notifications</li>
-            <li>رفع مشکل auto-cancellation در تست‌های PocketBase</li>
-            <li>بهبود واکنش‌پذیری permission و subscription</li>
-          </ul>
+          <!-- Version 2.11.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.11.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              19 ژولای 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>به‌روزرسانی نسخه به 2.11.0</li>
+              <li>بهبودهای عمومی عملکرد و پایداری</li>
+              <li>آماده‌سازی برای قابلیت‌های جدید</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهینه‌سازی فرآیند ساخت و استقرار</li>
+              <li>به‌روزرسانی وابستگی‌ها</li>
+              <li>بهبود مدیریت نسخه‌گذاری</li>
+            </ul>
+          </div>
+
+          <!-- Version 2.10.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.10.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              19 ژولای 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود کامل سیستم PWA notifications برای نمایش native در اندروید و ویندوز حتی در حالت بسته بودن اپ</li>
+              <li>تست و راهنمای کامل برای نوتیفیکیشن‌ها در صفحه /test-notifications</li>
+              <li>رفع مشکل auto-cancellation در تست‌های PocketBase</li>
+              <li>بهبود واکنش‌پذیری permission و subscription</li>
+            </ul>
+          </div>
           <!-- Version 2.9.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

@@ -1,3 +1,5 @@
+import { useSessionGoals } from './useSessionGoals'
+
 export type SessionType = 'educational' | 'therapic'
 export type SessionStatus = 'inprogress' | 'done' | 'closed' | 'delete'
 
@@ -19,6 +21,15 @@ export type SessionFilter = {
   status?: SessionStatus
   therapistId?: string
   patientId?: string
+}
+
+export type AdminSessionFilter = {
+  status?: SessionStatus
+  session_type?: SessionType
+  search?: string
+  page?: number
+  perPage?: number
+  sort?: string
 }
 
 export function useSessions() {
@@ -97,7 +108,24 @@ export function useSessions() {
     }
 
     try {
-      return await nuxtApp.$pb.collection('sessions').create(sessionData)
+      const session = await nuxtApp.$pb.collection('sessions').create(sessionData)
+      
+      // Auto-generate first session goals if this is the user's first session
+      if (session && session.id) {
+        try {
+          const { createFirstSessionGoals } = useSessionGoals()
+          await createFirstSessionGoals(
+            session.id,
+            session.user,
+            session.therapist || 'ai-therapist' // Default therapist ID for AI sessions
+          )
+        } catch (goalError) {
+          console.error('Error creating first session goals:', goalError)
+          // Don't throw error here to prevent session creation failure
+        }
+      }
+      
+      return session
     }
     catch (error: any) {
       if (error?.isAbort) {
@@ -125,10 +153,122 @@ export function useSessions() {
     }
   }
 
+  const getAllSessionsForAdmin = async (filter?: AdminSessionFilter) => {
+    if (!nuxtApp.$pb.authStore.isValid) {
+      throw new Error('User not authenticated')
+    }
+
+    // Check if user is admin
+    const userRole = nuxtApp.$pb.authStore.model?.role
+    if (userRole !== 'admin') {
+      throw new Error('Access denied: Admin privileges required')
+    }
+
+    try {
+      // Build filter string
+      let filterStr = ''
+      const filterConditions = []
+
+      if (filter?.status) {
+        filterConditions.push(`status = "${filter.status}"`)
+      }
+      if (filter?.session_type) {
+        filterConditions.push(`session_type = "${filter.session_type}"`)
+      }
+      if (filter?.search) {
+        // Search in user name, email, or therapist name
+        const searchTerm = filter.search.toLowerCase()
+        filterConditions.push(`(user.name ~ "${searchTerm}" || user.email ~ "${searchTerm}" || therapist.name ~ "${searchTerm}")`)
+      }
+
+      if (filterConditions.length > 0) {
+        filterStr = filterConditions.join(' && ')
+      }
+
+      // Pagination parameters
+      const page = filter?.page || 1
+      const perPage = filter?.perPage || 10
+      const sort = filter?.sort || '-created'
+
+      // Fetch sessions with pagination
+      const result = await nuxtApp.$pb.collection('sessions').getList(page, perPage, {
+        sort,
+        filter: filterStr,
+        expand: 'user,therapist,session_analysis_for_system',
+      })
+
+      return {
+        items: result.items,
+        page: result.page,
+        perPage: result.perPage,
+        totalItems: result.totalItems,
+        totalPages: result.totalPages,
+      }
+    }
+    catch (error: any) {
+      if (error?.isAbort) {
+        console.log('Request was cancelled')
+        return {
+          items: [],
+          page: 1,
+          perPage: 10,
+          totalItems: 0,
+          totalPages: 0,
+        }
+      }
+      throw error
+    }
+  }
+
+  const getSessionsByUserId = async (userId: string, filter?: { status?: SessionStatus, session_type?: SessionType }) => {
+    if (!nuxtApp.$pb.authStore.isValid) {
+      throw new Error('User not authenticated')
+    }
+
+    // Check if user is admin (required to view other users' sessions)
+    const userRole = nuxtApp.$pb.authStore.model?.role
+    if (userRole !== 'admin') {
+      throw new Error('Access denied: Admin privileges required')
+    }
+
+    try {
+      // Build filter string
+      let filterStr = `user = "${userId}"`
+      const filterConditions = [filterStr]
+
+      if (filter?.status) {
+        filterConditions.push(`status = "${filter.status}"`)
+      }
+      if (filter?.session_type) {
+        filterConditions.push(`session_type = "${filter.session_type}"`)
+      }
+
+      const finalFilter = filterConditions.join(' && ')
+
+      // Fetch all sessions for the user
+      const result = await nuxtApp.$pb.collection('sessions').getFullList({
+        sort: '-created',
+        filter: finalFilter,
+        expand: 'user,therapist,session_analysis_for_system',
+      })
+
+      return result
+    }
+    catch (error: any) {
+      if (error?.isAbort) {
+        console.log('Request was cancelled')
+        return []
+      }
+      throw error
+    }
+  }
+
   return {
     getSessions,
     getSession,
     createSession,
     updateSession,
+    getAllSessionsForAdmin,
+    getSessionsByUserId,
   }
 }

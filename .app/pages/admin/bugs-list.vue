@@ -13,7 +13,7 @@ const { user } = useUser()
 
 // Check for admin access
 onMounted(() => {
-  if (!user.value?.meta?.isAdmin) {
+  if (user.value.role !== 'admin') {
     toaster.show({
       title: 'دسترسی محدود',
       message: 'شما به این بخش دسترسی ندارید',

@@ -40,8 +40,80 @@ const isAIResponding = ref(false)
 const userReport = ref<Report | null>(null)
 const hasPreviousData = ref(false)
 
+// Feedback modal state
+const showFeedbackModal = ref(false)
+const feedbackMessage = ref<any>(null)
+const feedbackRating = ref(5)
+const feedbackLoading = ref(false)
+const feedbackActiveTab = ref('general')
+
+// Separate feedback data for each tab
+const generalFeedback = ref({
+  text: '',
+  otherText: ''
+})
+const problemsFeedback = ref({
+  categories: [] as string[],
+  otherText: ''
+})
+const qualityFeedback = ref({
+  categories: [] as string[],
+  otherText: ''
+})
+const improvementsFeedback = ref({
+  categories: [] as string[],
+  otherText: ''
+})
+
+// Feedback problem categories
+const problemCategories = [
+  { value: 'not_empathic', label: 'پیام همدلانه نیست', icon: 'ph:heart-break-duotone', color: 'danger' },
+  { value: 'repetitive', label: 'پیشنهاد تکراری است', icon: 'ph:repeat-duotone', color: 'warning' },
+  { value: 'not_helpful', label: 'پاسخ مفید نیست', icon: 'ph:thumbs-down-duotone', color: 'danger' },
+  { value: 'too_generic', label: 'پاسخ کلی و عمومی است', icon: 'ph:chats-duotone', color: 'warning' },
+  { value: 'inappropriate', label: 'پاسخ نامناسب است', icon: 'ph:warning-duotone', color: 'danger' },
+  { value: 'off_topic', label: 'خارج از موضوع است', icon: 'ph:arrow-square-out-duotone', color: 'warning' },
+  { value: 'too_long', label: 'خیلی طولانی است', icon: 'ph:text-align-justify-duotone', color: 'info' },
+  { value: 'too_short', label: 'خیلی کوتاه است', icon: 'ph:text-align-center-duotone', color: 'info' },
+  { value: 'not_islamic_aligned', label: 'منطبق با باورهای اسلامی نیست', icon: 'ph:mosque-duotone', color: 'danger' },
+]
+
+// Feedback quality categories
+const qualityCategories = [
+  { value: 'clear_helpful', label: 'واضح و مفید', icon: 'ph:lightbulb-duotone', color: 'success' },
+  { value: 'professional', label: 'حرفه‌ای و مناسب', icon: 'ph:medal-duotone', color: 'success' },
+  { value: 'good_timing', label: 'زمان‌بندی مناسب', icon: 'ph:clock-duotone', color: 'success' },
+  { value: 'empathetic', label: 'همدلانه و دلسوزانه', icon: 'ph:heart-duotone', color: 'success' },
+  { value: 'actionable', label: 'قابل اجرا و عملی', icon: 'ph:check-square-duotone', color: 'success' },
+  { value: 'comprehensive', label: 'جامع و کامل', icon: 'ph:list-checks-duotone', color: 'success' },
+]
+
+// Feedback improvement suggestions
+const improvementSuggestions = [
+  { value: 'more_empathy', label: 'بیشتر همدلی نشان دهد', icon: 'ph:heart-duotone', color: 'primary' },
+  { value: 'more_specific', label: 'خاص‌تر و مشخص‌تر باشد', icon: 'ph:target-duotone', color: 'primary' },
+  { value: 'more_examples', label: 'مثال‌های بیشتر ارائه دهد', icon: 'ph:list-bullets-duotone', color: 'primary' },
+  { value: 'ask_questions', label: 'سوال‌های بیشتری بپرسد', icon: 'ph:question-duotone', color: 'primary' },
+  { value: 'shorter_response', label: 'پاسخ کوتاه‌تری دهد', icon: 'ph:minus-duotone', color: 'primary' },
+  { value: 'longer_response', label: 'پاسخ بیشتر توضیح دهد', icon: 'ph:plus-duotone', color: 'primary' },
+]
+
 const { generateAnalysis, createAnalysis, getAnalysisForSession } = useSessionAnalysis()
 const { createAndLinkAnalysis, getMessageAnalysis } = useMessageAnalysis()
+const { 
+  getSessionGoals, 
+  createGoal, 
+  updateGoalProgress, 
+  generateAIGoals, 
+  evaluateGoalAchievement,
+  goalTemplates 
+} = useSessionGoals()
+
+// Goals state
+const sessionGoals = ref<any[]>([])
+const goalsLoading = ref(false)
+const showGoalsModal = ref(false)
+const selectedGoal = ref<any>(null)
 
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
@@ -157,6 +229,9 @@ const loadMessages = async (therapistId: string) => {
       messages.value = messagesWithAnalysis
       scrollToBottom()
       startSessionTimer() // Start session timer when messages are loaded
+      
+      // Load session goals
+      await loadSessionGoals()
     }
     else if (!showNoCharge.value) {
       const newSession = await createSession(therapistId)
@@ -237,6 +312,9 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
+
+
+
 const {
   streamChat,
   models,
@@ -255,6 +333,14 @@ const streamingResponse = ref('')
 const showModelError = ref(false)
 const modelSearchInput = ref('')
 const showModelDropdown = ref(false)
+const showSystemPromptModal = ref(false)
+const showFeedbackSummaryModal = ref(false)
+const showFactoryResetModal = ref(false)
+const systemPromptContent = ref('')
+const feedbackSummaryContent = ref('')
+const loadingSystemPrompt = ref(false)
+const loadingFeedbackSummary = ref(false)
+const factoryResetLoading = ref(false)
 
 watch(modelSearchInput, (newValue) => {
   searchQuery.value = newValue
@@ -391,7 +477,7 @@ async function submitMessage() {
     await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user }, (chunk) => {
       aiResponse += chunk
       thinkingResponse.value = aiResponse
-    })
+    }, activeSession.value?.id, activeSession.value?.goals)
     isAIThinking.value = false
 
     // Remove any temporary typing indicators
@@ -748,6 +834,653 @@ const gotoReport = () => {
   navigateTo(`/report`)
 }
 
+// Feedback functions
+const openFeedbackModal = (message: any) => {
+  console.log('Opening feedback modal for message:', message)
+  
+  if (!message) {
+    console.warn('No message provided to feedback modal')
+    toaster.show({
+      title: 'خطا',
+      message: 'پیام مورد نظر یافت نشد',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+    return
+  }
+
+  feedbackMessage.value = message
+  feedbackRating.value = 5
+  feedbackActiveTab.value = 'general'
+  
+  // Reset all feedback data
+  generalFeedback.value = { text: '', otherText: '' }
+  problemsFeedback.value = { categories: [], otherText: '' }
+  qualityFeedback.value = { categories: [], otherText: '' }
+  improvementsFeedback.value = { categories: [], otherText: '' }
+  
+  showFeedbackModal.value = true
+}
+
+const closeFeedbackModal = () => {
+  showFeedbackModal.value = false
+  feedbackMessage.value = null
+  feedbackRating.value = 5
+  feedbackActiveTab.value = 'general'
+  
+  // Reset all feedback data
+  generalFeedback.value = { text: '', otherText: '' }
+  problemsFeedback.value = { categories: [], otherText: '' }
+  qualityFeedback.value = { categories: [], otherText: '' }
+  improvementsFeedback.value = { categories: [], otherText: '' }
+}
+
+// Helper function to get message content from different possible message structures
+const getMessageContent = (message: any): string => {
+  if (!message) return ''
+  return message.text || message.content || message.message || ''
+}
+
+// Toggle functions for different feedback types
+const toggleProblemsCategory = (category: string) => {
+  const index = problemsFeedback.value.categories.indexOf(category)
+  if (index > -1) {
+    problemsFeedback.value.categories.splice(index, 1)
+  } else {
+    problemsFeedback.value.categories.push(category)
+  }
+}
+
+const toggleQualityCategory = (category: string) => {
+  const index = qualityFeedback.value.categories.indexOf(category)
+  if (index > -1) {
+    qualityFeedback.value.categories.splice(index, 1)
+  } else {
+    qualityFeedback.value.categories.push(category)
+  }
+}
+
+const toggleImprovementsCategory = (category: string) => {
+  const index = improvementsFeedback.value.categories.indexOf(category)
+  if (index > -1) {
+    improvementsFeedback.value.categories.splice(index, 1)
+  } else {
+    improvementsFeedback.value.categories.push(category)
+  }
+}
+
+const submitFeedback = async () => {
+  // Check if any feedback has been provided
+  const hasGeneralFeedback = generalFeedback.value.text.trim() || generalFeedback.value.otherText.trim()
+  const hasProblemsFeedback = problemsFeedback.value.categories.length > 0 || problemsFeedback.value.otherText.trim()
+  const hasQualityFeedback = qualityFeedback.value.categories.length > 0 || qualityFeedback.value.otherText.trim()
+  const hasImprovementsFeedback = improvementsFeedback.value.categories.length > 0 || improvementsFeedback.value.otherText.trim()
+  
+  if (!feedbackMessage.value || (!hasGeneralFeedback && !hasProblemsFeedback && !hasQualityFeedback && !hasImprovementsFeedback)) {
+    toaster.show({
+      title: 'خطا',
+      message: 'لطفاً حداقل یک نظر یا گزینه را انتخاب کنید',
+      color: 'warning',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+    return
+  }
+  
+  feedbackLoading.value = true
+  try {
+    // Create comprehensive feedback record in database
+    await nuxtApp.$pb.collection('message_feedback').create({
+      message_id: feedbackMessage.value.id,
+      session_id: activeSession.value?.id,
+      user_id: nuxtApp.$pb.authStore.model?.id,
+      therapist_id: activeTherapistId.value,
+      rating: feedbackRating.value,
+      message_content: feedbackMessage.value.text,
+      
+      // General feedback
+      general_text: generalFeedback.value.text.trim(),
+      general_other: generalFeedback.value.otherText.trim(),
+      
+      // Problems feedback
+      problems_categories: problemsFeedback.value.categories,
+      problems_other: problemsFeedback.value.otherText.trim(),
+      
+      // Quality feedback
+      quality_categories: qualityFeedback.value.categories,
+      quality_other: qualityFeedback.value.otherText.trim(),
+      
+      // Improvements feedback
+      improvements_categories: improvementsFeedback.value.categories,
+      improvements_other: improvementsFeedback.value.otherText.trim(),
+      
+      created: new Date().toISOString()
+    })
+
+    // Feedback will be stored in message_feedback collection and aggregated when needed
+    // This ensures it persists and works with existing database structure
+
+    // Generate single improved response with feedback applied
+    try {
+      isAIResponding.value = true
+      isAIThinking.value = true
+      thinkingResponse.value = ''
+      
+      // Create comprehensive feedback summary
+      const feedbackSummary = []
+      if (problemsFeedback.value.categories.length > 0) {
+        feedbackSummary.push(`مشکلات: ${problemsFeedback.value.categories.join(', ')}`)
+      }
+      if (problemsFeedback.value.otherText.trim()) {
+        feedbackSummary.push(`مشکل دیگر: ${problemsFeedback.value.otherText}`)
+      }
+      if (qualityFeedback.value.categories.length > 0) {
+        feedbackSummary.push(`نقاط قوت: ${qualityFeedback.value.categories.join(', ')}`)
+      }
+      if (qualityFeedback.value.otherText.trim()) {
+        feedbackSummary.push(`نقطه قوت دیگر: ${qualityFeedback.value.otherText}`)
+      }
+      if (improvementsFeedback.value.categories.length > 0) {
+        feedbackSummary.push(`پیشنهادات: ${improvementsFeedback.value.categories.join(', ')}`)
+      }
+      if (improvementsFeedback.value.otherText.trim()) {
+        feedbackSummary.push(`پیشنهاد دیگر: ${improvementsFeedback.value.otherText}`)
+      }
+      if (generalFeedback.value.text.trim()) {
+        feedbackSummary.push(`نظر کلی: ${generalFeedback.value.text}`)
+      }
+      if (generalFeedback.value.otherText.trim()) {
+        feedbackSummary.push(`نظر اضافی: ${generalFeedback.value.otherText}`)
+      }
+      
+      // Get conversation context
+      const contextMessages = messages.value
+        .filter(msg => msg.type === 'user' || msg.type === 'assistant')
+        .slice(-10)
+        .map(msg => ({
+          role: msg.type === 'user' ? 'user' : 'assistant',
+          content: msg.text
+        }))
+      
+      // Get the last user message to understand what they were discussing
+      const lastUserMessage = messages.value
+        .filter(msg => msg.type === 'user')
+        .slice(-1)[0]
+      
+      const improvedResponsePrompt = {
+        role: 'user',
+        content: `بازخورد مراجع در مورد پیام قبلی من:
+${feedbackSummary.join('\n')}
+
+${lastUserMessage ? `در ادامه موضوع "${lastUserMessage.text.slice(0, 50)}..." که در حال بحث بودیم، ` : ''}لطفاً پاسخ بهتری ارائه دهید که:
+- از دریافت بازخورد تشکر کنید (کوتاه)
+- این نکات را در نظر بگیرد
+- به درستی به نیازهای من پاسخ دهد
+- موضوع اصلی را ادامه دهد
+- مناسب یک روانشناس حرفه‌ای باشد`
+      }
+      
+      const chatMessagesForAI = [
+        ...contextMessages,
+        improvedResponsePrompt
+      ]
+      
+      let aiResponse = ''
+      await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user }, (chunk) => {
+        aiResponse += chunk
+        thinkingResponse.value = aiResponse
+      }, activeSession.value?.id, activeSession.value?.goals)
+      
+      isAIThinking.value = false
+      
+      // Add the single improved response to messages
+      const improvedMessage = {
+        id: Date.now().toString(),
+        text: aiResponse,
+        type: 'assistant',
+        timestamp: new Date(),
+        user: selectedConversationComputed.value?.user
+      }
+      
+      messages.value.push(improvedMessage)
+      
+      // Save improved response to database
+      if (activeSession.value?.id) {
+        await nuxtApp.$pb.collection('messages').create({
+          session_id: activeSession.value.id,
+          content: improvedMessage.text,
+          type: 'assistant',
+          user_id: selectedConversationComputed.value?.user?.id,
+          created: improvedMessage.timestamp.toISOString()
+        })
+      }
+      
+    } catch (error) {
+      console.error('Error generating improved response:', error)
+      isAIThinking.value = false
+    } finally {
+      isAIResponding.value = false
+    }
+
+    // Show success toast
+    toaster.show({
+      title: 'نظر شما ثبت شد',
+      message: 'بازخورد شما در پاسخ‌های آینده اعمال خواهد شد.',
+      color: 'success',
+      icon: 'ph:check-circle-fill',
+      closable: true,
+    })
+
+    closeFeedbackModal()
+  } catch (error) {
+    console.error('Error submitting feedback:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در ثبت نظر. لطفاً دوباره تلاش کنید',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  } finally {
+    feedbackLoading.value = false
+  }
+}
+
+// Goals functions
+const loadSessionGoals = async () => {
+  if (!activeSession.value?.id) return
+  
+  goalsLoading.value = true
+  try {
+    const goals = await getSessionGoals(activeSession.value.id)
+    sessionGoals.value = goals
+  } catch (error) {
+    console.error('Error loading session goals:', error)
+  } finally {
+    goalsLoading.value = false
+  }
+}
+
+// Function to display current system prompt
+const displaySystemPrompt = async () => {
+  if (!activeSession.value?.id) return
+  
+  loadingSystemPrompt.value = true
+  try {
+    const { getSessionFeedbackSummary, buildEnhancedSystemPrompt, getUserFeedbackProfile } = useFeedbackPrompt()
+    const userId = nuxtApp.$pb.authStore.model?.id
+    
+    // Get both session feedback and user profile
+    const [feedbackSummary, userProfile] = await Promise.all([
+      getSessionFeedbackSummary(activeSession.value.id),
+      userId ? getUserFeedbackProfile(userId) : Promise.resolve('')
+    ])
+    
+    // Base system prompt for therapist
+    const basePrompt = `اطلاعات هویتی تو در پایین آمده است:
+نام: ${selectedConversationComputed.value?.user?.name || 'روانشناس'}
+تخصص: ${selectedConversationComputed.value?.user?.specialty || 'روانشناسی'}
+توضیح کوتاه: ${selectedConversationComputed.value?.user?.shortDescription || ''}
+توضیح بلند: ${selectedConversationComputed.value?.user?.longDescription || ''}
+صفات تعریف کننده: ${selectedConversationComputed.value?.user?.definingTraits || ''}
+داستان زندگی: ${selectedConversationComputed.value?.user?.backStory || ''}
+شخصیت: ${selectedConversationComputed.value?.user?.personality || ''}
+ظاهر: ${selectedConversationComputed.value?.user?.appearance || ''}
+رویکرد: ${selectedConversationComputed.value?.user?.approach || ''}
+تخصص: ${selectedConversationComputed.value?.user?.expertise || ''}
+
+تو یک روانشناس هستی که در یک سیستم مشاوره متنی با مراجعین در حال گفتگو هستی.
+همیشه در نقش یک روانشناس حرفه‌ای باش و از اصول اخلاقی و حرفه‌ای پیروی کن.`
+    
+    // Build enhanced prompt
+    const enhancedPrompt = buildEnhancedSystemPrompt(basePrompt, feedbackSummary, activeSession.value?.goals, userProfile)
+    
+    systemPromptContent.value = enhancedPrompt
+    showSystemPromptModal.value = true
+    
+  } catch (error) {
+    console.error('Error generating system prompt:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در نمایش system prompt',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  } finally {
+    loadingSystemPrompt.value = false
+  }
+}
+
+// Function to display user feedback summary
+const displayFeedbackSummary = async () => {
+  loadingFeedbackSummary.value = true
+  try {
+    const { getUserFeedbackProfile } = useFeedbackPrompt()
+    const userId = nuxtApp.$pb.authStore.model?.id
+    
+    if (!userId) {
+      toaster.show({
+        title: 'خطا',
+        message: 'کاربر شناسایی نشده',
+        color: 'warning',
+        icon: 'ph:warning-circle-fill',
+        closable: true,
+      })
+      return
+    }
+    
+    const userProfile = await getUserFeedbackProfile(userId)
+    
+    if (!userProfile) {
+      toaster.show({
+        title: 'اطلاعات',
+        message: 'هنوز بازخوردی ثبت نشده است',
+        color: 'info',
+        icon: 'ph:info-circle-fill',
+        closable: true,
+      })
+      return
+    }
+    
+    feedbackSummaryContent.value = userProfile
+    showFeedbackSummaryModal.value = true
+    
+  } catch (error) {
+    console.error('Error getting feedback summary:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در نمایش خلاصه بازخوردها',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  } finally {
+    loadingFeedbackSummary.value = false
+  }
+}
+
+// Factory reset function - removes all user data
+const performFactoryReset = async () => {
+  factoryResetLoading.value = true
+  try {
+    const userId = nuxtApp.$pb.authStore.model?.id
+    if (!userId) {
+      toaster.show({
+        title: 'خطا',
+        message: 'کاربر شناسایی نشده',
+        color: 'warning',
+        icon: 'ph:warning-circle-fill',
+        closable: true,
+      })
+      return
+    }
+
+    let totalDeleted = 0
+
+    // Helper function to safely delete records
+    const safeDelete = async (collection: string, filter: string) => {
+      try {
+        console.log(`Fetching ${collection} records with filter: ${filter}`)
+        const records = await nuxtApp.$pb.collection(collection).getFullList({
+          filter: filter
+        })
+        
+        console.log(`Found ${records.length} ${collection} records to delete`)
+        
+        for (const record of records) {
+          try {
+            console.log(`Deleting ${collection} record ${record.id}`)
+            await nuxtApp.$pb.collection(collection).delete(record.id)
+            totalDeleted++
+            console.log(`Successfully deleted ${collection} record ${record.id}`)
+          } catch (deleteError) {
+            console.warn(`Failed to delete ${collection} record ${record.id}:`, deleteError)
+            // Continue with other records
+          }
+        }
+      } catch (fetchError) {
+        console.warn(`Failed to fetch ${collection} records:`, fetchError)
+      }
+    }
+
+    // Delete all user data sequentially to avoid overwhelming the server
+    await safeDelete('sessions', `user = "${userId}"`)
+    await safeDelete('messages', `user_id = "${userId}"`)
+    await safeDelete('message_feedback', `user_id = "${userId}"`)
+    await safeDelete('final_reports', `user = "${userId}"`)
+
+    // Also try to delete any session-related data
+    if (activeSession.value?.id) {
+      await safeDelete('messages', `session_id = "${activeSession.value.id}"`)
+      await safeDelete('message_feedback', `session_id = "${activeSession.value.id}"`)
+    }
+
+    // Clear local state
+    messages.value = []
+    activeSession.value = null
+    activeTherapistId.value = null
+    conversations.value = []
+    systemPromptContent.value = ''
+    feedbackSummaryContent.value = ''
+
+    toaster.show({
+      title: 'بازنشانی انجام شد',
+      message: `${totalDeleted} رکورد پاک شد. در حال خروج از سیستم...`,
+      color: 'success',
+      icon: 'ph:check-circle-fill',
+      closable: true,
+    })
+
+    showFactoryResetModal.value = false
+
+    // Logout user and redirect to login
+    setTimeout(async () => {
+      try {
+        // Clear PocketBase auth
+        nuxtApp.$pb.authStore.clear()
+        
+        // Redirect to login page
+        await navigateTo('/auth/login')
+      } catch (error) {
+        console.error('Error during logout:', error)
+        // Fallback - reload page
+        window.location.href = '/auth/login'
+      }
+    }, 2000)
+
+  } catch (error) {
+    console.error('Error during factory reset:', error)
+    toaster.show({
+      title: 'خطا در بازنشانی',
+      message: 'خطایی در پاک کردن اطلاعات رخ داد. لطفاً دوباره تلاش کنید',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  } finally {
+    factoryResetLoading.value = false
+  }
+}
+
+const generateSessionGoals = async () => {
+  if (!activeSession.value?.id || !nuxtApp.$pb.authStore.model?.id) {
+    console.warn('Missing required IDs for goal generation')
+    return
+  }
+  
+  goalsLoading.value = true
+  try {
+    // Get user's recent sessions for goal generation
+    const { getReportByUserId } = useReport()
+    const userReport = await getReportByUserId(nuxtApp.$pb.authStore.model.id)
+    
+    if (!userReport) {
+      console.warn('No user report found for goal generation')
+      toaster.show({
+        title: 'اطلاعات ناکافی',
+        message: 'برای تولید اهداف، ابتدا نیاز به جلسات قبلی دارید',
+        color: 'warning',
+        icon: 'ph:info-duotone'
+      })
+      return
+    }
+    
+    if (userReport.summaries && userReport.summaries.length > 0) {
+      // Use last 3 sessions for goal generation
+      const recentSessions = userReport.summaries.slice(-3)
+      
+      console.log('Recent sessions for goal generation:', recentSessions)
+      
+      const aiGoals = await generateAIGoals(
+        nuxtApp.$pb.authStore.model.id,
+        activeSession.value.id,
+        recentSessions
+      )
+      
+      // Create goals in database
+      if (aiGoals.goals && aiGoals.goals.length > 0) {
+        for (const goalData of aiGoals.goals) {
+          await createGoal({
+            session_id: activeSession.value.id,
+            user_id: nuxtApp.$pb.authStore.model.id,
+            therapist_id: activeTherapistId.value,
+            title: goalData.title,
+            description: goalData.description,
+            goal_type: goalData.goal_type,
+            priority: goalData.priority,
+            target_behaviors: goalData.target_behaviors || [],
+            success_criteria: goalData.success_criteria || [],
+            // Don't include based_on_sessions if it contains invalid IDs
+            based_on_sessions: []
+          })
+        }
+        
+        // Reload goals
+        await loadSessionGoals()
+        
+        toaster.show({
+          title: 'موفق',
+          message: 'اهداف جلسه با موفقیت تولید شد',
+          color: 'success',
+          icon: 'ph:check-circle-fill',
+          closable: true,
+        })
+      } else {
+        toaster.show({
+          title: 'خطا',
+          message: 'خطا در تولید اهداف از سرور',
+          color: 'danger',
+          icon: 'ph:warning-circle-fill',
+          closable: true,
+        })
+      }
+    } else {
+      toaster.show({
+        title: 'اطلاعات ناکافی',
+        message: 'برای تولید اهداف، ابتدا نیاز به جلسات قبلی دارید',
+        color: 'warning',
+        icon: 'ph:info-duotone',
+        closable: true,
+      })
+    }
+  } catch (error) {
+    console.error('Error generating session goals:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در تولید اهداف جلسه',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  } finally {
+    goalsLoading.value = false
+  }
+}
+
+const evaluateGoals = async () => {
+  if (!activeSession.value?.id || sessionGoals.value.length === 0) return
+  
+  try {
+    for (const goal of sessionGoals.value) {
+      if (goal.status !== 'achieved') {
+        await evaluateGoalAchievement(goal.id, messages.value)
+      }
+    }
+    
+    // Reload goals to show updated progress
+    await loadSessionGoals()
+    
+    toaster.show({
+      title: 'موفق',
+      message: 'ارزیابی اهداف انجام شد',
+      color: 'success',
+      icon: 'ph:check-circle-fill',
+      closable: true,
+    })
+  } catch (error) {
+    console.error('Error evaluating goals:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در ارزیابی اهداف',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  }
+}
+
+const openGoalModal = (goal: any) => {
+  selectedGoal.value = goal
+  showGoalsModal.value = true
+}
+
+const closeGoalModal = () => {
+  showGoalsModal.value = false
+  selectedGoal.value = null
+}
+
+const getGoalStatusColor = (status: string) => {
+  switch (status) {
+    case 'pending': return 'muted'
+    case 'in_progress': return 'warning'
+    case 'achieved': return 'success'
+    case 'partially_achieved': return 'info'
+    case 'modified': return 'primary'
+    default: return 'muted'
+  }
+}
+
+const getGoalStatusText = (status: string) => {
+  switch (status) {
+    case 'pending': return 'در انتظار'
+    case 'in_progress': return 'در حال انجام'
+    case 'achieved': return 'محقق شده'
+    case 'partially_achieved': return 'تا حدی محقق شده'
+    case 'modified': return 'تغییر یافته'
+    default: return 'نامشخص'
+  }
+}
+
+const getGoalPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'high': return 'danger'
+    case 'medium': return 'warning'
+    case 'low': return 'info'
+    default: return 'muted'
+  }
+}
+
+const getGoalPriorityText = (priority: string) => {
+  switch (priority) {
+    case 'high': return 'بالا'
+    case 'medium': return 'متوسط'
+    case 'low': return 'پایین'
+    default: return 'نامشخص'
+  }
+}
+
 // Function to have the AI start the conversation with a summary of previous sessions
 async function startAIConversationWithSummary(therapist: any, sessionId: string, report: any) {
   if (!therapist || !sessionId || !report) return
@@ -801,7 +1534,7 @@ ${report.possibleRiskFactors?.flat().map((risk: any) =>
     await streamChat([systemContext], { therapistDetails: therapist }, (chunk) => {
       aiResponse += chunk
       thinkingResponse.value = aiResponse
-    })
+    }, activeSession.value?.id, activeSession.value?.goals)
 
     isAIThinking.value = false
 
@@ -1099,6 +1832,10 @@ const isAIThinking = ref(false)
 
 <template>
   <div class="relative">
+    <!-- Horizontal Sidebar -->
+    <HorizontalSideBar />
+    
+    <!-- Main Content with top padding for HorizontalSideBar -->
     <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen overflow-hidden">
       <!-- Sidebar -->
       <div
@@ -1142,7 +1879,7 @@ const isAIThinking = ref(false)
               </a>
             </div>
 
-            <div class="flex h-16 w-full items-center justify-center">
+            <!-- <div class="flex h-16 w-full items-center justify-center">
               <button
                 type="button"
                 class="text-danger-400 hover:text-danger-500 hover:bg-danger-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300 disabled:opacity-50"
@@ -1151,7 +1888,7 @@ const isAIThinking = ref(false)
               >
                 <Icon name="ph:trash-duotone" class="size-5" />
               </button>
-            </div>
+            </div> -->
             <div class="flex h-16 w-full items-center justify-center">
               <DemoAccountMenu />
             </div>
@@ -1347,10 +2084,10 @@ const isAIThinking = ref(false)
                 </div>
                 <div class="max-w-sm">
                   <h3 class="font-heading text-muted-800 text-xl font-medium leading-normal dark:text-white">
-                    {{ showNoCharge ? 'امکان استفاده رایگان' : 'شروع گفت و گو' }}
+                    {{ showNoCharge ? 'نیاز به دریافت اشتراک' : 'شروع گفت و گو' }}
                   </h3>
                   <p class="text-muted-400 mt-2">
-                    {{ showNoCharge ? 'با توجه به نیاز به همدلی، در حال حاضر می توانید رایگان از سیستم استفاده کنید' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
+                    {{ showNoCharge ? 'برای استفاده از سرویس ها باید اشتراک تهیه کنید.' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
                   </p>
                   <div class="mt-4">
                     <BaseButton
@@ -1362,9 +2099,9 @@ const isAIThinking = ref(false)
                     <BaseButton
                       v-else
                       color="primary"
-                      @click="$router.push('/deeds/flwuszbc7yo9obf')"
+                      @click="$router.push('/onboarding')"
                     >
-                      دریافت کد
+                        تهیه اشتراک
                     </BaseButton>
                   </div>
                 </div>
@@ -1445,6 +2182,17 @@ const isAIThinking = ref(false)
                               @click="openMessageDetailModal(item)"
                             >
                               <Icon name="ph:magnifying-glass-duotone" class="size-4" />
+                            </BaseButton>
+                            <!-- Feedback button for assistant messages -->
+                            <BaseButton
+                              v-if="item.type === 'received' && !item.isTyping"
+                              rounded="full"
+                              title="نظر دهید"
+                              size="sm"
+                              color="warning"
+                              @click="openFeedbackModal(item)"
+                            >
+                              <Icon name="ph:chat-circle-text-duotone" class="size-4" />
                             </BaseButton>
                           </div>
                           <span class="text-muted-400 font-sans text-xs">
@@ -2129,6 +2877,761 @@ const isAIThinking = ref(false)
             بستن
           </BaseButton>
         </div>
+      </div>
+    </template>
+  </TairoModal>
+
+  <!-- Feedback Modal -->
+  <TairoModal
+    :open="showFeedbackModal"
+    size="xl"
+    @close="closeFeedbackModal"
+  >
+    <template #header>
+      <div class="flex items-center gap-4 p-2">
+        <div class="bg-gradient-to-r from-primary-500/20 to-primary-600/20 p-3 rounded-xl">
+          <Icon name="ph:chat-circle-text-duotone" class="text-primary-600 size-7" />
+        </div>
+        <div>
+          <h3 class="font-heading text-muted-900 dark:text-white text-right text-2xl font-bold">
+            نظرسنجی پیام
+          </h3>
+          <p class="text-muted-500 dark:text-muted-400 text-sm mt-1">
+            نظر شما به بهبود کیفیت پاسخ‌ها کمک می‌کند
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <div class="px-6 py-4 space-y-8 max-h-[70vh] overflow-y-auto text-right">
+      <!-- Message preview -->
+      <div v-if="feedbackMessage" class="bg-gradient-to-r from-muted-50 to-muted-100 dark:from-muted-800 dark:to-muted-700 rounded-xl p-5 border border-muted-200 dark:border-muted-600">
+        <div class="mb-4 flex items-center gap-3">
+          <Icon name="ph:chat-duotone" class="text-info-500 size-6" />
+          <span class="text-muted-700 dark:text-muted-300 text-base font-semibold">پیام مورد بررسی</span>
+        </div>
+        <div class="bg-white dark:bg-muted-900 text-muted-800 dark:text-muted-100 rounded-lg p-4 max-h-32 overflow-y-auto shadow-sm border border-muted-200 dark:border-muted-600 text-right">
+          <div v-if="getMessageContent(feedbackMessage)">
+            <AddonMarkdownRemark :source="getMessageContent(feedbackMessage)" />
+          </div>
+          <div v-else class="text-muted-500 dark:text-muted-400 italic">
+            متن پیام موجود نیست
+          </div>
+        </div>
+      </div>
+
+      <!-- Rating -->
+      <div class="space-y-5">
+        <div class="flex items-center gap-3">
+          <Icon name="ph:ranking-duotone" class="text-warning-500 size-6" />
+          <BaseFormLabel for="rating" class="text-muted-700 dark:text-muted-300 font-semibold text-base">
+            امتیاز کلی (۱ تا ۵)
+          </BaseFormLabel>
+        </div>
+        <div class="flex items-center gap-4 bg-muted-50 dark:bg-muted-800 rounded-xl p-5">
+          <div class="flex items-center gap-2">
+            <button
+              v-for="rating in 5"
+              :key="rating"
+              type="button"
+              class="text-4xl transition-all duration-200 hover:scale-110"
+              :class="rating <= feedbackRating ? 'text-yellow-400 drop-shadow-lg' : 'text-muted-300 dark:text-muted-600 hover:text-yellow-200'"
+              @click="feedbackRating = rating"
+            >
+              <Icon name="ph:star-duotone" class="size-8" />
+            </button>
+          </div>
+          <div class="bg-primary-500/10 px-4 py-2 rounded-full">
+            <span class="text-primary-600 dark:text-primary-400 text-sm font-semibold">
+              {{ feedbackRating }} از ۵ ستاره
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback Tabs -->
+      <div class="space-y-5">
+        <div class="flex items-center gap-3">
+          <Icon name="ph:folders-duotone" class="text-success-500 size-6" />
+          <BaseFormLabel class="text-muted-700 dark:text-muted-300 font-semibold text-base">
+            دسته‌بندی نظرات
+          </BaseFormLabel>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-muted-200 dark:border-muted-700">
+          <button
+            type="button"
+            class="px-4 py-2 font-medium text-sm transition-colors border-b-2"
+            :class="{
+              'border-primary-500 text-primary-600 dark:text-primary-400': feedbackActiveTab === 'general',
+              'border-transparent text-muted-500 dark:text-muted-400 hover:text-muted-700 dark:hover:text-muted-300': feedbackActiveTab !== 'general'
+            }"
+            @click="feedbackActiveTab = 'general'"
+          >
+            عمومی
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 font-medium text-sm transition-colors border-b-2"
+            :class="{
+              'border-primary-500 text-primary-600 dark:text-primary-400': feedbackActiveTab === 'problems',
+              'border-transparent text-muted-500 dark:text-muted-400 hover:text-muted-700 dark:hover:text-muted-300': feedbackActiveTab !== 'problems'
+            }"
+            @click="feedbackActiveTab = 'problems'"
+          >
+            مشکلات
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 font-medium text-sm transition-colors border-b-2"
+            :class="{
+              'border-primary-500 text-primary-600 dark:text-primary-400': feedbackActiveTab === 'quality',
+              'border-transparent text-muted-500 dark:text-muted-400 hover:text-muted-700 dark:hover:text-muted-300': feedbackActiveTab !== 'quality'
+            }"
+            @click="feedbackActiveTab = 'quality'"
+          >
+            کیفیت
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 font-medium text-sm transition-colors border-b-2"
+            :class="{
+              'border-primary-500 text-primary-600 dark:text-primary-400': feedbackActiveTab === 'improvements',
+              'border-transparent text-muted-500 dark:text-muted-400 hover:text-muted-700 dark:hover:text-muted-300': feedbackActiveTab !== 'improvements'
+            }"
+            @click="feedbackActiveTab = 'improvements'"
+          >
+            پیشنهادات
+          </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="min-h-[200px]">
+          <!-- General Tab -->
+          <div v-if="feedbackActiveTab === 'general'" class="space-y-4">
+            <p class="text-muted-600 dark:text-muted-400 text-sm text-right">
+              نظر کلی خود را در مورد این پیام بیان کنید
+            </p>
+            <BaseTextarea
+              v-model="generalFeedback.text"
+              placeholder="نظر خود را اینجا بنویسید..."
+              rows="4"
+              :disabled="feedbackLoading"
+              class="resize-none"
+            />
+          </div>
+
+          <!-- Problems Tab -->
+          <div v-if="feedbackActiveTab === 'problems'" class="space-y-4">
+            <p class="text-muted-600 dark:text-muted-400 text-sm">
+              مشکلات موجود در این پیام را مشخص کنید
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <button
+                v-for="option in problemCategories"
+                :key="option.value"
+                type="button"
+                class="flex items-center gap-3 p-4 rounded-lg border-2 transition-all duration-200 hover:scale-105"
+                :class="{
+                  'border-danger-500 bg-danger-50 dark:bg-danger-500/10': problemsFeedback.categories.includes(option.value),
+                  'border-muted-200 dark:border-muted-600 bg-white dark:bg-muted-800 hover:border-danger-300 dark:hover:border-danger-600': !problemsFeedback.categories.includes(option.value)
+                }"
+                @click="toggleProblemsCategory(option.value)"
+              >
+                <div 
+                  class="p-2 rounded-lg shrink-0"
+                  :class="{
+                    'bg-danger-500/20': problemsFeedback.categories.includes(option.value),
+                    'bg-muted-100 dark:bg-muted-700': !problemsFeedback.categories.includes(option.value)
+                  }"
+                >
+                  <Icon 
+                    :name="option.icon" 
+                    class="size-5"
+                    :class="{
+                      'text-danger-600 dark:text-danger-400': problemsFeedback.categories.includes(option.value),
+                      [`text-${option.color}-500`]: !problemsFeedback.categories.includes(option.value)
+                    }"
+                  />
+                </div>
+                <span 
+                  class="text-sm font-medium text-right flex-1"
+                  :class="{
+                    'text-danger-700 dark:text-danger-300': problemsFeedback.categories.includes(option.value),
+                    'text-muted-700 dark:text-muted-300': !problemsFeedback.categories.includes(option.value)
+                  }"
+                >
+                  {{ option.label }}
+                </span>
+                <div class="mr-auto">
+                  <Icon 
+                    name="ph:check-circle-duotone" 
+                    class="size-5 transition-all duration-200"
+                    :class="{
+                      'text-danger-500 scale-100': problemsFeedback.categories.includes(option.value),
+                      'text-transparent scale-0': !problemsFeedback.categories.includes(option.value)
+                    }"
+                  />
+                </div>
+              </button>
+            </div>
+            
+            <!-- Additional problems feedback -->
+            <div class="space-y-2">
+              <label class="text-sm font-medium text-muted-700 dark:text-muted-300">
+                توضیحات بیشتر (اختیاری)
+              </label>
+              <BaseTextarea
+                v-model="problemsFeedback.otherText"
+                placeholder="سایر مشکلات یا توضیحات بیشتر..."
+                rows="3"
+                :disabled="feedbackLoading"
+                class="resize-none"
+              />
+            </div>
+          </div>
+
+          <!-- Quality Tab -->
+          <div v-if="feedbackActiveTab === 'quality'" class="space-y-4">
+            <p class="text-muted-600 dark:text-muted-400 text-sm">
+              نقاط قوت و کیفیت این پیام را مشخص کنید
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <button
+                v-for="option in qualityCategories"
+                :key="option.value"
+                type="button"
+                class="flex items-center gap-3 p-4 rounded-lg border-2 transition-all duration-200 hover:scale-105"
+                :class="{
+                  'border-success-500 bg-success-50 dark:bg-success-500/10': qualityFeedback.categories.includes(option.value),
+                  'border-muted-200 dark:border-muted-600 bg-white dark:bg-muted-800 hover:border-success-300 dark:hover:border-success-600': !qualityFeedback.categories.includes(option.value)
+                }"
+                @click="toggleQualityCategory(option.value)"
+              >
+                <div 
+                  class="p-2 rounded-lg shrink-0"
+                  :class="{
+                    'bg-success-500/20': qualityFeedback.categories.includes(option.value),
+                    'bg-muted-100 dark:bg-muted-700': !qualityFeedback.categories.includes(option.value)
+                  }"
+                >
+                  <Icon 
+                    :name="option.icon" 
+                    class="size-5"
+                    :class="{
+                      'text-success-600 dark:text-success-400': qualityFeedback.categories.includes(option.value),
+                      [`text-${option.color}-500`]: !qualityFeedback.categories.includes(option.value)
+                    }"
+                  />
+                </div>
+                <span 
+                  class="text-sm font-medium text-right flex-1"
+                  :class="{
+                    'text-success-700 dark:text-success-300': qualityFeedback.categories.includes(option.value),
+                    'text-muted-700 dark:text-muted-300': !qualityFeedback.categories.includes(option.value)
+                  }"
+                >
+                  {{ option.label }}
+                </span>
+                <div class="mr-auto">
+                  <Icon 
+                    name="ph:check-circle-duotone" 
+                    class="size-5 transition-all duration-200"
+                    :class="{
+                      'text-success-500 scale-100': qualityFeedback.categories.includes(option.value),
+                      'text-transparent scale-0': !qualityFeedback.categories.includes(option.value)
+                    }"
+                  />
+                </div>
+              </button>
+            </div>
+            
+            <!-- Additional quality feedback -->
+            <div class="space-y-2">
+              <label class="text-sm font-medium text-muted-700 dark:text-muted-300">
+                توضیحات بیشتر (اختیاری)
+              </label>
+              <BaseTextarea
+                v-model="qualityFeedback.otherText"
+                placeholder="سایر نقاط قوت یا توضیحات بیشتر..."
+                rows="3"
+                :disabled="feedbackLoading"
+                class="resize-none"
+              />
+            </div>
+          </div>
+
+          <!-- Improvements Tab -->
+          <div v-if="feedbackActiveTab === 'improvements'" class="space-y-4">
+            <p class="text-muted-600 dark:text-muted-400 text-sm">
+              پیشنهادات شما برای بهبود این نوع پیام‌ها
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <button
+                v-for="option in improvementSuggestions"
+                :key="option.value"
+                type="button"
+                class="flex items-center gap-3 p-4 rounded-lg border-2 transition-all duration-200 hover:scale-105"
+                :class="{
+                  'border-primary-500 bg-primary-50 dark:bg-primary-500/10': improvementsFeedback.categories.includes(option.value),
+                  'border-muted-200 dark:border-muted-600 bg-white dark:bg-muted-800 hover:border-primary-300 dark:hover:border-primary-600': !improvementsFeedback.categories.includes(option.value)
+                }"
+                @click="toggleImprovementsCategory(option.value)"
+              >
+                <div 
+                  class="p-2 rounded-lg shrink-0"
+                  :class="{
+                    'bg-primary-500/20': improvementsFeedback.categories.includes(option.value),
+                    'bg-muted-100 dark:bg-muted-700': !improvementsFeedback.categories.includes(option.value)
+                  }"
+                >
+                  <Icon 
+                    :name="option.icon" 
+                    class="size-5"
+                    :class="{
+                      'text-primary-600 dark:text-primary-400': improvementsFeedback.categories.includes(option.value),
+                      [`text-${option.color}-500`]: !improvementsFeedback.categories.includes(option.value)
+                    }"
+                  />
+                </div>
+                <span 
+                  class="text-sm font-medium text-right flex-1"
+                  :class="{
+                    'text-primary-700 dark:text-primary-300': improvementsFeedback.categories.includes(option.value),
+                    'text-muted-700 dark:text-muted-300': !improvementsFeedback.categories.includes(option.value)
+                  }"
+                >
+                  {{ option.label }}
+                </span>
+                <div class="mr-auto">
+                  <Icon 
+                    name="ph:check-circle-duotone" 
+                    class="size-5 transition-all duration-200"
+                    :class="{
+                      'text-primary-500 scale-100': improvementsFeedback.categories.includes(option.value),
+                      'text-transparent scale-0': !improvementsFeedback.categories.includes(option.value)
+                    }"
+                  />
+                </div>
+              </button>
+            </div>
+            
+            <!-- Additional improvements feedback -->
+            <div class="space-y-2">
+              <label class="text-sm font-medium text-muted-700 dark:text-muted-300">
+                توضیحات بیشتر (اختیاری)
+              </label>
+              <BaseTextarea
+                v-model="improvementsFeedback.otherText"
+                placeholder="سایر پیشنهادات یا توضیحات بیشتر..."
+                rows="3"
+                :disabled="feedbackLoading"
+                class="resize-none"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other specific feedback -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <Icon name="ph:note-duotone" class="text-warning-500 size-6" />
+          <BaseFormLabel for="other-feedback" class="text-muted-700 dark:text-muted-300 font-semibold text-base">
+            سایر موارد (اختیاری)
+          </BaseFormLabel>
+        </div>
+        <BaseInput
+          id="other-feedback"
+          v-model="generalFeedback.otherText"
+          placeholder="مثال: پیشنهاد خاص، نکته فنی، و غیره..."
+          :disabled="feedbackLoading"
+        />
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="p-6 bg-muted-50 dark:bg-muted-800 border-t border-muted-200 dark:border-muted-700 w-full">
+        <div class="flex justify-between items-center">
+          <div class="text-muted-500 dark:text-muted-400 text-sm flex items-center gap-2">
+            <Icon name="ph:shield-check-duotone" class="size-4" />
+            نظرات شما محرمانه و امن است
+          </div>
+          <div class="flex gap-4">
+            <BaseButton
+              type="button"
+              color="muted"
+              size="lg"
+              @click="closeFeedbackModal"
+            >
+              انصراف
+            </BaseButton>
+            <BaseButton
+              type="button"
+              color="primary"
+              size="lg"
+              :loading="feedbackLoading"
+              @click="submitFeedback"
+            >
+              <Icon name="ph:paper-plane-duotone" class="size-4 ml-2" />
+              ارسال نظر
+            </BaseButton>
+          </div>
+        </div>
+      </div>
+    </template>
+  </TairoModal>
+
+  <!-- Goals Detail Modal -->
+  <TairoModal
+    :open="showGoalsModal"
+    size="lg"
+    @close="closeGoalModal"
+  >
+    <template #header>
+      <div class="flex items-center gap-4 p-2">
+        <div class="bg-gradient-to-r from-primary-500/20 to-primary-600/20 p-3 rounded-xl">
+          <Icon name="ph:target-duotone" class="text-primary-600 size-7" />
+        </div>
+        <div>
+          <h3 class="font-heading text-muted-900 dark:text-white text-xl font-bold">
+            جزئیات هدف
+          </h3>
+          <p class="text-muted-500 dark:text-muted-400 text-sm mt-1">
+            پیشرفت و وضعیت هدف درمانی
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <div v-if="selectedGoal" class="px-6 py-4 space-y-6">
+      <!-- Goal Header -->
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <h4 class="text-lg font-semibold text-muted-800 dark:text-white mb-2">
+            {{ selectedGoal.title }}
+          </h4>
+          <p class="text-muted-600 dark:text-muted-300 text-sm">
+            {{ selectedGoal.description }}
+          </p>
+        </div>
+        <div class="flex flex-col items-end gap-2">
+          <BaseTag
+            :color="getGoalStatusColor(selectedGoal.status)"
+            size="sm"
+          >
+            {{ getGoalStatusText(selectedGoal.status) }}
+          </BaseTag>
+          <BaseTag
+            :color="getGoalPriorityColor(selectedGoal.priority)"
+            size="sm"
+          >
+            {{ getGoalPriorityText(selectedGoal.priority) }}
+          </BaseTag>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-muted-700 dark:text-muted-300">پیشرفت</span>
+          <span class="text-sm font-semibold text-primary-600 dark:text-primary-400">
+            {{ selectedGoal.progress_percentage || 0 }}%
+          </span>
+        </div>
+        <div class="w-full bg-muted-200 dark:bg-muted-700 rounded-full h-3">
+          <div
+            class="bg-primary-500 h-3 rounded-full transition-all duration-500"
+            :style="{ width: `${selectedGoal.progress_percentage || 0}%` }"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Goal Details Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Target Behaviors -->
+        <div class="bg-muted-50 dark:bg-muted-800 rounded-lg p-4">
+          <h5 class="font-medium text-muted-800 dark:text-white mb-3 flex items-center gap-2">
+            <Icon name="ph:list-checks-duotone" class="text-success-500 size-4" />
+            رفتارهای هدف
+          </h5>
+          <ul v-if="selectedGoal.target_behaviors && selectedGoal.target_behaviors.length > 0" class="space-y-2">
+            <li
+              v-for="behavior in selectedGoal.target_behaviors"
+              :key="behavior"
+              class="flex items-start gap-2 text-sm text-muted-600 dark:text-muted-300"
+            >
+              <Icon name="ph:check-duotone" class="text-success-500 size-4 mt-0.5 shrink-0" />
+              {{ behavior }}
+            </li>
+          </ul>
+          <p v-else class="text-sm text-muted-500 dark:text-muted-400">
+            رفتاری تعیین نشده
+          </p>
+        </div>
+
+        <!-- Success Criteria -->
+        <div class="bg-muted-50 dark:bg-muted-800 rounded-lg p-4">
+          <h5 class="font-medium text-muted-800 dark:text-white mb-3 flex items-center gap-2">
+            <Icon name="ph:trophy-duotone" class="text-warning-500 size-4" />
+            معیارهای موفقیت
+          </h5>
+          <ul v-if="selectedGoal.success_criteria && selectedGoal.success_criteria.length > 0" class="space-y-2">
+            <li
+              v-for="criteria in selectedGoal.success_criteria"
+              :key="criteria"
+              class="flex items-start gap-2 text-sm text-muted-600 dark:text-muted-300"
+            >
+              <Icon name="ph:star-duotone" class="text-warning-500 size-4 mt-0.5 shrink-0" />
+              {{ criteria }}
+            </li>
+          </ul>
+          <p v-else class="text-sm text-muted-500 dark:text-muted-400">
+            معیاری تعیین نشده
+          </p>
+        </div>
+      </div>
+
+      <!-- AI Evaluation -->
+      <div v-if="selectedGoal.ai_evaluation" class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-4">
+        <h5 class="font-medium text-muted-800 dark:text-white mb-3 flex items-center gap-2">
+          <Icon name="ph:brain-duotone" class="text-blue-500 size-4" />
+          ارزیابی هوشمند
+        </h5>
+        <p class="text-sm text-muted-700 dark:text-muted-300">
+          {{ selectedGoal.ai_evaluation }}
+        </p>
+      </div>
+
+      <!-- Notes -->
+      <div v-if="selectedGoal.notes" class="bg-muted-50 dark:bg-muted-800 rounded-lg p-4">
+        <h5 class="font-medium text-muted-800 dark:text-white mb-3 flex items-center gap-2">
+          <Icon name="ph:note-duotone" class="text-info-500 size-4" />
+          یادداشت‌ها
+        </h5>
+        <p class="text-sm text-muted-600 dark:text-muted-300">
+          {{ selectedGoal.notes }}
+        </p>
+      </div>
+
+      <!-- Timestamps -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <Icon name="ph:calendar-plus-duotone" class="text-muted-400 size-4" />
+          <span class="text-muted-500 dark:text-muted-400">ایجاد:</span>
+          <span class="text-muted-700 dark:text-muted-300">
+            {{ new Date(selectedGoal.created).toLocaleDateString('fa-IR') }}
+          </span>
+        </div>
+        <div v-if="selectedGoal.updated" class="flex items-center gap-2">
+          <Icon name="ph:calendar-check-duotone" class="text-muted-400 size-4" />
+          <span class="text-muted-500 dark:text-muted-400">آخرین بروزرسانی:</span>
+          <span class="text-muted-700 dark:text-muted-300">
+            {{ new Date(selectedGoal.updated).toLocaleDateString('fa-IR') }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="p-6 bg-muted-50 dark:bg-muted-800 border-t border-muted-200 dark:border-muted-700">
+        <div class="flex justify-end">
+          <BaseButton
+            type="button"
+            color="muted"
+            size="lg"
+            @click="closeGoalModal"
+          >
+            بستن
+          </BaseButton>
+        </div>
+      </div>
+    </template>
+  </TairoModal>
+
+  <!-- System Prompt Modal -->
+  <TairoModal
+    :open="showSystemPromptModal"
+    size="xl"
+    @close="showSystemPromptModal = false"
+  >
+    <template #header>
+      <div class="flex items-center gap-4 p-2">
+        <div class="bg-gradient-to-r from-muted-500/20 to-muted-600/20 p-3 rounded-xl">
+          <Icon name="ph:code-block-duotone" class="text-muted-600 size-7" />
+        </div>
+        <div>
+          <h3 class="font-heading text-muted-900 dark:text-white text-right text-2xl font-bold">
+            System Prompt
+          </h3>
+          <p class="text-muted-500 dark:text-muted-400 text-sm mt-1">
+            پرامپت سیستم که شامل اطلاعات شما و بازخوردهای قبلی می‌باشد
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <div class="px-6 py-4 space-y-4 max-h-[70vh] overflow-y-auto text-right">
+      <div class="bg-gradient-to-r from-muted-50 to-muted-100 dark:from-muted-800 dark:to-muted-700 rounded-xl p-5 border border-muted-200 dark:border-muted-600">
+        <div class="mb-4 flex items-center gap-3">
+          <Icon name="ph:code-duotone" class="text-muted-500 size-6" />
+          <span class="text-muted-700 dark:text-muted-300 text-base font-semibold">متن کامل پرامپت سیستم</span>
+        </div>
+        <div class="bg-white dark:bg-muted-900 text-muted-800 dark:text-muted-100 rounded-lg p-6 max-h-96 overflow-y-auto shadow-sm border border-muted-200 dark:border-muted-600 text-right">
+          <pre class="whitespace-pre-wrap text-sm font-mono leading-relaxed">{{ systemPromptContent }}</pre>
+        </div>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="flex gap-x-3 justify-end p-6">
+        <BaseButton
+          type="button"
+          color="muted"
+          size="lg"
+          @click="showSystemPromptModal = false"
+          class="min-w-[120px]"
+        >
+          بستن
+        </BaseButton>
+      </div>
+    </template>
+  </TairoModal>
+
+  <!-- Feedback Summary Modal -->
+  <TairoModal
+    :open="showFeedbackSummaryModal"
+    size="xl"
+    @close="showFeedbackSummaryModal = false"
+  >
+    <template #header>
+      <div class="flex items-center gap-4 p-2">
+        <div class="bg-gradient-to-r from-info-500/20 to-info-600/20 p-3 rounded-xl">
+          <Icon name="ph:chat-circle-dots-duotone" class="text-info-600 size-7" />
+        </div>
+        <div>
+          <h3 class="font-heading text-muted-900 dark:text-white text-right text-2xl font-bold">
+            خلاصه بازخوردهای شما
+          </h3>
+          <p class="text-muted-500 dark:text-muted-400 text-sm mt-1">
+            بازخوردهای ثبت شده شما که در پاسخ‌های AI اعمال می‌شود
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <div class="px-6 py-4 space-y-4 max-h-[70vh] overflow-y-auto text-right">
+      <div class="bg-gradient-to-r from-info-50 to-info-100 dark:from-info-800 dark:to-info-700 rounded-xl p-5 border border-info-200 dark:border-info-600">
+        <div class="mb-4 flex items-center gap-3">
+          <Icon name="ph:chat-circle-text-duotone" class="text-info-500 size-6" />
+          <span class="text-info-700 dark:text-info-300 text-base font-semibold">بازخوردهای اعمال شده</span>
+        </div>
+        <div class="bg-white dark:bg-muted-900 text-muted-800 dark:text-muted-100 rounded-lg p-6 max-h-96 overflow-y-auto shadow-sm border border-muted-200 dark:border-muted-600 text-right">
+          <pre class="whitespace-pre-wrap text-sm leading-relaxed font-sans">{{ feedbackSummaryContent }}</pre>
+        </div>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="flex gap-x-3 justify-end p-6">
+        <BaseButton
+          type="button"
+          color="muted"
+          size="lg"
+          @click="showFeedbackSummaryModal = false"
+          class="min-w-[120px]"
+        >
+          بستن
+        </BaseButton>
+      </div>
+    </template>
+  </TairoModal>
+
+  <!-- Factory Reset Confirmation Modal -->
+  <TairoModal
+    :open="showFactoryResetModal"
+    size="md"
+    @close="showFactoryResetModal = false"
+  >
+    <template #header>
+      <div class="flex items-center gap-4 p-2">
+        <div class="bg-gradient-to-r from-danger-500/20 to-danger-600/20 p-3 rounded-xl">
+          <Icon name="ph:warning-duotone" class="text-danger-600 size-7" />
+        </div>
+        <div>
+          <h3 class="font-heading text-muted-900 dark:text-white text-right text-2xl font-bold">
+            بازنشانی کامل
+          </h3>
+          <p class="text-muted-500 dark:text-muted-400 text-sm mt-1">
+            این عمل غیرقابل برگشت است
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <div class="px-6 py-6 space-y-6 text-right">
+      <div class="bg-gradient-to-r from-danger-50 to-danger-100 dark:from-danger-900/30 dark:to-danger-800/30 rounded-xl p-6 border border-danger-200 dark:border-danger-700">
+        <div class="mb-6 flex items-center gap-3">
+          <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-6" />
+          <span class="text-danger-700 dark:text-danger-300 text-base font-semibold">هشدار مهم</span>
+        </div>
+        <div class="text-danger-800 dark:text-danger-200 text-sm leading-relaxed space-y-4">
+          <p class="font-medium text-base">این عمل تمام اطلاعات زیر را به طور کامل پاک خواهد کرد:</p>
+          <ul class="space-y-3 mr-4">
+            <li class="flex items-center gap-3">
+              <Icon name="ph:dot-duotone" class="size-4 text-danger-500" />
+              <span>تمام جلسات درمانی شما</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <Icon name="ph:dot-duotone" class="size-4 text-danger-500" />
+              <span>تمام پیام‌ها و مکالمات</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <Icon name="ph:dot-duotone" class="size-4 text-danger-500" />
+              <span>تمام بازخوردها و تنظیمات شخصی</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <Icon name="ph:dot-duotone" class="size-4 text-danger-500" />
+              <span>تمام گزارش‌ها و تحلیل‌ها</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <Icon name="ph:dot-duotone" class="size-4 text-danger-500" />
+              <span>تمام اهداف و پیشرفت‌ها</span>
+            </li>
+          </ul>
+          <div class="mt-6 p-4 bg-danger-100 dark:bg-danger-900/50 rounded-lg border border-danger-200 dark:border-danger-700">
+            <p class="font-medium text-danger-700 dark:text-danger-300 flex items-center gap-2">
+              <Icon name="ph:warning-duotone" class="size-5" />
+              این عمل غیرقابل برگشت است و تمام اطلاعات شما برای همیشه پاک خواهد شد.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="flex gap-x-3 justify-end p-6">
+        <BaseButton
+          type="button"
+          color="muted"
+          size="lg"
+          @click="showFactoryResetModal = false"
+          class="min-w-[120px]"
+        >
+          انصراف
+        </BaseButton>
+        <BaseButton
+          type="button"
+          color="danger"
+          size="lg"
+          :loading="factoryResetLoading"
+          @click="performFactoryReset"
+          class="min-w-[180px]"
+        >
+          <Icon name="ph:trash-duotone" class="size-4 ml-1" />
+          بله، همه چیز را پاک کن
+        </BaseButton>
       </div>
     </template>
   </TairoModal>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Invite, StepData } from '../../types'
+import type { PsychoReg, StepData } from '../../types'
 
 definePageMeta({
   layout: 'empty',
@@ -10,15 +10,44 @@ useHead({
 })
 
 const { newPsychoRegister } = usePsychotherapist()
-const initialState = ref<Invite>({
-  name: '',
-  email: '',
-  role: [],
+const initialState = ref<PsychoReg>({
+  // Step 1: Personal Information
+  firstName: '',
+  lastName: '',
   gender: '',
-  age: null,
+  age: 0,
+  phoneNumber: '',
+  email: '',
   maritalStatus: '',
-  jobStatus: '',
-  description: '',
+  
+  // Step 2: Professional Information
+  licenseStatus: '',
+  educationLevel: '',
+  specialization: [],
+  yearsOfExperience: 0,
+  workplace: '',
+  
+  // Step 3: Expertise & Qualifications
+  therapyApproaches: [],
+  targetAgeGroups: [],
+  languages: [],
+  certifications: [],
+  
+  // Step 4: Availability & Preferences
+  availableDays: [],
+  workingHours: {
+    start: '09:00',
+    end: '17:00'
+  },
+  sessionTypes: [],
+  onlineConsultation: false,
+  
+  // Step 5: Documents & Agreement
+  profilePhoto: null,
+  licenseDocument: null,
+  cvDocument: null,
+  agreementAccepted: false,
+  privacyPolicyAccepted: false
 })
 
 const toaster = useToaster()
@@ -41,12 +70,15 @@ function convertLabels(label) {
   const maritalStatus = {
     مجرد: 'single',
     متاهل: 'married',
+    مطلقه: 'divorced',
+    بیوه: 'widowed',
   }
 
   const gender = {
     مرد: 'male',
     زن: 'female',
   }
+  
   const licenseStatus = {
     'بدون پروانه - فعالیت داوطلبانه': 'notHaveVolunteer',
     'بدون پروانه - دانشجوی روانشناسی': 'notHavePsychologyStudent',
@@ -64,7 +96,7 @@ function convertLabels(label) {
     return licenseStatus[label]
   }
   else {
-    return 'Unknown label' // Return the label as is if no translation is found
+    return label // Return the label as is if no translation is found
   }
 }
 function convertPersianToEnglishAndRemoveNonDigits(input) {
@@ -90,60 +122,97 @@ const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = pro
     {
       to: '/clinic/psychotherapist-register',
       meta: {
-        name: 'اطلاعات اولیه',
-        title: 'اطلاعات اولیه',
-        subtitle:
-          'کمی بیشتر از خودتان بگویید. لطفا فرم زیر را پر کنید. این فرم دارای چند بخش است. پس از تکمیل هر بخش روی دکمه ی ادامه کلیک کنید.',
+        name: 'اطلاعات شخصی',
+        title: 'اطلاعات شخصی',
+        subtitle: 'لطفا اطلاعات شخصی خود را وارد کنید.',
       },
       async validate({ data, setFieldError, resetFieldError }) {
         if (data.value.phoneNumber)
           data.value.phoneNumber = convertPersianToEnglishAndRemoveNonDigits(data.value.phoneNumber)
         if (data.value.age)
-          data.value.age = (convertPersianToEnglishAndRemoveNonDigits(data.value.age))
+          data.value.age = Number(convertPersianToEnglishAndRemoveNonDigits(data.value.age))
 
-        resetFieldError(['firstName', 'lastName', 'phoneNumber', 'email', 'age', 'gender', 'maritalStatus', 'licenseStatus'])
+        resetFieldError(['firstName', 'lastName', 'phoneNumber', 'email', 'age', 'gender', 'maritalStatus'])
         if (!data.value.firstName) setFieldError('firstName', 'نام خود را وارد نمایید')
         if (!data.value.lastName) setFieldError('lastName', 'نام خانوادگی خود را وارد نمایید')
         if (!data.value.phoneNumber) setFieldError('phoneNumber', 'شماره تماس خود را وارد نمایید')
         if (!data.value.email) setFieldError('email', 'ایمیل خود را وارد نمایید')
         if (!data.value.age) setFieldError('age', 'سن خود را وارد نمایید')
-        if (!data.value.gender) setFieldError('gender', 'جنسیت را به درستی انتخاب نمایید')
-        if (!data.value.maritalStatus) setFieldError('maritalStatus', 'وضعیت تاهل را به درستی وارد نمایید')
-        if (!data.value.licenseStatus) setFieldError('licenseStatus', 'وضعیت پروانه را به درستی وارد نمایید')
+        if (!data.value.gender) setFieldError('gender', 'جنسیت را انتخاب نمایید')
+        if (!data.value.maritalStatus) setFieldError('maritalStatus', 'وضعیت تاهل را انتخاب نمایید')
         if (data.value.phoneNumber) {
           if (data.value.phoneNumber[0] != '0' && data.value.phoneNumber[1] != '9') setFieldError('phoneNumber', 'شماره باید با ۰۹ شروع شود')
           if (data.value.phoneNumber.length != 11) setFieldError('phoneNumber', 'شماره باید یازده رقم باشد')
         }
       },
-
     },
-    // {
-    //   to: '/clinic/psychotherapist-register/topic',
-    //   meta: {
-    //     name: 'انتخاب سوپروایزر',
-    //     title: 'انتخاب سوپروایزر',
-    //     subtitle:
-    //       'سوپرویژن به بهبود ارائه ی خدمات و رشد حرفه ای کمک می کند. در صورتی که امتیاز شما بالای پانصد باشد، می توانید بدون سوپروایزر به مشاوره بپردازید.',
-    //   },
-    //   async validate({ data, setFieldError, resetFieldError }) {
-    //     resetFieldError(['selectedSupervisor'])
-    //     if (!data.value.selectedSupervisor) setFieldError('selectedSupervisor', 'حداقل یک عدد باید انتخاب گردد.')
-    //   },
-    // },
-    // {
-    //   to: '/clinic/psychotherapist-register/review',
-    //   meta: {
-    //     name: 'بارگذاری مدارک',
-    //     title: 'بارگذاری مدارک',
-    //     subtitle:
-    //       'مدارک مورد نیاز را آپلود نمایید. این مدارک را به صورت انتخاب چندین فایل از روی دستگاه خود انجام دهید.',
-    //   },
-    // },
+    {
+      to: '/clinic/psychotherapist-register/professional',
+      meta: {
+        name: 'اطلاعات حرفه‌ای',
+        title: 'اطلاعات حرفه‌ای',
+        subtitle: 'اطلاعات مربوط به تحصیلات و تجربه کاری خود را وارد کنید.',
+      },
+      async validate({ data, setFieldError, resetFieldError }) {
+        if (data.value.yearsOfExperience)
+          data.value.yearsOfExperience = Number(convertPersianToEnglishAndRemoveNonDigits(data.value.yearsOfExperience))
+
+        resetFieldError(['licenseStatus', 'educationLevel', 'specialization', 'yearsOfExperience', 'workplace'])
+        if (!data.value.licenseStatus) setFieldError('licenseStatus', 'وضعیت پروانه را انتخاب نمایید')
+        if (!data.value.educationLevel) setFieldError('educationLevel', 'سطح تحصیلات را انتخاب نمایید')
+        if (!data.value.specialization.length) setFieldError('specialization', 'حداقل یک تخصص انتخاب کنید')
+        if (data.value.yearsOfExperience === null || data.value.yearsOfExperience === undefined || data.value.yearsOfExperience === '') setFieldError('yearsOfExperience', 'سال‌های تجربه را وارد نمایید')
+        if (!data.value.workplace) setFieldError('workplace', 'محل کار را وارد نمایید')
+      },
+    },
+    {
+      to: '/clinic/psychotherapist-register/expertise',
+      meta: {
+        name: 'تخصص و صلاحیت',
+        title: 'تخصص و صلاحیت‌ها',
+        subtitle: 'روش‌های درمانی و مهارت‌های خود را مشخص کنید.',
+      },
+      async validate({ data, setFieldError, resetFieldError }) {
+        resetFieldError(['therapyApproaches', 'targetAgeGroups', 'languages'])
+        if (!data.value.therapyApproaches.length) setFieldError('therapyApproaches', 'حداقل یک روش درمانی انتخاب کنید')
+        if (!data.value.targetAgeGroups.length) setFieldError('targetAgeGroups', 'حداقل یک گروه سنی هدف انتخاب کنید')
+        if (!data.value.languages.length) setFieldError('languages', 'حداقل یک زبان انتخاب کنید')
+      },
+    },
+    {
+      to: '/clinic/psychotherapist-register/availability',
+      meta: {
+        name: 'دسترسی و ترجیحات',
+        title: 'دسترسی و ترجیحات',
+        subtitle: 'زمان‌بندی و نحوه ارائه خدمات خود را تعریف کنید.',
+      },
+      async validate({ data, setFieldError, resetFieldError }) {
+        resetFieldError(['availableDays', 'sessionTypes', 'workingHours'])
+        if (!data.value.availableDays.length) setFieldError('availableDays', 'حداقل یک روز در هفته انتخاب کنید')
+        if (!data.value.sessionTypes.length) setFieldError('sessionTypes', 'حداقل یک نوع جلسه انتخاب کنید')
+        if (!data.value.workingHours.start || !data.value.workingHours.end) setFieldError('workingHours', 'ساعات کاری را مشخص کنید')
+      },
+    },
+    {
+      to: '/clinic/psychotherapist-register/documents',
+      meta: {
+        name: 'مدارک و توافق‌نامه',
+        title: 'مدارک و توافق‌نامه',
+        subtitle: 'مدارک مورد نیاز را آپلود کرده و توافق‌نامه‌ها را بپذیرید.',
+      },
+      async validate({ data, setFieldError, resetFieldError }) {
+        resetFieldError(['agreementAccepted', 'privacyPolicyAccepted'])
+        if (!data.value.agreementAccepted) setFieldError('agreementAccepted', 'باید قوانین و مقررات را بپذیرید')
+        if (!data.value.privacyPolicyAccepted) setFieldError('privacyPolicyAccepted', 'باید سیاست حفظ حریم خصوصی را بپذیرید')
+      },
+    },
   ],
   onSubmit: async (data, ctx) => {
+    // Convert labels to backend format
     data.gender = convertLabels(data.gender)
     data.maritalStatus = convertLabels(data.maritalStatus)
-    data.jobStatus = convertLabels(data.jobStatus)
+    data.licenseStatus = convertLabels(data.licenseStatus)
+    
     await newPsychoRegister(data)
     toaster.clearAll()
     toaster.show({

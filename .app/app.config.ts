@@ -76,16 +76,6 @@ export default defineAppConfig({
           },
           {
             // Title displayed in the sidebar
-            title: 'ویدیوهای معرفی شده',
-            icon: { name: 'ph:video', class: 'w-7 h-7' },
-            activePath: '/videos/list',
-            to: '/videos/list',
-            class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
-            click: () => {
-            },
-          },
-          {
-            // Title displayed in the sidebar
             title: 'مقالات',
             icon: { name: 'ph:book', class: 'w-7 h-7' },
             activePath: '/posts/list',

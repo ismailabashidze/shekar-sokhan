@@ -64,6 +64,7 @@ import type { TherapistGenerateInput, TherapistGenerateOutput } from '~/types'
 
 export function useOpenRouter() {
   const config = useRuntimeConfig()
+  const { getSessionFeedbackSummary, buildEnhancedSystemPrompt, getUserFeedbackProfile } = useFeedbackPrompt()
 
   // Chat state
   const processing = ref(false)
@@ -90,18 +91,7 @@ export function useOpenRouter() {
     error.value = null
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/models', {
-        headers: {
-          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
+      const data = await $fetch('/api/openrouter/models')
       if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
         throw new Error('No models available')
       }
@@ -121,6 +111,8 @@ export function useOpenRouter() {
     messages: ChatMessage[],
     options: OpenRouterOptions = {},
     onChunk: (chunk: any) => void,
+    sessionId?: string,
+    sessionGoals?: any[]
   ) => {
     processing.value = true
     error.value = null
@@ -184,27 +176,40 @@ export function useOpenRouter() {
 `
       }
 
+      // Get feedback summary for session and user profile if available
+      let enhancedSystemPrompt = systemPrompt
+      if (therapistDetails) {
+        try {
+          const nuxtApp = useNuxtApp()
+          const userId = nuxtApp.$pb.authStore.model?.id
+          
+          // Get both session feedback and user profile
+          const [feedbackSummary, userProfile] = await Promise.all([
+            sessionId ? getSessionFeedbackSummary(sessionId) : Promise.resolve(''),
+            userId ? getUserFeedbackProfile(userId) : Promise.resolve('')
+          ])
+          
+          enhancedSystemPrompt = buildEnhancedSystemPrompt(systemPrompt, feedbackSummary, sessionGoals, userProfile)
+        } catch (error) {
+          console.warn('Failed to get feedback data:', error)
+          // Continue with base system prompt
+        }
+      }
+
       const messagesWithSystem = systemMessage
         ? messages
-        : [{ role: 'system', content: systemPrompt }, ...messages]
+        : [{ role: 'system', content: enhancedSystemPrompt }, ...messages]
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch('/api/openrouter/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-          'X-Title': 'Therapist Chat',
         },
         body: JSON.stringify({
           model: options.model || selectedModel.value,
           messages: messagesWithSystem,
-          stream: true,
           temperature: options.temperature || 0.7,
           max_tokens: options.max_tokens || 0,
-          include_reasoning: true,
-          plugins: [],
-          transforms: ['middle-out'],
         }),
       })
 
@@ -423,137 +428,16 @@ export function useOpenRouter() {
     error.value = null
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const result = await $fetch('/api/openrouter/generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-          'X-Title': 'Patient Details Generator',
-        },
-        body: JSON.stringify({
-          model: selectedModel.value,
-          messages: [
-            {
-              role: 'system',
-              content: 'شما یک دستیار روانشناس هستید که در تولید اطلاعات بیمار کمک می‌کند. لطفا با توجه به اطلاعات اولیه بیمار، سایر جزئیات را به صورت منطقی و به زبان فارسی تولید کنید.',
-            },
-            {
-              role: 'user',
-              content: `اطلاعات اولیه بیمار:
-نام: ${input.name}
-سن: ${input.age}
-توضیح کوتاه: ${input.shortDescription}
-
-لطفا جزئیات زیر را تولید کنید:
-- توضیح بلند
-- صفات تعریف کننده
-- داستان زندگی
-- شخصیت
-- ظاهر
-- انگیزه
-- وضعیت هیجانی حال حاضر
-
-خروجی باید به صورت یک آبجکت JSON با کلیدهای زیر باشد:
-longDescription, definingTraits, backStory, personality, appearance, motivation, moodAndCurrentEmotions
-`,
-            },
-          ] as ChatMessage[], // Add type assertion here
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'patient_details',
-              strict: true,
-              schema: {
-                type: 'object',
-                properties: {
-                  longDescription: {
-                    type: 'string',
-                    description: 'توضیح بلند و کامل در مورد بیمار و وضعیت او',
-                  },
-                  definingTraits: {
-                    type: 'string',
-                    description: 'صفات و ویژگی‌های تعریف‌کننده شخصیت و رفتار بیمار',
-                  },
-                  backStory: {
-                    type: 'string',
-                    description: 'داستان زندگی، پیشینه و تجربیات مهم بیمار',
-                  },
-                  personality: {
-                    type: 'string',
-                    description: 'شخصیت، رفتارها و خصوصیات روانشناختی بیمار',
-                  },
-                  appearance: {
-                    type: 'string',
-                    description: 'توصیف ظاهری و ویژگی‌های فیزیکی بیمار',
-                  },
-                  motivation: {
-                    type: 'string',
-                    description: 'انگیزه‌ها، اهداف و خواسته‌های اصلی بیمار',
-                  },
-                  moodAndCurrentEmotions: {
-                    type: 'string',
-                    description: 'حالت روحی، احساسات و وضعیت عاطفی فعلی بیمار',
-                  },
-                },
-                required: [
-                  'longDescription',
-                  'definingTraits',
-                  'backStory',
-                  'personality',
-                  'appearance',
-                  'motivation',
-                  'moodAndCurrentEmotions',
-                ],
-                additionalProperties: false,
-              },
-            },
-          },
-          temperature: 0.7,
-          max_tokens: 0,
-          include_reasoning: true,
-          plugins: [],
-          transforms: ['middle-out'],
-        }),
+        body: {
+          name: input.name,
+          age: input.age,
+          shortDescription: input.shortDescription
+        }
       })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        let errorMessage: string
-        try {
-          const errorData = JSON.parse(errorText)
-          errorMessage = errorData?.error?.message || errorData?.message || errorText
-        }
-        catch {
-          errorMessage = errorText
-        }
-        throw new Error(`Chat error: ${errorMessage}`)
-      }
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        let errorMessage: string
-        try {
-          const errorData = JSON.parse(errorText)
-          errorMessage = errorData?.error?.message || errorData?.message || errorText
-        }
-        catch {
-          errorMessage = errorText
-        }
-        throw new Error(`Generate error: ${errorMessage}`)
-      }
-
-      const data = await response.json()
-      const content = data.choices[0].message.content
-
-      let result: PatientGenerateOutput
-      try {
-        result = typeof content === 'string' ? JSON.parse(content) : content
-        return result
-      }
-      catch (e: any) {
-        throw new Error(`Invalid response format: ${e.message}`)
-      }
+      
+      return result
     }
     catch (e: any) {
       error.value = e.message
@@ -711,8 +595,288 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
     let result = ''
     await streamChat(messages as ChatMessage[], {}, (chunk) => {
       result += chunk.choices?.[0]?.delta?.content || ''
-    })
+    }, undefined, undefined)
     return result
+  }
+
+  /**
+   * Generate therapy session goals based on previous sessions and user history
+   */
+  async function generateGoalsFromHistory(data: {
+    userId: string
+    sessionId: string
+    sessionHistory: any[]
+    goalTemplates: any[]
+  }) {
+    processing.value = true
+    error.value = null
+
+    try {
+      // Validate inputs
+      if (!config.public.openRouterApiKey) {
+        throw new Error('OpenRouter API key is missing')
+      }
+      
+      if (!selectedModel.value) {
+        throw new Error('No model selected')
+      }
+      
+      if (!data.sessionHistory || data.sessionHistory.length === 0) {
+        throw new Error('No session history provided')
+      }
+      
+      console.log('Generating goals with:', {
+        model: selectedModel.value,
+        sessionCount: data.sessionHistory.length,
+        templateCount: data.goalTemplates.length
+      })
+
+      const requestBody = {
+        model: selectedModel.value,
+        messages: [
+          {
+            role: 'system',
+            content: `شما یک روانشناس متخصص هستید که در تعیین اهداف درمانی برای جلسات مشاوره تخصص دارید. 
+            بر اساس تاریخچه جلسات قبلی، اهداف مناسب برای جلسه فعلی تعیین کنید. 
+            اهداف باید شامل اهداف کلی (general) و اهداف خاص (specific) باشد.
+            اهداف باید قابل اندازه‌گیری، قابل دستیابی و منطقی باشند.`
+          },
+          {
+            role: 'user',
+            content: `تاریخچه جلسات قبلی:
+${data.sessionHistory.map((session, index) => `
+جلسه ${index + 1} (${session.date}):
+- تحلیل: ${session.analysis}
+- احساسات: ${session.emotions}
+- موضوعات: ${session.topics}
+- دستاوردها: ${session.achievements}
+`).join('\n')}
+
+قالب‌های اهداف موجود:
+${data.goalTemplates.map(template => `
+- ${template.title}: ${template.description}
+  دسته‌بندی: ${template.category}
+  رفتارهای هدف: ${template.target_behaviors.join(', ')}
+  معیارهای موفقیت: ${template.success_criteria.join(', ')}
+`).join('\n')}
+
+لطفاً 3-5 هدف مناسب برای جلسه فعلی تعیین کنید. 
+
+مهم: خروجی باید دقیقاً JSON معتبر باشد، بدون کد بلاک یا متن اضافی:
+
+{
+  "goals": [
+    {
+      "title": "عنوان هدف",
+      "description": "توضیح کامل هدف",
+      "goal_type": "general",
+      "priority": "high",
+      "target_behaviors": ["رفتار1", "رفتار2"],
+      "success_criteria": ["معیار1", "معیار2"],
+      "category": "emotional"
+    }
+  ]
+}
+
+نکته: goal_type فقط می‌تواند "general" یا "specific" باشد، priority فقط می‌تواند "high", "medium", یا "low" باشد و category فقط می‌تواند "emotional", "social", "anxiety", "depression", یا "self_worth" باشد.`
+          }
+        ] as ChatMessage[],
+        // Force structured output for OpenAI models that support it
+        ...(selectedModel.value.includes('gpt-4') || selectedModel.value.includes('gpt-3.5') ? {
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'therapy_goals',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  goals: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        title: { type: 'string' },
+                        description: { type: 'string' },
+                        goal_type: { type: 'string', enum: ['general', 'specific'] },
+                        priority: { type: 'string', enum: ['high', 'medium', 'low'] },
+                        target_behaviors: { type: 'array', items: { type: 'string' } },
+                        success_criteria: { type: 'array', items: { type: 'string' } },
+                        category: { type: 'string', enum: ['emotional', 'social', 'anxiety', 'depression', 'self_worth'] }
+                      },
+                      required: ['title', 'description', 'goal_type', 'priority', 'target_behaviors', 'success_criteria', 'category']
+                    }
+                  }
+                },
+                required: ['goals']
+              }
+            }
+          }
+        } : {
+          // For non-OpenAI models, use regular JSON mode
+          response_format: { type: 'json_object' }
+        })
+      }
+      
+      console.log('Request body:', JSON.stringify(requestBody, null, 2))
+      
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+          'X-Title': 'Therapy Goals Generator',
+        },
+        body: JSON.stringify(requestBody)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('OpenRouter API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        })
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      console.log('OpenRouter API Response:', result)
+      
+      if (!result.choices || !result.choices[0] || !result.choices[0].message) {
+        throw new Error('Invalid response format from OpenRouter API')
+      }
+      
+      const content = result.choices[0].message.content
+      if (!content) {
+        throw new Error('Empty response content from OpenRouter API')
+      }
+      
+      try {
+        return JSON.parse(content)
+      } catch (parseError) {
+        console.error('Failed to parse JSON response:', content)
+        
+        // Try to extract JSON from markdown code blocks
+        let cleanContent = content
+        const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+        if (codeBlockMatch) {
+          cleanContent = codeBlockMatch[1].trim()
+          console.log('Extracted JSON from code block:', cleanContent)
+        }
+        
+        // Try to extract JSON from the response if it contains extra text
+        const jsonMatch = cleanContent.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          try {
+            return JSON.parse(jsonMatch[0])
+          } catch (secondParseError) {
+            console.error('Failed to parse extracted JSON:', jsonMatch[0])
+          }
+        }
+        
+        // If still failing, try the original content without code blocks
+        try {
+          return JSON.parse(cleanContent)
+        } catch (finalParseError) {
+          console.error('All JSON parsing attempts failed')
+          throw new Error(`Failed to parse JSON response: ${parseError}`)
+        }
+      }
+    } catch (e: any) {
+      error.value = e.message
+      console.error('Full error in generateGoalsFromHistory:', e)
+      throw e
+    } finally {
+      processing.value = false
+    }
+  }
+
+  /**
+   * Evaluate goal progress based on session messages
+   */
+  async function evaluateGoalProgress(data: {
+    goal: any
+    sessionMessages: any[]
+    previousProgress: number
+  }) {
+    processing.value = true
+    error.value = null
+
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+          'X-Title': 'Goal Progress Evaluator',
+        },
+        body: JSON.stringify({
+          model: selectedModel.value,
+          messages: [
+            {
+              role: 'system',
+              content: `شما یک روانشناس متخصص هستید که پیشرفت اهداف درمانی را ارزیابی می‌کنید.
+              بر اساس پیام‌های جلسه و هدف تعیین شده، میزان پیشرفت را تحلیل کنید.
+              پیشرفت را بر اساس رفتارهای هدف و معیارهای موفقیت اندازه‌گیری کنید.`
+            },
+            {
+              role: 'user',
+              content: `هدف مورد ارزیابی:
+عنوان: ${data.goal.title}
+توضیح: ${data.goal.description}
+رفتارهای هدف: ${data.goal.target_behaviors?.join(', ')}
+معیارهای موفقیت: ${data.goal.success_criteria?.join(', ')}
+پیشرفت قبلی: ${data.previousProgress}%
+
+پیام‌های جلسه:
+${data.sessionMessages.map((msg, index) => `${index + 1}. ${msg.type === 'sent' ? 'کاربر' : 'مشاور'}: ${msg.text}`).join('\n')}
+
+لطفاً پیشرفت هدف را ارزیابی کنید:
+{
+  "progress_percentage": عدد بین 0 تا 100,
+  "status": "pending|in_progress|achieved|partially_achieved|modified",
+  "evaluation": "تحلیل کامل پیشرفت",
+  "behavior_changes": ["تغییر رفتاری 1", "تغییر رفتاری 2"],
+  "recommendations": ["پیشنهاد 1", "پیشنهاد 2"]
+}`
+            }
+          ] as ChatMessage[],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'goal_evaluation',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  progress_percentage: { type: 'number', minimum: 0, maximum: 100 },
+                  status: { type: 'string', enum: ['pending', 'in_progress', 'achieved', 'partially_achieved', 'modified'] },
+                  evaluation: { type: 'string' },
+                  behavior_changes: { type: 'array', items: { type: 'string' } },
+                  recommendations: { type: 'array', items: { type: 'string' } }
+                },
+                required: ['progress_percentage', 'status', 'evaluation']
+              }
+            }
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      return JSON.parse(result.choices[0].message.content)
+    } catch (e: any) {
+      error.value = e.message
+      throw e
+    } finally {
+      processing.value = false
+    }
   }
 
   // Initialize models on composable creation
@@ -738,5 +902,9 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
     generateTherapist,
     generateInlineAnalysis,
     generateGoalsList,
+    
+    // Goal generation and evaluation
+    generateGoalsFromHistory,
+    evaluateGoalProgress,
   }
 }

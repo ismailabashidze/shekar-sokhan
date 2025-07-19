@@ -33,6 +33,12 @@ const silenceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const countDown = ref(3)
 const showCountdown = ref(false)
 
+// Audio sensitivity settings
+const speechStartTime = ref<number | null>(null)
+const minSpeechDuration = 1000 // Minimum 1 second of speech before considering silence
+const volumeThreshold = 15 // Lower threshold to be more permissive for legitimate speech
+const sustainedSilenceRequired = 2000 // Require 2 seconds of sustained silence
+
 const deviceInfo = ref('')
 const audioStatus = ref('')
 const errorMessage = ref('')
@@ -60,7 +66,38 @@ const getDeviceInfo = async () => {
   }
 }
 
+// Check current audio volume level
+const getCurrentVolume = () => {
+  if (!analyser || !freqs) return 0
+  
+  analyser.getByteFrequencyData(freqs)
+  // Calculate average volume from frequency data
+  let sum = 0
+  for (let i = 0; i < freqs.length; i++) {
+    sum += freqs[i]
+  }
+  return sum / freqs.length
+}
+
+// Check if user has been speaking long enough to consider ending
+const hasSpokenLongEnough = () => {
+  if (!speechStartTime.value) return false
+  const duration = Date.now() - speechStartTime.value
+  console.log('[AudioUser] Speech duration:', duration, 'ms, required:', minSpeechDuration, 'ms')
+  return duration >= minSpeechDuration
+}
+
 const startSilenceTimer = () => {
+  // Start silence timer if user has spoken for minimum duration OR if we have any meaningful text
+  const hasText = allText.value.trim().length > 0 || finalText.value.trim().length > 0
+  
+  if (!hasSpokenLongEnough() && !hasText) {
+    console.log('[AudioUser] Not starting silence timer - insufficient speech duration and no text')
+    return
+  }
+  
+  console.log('[AudioUser] Starting silence timer - speech duration met or text present')
+  
   if (silenceTimer.value) clearTimeout(silenceTimer.value)
   showCountdown.value = true
   countDown.value = 3
@@ -221,6 +258,7 @@ const initSpeechRecognition = () => {
 
     recognition.value.onstart = () => {
       logStatus('Recognition started')
+      console.log('[AudioUser] Recognition session started, lastProcessedIndex:', lastProcessedIndex.value, 'allText:', allText.value)
     }
 
     recognition.value.onresult = (event: any) => {
@@ -239,17 +277,43 @@ const initSpeechRecognition = () => {
         }
       }
 
+      // Check current volume to determine if this is actual speech
+      const currentVolume = getCurrentVolume()
+      const isActualSpeech = currentVolume > volumeThreshold
+      
+      // Track when user started speaking (either with volume or with any speech recognition)
+      if ((finalTranscript || interimTranscript) && !speechStartTime.value) {
+        speechStartTime.value = Date.now()
+        console.log('[AudioUser] Speech started, volume:', currentVolume, 'isActualSpeech:', isActualSpeech)
+      }
+
       // Update the display text
       if (finalTranscript) {
-        finalText.value = finalTranscript.trim()
+        const trimmedFinal = finalTranscript.trim()
+        finalText.value = trimmedFinal
+        
         // Add a space only if allText is not empty
-        allText.value = allText.value ? `${allText.value} ${finalTranscript}`.trim() : finalTranscript.trim()
+        const newAllText = allText.value ? `${allText.value} ${trimmedFinal}`.trim() : trimmedFinal
+        allText.value = newAllText
         interimText.value = interimTranscript.trim()
-        startSilenceTimer()
+        
+        console.log('[AudioUser] Final text added:', trimmedFinal, 'Complete text now:', newAllText)
+        
+        // Start silence timer if this is actual speech OR if volume detection isn't working but we have text
+        if (isActualSpeech || trimmedFinal.length > 2) {
+          console.log('[AudioUser] Starting silence timer - speech detected')
+          startSilenceTimer()
+        } else {
+          console.log('[AudioUser] Low-volume speech detected, volume:', currentVolume, 'text length:', trimmedFinal.length)
+        }
       }
       else if (interimTranscript) {
         interimText.value = interimTranscript.trim()
-        resetSilenceTimer()
+        console.log('[AudioUser] Interim text:', interimTranscript.trim())
+        // Reset silence timer when actively speaking
+        if (isActualSpeech || interimTranscript.trim().length > 2) {
+          resetSilenceTimer()
+        }
       }
     }
 
@@ -261,6 +325,10 @@ const initSpeechRecognition = () => {
     recognition.value.onend = () => {
       logStatus('Recognition ended')
       if (isStarted.value) {
+        // Reset the lastProcessedIndex for the new recognition session
+        lastProcessedIndex.value = -1
+        console.log('[AudioUser] Recognition restarting, reset lastProcessedIndex, current allText:', allText.value)
+        
         // Add a small delay before restarting recognition
         recognitionTimeout.value = setTimeout(() => {
           try {
@@ -294,6 +362,7 @@ const startRecognition = () => {
     interimText.value = ''
     allText.value = ''
     lastProcessedIndex.value = -1
+    speechStartTime.value = null // Reset speech start time
 
     // Add a small delay before starting recognition
     setTimeout(() => {
@@ -403,6 +472,7 @@ const resetState = () => {
   isStarted.value = false
   showCountdown.value = false
   countDown.value = 3
+  speechStartTime.value = null // Reset speech tracking
   if (recognition.value) {
     try {
       recognition.value.stop()

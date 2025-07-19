@@ -2,11 +2,11 @@ import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
 // خواندن ورژن از package.json
-let appVersion = '2.8.0'
+let appVersion = '2.11.0'
 try {
   const packagePath = resolve(__dirname, './package.json')
   const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'))
-  appVersion = packageJson.version || '2.8.0'
+  appVersion = packageJson.version || '2.11.0'
 }
 catch (error) {
   console.warn('Could not read version from package.json, using fallback:', appVersion)
@@ -41,10 +41,15 @@ export default defineNuxtConfig({
 
   // Runtime environment variables
   runtimeConfig: {
+    // Private keys (server-side only)
+    unsplashAccessKey: process.env.UNSPLASH_ACCESS_KEY || '',
+    pexelsApiKey: process.env.PEXELS_API_KEY || '',
+    pixabayApiKey: process.env.PIXABAY_API_KEY || '',
+    openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
+    
     public: {
       appVersion,
       appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:3000',
-      openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
       dargahMerchantId: process.env.DARGAH_MERCHANT_ID || '',
       dargahBaseUrl: process.env.DARGAH_BASE_URL || 'https://dargahno.net',
       dargahUsername: process.env.DARGAH_USERNAME || '',

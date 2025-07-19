@@ -49,32 +49,23 @@ onBeforeMount(checkPreviousSteps)
       </BaseParagraph>
     </div>
 
-    <div v-if="!complete" class="w-full max-w-md">
+    <div v-if="!complete" class="w-full max-w-lg">
       <div class="grid grid-cols-12 gap-4">
-        <div class="sm:col-span-12 md:col-span-6">
+        <div class="col-span-12 sm:col-span-6">
           <BaseInput
             v-model="request.firstName"
             v-focus
             :error="errors.fields.firstName"
-            label="نام شما"
-            placeholder="وارد نمایید"
+            label="نام"
+            placeholder="نام خود را وارد کنید"
           />
         </div>
-        <div class="sm:col-span-12 md:col-span-6">
+        <div class="col-span-12 sm:col-span-6">
           <BaseInput
             v-model="request.lastName"
-            v-focus
             :error="errors.fields.lastName"
-            label="نام خانوادگی شما"
-            placeholder="وارد نمایید"
-          />
-        </div>
-        <div class="col-span-12">
-          <BaseInput
-            v-model="request.phoneNumber"
-            :error="errors.fields.phoneNumber"
-            label="شماره تماس"
-            placeholder="با ۰۹ شروع می شود"
+            label="نام خانوادگی"
+            placeholder="نام خانوادگی خود را وارد کنید"
           />
         </div>
         <div class="col-span-12">
@@ -82,17 +73,26 @@ onBeforeMount(checkPreviousSteps)
             v-model="request.email"
             :error="errors.fields.email"
             label="آدرس ایمیل"
-            placeholder="معتبر"
+            placeholder="example@email.com"
+            type="email"
+          />
+        </div>
+        <div class="col-span-12">
+          <BaseInput
+            v-model="request.phoneNumber"
+            :error="errors.fields.phoneNumber"
+            label="شماره تماس"
+            placeholder="09123456789"
           />
         </div>
         <div class="col-span-12 sm:col-span-6">
           <BaseInputNumber
             v-model="request.age"
-            v-focus
             :error="errors.fields.age"
-            label="سن شما"
-            placeholder="به صورت عددی"
-            :min="8"
+            label="سن"
+            placeholder="25"
+            :min="18"
+            :max="80"
           />
         </div>
         <div class="col-span-12 sm:col-span-6">
@@ -100,28 +100,18 @@ onBeforeMount(checkPreviousSteps)
             v-model="request.gender"
             label="جنسیت"
             :items="['مرد', 'زن']"
-            placeholder="جنسیت را انتخاب نمایید"
+            placeholder="انتخاب کنید"
             :error="errors.fields.gender"
             rounded="lg"
           />
         </div>
-        <div class="col-span-12 sm:col-span-6">
+        <div class="col-span-12">
           <BaseListbox
             v-model="request.maritalStatus"
             label="وضعیت تاهل"
-            :items="['مجرد', 'متاهل']"
-            placeholder="انتخاب نمایید"
+            :items="['مجرد', 'متاهل', 'مطلقه', 'بیوه']"
+            placeholder="انتخاب کنید"
             :error="errors.fields.maritalStatus"
-            rounded="lg"
-          />
-        </div>
-        <div class="col-span-12 sm:col-span-6">
-          <BaseListbox
-            v-model="request.licenseStatus"
-            label="وضعیت پروانه فعالیت"
-            :items="[`بدون پروانه - فعالیت داوطلبانه`, `بدون پروانه - دانشجوی روانشناسی`, `پروانه در دست اقدام`, 'دارای پروانه']"
-            placeholder="انتخاب نمایید"
-            :error="errors.fields.licenseStatus"
             rounded="lg"
           />
         </div>

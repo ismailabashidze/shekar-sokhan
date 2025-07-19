@@ -494,9 +494,9 @@ onMounted(() => {
             <div class="flex-1 p-4">
               <!-- Main Content Grid -->
               <div class="grid h-full grid-cols-1 gap-4">
-                <!-- Left Column: Session Stats -->
-                <div class="space-y-3">
-                  <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
+                <!-- Session Stats Row - Three Columns -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3 h-20">
                     <div class="bg-primary-100 dark:bg-primary-500/20 ml-3 rounded-full p-2">
                       <Icon name="ph:clock-duotone" class="text-primary-500 size-4" />
                     </div>
@@ -508,7 +508,7 @@ onMounted(() => {
                     </div>
                   </div>
 
-                  <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
+                  <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3 h-20">
                     <div class="bg-info-100 dark:bg-info-500/20 ml-3 rounded-full p-2">
                       <Icon name="ph:chat-dots-duotone" class="text-info-500 size-4" />
                     </div>
@@ -520,7 +520,7 @@ onMounted(() => {
                     </div>
                   </div>
 
-                  <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
+                  <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3 h-20">
                     <div class="bg-success-100 dark:bg-success-500/20 ml-3 rounded-full p-2">
                       <Icon name="ph:timer-duotone" class="text-success-500 size-4" />
                     </div>
@@ -534,7 +534,7 @@ onMounted(() => {
                 </div>
 
                 <!-- Right Column: Analysis Summary -->
-                <div v-if="session.expand?.session_analysis_for_system" class="bg-muted-50 dark:bg-muted-900/50 rounded-lg p-4">
+                <div v-if="session.expand?.session_analysis_for_system" class="bg-muted-50 dark:bg-muted-900/50 rounded-lg p-4 h-80">
                   <div class="mb-3 flex items-center">
                     <div class="bg-info-100 dark:bg-info-500/20 ml-2 rounded-full p-1">
                       <Icon name="ph:brain-duotone" class="text-info-500 size-4" />
@@ -549,7 +549,7 @@ onMounted(() => {
                     </BaseHeading>
                   </div>
 
-                  <div class="space-y-3">
+                  <div class="space-y-3 h-full overflow-y-auto">
                     <!-- Session Title -->
                     <div v-if="session.expand.session_analysis_for_system.title">
                       <BaseHeading
@@ -601,7 +601,7 @@ onMounted(() => {
                 </div>
 
                 <!-- Fallback for sessions without analysis -->
-                <div v-else class="bg-muted-50 dark:bg-muted-900/50 rounded-lg p-4">
+                <div v-else class="bg-muted-50 dark:bg-muted-900/50 rounded-lg p-4 h-80">
                   <div class="mb-3 flex items-center">
                     <div class="bg-muted-200 dark:bg-muted-700 ml-2 rounded-full p-1">
                       <Icon name="ph:clock-duotone" class="text-muted-500 size-4" />
@@ -616,7 +616,7 @@ onMounted(() => {
                     </BaseHeading>
                   </div>
 
-                  <div class="space-y-3">
+                  <div class="space-y-3 h-full flex flex-col justify-center">
                     <!-- Session ID -->
                     <div>
                       <span class="text-muted-600 dark:text-muted-400 text-xs">شناسه جلسه:</span>

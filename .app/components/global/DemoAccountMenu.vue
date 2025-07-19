@@ -8,8 +8,83 @@ const props = defineProps<{
 const { user } = useUser()
 const { getUserAvatarUrl } = useAvatarManager()
 
-const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png')
-const displayName = computed(() => user.value.meta?.name || 'کاربر جدید')
+const avatarUrl = computed(() => {
+  try {
+    if (!user.value) return '/img/avatars/1.png'
+    
+    const url = getUserAvatarUrl(user.value)
+    return url || '/img/avatars/1.png'
+  } catch (error) {
+    console.warn('Error getting avatar URL:', error)
+    return '/img/avatars/1.png'
+  }
+})
+
+const displayName = computed(() => user.value?.meta?.name || 'کاربر جدید')
+
+// Generate user initials for placeholder
+const userInitials = computed(() => {
+  if (!user.value?.meta?.name) return 'ک'
+  
+  const name = user.value.meta.name.trim()
+  const words = name.split(' ')
+  
+  if (words.length >= 2) {
+    // First letter of first name + first letter of last name
+    return words[0][0] + words[words.length - 1][0]
+  } else if (words.length === 1) {
+    // First two letters of single name
+    return words[0].substring(0, 2)
+  }
+  
+  return 'ک' // Default fallback
+})
+
+// Generate consistent background color based on user ID
+const placeholderColor = computed(() => {
+  if (!user.value?.id) return 'bg-primary-500'
+  
+  const colors = [
+    'bg-primary-500',
+    'bg-blue-500', 
+    'bg-green-500',
+    'bg-purple-500',
+    'bg-pink-500',
+    'bg-orange-500',
+    'bg-teal-500',
+    'bg-indigo-500'
+  ]
+  
+  // Use user ID to consistently pick a color
+  const hash = user.value.id.split('').reduce((acc, char) => {
+    return acc + char.charCodeAt(0)
+  }, 0)
+  
+  return colors[hash % colors.length]
+})
+
+// Add loading state for avatar
+const avatarLoading = ref(true)
+const avatarError = ref(false)
+
+const handleAvatarLoad = () => {
+  avatarLoading.value = false
+  avatarError.value = false
+}
+
+const handleAvatarError = (event: Event) => {
+  console.warn('Avatar failed to load, using fallback')
+  avatarError.value = true
+  avatarLoading.value = false
+  const target = event.target as HTMLImageElement
+  target.src = '/img/avatars/1.png'
+}
+
+// Watch for avatar URL changes to reset loading state
+watch(avatarUrl, () => {
+  avatarLoading.value = true
+  avatarError.value = false
+}, { immediate: true })
 </script>
 
 <template>
@@ -27,11 +102,22 @@ const displayName = computed(() => user.value.meta?.name || 'کاربر جدید
           <div
             class="relative inline-flex size-10 items-center justify-center rounded-full"
           >
+            <!-- Personalized avatar placeholder -->
+            <div
+              v-if="avatarLoading"
+              class="absolute inset-0 flex items-center justify-center rounded-full text-white font-semibold text-sm"
+              :class="placeholderColor"
+            >
+              {{ userInitials }}
+            </div>
+            
             <img
               :src="avatarUrl"
-              class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
+              class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent transition-opacity duration-200"
+              :class="{ 'opacity-0': avatarLoading }"
               alt=""
-              @error="$event.target.src = '/img/avatars/1.png'"
+              @load="handleAvatarLoad"
+              @error="handleAvatarError"
             >
           </div>
         </button>
@@ -54,11 +140,22 @@ const displayName = computed(() => user.value.meta?.name || 'کاربر جدید
               <div
                 class="relative inline-flex size-14 items-center justify-center rounded-full"
               >
+                <!-- Personalized avatar placeholder -->
+                <div
+                  v-if="avatarLoading"
+                  class="absolute inset-0 flex items-center justify-center rounded-full text-white font-semibold text-lg"
+                  :class="placeholderColor"
+                >
+                  {{ userInitials }}
+                </div>
+                
                 <img
                   :src="avatarUrl"
-                  class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
+                  class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent transition-opacity duration-200"
+                  :class="{ 'opacity-0': avatarLoading }"
                   alt=""
-                  @error="$event.target.src = '/img/avatars/1.png'"
+                  @load="handleAvatarLoad"
+                  @error="handleAvatarError"
                 >
               </div>
               <div class="ms-3 text-right leading-6">
