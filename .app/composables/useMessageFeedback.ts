@@ -107,6 +107,22 @@ export const FEEDBACK_CATEGORIES = {
         icon: 'ph:robot-duotone',
         severity: 'medium',
         examples: ['پاسخ‌های قالبی', 'عدم شخصی‌سازی'] 
+      },
+      { 
+        id: 'cultural_mismatch', 
+        name: 'ناهماهنگی فرهنگی', 
+        description: 'عدم تطبیق با فرهنگ و بافت اجتماعی',
+        icon: 'ph:globe-duotone',
+        severity: 'high',
+        examples: ['نادیده گیری فرهنگ ایرانی', 'پیشنهادات غیرقابل اجرا در جامعه'] 
+      },
+      { 
+        id: 'islamic_contradiction', 
+        name: 'مغایرت با ارزش‌های اسلامی', 
+        description: 'تضاد با اصول و ارزش‌های دینی',
+        icon: 'ph:mosque-duotone',
+        severity: 'critical',
+        examples: ['توصیه‌های مخالف شریعت', 'نادیده گیری آموزه‌های اسلامی'] 
       }
     ]
   },

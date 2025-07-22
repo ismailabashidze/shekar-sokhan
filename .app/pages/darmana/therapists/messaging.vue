@@ -2502,7 +2502,7 @@ const isAIThinking = ref(false)
           </div>
 
           <!-- Rating -->
-          <div class="space-y-4">
+          <div class="space-y-4 text-right">
             <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">
               امتیاز کلی <span class="text-danger-500">*</span>
             </label>
@@ -2530,7 +2530,7 @@ const isAIThinking = ref(false)
           </div>
 
           <!-- General feedback -->
-          <div class="space-y-3">
+          <div class="space-y-3 text-right">
             <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">
               نظر کلی <span class="text-danger-500">*</span>
             </label>
@@ -2546,7 +2546,7 @@ const isAIThinking = ref(false)
           </div>
 
           <!-- Additional comments -->
-          <div class="space-y-3">
+          <div class="space-y-3 text-right">
             <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">توضیحات اضافی</label>
             <BaseTextarea
               v-model="feedbackForm.general_other"
@@ -2583,7 +2583,7 @@ const isAIThinking = ref(false)
                 <Icon name="ph:warning-duotone" class="text-danger-600 dark:text-danger-400 size-5" />
               </div>
               <div>
-                <label class="block text-danger-800 dark:text-danger-200 font-bold text-base">مشکلات موجود</label>
+                <label class="block text-danger-800 dark:text-danger-200 font-bold text-base text-right">مشکلات موجود</label>
                 <p class="text-danger-600 dark:text-danger-300 text-sm">در صورت وجود مشکل، انتخاب کنید</p>
               </div>
               <div class="ml-auto">
@@ -2654,7 +2654,7 @@ const isAIThinking = ref(false)
 
             <!-- Custom problem input -->
             <div class="mt-6">
-              <label class="block text-danger-700 dark:text-danger-300 text-sm font-medium mb-2">
+              <label class="block text-danger-700 dark:text-danger-300 text-sm font-medium mb-2 text-right">
                 توضیح بیشتر یا مشکل دیگری؟
               </label>
               <BaseTextarea
@@ -2674,7 +2674,7 @@ const isAIThinking = ref(false)
                 <Icon name="ph:heart-duotone" class="text-success-600 dark:text-success-400 size-5" />
               </div>
               <div>
-                <label class="block text-success-800 dark:text-success-200 font-bold text-base">نقاط قوت پاسخ</label>
+                <label class="block text-success-800 dark:text-success-200 font-bold text-base text-right">نقاط قوت پاسخ</label>
                 <p class="text-success-600 dark:text-success-300 text-sm">چه چیزهایی عالی بود؟</p>
               </div>
               <div class="ml-auto">
@@ -2744,7 +2744,7 @@ const isAIThinking = ref(false)
 
             <!-- Custom quality input -->
             <div class="mt-6">
-              <label class="block text-success-700 dark:text-success-300 text-sm font-medium mb-2">
+              <label class="block text-success-700 dark:text-success-300 text-sm font-medium mb-2 text-right">
                 نقاط قوت دیگر؟
               </label>
               <BaseTextarea
@@ -2991,7 +2991,7 @@ const isAIThinking = ref(false)
                 </h6>
                 <div class="space-y-2 text-sm">
                   <div v-if="feedbackForm.general_text?.trim()">
-                    <span class="font-medium text-primary-600">نظر کلی:</span>
+                    <span class="font-medium text-primary-600 text-right">نظر کلی:</span>
                     <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">{{ feedbackForm.general_text }}</p>
                   </div>
                   <div v-if="feedbackForm.improvements_other?.trim()">
