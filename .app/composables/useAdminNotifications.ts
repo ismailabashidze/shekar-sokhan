@@ -16,6 +16,7 @@ export interface BulkSendOptions {
   sendToAll: boolean
   selectedRecipients: string[]
   userRole?: string // Optional: send to specific role
+  sendFCM?: boolean // Optional: send FCM push notifications
 }
 
 export function useAdminNotifications() {
@@ -459,6 +460,80 @@ export function useAdminNotifications() {
     })
   }
 
+  // Send FCM notifications to multiple recipients
+  const sendFCMNotification = async (
+    formData: AdminNotificationForm,
+    options: BulkSendOptions,
+  ) => {
+    try {
+      isSending.value = true
+
+      let recipients: string[] = []
+
+      if (options.sendToAll) {
+        // Get all users or users with specific role
+        const allUsers = options.userRole
+          ? users.value.filter(u => u.role === options.userRole)
+          : users.value
+        recipients = allUsers.map(u => u.id)
+      }
+      else {
+        recipients = options.selectedRecipients
+      }
+
+      if (recipients.length === 0) {
+        throw new Error('هیچ گیرنده‌ای انتخاب نشده است')
+      }
+
+      // Send FCM notifications
+      const promises = recipients.map(recipientId =>
+        $fetch('/api/fcm/send-notification', {
+          method: 'POST',
+          body: {
+            title: formData.title,
+            body: formData.message,
+            userId: recipientId,
+            data: {
+              type: formData.type,
+              priority: formData.priority,
+              action_url: formData.action_url,
+              complete_message: formData.complete_message,
+            },
+            scheduleTime: formData.announce_time,
+          },
+        })
+      )
+
+      await Promise.all(promises)
+
+      // Also create in-app notifications for persistence
+      const inAppPromises = recipients.map(recipientId =>
+        createNotification({
+          title: formData.title,
+          message: formData.message,
+          complete_message: formData.complete_message,
+          type: formData.type,
+          priority: formData.priority,
+          recipient_user_id: recipientId,
+          user: formData.user_id,
+          action_url: formData.action_url,
+          action_text: formData.action_text,
+          announce_time: formData.announce_time,
+        }),
+      )
+
+      await Promise.all(inAppPromises)
+      return recipients.length
+    }
+    catch (error) {
+      console.error('خطا در ارسال اعلان FCM:', error)
+      throw error
+    }
+    finally {
+      isSending.value = false
+    }
+  }
+
   return {
     // State
     isLoading,
@@ -490,6 +565,7 @@ export function useAdminNotifications() {
     loadMoreUsers,
     fetchAllNotifications,
     sendBulkNotification,
+    sendFCMNotification,
     deleteNotificationAdmin,
     updateNotification,
     getUsersByRole,

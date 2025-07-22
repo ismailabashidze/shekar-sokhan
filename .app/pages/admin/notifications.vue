@@ -18,6 +18,7 @@ const {
   fetchUsers,
   loadMoreUsers,
   sendBulkNotification,
+  sendFCMNotification,
   getNotificationStats,
   getUsersByRole,
   searchUsers,
@@ -95,6 +96,7 @@ const bulkOptions = ref<BulkSendOptions>({
   sendToAll: false,
   selectedRecipients: [],
   userRole: '',
+  sendFCM: false,
 })
 
 // Local state
@@ -246,7 +248,12 @@ const sendNotification = async () => {
       userRole: selectedRole.value,
     }
 
-    const sentCount = await sendBulkNotification(formData.value, options)
+    let sentCount
+    if (options.sendFCM) {
+      sentCount = await sendFCMNotification(formData.value, options)
+    } else {
+      sentCount = await sendBulkNotification(formData.value, options)
+    }
 
     // Reset form
     formData.value = {
@@ -268,6 +275,7 @@ const sendNotification = async () => {
       sendToAll: false,
       selectedRecipients: [],
       userRole: '',
+      sendFCM: false,
     }
     selectedRole.value = ''
     localSearchQuery.value = ''
@@ -606,6 +614,11 @@ const roleOptions: RoleOption[] = [
                 <label class="flex items-center space-x-2 space-x-reverse">
                   <BaseCheckbox v-model="bulkOptions.sendToAll" />
                   <span class="text-muted-700 dark:text-muted-300 text-sm">ارسال به همه کاربران</span>
+                </label>
+
+                <label class="flex items-center space-x-2 space-x-reverse">
+                  <BaseCheckbox v-model="bulkOptions.sendFCM" />
+                  <span class="text-muted-700 dark:text-muted-300 text-sm">ارسال اعلان push (FCM)</span>
                 </label>
 
                 <BaseListbox

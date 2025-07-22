@@ -1,0 +1,434 @@
+[
+  {
+    "id": "fcm_tokens_collection",
+    "name": "fcm_tokens",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "id": "user_id",
+        "name": "user_id",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 50,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "token",
+        "name": "token",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 1000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "device_type",
+        "name": "device_type",
+        "type": "select",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "android",
+            "ios",
+            "web"
+          ]
+        }
+      },
+      {
+        "id": "is_active",
+        "name": "is_active",
+        "type": "bool",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      }
+    ],
+    "indexes": [
+      "CREATE INDEX fcm_tokens_user_id_idx ON fcm_tokens (user_id)",
+      "CREATE INDEX fcm_tokens_token_idx ON fcm_tokens (token)"
+    ],
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\" && user_id = @request.auth.id",
+    "createRule": "@request.auth.id != \"\" && user_id = @request.auth.id",
+    "updateRule": "@request.auth.id != \"\" && user_id = @request.auth.id",
+    "deleteRule": "@request.auth.id != \"\" && user_id = @request.auth.id",
+    "options": {}
+  },
+  {
+    "id": "scheduled_notifications_collection",
+    "name": "scheduled_notifications",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "id": "user_id",
+        "name": "user_id",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 50,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "title",
+        "name": "title",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 255,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "body",
+        "name": "body",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 2000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "data",
+        "name": "data",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 10000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "schedule_time",
+        "name": "schedule_time",
+        "type": "date",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "id": "status",
+        "name": "status",
+        "type": "select",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "pending",
+            "sent",
+            "failed",
+            "cancelled"
+          ]
+        }
+      },
+      {
+        "id": "source",
+        "name": "source",
+        "type": "select",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "admin",
+            "session_analysis",
+            "system"
+          ]
+        }
+      },
+      {
+        "id": "source_id",
+        "name": "source_id",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 50,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "processed_at",
+        "name": "processed_at",
+        "type": "date",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "id": "error_message",
+        "name": "error_message",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 1000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "fcm_response",
+        "name": "fcm_response",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 1000,
+          "pattern": ""
+        }
+      }
+    ],
+    "indexes": [
+      "CREATE INDEX scheduled_notifications_user_id_idx ON scheduled_notifications (user_id)",
+      "CREATE INDEX scheduled_notifications_schedule_time_idx ON scheduled_notifications (schedule_time)",
+      "CREATE INDEX scheduled_notifications_status_idx ON scheduled_notifications (status)"
+    ],
+    "listRule": "@request.auth.role = \"admin\"",
+    "viewRule": "@request.auth.role = \"admin\" || user_id = @request.auth.id",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.role = \"admin\"",
+    "deleteRule": "@request.auth.role = \"admin\"",
+    "options": {}
+  },
+  {
+    "id": "notification_logs_collection", 
+    "name": "notification_logs",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "id": "user_id",
+        "name": "user_id",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 50,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "title",
+        "name": "title",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 255,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "body",
+        "name": "body",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 2000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "fcm_response",
+        "name": "fcm_response",
+        "type": "text",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 1000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "sent_at",
+        "name": "sent_at",
+        "type": "date",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "id": "status",
+        "name": "status",
+        "type": "select",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "sent",
+            "failed",
+            "pending"
+          ]
+        }
+      },
+      {
+        "id": "source",
+        "name": "source",
+        "type": "select",
+        "system": false,
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "admin",
+            "scheduled",
+            "system"
+          ]
+        }
+      }
+    ],
+    "indexes": [
+      "CREATE INDEX notification_logs_user_id_idx ON notification_logs (user_id)",
+      "CREATE INDEX notification_logs_sent_at_idx ON notification_logs (sent_at)"
+    ],
+    "listRule": "@request.auth.role = \"admin\"",
+    "viewRule": "@request.auth.role = \"admin\" || user_id = @request.auth.id",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.role = \"admin\"",
+    "deleteRule": "@request.auth.role = \"admin\"",
+    "options": {}
+  },
+  {
+    "id": "session_analyses_collection",
+    "name": "session_analyses",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "id": "session_id",
+        "name": "session_id",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 100,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "user_id",
+        "name": "user_id",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 50,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "analysis_data",
+        "name": "analysis_data",
+        "type": "text",
+        "system": false,
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 50000,
+          "pattern": ""
+        }
+      }
+    ],
+    "indexes": [
+      "CREATE INDEX session_analyses_session_id_idx ON session_analyses (session_id)",
+      "CREATE INDEX session_analyses_user_id_idx ON session_analyses (user_id)"
+    ],
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\" && user_id = @request.auth.id",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\" && user_id = @request.auth.id",
+    "deleteRule": "@request.auth.role = \"admin\"",
+    "options": {}
+  }
+]

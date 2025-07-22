@@ -51,8 +51,42 @@ const headlines = ref([
     descriptionFa: 'مریم صریحا اعلام کرده که به خودکشی فکر نمی کند و این یک پیش آگهی خوب است.',
   },
 ])
+const { requestPermission, saveFCMToken } = useFirebaseMessaging()
+
+const triggerSessionAnalysis = async () => {
+  try {
+    isLoading.value = true
+    
+    const response = await $fetch('/api/openrouter/session-analysis', {
+      method: 'POST',
+      body: {
+        sessionId: route.query.sessionId,
+        userId: route.query.userId,
+        messages: userSum.value // or get messages from appropriate source
+      }
+    })
+    
+    console.log('Session analysis completed:', response)
+  } catch (error) {
+    console.error('Failed to analyze session:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
 onMounted(async () => {
   userDetails.value = await getUserDetailsWithUserId(route.query.userDetailsId as string)
+  
+  // Request notification permission and save FCM token
+  const fcmToken = await requestPermission()
+  if (fcmToken && route.query.userId) {
+    await saveFCMToken(fcmToken, route.query.userId as string)
+  }
+  
+  // Trigger session analysis if we have necessary data
+  if (route.query.sessionId && route.query.userId) {
+    await triggerSessionAnalysis()
+  }
 })
 
 function useSuicideRiskCondition() {
