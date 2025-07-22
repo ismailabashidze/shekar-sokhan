@@ -15,9 +15,12 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const { user } = useUser()
 const { getUserAvatarUrl } = useAvatarManager()
+const { confirmAndRemoveData } = useDataRemoval()
 const avatarUrl = computed(() => getUserAvatarUrl(user.value))
 
-// Rest of the code remains the same
+const handleDataRemoval = async () => {
+  await confirmAndRemoveData()
+}
 </script>
 
 <template>
@@ -361,6 +364,33 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
               </BaseText>
             </div>
           </NuxtLink>
+        </BaseCard>
+        
+        <!-- Data Removal Card -->
+        <BaseCard
+          rounded="lg"
+          elevated-hover
+          class="hover:!border-red-500 group border-2"
+        >
+          <div class="block p-6" @click="handleDataRemoval">
+            <div class="text-center cursor-pointer">
+              <Icon
+                name="ph:trash-duotone"
+                class="group-hover:text-red-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
+              />
+              <BaseHeading
+                tag="h3"
+                size="xs"
+                weight="semibold"
+                class="mt-2 !text-[0.65rem] uppercase"
+              >
+                حذف داده‌ها
+              </BaseHeading>
+              <BaseText size="xs" class="text-muted-400">
+                حذف کامل اطلاعات
+              </BaseText>
+            </div>
+          </div>
         </BaseCard>
       </div>
 
