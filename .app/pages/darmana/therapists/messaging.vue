@@ -42,6 +42,7 @@ const hasPreviousData = ref(false)
 
 const { generateAnalysis, createAnalysis, getAnalysisForSession } = useSessionAnalysis()
 const { createAndLinkAnalysis, getMessageAnalysis } = useMessageAnalysis()
+const { submitFeedback } = useMessageFeedback()
 
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
@@ -863,6 +864,21 @@ const closeDeleteModal = () => {
 const isMessageDetailModalOpen = ref(false)
 const selectedMessage = ref<any>(null)
 
+const isFeedbackModalOpen = ref(false)
+const selectedMessageForFeedback = ref<any>(null)
+const feedbackForm = ref({
+  rating: 0,
+  general_text: '',
+  general_other: '',
+  problems_categories: {},
+  problems_other: '',
+  quality_categories: {},
+  quality_other: '',
+  improvements_categories: {},
+  improvements_other: '',
+})
+const isSubmittingFeedback = ref(false)
+
 const openMessageDetailModal = (message: any) => {
   selectedMessage.value = message
   isMessageDetailModalOpen.value = true
@@ -871,6 +887,142 @@ const openMessageDetailModal = (message: any) => {
 const closeMessageDetailModal = () => {
   isMessageDetailModalOpen.value = false
   selectedMessage.value = null
+}
+
+const openFeedbackModal = (message: any) => {
+  selectedMessageForFeedback.value = message
+  isFeedbackModalOpen.value = true
+  // Reset form
+  feedbackForm.value = {
+    rating: 0,
+    general_text: '',
+    general_other: '',
+    problems_categories: {},
+    problems_other: '',
+    quality_categories: {},
+    quality_other: '',
+    improvements_categories: {},
+    improvements_other: '',
+  }
+}
+
+const closeFeedbackModal = () => {
+  if (!isSubmittingFeedback.value) {
+    isFeedbackModalOpen.value = false
+    selectedMessageForFeedback.value = null
+  }
+}
+
+const submitMessageFeedback = async () => {
+  if (!selectedMessageForFeedback.value || !activeSession.value || !activeTherapistId.value) return
+
+  isSubmittingFeedback.value = true
+  try {
+    const feedbackData = {
+      message_id: selectedMessageForFeedback.value.id,
+      session_id: activeSession.value.id,
+      user_id: nuxtApp.$pb.authStore.model.id,
+      therapist_id: activeTherapistId.value,
+      message_content: selectedMessageForFeedback.value.text,
+      ...feedbackForm.value,
+    }
+
+    await submitFeedback(feedbackData)
+    
+    toaster.show({
+      title: 'موفق',
+      message: 'بازخورد شما با موفقیت ثبت شد.',
+      color: 'success',
+      icon: 'ph:check-circle-fill',
+      closable: true,
+    })
+
+    closeFeedbackModal()
+  } catch (error) {
+    console.error('Error submitting feedback:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در ثبت بازخورد. لطفا دوباره تلاش کنید.',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  } finally {
+    isSubmittingFeedback.value = false
+  }
+}
+
+const retryLastMessage = async () => {
+  if (messageLoading.value || isAIResponding.value || !messages.value.length) return
+  
+  // Find the last AI message
+  const lastAIMessage = [...messages.value].reverse().find(msg => msg.type === 'received')
+  if (!lastAIMessage) return
+
+  try {
+    messageLoading.value = true
+    isAIResponding.value = true
+
+    // Remove the last AI message from the UI and database
+    const lastAIMessageIndex = messages.value.findIndex(msg => msg.id === lastAIMessage.id)
+    if (lastAIMessageIndex !== -1) {
+      messages.value.splice(lastAIMessageIndex, 1)
+    }
+
+    // Delete from database
+    try {
+      await nuxtApp.$pb.collection('therapists_messages').delete(lastAIMessage.id)
+    } catch (deleteError) {
+      console.error('Error deleting message from database:', deleteError)
+    }
+
+    // Get the last user message to regenerate response
+    const lastUserMessage = [...messages.value].reverse().find(msg => msg.type === 'sent')
+    if (!lastUserMessage) return
+
+    // Prepare chat history for AI
+    const contextMessages = messages.value.map(msg => ({
+      role: msg.type === 'sent' ? 'user' : 'assistant',
+      content: msg.text,
+    }))
+
+    // Generate new AI response
+    let aiResponse = ''
+    isAIThinking.value = true
+    thinkingResponse.value = ''
+    
+    await streamChat(contextMessages, { therapistDetails: selectedConversationComputed.value?.user }, (chunk) => {
+      aiResponse += chunk
+      thinkingResponse.value = aiResponse
+    })
+    
+    isAIThinking.value = false
+
+    // Save new AI response to PocketBase
+    const savedAIMessage = await sendMessage(activeTherapistId.value!, activeSession.value!.id, aiResponse, 'received')
+
+    // Add new AI response to messages
+    messages.value.push({
+      type: 'received',
+      text: aiResponse,
+      timestamp: savedAIMessage.time,
+      id: savedAIMessage.id,
+    })
+
+    scrollToBottom()
+  } catch (error) {
+    console.error('Error retrying message:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در تولید پاسخ جدید. لطفا دوباره تلاش کنید.',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  } finally {
+    messageLoading.value = false
+    isAIResponding.value = false
+  }
 }
 
 // Convert analysis result to EmotionWheel format
@@ -1445,6 +1597,29 @@ const isAIThinking = ref(false)
                               @click="openMessageDetailModal(item)"
                             >
                               <Icon name="ph:magnifying-glass-duotone" class="size-4" />
+                            </BaseButton>
+                            <!-- Feedback button for received messages -->
+                            <BaseButton
+                              v-if="item.type === 'received'"
+                              rounded="full"
+                              title="ثبت بازخورد"
+                              size="sm"
+                              color="info"
+                              @click="openFeedbackModal(item)"
+                            >
+                              <Icon name="ph:magnifying-glass-duotone" class="size-4" />
+                            </BaseButton>
+                            <!-- Retry button for last received message -->
+                            <BaseButton
+                              v-if="item.type === 'received' && item.id === [...messages].reverse().find(msg => msg.type === 'received')?.id"
+                              rounded="full"
+                              title="تولید پاسخ جدید"
+                              size="sm"
+                              color="warning"
+                              :disabled="messageLoading || isAIResponding"
+                              @click="retryLastMessage"
+                            >
+                              <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
                             </BaseButton>
                           </div>
                           <span class="text-muted-400 font-sans text-xs">
@@ -2127,6 +2302,125 @@ const isAIThinking = ref(false)
         <div class="flex justify-end">
           <BaseButton @click="closeMessageDetailModal">
             بستن
+          </BaseButton>
+        </div>
+      </div>
+    </template>
+  </TairoModal>
+
+  <!-- Message Feedback Modal -->
+  <TairoModal
+    :open="isFeedbackModalOpen"
+    size="lg"
+    @close="closeFeedbackModal"
+  >
+    <template #header>
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+          بازخورد پیام
+        </h3>
+        <BaseButtonClose @click="closeFeedbackModal" />
+      </div>
+    </template>
+
+    <div class="max-h-[70vh] overflow-y-auto p-4 md:p-6">
+      <div v-if="selectedMessageForFeedback" class="space-y-6">
+        <!-- Message content -->
+        <div class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+          <div class="mb-2 flex items-center gap-2">
+            <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
+            <span class="text-muted-600 dark:text-muted-300 text-sm font-medium">پیام روانشناس</span>
+          </div>
+          <div class="prose prose-sm dark:prose-invert max-w-none text-right">
+            <AddonMarkdownRemark :source="selectedMessageForFeedback.text" />
+          </div>
+        </div>
+
+        <!-- Rating -->
+        <div class="space-y-3">
+          <label class="text-muted-700 dark:text-muted-300 text-sm font-medium">امتیاز کلی (1 تا 5)</label>
+          <div class="flex gap-2">
+            <button
+              v-for="star in 5"
+              :key="star"
+              type="button"
+              class="transition-colors duration-200"
+              :class="star <= feedbackForm.rating ? 'text-yellow-400' : 'text-muted-300'"
+              @click="feedbackForm.rating = star"
+            >
+              <Icon name="ph:star-fill" class="size-6" />
+            </button>
+          </div>
+        </div>
+
+        <!-- General feedback -->
+        <div class="space-y-3">
+          <label class="text-muted-700 dark:text-muted-300 text-sm font-medium">نظر کلی</label>
+          <BaseTextarea
+            v-model="feedbackForm.general_text"
+            placeholder="نظر خود را درباره پاسخ روانشناس بنویسید..."
+            :rows="3"
+          />
+        </div>
+
+        <!-- Additional comments -->
+        <div class="space-y-3">
+          <label class="text-muted-700 dark:text-muted-300 text-sm font-medium">توضیحات اضافی</label>
+          <BaseTextarea
+            v-model="feedbackForm.general_other"
+            placeholder="توضیحات بیشتر (اختیاری)..."
+            :rows="2"
+          />
+        </div>
+
+        <!-- Problems -->
+        <div class="space-y-3">
+          <label class="text-muted-700 dark:text-muted-300 text-sm font-medium">مشکلات احتمالی</label>
+          <BaseTextarea
+            v-model="feedbackForm.problems_other"
+            placeholder="در صورتی که مشکلی با پاسخ داشتید، لطفاً توضیح دهید..."
+            :rows="2"
+          />
+        </div>
+
+        <!-- Quality feedback -->
+        <div class="space-y-3">
+          <label class="text-muted-700 dark:text-muted-300 text-sm font-medium">کیفیت پاسخ</label>
+          <BaseTextarea
+            v-model="feedbackForm.quality_other"
+            placeholder="نظر شما درباره کیفیت پاسخ..."
+            :rows="2"
+          />
+        </div>
+
+        <!-- Improvements -->
+        <div class="space-y-3">
+          <label class="text-muted-700 dark:text-muted-300 text-sm font-medium">پیشنهادات بهبود</label>
+          <BaseTextarea
+            v-model="feedbackForm.improvements_other"
+            placeholder="پیشنهاد شما برای بهبود پاسخ‌ها..."
+            :rows="2"
+          />
+        </div>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="p-4 md:p-6">
+        <div class="flex justify-end gap-2">
+          <BaseButton
+            :disabled="isSubmittingFeedback"
+            @click="closeFeedbackModal"
+          >
+            انصراف
+          </BaseButton>
+          <BaseButton
+            color="primary"
+            :loading="isSubmittingFeedback"
+            :disabled="isSubmittingFeedback || feedbackForm.rating === 0"
+            @click="submitMessageFeedback"
+          >
+            ثبت بازخورد
           </BaseButton>
         </div>
       </div>
