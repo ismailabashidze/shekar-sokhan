@@ -41,39 +41,219 @@ export const FEEDBACK_CATEGORIES = {
     id: 'problems',
     name: 'مشکلات',
     description: 'مشکلات موجود در پاسخ',
+    icon: 'ph:warning-duotone',
+    color: 'danger',
     subcategories: [
-      { id: 'irrelevant', name: 'غیر مرتبط', description: 'پاسخ مرتبط با سوال نیست' },
-      { id: 'inaccurate', name: 'نادرست', description: 'اطلاعات ارائه شده اشتباه است' },
-      { id: 'incomplete', name: 'ناکامل', description: 'پاسخ کامل نیست' },
-      { id: 'inappropriate', name: 'نامناسب', description: 'محتوای نامناسب یا آزاردهنده' },
-      { id: 'confusing', name: 'گیج‌کننده', description: 'پاسخ قابل فهم نیست' },
-      { id: 'repetitive', name: 'تکراری', description: 'پاسخ تکراری و غیرضروری' }
+      { 
+        id: 'irrelevant', 
+        name: 'غیر مرتبط', 
+        description: 'پاسخ مرتبط با سوال نیست',
+        icon: 'ph:target-duotone',
+        severity: 'high',
+        examples: ['پاسخ به سوال دیگری داده', 'موضوع اصلی نادیده گرفته شده'] 
+      },
+      { 
+        id: 'inaccurate', 
+        name: 'نادرست', 
+        description: 'اطلاعات ارائه شده اشتباه است',
+        icon: 'ph:x-circle-duotone',
+        severity: 'high',
+        examples: ['اطلاعات پزشکی نادرست', 'توصیه‌های خطرناک'] 
+      },
+      { 
+        id: 'incomplete', 
+        name: 'ناکامل', 
+        description: 'پاسخ کامل نیست',
+        icon: 'ph:circle-half-duotone',
+        severity: 'medium',
+        examples: ['سوال کاملاً پاسخ داده نشده', 'جنبه‌های مهم نادیده گرفته شده'] 
+      },
+      { 
+        id: 'inappropriate', 
+        name: 'نامناسب', 
+        description: 'محتوای نامناسب یا آزاردهنده',
+        icon: 'ph:prohibit-duotone',
+        severity: 'critical',
+        examples: ['لحن نامناسب', 'محتوای حساس بدون هشدار'] 
+      },
+      { 
+        id: 'confusing', 
+        name: 'گیج‌کننده', 
+        description: 'پاسخ قابل فهم نیست',
+        icon: 'ph:question-duotone',
+        severity: 'medium',
+        examples: ['جملات پیچیده و نامفهوم', 'ساختار نامنظم'] 
+      },
+      { 
+        id: 'repetitive', 
+        name: 'تکراری', 
+        description: 'پاسخ تکراری و غیرضروری',
+        icon: 'ph:copy-duotone',
+        severity: 'low',
+        examples: ['تکرار پاسخ‌های قبلی', 'اطلاعات اضافی'] 
+      },
+      { 
+        id: 'insensitive', 
+        name: 'بی‌توجه', 
+        description: 'عدم توجه به حالت احساسی کاربر',
+        icon: 'ph:heart-break-duotone',
+        severity: 'high',
+        examples: ['نادیده گیری احساسات', 'پاسخ خشک و بی‌روح'] 
+      },
+      { 
+        id: 'generic', 
+        name: 'کلیشه‌ای', 
+        description: 'پاسخ عمومی و غیرشخصی',
+        icon: 'ph:robot-duotone',
+        severity: 'medium',
+        examples: ['پاسخ‌های قالبی', 'عدم شخصی‌سازی'] 
+      }
     ]
   },
   quality: {
     id: 'quality',
     name: 'کیفیت',
     description: 'ارزیابی کیفیت پاسخ',
+    icon: 'ph:heart-duotone',
+    color: 'success',
     subcategories: [
-      { id: 'helpful', name: 'مفید', description: 'پاسخ کمک‌کننده بود' },
-      { id: 'empathetic', name: 'همدلانه', description: 'پاسخ با همدلی ارائه شد' },
-      { id: 'professional', name: 'حرفه‌ای', description: 'پاسخ حرفه‌ای و علمی' },
-      { id: 'personalized', name: 'شخصی‌سازی شده', description: 'پاسخ متناسب با شرایط من بود' },
-      { id: 'actionable', name: 'عملی', description: 'راهکارهای عملی ارائه شد' },
-      { id: 'supportive', name: 'حمایتگر', description: 'احساس حمایت کردم' }
+      { 
+        id: 'helpful', 
+        name: 'مفید', 
+        description: 'پاسخ کمک‌کننده بود',
+        icon: 'ph:hand-heart-duotone',
+        impact: 'high',
+        examples: ['مشکل حل شد', 'راهکار عملی داشت'] 
+      },
+      { 
+        id: 'empathetic', 
+        name: 'همدلانه', 
+        description: 'پاسخ با همدلی ارائه شد',
+        icon: 'ph:heart-duotone',
+        impact: 'high',
+        examples: ['احساس درک شدن', 'لحن مهربانانه'] 
+      },
+      { 
+        id: 'professional', 
+        name: 'حرفه‌ای', 
+        description: 'پاسخ حرفه‌ای و علمی',
+        icon: 'ph:graduation-cap-duotone',
+        impact: 'high',
+        examples: ['استناد به منابع معتبر', 'تخصص واضح'] 
+      },
+      { 
+        id: 'personalized', 
+        name: 'شخصی‌سازی شده', 
+        description: 'پاسخ متناسب با شرایط من بود',
+        icon: 'ph:user-focus-duotone',
+        impact: 'high',
+        examples: ['در نظر گیری شرایط خاص', 'پاسخ منحصر به فرد'] 
+      },
+      { 
+        id: 'actionable', 
+        name: 'عملی', 
+        description: 'راهکارهای عملی ارائه شد',
+        icon: 'ph:gear-duotone',
+        impact: 'high',
+        examples: ['مراحل واضح', 'قابل اجرا بودن'] 
+      },
+      { 
+        id: 'supportive', 
+        name: 'حمایتگر', 
+        description: 'احساس حمایت کردم',
+        icon: 'ph:shield-check-duotone',
+        impact: 'high',
+        examples: ['ایجاد اعتماد', 'حس امنیت'] 
+      },
+      { 
+        id: 'encouraging', 
+        name: 'تشویق‌کننده', 
+        description: 'انگیزه و امید بخش',
+        icon: 'ph:trophy-duotone',
+        impact: 'medium',
+        examples: ['ایجاد انگیزه', 'تأکید بر نقاط قوت'] 
+      },
+      { 
+        id: 'timely', 
+        name: 'به‌موقع', 
+        description: 'پاسخ سریع و مناسب',
+        icon: 'ph:clock-duotone',
+        impact: 'medium',
+        examples: ['پاسخ فوری', 'در زمان نیاز'] 
+      }
     ]
   },
   improvements: {
     id: 'improvements',
     name: 'بهبودها',
     description: 'پیشنهادات برای بهبود',
+    icon: 'ph:lightbulb-duotone',
+    color: 'warning',
     subcategories: [
-      { id: 'more_detail', name: 'جزئیات بیشتر', description: 'نیاز به توضیحات بیشتر' },
-      { id: 'simpler_language', name: 'زبان ساده‌تر', description: 'استفاده از زبان ساده‌تر' },
-      { id: 'more_examples', name: 'مثال‌های بیشتر', description: 'ارائه مثال‌های عملی بیشتر' },
-      { id: 'step_by_step', name: 'مرحله به مرحله', description: 'راهنمای گام به گام' },
-      { id: 'resources', name: 'منابع اضافی', description: 'معرفی منابع و مطالب مفید' },
-      { id: 'follow_up', name: 'پیگیری', description: 'سوالات پیگیری مناسب' }
+      { 
+        id: 'more_detail', 
+        name: 'جزئیات بیشتر', 
+        description: 'نیاز به توضیحات بیشتر',
+        icon: 'ph:magnifying-glass-plus-duotone',
+        priority: 'high',
+        examples: ['توضیح عمیق‌تر مفاهیم', 'پوشش جنبه‌های بیشتر'] 
+      },
+      { 
+        id: 'simpler_language', 
+        name: 'زبان ساده‌تر', 
+        description: 'استفاده از زبان ساده‌تر',
+        icon: 'ph:text-aa-duotone',
+        priority: 'medium',
+        examples: ['کلمات ساده‌تر', 'جملات کوتاه‌تر'] 
+      },
+      { 
+        id: 'more_examples', 
+        name: 'مثال‌های بیشتر', 
+        description: 'ارائه مثال‌های عملی بیشتر',
+        icon: 'ph:lightbulb-filament-duotone',
+        priority: 'high',
+        examples: ['مثال‌های عملی', 'داستان‌های موردی'] 
+      },
+      { 
+        id: 'step_by_step', 
+        name: 'مرحله به مرحله', 
+        description: 'راهنمای گام به گام',
+        icon: 'ph:steps-duotone',
+        priority: 'high',
+        examples: ['لیست مرحله‌ای', 'راهنمای عملی'] 
+      },
+      { 
+        id: 'resources', 
+        name: 'منابع اضافی', 
+        description: 'معرفی منابع و مطالب مفید',
+        icon: 'ph:books-duotone',
+        priority: 'medium',
+        examples: ['کتاب‌های مفید', 'لینک‌های آموزشی'] 
+      },
+      { 
+        id: 'follow_up', 
+        name: 'پیگیری', 
+        description: 'سوالات پیگیری مناسب',
+        icon: 'ph:chat-circle-dots-duotone',
+        priority: 'medium',
+        examples: ['سوالات تکمیلی', 'پیگیری وضعیت'] 
+      },
+      { 
+        id: 'visual_aids', 
+        name: 'کمک‌های تصویری', 
+        description: 'استفاده از نمودار و تصویر',
+        icon: 'ph:image-duotone',
+        priority: 'low',
+        examples: ['نمودار توضیحی', 'عکس‌های آموزشی'] 
+      },
+      { 
+        id: 'interactive', 
+        name: 'تعاملی‌تر', 
+        description: 'بیشتر درگیر کردن کاربر',
+        icon: 'ph:hand-tap-duotone',
+        priority: 'medium',
+        examples: ['سوال از کاربر', 'تمرین‌های عملی'] 
+      }
     ]
   }
 } as const

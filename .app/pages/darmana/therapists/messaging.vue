@@ -2559,159 +2559,463 @@ const isAIThinking = ref(false)
         <!-- Step 2: Problems and Quality -->
         <div v-if="feedbackStep === 2" class="space-y-8">
           <div class="text-center mb-6">
-            <h4 class="text-lg font-semibold text-muted-800 dark:text-white">ارزیابی جزئیات</h4>
-            <p class="text-muted-500 text-sm mt-1">مشکلات و نقاط قوت پاسخ را مشخص کنید</p>
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 mb-4">
+              <Icon name="ph:magnifying-glass-duotone" class="size-8 text-primary-600 dark:text-primary-400" />
+            </div>
+            <h4 class="text-xl font-bold text-muted-800 dark:text-white">ارزیابی جزئیات</h4>
+            <p class="text-muted-500 text-sm mt-2">مشکلات و نقاط قوت پاسخ را مشخص کنید</p>
+            <div class="flex justify-center gap-4 mt-4 text-xs">
+              <div class="flex items-center gap-1">
+                <div class="w-3 h-3 rounded-full bg-danger-200"></div>
+                <span class="text-muted-600">مشکلات</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <div class="w-3 h-3 rounded-full bg-success-200"></div>
+                <span class="text-muted-600">نقاط قوت</span>
+              </div>
+            </div>
           </div>
 
-          <!-- Problems -->
-          <div class="space-y-4">
-            <div class="flex items-center gap-2">
-              <Icon name="ph:warning-duotone" class="text-danger-500 size-5" />
-              <label class="text-muted-700 dark:text-muted-300 font-medium">مشکلات موجود (در صورت وجود)</label>
+          <!-- Problems Section -->
+          <div class="bg-gradient-to-br from-danger-25 to-orange-25 dark:from-danger-950/20 dark:to-orange-950/20 rounded-2xl p-6 space-y-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-danger-100 dark:bg-danger-900/30">
+                <Icon name="ph:warning-duotone" class="text-danger-600 dark:text-danger-400 size-5" />
+              </div>
+              <div>
+                <label class="block text-danger-800 dark:text-danger-200 font-bold text-base">مشکلات موجود</label>
+                <p class="text-danger-600 dark:text-danger-300 text-sm">در صورت وجود مشکل، انتخاب کنید</p>
+              </div>
+              <div class="ml-auto">
+                <div class="text-xs text-danger-600 dark:text-danger-400 bg-danger-100 dark:bg-danger-900/40 px-2 py-1 rounded-full">
+                  {{ Object.keys(feedbackForm.problems_categories).filter(k => feedbackForm.problems_categories[k]).length }} انتخاب شده
+                </div>
+              </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <button
+
+            <!-- Problem categories with enhanced design -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
                 v-for="problem in FEEDBACK_CATEGORIES.problems.subcategories"
                 :key="problem.id"
-                type="button"
-                class="p-3 rounded-lg border-2 transition-all duration-200 text-right hover:shadow-md"
-                :class="feedbackForm.problems_categories[problem.id] 
-                  ? 'border-danger-500 bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-300' 
-                  : 'border-muted-200 hover:border-danger-300 dark:border-muted-600'"
-                :title="problem.description"
-                @click="feedbackForm.problems_categories[problem.id] = !feedbackForm.problems_categories[problem.id]"
+                class="group relative"
               >
-                <div class="flex items-center justify-between">
-                  <span class="text-sm font-medium">{{ problem.name }}</span>
-                  <Icon 
-                    v-if="feedbackForm.problems_categories[problem.id]" 
-                    name="ph:check-circle-fill" 
-                    class="size-5 text-danger-500" 
-                  />
-                </div>
-                <p class="text-xs mt-1 opacity-75">{{ problem.description }}</p>
-              </button>
+                <button
+                  type="button"
+                  class="w-full p-4 rounded-xl border-2 transition-all duration-300 text-right hover:shadow-lg hover:scale-[1.02] relative overflow-hidden"
+                  :class="feedbackForm.problems_categories[problem.id] 
+                    ? 'border-danger-400 bg-gradient-to-br from-danger-50 to-red-50 text-danger-800 dark:from-danger-900/30 dark:to-red-900/30 dark:text-danger-200 shadow-lg shadow-danger-100/50' 
+                    : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-danger-300 dark:border-muted-600 hover:bg-danger-25 dark:hover:bg-danger-950/10'"
+                  @click="feedbackForm.problems_categories[problem.id] = !feedbackForm.problems_categories[problem.id]"
+                >
+                  <!-- Severity indicator -->
+                  <div 
+                    v-if="problem.severity"
+                    class="absolute top-2 left-2 w-2 h-2 rounded-full"
+                    :class="{
+                      'bg-red-500': problem.severity === 'critical',
+                      'bg-orange-500': problem.severity === 'high',
+                      'bg-yellow-500': problem.severity === 'medium',
+                      'bg-blue-500': problem.severity === 'low'
+                    }"
+                  ></div>
+
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <Icon :name="problem.icon || 'ph:warning-duotone'" class="size-5 opacity-75" />
+                      <span class="font-semibold">{{ problem.name }}</span>
+                    </div>
+                    <Icon 
+                      v-if="feedbackForm.problems_categories[problem.id]" 
+                      name="ph:check-circle-fill" 
+                      class="size-6 text-danger-500 animate-in zoom-in duration-200" 
+                    />
+                    <div v-else class="w-6 h-6 border-2 border-muted-300 rounded-full group-hover:border-danger-400 transition-colors"></div>
+                  </div>
+                  
+                  <p class="text-sm opacity-90 mb-3 leading-relaxed">{{ problem.description }}</p>
+                  
+                  <!-- Examples (show on hover or when selected) -->
+                  <div 
+                    v-if="problem.examples && (feedbackForm.problems_categories[problem.id] || false)"
+                    class="text-xs bg-white/50 dark:bg-muted-700/50 rounded-lg p-2 space-y-1"
+                  >
+                    <div class="font-medium opacity-75">مثال:</div>
+                    <ul class="space-y-1">
+                      <li v-for="example in problem.examples" :key="example" class="flex items-start gap-1">
+                        <span class="text-danger-400 mt-0.5">•</span>
+                        <span class="opacity-80">{{ example }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </button>
+              </div>
             </div>
-            <BaseTextarea
-              v-model="feedbackForm.problems_other"
-              placeholder="سایر مشکلات یا توضیحات بیشتر..."
-              :rows="2"
-              size="sm"
-            />
+
+            <!-- Custom problem input -->
+            <div class="mt-6">
+              <label class="block text-danger-700 dark:text-danger-300 text-sm font-medium mb-2">
+                توضیح بیشتر یا مشکل دیگری؟
+              </label>
+              <BaseTextarea
+                v-model="feedbackForm.problems_other"
+                placeholder="اگر مشکل خاصی وجود دارد که در فهرست نیست، لطفاً توضیح دهید..."
+                :rows="3"
+                size="lg"
+                class="!border-danger-200 focus:!border-danger-400 dark:!border-danger-800"
+              />
+            </div>
           </div>
 
-          <!-- Quality aspects -->
-          <div class="space-y-4">
-            <div class="flex items-center gap-2">
-              <Icon name="ph:heart-duotone" class="text-success-500 size-5" />
-              <label class="text-muted-700 dark:text-muted-300 font-medium">نقاط قوت پاسخ</label>
+          <!-- Quality Section -->
+          <div class="bg-gradient-to-br from-success-25 to-emerald-25 dark:from-success-950/20 dark:to-emerald-950/20 rounded-2xl p-6 space-y-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-success-100 dark:bg-success-900/30">
+                <Icon name="ph:heart-duotone" class="text-success-600 dark:text-success-400 size-5" />
+              </div>
+              <div>
+                <label class="block text-success-800 dark:text-success-200 font-bold text-base">نقاط قوت پاسخ</label>
+                <p class="text-success-600 dark:text-success-300 text-sm">چه چیزهایی عالی بود؟</p>
+              </div>
+              <div class="ml-auto">
+                <div class="text-xs text-success-600 dark:text-success-400 bg-success-100 dark:bg-success-900/40 px-2 py-1 rounded-full">
+                  {{ Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length }} انتخاب شده
+                </div>
+              </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <button
+
+            <!-- Quality categories with enhanced design -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
                 v-for="quality in FEEDBACK_CATEGORIES.quality.subcategories"
                 :key="quality.id"
-                type="button"
-                class="p-3 rounded-lg border-2 transition-all duration-200 text-right hover:shadow-md"
-                :class="feedbackForm.quality_categories[quality.id]
-                  ? 'border-success-500 bg-success-50 text-success-700 dark:bg-success-900/20 dark:text-success-300'
-                  : 'border-muted-200 hover:border-success-300 dark:border-muted-600'"
-                :title="quality.description"
-                @click="feedbackForm.quality_categories[quality.id] = !feedbackForm.quality_categories[quality.id]"
+                class="group relative"
               >
-                <div class="flex items-center justify-between">
-                  <span class="text-sm font-medium">{{ quality.name }}</span>
-                  <Icon 
-                    v-if="feedbackForm.quality_categories[quality.id]" 
-                    name="ph:check-circle-fill" 
-                    class="size-5 text-success-500" 
-                  />
-                </div>
-                <p class="text-xs mt-1 opacity-75">{{ quality.description }}</p>
-              </button>
+                <button
+                  type="button"
+                  class="w-full p-4 rounded-xl border-2 transition-all duration-300 text-right hover:shadow-lg hover:scale-[1.02] relative overflow-hidden"
+                  :class="feedbackForm.quality_categories[quality.id]
+                    ? 'border-success-400 bg-gradient-to-br from-success-50 to-emerald-50 text-success-800 dark:from-success-900/30 dark:to-emerald-900/30 dark:text-success-200 shadow-lg shadow-success-100/50'
+                    : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-success-300 dark:border-muted-600 hover:bg-success-25 dark:hover:bg-success-950/10'"
+                  @click="feedbackForm.quality_categories[quality.id] = !feedbackForm.quality_categories[quality.id]"
+                >
+                  <!-- Impact indicator -->
+                  <div 
+                    v-if="quality.impact"
+                    class="absolute top-2 left-2 w-2 h-2 rounded-full"
+                    :class="{
+                      'bg-emerald-500': quality.impact === 'high',
+                      'bg-green-500': quality.impact === 'medium',
+                      'bg-lime-500': quality.impact === 'low'
+                    }"
+                  ></div>
+
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <Icon :name="quality.icon || 'ph:heart-duotone'" class="size-5 opacity-75" />
+                      <span class="font-semibold">{{ quality.name }}</span>
+                    </div>
+                    <Icon 
+                      v-if="feedbackForm.quality_categories[quality.id]" 
+                      name="ph:check-circle-fill" 
+                      class="size-6 text-success-500 animate-in zoom-in duration-200" 
+                    />
+                    <div v-else class="w-6 h-6 border-2 border-muted-300 rounded-full group-hover:border-success-400 transition-colors"></div>
+                  </div>
+                  
+                  <p class="text-sm opacity-90 mb-3 leading-relaxed">{{ quality.description }}</p>
+                  
+                  <!-- Examples -->
+                  <div 
+                    v-if="quality.examples && (feedbackForm.quality_categories[quality.id] || false)"
+                    class="text-xs bg-white/50 dark:bg-muted-700/50 rounded-lg p-2 space-y-1"
+                  >
+                    <div class="font-medium opacity-75">مثال:</div>
+                    <ul class="space-y-1">
+                      <li v-for="example in quality.examples" :key="example" class="flex items-start gap-1">
+                        <span class="text-success-400 mt-0.5">•</span>
+                        <span class="opacity-80">{{ example }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </button>
+              </div>
             </div>
-            <BaseTextarea
-              v-model="feedbackForm.quality_other"
-              placeholder="سایر نقاط قوت یا توضیحات بیشتر..."
-              :rows="2"
-              size="sm"
-            />
+
+            <!-- Custom quality input -->
+            <div class="mt-6">
+              <label class="block text-success-700 dark:text-success-300 text-sm font-medium mb-2">
+                نقاط قوت دیگر؟
+              </label>
+              <BaseTextarea
+                v-model="feedbackForm.quality_other"
+                placeholder="چه چیز دیگری در این پاسخ خوب بود؟ لطفاً توضیح دهید..."
+                :rows="3"
+                size="lg"
+                class="!border-success-200 focus:!border-success-400 dark:!border-success-800"
+              />
+            </div>
+          </div>
+
+          <!-- Progress indicator -->
+          <div class="flex items-center justify-center gap-2 mt-8">
+            <div class="flex items-center gap-1 text-xs text-muted-600">
+              <Icon name="ph:info-duotone" class="size-4" />
+              <span>انتخاب هیچ‌کدام از گزینه‌ها اختیاری است</span>
+            </div>
           </div>
         </div>
 
         <!-- Step 3: Improvements -->
-        <div v-if="feedbackStep === 3" class="space-y-6">
-          <div class="text-center mb-6">
-            <h4 class="text-lg font-semibold text-muted-800 dark:text-white">پیشنهادات بهبود</h4>
-            <p class="text-muted-500 text-sm mt-1">چگونه می‌توان پاسخ‌ها را بهتر کرد؟</p>
+        <div v-if="feedbackStep === 3" class="space-y-8">
+          <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-warning-100 to-amber-100 dark:from-warning-900/30 dark:to-amber-900/30 mb-4">
+              <Icon name="ph:lightbulb-duotone" class="size-8 text-warning-600 dark:text-warning-400" />
+            </div>
+            <h4 class="text-xl font-bold text-muted-800 dark:text-white">پیشنهادات بهبود</h4>
+            <p class="text-muted-500 text-sm mt-2">چگونه می‌توان پاسخ‌ها را بهتر کرد؟</p>
+            <div class="inline-flex items-center gap-2 mt-4 px-3 py-1 bg-warning-100 dark:bg-warning-900/30 rounded-full text-xs text-warning-700 dark:text-warning-300">
+              <Icon name="ph:rocket-duotone" class="size-4" />
+              <span>ایده‌های شما برای بهبود</span>
+            </div>
           </div>
 
-          <!-- Improvements -->
-          <div class="space-y-4">
-            <div class="flex items-center gap-2">
-              <Icon name="ph:lightbulb-duotone" class="text-warning-500 size-5" />
-              <label class="text-muted-700 dark:text-muted-300 font-medium">پیشنهادات شما</label>
+          <!-- Improvements Section -->
+          <div class="bg-gradient-to-br from-warning-25 to-amber-25 dark:from-warning-950/20 dark:to-amber-950/20 rounded-2xl p-6 space-y-6">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-warning-100 dark:bg-warning-900/30">
+                <Icon name="ph:lightbulb-duotone" class="text-warning-600 dark:text-warning-400 size-5" />
+              </div>
+              <div>
+                <label class="block text-warning-800 dark:text-warning-200 font-bold text-base">پیشنهادات شما</label>
+                <p class="text-warning-600 dark:text-warning-300 text-sm">چه چیزی می‌تواند بهتر باشد؟</p>
+              </div>
+              <div class="ml-auto">
+                <div class="text-xs text-warning-600 dark:text-warning-400 bg-warning-100 dark:bg-warning-900/40 px-2 py-1 rounded-full">
+                  {{ Object.keys(feedbackForm.improvements_categories).filter(k => feedbackForm.improvements_categories[k]).length }} انتخاب شده
+                </div>
+              </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <button
+
+            <!-- Improvements grid with enhanced design -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
                 v-for="improvement in FEEDBACK_CATEGORIES.improvements.subcategories"
                 :key="improvement.id"
-                type="button"
-                class="p-3 rounded-lg border-2 transition-all duration-200 text-right hover:shadow-md"
-                :class="feedbackForm.improvements_categories[improvement.id]
-                  ? 'border-warning-500 bg-warning-50 text-warning-700 dark:bg-warning-900/20 dark:text-warning-300'
-                  : 'border-muted-200 hover:border-warning-300 dark:border-muted-600'"
-                :title="improvement.description"
-                @click="feedbackForm.improvements_categories[improvement.id] = !feedbackForm.improvements_categories[improvement.id]"
+                class="group relative"
               >
-                <div class="flex items-center justify-between">
-                  <span class="text-sm font-medium">{{ improvement.name }}</span>
-                  <Icon 
-                    v-if="feedbackForm.improvements_categories[improvement.id]" 
-                    name="ph:check-circle-fill" 
-                    class="size-5 text-warning-500" 
-                  />
-                </div>
-                <p class="text-xs mt-1 opacity-75">{{ improvement.description }}</p>
-              </button>
+                <button
+                  type="button"
+                  class="w-full p-4 rounded-xl border-2 transition-all duration-300 text-right hover:shadow-lg hover:scale-[1.02] relative overflow-hidden"
+                  :class="feedbackForm.improvements_categories[improvement.id]
+                    ? 'border-warning-400 bg-gradient-to-br from-warning-50 to-amber-50 text-warning-800 dark:from-warning-900/30 dark:to-amber-900/30 dark:text-warning-200 shadow-lg shadow-warning-100/50'
+                    : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-warning-300 dark:border-muted-600 hover:bg-warning-25 dark:hover:bg-warning-950/10'"
+                  @click="feedbackForm.improvements_categories[improvement.id] = !feedbackForm.improvements_categories[improvement.id]"
+                >
+                  <!-- Priority indicator -->
+                  <div 
+                    v-if="improvement.priority"
+                    class="absolute top-2 left-2 w-2 h-2 rounded-full"
+                    :class="{
+                      'bg-red-400': improvement.priority === 'high',
+                      'bg-yellow-400': improvement.priority === 'medium',
+                      'bg-blue-400': improvement.priority === 'low'
+                    }"
+                  ></div>
+
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <Icon :name="improvement.icon || 'ph:lightbulb-duotone'" class="size-5 opacity-75" />
+                      <span class="font-semibold">{{ improvement.name }}</span>
+                    </div>
+                    <Icon 
+                      v-if="feedbackForm.improvements_categories[improvement.id]" 
+                      name="ph:check-circle-fill" 
+                      class="size-6 text-warning-500 animate-in zoom-in duration-200" 
+                    />
+                    <div v-else class="w-6 h-6 border-2 border-muted-300 rounded-full group-hover:border-warning-400 transition-colors"></div>
+                  </div>
+                  
+                  <p class="text-sm opacity-90 mb-3 leading-relaxed">{{ improvement.description }}</p>
+                  
+                  <!-- Examples -->
+                  <div 
+                    v-if="improvement.examples && (feedbackForm.improvements_categories[improvement.id] || false)"
+                    class="text-xs bg-white/50 dark:bg-muted-700/50 rounded-lg p-2 space-y-1"
+                  >
+                    <div class="font-medium opacity-75">مثال:</div>
+                    <ul class="space-y-1">
+                      <li v-for="example in improvement.examples" :key="example" class="flex items-start gap-1">
+                        <span class="text-warning-400 mt-0.5">•</span>
+                        <span class="opacity-80">{{ example }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </button>
+              </div>
             </div>
-            <BaseTextarea
-              v-model="feedbackForm.improvements_other"
-              placeholder="سایر پیشنهادات یا ایده‌های شما برای بهبود..."
-              :rows="3"
-            />
+
+            <!-- Custom improvement input with enhanced design -->
+            <div class="mt-8 bg-white/50 dark:bg-muted-800/50 rounded-xl p-5">
+              <label class="block text-warning-700 dark:text-warning-300 text-sm font-semibold mb-3 flex items-center gap-2">
+                <Icon name="ph:chat-circle-text-duotone" class="size-4" />
+                پیشنهاد خاص شما
+              </label>
+              <BaseTextarea
+                v-model="feedbackForm.improvements_other"
+                placeholder="ایده‌های شما برای بهبود پاسخ‌ها چیست؟ چه چیزی می‌تواند تجربه را بهتر کند؟"
+                :rows="4"
+                size="lg"
+                class="!border-warning-200 focus:!border-warning-400 dark:!border-warning-800"
+              />
+              <div class="mt-2 text-xs text-warning-600 dark:text-warning-400 opacity-75">
+                هر ایده‌ای که دارید، هر کوچک که باشد، برای ما ارزشمند است! ✨
+              </div>
+            </div>
           </div>
 
-          <!-- Summary -->
-          <div class="bg-info-50 dark:bg-info-900/20 rounded-xl p-4">
-            <h5 class="font-medium text-info-700 dark:text-info-300 mb-3 flex items-center gap-2">
-              <Icon name="ph:clipboard-text-duotone" class="size-5" />
-              خلاصه بازخورد شما
-            </h5>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <span class="text-muted-600 dark:text-muted-400">امتیاز:</span>
-                <div class="flex">
-                  <Icon v-for="star in feedbackForm.rating" :key="star" name="ph:star-fill" class="size-4 text-yellow-400" />
+          <!-- Enhanced Summary Section -->
+          <div class="bg-gradient-to-br from-info-50 via-blue-25 to-indigo-50 dark:from-info-950/20 dark:via-blue-950/10 dark:to-indigo-950/20 rounded-2xl p-6 border border-info-200/50 dark:border-info-800/30">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-info-100 to-blue-100 dark:from-info-900/50 dark:to-blue-900/50">
+                <Icon name="ph:clipboard-text-duotone" class="size-6 text-info-600 dark:text-info-400" />
+              </div>
+              <div>
+                <h5 class="font-bold text-info-800 dark:text-info-200 text-lg">خلاصه بازخورد شما</h5>
+                <p class="text-info-600 dark:text-info-300 text-sm">مرور نهایی قبل از ارسال</p>
+              </div>
+            </div>
+            
+            <div class="grid gap-4">
+              <!-- Rating Summary -->
+              <div class="bg-white/70 dark:bg-muted-800/70 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-muted-700 dark:text-muted-300">امتیاز کلی:</span>
+                  <div class="flex items-center gap-2">
+                    <div class="flex">
+                      <Icon 
+                        v-for="star in 5" 
+                        :key="star" 
+                        name="ph:star-fill" 
+                        class="size-5"
+                        :class="star <= feedbackForm.rating ? 'text-yellow-400' : 'text-muted-300'" 
+                      />
+                    </div>
+                    <span class="font-bold text-lg text-primary-600 dark:text-primary-400">
+                      {{ feedbackForm.rating }}/5
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div v-if="Object.keys(feedbackForm.problems_categories).some(k => feedbackForm.problems_categories[k])">
-                <span class="text-muted-600 dark:text-muted-400">مشکلات: </span>
-                <span class="text-danger-600 dark:text-danger-400">
-                  {{ Object.keys(feedbackForm.problems_categories).filter(k => feedbackForm.problems_categories[k]).length }} مورد
-                </span>
+
+              <!-- Categories Summary -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <!-- Problems -->
+                <div class="bg-white/70 dark:bg-muted-800/70 rounded-lg p-3">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <Icon name="ph:warning-duotone" class="size-4 text-danger-500" />
+                      <span class="text-sm font-medium text-danger-700 dark:text-danger-300">مشکلات</span>
+                    </div>
+                    <span class="text-xs bg-danger-100 dark:bg-danger-900/40 text-danger-600 dark:text-danger-400 px-2 py-0.5 rounded-full">
+                      {{ Object.keys(feedbackForm.problems_categories).filter(k => feedbackForm.problems_categories[k]).length }}
+                    </span>
+                  </div>
+                  <div class="text-xs space-y-1">
+                    <div 
+                      v-for="(selected, key) in feedbackForm.problems_categories" 
+                      :key="key"
+                      v-if="selected"
+                      class="flex items-center gap-1 text-danger-600 dark:text-danger-400"
+                    >
+                      <span>•</span>
+                      <span>{{ FEEDBACK_CATEGORIES.problems.subcategories.find(p => p.id === key)?.name }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Quality -->
+                <div class="bg-white/70 dark:bg-muted-800/70 rounded-lg p-3">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <Icon name="ph:heart-duotone" class="size-4 text-success-500" />
+                      <span class="text-sm font-medium text-success-700 dark:text-success-300">نقاط قوت</span>
+                    </div>
+                    <span class="text-xs bg-success-100 dark:bg-success-900/40 text-success-600 dark:text-success-400 px-2 py-0.5 rounded-full">
+                      {{ Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length }}
+                    </span>
+                  </div>
+                  <div class="text-xs space-y-1">
+                    <div 
+                      v-for="(selected, key) in feedbackForm.quality_categories" 
+                      :key="key"
+                      v-if="selected"
+                      class="flex items-center gap-1 text-success-600 dark:text-success-400"
+                    >
+                      <span>•</span>
+                      <span>{{ FEEDBACK_CATEGORIES.quality.subcategories.find(q => q.id === key)?.name }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Improvements -->
+                <div class="bg-white/70 dark:bg-muted-800/70 rounded-lg p-3">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <Icon name="ph:lightbulb-duotone" class="size-4 text-warning-500" />
+                      <span class="text-sm font-medium text-warning-700 dark:text-warning-300">پیشنهادات</span>
+                    </div>
+                    <span class="text-xs bg-warning-100 dark:bg-warning-900/40 text-warning-600 dark:text-warning-400 px-2 py-0.5 rounded-full">
+                      {{ Object.keys(feedbackForm.improvements_categories).filter(k => feedbackForm.improvements_categories[k]).length }}
+                    </span>
+                  </div>
+                  <div class="text-xs space-y-1">
+                    <div 
+                      v-for="(selected, key) in feedbackForm.improvements_categories" 
+                      :key="key"
+                      v-if="selected"
+                      class="flex items-center gap-1 text-warning-600 dark:text-warning-400"
+                    >
+                      <span>•</span>
+                      <span>{{ FEEDBACK_CATEGORIES.improvements.subcategories.find(i => i.id === key)?.name }}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div v-if="Object.keys(feedbackForm.quality_categories).some(k => feedbackForm.quality_categories[k])">
-                <span class="text-muted-600 dark:text-muted-400">نقاط قوت: </span>
-                <span class="text-success-600 dark:text-success-400">
-                  {{ Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length }} مورد
-                </span>
+
+              <!-- Custom Comments Summary -->
+              <div v-if="feedbackForm.general_text?.trim() || feedbackForm.problems_other?.trim() || feedbackForm.quality_other?.trim() || feedbackForm.improvements_other?.trim()" class="bg-white/70 dark:bg-muted-800/70 rounded-xl p-4">
+                <h6 class="font-medium text-muted-700 dark:text-muted-300 mb-3 flex items-center gap-2">
+                  <Icon name="ph:chat-circle-text-duotone" class="size-4" />
+                  نظرات تفصیلی
+                </h6>
+                <div class="space-y-2 text-sm">
+                  <div v-if="feedbackForm.general_text?.trim()">
+                    <span class="font-medium text-primary-600">نظر کلی:</span>
+                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">{{ feedbackForm.general_text }}</p>
+                  </div>
+                  <div v-if="feedbackForm.improvements_other?.trim()">
+                    <span class="font-medium text-warning-600">پیشنهادات:</span>
+                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">{{ feedbackForm.improvements_other }}</p>
+                  </div>
+                </div>
               </div>
-              <div v-if="Object.keys(feedbackForm.improvements_categories).some(k => feedbackForm.improvements_categories[k])">
-                <span class="text-muted-600 dark:text-muted-400">پیشنهادات: </span>
-                <span class="text-warning-600 dark:text-warning-400">
-                  {{ Object.keys(feedbackForm.improvements_categories).filter(k => feedbackForm.improvements_categories[k]).length }} مورد
-                </span>
+            </div>
+
+            <!-- Final message -->
+            <div class="mt-6 text-center">
+              <div class="inline-flex items-center gap-2 text-sm text-info-700 dark:text-info-300 bg-info-100/50 dark:bg-info-900/30 px-4 py-2 rounded-lg">
+                <Icon name="ph:heart-duotone" class="size-4" />
+                <span>ممنون از وقتی که برای بازخورد گذاشتید! 🙏</span>
               </div>
+            </div>
+          </div>
+
+          <!-- Progress hint -->
+          <div class="flex items-center justify-center gap-2">
+            <div class="flex items-center gap-1 text-xs text-muted-600">
+              <Icon name="ph:check-circle-duotone" class="size-4 text-success-500" />
+              <span>آماده برای ارسال بازخورد</span>
             </div>
           </div>
         </div>
