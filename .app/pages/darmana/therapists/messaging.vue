@@ -887,6 +887,7 @@ const feedbackStep = ref(1)
 const feedbackErrors = ref<string[]>([])
 const existingFeedback = ref<any>(null)
 const showRetryConfirm = ref(false)
+const selectedFeedbackType = ref<'problems' | 'quality' | null>(null)
 
 const openMessageDetailModal = (message: any) => {
   selectedMessage.value = message
@@ -902,6 +903,7 @@ const openFeedbackModal = async (message: any) => {
   selectedMessageForFeedback.value = message
   feedbackStep.value = 1
   feedbackErrors.value = []
+  selectedFeedbackType.value = null
   
   // Check if feedback already exists for this message
   try {
@@ -942,20 +944,24 @@ const openFeedbackModal = async (message: any) => {
 }
 
 const closeFeedbackModal = () => {
-  if (!isSubmittingFeedback.value) {
-    isFeedbackModalOpen.value = false
-    selectedMessageForFeedback.value = null
-  }
+  isFeedbackModalOpen.value = false
+  selectedMessageForFeedback.value = null
 }
 
 const nextFeedbackStep = () => {
   feedbackErrors.value = []
   
   if (feedbackStep.value === 1) {
-    // Validate basic feedback
+    // Validate basic feedback and category selection
     const errors = validateFeedback(feedbackForm.value)
     if (errors.length > 0) {
       feedbackErrors.value = errors
+      return
+    }
+    
+    // Check if user selected a feedback type
+    if (!selectedFeedbackType.value) {
+      feedbackErrors.value = ['لطفاً نوع بازخورد خود را انتخاب کنید (مشکلات یا نقاط قوت)']
       return
     }
   }
@@ -2483,22 +2489,25 @@ const isAIThinking = ref(false)
           </div>
         </BaseMessage>
 
-        <!-- Message content (always visible) -->
-        <div class="bg-gradient-to-r from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 rounded-xl p-4 mb-6">
-          <div class="mb-3 flex items-center gap-2">
-            <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
-            <span class="text-primary-700 dark:text-primary-300 text-sm font-medium">پیام روانشناس</span>
+        <!-- Step 1: Message Display and Category Selection -->
+        <div v-if="feedbackStep === 1" class="space-y-8">
+          <!-- Message content -->
+          <div class="bg-gradient-to-r from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 rounded-xl p-4 mb-6">
+            <div class="mb-3 flex items-center gap-2">
+              <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
+              <span class="text-primary-700 dark:text-primary-300 text-sm font-medium">پیام روانشناس</span>
+            </div>
+            <div class="prose prose-sm dark:prose-invert max-w-none text-right bg-white dark:bg-muted-800 rounded-lg p-3">
+              <AddonMarkdownRemark :source="selectedMessageForFeedback.text" />
+            </div>
           </div>
-          <div class="prose prose-sm dark:prose-invert max-w-none text-right bg-white dark:bg-muted-800 rounded-lg p-3">
-            <AddonMarkdownRemark :source="selectedMessageForFeedback.text" />
-          </div>
-        </div>
 
-        <!-- Step 1: Rating and General Feedback -->
-        <div v-if="feedbackStep === 1" class="space-y-6">
-          <div class="text-center mb-6">
-            <h4 class="text-lg font-semibold text-muted-800 dark:text-white">ارزیابی کلی</h4>
-            <p class="text-muted-500 text-sm mt-1">لطفا امتیاز و نظر کلی خود را ثبت کنید</p>
+          <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary-100 to-info-100 dark:from-primary-900/30 dark:to-info-900/30 mb-4">
+              <Icon name="ph:star-duotone" class="size-8 text-primary-600 dark:text-primary-400" />
+            </div>
+            <h4 class="text-xl font-bold text-muted-800 dark:text-white">ارزیابی کلی</h4>
+            <p class="text-muted-500 text-sm mt-2">ابتدا امتیاز کلی و نوع بازخورد خود را انتخاب کنید</p>
           </div>
 
           <!-- Rating -->
@@ -2529,6 +2538,92 @@ const isAIThinking = ref(false)
             </div>
           </div>
 
+          <!-- Feedback Type Selection -->
+          <div class="space-y-6 text-right">
+            <div class="text-center mb-6">
+              <h5 class="text-lg font-bold text-muted-800 dark:text-white mb-2">نوع بازخورد</h5>
+              <p class="text-muted-500 text-sm">کدام جنبه را می‌خواهید ارزیابی کنید؟</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Problems Selection -->
+              <button
+                type="button"
+                @click="selectedFeedbackType = 'problems'"
+                class="group relative p-6 border-2 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/20"
+                :class="selectedFeedbackType === 'problems' 
+                  ? 'border-danger-500 bg-gradient-to-br from-danger-50 to-red-50 dark:from-danger-900/20 dark:to-red-900/20 shadow-lg shadow-danger-500/10' 
+                  : 'border-muted-200 dark:border-muted-700 bg-white dark:bg-muted-800 hover:border-danger-300 hover:shadow-md'"
+              >
+                <div class="flex items-center justify-center mb-3">
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
+                       :class="selectedFeedbackType === 'problems' 
+                         ? 'bg-danger-100 dark:bg-danger-900/40' 
+                         : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-danger-50'"
+                  >
+                    <Icon name="ph:warning-duotone" 
+                          :class="selectedFeedbackType === 'problems' 
+                            ? 'text-danger-600 dark:text-danger-400' 
+                            : 'text-muted-500 group-hover:text-danger-500'" 
+                          class="size-6" />
+                  </div>
+                </div>
+                <h6 class="font-bold mb-2" 
+                   :class="selectedFeedbackType === 'problems' 
+                     ? 'text-danger-700 dark:text-danger-300' 
+                     : 'text-muted-800 dark:text-white group-hover:text-danger-600'"
+                >
+                  مشکلات موجود
+                </h6>
+                <p class="text-sm" 
+                   :class="selectedFeedbackType === 'problems' 
+                     ? 'text-danger-600 dark:text-danger-400' 
+                     : 'text-muted-500 group-hover:text-danger-500'"
+                >
+                  اگر مشکلی در پاسخ دیدید
+                </p>
+              </button>
+
+              <!-- Quality Selection -->
+              <button
+                type="button"
+                @click="selectedFeedbackType = 'quality'"
+                class="group relative p-6 border-2 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/20"
+                :class="selectedFeedbackType === 'quality' 
+                  ? 'border-success-500 bg-gradient-to-br from-success-50 to-emerald-50 dark:from-success-900/20 dark:to-emerald-900/20 shadow-lg shadow-success-500/10' 
+                  : 'border-muted-200 dark:border-muted-700 bg-white dark:bg-muted-800 hover:border-success-300 hover:shadow-md'"
+              >
+                <div class="flex items-center justify-center mb-3">
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
+                       :class="selectedFeedbackType === 'quality' 
+                         ? 'bg-success-100 dark:bg-success-900/40' 
+                         : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-success-50'"
+                  >
+                    <Icon name="ph:heart-duotone" 
+                          :class="selectedFeedbackType === 'quality' 
+                            ? 'text-success-600 dark:text-success-400' 
+                            : 'text-muted-500 group-hover:text-success-500'" 
+                          class="size-6" />
+                  </div>
+                </div>
+                <h6 class="font-bold mb-2" 
+                   :class="selectedFeedbackType === 'quality' 
+                     ? 'text-success-700 dark:text-success-300' 
+                     : 'text-muted-800 dark:text-white group-hover:text-success-600'"
+                >
+                  نقاط قوت پاسخ
+                </h6>
+                <p class="text-sm" 
+                   :class="selectedFeedbackType === 'quality' 
+                     ? 'text-success-600 dark:text-success-400' 
+                     : 'text-muted-500 group-hover:text-success-500'"
+                >
+                  نقاط مثبت و قوت‌های پاسخ
+                </p>
+              </button>
+            </div>
+          </div>
+
           <!-- General feedback -->
           <div class="space-y-3 text-right">
             <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">
@@ -2556,28 +2651,32 @@ const isAIThinking = ref(false)
           </div>
         </div>
 
-        <!-- Step 2: Problems and Quality -->
+        <!-- Step 2: Selected Category Details -->
         <div v-if="feedbackStep === 2" class="space-y-8">
           <div class="text-center mb-6">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 mb-4">
-              <Icon name="ph:magnifying-glass-duotone" class="size-8 text-primary-600 dark:text-primary-400" />
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
+                 :class="selectedFeedbackType === 'problems' 
+                   ? 'bg-danger-100 dark:bg-danger-900/30' 
+                   : 'bg-success-100 dark:bg-success-900/30'"
+            >
+              <Icon :name="selectedFeedbackType === 'problems' ? 'ph:warning-duotone' : 'ph:heart-duotone'" 
+                    :class="selectedFeedbackType === 'problems' 
+                      ? 'text-danger-600 dark:text-danger-400' 
+                      : 'text-success-600 dark:text-success-400'" 
+                    class="size-8" />
             </div>
-            <h4 class="text-xl font-bold text-muted-800 dark:text-white">ارزیابی جزئیات</h4>
-            <p class="text-muted-500 text-sm mt-2">مشکلات و نقاط قوت پاسخ را مشخص کنید</p>
-            <div class="flex justify-center gap-4 mt-4 text-xs">
-              <div class="flex items-center gap-1">
-                <div class="w-3 h-3 rounded-full bg-danger-200"></div>
-                <span class="text-muted-600">مشکلات</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <div class="w-3 h-3 rounded-full bg-success-200"></div>
-                <span class="text-muted-600">نقاط قوت</span>
-              </div>
-            </div>
+            <h4 class="text-xl font-bold text-muted-800 dark:text-white">
+              {{ selectedFeedbackType === 'problems' ? 'مشکلات موجود' : 'نقاط قوت پاسخ' }}
+            </h4>
+            <p class="text-muted-500 text-sm mt-2">
+              {{ selectedFeedbackType === 'problems' 
+                ? 'مشکلات موجود در پاسخ را مشخص کنید' 
+                : 'نقاط قوت و مثبت پاسخ را انتخاب کنید' }}
+            </p>
           </div>
 
           <!-- Problems Section -->
-          <div class="bg-gradient-to-br from-danger-25 to-orange-25 dark:from-danger-950/20 dark:to-orange-950/20 rounded-2xl p-6 space-y-5">
+          <div v-if="selectedFeedbackType === 'problems'" class="bg-gradient-to-br from-danger-25 to-orange-25 dark:from-danger-950/20 dark:to-orange-950/20 rounded-2xl p-6 space-y-5">
             <div class="flex items-center gap-3 mb-4">
               <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-danger-100 dark:bg-danger-900/30">
                 <Icon name="ph:warning-duotone" class="text-danger-600 dark:text-danger-400 size-5" />
@@ -2668,14 +2767,14 @@ const isAIThinking = ref(false)
           </div>
 
           <!-- Quality Section -->
-          <div class="bg-gradient-to-br from-success-25 to-emerald-25 dark:from-success-950/20 dark:to-emerald-950/20 rounded-2xl p-6 space-y-5">
+          <div v-if="selectedFeedbackType === 'quality'" class="bg-gradient-to-br from-success-25 to-emerald-25 dark:from-success-950/20 dark:to-emerald-950/20 rounded-2xl p-6 space-y-5">
             <div class="flex items-center gap-3 mb-4">
               <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-success-100 dark:bg-success-900/30">
                 <Icon name="ph:heart-duotone" class="text-success-600 dark:text-success-400 size-5" />
               </div>
               <div>
                 <label class="block text-success-800 dark:text-success-200 font-bold text-base text-right">نقاط قوت پاسخ</label>
-                <p class="text-success-600 dark:text-success-300 text-sm">چه چیزهایی عالی بود؟</p>
+                <p class="text-success-600 dark:text-success-300 text-sm">مواردی که در پاسخ خوب بود</p>
               </div>
               <div class="ml-auto">
                 <div class="text-xs text-success-600 dark:text-success-400 bg-success-100 dark:bg-success-900/40 px-2 py-1 rounded-full">
