@@ -346,7 +346,7 @@ onMounted(() => {
       <div v-if="loading" class="py-10">
         <div class="flex flex-col items-center justify-center">
           <div class="mt-8 w-full">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <div
                 v-for="i in 5"
                 :key="i"
@@ -494,8 +494,8 @@ onMounted(() => {
             <div class="flex-1 p-4">
               <!-- Main Content Grid -->
               <div class="grid h-full grid-cols-1 gap-4">
-                <!-- Left Column: Session Stats -->
-                <div class="space-y-3">
+                <!-- Session Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3">
                   <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
                     <div class="bg-primary-100 dark:bg-primary-500/20 ml-3 rounded-full p-2">
                       <Icon name="ph:clock-duotone" class="text-primary-500 size-4" />

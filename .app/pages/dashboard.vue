@@ -297,8 +297,19 @@ const closeAlphaModal = () => {
                         to="/darmana/therapists/sessions"
                         data-tour="therapists-button"
                       >
-                        <Icon name="ph:robot-duotone" class="ml-2 size-4" />
-                        <span>روانشناسان هوش مصنوعی</span>
+                        <Icon name="ph:chat-circle-text-duotone" class="ml-2 size-4" />
+                        <span>گفت و گوی آزاد</span>
+                      </BaseButton>
+                      <BaseButton
+                        size="sm"
+                        color="light"
+                        variant="outline"
+                        class="w-full sm:w-auto"
+                        to="/darmana/therapists/sessions"
+                        data-tour="therapists-button"
+                      >
+                        <Icon name="ph:stethoscope" class="ml-2 size-4" />
+                        <span>گفت و گوی درمانی</span>
                       </BaseButton>
                     </div>
                   </div>
