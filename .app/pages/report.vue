@@ -1,7 +1,5 @@
 <template>
   <div class="relative">
-    <!-- Client-only wrapper to prevent SSR hydration issues -->
-    <ClientOnly>
     <!-- Loading State -->
     <div v-if="isLoading" class="grid grid-cols-12 gap-6">
       <!-- Loading Header -->
@@ -882,12 +880,11 @@
         </div>
       </div>
     </div>
-    </ClientOnly>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, watch, computed, nextTick } from 'vue'
 import { useDataImportance } from '@/composables/useDataImportance'
 import { useSmartFiltering } from '@/composables/useSmartFiltering'
 import type { SessionSummaryWithImportance } from '@/composables/useDataImportance'
@@ -904,7 +901,7 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const isLoading = ref(true)
-const hasData = ref(true)
+const hasData = ref(false)
 const report = ref({
   collectionId: '',
   collectionName: '',
@@ -996,6 +993,11 @@ const isDeletingAllRiskFactors = ref(false)
 
 // Process summaries with importance metrics
 const processedSummaries = computed((): SessionSummaryWithImportance[] => {
+  // Skip processing on server-side to prevent blocking
+  if (!process.client) {
+    return []
+  }
+  
   const summaries = (report.value.summaries || []).map((summary) => {
     const processed: SessionSummaryWithImportance = {
       ...summary,
@@ -1014,16 +1016,28 @@ const processedSummaries = computed((): SessionSummaryWithImportance[] => {
 
 // Filtered summaries based on current filters
 const filteredSummaries = computed(() => {
+  // Skip filtering on server-side
+  if (!process.client) {
+    return []
+  }
   return filterSummaries(processedSummaries.value, currentFilters.value)
 })
 
 // Time-based groups
 const timeGroups = computed(() => {
+  // Skip grouping on server-side
+  if (!process.client) {
+    return []
+  }
   return groupByTimeBasedImportance(filteredSummaries.value)
 })
 
 // Visible summaries for list view
 const visibleSummaries = computed(() => {
+  // Skip processing on server-side
+  if (!process.client) {
+    return []
+  }
   if (viewMode.value === 'groups') {
     return filteredSummaries.value
   }
@@ -1059,6 +1073,9 @@ const editDemographicProfile = reactive({
 watch(
   () => report.value.finalDemographicProfile,
   (profile) => {
+    // Only run on client-side to prevent SSR issues
+    if (!process.client) return
+    
     if (!isEditingDemographic.value && profile) {
       Object.assign(editDemographicProfile, profile)
     }
@@ -1116,7 +1133,13 @@ async function saveDemographicProfile() {
 }
 
 // Check if current user is admin
-const isAdmin = computed(() => role.value === 'admin')
+const isAdmin = computed(() => {
+  // Safe check for server-side
+  if (!process.client) {
+    return false
+  }
+  return role.value === 'admin'
+})
 
 // Get target user ID from query params or use current user
 const targetUserId = computed(() => {
@@ -1179,29 +1202,37 @@ async function fetchReport() {
 }
 
 onMounted(() => {
-  // Only fetch data on client-side
+  // Only fetch data on client-side with defer to prevent blocking
   if (process.client) {
-    fetchReport()
+    nextTick(() => {
+      setTimeout(() => {
+        fetchReport()
+      }, 100)
+    })
   }
 })
 
 // Reset visible counts when data changes
 watch(() => report.value.summaries, () => {
+  if (!process.client) return
   visibleCount.value = 10
 })
 
 // Reset visible count when filters change
 watch(() => currentFilters.value, () => {
+  if (!process.client) return
   if (viewMode.value === 'list') {
     visibleCount.value = 10
   }
 }, { deep: true })
 
 watch(() => report.value.possibleDeeperGoals, () => {
+  if (!process.client) return
   visibleDeeperGoalsCount.value = 5
 })
 
 watch(() => report.value.possibleRiskFactors, () => {
+  if (!process.client) return
   visibleRiskFactorsCount.value = 5
 }, { immediate: false })
 
