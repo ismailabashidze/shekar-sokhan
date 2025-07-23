@@ -1,5 +1,7 @@
 <template>
   <div class="relative">
+    <!-- Client-only wrapper to prevent SSR hydration issues -->
+    <ClientOnly>
     <!-- Loading State -->
     <div v-if="isLoading" class="grid grid-cols-12 gap-6">
       <!-- Loading Header -->
@@ -880,6 +882,7 @@
         </div>
       </div>
     </div>
+    </ClientOnly>
   </div>
 </template>
 
@@ -1121,7 +1124,9 @@ const targetUserId = computed(() => {
     ? route.query.userId[0]
     : route.query.userId
 
-  return queryUserId || nuxtApp.$pb.authStore.model?.id
+  // Only access PocketBase auth store on client-side
+  const currentUserId = process.client ? nuxtApp.$pb.authStore.model?.id : null
+  return queryUserId || currentUserId
 })
 // For demo, we'll simulate data fetching with a timeout
 
@@ -1130,6 +1135,12 @@ async function fetchReport() {
   isLoading.value = true
 
   try {
+    // Only execute on client-side
+    if (!process.client) {
+      isLoading.value = false
+      return
+    }
+
     // Check if user is trying to access another user's report without admin rights
     const queryUserId = Array.isArray(route.query.userId)
       ? route.query.userId[0]
@@ -1137,7 +1148,7 @@ async function fetchReport() {
 
     if (queryUserId && !isAdmin.value) {
       // Non-admin trying to access another user's report - redirect to their own report
-      router.push('/report')
+      await router.push('/report')
       return
     }
 
@@ -1168,7 +1179,10 @@ async function fetchReport() {
 }
 
 onMounted(() => {
-  fetchReport()
+  // Only fetch data on client-side
+  if (process.client) {
+    fetchReport()
+  }
 })
 
 // Reset visible counts when data changes
@@ -1192,12 +1206,20 @@ watch(() => report.value.possibleRiskFactors, () => {
 }, { immediate: false })
 
 function startNewSession() {
-  // Navigate to the session creation page
-  router.push('/darmana/therapists/sessions')
+  // Navigate to the session creation page (only on client-side)
+  if (process.client) {
+    router.push('/darmana/therapists/sessions')
+  }
 }
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '—'
+  
+  // Only use browser APIs on client-side
+  if (!process.client) {
+    return new Date(dateStr).toISOString().split('T')[0] // Fallback for SSR
+  }
+  
   const d = new Date(dateStr)
 
   // Format date and time separately and combine with dash
