@@ -888,6 +888,7 @@ const feedbackErrors = ref<string[]>([])
 const existingFeedback = ref<any>(null)
 const showRetryConfirm = ref(false)
 const selectedFeedbackType = ref<'problems' | 'quality' | null>(null)
+const feedbackModalContent = ref<HTMLElement | null>(null)
 
 const openMessageDetailModal = (message: any) => {
   selectedMessage.value = message
@@ -943,6 +944,12 @@ const openFeedbackModal = async (message: any) => {
   isFeedbackModalOpen.value = true
 }
 
+const resetModalScroll = () => {
+  if (feedbackModalContent.value) {
+    feedbackModalContent.value.scrollTop = 0
+  }
+}
+
 const closeFeedbackModal = () => {
   isFeedbackModalOpen.value = false
   selectedMessageForFeedback.value = null
@@ -968,12 +975,14 @@ const nextFeedbackStep = () => {
   
   if (feedbackStep.value < 3) {
     feedbackStep.value++
+    resetModalScroll()
   }
 }
 
 const prevFeedbackStep = () => {
   if (feedbackStep.value > 1) {
     feedbackStep.value--
+    resetModalScroll()
   }
   feedbackErrors.value = []
 }
@@ -1630,10 +1639,10 @@ const isAIThinking = ref(false)
                 </div>
                 <div class="max-w-sm">
                   <h3 class="font-heading text-muted-800 text-xl font-medium leading-normal dark:text-white">
-                    {{ showNoCharge ? 'امکان استفاده رایگان' : 'شروع گفت و گو' }}
+                    {{ showNoCharge ? 'دریافت اشتراک' : 'شروع گفت و گو' }}
                   </h3>
                   <p class="text-muted-400 mt-2">
-                    {{ showNoCharge ? 'با توجه به نیاز به همدلی، در حال حاضر می توانید رایگان از سیستم استفاده کنید' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
+                    {{ showNoCharge ? 'برای استفاده از سامانه لطفا اشتراک تهیه کنید.' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
                   </p>
                   <div class="mt-4">
                     <BaseButton
@@ -1645,9 +1654,9 @@ const isAIThinking = ref(false)
                     <BaseButton
                       v-else
                       color="primary"
-                      @click="$router.push('/deeds/flwuszbc7yo9obf')"
+                      @click="$router.push('/onboarding')"
                     >
-                      دریافت کد
+                      دریافت اشتراک
                     </BaseButton>
                   </div>
                 </div>
@@ -2470,7 +2479,7 @@ const isAIThinking = ref(false)
       </div>
     </template>
 
-    <div class="max-h-[75vh] overflow-y-auto p-4 md:p-6">
+    <div ref="feedbackModalContent" class="max-h-[75vh] overflow-y-auto p-4 md:p-6">
       <div v-if="selectedMessageForFeedback">
         <!-- Errors display -->
         <BaseMessage
@@ -2497,7 +2506,7 @@ const isAIThinking = ref(false)
               <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
               <span class="text-primary-700 dark:text-primary-300 text-sm font-medium">پیام روانشناس</span>
             </div>
-            <div class="prose prose-sm dark:prose-invert max-w-none text-right bg-white dark:bg-muted-800 rounded-lg p-3">
+            <div class="prose prose-sm dark:prose-invert max-w-none text-right bg-white dark:bg-muted-800 rounded-lg p-3 max-h-60 overflow-y-auto">
               <AddonMarkdownRemark :source="selectedMessageForFeedback.text" />
             </div>
           </div>
