@@ -930,18 +930,28 @@ const { getReportByUserId, updateReport } = useReport()
 const nuxtApp = useNuxtApp()
 const { user, role } = useUser()
 
-// Smart filtering and data importance
+// Smart filtering and data importance - only initialize on client
+const dataImportance = process.client ? useDataImportance() : { 
+  calculateImportanceMetrics: () => ({}), 
+  compressSummaries: (data) => data, 
+  defaultCompressionSettings: {} 
+}
 const {
   calculateImportanceMetrics,
   compressSummaries,
   defaultCompressionSettings,
-} = useDataImportance()
+} = dataImportance
 
+const smartFiltering = process.client ? useSmartFiltering() : {
+  filterSummaries: (data) => data,
+  groupByTimeBasedImportance: () => [],
+  smartSearch: () => []
+}
 const {
   filterSummaries,
   groupByTimeBasedImportance,
   smartSearch,
-} = useSmartFiltering()
+} = smartFiltering
 
 // Filter state
 const currentFilters = ref<FilterOptions>({
@@ -997,8 +1007,15 @@ const processedSummaries = computed((): SessionSummaryWithImportance[] => {
   if (!process.client) {
     return []
   }
+
+  // Return empty array if no summaries to avoid processing empty data
+  const rawSummaries = report.value.summaries || []
+  if (rawSummaries.length === 0) {
+    return []
+  }
   
-  const summaries = (report.value.summaries || []).map((summary) => {
+  // Use nextTick to defer heavy processing and prevent blocking
+  const summaries = rawSummaries.map((summary) => {
     const processed: SessionSummaryWithImportance = {
       ...summary,
       importance: calculateImportanceMetrics(summary as SessionSummaryWithImportance),
@@ -1070,18 +1087,6 @@ const editDemographicProfile = reactive({
   maritalStatus: '',
 })
 
-watch(
-  () => report.value.finalDemographicProfile,
-  (profile) => {
-    // Only run on client-side to prevent SSR issues
-    if (!process.client) return
-    
-    if (!isEditingDemographic.value && profile) {
-      Object.assign(editDemographicProfile, profile)
-    }
-  },
-  { immediate: true },
-)
 
 function enableEditDemographic() {
   isEditingDemographic.value = true
@@ -1147,8 +1152,11 @@ const targetUserId = computed(() => {
     ? route.query.userId[0]
     : route.query.userId
 
-  // Only access PocketBase auth store on client-side
-  const currentUserId = process.client ? nuxtApp.$pb.authStore.model?.id : null
+  // Only access PocketBase auth store on client-side with safe fallback
+  let currentUserId = null
+  if (process.client && nuxtApp.$pb?.authStore?.model?.id) {
+    currentUserId = nuxtApp.$pb.authStore.model.id
+  }
   return queryUserId || currentUserId
 })
 // For demo, we'll simulate data fetching with a timeout
@@ -1168,12 +1176,6 @@ async function fetchReport() {
     const queryUserId = Array.isArray(route.query.userId)
       ? route.query.userId[0]
       : route.query.userId
-
-    if (queryUserId && !isAdmin.value) {
-      // Non-admin trying to access another user's report - redirect to their own report
-      await router.push('/report')
-      return
-    }
 
     // If no user ID is available
     if (!targetUserId.value) {
@@ -1201,40 +1203,11 @@ async function fetchReport() {
   }
 }
 
-onMounted(() => {
-  // Only fetch data on client-side with defer to prevent blocking
-  if (process.client) {
-    nextTick(() => {
-      setTimeout(() => {
-        fetchReport()
-      }, 100)
-    })
-  }
+onMounted(async () => {
+  // Use nextTick to ensure DOM is ready and prevent blocking
+  await nextTick()
+  fetchReport()
 })
-
-// Reset visible counts when data changes
-watch(() => report.value.summaries, () => {
-  if (!process.client) return
-  visibleCount.value = 10
-})
-
-// Reset visible count when filters change
-watch(() => currentFilters.value, () => {
-  if (!process.client) return
-  if (viewMode.value === 'list') {
-    visibleCount.value = 10
-  }
-}, { deep: true })
-
-watch(() => report.value.possibleDeeperGoals, () => {
-  if (!process.client) return
-  visibleDeeperGoalsCount.value = 5
-})
-
-watch(() => report.value.possibleRiskFactors, () => {
-  if (!process.client) return
-  visibleRiskFactorsCount.value = 5
-}, { immediate: false })
 
 function startNewSession() {
   // Navigate to the session creation page (only on client-side)
