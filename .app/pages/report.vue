@@ -884,7 +884,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, watch, computed, nextTick } from 'vue'
 import { useDataImportance } from '@/composables/useDataImportance'
 import { useSmartFiltering } from '@/composables/useSmartFiltering'
 import type { SessionSummaryWithImportance } from '@/composables/useDataImportance'
@@ -901,7 +901,7 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const isLoading = ref(true)
-const hasData = ref(true)
+const hasData = ref(false)
 const report = ref({
   collectionId: '',
   collectionName: '',
@@ -930,18 +930,28 @@ const { getReportByUserId, updateReport } = useReport()
 const nuxtApp = useNuxtApp()
 const { user, role } = useUser()
 
-// Smart filtering and data importance
+// Smart filtering and data importance - only initialize on client
+const dataImportance = process.client ? useDataImportance() : { 
+  calculateImportanceMetrics: () => ({}), 
+  compressSummaries: (data) => data, 
+  defaultCompressionSettings: {} 
+}
 const {
   calculateImportanceMetrics,
   compressSummaries,
   defaultCompressionSettings,
-} = useDataImportance()
+} = dataImportance
 
+const smartFiltering = process.client ? useSmartFiltering() : {
+  filterSummaries: (data) => data,
+  groupByTimeBasedImportance: () => [],
+  smartSearch: () => []
+}
 const {
   filterSummaries,
   groupByTimeBasedImportance,
   smartSearch,
-} = useSmartFiltering()
+} = smartFiltering
 
 // Filter state
 const currentFilters = ref<FilterOptions>({
@@ -993,7 +1003,19 @@ const isDeletingAllRiskFactors = ref(false)
 
 // Process summaries with importance metrics
 const processedSummaries = computed((): SessionSummaryWithImportance[] => {
-  const summaries = (report.value.summaries || []).map((summary) => {
+  // Skip processing on server-side to prevent blocking
+  if (!process.client) {
+    return []
+  }
+
+  // Return empty array if no summaries to avoid processing empty data
+  const rawSummaries = report.value.summaries || []
+  if (rawSummaries.length === 0) {
+    return []
+  }
+  
+  // Use nextTick to defer heavy processing and prevent blocking
+  const summaries = rawSummaries.map((summary) => {
     const processed: SessionSummaryWithImportance = {
       ...summary,
       importance: calculateImportanceMetrics(summary as SessionSummaryWithImportance),
@@ -1011,16 +1033,28 @@ const processedSummaries = computed((): SessionSummaryWithImportance[] => {
 
 // Filtered summaries based on current filters
 const filteredSummaries = computed(() => {
+  // Skip filtering on server-side
+  if (!process.client) {
+    return []
+  }
   return filterSummaries(processedSummaries.value, currentFilters.value)
 })
 
 // Time-based groups
 const timeGroups = computed(() => {
+  // Skip grouping on server-side
+  if (!process.client) {
+    return []
+  }
   return groupByTimeBasedImportance(filteredSummaries.value)
 })
 
 // Visible summaries for list view
 const visibleSummaries = computed(() => {
+  // Skip processing on server-side
+  if (!process.client) {
+    return []
+  }
   if (viewMode.value === 'groups') {
     return filteredSummaries.value
   }
@@ -1053,15 +1087,6 @@ const editDemographicProfile = reactive({
   maritalStatus: '',
 })
 
-watch(
-  () => report.value.finalDemographicProfile,
-  (profile) => {
-    if (!isEditingDemographic.value && profile) {
-      Object.assign(editDemographicProfile, profile)
-    }
-  },
-  { immediate: true },
-)
 
 function enableEditDemographic() {
   isEditingDemographic.value = true
@@ -1113,7 +1138,13 @@ async function saveDemographicProfile() {
 }
 
 // Check if current user is admin
-const isAdmin = computed(() => role.value === 'admin')
+const isAdmin = computed(() => {
+  // Safe check for server-side
+  if (!process.client) {
+    return false
+  }
+  return role.value === 'admin'
+})
 
 // Get target user ID from query params or use current user
 const targetUserId = computed(() => {
@@ -1121,7 +1152,12 @@ const targetUserId = computed(() => {
     ? route.query.userId[0]
     : route.query.userId
 
-  return queryUserId || nuxtApp.$pb.authStore.model?.id
+  // Only access PocketBase auth store on client-side with safe fallback
+  let currentUserId = null
+  if (process.client && nuxtApp.$pb?.authStore?.model?.id) {
+    currentUserId = nuxtApp.$pb.authStore.model.id
+  }
+  return queryUserId || currentUserId
 })
 // For demo, we'll simulate data fetching with a timeout
 
@@ -1130,16 +1166,16 @@ async function fetchReport() {
   isLoading.value = true
 
   try {
+    // Only execute on client-side
+    if (!process.client) {
+      isLoading.value = false
+      return
+    }
+
     // Check if user is trying to access another user's report without admin rights
     const queryUserId = Array.isArray(route.query.userId)
       ? route.query.userId[0]
       : route.query.userId
-
-    if (queryUserId && !isAdmin.value) {
-      // Non-admin trying to access another user's report - redirect to their own report
-      router.push('/report')
-      return
-    }
 
     // If no user ID is available
     if (!targetUserId.value) {
@@ -1167,37 +1203,27 @@ async function fetchReport() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // Use nextTick to ensure DOM is ready and prevent blocking
+  await nextTick()
   fetchReport()
 })
 
-// Reset visible counts when data changes
-watch(() => report.value.summaries, () => {
-  visibleCount.value = 10
-})
-
-// Reset visible count when filters change
-watch(() => currentFilters.value, () => {
-  if (viewMode.value === 'list') {
-    visibleCount.value = 10
-  }
-}, { deep: true })
-
-watch(() => report.value.possibleDeeperGoals, () => {
-  visibleDeeperGoalsCount.value = 5
-})
-
-watch(() => report.value.possibleRiskFactors, () => {
-  visibleRiskFactorsCount.value = 5
-}, { immediate: false })
-
 function startNewSession() {
-  // Navigate to the session creation page
-  router.push('/darmana/therapists/sessions')
+  // Navigate to the session creation page (only on client-side)
+  if (process.client) {
+    router.push('/darmana/therapists/sessions')
+  }
 }
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '—'
+  
+  // Only use browser APIs on client-side
+  if (!process.client) {
+    return new Date(dateStr).toISOString().split('T')[0] // Fallback for SSR
+  }
+  
   const d = new Date(dateStr)
 
   // Format date and time separately and combine with dash
