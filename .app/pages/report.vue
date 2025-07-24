@@ -133,19 +133,9 @@
 
       <!-- Report Content -->
       <div class="col-span-12 mb-8 lg:col-span-8">
-        <!-- Smart Analytics -->
-        <ReportAnalytics
-          :summaries="processedSummaries"
-          :time-groups="timeGroups"
-          class="mb-6"
-        />
-
-        <!-- Importance Score Guide -->
-        <ImportanceScoreGuide class="mb-6" />
-
-        <!-- Smart Filter and View Controls -->
-        <BaseCard class="mb-6 p-6" shape="curved">
-          <div class="mb-4 flex items-center justify-between">
+        <!-- Summaries Card -->
+        <BaseCard class="p-6" shape="curved">
+          <div class="mb-2 flex items-center justify-between">
             <BaseHeading
               as="h3"
               size="md"
@@ -153,147 +143,84 @@
               lead="tight"
               class="text-muted-800 dark:text-white"
             >
-              <span>خلاصه جلسات هوشمند</span>
+              <span>خلاصه جلسات</span>
             </BaseHeading>
-            <div class="flex items-center gap-2">
-              <BaseButton
-                size="sm"
-                :color="viewMode === 'list' ? 'primary' : 'default'"
-                :variant="viewMode === 'list' ? 'solid' : 'outline'"
-                @click="viewMode = 'list'"
-              >
-                <Icon name="ph:list-duotone" class="me-1 size-4" />
-                فهرست
-              </BaseButton>
-              <BaseButton
-                size="sm"
-                :color="viewMode === 'groups' ? 'primary' : 'default'"
-                :variant="viewMode === 'groups' ? 'solid' : 'outline'"
-                @click="viewMode = 'groups'"
-              >
-                <Icon name="ph:stack-duotone" class="me-1 size-4" />
-                گروه‌بندی
-              </BaseButton>
-            </div>
           </div>
+          <div class="flex justify-between">
+            <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+              <Icon name="ph:notepad-duotone" class="size-4" />
+              <span>خلاصه تمام جلسات مشاوره</span>
+            </BaseParagraph>
+          </div>
+          <div class="mt-6">
+            <template v-if="report.summaries && report.summaries.length > 0">
+              <div
+                v-for="(summary, idx) in visibleSummaries"
+                :key="summary.session"
+                class="mb-6"
+              >
+                <BaseCard
+                  shape="rounded"
+                  class="border-primary-100 dark:border-primary-500/20 relative border-2 p-5 transition-all duration-300 hover:shadow-lg"
+                >
+                  <BaseHeading
+                    as="h4"
+                    size="sm"
+                    weight="medium"
+                    lead="tight"
+                    class="text-primary-500 dark:text-primary-400 mb-2"
+                  >
+                    {{ summary.title }}
+                  </BaseHeading>
+                  <div class="my-2 flex flex-wrap gap-4">
+                    <span v-if="summary.date" class="text-muted-500 dark:text-muted-400 text-xs">
+                      تاریخ برگزاری: {{ formatDate(summary.date) }}
+                    </span>
+                    <span v-if="summary.duration" class="text-muted-500 dark:text-muted-400 text-xs">
+                      مدت جلسه: {{ summary.duration }} دقیقه
+                    </span>
+                  </div>
 
-          <div class="mb-4 flex justify-between">
-            <div class="max-w-full">
-              <BaseParagraph size="xs" class="text-muted-400 mb-1">
-                <Icon name="ph:brain-duotone" class="size-4" />
-                <span>نمایش هوشمند بر اساس اهمیت و تاریخ</span>
-              </BaseParagraph>
-              <BaseParagraph size="xs" class="text-muted-500">
-                🤖 <strong>سیستم هوش مصنوعی:</strong> هر جلسه بر اساس ۴ معیار علمی امتیازدهی می‌شود:
-                تازگی (۳۰٪)، محتوا (۳۰٪)، طول متن (۲۰٪) و کلمات کلیدی مهم (۴۰٪).
-                امتیاز نهایی از ۰ تا ۱۰۰ محاسبه شده تا بتوانید مهم‌ترین جلسات را سریع شناسایی کنید.
-              </BaseParagraph>
-              <BaseParagraph size="xs" class="text-muted-500 mt-1">
-                💡 <strong>راهنما:</strong> برای درک بهتر نحوه کارکرد امتیازدهی، بخش "راهنمای امتیازدهی جلسات" را مطالعه کنید.
-              </BaseParagraph>
-            </div>
-            <div class="text-muted-500 text-xs">
-              {{ filteredSummaries.length }} از {{ processedSummaries.length }} جلسه
-            </div>
+                  <BaseText size="sm" class="text-muted-700 dark:text-muted-300 mb-2">
+                    {{ summary.summary }}
+                  </BaseText>
+                  <!-- Delete button -->
+                  <button
+                    class="text-danger-500 hover:text-danger-600 dark:text-danger-400 dark:hover:text-danger-300 absolute left-2 top-2 transition-colors duration-300"
+                    @click.prevent="openDeleteModal(idx, summary)"
+                  >
+                    <Icon name="ph:trash-duotone" class="size-5" />
+                  </button>
+                </BaseCard>
+              </div>
+              <!-- Show More Button -->
+              <div v-if="report.summaries.length > visibleCount" class="mt-6 text-center">
+                <BaseButton
+                  @click="showMore"
+                  color="primary"
+                  class="mx-auto"
+                >
+                  نمایش بیشتر ({{ report.summaries.length - visibleCount }} مورد دیگر)
+                </BaseButton>
+              </div>
+            </template>
+            <template v-else>
+              <div class="flex flex-col items-center justify-center py-10 text-center">
+                <Icon name="ph:notepad-duotone" class="text-muted-300 mb-2 size-12" />
+                <BaseHeading
+                  as="h4"
+                  size="sm"
+                  class="text-muted-500 mb-2"
+                >
+                  خلاصه‌ای برای نمایش وجود ندارد
+                </BaseHeading>
+                <BaseText size="xs" class="text-muted-400">
+                  هنوز هیچ خلاصه‌ای برای جلسات شما ثبت نشده است.
+                </BaseText>
+              </div>
+            </template>
           </div>
         </BaseCard>
-
-        <!-- Filter Component -->
-        <div class="mb-6 grid grid-cols-12 gap-6">
-          <div class="col-span-12 lg:col-span-4">
-            <ReportSmartFilter
-              v-model="currentFilters"
-              :total-count="processedSummaries.length"
-              :filtered-count="filteredSummaries.length"
-              @update:model-value="updateFilters"
-            />
-          </div>
-
-          <!-- Summaries Content -->
-          <div class="col-span-12 lg:col-span-8">
-            <BaseCard class="p-6" shape="curved">
-              <div class="mt-6">
-                <template v-if="filteredSummaries.length > 0">
-                  <!-- List View -->
-                  <template v-if="viewMode === 'list'">
-                    <div
-                      v-for="(summary, idx) in visibleSummaries"
-                      :key="summary.session"
-                      class="mb-6"
-                    >
-                      <SessionSummaryCard
-                        :summary="summary"
-                        @delete="openDeleteModal(idx, summary)"
-                      />
-                    </div>
-                    <!-- Show More Button -->
-                    <div v-if="filteredSummaries.length > visibleCount" class="mt-6 text-center">
-                      <BaseButton
-                        color="primary"
-                        class="mx-auto"
-                        @click="showMore"
-                      >
-                        نمایش بیشتر ({{ filteredSummaries.length - visibleCount }} مورد دیگر)
-                      </BaseButton>
-                    </div>
-                  </template>
-
-                  <!-- Groups View -->
-                  <template v-else>
-                    <div class="space-y-8">
-                      <div
-                        v-for="group in timeGroups"
-                        :key="group.period"
-                        class="space-y-4"
-                      >
-                        <div class="border-muted-200 dark:border-muted-700 border-b pb-2">
-                          <div class="flex items-center justify-between">
-                            <BaseHeading
-                              as="h4"
-                              size="sm"
-                              weight="medium"
-                              class="text-muted-700 dark:text-muted-300"
-                            >
-                              {{ group.label }}
-                            </BaseHeading>
-                            <span class="text-muted-500 text-xs">
-                              {{ group.items.length }} جلسه
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          v-for="(summary, idx) in group.items"
-                          :key="summary.session"
-                          class="mb-4"
-                        >
-                          <SessionSummaryCard
-                            :summary="summary"
-                            @delete="openDeleteModal(idx, summary)"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                </template>
-                <template v-else>
-                  <div class="flex flex-col items-center justify-center py-10 text-center">
-                    <Icon name="ph:funnel-x-duotone" class="text-muted-300 mb-2 size-12" />
-                    <BaseHeading
-                      as="h4"
-                      size="sm"
-                      class="text-muted-500 mb-2"
-                    >
-                      نتیجه‌ای یافت نشد
-                    </BaseHeading>
-                    <BaseText size="xs" class="text-muted-400">
-                      با فیلترهای انتخاب شده، هیچ جلسه‌ای پیدا نشد.
-                    </BaseText>
-                  </div>
-                </template>
-              </div>
-            </BaseCard>
-          </div>
-        </div>
 
         <!-- Delete Confirmation Modal -->
         <TairoModal
@@ -771,10 +698,10 @@
                 <!-- Show More Button for Deeper Goals -->
                 <div v-if="report.possibleDeeperGoals.length > visibleDeeperGoalsCount" class="mt-4 text-center">
                   <BaseButton
+                    @click="showMoreDeeperGoals"
                     color="primary"
                     size="sm"
                     class="mx-auto"
-                    @click="showMoreDeeperGoals"
                   >
                     نمایش بیشتر ({{ report.possibleDeeperGoals.length - visibleDeeperGoalsCount }} مورد دیگر)
                   </BaseButton>
@@ -829,8 +756,7 @@
                   <div
                     v-for="(risk, j) in group"
                     :key="j"
-                    class="group relative"
-                  >
+                    class="group relative">
                     <BaseCard
                       shape="rounded"
                       class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
@@ -860,10 +786,10 @@
                 <!-- Show More Button for Risk Factors -->
                 <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
                   <BaseButton
+                    @click="showMoreRiskFactors"
                     color="primary"
                     size="sm"
                     class="mx-auto"
-                    @click="showMoreRiskFactors"
                   >
                     نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
                   </BaseButton>
@@ -884,16 +810,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, computed, nextTick } from 'vue'
-import { useDataImportance } from '@/composables/useDataImportance'
-import { useSmartFiltering } from '@/composables/useSmartFiltering'
-import type { SessionSummaryWithImportance } from '@/composables/useDataImportance'
-import type { FilterOptions } from '@/composables/useSmartFiltering'
-import ReportSmartFilter from '@/components/report/ReportSmartFilter.vue'
-import SessionSummaryCard from '@/components/report/SessionSummaryCard.vue'
-import ReportAnalytics from '@/components/report/ReportAnalytics.vue'
-import ImportanceScoreGuide from '@/components/report/ImportanceScoreGuide.vue'
-
+import { ref, reactive, watch, computed } from 'vue'
 definePageMeta({
   title: 'گزارش نهایی',
   layout: 'sidebar',
@@ -901,7 +818,7 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 const isLoading = ref(true)
-const hasData = ref(false)
+const hasData = ref(true)
 const report = ref({
   collectionId: '',
   collectionName: '',
@@ -930,40 +847,8 @@ const { getReportByUserId, updateReport } = useReport()
 const nuxtApp = useNuxtApp()
 const { user, role } = useUser()
 
-// Smart filtering and data importance - only initialize on client
-const dataImportance = process.client ? useDataImportance() : { 
-  calculateImportanceMetrics: () => ({}), 
-  compressSummaries: (data) => data, 
-  defaultCompressionSettings: {} 
-}
-const {
-  calculateImportanceMetrics,
-  compressSummaries,
-  defaultCompressionSettings,
-} = dataImportance
-
-const smartFiltering = process.client ? useSmartFiltering() : {
-  filterSummaries: (data) => data,
-  groupByTimeBasedImportance: () => [],
-  smartSearch: () => []
-}
-const {
-  filterSummaries,
-  groupByTimeBasedImportance,
-  smartSearch,
-} = smartFiltering
-
-// Filter state
-const currentFilters = ref<FilterOptions>({
-  sortBy: 'relevance',
-  sortOrder: 'desc',
-})
-
-// View mode
-const viewMode = ref<'list' | 'groups'>('list')
-
 // Batching state
-const visibleCount = ref(10)
+const visibleCount = ref(5)
 const visibleDeeperGoalsCount = ref(5)
 const visibleRiskFactorsCount = ref(5)
 
@@ -1001,75 +886,16 @@ const isDeletingAllDeeperGoals = ref(false)
 const isDeleteAllRiskFactorsModalOpen = ref(false)
 const isDeletingAllRiskFactors = ref(false)
 
-// Process summaries with importance metrics
-const processedSummaries = computed((): SessionSummaryWithImportance[] => {
-  // Skip processing on server-side to prevent blocking
-  if (!process.client) {
-    return []
-  }
-
-  // Return empty array if no summaries to avoid processing empty data
-  const rawSummaries = report.value.summaries || []
-  if (rawSummaries.length === 0) {
-    return []
-  }
-  
-  // Use nextTick to defer heavy processing and prevent blocking
-  const summaries = rawSummaries.map((summary) => {
-    const processed: SessionSummaryWithImportance = {
-      ...summary,
-      importance: calculateImportanceMetrics(summary as SessionSummaryWithImportance),
-    }
-    return processed
-  })
-
-  // Apply compression to old, less important summaries
-  return compressSummaries(summaries, {
-    ...defaultCompressionSettings,
-    maxAge: 120, // 4 months
-    importanceThreshold: 35,
-  })
-})
-
-// Filtered summaries based on current filters
-const filteredSummaries = computed(() => {
-  // Skip filtering on server-side
-  if (!process.client) {
-    return []
-  }
-  return filterSummaries(processedSummaries.value, currentFilters.value)
-})
-
-// Time-based groups
-const timeGroups = computed(() => {
-  // Skip grouping on server-side
-  if (!process.client) {
-    return []
-  }
-  return groupByTimeBasedImportance(filteredSummaries.value)
-})
-
-// Visible summaries for list view
+// Computed property for visible summaries (reversed and limited)
 const visibleSummaries = computed(() => {
-  // Skip processing on server-side
-  if (!process.client) {
-    return []
-  }
-  if (viewMode.value === 'groups') {
-    return filteredSummaries.value
-  }
-  return filteredSummaries.value.slice(0, visibleCount.value)
+  // Create a new array to avoid mutating the original
+  const reversed = [...(report.value.summaries || [])].reverse()
+  return reversed.slice(0, visibleCount.value)
 })
 
 // Show more items
 function showMore() {
-  visibleCount.value += 10
-}
-
-// Update filters
-function updateFilters(newFilters: FilterOptions) {
-  currentFilters.value = newFilters
-  visibleCount.value = 10 // Reset visible count when filters change
+  visibleCount.value += 5
 }
 
 const toaster = useToaster()
@@ -1087,6 +913,15 @@ const editDemographicProfile = reactive({
   maritalStatus: '',
 })
 
+watch(
+  () => report.value.finalDemographicProfile,
+  (profile) => {
+    if (!isEditingDemographic.value && profile) {
+      Object.assign(editDemographicProfile, profile)
+    }
+  },
+  { immediate: true },
+)
 
 function enableEditDemographic() {
   isEditingDemographic.value = true
@@ -1138,13 +973,7 @@ async function saveDemographicProfile() {
 }
 
 // Check if current user is admin
-const isAdmin = computed(() => {
-  // Safe check for server-side
-  if (!process.client) {
-    return false
-  }
-  return role.value === 'admin'
-})
+const isAdmin = computed(() => role.value === 'admin')
 
 // Get target user ID from query params or use current user
 const targetUserId = computed(() => {
@@ -1152,12 +981,7 @@ const targetUserId = computed(() => {
     ? route.query.userId[0]
     : route.query.userId
 
-  // Only access PocketBase auth store on client-side with safe fallback
-  let currentUserId = null
-  if (process.client && nuxtApp.$pb?.authStore?.model?.id) {
-    currentUserId = nuxtApp.$pb.authStore.model.id
-  }
-  return queryUserId || currentUserId
+  return queryUserId || nuxtApp.$pb.authStore.model?.id
 })
 // For demo, we'll simulate data fetching with a timeout
 
@@ -1166,16 +990,16 @@ async function fetchReport() {
   isLoading.value = true
 
   try {
-    // Only execute on client-side
-    if (!process.client) {
-      isLoading.value = false
-      return
-    }
-
     // Check if user is trying to access another user's report without admin rights
     const queryUserId = Array.isArray(route.query.userId)
       ? route.query.userId[0]
       : route.query.userId
+
+    if (queryUserId && !isAdmin.value) {
+      // Non-admin trying to access another user's report - redirect to their own report
+      router.push('/report')
+      return
+    }
 
     // If no user ID is available
     if (!targetUserId.value) {
@@ -1203,27 +1027,30 @@ async function fetchReport() {
   }
 }
 
-onMounted(async () => {
-  // Use nextTick to ensure DOM is ready and prevent blocking
-  await nextTick()
+onMounted(() => {
   fetchReport()
 })
 
+// Reset visible counts when data changes
+watch(() => report.value.summaries, () => {
+  visibleCount.value = 5
+})
+
+watch(() => report.value.possibleDeeperGoals, () => {
+  visibleDeeperGoalsCount.value = 5
+})
+
+watch(() => report.value.possibleRiskFactors, () => {
+  visibleRiskFactorsCount.value = 5
+}, { immediate: false })
+
 function startNewSession() {
-  // Navigate to the session creation page (only on client-side)
-  if (process.client) {
-    router.push('/darmana/therapists/sessions')
-  }
+  // Navigate to the session creation page
+  router.push('/darmana/therapists/sessions')
 }
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '—'
-  
-  // Only use browser APIs on client-side
-  if (!process.client) {
-    return new Date(dateStr).toISOString().split('T')[0] // Fallback for SSR
-  }
-  
   const d = new Date(dateStr)
 
   // Format date and time separately and combine with dash
@@ -1234,10 +1061,8 @@ function formatDate(dateStr: string) {
 }
 
 // Open the delete confirmation modal
-function openDeleteModal(index: number, summary: SessionSummaryWithImportance) {
-  // Find the actual index in the original summaries array
-  const actualIndex = report.value.summaries.findIndex(s => s.session === summary.session)
-  summaryIndexToDelete.value = actualIndex
+function openDeleteModal(index: number, summary: any) {
+  summaryIndexToDelete.value = index
   summaryToDelete.value = summary
   isDeleteModalOpen.value = true
 }

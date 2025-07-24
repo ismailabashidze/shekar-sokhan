@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.2] - 2025-07-24
+### Fixed
+- Minor bug fixes and improvements
+
+## [2.10.1] - 2025-07-24
+### Fixed
+- Minor bug fixes and improvements
+
 ## [2.10.0] - 2024-07-13
 ### Added
 - بهبود کامل سیستم PWA notifications برای نمایش native در اندروید و ویندوز حتی در حالت بسته بودن اپ
