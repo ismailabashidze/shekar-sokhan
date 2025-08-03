@@ -59,36 +59,61 @@
           <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">محتوای دوره</h3>
           
           <div class="space-y-4">
-            <div v-for="(module, index) in modules" :key="index" class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4 space-x-reverse">
-                  <div :class="getModuleIcon(module.status)" class="w-8 h-8 rounded-full flex items-center justify-center">
-                    <svg v-if="module.status === 'completed'" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                    </svg>
-                    <svg v-else-if="module.status === 'in_progress'" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
-                    </svg>
-                    <svg v-else class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 class="font-medium text-gray-900 dark:text-white">{{ module.title }}</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-300">{{ module.description }}</p>
-                    <div v-if="module.lessons" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {{ module.lessons }}
+            <div v-for="(module, index) in modules" :key="index" class="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden transition-colors">
+              <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" @click="toggleModule(index)">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-4 space-x-reverse">
+                    <div :class="getModuleIcon(module.status)" class="w-8 h-8 rounded-full flex items-center justify-center">
+                      <svg v-if="module.status === 'completed'" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                      <svg v-else-if="module.status === 'in_progress'" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                      </svg>
+                      <svg v-else class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-gray-900 dark:text-white">{{ module.title }}</h4>
+                      <p class="text-sm text-gray-600 dark:text-gray-300">{{ module.description }}</p>
+                      <div class="flex items-center space-x-4 space-x-reverse mt-1">
+                        <div v-if="module.lessons" class="text-xs text-gray-500 dark:text-gray-400">
+                          {{ module.lessons }}
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                          ⏱️ {{ module.duration }}
+                        </div>
+                      </div>
                     </div>
                   </div>
+                  <div class="flex items-center space-x-2 space-x-reverse">
+                    <span :class="getStatusBadge(module.status)" class="px-2 py-1 rounded-full text-xs font-medium">
+                      {{ getStatusText(module.status) }}
+                    </span>
+                    <button class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-transform" :class="{ 'rotate-180': expandedModules.has(index) }">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-                <div class="flex items-center space-x-2 space-x-reverse">
-                  <span :class="getStatusBadge(module.status)" class="px-2 py-1 rounded-full text-xs font-medium">
-                    {{ getStatusText(module.status) }}
-                  </span>
-                  <button class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
+              </div>
+              
+              <div v-if="expandedModules.has(index)" class="border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-750 p-4">
+                <h5 class="font-medium text-gray-900 dark:text-white mb-3">محتوای این ماژول:</h5>
+                <ul class="space-y-2">
+                  <li v-for="(item, itemIndex) in module.content" :key="itemIndex" class="flex items-start space-x-3 space-x-reverse">
+                    <div class="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ item }}</span>
+                  </li>
+                </ul>
+                <div v-if="module.status !== 'locked'" class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
+                  <button v-if="module.status === 'completed'" class="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
+                    مرور مجدد ماژول
+                  </button>
+                  <button v-else-if="module.status === 'in_progress'" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                    ادامه یادگیری
                   </button>
                 </div>
               </div>
@@ -244,6 +269,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const expandedModules = ref(new Set())
+
+const toggleModule = (index: number) => {
+  if (expandedModules.value.has(index)) {
+    expandedModules.value.delete(index)
+  } else {
+    expandedModules.value.add(index)
+  }
+}
+
 definePageMeta({
   title: 'تسلط بر هوش هیجانی',
   preview: {
@@ -264,31 +299,70 @@ const modules = ref([
     title: 'ماژول 1: درک خود',
     description: 'درک احساسات، نمونه‌های احساسی',
     status: 'completed',
-    lessons: null
+    lessons: '4 از 4 درس تکمیل شده',
+    duration: '45 دقیقه',
+    content: [
+      'معرفی هوش هیجانی و اهمیت آن',
+      'شناخت احساسات اولیه و ثانویه',
+      'تمرین‌های خودشناسی هیجانی',
+      'ارزیابی سطح هوش هیجانی شخصی'
+    ]
   },
   {
     title: 'ماژول 2: خودآگاهی',
     description: 'تشخیص الگوهای احساسی خود',
     status: 'completed',
-    lessons: null
+    lessons: '5 از 5 درس تکمیل شده',
+    duration: '60 دقیقه',
+    content: [
+      'شناسایی تریگرهای احساسی',
+      'درک واکنش‌های جسمی به احساسات',
+      'تکنیک‌های مراقبه و حضور ذهن',
+      'ایجاد دفترچه احساسات روزانه',
+      'تمرین‌های تنفس آگاهانه'
+    ]
   },
   {
     title: 'ماژول 3: تنظیم احساسات',
     description: 'مدیریت و کنترل احساسات',
     status: 'in_progress',
-    lessons: '2 از 5 درس تکمیل شده'
+    lessons: '2 از 5 درس تکمیل شده',
+    duration: '75 دقیقه',
+    content: [
+      'استراتژی‌های مدیریت خشم',
+      'تکنیک‌های کاهش اضطراب و استرس',
+      'روش‌های تغییر نگرش منفی',
+      'تمرین‌های بازسازی شناختی',
+      'مدیریت احساسات در موقعیت‌های چالشی'
+    ]
   },
   {
     title: 'ماژول 4: خودآگاهی اجتماعی',
     description: 'درک احساسات دیگران',
     status: 'locked',
-    lessons: null
+    lessons: '0 از 4 درس',
+    duration: '50 دقیقه',
+    content: [
+      'خواندن زبان بدن و نشانه‌های غیرکلامی',
+      'تقویت مهارت‌های گوش دادن فعال',
+      'درک احساسات پنهان در گفتگو',
+      'تمرین‌های همدلی و درک دیگران'
+    ]
   },
   {
     title: 'ماژول 5: مدیریت روابط',
     description: 'ایجاد ارتباطات قوی‌تر',
     status: 'locked',
-    lessons: null
+    lessons: '0 از 6 درس',
+    duration: '90 دقیقه',
+    content: [
+      'اصول ارتباط مؤثر و احترام‌آمیز',
+      'مدیریت تعارض و حل اختلاف',
+      'ایجاد اعتماد در روابط شخصی',
+      'مهارت‌های رهبری هیجانی',
+      'حفظ روابط سالم در محیط کار',
+      'ارتباط مؤثر با خانواده و دوستان'
+    ]
   }
 ])
 
