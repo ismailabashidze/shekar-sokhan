@@ -267,8 +267,7 @@ function handleQuickAction(action: string) {
       console.log('Continue current course')
       break
     case 'profile':
-      // TODO: Navigate to profile page
-      console.log('Navigate to profile')
+      navigateTo('/hammasir/profile')
       break
     default:
       console.log('Unknown action:', action)
