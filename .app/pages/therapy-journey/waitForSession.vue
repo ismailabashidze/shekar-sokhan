@@ -46,8 +46,8 @@ onMounted(async () => {
   // Start checking for analysis
   checkForAnalysis()
 
-  // Set up interval to check every 2 seconds for better UX
-  checkInterval.value = setInterval(checkForAnalysis, 2000)
+  // Set up interval to check every 5 seconds
+  checkInterval.value = setInterval(checkForAnalysis, 5000)
 })
 
 onUnmounted(() => {

@@ -305,7 +305,7 @@ const closeAlphaModal = () => {
                         color="light"
                         variant="outline"
                         class="w-full sm:w-auto"
-                        to="/darmana/therapists/sessions"
+                        to="/therapy-journey/welcome"
                         data-tour="therapists-button"
                       >
                         <Icon name="ph:stethoscope" class="ml-2 size-4" />

@@ -65,6 +65,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAssessment } from '~/composables/useAssessment'
 import { useGoal } from '~/composables/goal'
+import { useGoals } from '~/composables/useGoals'
+import { useTherapist } from '~/composables/therapist'
 
 definePageMeta({
   title: 'سفر درمانی - در حال پردازش',
@@ -80,23 +82,30 @@ const router = useRouter()
 const { user } = useUser()
 const { getUserAssessments } = useAssessment()
 const { getTherapyGoals, createTherapyGoal } = useGoal()
+const { generateDiagnosisGoals } = useGoals()
+const { getTherapists } = useTherapist()
 
 const currentStep = ref(0)
 const progress = ref(0)
 
 const processingSteps = ref([
   { text: 'تحلیل نتایج ارزیابی', status: 'pending' },
-  { text: 'تعریف اهداف درمانی', status: 'pending' }
+  { text: 'تولید اهداف تشخیصی با هوش مصنوعی', status: 'pending' },
+  { text: 'بررسی معیارهای DSM-5 و ICD-11', status: 'pending' }
 ])
 
 const statusMessages = [
   {
-    title: 'بررسی پاسخ‌های شما',
+    title: 'تحلیل ارزیابی شما',
     message: 'در حال مطالعه دقیق اطلاعاتی که با ما به اشتراک گذاشتید...'
   },
   {
-    title: 'تعریف اهداف درمانی',
-    message: 'بر اساس پاسخ‌هایتان، در حال تعریف اهداف مناسب برای درمان شما...'
+    title: 'تولید اهداف تشخیصی',
+    message: 'هوش مصنوعی در حال تولید اهداف تشخیصی بر اساس علائم شما...'
+  },
+  {
+    title: 'بررسی معیارهای تشخیصی',
+    message: 'در حال بررسی معیارهای DSM-5 و ICD-11 برای تشخیص دقیق...'
   }
 ]
 
@@ -106,7 +115,7 @@ const processAssessment = async () => {
   try {
     // Step 1: Analyze assessment results
     updateStep(0, 'processing')
-    await new Promise(resolve => setTimeout(resolve, 5000)) // Ensure minimum wait time
+    await new Promise(resolve => setTimeout(resolve, 3000))
     
     const assessments = await getUserAssessments()
     if (assessments.length === 0) {
@@ -116,21 +125,50 @@ const processAssessment = async () => {
     const latestAssessment = assessments[0]
     updateStep(0, 'completed')
     
-    // Step 2: Generate therapy goals based on assessment
+    // Step 2: Generate AI-powered diagnosis goals
     updateStep(1, 'processing')
-    await new Promise(resolve => setTimeout(resolve, 6000))
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
-    const therapyGoals = await generateTherapyGoals(latestAssessment)
+    const diagnosisGoals = await generateDiagnosisGoals(latestAssessment, 1)
     updateStep(1, 'completed')
     
-    // Redirect to next step (goal setting or chat)
+    // Step 3: Process DSM-5 and ICD-11 criteria
+    updateStep(2, 'processing')
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    
+    // Save the generated goals to database
+    for (const goal of diagnosisGoals) {
+      await createTherapyGoal({
+        ...goal,
+        user_id: user.value?.id,
+        therapist_id: user.value?.id || '',
+        status: 'pending',
+        progress_percentage: 0,
+        ai_evaluation: '',
+        notes: '',
+        target_date: null,
+        achieved_date: null,
+        sub_goals: []
+      })
+    }
+    
+    updateStep(2, 'completed')
+    
+    // Get available therapists and redirect to chat page
+    const therapists = await getTherapists()
+    const defaultTherapist = therapists.find(t => t.isActive) || therapists[0]
+    
     setTimeout(() => {
-      router.push(`/therapy-journey/goal-setting?assessment=${latestAssessment.id}`)
+      if (defaultTherapist) {
+        router.push(`/therapy-journey/chat?therapistId=${defaultTherapist.id}`)
+      } else {
+        router.push('/therapy-journey/chat')
+      }
     }, 1000)
     
   } catch (error) {
     console.error('Error processing assessment:', error)
-    // Handle error - maybe redirect back or show error message
+    // Handle error - redirect with fallback goals
     setTimeout(() => {
       router.push(`/therapy-journey/goal-setting`)
     }, 1000)
@@ -149,107 +187,6 @@ const updateStep = (stepIndex: number, status: 'pending' | 'processing' | 'compl
   progress.value = (completedSteps + processingSteps_count * 0.5) / processingSteps.value.length * 100
 }
 
-const generateTherapyGoals = async (assessment: any) => {
-  // Create therapy goals based on assessment responses
-  const goals = []
-  
-  // Primary goal: General well-being improvement
-  goals.push({
-    goal_type: 'general',
-    title: 'بهbود کلی سلامت روان',
-    description: 'بهبود کیفیت زندگی و سلامت روانی بر اساس نیازهای شناسایی‌شده',
-    target_behaviors: [
-      'شناسایی و مدیریت احساسات',
-      'بهبود مهارت‌های مقابله‌ای',
-      'تقویت حمایت اجتماعی',
-      'افزایش خودآگاهی'
-    ],
-    success_criteria: [
-      'کاهش سطح استرس روزانه',
-      'بهبود کیفیت خواب',
-      'افزایش احساس رضایت از زندگی',
-      'تقویت روابط بین‌فردی'
-    ],
-    priority: 'high',
-    status: 'pending'
-  })
-
-  // Anxiety management goal (if high anxiety indicated)
-  if (assessment.anxietyLevel >= 6) {
-    goals.push({
-      goal_type: 'specific',
-      title: 'مدیریت اضطراب',
-      description: 'یادگیری تکنیک‌های مؤثر برای کنترل و کاهش اضطراب',
-      target_behaviors: [
-        'تمرین تکنیک‌های تنفس عمیق',
-        'یادگیری تکنیک‌های آرام‌سازی',
-        'شناسایی محرک‌های اضطراب',
-        'تمرین ذهن‌آگاهی'
-      ],
-      success_criteria: [
-        'کاهش شدت حملات اضطراب',
-        'افزایش احساس کنترل',
-        'بهبود کیفیت زندگی',
-        'کاهش اجتناب از موقعیت‌ها'
-      ],
-      priority: 'high',
-      status: 'pending'
-    })
-  }
-
-  // Mood improvement goal (if depressive symptoms indicated)
-  const depressiveIndicators = [
-    assessment.mood === 'افسرده' || assessment.mood === 'بی‌حال',
-    assessment.energyLevel <= 3,
-    assessment.motivationLevel <= 3,
-    assessment.sleepQuality <= 3
-  ].filter(Boolean).length
-  
-  if (depressiveIndicators >= 2) {
-    goals.push({
-      goal_type: 'specific',
-      title: 'بهبود خلق و انگیزه',
-      description: 'بهبود وضعیت خلقی و افزایش انگیزه برای فعالیت‌های روزانه',
-      target_behaviors: [
-        'ایجاد برنامه روزانه ساختاریافته',
-        'تمرین فعالیت‌های لذت‌بخش',
-        'تنظیم اهداف کوچک و قابل دستیابی',
-        'تمرین قدردانی و تفکر مثبت'
-      ],
-      success_criteria: [
-        'افزایش سطح انرژی روزانه',
-        'بهبود کیفیت خواب',
-        'افزایش مشارکت در فعالیت‌ها',
-        'بهبود احساس خوشبینی'
-      ],
-      priority: 'high',
-      status: 'pending'
-    })
-  }
-
-  // Self-care and lifestyle improvement goal
-  goals.push({
-    goal_type: 'specific',
-    title: 'بهبود سبک زندگی و خودمراقبتی',
-    description: 'ایجاد عادات سالم و تقویت مهارت‌های خودمراقبتی',
-    target_behaviors: [
-      'ایجاد برنامه ورزش منظم',
-      'بهبود الگوی تغذیه',
-      'تنظیم ساعات خواب',
-      'تمرین فعالیت‌های آرام‌بخش'
-    ],
-    success_criteria: [
-      'داشتن برنامه ورزشی هفتگی',
-      'بهبود کیفیت تغذیه',
-      'تنظیم چرخه خواب و بیداری',
-      'کاهش سطح استرس'
-    ],
-    priority: 'medium',
-    status: 'pending'
-  })
-
-  return goals
-}
 
 onMounted(() => {
   // Start processing after component mounts

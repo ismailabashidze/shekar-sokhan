@@ -16,10 +16,10 @@ export type SelectedTherapicGoals = {
 
 export type TherapyGoal = {
   id?: string
-  session_id: string
+  session_id?: string
   user_id: string
   therapist_id: string
-  goal_type: 'general' | 'specific'
+  goal_type: 'general' | 'specific' | 'diagnostic' | 'treatment'
   title: string
   description: string
   target_behaviors: string[]
@@ -65,14 +65,18 @@ export function useGoal() {
       throw new Error('User not authenticated')
     }
 
-    const goal = {
-      ...goalData,
+    const goalRecord = {
       user_id: user.value.id,
-      created: new Date().toISOString(),
+      goals: {
+        ...goalData,
+        created: new Date().toISOString(),
+        status: goalData.status || 'pending',
+        progress_percentage: goalData.progress_percentage || 0
+      }
     }
 
     try {
-      return await nuxtApp.$pb.collection('goals').create(goal)
+      return await nuxtApp.$pb.collection('goals_2').create(goalRecord)
     } catch (error) {
       console.error('Error creating therapy goal:', error)
       throw error
@@ -87,13 +91,20 @@ export function useGoal() {
     try {
       let filter = `user_id = "${user.value.id}"`
       if (sessionId) {
-        filter += ` && session_id = "${sessionId}"`
+        filter += ` && goals.session_id = "${sessionId}"`
       }
 
-      return await nuxtApp.$pb.collection('goals').getFullList({
+      const records = await nuxtApp.$pb.collection('goals_2').getFullList({
         filter,
         sort: '-created',
       })
+      
+      // Extract goals from the nested structure
+      return records.map(record => ({
+        id: record.id,
+        ...record.goals,
+        user_id: record.user_id
+      }))
     } catch (error) {
       console.error('Error fetching therapy goals:', error)
       throw error
@@ -106,9 +117,15 @@ export function useGoal() {
     }
 
     try {
-      return await nuxtApp.$pb.collection('goals').update(id, {
-        ...goalData,
-        updated: new Date().toISOString(),
+      // Get current record to preserve the nested structure
+      const currentRecord = await nuxtApp.$pb.collection('goals_2').getOne(id)
+      
+      return await nuxtApp.$pb.collection('goals_2').update(id, {
+        goals: {
+          ...currentRecord.goals,
+          ...goalData,
+          updated: new Date().toISOString(),
+        }
       })
     } catch (error) {
       console.error('Error updating therapy goal:', error)
@@ -118,8 +135,8 @@ export function useGoal() {
 
   const updateSubGoalStatus = async (goalId: string, subGoalIndex: number, status: 'pending' | 'in_progress' | 'completed') => {
     try {
-      const goal = await nuxtApp.$pb.collection('goals').getOne(goalId)
-      const subGoals = [...goal.sub_goals]
+      const record = await nuxtApp.$pb.collection('goals_2').getOne(goalId)
+      const subGoals = [...record.goals.sub_goals]
       
       subGoals[subGoalIndex] = {
         ...subGoals[subGoalIndex],

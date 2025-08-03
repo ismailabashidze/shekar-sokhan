@@ -336,7 +336,7 @@ else {
   font-size: 20px;
   margin-right: -14px;
 }
-#loader .text:after {
+#loader .text::before {
   content: "";
   display: inline-block;
   background: transparent;

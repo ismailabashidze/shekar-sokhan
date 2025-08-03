@@ -1,4 +1,4 @@
-export type SessionType = 'educational' | 'therapic'
+export type SessionType = 'educational' | 'therapic' | 'therapy_journey'
 export type SessionStatus = 'inprogress' | 'done' | 'closed' | 'delete'
 
 export type Session = {
@@ -11,6 +11,9 @@ export type Session = {
   count_of_total_messages: number
   total_time_passed: number
   session_analysis_for_system: SessionAnalysis
+  goals?: string[] // Array of goal IDs for therapy_journey sessions
+  therapist?: string // Therapist ID for therapy_journey sessions
+  assessment_id?: string // Assessment ID for linking to original assessment
   created?: string
   updated?: string
 }

@@ -760,8 +760,8 @@ const gotoReport = () => {
 const openGoalsModal = async () => {
   try {
     showGoalsModal.value = true
-    // Fetch user's therapy goals
-    userGoals.value = await getTherapyGoals()
+    // Fetch user's therapy goals with current session
+    userGoals.value = await getTherapyGoals(activeSession.value?.id)
   } catch (error) {
     console.error('Error fetching goals:', error)
     userGoals.value = []
@@ -829,7 +829,7 @@ ${report.possibleRiskFactors?.flat().map((risk: any) =>
     messages.value = messages.value.filter(msg => !msg.isTyping)
 
     // Save AI response to PocketBase
-    const savedAIMessage = await sendMessage(therapist.id, sessionId, aiResponse, 'received')
+    const savedAIMessage = await sendMessage(activeTherapistId.value || therapist.id, sessionId, aiResponse, 'received')
 
     // Add AI response to messages with the correct ID
     messages.value.push({
@@ -1018,7 +1018,7 @@ const submitMessageFeedback = async () => {
       message_id: selectedMessageForFeedback.value.id,
       session_id: activeSession.value.id,
       user_id: nuxtApp.$pb.authStore.model.id,
-      therapist_id: activeTherapistId.value,
+      therapist_id: activeTherapistId.value || selectedConversationComputed.value?.user.id,
       message_content: selectedMessageForFeedback.value.text,
       ...feedbackForm.value,
     }
@@ -3389,7 +3389,7 @@ const isAIThinking = ref(false)
           </div>
 
           <!-- Success Criteria -->
-          <div v-if="goal.success_criteria && goal.success_criteria.length > 0">
+          <div v-if="goal.success_criteria && goal.success_criteria.length > 0" class="mb-5">
             <div class="flex items-center gap-2 mb-4">
               <div class="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
                 <Icon name="ph:trophy-duotone" class="size-4 text-emerald-600 dark:text-emerald-400" />
@@ -3403,6 +3403,72 @@ const isAIThinking = ref(false)
                     <Icon name="ph:star" class="size-3 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <span class="text-sm text-emerald-800 dark:text-emerald-200 leading-relaxed">{{ criteria }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- DSM-5 Criteria (for diagnostic goals) -->
+          <div v-if="goal.dsm5_criteria && goal.dsm5_criteria.length > 0" class="mb-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                <Icon name="ph:book-open-duotone" class="size-4 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h5 class="text-sm font-semibold text-muted-800 dark:text-muted-200">معیارهای DSM-5</h5>
+            </div>
+            <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-100 dark:border-purple-800/30">
+              <div class="space-y-4">
+                <div v-for="disorder in goal.dsm5_criteria" :key="disorder.code" class="border-b border-purple-200 dark:border-purple-700 last:border-b-0 pb-3 last:pb-0">
+                  <h6 class="font-medium text-purple-800 dark:text-purple-200 mb-2">{{ disorder.name }} ({{ disorder.code }})</h6>
+                  <ul class="space-y-2">
+                    <li v-for="criteria in disorder.criteria" :key="criteria" class="flex items-start gap-2 text-sm text-purple-700 dark:text-purple-300">
+                      <span class="text-purple-400 mt-1">•</span>
+                      <span>{{ criteria }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ICD-11 Criteria (for diagnostic goals) -->
+          <div v-if="goal.icd11_criteria && goal.icd11_criteria.length > 0" class="mb-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                <Icon name="ph:hospital-duotone" class="size-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <h5 class="text-sm font-semibold text-muted-800 dark:text-muted-200">معیارهای ICD-11</h5>
+            </div>
+            <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 border border-indigo-100 dark:border-indigo-800/30">
+              <div class="space-y-4">
+                <div v-for="disorder in goal.icd11_criteria" :key="disorder.code" class="border-b border-indigo-200 dark:border-indigo-700 last:border-b-0 pb-3 last:pb-0">
+                  <h6 class="font-medium text-indigo-800 dark:text-indigo-200 mb-2">{{ disorder.name }} ({{ disorder.code }})</h6>
+                  <ul class="space-y-2">
+                    <li v-for="criteria in disorder.criteria" :key="criteria" class="flex items-start gap-2 text-sm text-indigo-700 dark:text-indigo-300">
+                      <span class="text-indigo-400 mt-1">•</span>
+                      <span>{{ criteria }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Plans (for diagnostic goals) -->
+          <div v-if="goal.action_plans && goal.action_plans.length > 0">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                <Icon name="ph:clipboard-text-duotone" class="size-4 text-orange-600 dark:text-orange-400" />
+              </div>
+              <h5 class="text-sm font-semibold text-muted-800 dark:text-muted-200">برنامه‌های عملی</h5>
+            </div>
+            <div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 border border-orange-100 dark:border-orange-800/30">
+              <ul class="space-y-3">
+                <li v-for="plan in goal.action_plans" :key="plan" class="flex items-start gap-3">
+                  <div class="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-800/50 flex items-center justify-center mt-0.5">
+                    <Icon name="ph:arrow-right" class="size-3 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <span class="text-sm text-orange-800 dark:text-orange-200 leading-relaxed">{{ plan }}</span>
                 </li>
               </ul>
             </div>
