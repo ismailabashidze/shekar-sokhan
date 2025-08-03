@@ -249,6 +249,31 @@ function canAccessStage(stage: any) {
   
   return stageIndex <= currentStageIndex + 1
 }
+
+function handleQuickAction(action: string) {
+  switch (action) {
+    case 'roadmap':
+      navigateTo('/hammasir/roadmap')
+      break
+    case 'questionnaires':
+      navigateTo('/hammasir/questionnaires')
+      break
+    case 'counseling':
+      // TODO: Navigate to counseling page
+      console.log('Navigate to counseling')
+      break
+    case 'continue_course':
+      // TODO: Navigate to current course
+      console.log('Continue current course')
+      break
+    case 'profile':
+      // TODO: Navigate to profile page
+      console.log('Navigate to profile')
+      break
+    default:
+      console.log('Unknown action:', action)
+  }
+}
 </script>
 
 <style scoped>
@@ -1170,6 +1195,7 @@ function canAccessStage(stage: any) {
                 <button 
                   v-for="action in quickActions" 
                   :key="action.action"
+                  @click="handleQuickAction(action.action)"
                   class="group w-full flex items-center gap-4 p-4 rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-white/50 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg text-right"
                 >
                   <div class="flex-shrink-0">
