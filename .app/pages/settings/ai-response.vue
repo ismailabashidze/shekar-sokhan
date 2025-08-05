@@ -1,13 +1,11 @@
 <script setup lang="ts">
 definePageMeta({
-  title: 'تنظیمات',
+  title: 'تنظیمات پاسخ هوش مصنوعی',
   preview: {
-    title: 'تنظیمات',
-    description: 'نمایش تنظیمات حساب کاربری',
-    categories: ['layouts', 'profile'],
-    src: '/img/screens/layouts-subpages-settings.png',
-    srcDark: '/img/screens/layouts-subpages-settings-dark.png',
-    order: 81,
+    title: 'تنظیمات پاسخ هوش مصنوعی',
+    description: 'تنظیمات سفارشی‌سازی پاسخ‌های هوش مصنوعی',
+    categories: ['settings', 'ai'],
+    order: 82,
   },
   layout: 'sidebar',
 })
@@ -134,258 +132,414 @@ function goBack() {
 </script>
 
 <template>
-  <div class="p-6 bg-muted-50 dark:bg-muted-900">
+  <div class="p-6 bg-muted-50 dark:bg-muted-900 min-h-screen">
     <div class="max-w-5xl mx-auto space-y-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-semibold flex items-center gap-3 text-muted-900 dark:text-white">
-          <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
-            <!-- heroicons: sparkles -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.813 15.904a6.375 6.375 0 1 1 4.374-4.374m-4.374 4.374L6 21m3.813-5.096L15 18m-2.813-6.47L18 6" />
-            </svg>
+          <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
+            <Icon name="ph:brain-duotone" class="size-6" />
           </span>
           تنظیمات پاسخ هوش مصنوعی
         </h1>
         <div class="flex items-center gap-2">
-          <button class="btn btn-sm bg-muted-100 hover:bg-muted-200 text-muted-800 rounded-lg px-3 py-2" @click="goBack">
-            <!-- heroicons: arrow-left -->
-            <svg class="h-5 w-5 inline-block mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 19.5L3 12l7.5-7.5M3 12h18" />
-            </svg>
+          <BaseButton 
+            color="muted" 
+            variant="solid" 
+            @click="goBack"
+          >
+            <Icon name="ph:arrow-left" class="size-4 ml-1" />
             بازگشت
-          </button>
-          <button class="btn btn-sm bg-warning-100 text-warning-700 hover:bg-warning-200 rounded-lg px-3 py-2" @click="resetToDefaults">
-            <!-- heroicons: arrow-path -->
-            <svg class="h-5 w-5 inline-block mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.023 9.348h4.992M19.515 5.859l1.5 3.489-3.489 1.5M7.977 14.652H2.985m2.508 3.489l-1.5-3.489 3.489-1.5M8.25 6.75a5.25 5.25 0 0 1 9.584 2.598M15.75 17.25A5.25 5.25 0 0 1 6.166 14.652" />
-            </svg>
+          </BaseButton>
+          <BaseButton 
+            color="warning" 
+            variant="solid" 
+            @click="resetToDefaults"
+          >
+            <Icon name="ph:arrow-counter-clockwise" class="size-4 ml-1" />
             بازنشانی
-          </button>
+          </BaseButton>
         </div>
       </div>
 
       <!-- Summary card -->
-      <div class="rounded-xl border border-muted-200 dark:border-muted-700/50 bg-white dark:bg-muted-800 shadow-sm p-4">
-        <div class="flex items-center gap-3 text-muted-700 dark:text-muted-200">
-          <!-- heroicons: eye -->
-          <svg class="h-5 w-5 text-muted-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.036 12.322c1.258-4.233 5.34-7.322 9.964-7.322s8.706 3.089 9.964 7.322c-1.258 4.233-5.34 7.322-9.964 7.322S3.294 16.555 2.036 12.322z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+      <div class="rounded-xl border border-muted-200 dark:border-muted-700/50 bg-white dark:bg-muted-800 shadow-sm p-5">
+        <div class="flex items-center gap-3 text-muted-700 dark:text-muted-200 mb-3">
+          <Icon name="ph:eye-duotone" class="size-5 text-muted-500" />
           <span class="font-medium">پیش‌نمایش</span>
         </div>
-        <p class="mt-2 text-sm text-muted-600 dark:text-muted-300">
-          {{ previewSummary }}
-        </p>
+        <div class="bg-muted-100 dark:bg-muted-900/50 rounded-lg p-4">
+          <p class="text-sm text-muted-600 dark:text-muted-300 leading-relaxed">
+            {{ previewSummary }}
+          </p>
+        </div>
       </div>
 
       <!-- Controls grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-muted-900 dark:text-muted-100">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <!-- Multi-message vs single -->
-        <div class="rounded-xl border border-muted-200 dark:border-muted-700/50 bg-white dark:bg-muted-800 shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: squares-2x2 -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 3.75h7.5v7.5h-7.5zM12.75 3.75h7.5v7.5h-7.5zM3.75 12.75h7.5v7.5h-7.5zM12.75 12.75h7.5v7.5h-7.5z" />
-            </svg>
-            <h3 class="font-medium">حالت پیام</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:squares-four-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">حالت پیام</h3>
+            </div>
+            <div class="flex gap-3">
+              <BaseButton 
+                :color="state.multiMsgMode === 'single' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.multiMsgMode='single'"
+              >
+                تک پیام
+              </BaseButton>
+              <BaseButton 
+                :color="state.multiMsgMode === 'multi_short' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.multiMsgMode='multi_short'"
+              >
+                چند پیام کوتاه
+              </BaseButton>
+            </div>
           </div>
-          <div class="flex gap-3">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.multiMsgMode==='single' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.multiMsgMode='single'">تک پیام</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.multiMsgMode==='multi_short' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.multiMsgMode='multi_short'">چند پیام کوتاه</button>
-          </div>
-        </div>
+        </BaseCard>
 
         <!-- Length -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: bars-3-bottom-left -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 6.75h12.5M3.75 12h8.75M3.75 17.25h5" />
-            </svg>
-            <h3 class="font-medium">طول پیام</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:text-align-left-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">طول پیام</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <BaseButton 
+                size="sm"
+                :color="state.lengthPref === 'very_short' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.lengthPref='very_short'"
+              >
+                خیلی کوتاه
+              </BaseButton>
+              <BaseButton 
+                size="sm"
+                :color="state.lengthPref === 'short' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.lengthPref='short'"
+              >
+                کوتاه
+              </BaseButton>
+              <BaseButton 
+                size="sm"
+                :color="state.lengthPref === 'long' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.lengthPref='long'"
+              >
+                بلند
+              </BaseButton>
+            </div>
           </div>
-          <div class="flex gap-3 flex-wrap">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.lengthPref==='very_short' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.lengthPref='very_short'">خیلی کوتاه</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.lengthPref==='short' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.lengthPref='short'">کوتاه</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.lengthPref==='long' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.lengthPref='long'">بلند</button>
-          </div>
-        </div>
+        </BaseCard>
 
         <!-- Emoji usage -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: face-smile -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.59 14.37a4.5 4.5 0 0 1-7.18 0M8.25 9a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm9 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0z" />
-              <circle cx="12" cy="12" r="9" />
-            </svg>
-            <h3 class="font-medium">استفاده از ایموجی</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:smiley-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">استفاده از ایموجی</h3>
+            </div>
+            <BaseSelect
+              v-model="state.emojiLevel"
+              :options="[
+                { label: 'خیلی زیاد', value: 'very_high' },
+                { label: 'زیاد', value: 'high' },
+                { label: 'متوسط', value: 'medium' },
+                { label: 'کم', value: 'low' },
+                { label: 'بدون ایموجی', value: 'none' }
+              ]"
+              placeholder="انتخاب کنید"
+              rounded="md"
+            />
           </div>
-          <select v-model="state.emojiLevel" class="form-select w-full dark:bg-muted-900 dark:text-muted-100">
-            <option value="very_high">خیلی زیاد</option>
-            <option value="high">زیاد</option>
-            <option value="medium">متوسط</option>
-            <option value="low">کم</option>
-            <option value="none">بدون ایموجی</option>
-          </select>
-        </div>
+        </BaseCard>
 
         <!-- Tone -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: scale -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h18M6 3v6m12-6v6M6 9h12l-2 12H8L6 9z" />
-            </svg>
-            <h3 class="font-medium">لحن</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:scale-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">لحن</h3>
+            </div>
+            <div class="flex gap-3">
+              <BaseButton 
+                :color="state.tone === 'formal' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.tone='formal'"
+              >
+                رسمی
+              </BaseButton>
+              <BaseButton 
+                :color="state.tone === 'informal' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.tone='informal'"
+              >
+                محاوره‌ای
+              </BaseButton>
+            </div>
           </div>
-          <div class="flex gap-3">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.tone==='formal' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.tone='formal'">رسمی</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.tone==='informal' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.tone='informal'">محاوره‌ای</button>
-          </div>
-        </div>
+        </BaseCard>
 
         <!-- Kindness -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: heart -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.995 20.25S3.75 15 3.75 9.75a4.5 4.5 0 0 1 8.245-2.655A4.5 4.5 0 0 1 20.25 9.75c0 5.25-8.255 10.5-8.255 10.5z" />
-            </svg>
-            <h3 class="font-medium">مهربانی</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:heart-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">مهربانی</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <BaseButton 
+                size="sm"
+                :color="state.kindness === 'very_kind' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.kindness='very_kind'"
+              >
+                بسیار مهربان
+              </BaseButton>
+              <BaseButton 
+                size="sm"
+                :color="state.kindness === 'kind' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.kindness='kind'"
+              >
+                مهربان
+              </BaseButton>
+              <BaseButton 
+                size="sm"
+                :color="state.kindness === 'not_kind' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.kindness='not_kind'"
+              >
+                غیرمهربان
+              </BaseButton>
+            </div>
           </div>
-          <div class="flex gap-3 flex-wrap">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.kindness==='very_kind' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.kindness='very_kind'">بسیار مهربان</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.kindness==='kind' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.kindness='kind'">مهربان</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.kindness==='not_kind' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.kindness='not_kind'">غیرمهربان</button>
-          </div>
-        </div>
+        </BaseCard>
 
         <!-- Creativity -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: beaker -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v5.25L4.5 16.5A3.75 3.75 0 0 0 8.25 22.5h7.5A3.75 3.75 0 0 0 19.5 16.5L15 8.25V3" />
-            </svg>
-            <h3 class="font-medium">خلاقیت</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:flask-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">خلاقیت</h3>
+            </div>
+            <div class="space-y-4">
+              <BaseSlider
+                v-model="state.creativity"
+                :min="0"
+                :max="2"
+                :step="1"
+                tooltip
+              />
+              <div class="text-center">
+                <span class="text-sm font-medium text-muted-700 dark:text-muted-300">
+                  {{ state.creativity === 0 ? 'قطعی' : state.creativity === 1 ? 'متعادل' : 'خلاق' }}
+                </span>
+              </div>
+            </div>
           </div>
-          <input type="range" min="0" max="2" step="1" v-model.number="state.creativity" class="w-full" />
-          <div class="text-xs text-muted-600 mt-1">
-            {{ state.creativity === 0 ? 'قطعی' : state.creativity === 1 ? 'متعادل' : 'خلاق' }}
-          </div>
-        </div>
+        </BaseCard>
 
         <!-- Domain strictness -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: shield-check -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3l7.5 4.5v4.75A8.75 8.75 0 0 1 12 21.75A8.75 8.75 0 0 1 4.5 12.25V7.5L12 3z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m9.75 12.75 1.5 1.5 3-3" />
-            </svg>
-            <h3 class="font-medium">سخت‌گیری دامنه</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:shield-check-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">سخت‌گیری دامنه</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <BaseButton 
+                size="sm"
+                :color="state.domainStrictness === 'strict' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.domainStrictness='strict'"
+              >
+                سخت‌گیر
+              </BaseButton>
+              <BaseButton 
+                size="sm"
+                :color="state.domainStrictness === 'balanced' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.domainStrictness='balanced'"
+              >
+                متعادل
+              </BaseButton>
+              <BaseButton 
+                size="sm"
+                :color="state.domainStrictness === 'loose' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.domainStrictness='loose'"
+              >
+                آزاد
+              </BaseButton>
+            </div>
           </div>
-          <div class="flex gap-3">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.domainStrictness==='strict' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.domainStrictness='strict'">سخت‌گیر</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.domainStrictness==='balanced' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.domainStrictness='balanced'">متعادل</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.domainStrictness==='loose' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.domainStrictness='loose'">آزاد</button>
-          </div>
-        </div>
+        </BaseCard>
 
         <!-- Language style -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: chat-bubble-left-right -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.25 8.511a6.739 6.739 0 0 1-2.25.389 6.75 6.75 0 1 1-6.75-6.75c.133 0 .265.003.396.01" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 15.75 6 21l5.25-2.25" />
-            </svg>
-            <h3 class="font-medium">سبک زبان</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:chat-centered-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">سبک زبان</h3>
+            </div>
+            <BaseSelect
+              v-model="state.languageStyle"
+              :options="[
+                { label: 'ساده', value: 'plain' },
+                { label: 'حرفه‌ای', value: 'professional' },
+                { label: 'دوستانه', value: 'friendly' }
+              ]"
+              placeholder="انتخاب کنید"
+              rounded="md"
+            />
           </div>
-          <select v-model="state.languageStyle" class="form-select w-full dark:bg-muted-900 dark:text-muted-100">
-            <option value="plain">ساده</option>
-            <option value="professional">حرفه‌ای</option>
-            <option value="friendly">دوستانه</option>
-          </select>
-        </div>
+        </BaseCard>
 
         <!-- Disclaimers -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: information-circle -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8.25v.008M12 11.25v4.5" />
-              <circle cx="12" cy="12" r="9" />
-            </svg>
-            <h3 class="font-medium">بیانیه‌های سلب مسئولیت</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:info-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">بیانیه‌های سلب مسئولیت</h3>
+            </div>
+            <BaseSelect
+              v-model="state.disclaimers"
+              :options="[
+                { label: 'همیشه', value: 'always' },
+                { label: 'در صورت نیاز', value: 'when_needed' },
+                { label: 'هرگز', value: 'never' }
+              ]"
+              placeholder="انتخاب کنید"
+              rounded="md"
+            />
           </div>
-          <select v-model="state.disclaimers" class="form-select w-full dark:bg-muted-900 dark:text-muted-100">
-            <option value="always">همیشه</option>
-            <option value="when_needed">در صورت نیاز</option>
-            <option value="never">هرگز</option>
-          </select>
-        </div>
+        </BaseCard>
 
         <!-- Profanity filter -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: no-symbol -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m18.364 5.636-12.728 12.728M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
-            </svg>
-            <h3 class="font-medium">الفاظ رکیک</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:prohibit-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">الفاظ رکیک</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <BaseButton 
+                size="sm"
+                :color="state.profanity === 'block' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.profanity='block'"
+              >
+                مسدود
+              </BaseButton>
+              <BaseButton 
+                size="sm"
+                :color="state.profanity === 'soften' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.profanity='soften'"
+              >
+                تلطیف
+              </BaseButton>
+              <BaseButton 
+                size="sm"
+                :color="state.profanity === 'allow' ? 'primary' : 'default'" 
+                variant="solid"
+                @click="state.profanity='allow'"
+              >
+                مجاز
+              </BaseButton>
+            </div>
           </div>
-          <div class="flex gap-3">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.profanity==='block' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.profanity='block'">مسدود</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.profanity==='soften' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.profanity='soften'">تلطیف</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.profanity==='allow' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.profanity='allow'">مجاز</button>
-          </div>
-        </div>
+        </BaseCard>
 
         <!-- Formatting preference -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: list-bullet -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 7.5h10.5M6.75 12h10.5M6.75 16.5h10.5" />
-            </svg>
-            <h3 class="font-medium">قالب‌بندی</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:list-bullets-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">قالب‌بندی</h3>
+            </div>
+            <BaseSelect
+              v-model="state.formatting"
+              :options="[
+                { label: 'بدون قالب', value: 'none' },
+                { label: 'گلوله‌ای', value: 'bullets' },
+                { label: 'مارک‌داون', value: 'markdown' }
+              ]"
+              placeholder="انتخاب کنید"
+              rounded="md"
+            />
           </div>
-          <select v-model="state.formatting" class="form-select w-full dark:bg-muted-900 dark:text-muted-100">
-            <option value="none">بدون قالب</option>
-            <option value="bullets">گلوله‌ای</option>
-            <option value="markdown">مارک‌داون</option>
-          </select>
-        </div>
+        </BaseCard>
 
         <!-- Reply speed -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: bolt -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m13.5 4.5-6 9h6L10.5 21l6-9h-6l3-7.5z" />
-            </svg>
-            <h3 class="font-medium">سرعت پاسخ (میلی‌ثانیه)</h3>
+        <BaseCard rounded="lg" elevated class="border border-muted-200 dark:border-muted-700/50">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg">
+                <Icon name="ph:lightning-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 class="font-semibold text-muted-900 dark:text-white">سرعت پاسخ (میلی‌ثانیه)</h3>
+            </div>
+            <div class="space-y-4">
+              <BaseSlider
+                v-model="state.replySpeedMs"
+                :min="100"
+                :max="1000"
+                :step="50"
+                tooltip
+              />
+              <div class="text-center">
+                <span class="text-sm font-medium text-muted-700 dark:text-muted-300">
+                  {{ state.replySpeedMs }} میلی‌ثانیه بین بخش‌ها
+                </span>
+              </div>
+            </div>
           </div>
-          <input type="range" min="100" max="1000" step="50" v-model.number="state.replySpeedMs" class="w-full" />
-          <div class="text-xs text-muted-600 mt-1">
-            {{ state.replySpeedMs }} میلی‌ثانیه بین بخش‌ها
-          </div>
-        </div>
+        </BaseCard>
       </div>
 
-        <div class="rounded-xl border border-muted-200 dark:border-muted-700/50 bg-white dark:bg-muted-800 shadow-sm p-4 flex items-center justify-between">
+      <div class="rounded-xl border border-muted-200 dark:border-muted-700/50 bg-white dark:bg-muted-800 shadow-sm p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="text-sm text-muted-700 dark:text-muted-300">
+          <Icon name="ph:info-duotone" class="size-4 inline-block mr-1" />
           تنظیمات به‌صورت خودکار در این دستگاه ذخیره می‌شوند.
         </div>
-        <NuxtLink to="/darmana/therapists/messaging" class="btn bg-primary-600 text-white dark:text-white rounded-lg px-4 py-2 hover:bg-primary-700">
-          <!-- heroicons: paper-airplane -->
-          <svg class="h-5 w-5 inline-block mr-2 -rotate-45" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m3 11 18-8-8 18-2-8-8-2z" />
-          </svg>
-          ورود به گفتگو
+        <NuxtLink to="/darmana/therapists/messaging">
+          <BaseButton 
+            color="primary" 
+            variant="solid"
+          >
+            <Icon name="ph:chat-circle-text-duotone" class="size-4 ml-1" />
+            ورود به گفتگو
+          </BaseButton>
         </NuxtLink>
       </div>
     </div>
