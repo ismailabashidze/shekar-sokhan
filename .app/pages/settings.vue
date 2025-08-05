@@ -131,21 +131,21 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
               >
                 مشاوره هوشمند
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
-                تنظیمات مشاور هوشمند
-              </BaseText>
-            </div>
-          </NuxtLink>
+          <BaseText size="xs" class="text-muted-400">
+            تنظیمات مشاور هوشمند
+          </BaseText>
+        </div>
+      </NuxtLink>
         </BaseCard>
         <BaseCard
           rounded="lg"
           elevated-hover
           class="hover:!border-primary-500 group border-2"
         >
-          <NuxtLink to="/darmana/therapists/sessions" class="block p-6">
+          <NuxtLink to="/settings/ai-response" class="block p-6">
             <div class="text-center">
               <Icon
-                name="ph:chat-circle-text-duotone"
+                name="ph:brain-duotone"
                 class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
               />
               <BaseHeading
@@ -154,10 +154,10 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
                 weight="semibold"
                 class="mt-2 !text-[0.65rem] uppercase"
               >
-                جلسات
+                مشاوره هوشمند
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
-                جلسات مشاوره
+                تنظیمات مشاور هوشمند
               </BaseText>
             </div>
           </NuxtLink>
