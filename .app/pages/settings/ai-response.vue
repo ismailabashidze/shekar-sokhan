@@ -181,199 +181,155 @@ function goBack() {
 
       <!-- Controls grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Multi-message vs single -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: squares-2x2 -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 3.75h7.5v7.5h-7.5zM12.75 3.75h7.5v7.5h-7.5zM3.75 12.75h7.5v7.5h-7.5zM12.75 12.75h7.5v7.5h-7.5z" />
-            </svg>
-            <h3 class="font-medium">حالت پیام</h3>
+        <!-- حالت پیام -->
+        <TairoFormGroup label="حالت پیام" sublabel="نحوه ارسال پاسخ توسط هوش مصنوعی">
+          <div class="grid grid-cols-2 gap-3">
+            <TairoRadioCard
+              name="multiMsgMode"
+              value="single"
+              :model-value="state.multiMsgMode"
+              @update:model-value="state.multiMsgMode = $event as any"
+              title="تک پیام"
+              subtitle="همه محتوا در یک پیام"
+              icon="ph:chat-circle-text-duotone"
+            />
+            <TairoRadioCard
+              name="multiMsgMode"
+              value="multi_short"
+              :model-value="state.multiMsgMode"
+              @update:model-value="state.multiMsgMode = $event as any"
+              title="چند پیام کوتاه"
+              subtitle="تقسیم پاسخ به چند پیام"
+              icon="ph:chats-teardrop-duotone"
+            />
           </div>
-          <div class="flex gap-3">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.multiMsgMode==='single' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.multiMsgMode='single'">تک پیام</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.multiMsgMode==='multi_short' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.multiMsgMode='multi_short'">چند پیام کوتاه</button>
-          </div>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Length -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: bars-3-bottom-left -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 6.75h12.5M3.75 12h8.75M3.75 17.25h5" />
-            </svg>
-            <h3 class="font-medium">طول پیام</h3>
+        <!-- طول پیام -->
+        <TairoFormGroup label="طول پیام" sublabel="اندازه متن تولیدی">
+          <div class="grid grid-cols-3 gap-3">
+            <TairoRadioCard
+              name="lengthPref"
+              value="very_short"
+              :model-value="state.lengthPref"
+              @update:model-value="state.lengthPref = $event as any"
+              title="خیلی کوتاه"
+              subtitle="خلاصه و موجز"
+              icon="ph:dots-three-duotone"
+            />
+            <TairoRadioCard
+              name="lengthPref"
+              value="short"
+              :model-value="state.lengthPref"
+              @update:model-value="state.lengthPref = $event as any"
+              title="کوتاه"
+              subtitle="چند جمله"
+              icon="ph:align-left-duotone"
+            />
+            <TairoRadioCard
+              name="lengthPref"
+              value="long"
+              :model-value="state.lengthPref"
+              @update:model-value="state.lengthPref = $event as any"
+              title="بلند"
+              subtitle="جزئیات بیشتر"
+              icon="ph:textbox-duotone"
+            />
           </div>
-          <div class="flex gap-3 flex-wrap">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.lengthPref==='very_short' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.lengthPref='very_short'">خیلی کوتاه</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.lengthPref==='short' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.lengthPref='short'">کوتاه</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.lengthPref==='long' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.lengthPref='long'">بلند</button>
-          </div>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Emoji usage -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: face-smile -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.59 14.37a4.5 4.5 0 0 1-7.18 0M8.25 9a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm9 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0z" />
-              <circle cx="12" cy="12" r="9" />
-            </svg>
-            <h3 class="font-medium">استفاده از ایموجی</h3>
+        <!-- استفاده از ایموجی -->
+        <TairoFormGroup label="استفاده از ایموجی" sublabel="میزان استفاده از ایموجی در پاسخ">
+          <div class="grid grid-cols-5 gap-3">
+            <TairoRadioCard name="emojiLevel" value="none" :model-value="state.emojiLevel" @update:model-value="state.emojiLevel = $event as any" title="هیچ" icon="ph:prohibit-duotone" />
+            <TairoRadioCard name="emojiLevel" value="low" :model-value="state.emojiLevel" @update:model-value="state.emojiLevel = $event as any" title="کم" icon="ph:smiley-nervous-duotone" />
+            <TairoRadioCard name="emojiLevel" value="medium" :model-value="state.emojiLevel" @update:model-value="state.emojiLevel = $event as any" title="متوسط" icon="ph:smiley-duotone" />
+            <TairoRadioCard name="emojiLevel" value="high" :model-value="state.emojiLevel" @update:model-value="state.emojiLevel = $event as any" title="زیاد" icon="ph:smiley-wink-duotone" />
+            <TairoRadioCard name="emojiLevel" value="very_high" :model-value="state.emojiLevel" @update:model-value="state.emojiLevel = $event as any" title="خیلی زیاد" icon="ph:party-popper-duotone" />
           </div>
-          <select v-model="state.emojiLevel" class="form-select w-full">
-            <option value="very_high">خیلی زیاد</option>
-            <option value="high">زیاد</option>
-            <option value="medium">متوسط</option>
-            <option value="low">کم</option>
-            <option value="none">بدون ایموجی</option>
-          </select>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Tone -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: scale -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h18M6 3v6m12-6v6M6 9h12l-2 12H8L6 9z" />
-            </svg>
-            <h3 class="font-medium">لحن</h3>
+        <!-- لحن -->
+        <TairoFormGroup label="لحن" sublabel="سبک نوشتاری پاسخ">
+          <div class="grid grid-cols-2 gap-3">
+            <TairoRadioCard name="tone" value="formal" :model-value="state.tone" @update:model-value="state.tone = $event as any" title="رسمی" icon="ph:seal-check-duotone" />
+            <TairoRadioCard name="tone" value="informal" :model-value="state.tone" @update:model-value="state.tone = $event as any" title="محاوره‌ای" icon="ph:hand-waving-duotone" />
           </div>
-          <div class="flex gap-3">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.tone==='formal' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.tone='formal'">رسمی</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.tone==='informal' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.tone='informal'">محاوره‌ای</button>
-          </div>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Kindness -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: heart -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.995 20.25S3.75 15 3.75 9.75a4.5 4.5 0 0 1 8.245-2.655A4.5 4.5 0 0 1 20.25 9.75c0 5.25-8.255 10.5-8.255 10.5z" />
-            </svg>
-            <h3 class="font-medium">مهربانی</h3>
+        <!-- مهربانی -->
+        <TairoFormGroup label="مهربانی" sublabel="سطح همدلی و ادب">
+          <div class="grid grid-cols-3 gap-3">
+            <TairoRadioCard name="kindness" value="not_kind" :model-value="state.kindness" @update:model-value="state.kindness = $event as any" title="غیرمهربان" icon="ph:minus-circle-duotone" />
+            <TairoRadioCard name="kindness" value="kind" :model-value="state.kindness" @update:model-value="state.kindness = $event as any" title="مهربان" icon="ph:heart-duotone" />
+            <TairoRadioCard name="kindness" value="very_kind" :model-value="state.kindness" @update:model-value="state.kindness = $event as any" title="بسیار مهربان" icon="ph:hands-praying-duotone" />
           </div>
-          <div class="flex gap-3 flex-wrap">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.kindness==='very_kind' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.kindness='very_kind'">بسیار مهربان</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.kindness==='kind' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.kindness='kind'">مهربان</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.kindness==='not_kind' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.kindness='not_kind'">غیرمهربان</button>
-          </div>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Creativity -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: beaker -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v5.25L4.5 16.5A3.75 3.75 0 0 0 8.25 22.5h7.5A3.75 3.75 0 0 0 19.5 16.5L15 8.25V3" />
-            </svg>
-            <h3 class="font-medium">خلاقیت</h3>
+        <!-- خلاقیت (slider) -->
+        <TairoFormGroup label="خلاقیت" sublabel="میزان خلاقیت در تولید پاسخ">
+          <div class="rounded-xl border border-muted-200 bg-white dark:bg-muted-900 shadow-sm p-5">
+            <input type="range" min="0" max="2" step="1" v-model.number="state.creativity" class="w-full" />
+            <div class="text-xs text-muted-600 dark:text-muted-300 mt-1">
+              {{ state.creativity === 0 ? 'قطعی' : state.creativity === 1 ? 'متعادل' : 'خلاق' }}
+            </div>
           </div>
-          <input type="range" min="0" max="2" step="1" v-model.number="state.creativity" class="w-full" />
-          <div class="text-xs text-muted-600 mt-1">
-            {{ state.creativity === 0 ? 'قطعی' : state.creativity === 1 ? 'متعادل' : 'خلاق' }}
-          </div>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Domain strictness -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: shield-check -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3l7.5 4.5v4.75A8.75 8.75 0 0 1 12 21.75A8.75 8.75 0 0 1 4.5 12.25V7.5L12 3z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m9.75 12.75 1.5 1.5 3-3" />
-            </svg>
-            <h3 class="font-medium">سخت‌گیری دامنه</h3>
+        <!-- سخت‌گیری دامنه -->
+        <TairoFormGroup label="سخت‌گیری دامنه" sublabel="پایبندی به حوزه موضوعی">
+          <div class="grid grid-cols-3 gap-3">
+            <TairoRadioCard name="domainStrictness" value="strict" :model-value="state.domainStrictness" @update:model-value="state.domainStrictness = $event as any" title="سخت‌گیر" subtitle="پایبندی شدید" icon="ph:shield-duotone" />
+            <TairoRadioCard name="domainStrictness" value="balanced" :model-value="state.domainStrictness" @update:model-value="state.domainStrictness = $event as any" title="متعادل" subtitle="تعادل محتوا" icon="ph:scales-duotone" />
+            <TairoRadioCard name="domainStrictness" value="loose" :model-value="state.domainStrictness" @update:model-value="state.domainStrictness = $event as any" title="آزاد" subtitle="انعطاف بالا" icon="ph:arrows-out-cardinal-duotone" />
           </div>
-          <div class="flex gap-3">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.domainStrictness==='strict' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.domainStrictness='strict'">سخت‌گیر</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.domainStrictness==='balanced' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.domainStrictness='balanced'">متعادل</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.domainStrictness==='loose' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.domainStrictness='loose'">آزاد</button>
-          </div>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Language style -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: chat-bubble-left-right -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.25 8.511a6.739 6.739 0 0 1-2.25.389 6.75 6.75 0 1 1-6.75-6.75c.133 0 .265.003.396.01" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 15.75 6 21l5.25-2.25" />
-            </svg>
-            <h3 class="font-medium">سبک زبان</h3>
+        <!-- سبک زبان -->
+        <TairoFormGroup label="سبک زبان" sublabel="حال‌وهوای نوشتار">
+          <div class="grid grid-cols-3 gap-3">
+            <TairoRadioCard name="languageStyle" value="plain" :model-value="state.languageStyle" @update:model-value="state.languageStyle = $event as any" title="ساده" subtitle="روشن و مستقیم" icon="ph:text-t-duotone" />
+            <TairoRadioCard name="languageStyle" value="professional" :model-value="state.languageStyle" @update:model-value="state.languageStyle = $event as any" title="حرفه‌ای" subtitle="رسمی و دقیق" icon="ph:suitcase-duotone" />
+            <TairoRadioCard name="languageStyle" value="friendly" :model-value="state.languageStyle" @update:model-value="state.languageStyle = $event as any" title="دوستانه" subtitle="گرم و صمیمی" icon="ph:handshake-duotone" />
           </div>
-          <select v-model="state.languageStyle" class="form-select w-full">
-            <option value="plain">ساده</option>
-            <option value="professional">حرفه‌ای</option>
-            <option value="friendly">دوستانه</option>
-          </select>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Disclaimers -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: information-circle -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8.25v.008M12 11.25v4.5" />
-              <circle cx="12" cy="12" r="9" />
-            </svg>
-            <h3 class="font-medium">بیانیه‌های سلب مسئولیت</h3>
+        <!-- بیانیه‌های سلب مسئولیت -->
+        <TairoFormGroup label="بیانیه‌های سلب مسئولیت" sublabel="افزودن عبارات راهنما">
+          <div class="grid grid-cols-3 gap-3">
+            <TairoRadioCard name="disclaimers" value="always" :model-value="state.disclaimers" @update:model-value="state.disclaimers = $event as any" title="همیشه" subtitle="افزودن دائم" icon="ph:info-duotone" />
+            <TairoRadioCard name="disclaimers" value="when_needed" :model-value="state.disclaimers" @update:model-value="state.disclaimers = $event as any" title="در صورت نیاز" subtitle="بسته به محتوا" icon="ph:question-duotone" />
+            <TairoRadioCard name="disclaimers" value="never" :model-value="state.disclaimers" @update:model-value="state.disclaimers = $event as any" title="هرگز" subtitle="غیرفعال" icon="ph:x-circle-duotone" />
           </div>
-          <select v-model="state.disclaimers" class="form-select w-full">
-            <option value="always">همیشه</option>
-            <option value="when_needed">در صورت نیاز</option>
-            <option value="never">هرگز</option>
-          </select>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Profanity filter -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: no-symbol -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m18.364 5.636-12.728 12.728M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
-            </svg>
-            <h3 class="font-medium">الفاظ رکیک</h3>
+        <!-- الفاظ رکیک -->
+        <TairoFormGroup label="الفاظ رکیک" sublabel="کنترل استفاده از واژگان نامناسب">
+          <div class="grid grid-cols-3 gap-3">
+            <TairoRadioCard name="profanity" value="block" :model-value="state.profanity" @update:model-value="state.profanity = $event as any" title="مسدود" subtitle="عدم نمایش" icon="ph:prohibit-duotone" />
+            <TairoRadioCard name="profanity" value="soften" :model-value="state.profanity" @update:model-value="state.profanity = $event as any" title="تلطیف" subtitle="ملایم‌سازی" icon="ph:eraser-duotone" />
+            <TairoRadioCard name="profanity" value="allow" :model-value="state.profanity" @update:model-value="state.profanity = $event as any" title="مجاز" subtitle="بدون محدودیت" icon="ph:check-circle-duotone" />
           </div>
-          <div class="flex gap-3">
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.profanity==='block' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.profanity='block'">مسدود</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.profanity==='soften' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.profanity='soften'">تلطیف</button>
-            <button :class="['px-3 py-2 rounded-lg text-sm border', state.profanity==='allow' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-muted-700 border-muted-300']" @click="state.profanity='allow'">مجاز</button>
-          </div>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Formatting preference -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: list-bullet -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 7.5h10.5M6.75 12h10.5M6.75 16.5h10.5" />
-            </svg>
-            <h3 class="font-medium">قالب‌بندی</h3>
+        <!-- قالب‌بندی -->
+        <TairoFormGroup label="قالب‌بندی" sublabel="نحوه ساختار پاسخ">
+          <div class="grid grid-cols-3 gap-3">
+            <TairoRadioCard name="formatting" value="none" :model-value="state.formatting" @update:model-value="state.formatting = $event as any" title="بدون قالب" subtitle="متن ساده" icon="ph:text-aa-duotone" />
+            <TairoRadioCard name="formatting" value="bullets" :model-value="state.formatting" @update:model-value="state.formatting = $event as any" title="گلوله‌ای" subtitle="فهرست‌وار" icon="ph:list-bullets-duotone" />
+            <TairoRadioCard name="formatting" value="markdown" :model-value="state.formatting" @update:model-value="state.formatting = $event as any" title="مارک‌داون" subtitle="تاکید و فهرست" icon="ph:hash-duotone" />
           </div>
-          <select v-model="state.formatting" class="form-select w-full">
-            <option value="none">بدون قالب</option>
-            <option value="bullets">گلوله‌ای</option>
-            <option value="markdown">مارک‌داون</option>
-          </select>
-        </div>
+        </TairoFormGroup>
 
-        <!-- Reply speed -->
-        <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-5">
-          <div class="flex items-center gap-2 mb-3">
-            <!-- heroicons: bolt -->
-            <svg class="h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m13.5 4.5-6 9h6L10.5 21l6-9h-6l3-7.5z" />
-            </svg>
-            <h3 class="font-medium">سرعت پاسخ (میلی‌ثانیه)</h3>
+        <!-- سرعت پاسخ (slider) -->
+        <TairoFormGroup label="سرعت پاسخ (میلی‌ثانیه)" sublabel="فاصله زمانی بین بخش‌های پاسخ در استریم">
+          <div class="rounded-xl border border-muted-200 bg-white dark:bg-muted-900 shadow-sm p-5">
+            <input type="range" min="100" max="1000" step="50" v-model.number="state.replySpeedMs" class="w-full" />
+            <div class="text-xs text-muted-600 dark:text-muted-300 mt-1">
+              {{ state.replySpeedMs }} میلی‌ثانیه بین بخش‌ها
+            </div>
           </div>
-          <input type="range" min="100" max="1000" step="50" v-model.number="state.replySpeedMs" class="w-full" />
-          <div class="text-xs text-muted-600 mt-1">
-            {{ state.replySpeedMs }} میلی‌ثانیه بین بخش‌ها
-          </div>
-        </div>
+        </TairoFormGroup>
       </div>
 
       <div class="rounded-xl border border-muted-200 bg-white shadow-sm p-4 flex items-center justify-between">
