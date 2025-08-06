@@ -13,8 +13,60 @@ export const useDataRemoval = () => {
 
       // 1. Clear PocketBase collections
       await Promise.all([
-        // Delete all user sessions
-        $pb.collection('sessions').delete(`user="${userId}"`).catch(() => {}),
+        // Delete ALL user sessions (including those with status='deleted')
+        (async () => {
+          try {
+            // Get ALL sessions for the user regardless of status
+            const allUserSessions = await $pb.collection('sessions').getFullList({ 
+              filter: `user="${userId}"`,
+              // Don't use any status filter - get ALL sessions
+              requestKey: null
+            })
+            
+            console.log(`Found ${allUserSessions.length} total sessions (including deleted) for user ${userId}:`, allUserSessions)
+            
+            // If no sessions found with quoted filter, try unquoted (relation field)
+            if (allUserSessions.length === 0) {
+              const unquotedSessions = await $pb.collection('sessions').getFullList({ 
+                filter: `user=${userId}`,
+                requestKey: null
+              })
+              console.log(`Found ${unquotedSessions.length} sessions with unquoted filter`)
+              
+              if (unquotedSessions.length === 0) {
+                // Last resort: get all sessions and filter locally
+                const allSessions = await $pb.collection('sessions').getFullList({ requestKey: null })
+                const filteredSessions = allSessions.filter((session: any) => 
+                  session.user === userId || session.user?.id === userId
+                )
+                console.log(`Found ${filteredSessions.length} sessions after local filtering from ${allSessions.length} total sessions`)
+                
+                // Delete the locally filtered sessions
+                for (const session of filteredSessions) {
+                  console.log(`Deleting session ${session.id} (status: ${session.status})`)
+                  await $pb.collection('sessions').delete(session.id)
+                }
+              } else {
+                // Delete unquoted filter results
+                for (const session of unquotedSessions) {
+                  console.log(`Deleting session ${session.id} (status: ${session.status})`)
+                  await $pb.collection('sessions').delete(session.id)
+                }
+              }
+            } else {
+              // Delete all found sessions regardless of their status
+              for (const session of allUserSessions) {
+                console.log(`Deleting session ${session.id} (status: ${session.status})`)
+                await $pb.collection('sessions').delete(session.id)
+              }
+            }
+            
+            console.log(`Successfully processed session deletion for user ${userId}`)
+          } catch (error) {
+            console.error('Error in session deletion process:', error)
+            throw error
+          }
+        })(),
         
         // Delete all user messages  
         deleteAllMessages(userId),
@@ -41,6 +93,24 @@ export const useDataRemoval = () => {
         $pb.collection('summerizedMessages').getFullList({ filter: `user="${userId}"` })
           .then(summaries => Promise.all(
             summaries.map(summary => $pb.collection('summerizedMessages').delete(summary.id))
+          )).catch(() => {}),
+
+        // Delete session analysis for patient
+        $pb.collection('session_analysis_for_patient').getFullList({ filter: `user="${userId}"` })
+          .then(analyses => Promise.all(
+            analyses.map(analysis => $pb.collection('session_analysis_for_patient').delete(analysis.id))
+          )).catch(() => {}),
+
+        // Delete session progress
+        $pb.collection('session_progress').getFullList({ filter: `user="${userId}"` })
+          .then(progress => Promise.all(
+            progress.map(p => $pb.collection('session_progress').delete(p.id))
+          )).catch(() => {}),
+
+        // Delete session analysis (generic)
+        $pb.collection('session_analysis').getFullList({ filter: `user="${userId}"` })
+          .then(analyses => Promise.all(
+            analyses.map(analysis => $pb.collection('session_analysis').delete(analysis.id))
           )).catch(() => {})
       ])
 
@@ -114,39 +184,14 @@ export const useDataRemoval = () => {
   }
 
   const confirmAndRemoveData = async (): Promise<boolean> => {
-    if (!import.meta.client) return false
+    // This function will be called from the component that handles the modal
+    // The modal logic will be moved to the settings page
+    return false // Placeholder - the actual confirmation will be handled by the modal in settings.vue
+  }
 
-    const confirmed = window.confirm(
-      'This will permanently delete ALL your data including:\n\n' +
-      '• All therapy and educational sessions\n' + 
-      '• All chat messages and conversations\n' +
-      '• All reports and analyses\n' +
-      '• All notifications and settings\n' +
-      '• Your account preferences\n\n' +
-      'This action CANNOT be undone. Are you absolutely sure?'
-    )
-
-    if (!confirmed) return false
-
-    const doubleConfirmed = window.confirm(
-      'Last chance!\n\nThis will PERMANENTLY DELETE everything. Type "DELETE" to confirm:'
-    )
-
-    if (!doubleConfirmed) return false
-
-    const finalConfirm = window.prompt(
-      'Type "DELETE MY DATA" to confirm permanent deletion:'
-    )
-
-    if (finalConfirm !== 'DELETE MY DATA') {
-      alert('Confirmation text did not match. Data removal cancelled.')
-      return false
-    }
-
+  const executeDataRemoval = async (): Promise<boolean> => {
     try {
       await removeAllUserData()
-      
-      alert('All your data has been permanently deleted. You will now be redirected to the home page.')
       
       // Redirect to home page and reload
       await navigateTo('/')
@@ -156,13 +201,14 @@ export const useDataRemoval = () => {
       
       return true
     } catch (error) {
-      alert(`Error removing data: ${error instanceof Error ? error.message : 'Unknown error'}`)
-      return false
+      console.error('Error removing data:', error)
+      throw error
     }
   }
 
   return {
     removeAllUserData,
-    confirmAndRemoveData
+    confirmAndRemoveData,
+    executeDataRemoval
   }
 }
