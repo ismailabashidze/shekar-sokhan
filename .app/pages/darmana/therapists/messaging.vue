@@ -1594,6 +1594,14 @@ const isAIThinking = ref(false)
             <TairoSidebarTools
               class="relative -end-4 z-20 flex h-16 w-full scale-90 items-center justify-end gap-2 sm:end-0 sm:scale-100"
             />
+            <!-- AI Controls button -->
+            <NuxtLink
+              to="/settings/ai-response"
+              class="bg-gradient-to-br from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/50 inline-flex size-12 items-center justify-center rounded-full text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              title="AI Controls"
+            >
+              <Icon name="ph:sliders-duotone" class="size-6" />
+            </NuxtLink>
           </div>
           <!-- Body -->
           <div

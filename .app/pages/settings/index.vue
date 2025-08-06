@@ -115,23 +115,25 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-primary-500 group border-2"
+          class="hover:!border-primary-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
-          <NuxtLink to="#" class="block p-6">
+          <NuxtLink to="/settings/ai-response" class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:brain-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-primary-100 dark:bg-primary-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:brain-duotone"
+                  class="group-hover:text-primary-500 text-primary-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="sm"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 مشاوره هوشمند
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 تنظیمات مشاور هوشمند
               </BaseText>
             </div>
@@ -140,48 +142,25 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-primary-500 group border-2"
-        >
-          <NuxtLink to="/darmana/therapists/sessions" class="block p-6">
-            <div class="text-center">
-              <Icon
-                name="ph:chat-circle-text-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
-              <BaseHeading
-                tag="h3"
-                size="sm"
-                weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
-              >
-                جلسات
-              </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
-                جلسات مشاوره
-              </BaseText>
-            </div>
-          </NuxtLink>
-        </BaseCard>
-        <BaseCard
-          rounded="lg"
-          elevated-hover
-          class="hover:!border-primary-500 group border-2"
+          class="hover:!border-info-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:notebook-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-info-100 dark:bg-info-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:notebook-duotone"
+                  class="group-hover:text-info-500 text-info-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="sm"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 یادداشت‌ها
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 مدیریت یادداشت‌ها
               </BaseText>
             </div>
@@ -190,23 +169,25 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-primary-500 group border-2"
+          class="hover:!border-success-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:heartbeat-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-success-100 dark:bg-success-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:heartbeat-duotone"
+                  class="group-hover:text-success-500 text-success-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="sm"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 سلامت روان
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 پیگیری وضعیت سلامت
               </BaseText>
             </div>
@@ -215,23 +196,25 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-primary-500 group border-2"
+          class="hover:!border-purple-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
           <NuxtLink to="/darmana/therapists/chooseTherapist" class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:robot"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-purple-100 dark:bg-purple-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:robot"
+                  class="group-hover:text-purple-500 text-purple-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="sm"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 مشاوران
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 مشاهده مشاوران
               </BaseText>
             </div>
@@ -240,23 +223,25 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-primary-500 group border-2"
+          class="hover:!border-warning-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
           <NuxtLink to="/payments" class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:credit-card-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-warning-100 dark:bg-warning-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:credit-card-duotone"
+                  class="group-hover:text-warning-500 text-warning-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="xs"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 پرداختی‌ها
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 مدیریت پرداختی‌ها
               </BaseText>
             </div>
@@ -265,23 +250,25 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-primary-500 group border-2"
+          class="hover:!border-secondary-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:chat-circle-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-secondary-100 dark:bg-secondary-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:chat-circle-duotone"
+                  class="group-hover:text-secondary-500 text-secondary-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="xs"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 چت
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 مدیریت چت
               </BaseText>
             </div>
@@ -290,23 +277,25 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-primary-500 group border-2"
+          class="hover:!border-danger-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:shield-check-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-danger-100 dark:bg-danger-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:shield-check-duotone"
+                  class="group-hover:text-danger-500 text-danger-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="xs"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 امنیت
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 مدیریت امنیت
               </BaseText>
             </div>
@@ -315,23 +304,25 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-primary-500 group border-2"
+          class="hover:!border-pink-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
           <NuxtLink to="/deeds" class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:hands-praying-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-pink-100 dark:bg-pink-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:hands-praying-duotone"
+                  class="group-hover:text-pink-500 text-pink-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="xs"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 کار نیک
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 کارهای نیک شما
               </BaseText>
             </div>
@@ -340,23 +331,25 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-primary-500 group border-2"
+          class="hover:!border-muted-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:gear-six-duotone"
-                class="group-hover:text-primary-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-muted-100 dark:bg-muted-800 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:gear-six-duotone"
+                  class="group-hover:text-muted-500 text-muted-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="xs"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 تنظیمات
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 مدیریت تنظیمات
               </BaseText>
             </div>
