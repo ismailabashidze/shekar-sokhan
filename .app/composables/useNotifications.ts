@@ -233,9 +233,14 @@ export function useNotifications() {
       // Check if permission is granted, if not request it immediately
       if (Notification.permission !== 'granted') {
         console.log('PWA permission not granted, requesting now...')
-        const granted = await pwa.autoRequestPermission()
-        if (!granted) {
-          console.warn('PWA notification permission denied, cannot show notification')
+        try {
+          const granted = await pwa.autoRequestPermission()
+          if (!granted) {
+            console.warn('PWA notification permission denied, cannot show notification')
+            return
+          }
+        } catch (err) {
+          console.warn('Failed to request PWA permission for notification:', err)
           return
         }
       }
@@ -797,22 +802,24 @@ export function useNotifications() {
         await fetchNotifications()
         await subscribeToNotifications()
 
-        // Auto-request PWA notification permission on first initialization
+        // Auto-request PWA notification permission on first initialization (non-blocking)
         if (process.client) {
           const pwa = pwaNotifications.value
           if (pwa) {
-            // Request permission immediately without delay
-            try {
-              const granted = await pwa.autoRequestPermission()
-              if (granted) {
-                console.log('PWA notifications enabled automatically')
-              } else {
-                console.log('PWA notifications not enabled - user may need to manually enable')
+            // Make this non-blocking to prevent hanging the app initialization
+            setTimeout(async () => {
+              try {
+                const granted = await pwa.autoRequestPermission()
+                if (granted) {
+                  console.log('PWA notifications enabled automatically')
+                } else {
+                  console.log('PWA notifications not enabled - user may need to manually enable')
+                }
               }
-            }
-            catch (err) {
-              console.warn('Failed to auto-request PWA permission:', err)
-            }
+              catch (err) {
+                console.warn('Failed to auto-request PWA permission:', err)
+              }
+            }, 2000) // Wait 2 seconds after app is fully loaded
           }
         }
 

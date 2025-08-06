@@ -102,7 +102,12 @@ export function usePwaNotifications() {
       if (existingSubscription) {
         subscription.value = existingSubscription
         isSubscribed.value = true
-        await saveSubscriptionToBackend(existingSubscription)
+        // Save existing subscription to backend (non-blocking) - only if user is logged in
+        if ($pb.authStore.isValid && $pb.authStore.model?.id) {
+          saveSubscriptionToBackend(existingSubscription).catch(err => {
+            console.error('Failed to save existing subscription to backend:', err)
+          })
+        }
         return true
       }
 
@@ -116,7 +121,14 @@ export function usePwaNotifications() {
       subscription.value = newSubscription
       isSubscribed.value = true
 
-      await saveSubscriptionToBackend(newSubscription)
+      // Save subscription to backend (non-blocking) - only if user is logged in
+      if ($pb.authStore.isValid && $pb.authStore.model?.id) {
+        saveSubscriptionToBackend(newSubscription).catch(err => {
+          console.error('Failed to save subscription to backend, but subscription is active locally:', err)
+        })
+      } else {
+        console.log('User not authenticated, skipping backend subscription save')
+      }
       return true
     }
     catch (err: any) {
@@ -249,7 +261,7 @@ export function usePwaNotifications() {
   // Save subscription to backend
   const saveSubscriptionToBackend = async (subscription: PushSubscription) => {
     try {
-      const subscriptionData: PushSubscriptionData = {
+      const subscriptionData = {
         endpoint: subscription.endpoint,
         keys: {
           p256dh: arrayBufferToBase64(subscription.getKey('p256dh')!),
@@ -257,16 +269,30 @@ export function usePwaNotifications() {
         },
       }
 
+      const payload = {
+        subscription: subscriptionData,
+        userId: $pb.authStore.model?.id,
+      }
+
+      console.log('Attempting to save subscription with payload:', payload)
+
+      // Send data with the correct structure expected by PocketBase
       await $pb.send('/api/notifications/subscribe', {
         method: 'POST',
-        body: {
-          subscription: subscriptionData,
-          userId: $pb.authStore.model?.id,
-        },
+        body: payload,
       })
+
+      console.log('Subscription saved successfully to backend')
     }
-    catch (err) {
+    catch (err: any) {
       console.error('Error saving subscription to backend:', err)
+      console.error('Error details:', err.response || err.message)
+      
+      // For now, don't throw the error to prevent blocking the subscription process
+      // But log it clearly so we can debug
+      if (err.status === 404) {
+        console.warn('Subscription endpoint not found - backend may not support PWA notifications yet')
+      }
     }
   }
 
@@ -282,6 +308,7 @@ export function usePwaNotifications() {
     }
     catch (err) {
       console.error('Error removing subscription from backend:', err)
+      // Don't throw the error to prevent blocking other operations
     }
   }
 
