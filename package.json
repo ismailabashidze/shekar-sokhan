@@ -67,6 +67,7 @@
     }
   },
   "dependencies": {
-    "jalaali-js": "^1.2.8"
+    "jalaali-js": "^1.2.8",
+    "mem0ai": "^2.1.37"
   }
 }

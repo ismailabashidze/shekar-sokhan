@@ -94,6 +94,16 @@ export default defineAppConfig({
             click: () => {
             },
           },
+          {
+            // Title displayed in the sidebar
+            title: 'خاطرات من',
+            icon: { name: 'ph:brain', class: 'w-7 h-7' },
+            activePath: '/memories',
+            to: '/memories',
+            class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
+            click: () => {
+            },
+          },
 
           {
             title: 'خانه',
