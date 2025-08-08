@@ -317,15 +317,26 @@ export const useMem0 = () => {
       }
 
       // Update in PocketBase
-      const updated = await nuxtApp.$pb.collection('memories').update(memoryId, updates)
+      let updated = null
+      try {
+        updated = await nuxtApp.$pb.collection('memories').update(memoryId, updates)
+      } catch (pbError) {
+        console.warn('PocketBase memories collection not available for update:', pbError)
+        throw new Error('Cannot update memory: Database not available')
+      }
 
       // If content changed, also update in mem0
       if (updates.content && updated.metadata?.mem0_id) {
-        const memoryClient = await initializeMemory()
-        await memoryClient.update({
-          memoryId: updated.metadata.mem0_id,
-          data: updates.content
-        })
+        try {
+          const memoryClient = await initializeMemory()
+          await memoryClient.update({
+            memoryId: updated.metadata.mem0_id,
+            data: updates.content
+          })
+        } catch (mem0Error) {
+          console.warn('Could not update mem0 memory:', mem0Error)
+          // Continue without mem0 update
+        }
       }
 
       return updated
@@ -345,18 +356,34 @@ export const useMem0 = () => {
       }
 
       // Get memory first to get mem0 ID
-      const memory_item = await nuxtApp.$pb.collection('memories').getOne(memoryId)
+      let memory_item = null
+      try {
+        memory_item = await nuxtApp.$pb.collection('memories').getOne(memoryId)
+      } catch (pbError) {
+        console.warn('PocketBase memories collection not available for delete:', pbError)
+        throw new Error('Cannot delete memory: Database not available')
+      }
 
       // Delete from mem0 if exists
       if (memory_item.metadata?.mem0_id) {
-        const memoryClient = await initializeMemory()
-        await memoryClient.delete(memory_item.metadata.mem0_id)
+        try {
+          const memoryClient = await initializeMemory()
+          await memoryClient.delete(memory_item.metadata.mem0_id)
+        } catch (mem0Error) {
+          console.warn('Could not delete from mem0:', mem0Error)
+          // Continue with local delete
+        }
       }
 
       // Soft delete in PocketBase (mark as inactive)
-      await nuxtApp.$pb.collection('memories').update(memoryId, {
-        is_active: false
-      })
+      try {
+        await nuxtApp.$pb.collection('memories').update(memoryId, {
+          is_active: false
+        })
+      } catch (pbError) {
+        console.warn('Could not mark memory as inactive:', pbError)
+        throw new Error('Cannot complete memory deletion')
+      }
 
       return { success: true }
     } catch (error) {

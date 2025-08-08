@@ -1812,6 +1812,34 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                       class="size-5"
                     />
                   </button>
+                  <!-- Memory Debug Toggle -->
+                  <button
+                    @click="toggleMemoryDebug"
+                    :class="[
+                      'mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
+                      showMemoryDebug 
+                        ? 'bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50' 
+                        : 'bg-purple-500/30 dark:bg-purple-500/70 dark:text-muted-100 text-muted-600 hover:text-purple-500 hover:bg-purple-500/50'
+                    ]"
+                    :title="showMemoryDebug ? 'بستن دیباگ خاطره' : 'باز کردن دیباگ خاطره'"
+                  >
+                    <Icon
+                      name="ph:brain-duotone"
+                      class="size-5"
+                    />
+                  </button>
+
+                  <!-- AI Controls button -->
+                  <NuxtLink
+                    to="/settings/ai-response"
+                    class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                    title="AI Controls"
+                  >
+                    <Icon
+                      name="ph:sliders-duotone"
+                      class="size-5"
+                    />
+                  </NuxtLink>
                 </div>
               </div>
             </div>
@@ -1819,28 +1847,6 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
             <TairoSidebarTools
               class="relative -end-4 z-20 flex h-16 w-full scale-90 items-center justify-end gap-2 sm:end-0 sm:scale-100"
             />
-            <!-- Memory Debug Toggle -->
-            <button
-              @click="toggleMemoryDebug"
-              :class="[
-                'inline-flex size-12 items-center justify-center rounded-full text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl',
-                showMemoryDebug 
-                  ? 'bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' 
-                  : 'bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700'
-              ]"
-              :title="showMemoryDebug ? 'بستن دیباگ خاطره' : 'باز کردن دیباگ خاطره'"
-            >
-              <Icon name="ph:brain-duotone" class="size-6" />
-            </button>
-
-            <!-- AI Controls button -->
-            <NuxtLink
-              to="/settings/ai-response"
-              class="bg-gradient-to-br from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500/50 inline-flex size-12 items-center justify-center rounded-full text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl ml-2"
-              title="AI Controls"
-            >
-              <Icon name="ph:sliders-duotone" class="size-6" />
-            </NuxtLink>
           </div>
           <!-- Body -->
           <div
