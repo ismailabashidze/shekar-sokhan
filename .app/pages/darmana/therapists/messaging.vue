@@ -2,6 +2,8 @@
 // import { generateInlineAnalysis } from '@/composables/useOpenRouter'  // REMOVE this import
 import { useOpenRouter } from '@/composables/useOpenRouter'
 import { convertToEmotionWheel } from '@/utils/emotion-mapper'
+import { useMemory } from '@/composables/useMemory'
+import type { MemoryRecordDraft } from '@/composables/useMemory'
 
 definePageMeta({
   title: 'گفتگو با روانشناس',
@@ -36,6 +38,12 @@ const userSubscription = ref<any>(null) // Initialize with null
 const currentLoadingTherapistId = ref<string | null>(null)
 const showScrollButton = ref(false)
 const isAIResponding = ref(false)
+
+// Memory integration
+const { detectMemoryFromMessage, saveMemory, getRelevantMemories, summarizeMemoriesForSystem } = useMemory()
+const detectedMemory = ref<MemoryRecordDraft | null>(null)
+const lastSavedMemory = ref<any>(null)
+const showMemoryBanner = ref(false)
 
 const userReport = ref<Report | null>(null)
 const hasPreviousData = ref(false)
@@ -319,6 +327,28 @@ async function submitMessage() {
     newMessage.value = ''
     scrollToBottom()
 
+    // Detect and persist memory (non-blocking)
+    try {
+      const draft = await detectMemoryFromMessage(userMessage.text, { sessionId: session.id, therapistId: currentTherapist.id })
+      detectedMemory.value = draft
+      if (draft.importance >= 0.4) {
+        const rec = await saveMemory(draft)
+        lastSavedMemory.value = rec
+        showMemoryBanner.value = true
+        setTimeout(() => { showMemoryBanner.value = false }, 3500)
+        toaster.show({
+          title: 'حافظه جدید ذخیره شد',
+          message: 'این پیام به عنوان یک حافظه مهم ثبت شد.',
+          color: 'info',
+          icon: 'ph:bookmark-duotone',
+          closable: true,
+        })
+      }
+    }
+    catch (err) {
+      console.error('memory detection/save error', err)
+    }
+
     // Inline Analysis Integration (in background)
     isAIThinking.value = true
     thinkingResponse.value = ''
@@ -389,6 +419,21 @@ async function submitMessage() {
       ...contextMessages,
       { role: 'user', content: userMessage.text },
     ]
+
+    // Prepend relevant memories as system context
+    try {
+      const mems = await getRelevantMemories({
+        categories: detectedMemory.value?.categories,
+        limit: 5,
+      })
+      const sys = summarizeMemoriesForSystem(mems)
+      if (sys) {
+        chatMessagesForAI.unshift({ role: 'system', content: sys } as any)
+      }
+    }
+    catch (err) {
+      console.warn('failed to load relevant memories', err)
+    }
     // Call streamChat with therapistDetails option (so system prompt is automatically added)
     let aiResponse = ''
     // Show streaming response in real time
@@ -1641,6 +1686,17 @@ const isAIThinking = ref(false)
             </div>
             <!-- Messages loop -->
             <div v-else class="space-y-12">
+              <!-- Memory banner -->
+              <BaseMessage v-if="showMemoryBanner && detectedMemory" color="info">
+                <div class="flex items-center justify-between gap-3 w-full">
+                  <div class="text-sm">
+                    حافظه جدید ذخیره شد: <span class="font-medium">{{ detectedMemory.text.slice(0, 80) }}{{ detectedMemory.text.length > 80 ? '…' : '' }}</span>
+                  </div>
+                  <div class="flex gap-1">
+                    <BaseTag v-for="cat in detectedMemory.categories" :key="cat" color="info" size="sm">{{ cat }}</BaseTag>
+                  </div>
+                </div>
+              </BaseMessage>
               <div v-if="messages.length === 0" class="flex h-[60vh] flex-col items-center justify-center text-center">
                 <div class="mb-6">
                   <Icon name="ph:chat-circle-dots-duotone" class="text-primary-500 size-16" />
@@ -2188,6 +2244,14 @@ const isAIThinking = ref(false)
       </div>
     </TairoModal>
   </div>
+
+  <MemoriesIndicator
+    v-if="showMemoryBanner && detectedMemory"
+    :text="detectedMemory.text"
+    :categories="detectedMemory.categories"
+    :importance="detectedMemory.importance"
+    @close="showMemoryBanner = false"
+  />
 
   <TairoModal
     :open="isDeleteModalOpen"

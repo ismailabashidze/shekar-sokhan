@@ -41,6 +41,7 @@ export default defineNuxtConfig({
 
   // Runtime environment variables
   runtimeConfig: {
+    mem0ApiKey: process.env.MEM0_API_KEY || '',
     public: {
       appVersion,
       appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:3000',
