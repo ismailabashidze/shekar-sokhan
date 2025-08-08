@@ -7,6 +7,43 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.12.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.12.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              8 فوریه 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>افزودن قابلیت کلیک روی کارت‌های قفل شده برای نمایش مودال پرمیوم</li>
+              <li>بهبود تجربه کاربری برای ویژگی‌های پرمیوم با راهنمایی بهتر</li>
+            </ul>
+
+            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های رابط کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بهبود فاصله‌گذاری در حاشیه‌های مودال پرمیوم</li>
+              <li>فشرده‌سازی متن‌های داخلی با تنظیم ارتفاع خط</li>
+              <li>تصحیح ساختار RTL برای آیکون‌ها و قرارگیری متن</li>
+              <li>بهبود قابلیت کلیک و تعامل کاربری کارت‌های تنظیمات</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              رفع مشکلات
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>حل مشکل عدم فعال شدن رویدادهای کلیک در کارت‌های غیرفعال</li>
+              <li>رفع مسدود شدن pointer events در اجزای radio غیرفعال</li>
+              <li>افزودن debug logging برای ردیابی بهتر مشکلات</li>
+            </ul>
+          </div>
+
           <h1>تغییرات نسخه 2.10.0</h1>
           <ul>
             <li>بهبود کامل سیستم PWA notifications برای نمایش native در اندروید و ویندوز حتی در حالت بسته بودن اپ</li>

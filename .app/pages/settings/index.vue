@@ -302,14 +302,14 @@ const confirmDeletion = async () => {
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-secondary-500 group border-2 transition-all duration-300 hover:shadow-lg"
+          class="hover:!border-teal-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
           <NuxtLink to="#" class="block p-6">
             <div class="text-center">
-              <div class="bg-secondary-100 dark:bg-secondary-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+              <div class="bg-teal-100 dark:bg-teal-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
                 <Icon
                   name="ph:chat-circle-duotone"
-                  class="group-hover:text-secondary-500 text-secondary-500 size-6 transition-all duration-300 group-hover:scale-110"
+                  class="group-hover:text-teal-500 text-teal-500 size-6 transition-all duration-300 group-hover:scale-110"
                 />
               </div>
               <BaseHeading
@@ -412,24 +412,26 @@ const confirmDeletion = async () => {
         <BaseCard
           rounded="lg"
           elevated-hover
-          class="hover:!border-red-500 group border-2 cursor-pointer"
+          class="hover:!border-red-500 group border-2 cursor-pointer transition-all duration-300 hover:shadow-lg"
           @click="handleDataRemoval"
         >
           <div class="block p-6">
             <div class="text-center">
-              <Icon
-                name="ph:trash-duotone"
-                class="group-hover:text-red-500 text-muted-400 size-8 transition-all duration-300 group-hover:rotate-6"
-              />
+              <div class="bg-red-100 dark:bg-red-900/30 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                <Icon
+                  name="ph:trash-duotone"
+                  class="group-hover:text-red-500 text-red-500 size-6 transition-all duration-300 group-hover:scale-110"
+                />
+              </div>
               <BaseHeading
                 tag="h3"
                 size="xs"
                 weight="semibold"
-                class="mt-2 !text-[0.65rem] uppercase"
+                class="mt-3 !text-[0.65rem] uppercase"
               >
                 حذف داده‌ها
               </BaseHeading>
-              <BaseText size="xs" class="text-muted-400">
+              <BaseText size="xs" class="text-muted-400 mt-1">
                 حذف کامل اطلاعات
               </BaseText>
             </div>
