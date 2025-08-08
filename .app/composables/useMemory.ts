@@ -141,9 +141,9 @@ export function useMemory() {
     if (!uid) return []
     const filterParts = [`user="${uid}"`]
     if (opts.categories?.length) {
-      // categories is a JSON array field; use PocketBase JSON filter operator ?~ (contains any)
-      const list = opts.categories.map(c => `"${c}"`).join(',')
-      filterParts.push(`categories ?~ [${list}]`)
+      // PocketBase expects a JSON array literal wrapped as a string for ?~ operator
+      const jsonArray = JSON.stringify(opts.categories)
+      filterParts.push(`categories ?~ '${jsonArray}'`)
     }
     const filter = filterParts.join(' && ')
     const res = await nuxtApp.$pb.collection('gpt_5_memories').getList(1, opts.limit || 5, {
