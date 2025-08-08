@@ -3,9 +3,7 @@ import { defineEventHandler, readBody } from 'h3'
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const apiKey = config.mem0ApiKey as string | undefined
-  if (!apiKey) {
-    return { ok: false, error: 'MEM0_API_KEY is not configured' }
-  }
+  if (!apiKey) return { ok: false, error: 'MEM0_API_KEY is not configured' }
 
   const body = await readBody<{ userId: string; content: string; metadata?: any }>(event)
   if (!body?.userId || !body?.content) {
@@ -23,9 +21,6 @@ export default defineEventHandler(async (event) => {
       content: body.content,
       metadata: body.metadata || {},
     },
-  }).catch((e) => {
-    // Normalize error for client
-    return { ok: false, error: (e as any)?.data || (e as any)?.message || 'mem0 request failed' }
   })
 
   return { ok: true, data: res }

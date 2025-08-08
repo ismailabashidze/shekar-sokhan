@@ -79,7 +79,7 @@ function categorizeHeuristically(text: string): MemoryCategoryId[] {
 export function useMemory() {
   const nuxtApp = useNuxtApp()
   const userId = computed(() => nuxtApp.$pb?.authStore?.model?.id as string | undefined)
-  const mem0Plugin = (nuxtApp as any).$mem0 as { enabled: boolean; apiKey?: string; baseUrl?: string } | undefined
+  // We no longer rely on a client plugin to gate Mem0 calls; the server route will validate the key
 
   async function detectMemoryFromMessage(text: string, opts?: { sessionId?: string; therapistId?: string }) {
     const importance = scoreImportance(text)
@@ -112,22 +112,20 @@ export function useMemory() {
 
     // If Mem0 API key is present, mirror memory server-side to avoid exposing the key
     try {
-      if (mem0Plugin?.enabled) {
-        await $fetch('/api/mem0/memories', {
-          method: 'POST',
-          body: {
-            userId: draft.userId,
-            content: draft.text,
-            metadata: {
-              sessionId: draft.sessionId,
-              therapistId: draft.therapistId,
-              categories: draft.categories,
-              importance: draft.importance,
-              source: draft.source,
-            },
+      await $fetch('/api/mem0/memories', {
+        method: 'POST',
+        body: {
+          userId: draft.userId,
+          content: draft.text,
+          metadata: {
+            sessionId: draft.sessionId,
+            therapistId: draft.therapistId,
+            categories: draft.categories,
+            importance: draft.importance,
+            source: draft.source,
           },
-        })
-      }
+        },
+      })
     }
     catch (e) {
       // Do not block on external memory forwarding; log only
