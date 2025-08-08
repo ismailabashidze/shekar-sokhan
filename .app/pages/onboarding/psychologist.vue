@@ -90,7 +90,7 @@ const redeem = async () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center py-8">
+  <div class="flex min-h-screen items-center justify-center py-8 md:bg-gradient-to-br md:from-blue-500 md:via-purple-500 md:to-pink-500 dark:md:from-blue-600 dark:md:via-purple-600 dark:md:to-pink-600">
     <div class="mx-auto w-full max-w-4xl">
       <BaseCard>
         <div

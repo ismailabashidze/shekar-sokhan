@@ -7,6 +7,53 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 2.13.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 2.13.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              8 اوت 2025
+            </p>
+
+            <h3 class="text-warning-500 mb-2 text-lg font-medium">
+              تغییرات مهم
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>حذف کامل سیستم mem0 و قابلیت‌های مدیریت خاطره از سیستم</li>
+              <li>بازگشت به سیستم پیام‌رسانی ساده و استاندارد</li>
+            </ul>
+
+            <h3 class="text-success-500 mb-2 mt-4 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>افزودن گرادیینت رنگی زیبا به صفحات onboarding (فقط در دسکتاپ)</li>
+              <li>بهبود نمایش جلسات در حال انجام با عدم نمایش دکمه‌های تاریخچه</li>
+              <li>نمایش "در حال انجام" برای زمان، تعداد پیام و شناسه جلسات فعال</li>
+            </ul>
+
+            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های رابط کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بازطراحی دکمه‌های Memory Debug و AI Controls با استایل یکپارچه</li>
+              <li>بهبود نمایش کارت‌های جلسات برای جلسات در حال انجام</li>
+              <li>حذف پنل دیباگ خاطره و المان‌های مربوطه</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              تغییرات فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>حذف composables های useMem0، useMemoryIntegratedChat و useEnhancedMessaging</li>
+              <li>حذف صفحات memories.vue، debug-memory.vue و simple-memory-test.vue</li>
+              <li>حذف types مربوط به memory و API endpoints خاطره</li>
+              <li>پاک‌سازی وابستگی mem0ai از package.json و nuxt.config</li>
+              <li>تمیز کردن کامل کدبیس از منطق mem0</li>
+            </ul>
+          </div>
+
           <!-- Version 2.12.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

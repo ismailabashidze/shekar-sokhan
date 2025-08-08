@@ -1,10 +1,6 @@
 <script setup lang="ts">
-// import { generateInlineAnalysis } from '@/composables/useOpenRouter'  // REMOVE this import
 import { useOpenRouter } from '@/composables/useOpenRouter'
 import { convertToEmotionWheel } from '@/utils/emotion-mapper'
-import { useMemoryIntegratedChat } from '@/composables/useMemoryIntegratedChat'
-import { useEnhancedMessaging } from '@/composables/useEnhancedMessaging'
-import { useMem0 } from '@/composables/useMem0'
 
 definePageMeta({
   title: 'گفتگو با روانشناس',
@@ -13,15 +9,7 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const { getTherapists } = useTherapist()
 const { getCurrentSession, endSession, createSession } = useTherapistSession()
-const { getMessages } = useTherapistsMessages()
-const { 
-  sendMessage, 
-  sendMessageWithMemoryAnalysis,
-  extractMemoryFromText,
-  analyzeMessageWorth 
-} = useMemoryIntegratedChat()
-const { analyzeMessageWorth: directAnalysis } = useEnhancedMessaging()
-const { getAllMemories, getMemoryStats } = useMem0()
+const { getMessages, sendMessage } = useTherapistsMessages()
 const route = useRoute()
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
@@ -284,195 +272,6 @@ watch(activeTherapistId, async (newId) => {
   }
 })
 
-// Memory debugging functions
-const toggleMemoryDebug = () => {
-  showMemoryDebug.value = !showMemoryDebug.value
-  if (showMemoryDebug.value) {
-    loadMemoryStats()
-    loadMemoryDebugData()
-  }
-}
-
-const loadMemoryStats = async () => {
-  try {
-    const stats = await getMemoryStats()
-    memoryStats.value = stats
-  } catch (error) {
-    console.error('Error loading memory stats:', error)
-    memoryStats.value = null
-  }
-}
-
-const loadMemoryDebugData = async () => {
-  try {
-    const memories = await getAllMemories()
-    memoryAnalysisResults.value = memories.slice(0, 10) // Show last 10 memories
-  } catch (error) {
-    console.error('Error loading memory debug data:', error)
-    memoryAnalysisResults.value = []
-  }
-}
-
-const testMessageAnalysis = async (messageText: string = newMessage.value || 'نام من علی است و 25 ساله هستم') => {
-  if (!messageText.trim()) return
-  
-  isAnalyzingMemory.value = true
-  memoryDebugLogs.value = []
-  
-  try {
-    // Add log entry
-    memoryDebugLogs.value.push({
-      timestamp: new Date().toISOString(),
-      type: 'info',
-      message: `شروع تحلیل پیام: "${messageText.substring(0, 50)}..."`
-    })
-
-    // Test analysis
-    const result = await directAnalysis(messageText)
-    lastMemoryAnalysis.value = result
-    
-    memoryDebugLogs.value.push({
-      timestamp: new Date().toISOString(),
-      type: result.isWorth ? 'success' : 'info',
-      message: `نتیجه: ${result.isWorth ? '✓ ارزش ذخیره دارد' : '✗ ارزش ذخیره ندارد'}`,
-      details: result
-    })
-
-    // If worthy, try to extract memory
-    if (result.isWorth && activeSession.value?.id) {
-      try {
-        const memoryResult = await extractMemoryFromText(
-          messageText,
-          true, // show toast
-          activeSession.value.id
-        )
-        
-        if (memoryResult) {
-          memoryDebugLogs.value.push({
-            timestamp: new Date().toISOString(),
-            type: 'success',
-            message: `✓ خاطره با موفقیت ذخیره شد`,
-            details: memoryResult
-          })
-          
-          // Refresh debug data
-          await loadMemoryDebugData()
-          await loadMemoryStats()
-        }
-      } catch (error) {
-        memoryDebugLogs.value.push({
-          timestamp: new Date().toISOString(),
-          type: 'error',
-          message: `✗ خطا در ذخیره خاطره: ${error.message}`,
-          details: error
-        })
-      }
-    }
-
-    toaster.show({
-      title: '🧠 تحلیل خاطره',
-      message: `${result.isWorth ? '✓ قابل ذخیره' : '✗ غیرقابل ذخیره'}: ${result.reason}`,
-      color: result.isWorth ? 'success' : 'info',
-      icon: 'ph:brain-duotone',
-      closable: true,
-      duration: 4000
-    })
-
-  } catch (error) {
-    console.error('Error testing message analysis:', error)
-    memoryDebugLogs.value.push({
-      timestamp: new Date().toISOString(),
-      type: 'error',
-      message: `خطا در تحلیل: ${error.message}`,
-      details: error
-    })
-  } finally {
-    isAnalyzingMemory.value = false
-  }
-}
-
-const clearMemoryDebugLogs = () => {
-  memoryDebugLogs.value = []
-  lastMemoryAnalysis.value = null
-}
-
-const analyzeAllMessages = async () => {
-  if (!messages.value.length) {
-    toaster.show({
-      title: 'خطا',
-      message: 'پیامی برای تحلیل وجود ندارد',
-      color: 'warning',
-      closable: true
-    })
-    return
-  }
-  
-  isAnalyzingMemory.value = true
-  let processedCount = 0
-  let memoryCount = 0
-  
-  try {
-    const userMessages = messages.value.filter(msg => msg.type === 'sent')
-    
-    for (const message of userMessages) {
-      try {
-        const result = await extractMemoryFromText(
-          message.text,
-          false, // don't show individual toasts
-          activeSession.value?.id
-        )
-        
-        if (result) {
-          memoryCount++
-        }
-        processedCount++
-        
-        // Show progress
-        if (processedCount % 3 === 0) {
-          toaster.show({
-            title: 'پردازش خاطرات',
-            message: `${processedCount} از ${userMessages.length} پیام پردازش شد`,
-            color: 'info',
-            duration: 1000
-          })
-        }
-      } catch (error) {
-        console.warn('Error processing message:', error)
-      }
-    }
-    
-    toaster.show({
-      title: 'تحلیل کامل',
-      message: `${memoryCount} خاطره از ${processedCount} پیام استخراج شد`,
-      color: 'success',
-      icon: 'ph:check-circle-duotone',
-      closable: true,
-      actions: [
-        {
-          label: 'مشاهده خاطرات',
-          color: 'primary',
-          size: 'sm',
-          to: '/memories'
-        }
-      ]
-    })
-    
-    // Refresh data
-    await loadMemoryDebugData()
-    await loadMemoryStats()
-    
-  } catch (error) {
-    console.error('Error analyzing all messages:', error)
-    toaster.show({
-      title: 'خطا',
-      message: 'خطا در تحلیل پیام‌ها',
-      color: 'danger',
-      closable: true
-    })
-  } finally {
-    isAnalyzingMemory.value = false
-  }
-}
 
 async function submitMessage() {
   if (showNoCharge.value) {
@@ -507,17 +306,7 @@ async function submitMessage() {
 
     const session = activeSession.value
 
-    const savedUserMessage = await sendMessageWithMemoryAnalysis(
-      currentTherapist.id, 
-      session.id, 
-      userMessage.text, 
-      'sent',
-      {
-        showAnalysisToast: showMemoryDebug.value, // Show analysis toast if debug mode is on
-        showMemoryToast: true, // Always show memory creation toasts
-        extractMemories: true
-      }
-    )
+    const savedUserMessage = await sendMessage(currentTherapist.id, session.id, userMessage.text, 'sent')
 
     // Add user message immediately (without analysis first)
     const messageId = savedUserMessage.id
@@ -694,10 +483,6 @@ function formatInlineAnalysis(analysisResult) {
 watch(messages, () => {
   if (!isAIResponding.value) {
     scrollToBottom()
-  }
-  // Refresh memory stats when messages change
-  if (showMemoryDebug.value) {
-    setTimeout(loadMemoryStats, 1000) // Small delay to allow memory processing
   }
 }, { deep: true })
 
@@ -1599,14 +1384,6 @@ const handleTextareaClick = () => {
 const thinkingResponse = ref('')
 const isAIThinking = ref(false)
 
-// Memory debugging states
-const showMemoryDebug = ref(false)
-const memoryAnalysisResults = ref<any[]>([])
-const isAnalyzingMemory = ref(false)
-const memoryStats = ref<any>(null)
-const lastMemoryAnalysis = ref<any>(null)
-const memoryDebugLogs = ref<any[]>([])
-const showMemoryAnalysisToast = ref(false)
 const testMessageInput = ref('نام من علی است و 25 ساله هستم و می‌خواهم اضطراب خودم را کنترل کنم')
 // --- Ensure no 'thinking' message is pushed to messages ---
 // In submitMessage or any streaming logic, do not push a 'thinking' or empty message to messages array.
@@ -1812,22 +1589,6 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                       class="size-5"
                     />
                   </button>
-                  <!-- Memory Debug Toggle -->
-                  <button
-                    @click="toggleMemoryDebug"
-                    :class="[
-                      'mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
-                      showMemoryDebug 
-                        ? 'bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50' 
-                        : 'bg-purple-500/30 dark:bg-purple-500/70 dark:text-muted-100 text-muted-600 hover:text-purple-500 hover:bg-purple-500/50'
-                    ]"
-                    :title="showMemoryDebug ? 'بستن دیباگ خاطره' : 'باز کردن دیباگ خاطره'"
-                  >
-                    <Icon
-                      name="ph:brain-duotone"
-                      class="size-5"
-                    />
-                  </button>
 
                   <!-- AI Controls button -->
                   <NuxtLink
@@ -1895,7 +1656,7 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                     {{ showNoCharge ? 'دریافت اشتراک' : 'شروع گفت و گو' }}
                   </h3>
                   <p class="text-muted-400 mt-2">
-                    {{ showNoCharge ? 'برای استفاده از سامانه لطفا اشتراک تهیه کنید.' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
+                    {{ showNoCharge ? 'برای ادامه‌ی استفاده از سامانه لطفا اشتراک تهیه کنید.' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
                   </p>
                   <div class="mt-4">
                     <BaseButton
@@ -1980,19 +1741,6 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                                 <AddonMarkdownRemark :source="item.text" />
                               </span>
                             </div>
-                            <!-- Memory indicator for sent messages -->
-                            <div 
-                              v-if="item.type === 'sent' && showMemoryDebug"
-                              class="flex items-center gap-1"
-                            >
-                              <button
-                                @click="testMessageAnalysis(item.text)"
-                                class="p-1 rounded-full hover:bg-white/20 transition-colors"
-                                title="تست تحلیل خاطره برای این پیام"
-                              >
-                                <Icon name="ph:brain" class="size-3 text-purple-300" />
-                              </button>
-                            </div>
 
                             <!-- Detail button for sent messages -->
                             <BaseButton
@@ -2072,163 +1820,6 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
             </div>
           </div>
 
-          <!-- Memory Debug Panel -->
-          <div 
-            v-if="showMemoryDebug"
-            class="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 mb-4"
-          >
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                <Icon name="ph:brain" class="size-5 text-purple-500" />
-                پنل دیباگ خاطره
-              </h3>
-              <div class="flex gap-2">
-                <BaseButton
-                  @click="testMessageAnalysis()"
-                  :loading="isAnalyzingMemory"
-                  color="info"
-                  size="sm"
-                >
-                  <Icon name="ph:test-tube" class="size-4 me-1" />
-                  تست تحلیل
-                </BaseButton>
-                <BaseButton
-                  @click="analyzeAllMessages"
-                  :loading="isAnalyzingMemory"
-                  color="warning"
-                  size="sm"
-                >
-                  <Icon name="ph:lightning" class="size-4 me-1" />
-                  تحلیل همه
-                </BaseButton>
-                <BaseButton
-                  @click="clearMemoryDebugLogs"
-                  color="muted"
-                  size="sm"
-                >
-                  <Icon name="ph:trash" class="size-4 me-1" />
-                  پاک کردن
-                </BaseButton>
-              </div>
-            </div>
-
-            <!-- Test Message Input -->
-            <div class="mb-4">
-              <BaseInput
-                v-model="testMessageInput"
-                placeholder="پیام آزمایشی بنویسید... (مثال: نام من علی است و 25 ساله هستم)"
-                class="mb-2"
-              >
-                <template #addon>
-                  <BaseButton
-                    @click="testMessageAnalysis(testMessageInput)"
-                    :disabled="!testMessageInput?.trim() || isAnalyzingMemory"
-                    color="primary"
-                    size="sm"
-                  >
-                    آزمایش
-                  </BaseButton>
-                </template>
-              </BaseInput>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <!-- Memory Stats -->
-              <BaseCard class="p-3">
-                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <Icon name="ph:chart-bar" class="size-4" />
-                  آمار خاطرات
-                </h4>
-                <div v-if="memoryStats" class="space-y-1 text-xs">
-                  <div class="flex justify-between">
-                    <span>کل خاطرات:</span>
-                    <span class="font-medium">{{ memoryStats.total || 0 }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span>امروز:</span>
-                    <span class="font-medium text-green-600">{{ memoryStats.today || 0 }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span>این جلسه:</span>
-                    <span class="font-medium text-blue-600">{{ memoryStats.session || 0 }}</span>
-                  </div>
-                </div>
-                <div v-else class="text-xs text-gray-500">در حال بارگیری...</div>
-              </BaseCard>
-
-              <!-- Last Analysis -->
-              <BaseCard class="p-3">
-                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <Icon name="ph:magnifying-glass" class="size-4" />
-                  آخرین تحلیل
-                </h4>
-                <div v-if="lastMemoryAnalysis" class="space-y-1 text-xs">
-                  <div class="flex items-center gap-1">
-                    <Icon 
-                      :name="lastMemoryAnalysis.isWorth ? 'ph:check-circle' : 'ph:x-circle'"
-                      :class="lastMemoryAnalysis.isWorth ? 'text-green-500' : 'text-gray-400'"
-                      class="size-3"
-                    />
-                    <span :class="lastMemoryAnalysis.isWorth ? 'text-green-600 font-medium' : 'text-gray-500'">
-                      {{ lastMemoryAnalysis.isWorth ? 'قابل ذخیره' : 'غیرقابل ذخیره' }}
-                    </span>
-                  </div>
-                  <div class="text-gray-600">{{ lastMemoryAnalysis.reason }}</div>
-                  <div v-if="lastMemoryAnalysis.suggestedCategory" class="flex items-center gap-1">
-                    <span class="text-gray-500">دسته:</span>
-                    <span class="font-medium">{{ lastMemoryAnalysis.suggestedCategory }}</span>
-                  </div>
-                </div>
-                <div v-else class="text-xs text-gray-500">تحلیلی انجام نشده</div>
-              </BaseCard>
-
-              <!-- Recent Memories -->
-              <BaseCard class="p-3">
-                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <Icon name="ph:clock-clockwise" class="size-4" />
-                  خاطرات اخیر
-                </h4>
-                <div v-if="memoryAnalysisResults.length" class="space-y-1 text-xs max-h-20 overflow-y-auto">
-                  <div 
-                    v-for="memory in memoryAnalysisResults.slice(0, 3)" 
-                    :key="memory.id"
-                    class="p-1 bg-gray-100 dark:bg-gray-700 rounded text-xs truncate"
-                  >
-                    <div class="font-medium">{{ memory.category }}</div>
-                    <div class="text-gray-600">{{ memory.content?.substring(0, 30) }}...</div>
-                  </div>
-                </div>
-                <div v-else class="text-xs text-gray-500">خاطره‌ای یافت نشد</div>
-              </BaseCard>
-            </div>
-
-            <!-- Debug Logs -->
-            <div v-if="memoryDebugLogs.length" class="mt-4">
-              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                <Icon name="ph:terminal-window" class="size-4" />
-                لاگ‌های دیباگ
-              </h4>
-              <div class="bg-black text-green-400 p-3 rounded font-mono text-xs max-h-32 overflow-y-auto">
-                <div 
-                  v-for="(log, index) in memoryDebugLogs.slice().reverse()" 
-                  :key="index"
-                  class="mb-1"
-                >
-                  <span class="text-gray-500">[{{ new Date(log.timestamp).toLocaleTimeString('fa-IR') }}]</span>
-                  <span 
-                    :class="{
-                      'text-green-400': log.type === 'success',
-                      'text-red-400': log.type === 'error',
-                      'text-yellow-400': log.type === 'warning',
-                      'text-blue-400': log.type === 'info'
-                    }"
-                  >
-                    {{ log.message }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <!-- Compose form - Fixed at bottom -->
 

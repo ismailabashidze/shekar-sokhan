@@ -45,7 +45,6 @@ export default defineNuxtConfig({
       appVersion,
       appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:3000',
       openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
-      mem0ApiKey: process.env.MEM0_API_KEY || 'm0-HeuBx8B5zmkoARpWekEtSLZ7hgf2yUcgnJeoU2lm',
       dargahMerchantId: process.env.DARGAH_MERCHANT_ID || '',
       dargahBaseUrl: process.env.DARGAH_BASE_URL || 'https://dargahno.net',
       dargahUsername: process.env.DARGAH_USERNAME || '',
@@ -124,7 +123,6 @@ export default defineNuxtConfig({
               'chromadb',
               '@anthropic-ai/sdk',
               '@gradio/client',
-              'mem0ai',
             ]
           : [],
       },
@@ -135,7 +133,6 @@ export default defineNuxtConfig({
         'chromadb',
         '@anthropic-ai/sdk',
         '@gradio/client',
-        'mem0ai',
       ],
     },
     // Enable faster builds
@@ -146,7 +143,7 @@ export default defineNuxtConfig({
     },
     // Server-side externals
     ssr: {
-      external: ['chromadb', '@anthropic-ai/sdk', '@gradio/client', 'mem0ai'],
+      external: ['chromadb', '@anthropic-ai/sdk', '@gradio/client'],
     },
   },
 

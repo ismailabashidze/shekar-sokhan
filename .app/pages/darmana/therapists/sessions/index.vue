@@ -110,8 +110,10 @@ const getSessionTypeInfo = (type: SessionWithExpanded['session_type']) => {
 }
 
 // Format time for display
-const formatTime = (timeString: string | undefined): string => {
-  if (!timeString) return 'زمان نامشخص'
+const formatTime = (timeString: string | undefined, isOngoing = false): string => {
+  if (!timeString) {
+    return isOngoing ? 'در حال انجام' : 'زمان نامشخص'
+  }
   const date = new Date(timeString)
   return new Intl.DateTimeFormat('fa-IR', {
     hour: '2-digit',
@@ -515,7 +517,7 @@ onMounted(() => {
                     <div class="flex flex-col">
                       <span class="text-muted-400 text-xs">تعداد پیام‌ها</span>
                       <span class="text-muted-800 font-medium dark:text-white">
-                        {{ session.count_of_total_messages || '0' }} پیام
+                        {{ session.status === 'inprogress' ? 'در حال انجام' : (session.count_of_total_messages || '0') + ' پیام' }}
                       </span>
                     </div>
                   </div>
@@ -527,7 +529,7 @@ onMounted(() => {
                     <div class="flex flex-col">
                       <span class="text-muted-400 text-xs">زمان شروع/پایان</span>
                       <span class="text-muted-800 font-medium dark:text-white">
-                        {{ formatTime(session.start_time) }} - {{ formatTime(session.end_time) }}
+                        {{ session.status === 'inprogress' ? 'در حال انجام' : formatTime(session.start_time) + ' - ' + formatTime(session.end_time) }}
                       </span>
                     </div>
                   </div>
@@ -618,10 +620,10 @@ onMounted(() => {
 
                   <div class="space-y-3">
                     <!-- Session ID -->
-                    <div>
+                    <div v-if="session.status !== 'inprogress'">
                       <span class="text-muted-600 dark:text-muted-400 text-xs">شناسه جلسه:</span>
                       <BaseParagraph size="xs" class="text-muted-700 dark:text-muted-300 mt-1 font-mono">
-                        {{ session.id.slice(-8) }}
+                        {{ session.status === 'inprogress' ? 'در حال انجام' : session.id.slice(-8) }}
                       </BaseParagraph>
                     </div>
 
@@ -652,18 +654,11 @@ onMounted(() => {
             </div>
 
             <!-- Action Buttons -->
-            <div class="border-muted-200 dark:border-muted-700 border-t p-4" :data-tour="index === 0 ? 'sessions-actions' : undefined">
+            <div 
+              class="border-muted-200 dark:border-muted-700 border-t p-4" 
+              :data-tour="index === 0 ? 'sessions-actions' : undefined"
+            >
               <div class="flex flex-wrap items-center justify-end gap-2">
-                <BaseButton
-                  v-if="session.status === 'inprogress'"
-                  color="primary"
-                  shape="curved"
-                  @click="continueSession(session.expand?.therapist?.id || '')"
-                >
-                  <Icon name="ph:chat-circle-dots-duotone" class="ml-1 size-4" />
-                  ادامه گفتگو
-                </BaseButton>
-
                 <BaseButton
                   v-if="session.status === 'done'"
                   color="info"
@@ -683,9 +678,9 @@ onMounted(() => {
                   <Icon name="ph:clock-counter-clockwise-duotone" class="ml-1 size-4" />
                   تاریخچه
                 </BaseButton>
-
+                
                 <BaseButton
-                  v-if="!['done', 'inprogress'].includes(session.status)"
+                  v-if="!['done', 'inprogress', 'closed', 'deleted'].includes(session.status)"
                   color="muted"
                   shape="curved"
                   disabled
