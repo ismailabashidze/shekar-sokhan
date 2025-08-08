@@ -108,19 +108,15 @@ export function useMemory() {
       categories: draft.categories,
       source: draft.source || 'messaging',
     }
-    const rec = await nuxtApp.$pb.collection('gpt-5-memories').create(payload)
+    const rec = await nuxtApp.$pb.collection('gpt_5_memories').create(payload)
 
-    // If Mem0 API key is present, mirror memory to Mem0 for global recall
+    // If Mem0 API key is present, mirror memory server-side to avoid exposing the key
     try {
-      if (mem0Plugin?.enabled && mem0Plugin.apiKey) {
-        await fetch(`${mem0Plugin.baseUrl || 'https://api.mem0.ai'}/v1/memories`, {
+      if (mem0Plugin?.enabled) {
+        await $fetch('/api/mem0/memories', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mem0Plugin.apiKey}`,
-          },
-          body: JSON.stringify({
-            user_id: draft.userId,
+          body: {
+            userId: draft.userId,
             content: draft.text,
             metadata: {
               sessionId: draft.sessionId,
@@ -129,7 +125,7 @@ export function useMemory() {
               importance: draft.importance,
               source: draft.source,
             },
-          }),
+          },
         })
       }
     }
@@ -150,7 +146,7 @@ export function useMemory() {
       filterParts.push(`categories ?~ [${list}]`)
     }
     const filter = filterParts.join(' && ')
-    const res = await nuxtApp.$pb.collection('gpt-5-memories').getList(1, opts.limit || 5, {
+    const res = await nuxtApp.$pb.collection('gpt_5_memories').getList(1, opts.limit || 5, {
       filter,
       sort: '-importance,-created',
     })

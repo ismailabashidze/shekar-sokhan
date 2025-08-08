@@ -20,7 +20,7 @@ async function loadMemories() {
   if (!userId.value) return
   loading.value = true
   try {
-    const res = await nuxtApp.$pb.collection('gpt-5-memories').getList(page.value, perPage.value, {
+    const res = await nuxtApp.$pb.collection('gpt_5_memories').getList(page.value, perPage.value, {
       filter: `user="${userId.value}"`,
       sort: '-importance,-created',
     })
@@ -36,7 +36,7 @@ onMounted(loadMemories)
 watch([page, perPage, userId], loadMemories)
 
 async function removeMemory(id: string) {
-  await nuxtApp.$pb.collection('gpt-5-memories').delete(id)
+  await nuxtApp.$pb.collection('gpt_5_memories').delete(id)
   await loadMemories()
 }
 </script>
