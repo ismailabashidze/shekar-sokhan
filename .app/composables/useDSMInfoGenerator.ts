@@ -1700,6 +1700,140 @@ export const useDSMInfoGenerator = () => {
 
       console.log('🔍 Found disorder record:', disorderRecord.titleEn)
       
+      // Helper function to transform diagnosticFeatures array to simplified expected structure
+      const transformDiagnosticFeatures = (features: any, associatedFeatures: any) => {
+        console.log('🔍 Transforming diagnosticFeatures:', features)
+        console.log('🔍 Using associatedFeatures:', associatedFeatures)
+
+        // Simplified structure based on actual data available
+        const transformed = {
+          core_symptoms: {
+            mandatory: [],
+            associated: [],
+            exclusion_criteria: 'معیارهای حذف تعریف نشده است'
+          },
+          // Remove complex temporal and functional sections that don't exist in data
+          contextual_factors: [],
+          differential_diagnostics: []
+        }
+
+        // Extract mandatory symptoms from diagnosticFeatures array
+        if (Array.isArray(features) && features.length > 0) {
+          features.forEach((feature: any) => {
+            if (feature.title && feature.description) {
+              // Handle differential diagnosis separately
+              if (feature.title.includes('تشخیص افتراقی') || feature.title.includes('differential diagnosis')) {
+                transformed.differential_diagnostics.push({
+                  disorder: feature.title,
+                  disorderEn: feature.titleEn || feature.title,
+                  code: 'نامشخص',
+                  distinguishing_features: [
+                    {
+                      feature: 'توصیف',
+                      comparison: feature.description
+                    }
+                  ]
+                })
+              }
+              // All other diagnostic features are mandatory symptoms
+              else {
+                transformed.core_symptoms.mandatory.push({
+                  symptom: feature.title,
+                  description: feature.description,
+                  quantification: 'بر اساس معیارهای DSM-5'
+                })
+              }
+            }
+          })
+        }
+
+        // Extract associated symptoms from associated_features
+        if (Array.isArray(associatedFeatures) && associatedFeatures.length > 0) {
+          associatedFeatures.forEach((category: any) => {
+            if (category.category && Array.isArray(category.items)) {
+              category.items.forEach((item: string) => {
+                transformed.core_symptoms.associated.push({
+                  symptom: item,
+                  description: `علامت ${category.category}`,
+                  category: category.category
+                })
+              })
+            }
+          })
+        }
+
+        console.log('🔍 Transformed structure:', transformed)
+        return transformed
+      }
+      
+      const rawDiagnosticFeatures = safeJSONParse(disorderRecord.diagnosticFeatures, [])
+      const rawAssociatedFeatures = safeJSONParse(disorderRecord.associated_features, [])
+      console.log('🔍 Raw diagnosticFeatures:', rawDiagnosticFeatures)
+      console.log('🔍 Raw associated_features:', rawAssociatedFeatures)
+      
+      // Helper function to transform diagnosticMarkers array to expected format
+      const transformDiagnosticMarkers = (markers: any) => {
+        if (Array.isArray(markers) && markers.length > 0) {
+          return markers.map((marker, index) => {
+            // Handle the specific database structure: { category: "...", markers: [...] }
+            if (typeof marker === 'object' && marker !== null && marker.category && Array.isArray(marker.markers)) {
+              return {
+                name: marker.category,
+                subtype: marker.markers
+              }
+            }
+            // Handle other possible structures for backward compatibility
+            else if (typeof marker === 'object' && marker !== null) {
+              return {
+                name: marker.name || marker.type || marker.category || `marker_${index + 1}`,
+                subtype: Array.isArray(marker.subtype) 
+                  ? marker.subtype 
+                  : Array.isArray(marker.subtypes)
+                    ? marker.subtypes
+                    : marker.tests
+                      ? (Array.isArray(marker.tests) ? marker.tests : [marker.tests])
+                      : marker.methods
+                        ? (Array.isArray(marker.methods) ? marker.methods : [marker.methods])
+                        : [marker.description || marker.title || 'تست تشخیصی']
+              }
+            } else if (typeof marker === 'string') {
+              // If it's just a string, create a basic marker structure
+              return {
+                name: marker.includes('آزمون') || marker.includes('test') ? 'diagnostic_test' : 'clinical_assessment',
+                subtype: [marker]
+              }
+            }
+            return {
+              name: `marker_${index + 1}`,
+              subtype: ['تست تشخیصی استاندارد']
+            }
+          })
+        } else if (typeof markers === 'object' && markers !== null && !Array.isArray(markers)) {
+          // If it's an object, try to extract markers
+          const markerArray = []
+          Object.keys(markers).forEach(key => {
+            if (Array.isArray(markers[key])) {
+              markerArray.push({
+                name: key,
+                subtype: markers[key]
+              })
+            } else if (typeof markers[key] === 'string') {
+              markerArray.push({
+                name: key,
+                subtype: [markers[key]]
+              })
+            }
+          })
+          return markerArray.length > 0 ? markerArray : []
+        } else {
+          // Return empty array for invalid data
+          return []
+        }
+      }
+
+      const rawDiagnosticMarkers = safeJSONParse(disorderRecord.diagnosticMarkers, [])
+      console.log('🔍 Raw diagnosticMarkers:', rawDiagnosticMarkers)
+      
       const disorder = {
         id: disorderRecord.id,
         code: disorderRecord.code,
@@ -1713,9 +1847,9 @@ export const useDSMInfoGenerator = () => {
         suicideRisk: disorderRecord.suicideRisk,
         diagnosisCriteria: safeJSONParse(disorderRecord.diagnosisCriteria, []),
         specifiers: safeJSONParse(disorderRecord.specifiers, []),
-        diagnosticFeatures: safeJSONParse(disorderRecord.diagnosticFeatures, {}),
-        associated_features: safeJSONParse(disorderRecord.associated_features, []),
-        diagnosticMarkers: safeJSONParse(disorderRecord.diagnosticMarkers, []),
+        diagnosticFeatures: transformDiagnosticFeatures(rawDiagnosticFeatures, rawAssociatedFeatures),
+        associated_features: rawAssociatedFeatures,
+        diagnosticMarkers: transformDiagnosticMarkers(rawDiagnosticMarkers),
         differentialDiagnosis: safeJSONParse(disorderRecord.differentialDiagnosis, []),
         riskAndPrognosticFactors: safeJSONParse(disorderRecord.riskAndPrognosticFactors, {}),
         cultureRelatedDiagnosticIssues: safeJSONParse(disorderRecord.cultureRelatedDiagnosticIssues, []),

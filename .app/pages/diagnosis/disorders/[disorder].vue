@@ -262,19 +262,19 @@
         <!-- Overview Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div class="bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 p-4 rounded-xl text-center">
-            <div class="text-red-600 dark:text-red-400 text-2xl font-bold">{{ disorderInfo.diagnosticFeatures?.core_symptoms?.mandatory?.length || 0 }}</div>
-            <div class="text-red-700 dark:text-red-300 text-sm">علائم اساسی</div>
+            <div class="text-red-600 dark:text-red-400 text-2xl font-bold">{{ disorderInfo.diagnosticFeatures?.length || 0 }}</div>
+            <div class="text-red-700 dark:text-red-300 text-sm">ویژگی‌های تشخیصی</div>
           </div>
           <div class="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 p-4 rounded-xl text-center">
-            <div class="text-blue-600 dark:text-blue-400 text-2xl font-bold">{{ disorderInfo.diagnosticFeatures?.core_symptoms?.associated?.length || 0 }}</div>
+            <div class="text-blue-600 dark:text-blue-400 text-2xl font-bold">{{ disorderInfo.associated_features?.length || 0 }}</div>
             <div class="text-blue-700 dark:text-blue-300 text-sm">علائم همراه</div>
           </div>
           <div class="bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 p-4 rounded-xl text-center">
-            <div class="text-orange-600 dark:text-orange-400 text-2xl font-bold">{{ disorderInfo.diagnosticFeatures?.contextual_factors?.length || 0 }}</div>
-            <div class="text-orange-700 dark:text-orange-300 text-sm">عوامل زمینه‌ای</div>
+            <div class="text-orange-600 dark:text-orange-400 text-2xl font-bold">{{ disorderInfo.riskAndPrognosticFactors?.length || 0 }}</div>
+            <div class="text-orange-700 dark:text-orange-300 text-sm">عوامل خطر</div>
           </div>
           <div class="bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 p-4 rounded-xl text-center">
-            <div class="text-purple-600 dark:text-purple-400 text-2xl font-bold">{{ disorderInfo.diagnosticFeatures?.differential_diagnostics?.length || 0 }}</div>
+            <div class="text-purple-600 dark:text-purple-400 text-2xl font-bold">{{ disorderInfo.differentialDiagnosis?.length || 0 }}</div>
             <div class="text-purple-700 dark:text-purple-300 text-sm">تشخیص‌های افتراقی</div>
           </div>
         </div>
@@ -337,28 +337,27 @@
             </div>
           </div>
 
-          <!-- Associated Symptoms -->
+          <!-- Associated Features -->
           <div class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border-2 border-blue-200 dark:border-blue-800">
             <div class="flex items-center justify-between mb-6">
               <h3 class="text-xl font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-3">
                 <div class="bg-blue-500 p-2 rounded-full">
-                  <Icon name="ph:info-fill" class="size-6 text-white" />
+                  <Icon name="ph:heart-fill" class="size-6 text-white" />
                 </div>
                 علائم همراه
               </h3>
               <div class="bg-blue-200 dark:bg-blue-800 px-3 py-1 rounded-full">
-                <span class="text-blue-800 dark:text-blue-200 text-sm font-medium">حمایت‌کننده تشخیص</span>
+                <span class="text-blue-800 dark:text-blue-200 text-sm font-medium">{{ disorderInfo.associated_features?.length || 0 }} دسته</span>
               </div>
             </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <!-- Empty State Button for Associated Symptoms -->
-              <div v-if="!disorderInfo.diagnosticFeatures?.core_symptoms?.associated || disorderInfo.diagnosticFeatures.core_symptoms.associated.length === 0" class="col-span-full text-center py-6">
+
+            <div class="grid gap-4">
+              <div v-if="!disorderInfo.associated_features || disorderInfo.associated_features.length === 0" class="text-center py-6">
                 <div class="bg-blue-100 dark:bg-blue-900/30 rounded-xl p-6 border-2 border-dashed border-blue-300 dark:border-blue-700">
                   <Icon name="ph:plus-circle" class="size-10 text-blue-400 mx-auto mb-3" />
                   <p class="text-blue-600 dark:text-blue-400 mb-3">علائم همراه تعریف نشده است</p>
                   <button 
-                    @click="handleAddAssociatedSymptoms"
+                    @click="handleAddAssociatedFeatures"
                     class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg transition-colors font-medium"
                   >
                     افزودن علائم همراه
@@ -367,21 +366,24 @@
               </div>
 
               <div
-                v-for="symptom in (disorderInfo.diagnosticFeatures?.core_symptoms?.associated || [])"
-                :key="symptom.symptom"
+                v-for="(category, index) in (disorderInfo.associated_features || [])"
+                :key="category.category"
                 class="bg-white dark:bg-blue-800/30 p-5 rounded-lg shadow-sm border border-blue-200 dark:border-blue-700"
               >
-                <div class="flex items-start gap-3 mb-3">
-                  <div class="bg-blue-500 p-1 rounded-full shrink-0 mt-1">
-                    <Icon :name="getSymptomIcon(symptom.category)" class="size-4 text-white" />
+                <h4 class="font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
+                  <div class="bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">
+                    {{ index + 1 }}
                   </div>
-                  <h4 class="font-semibold text-blue-800 dark:text-blue-200">{{ symptom.symptom }}</h4>
-                </div>
-                <p class="text-blue-700 dark:text-blue-300 text-sm mb-3 leading-relaxed mr-7">{{ symptom.description }}</p>
-                <div class="mr-7">
-                  <span class="bg-blue-200 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium">
-                    {{ symptom.category }}
-                  </span>
+                  {{ category.category }}
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div
+                    v-for="item in category.items"
+                    :key="item"
+                    class="bg-blue-100 dark:bg-blue-900/50 px-3 py-2 rounded-lg text-blue-700 dark:text-blue-300 text-sm"
+                  >
+                    {{ item }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -649,35 +651,7 @@
           </div>
         </div>
 
-        <!-- Clinical Notes -->
-        <div class="mt-8 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 p-6 rounded-xl border border-cyan-200 dark:border-cyan-800">
-          <div class="flex items-start gap-4">
-            <div class="bg-cyan-500 p-2 rounded-lg shrink-0">
-              <Icon name="ph:warning-octagon" class="size-6 text-white" />
-            </div>
-            <div>
-              <h3 class="font-semibold text-cyan-800 dark:text-cyan-300 mb-2">نکات مهم کلینیکی</h3>
-              <ul class="space-y-2 text-cyan-700 dark:text-cyan-400 text-sm">
-                <li class="flex items-start gap-2">
-                  <Icon name="ph:dot" class="size-4 shrink-0 mt-1" />
-                  <span>هیچ نشانگر زیستی خاصی برای تشخیص قطعی GDD وجود ندارد</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <Icon name="ph:dot" class="size-4 shrink-0 mt-1" />
-                  <span>تشخیص اصولاً بر اساس مشاهدات کلینیکی و آزمون‌های تکاملی استوار است</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <Icon name="ph:dot" class="size-4 shrink-0 mt-1" />
-                  <span>آزمون‌های تکمیلی برای رد علل زمینه‌ای (اختلالات ژنتیکی، متابولیک) استفاده می‌شوند</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <Icon name="ph:dot" class="size-4 shrink-0 mt-1" />
-                  <span>ارزیابی چندرشته‌ای شامل روانشناسی، گفتاردرمانی، و کاردرمانی ضروری است</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        
       </div>
 
       <!-- Associated Features -->
@@ -2059,13 +2033,13 @@ const handleAddSpecifiers = () => {
   // User will specify action later
 }
 
-const handleAddMandatorySymptoms = () => {
-  console.log('Add Mandatory Symptoms clicked')
+const handleAddDiagnosticFeatures = () => {
+  console.log('Add Diagnostic Features clicked')
   // User will specify action later
 }
 
-const handleAddAssociatedSymptoms = () => {
-  console.log('Add Associated Symptoms clicked')
+const handleAddAssociatedFeatures = () => {
+  console.log('Add Associated Features clicked')
   // User will specify action later
 }
 
