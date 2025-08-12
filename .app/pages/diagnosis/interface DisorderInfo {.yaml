@@ -1,0 +1,73 @@
+interface DisorderInfo {
+    code: string
+    title: string
+    titleEn: string
+    description: string
+    minimumCriteria: string
+    specialNote: string
+    Prevalence: string
+    developmentAndCourse: string
+    suicideRisk: string
+    diagnosisCriteria: DiagnosisCriterion[]
+    specifiers: Specifier[]
+    diagnosticFeatures: DiagnosticFeature[]
+    associated_features: AssociatedFeature[]
+    diagnosticMarkers: DiagnosticMarker[]
+    differentialDiagnosis: DifferentialDiagnosis[]
+    riskAndPrognosticFactors: RiskAndPrognosticFactor[]
+    cultureRelatedDiagnosticIssues: CultureRelatedDiagnosticIssue[]
+    genderRelatedDiagnosticIssues: GenderRelatedDiagnosticIssue[]
+  }
+
+  interface DiagnosisCriterion {
+    alphabet: string
+    description: string
+    subsets: CriterionSubset[]
+  }
+
+  interface CriterionSubset {
+    number: string
+    description: string
+  }
+
+  interface Specifier {
+    title: string
+    conditions: string[]
+  }
+
+  interface DiagnosticFeature {
+    title: string
+    description: string
+  }
+
+  interface AssociatedFeature {
+    category: string
+    items: string[]
+  }
+
+  interface DiagnosticMarker {
+    category: string
+    markers: string[]
+  }
+
+  interface DifferentialDiagnosis {
+    disorder: string
+    disorderEn: string
+    code: string
+    differentiatingFeatures: string[]
+  }
+
+  interface RiskAndPrognosticFactor {
+    category: string
+    factors: string[]
+  }
+
+  interface CultureRelatedDiagnosticIssue {
+    aspect: string
+    considerations: string[]
+  }
+
+  interface GenderRelatedDiagnosticIssue {
+    aspect: string
+    considerations: string[]
+  }
