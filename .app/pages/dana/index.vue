@@ -25,7 +25,7 @@ const conversations = ref([
     id: 1,
     user: {
       name: 'دانا، هوش مصنوعی',
-      photo: '/img/logo.png',
+      photo: '/img/logo.svg',
       role: 'مدل زبانی بزرگ',
       bio: 'دانا هوش مصنوعی، می تواند به زبان فارسی صحبت کند. او توانایی تحلیل و بررسی گفت و گو ها را دارد.',
       age: '1500ms-5000ms',

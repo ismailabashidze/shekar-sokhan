@@ -4,30 +4,30 @@ export type TherapyAssessment = {
   id?: string
   // User reference
   user?: string
-  
+
   // Status
   status: AssessmentStatus
-  
+
   // Step 1: Main concerns
   mainConcerns: string
   triggerEvents: string
   symptomsStarted: string
   impactOnLife: string
-  
+
   // Step 2: Current mood & emotional state
   mood: string
   emotionalState: string[] // JSON array
   energyLevel: number
   motivationLevel: number
   socialConnection: number
-  
+
   // Step 3: Physical & mental levels
   anxietyLevel: number
   sleepQuality: number
   stressLevel: number
   concentrationLevel: number
   physicalSymptoms: string[] // JSON array
-  
+
   // Step 4: Background & personal info
   age: string
   gender: string
@@ -38,7 +38,7 @@ export type TherapyAssessment = {
   previousTherapy: string
   currentMedication: string
   supportSystem: string
-  
+
   // Step 5: Therapy preferences
   preferredApproach: string
   timeAvailability: string
@@ -47,7 +47,7 @@ export type TherapyAssessment = {
   specificIssues: string[] // JSON array
   copingMethods: string[] // JSON array
   expectations: string
-  
+
   // Step 6: Demographics
   education: string
   incomeLevel: string
@@ -57,7 +57,7 @@ export type TherapyAssessment = {
   language: string
   familySize: string
   parentalStatus: string
-  
+
   // System fields
   assessmentVersion?: string
   completionTime?: number
@@ -81,7 +81,8 @@ export function useAssessment() {
 
     try {
       return await nuxtApp.$pb.collection('therapy_assessments').create(assessmentData)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error creating assessment:', error)
       throw error
     }
@@ -90,7 +91,8 @@ export function useAssessment() {
   const getAssessment = async (id: string) => {
     try {
       return await nuxtApp.$pb.collection('therapy_assessments').getOne(id)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error fetching assessment:', error)
       throw error
     }
@@ -107,7 +109,8 @@ export function useAssessment() {
         filter: `user = "${targetUserId}"`,
         sort: '-created',
       })
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error fetching user assessments:', error)
       throw error
     }
@@ -119,7 +122,8 @@ export function useAssessment() {
         ...assessment,
         updated: new Date().toISOString(),
       })
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error updating assessment:', error)
       throw error
     }
@@ -128,7 +132,8 @@ export function useAssessment() {
   const deleteAssessment = async (id: string) => {
     try {
       return await nuxtApp.$pb.collection('therapy_assessments').delete(id)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error deleting assessment:', error)
       throw error
     }

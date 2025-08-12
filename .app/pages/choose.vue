@@ -6,8 +6,8 @@ definePageMeta({
     title: 'انتخاب سرویس',
     description: 'استفاده از سرویس ها',
     categories: ['layouts'],
-    src: '/img/logo.png',
-    srcDark: '/img/logo.png',
+    src: '/img/logo.svg',
+    srcDark: '/img/logo.svg',
     order: 84,
   },
 })
@@ -169,7 +169,7 @@ const chooseService = () => {
     <div
       class="ltablet:max-w-full flex max-w-[425px] flex-col items-center gap-4 text-center md:flex-row md:text-left lg:max-w-full"
     >
-      <BaseAvatar src="/img/logo.png" size="lg" />
+      <BaseAvatar src="/img/logo.svg" size="lg" />
       <div class="text-right">
         <BaseHeading
           as="h2"

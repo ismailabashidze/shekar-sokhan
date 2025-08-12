@@ -229,7 +229,7 @@ const pasteCouponCode = () => {
                 class="mx-auto"
                 size="xl"
                 src="/img/avatars/mana.jpg"
-                badge-src="/img/logo.png"
+                badge-src="/img/logo.svg"
               />
               <div class="mx-auto mb-4 max-w-xs text-center">
                 <BaseHeading

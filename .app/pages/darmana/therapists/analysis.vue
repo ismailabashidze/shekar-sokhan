@@ -255,15 +255,15 @@ const checkNotificationStatus = (step: any) => {
     // Primary match: message content similarity
     const messageMatch = notification.message.includes(step.suggestedMessage.substring(0, 50))
       || step.suggestedMessage.includes(notification.message.substring(0, 50))
-    
+
     // Secondary match: title pattern
     const titleMatch = notification.title.includes('پیام مهربان')
       && (notification.title.includes(step.title.substring(0, 20)) || step.title.includes(notification.title.substring(0, 20)))
-    
+
     // Time-based match: scheduled time proximity (within 5 minutes)
     const timeMatch = notification.announce_time
       && Math.abs(new Date(notification.announce_time).getTime() - step.scheduledDate.getTime()) < 300000 // Within 5 minutes
-    
+
     return messageMatch || titleMatch || timeMatch
   })
 
@@ -535,7 +535,7 @@ const detectDataConflicts = (step: any) => {
     const dbTime = new Date(notificationStatus.announceTime)
     const stepTime = new Date(step.scheduledDate)
     const timeDiff = Math.abs(dbTime.getTime() - stepTime.getTime())
-    
+
     if (timeDiff > 300000) { // More than 5 minutes difference
       conflicts.push({
         type: 'time_mismatch',
@@ -550,7 +550,7 @@ const detectDataConflicts = (step: any) => {
   if (notificationStatus.notificationExists) {
     const now = new Date()
     const announceTime = notificationStatus.announceTime ? new Date(notificationStatus.announceTime) : null
-    
+
     if (announceTime && announceTime > now && notificationStatus.actualStatus !== 'scheduled') {
       conflicts.push({
         type: 'status_mismatch',
@@ -616,13 +616,13 @@ const getStatusInfo = (step: any) => {
         label: `در صف ارسال${conflictIndicator}`,
         color: 'warning',
         icon: 'ph:clock-countdown-duotone',
-        bgClass: conflictInfo.hasConflicts 
+        bgClass: conflictInfo.hasConflicts
           ? 'bg-gradient-to-r from-red-500/15 to-orange-500/20 dark:from-red-400/20 dark:to-orange-400/25 border border-red-200/40 dark:border-red-400/30'
           : 'bg-gradient-to-r from-amber-500/15 to-orange-500/20 dark:from-amber-400/20 dark:to-orange-400/25 border border-amber-200/40 dark:border-amber-400/30 shadow-amber-100/50 dark:shadow-amber-900/20',
-        textClass: conflictInfo.hasConflicts 
+        textClass: conflictInfo.hasConflicts
           ? 'text-red-700 dark:text-red-300'
           : 'text-amber-700 dark:text-amber-300',
-        iconClass: conflictInfo.hasConflicts 
+        iconClass: conflictInfo.hasConflicts
           ? 'text-red-600 dark:text-red-400'
           : 'text-amber-600 dark:text-amber-400',
         pulseClass: 'animate-pulse',
@@ -1894,7 +1894,6 @@ const getStatusInfo = (step: any) => {
                               />
                               <span>{{ notificationsCreated ? 'زمان‌بندی شده' : 'آماده زمان‌بندی' }}</span>
                             </div>
-
                           </div>
                         </div>
                       </div>

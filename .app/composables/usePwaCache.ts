@@ -8,7 +8,7 @@ export function usePwaCache() {
       isClearing.value = true
 
       if (!('serviceWorker' in navigator)) {
-        console.warn('[PWA] Service Worker not supported')
+        
         return false
       }
 
@@ -36,17 +36,17 @@ export function usePwaCache() {
         })
 
         if (success) {
-          console.log('[PWA] All caches cleared successfully')
+          
         }
         else {
-          console.warn('[PWA] Service worker cache clear may have failed')
+          
         }
       }
 
       return true
     }
     catch (error) {
-      console.error('[PWA] Failed to clear caches:', error)
+      
       return false
     }
     finally {
@@ -66,14 +66,14 @@ export function usePwaCache() {
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations()
         await Promise.all(registrations.map(reg => reg.unregister()))
-        console.log('[PWA] Service workers unregistered')
+        
       }
 
       // Force reload the page without cache
       window.location.reload()
     }
     catch (error) {
-      console.error('[PWA] Failed to force refresh:', error)
+      
       // Fallback to simple reload
       window.location.reload()
     }
@@ -103,7 +103,7 @@ export function usePwaCache() {
       }
     }
     catch (error) {
-      console.error('[PWA] Failed to get cache status:', error)
+      
       return null
     }
   }

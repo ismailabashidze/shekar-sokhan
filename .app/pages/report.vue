@@ -196,9 +196,9 @@
               <!-- Show More Button -->
               <div v-if="report.summaries.length > visibleCount" class="mt-6 text-center">
                 <BaseButton
-                  @click="showMore"
                   color="primary"
                   class="mx-auto"
+                  @click="showMore"
                 >
                   نمایش بیشتر ({{ report.summaries.length - visibleCount }} مورد دیگر)
                 </BaseButton>
@@ -698,10 +698,10 @@
                 <!-- Show More Button for Deeper Goals -->
                 <div v-if="report.possibleDeeperGoals.length > visibleDeeperGoalsCount" class="mt-4 text-center">
                   <BaseButton
-                    @click="showMoreDeeperGoals"
                     color="primary"
                     size="sm"
                     class="mx-auto"
+                    @click="showMoreDeeperGoals"
                   >
                     نمایش بیشتر ({{ report.possibleDeeperGoals.length - visibleDeeperGoalsCount }} مورد دیگر)
                   </BaseButton>
@@ -756,7 +756,8 @@
                   <div
                     v-for="(risk, j) in group"
                     :key="j"
-                    class="group relative">
+                    class="group relative"
+                  >
                     <BaseCard
                       shape="rounded"
                       class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
@@ -786,10 +787,10 @@
                 <!-- Show More Button for Risk Factors -->
                 <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
                   <BaseButton
-                    @click="showMoreRiskFactors"
                     color="primary"
                     size="sm"
                     class="mx-auto"
+                    @click="showMoreRiskFactors"
                   >
                     نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
                   </BaseButton>

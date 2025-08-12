@@ -34,7 +34,7 @@ export default defineAppConfig({
         logo: {
           component: 'img',
           props: {
-            src: '/img/logo.png',
+            src: '/img/logo.svg',
             alt: 'Logo',
             class: 'h-10',
           },

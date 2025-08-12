@@ -50,25 +50,21 @@ const isPwaInstalled = (): boolean => {
 
   // بررسی standalone mode (اصلی‌ترین روش)
   if (window.matchMedia('(display-mode: standalone)').matches) {
-    console.log('PWA detected: display-mode standalone')
     return true
   }
 
   // بررسی navigator.standalone برای iOS Safari
   if ((navigator as any).standalone === true) {
-    console.log('PWA detected: iOS standalone mode')
     return true
   }
 
   // بررسی window.navigator.standalone برای iOS
   if ('standalone' in window.navigator && (window.navigator as any).standalone) {
-    console.log('PWA detected: iOS navigator standalone')
     return true
   }
 
   // بررسی referrer برای installed PWA
   if (document.referrer.includes('android-app://')) {
-    console.log('PWA detected: Android app referrer')
     return true
   }
 
@@ -76,7 +72,6 @@ const isPwaInstalled = (): boolean => {
   try {
     const manualFlag = sessionStorage.getItem('isPWA-manual')
     if (manualFlag === 'true') {
-      console.log('PWA detected: manual sessionStorage flag')
       return true
     }
   }
@@ -88,15 +83,13 @@ const isPwaInstalled = (): boolean => {
   try {
     const manualInstall = localStorage.getItem('pwa-manually-installed')
     if (manualInstall === 'true') {
-      console.log('PWA detected: manual localStorage flag')
-      return true
+        return true
     }
   }
   catch (e) {
     // localStorage may not be available
   }
 
-  console.log('PWA not detected - showing install prompt')
   return false
 }
 
@@ -111,12 +104,10 @@ const getGlobalPrompt = (): BeforeInstallPromptEvent | null => {
 onMounted(() => {
   // اگر PWA قبلاً نصب شده باشد، پرامپت رو نشون نده
   if (isPwaInstalled()) {
-    console.log('PWA is already installed - hiding prompt')
     showInstallPrompt.value = false
     return
   }
 
-  console.log('PWA not installed - initializing prompt logic')
 
   // بررسی اولیه برای global prompt
   const globalPrompt = getGlobalPrompt()
@@ -134,7 +125,6 @@ onMounted(() => {
 
   // Listen for app installation
   window.addEventListener('appinstalled', () => {
-    console.log('PWA has been installed')
     showInstallPrompt.value = false
     deferredPrompt.value = null
     localStorage.removeItem('pwa-install-dismissed')
@@ -152,14 +142,12 @@ onMounted(() => {
   setTimeout(() => {
     if (!isPwaInstalled() && !localStorage.getItem('pwa-install-dismissed') && (getGlobalPrompt() || deferredPrompt.value || isPwaSupported())) {
       showInstallPrompt.value = true
-      console.log('Showing PWA install prompt')
     }
   }, 3000)
 
   // بررسی دوره‌ای برای تشخیص تغییرات وضعیت نصب
   const checkInstallStatus = () => {
     if (isPwaInstalled() && showInstallPrompt.value) {
-      console.log('PWA detected as installed, hiding prompt')
       showInstallPrompt.value = false
     }
 
@@ -238,11 +226,9 @@ const installPwa = async () => {
     const { outcome } = await deferredPrompt.value.userChoice
 
     if (outcome === 'accepted') {
-      console.log('User accepted PWA installation')
       // بررسی که آیا واقعاً نصب شده یا نه
       setTimeout(() => {
         if (isPwaInstalled()) {
-          console.log('PWA installed successfully')
           showInstallPrompt.value = false
           localStorage.removeItem('pwa-install-dismissed')
           try {
@@ -256,21 +242,18 @@ const installPwa = async () => {
       }, 1000)
     }
     else {
-      console.log('User dismissed PWA installation')
     }
 
     showInstallPrompt.value = false
     deferredPrompt.value = null
   }
   catch (error) {
-    console.error('Error installing PWA:', error)
     // Fallback to manual guidance
     showManualInstallGuidance()
   }
 }
 
 const dismissPrompt = () => {
-  console.log('User dismissed PWA install prompt')
   showInstallPrompt.value = false
   localStorage.setItem('pwa-install-dismissed', Date.now().toString())
 
@@ -278,7 +261,6 @@ const dismissPrompt = () => {
   setTimeout(() => {
     if (!isPwaInstalled()) {
       localStorage.removeItem('pwa-install-dismissed')
-      console.log('PWA install prompt dismiss period expired')
     }
   }, 7 * 24 * 60 * 60 * 1000)
 }

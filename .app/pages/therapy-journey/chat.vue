@@ -42,15 +42,26 @@ const userReport = ref<Report | null>(null)
 const hasPreviousData = ref(false)
 const showGoalsModal = ref(false)
 const userGoals = ref<any[]>([])
+const activeGoals = ref<any[]>([])
+const currentGoalIndex = ref(0)
+const goalProgress = ref<any>({})
+const conversationContext = ref<any>({})
+const adaptiveFlow = ref({
+  currentPriority: 'high',
+  questionsAsked: [],
+  culturalAdaptations: [],
+  riskFactorsIdentified: [],
+})
 
 const { generateAnalysis, createAnalysis, getAnalysisForSession } = useSessionAnalysis()
 const { createAndLinkAnalysis, getMessageAnalysis } = useMessageAnalysis()
-const { 
-  submitFeedback, 
-  getFeedbackForMessage, 
-  validateFeedback, 
-  FEEDBACK_CATEGORIES 
+const {
+  submitFeedback,
+  getFeedbackForMessage,
+  validateFeedback,
+  FEEDBACK_CATEGORIES,
 } = useMessageFeedback()
+const { getGoalsByUser, updateGoalProgress } = useGoals()
 
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
@@ -276,6 +287,195 @@ watch(activeTherapistId, async (newId) => {
   }
 })
 
+// === GOAL-GUIDED CONVERSATION HELPER FUNCTIONS ===
+function generateGoalGuidedPrompt(goals, userMessage, analysisResult) {
+  if (!goals || goals.length === 0) return ''
+
+  // Extract priority disorders from the new goal structure
+  const priorityDisorders = []
+  
+  goals.forEach(goal => {
+    const goalData = goal?.goals || goal
+    const disorders = goalData?.suggestedDisordersToInvestigate || []
+    
+    if (Array.isArray(disorders)) {
+      disorders.forEach(category => {
+        if (category?.disorders) {
+          category.disorders.forEach(disorder => {
+            priorityDisorders.push({
+              category: category.categoryTitle,
+              categoryDescription: category.categoryDescription,
+              title: disorder.title,
+              code: disorder.code,
+              description: disorder.description,
+              minimumCriteria: disorder.minimumCriteria,
+              suicideRisk: disorder.suicideRisk,
+              prevalence: disorder.Prevalence,
+              developmentAndCourse: disorder.developmentAndCourse,
+              conversationGuidance: goalData?.conversation_guidance
+            })
+          })
+        }
+      })
+    }
+  })
+
+  if (priorityDisorders.length === 0) {
+    // Fallback to old structure if new structure not found
+    const lowConfidenceGoals = goals.filter(g =>
+      g.dsm5_aspects?.diagnostic_confidence < 70 && g.status !== 'completed',
+    ).sort((a, b) => a.dsm5_aspects?.diagnostic_confidence - b.dsm5_aspects?.diagnostic_confidence)
+
+    if (lowConfidenceGoals.length === 0) return ''
+
+    let prompt = `\n\n=== DIAGNOSTIC GUIDANCE (Legacy Structure) ===\n`
+    prompt += `Focus on these diagnostic areas:\n\n`
+
+    lowConfidenceGoals.slice(0, 3).forEach((goal, index) => {
+      const aspects = goal.dsm5_aspects || {}
+      prompt += `${index + 1}. **${goal.title}** (Confidence: ${aspects.diagnostic_confidence || 0}%)\n`
+      prompt += `   - Category: ${aspects.dsm5_category || 'Unknown'}\n`
+      prompt += `   - Key criteria to explore: ${aspects.criteria_evidence || 'None specified'}\n`
+    })
+
+    return prompt
+  }
+
+  // Build comprehensive prompt with new structure
+  let prompt = `\n\n=== COMPREHENSIVE DSM-5 DIAGNOSTIC GUIDANCE ===\n`
+  prompt += `You are conducting an evidence-based diagnostic interview. Focus on exploring these disorders:\n\n`
+
+  priorityDisorders.slice(0, 5).forEach((disorder, index) => {
+    prompt += `${index + 1}. **${disorder.title}** (${disorder.code})\n`
+    prompt += `   - Category: ${disorder.category}\n`
+    prompt += `   - Description: ${disorder.description}\n`
+    prompt += `   - Key Criteria to Assess: ${disorder.minimumCriteria}\n`
+    
+    if (disorder.suicideRisk && disorder.suicideRisk !== 'low') {
+      prompt += `   - ⚠️ SUICIDE RISK: ${disorder.suicideRisk} - Monitor carefully\n`
+    }
+    
+    if (disorder.prevalence) {
+      prompt += `   - Prevalence: ${disorder.prevalence}\n`
+    }
+    
+    prompt += `\n`
+  })
+
+  // Add conversation guidance if available
+  if (priorityDisorders[0]?.conversationGuidance?.priority_questions) {
+    prompt += `\nPRIORITY QUESTIONS TO EXPLORE:\n`
+    priorityDisorders[0].conversationGuidance.priority_questions.slice(0, 3).forEach(question => {
+      prompt += `- ${question}\n`
+    })
+  }
+
+  prompt += `\nCONVERSATION APPROACH:\n`
+  prompt += `- Use natural, therapeutic conversation style\n`
+  prompt += `- Explore symptoms systematically but sensitively\n`
+  prompt += `- Pay attention to cultural context and individual presentation\n`
+  prompt += `- Monitor for suicide risk throughout the conversation\n`
+  prompt += `- Balance diagnostic assessment with emotional support\n`
+  prompt += `- Don't make the questioning feel like a clinical checklist\n`
+
+  if (analysisResult?.lastMessage_emotionIntensity === 'high') {
+    prompt += `- ⚠️ HIGH EMOTIONAL INTENSITY DETECTED - Prioritize emotional regulation first\n`
+  }
+
+  if (analysisResult?.session_humanInterventionNeeded) {
+    prompt += `- ⚠️ HUMAN INTERVENTION MAY BE NEEDED - Consider referral or immediate support\n`
+  }
+
+  // Check for high suicide risk
+  const hasHighSuicideRisk = priorityDisorders.some(d => d.suicideRisk && d.suicideRisk.includes('high'))
+  if (hasHighSuicideRisk) {
+    prompt += `- 🚨 HIGH SUICIDE RISK IDENTIFIED - Assess immediately and consider safety planning\n`
+  }
+
+  prompt += `\n=== END DIAGNOSTIC GUIDANCE ===\n\n`
+
+  return prompt
+}
+
+async function updateGoalProgressFromConversation(goals, userMessage, aiResponse, analysisResult) {
+  if (!goals || goals.length === 0) return
+
+  try {
+    for (const goal of goals) {
+      if (goal.status === 'completed') continue
+
+      const aspects = goal.dsm5_aspects || {}
+      let progressDelta = 0
+      let confidenceDelta = 0
+      let updatedEvidence = aspects.criteria_evidence || ''
+
+      // Analyze if user message provides evidence for this goal's criteria
+      const userMessageLower = userMessage.toLowerCase()
+      const criteriaWords = (aspects.criteria_evidence || '').toLowerCase().split(' ')
+
+      // Check for keyword matches (enhanced matching can be implemented later)
+      const matchedCriteria = criteriaWords.filter(word =>
+        word.length > 3 && userMessageLower.includes(word),
+      )
+
+      if (matchedCriteria.length > 0) {
+        // Evidence found - increase confidence
+        confidenceDelta = Math.min(10, matchedCriteria.length * 3)
+        progressDelta = 5
+
+        // Update evidence with new information
+        const newEvidence = `${userMessage.substring(0, 100)}...`
+        updatedEvidence += ` | New: ${newEvidence}`
+      }
+
+      // Use analysis result to inform progress
+      if (analysisResult) {
+        // Check emotional alignment with goal
+        const primaryEmotions = analysisResult.lastMessage_primaryEmotions || []
+
+        // Example: if goal relates to depression and user shows depressive emotions
+        if (aspects.dsm5_category?.includes('Depressive')
+          && primaryEmotions.some(emotion => ['sadness', 'hopelessness', 'despair'].includes(emotion))) {
+          confidenceDelta += 5
+          progressDelta += 3
+        }
+
+        // Example: anxiety-related goals
+        if (aspects.dsm5_category?.includes('Anxiety')
+          && primaryEmotions.some(emotion => ['anxiety', 'fear', 'worry'].includes(emotion))) {
+          confidenceDelta += 5
+          progressDelta += 3
+        }
+      }
+
+      // Apply progress updates if there's meaningful change
+      if (progressDelta > 0 || confidenceDelta > 0) {
+        const newConfidence = Math.min(100, (aspects.diagnostic_confidence || 0) + confidenceDelta)
+        const newProgress = Math.min(100, (goal.progress_percentage || 0) + progressDelta)
+
+        const updatedAspects = {
+          ...aspects,
+          diagnostic_confidence: newConfidence,
+          criteria_evidence: updatedEvidence,
+          last_updated: new Date().toISOString(),
+        }
+
+        await updateGoalProgress(goal.id, {
+          progress_percentage: newProgress,
+          dsm5_aspects: updatedAspects,
+          ai_evaluation: `Updated based on conversation. Evidence: ${matchedCriteria.join(', ')}`,
+        })
+
+        console.log(`Goal "${goal.title}" updated: confidence +${confidenceDelta}%, progress +${progressDelta}%`)
+      }
+    }
+  }
+  catch (error) {
+    console.error('Error in updateGoalProgressFromConversation:', error)
+    throw error
+  }
+}
+
 async function submitMessage() {
   if (showNoCharge.value) {
     toaster.show({
@@ -383,6 +583,27 @@ async function submitMessage() {
       checkIfScrolledToBottom()
     }
 
+    // === GOAL-GUIDED CONVERSATION ENHANCEMENT ===
+    // Load active diagnostic goals for the user
+    let activeUserGoals = []
+    let goalGuidedPrompt = ''
+    try {
+      if (user.value?.id) {
+        activeUserGoals = await getGoalsByUser(user.value.id)
+        console.log('Active goals loaded:', activeUserGoals.length)
+
+        // Generate goal-guided system prompt based on current goals and confidence levels
+        if (activeUserGoals.length > 0) {
+          goalGuidedPrompt = generateGoalGuidedPrompt(activeUserGoals, userMessage.text, analysisResult)
+          console.log('Goal-guided prompt generated')
+        }
+      }
+    }
+    catch (goalError) {
+      console.error('Error loading goals:', goalError)
+      // Continue without goal guidance if there's an error
+    }
+
     // Prepare chat history for AI with analysis; let composable inject system prompt
     const contextMessages = messages.value.map(msg => ({
       role: msg.type === 'sent' ? 'user' : 'assistant',
@@ -392,6 +613,15 @@ async function submitMessage() {
       ...contextMessages,
       { role: 'user', content: userMessage.text },
     ]
+
+    // Add goal-guided system message if available
+    if (goalGuidedPrompt) {
+      chatMessagesForAI.unshift({
+        role: 'system',
+        content: goalGuidedPrompt,
+      })
+    }
+
     // Call streamChat with therapistDetails option (so system prompt is automatically added)
     let aiResponse = ''
     // Show streaming response in real time
@@ -416,6 +646,20 @@ async function submitMessage() {
       timestamp: savedAIMessage.time, // Use timestamp from saved message
       id: savedAIMessage.id, // Use ID from saved message
     })
+
+    // === POST-CONVERSATION GOAL PROGRESS TRACKING ===
+    // Update goal progress based on conversation content
+    try {
+      if (activeUserGoals.length > 0) {
+        await updateGoalProgressFromConversation(activeUserGoals, userMessage.text, aiResponse, analysisResult)
+        console.log('Goal progress updated')
+      }
+    }
+    catch (progressError) {
+      console.error('Error updating goal progress:', progressError)
+      // Don't block the conversation flow if progress update fails
+    }
+
     checkIfScrolledToBottom()
     isAIResponding.value = false
   }
@@ -762,7 +1006,8 @@ const openGoalsModal = async () => {
     showGoalsModal.value = true
     // Fetch user's therapy goals with current session
     userGoals.value = await getTherapyGoals(activeSession.value?.id)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error fetching goals:', error)
     userGoals.value = []
   }
@@ -919,7 +1164,7 @@ const openFeedbackModal = async (message: any) => {
   feedbackStep.value = 1
   feedbackErrors.value = []
   selectedFeedbackType.value = null
-  
+
   // Check if feedback already exists for this message
   try {
     existingFeedback.value = await getFeedbackForMessage(message.id)
@@ -936,7 +1181,8 @@ const openFeedbackModal = async (message: any) => {
         improvements_categories: existingFeedback.value.improvements_categories || {},
         improvements_other: existingFeedback.value.improvements_other || '',
       }
-    } else {
+    }
+    else {
       // Reset form for new feedback
       feedbackForm.value = {
         rating: 0,
@@ -950,11 +1196,12 @@ const openFeedbackModal = async (message: any) => {
         improvements_other: '',
       }
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error checking existing feedback:', error)
     existingFeedback.value = null
   }
-  
+
   isFeedbackModalOpen.value = true
 }
 
@@ -971,7 +1218,7 @@ const closeFeedbackModal = () => {
 
 const nextFeedbackStep = () => {
   feedbackErrors.value = []
-  
+
   if (feedbackStep.value === 1) {
     // Validate basic feedback and category selection
     const errors = validateFeedback(feedbackForm.value)
@@ -979,14 +1226,14 @@ const nextFeedbackStep = () => {
       feedbackErrors.value = errors
       return
     }
-    
+
     // Check if user selected a feedback type
     if (!selectedFeedbackType.value) {
       feedbackErrors.value = ['لطفاً نوع بازخورد خود را انتخاب کنید (مشکلات یا نقاط قوت)']
       return
     }
   }
-  
+
   if (feedbackStep.value < 3) {
     feedbackStep.value++
     resetModalScroll()
@@ -1033,7 +1280,8 @@ const submitMessageFeedback = async () => {
         icon: 'ph:check-circle-fill',
         closable: true,
       })
-    } else {
+    }
+    else {
       // Create new feedback
       await submitFeedback(feedbackData)
       toaster.show({
@@ -1046,7 +1294,8 @@ const submitMessageFeedback = async () => {
     }
 
     closeFeedbackModal()
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error submitting feedback:', error)
     toaster.show({
       title: 'خطا',
@@ -1055,7 +1304,8 @@ const submitMessageFeedback = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     isSubmittingFeedback.value = false
   }
 }
@@ -1066,9 +1316,9 @@ const confirmRetryMessage = () => {
 
 const retryLastMessage = async () => {
   if (messageLoading.value || isAIResponding.value || !messages.value.length) return
-  
+
   showRetryConfirm.value = false
-  
+
   // Find the last AI message
   const lastAIMessage = [...messages.value].reverse().find(msg => msg.type === 'received')
   if (!lastAIMessage) {
@@ -1104,7 +1354,8 @@ const retryLastMessage = async () => {
     // Delete from database
     try {
       await nuxtApp.$pb.collection('therapists_messages').delete(lastAIMessage.id)
-    } catch (deleteError) {
+    }
+    catch (deleteError) {
       console.error('Error deleting message from database:', deleteError)
       // Continue even if delete fails
     }
@@ -1132,12 +1383,12 @@ const retryLastMessage = async () => {
     let aiResponse = ''
     isAIThinking.value = true
     thinkingResponse.value = ''
-    
+
     await streamChat(contextMessages, { therapistDetails: selectedConversationComputed.value?.user }, (chunk) => {
       aiResponse += chunk
       thinkingResponse.value = aiResponse
     })
-    
+
     isAIThinking.value = false
 
     // Save new AI response to PocketBase
@@ -1152,7 +1403,7 @@ const retryLastMessage = async () => {
     })
 
     scrollToBottom()
-    
+
     toaster.show({
       title: 'موفق',
       message: 'پاسخ جدید تولید شد.',
@@ -1160,7 +1411,8 @@ const retryLastMessage = async () => {
       icon: 'ph:check-circle-fill',
       closable: true,
     })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error retrying message:', error)
     toaster.show({
       title: 'خطا',
@@ -1169,7 +1421,8 @@ const retryLastMessage = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     messageLoading.value = false
     isAIResponding.value = false
   }
@@ -2483,7 +2736,11 @@ const isAIThinking = ref(false)
           <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
             {{ existingFeedback ? 'ویرایش بازخورد' : 'بازخورد پیام' }}
           </h3>
-          <BaseTag v-if="existingFeedback" color="info" size="sm">
+          <BaseTag
+            v-if="existingFeedback"
+            color="info"
+            size="sm"
+          >
             ویرایش
           </BaseTag>
         </div>
@@ -2511,9 +2768,15 @@ const isAIThinking = ref(false)
           color="danger"
         >
           <div class="space-y-1">
-            <div class="font-medium">لطفا موارد زیر را بررسی کنید:</div>
+            <div class="font-medium">
+              لطفا موارد زیر را بررسی کنید:
+            </div>
             <ul class="text-sm">
-              <li v-for="error in feedbackErrors" :key="error" class="flex items-center gap-2">
+              <li
+                v-for="error in feedbackErrors"
+                :key="error"
+                class="flex items-center gap-2"
+              >
                 <Icon name="ph:warning-circle-fill" class="size-4" />
                 {{ error }}
               </li>
@@ -2524,31 +2787,35 @@ const isAIThinking = ref(false)
         <!-- Step 1: Message Display and Category Selection -->
         <div v-if="feedbackStep === 1" class="space-y-8">
           <!-- Message content -->
-          <div class="bg-gradient-to-r from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 rounded-xl p-4 mb-6">
+          <div class="from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 mb-6 rounded-xl bg-gradient-to-r p-4">
             <div class="mb-3 flex items-center gap-2">
               <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
               <span class="text-primary-700 dark:text-primary-300 text-sm font-medium">پیام روانشناس</span>
             </div>
-            <div class="prose prose-sm dark:prose-invert max-w-none text-right bg-white dark:bg-muted-800 rounded-lg p-3 max-h-60 overflow-y-auto">
+            <div class="prose prose-sm dark:prose-invert dark:bg-muted-800 max-h-60 max-w-none overflow-y-auto rounded-lg bg-white p-3 text-right">
               <AddonMarkdownRemark :source="selectedMessageForFeedback.text" />
             </div>
           </div>
 
-          <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary-100 to-info-100 dark:from-primary-900/30 dark:to-info-900/30 mb-4">
-              <Icon name="ph:star-duotone" class="size-8 text-primary-600 dark:text-primary-400" />
+          <div class="mb-8 text-center">
+            <div class="from-primary-100 to-info-100 dark:from-primary-900/30 dark:to-info-900/30 mb-4 inline-flex size-16 items-center justify-center rounded-full bg-gradient-to-br">
+              <Icon name="ph:star-duotone" class="text-primary-600 dark:text-primary-400 size-8" />
             </div>
-            <h4 class="text-xl font-bold text-muted-800 dark:text-white">ارزیابی کلی</h4>
-            <p class="text-muted-500 text-sm mt-2">ابتدا امتیاز کلی و نوع بازخورد خود را انتخاب کنید</p>
+            <h4 class="text-muted-800 text-xl font-bold dark:text-white">
+              ارزیابی کلی
+            </h4>
+            <p class="text-muted-500 mt-2 text-sm">
+              ابتدا امتیاز کلی و نوع بازخورد خود را انتخاب کنید
+            </p>
           </div>
 
           <!-- Rating -->
           <div class="space-y-4 text-right">
-            <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">
+            <label class="text-muted-700 dark:text-muted-300 block text-sm font-medium">
               امتیاز کلی <span class="text-danger-500">*</span>
             </label>
-            <div class="flex items-center justify-center gap-3 p-4 bg-muted-50 dark:bg-muted-800 rounded-xl">
-              <span class="text-sm text-muted-600">ضعیف</span>
+            <div class="bg-muted-50 dark:bg-muted-800 flex items-center justify-center gap-3 rounded-xl p-4">
+              <span class="text-muted-600 text-sm">ضعیف</span>
               <div class="flex gap-2">
                 <button
                   v-for="star in 5"
@@ -2561,10 +2828,10 @@ const isAIThinking = ref(false)
                   <Icon name="ph:star-fill" class="size-8" />
                 </button>
               </div>
-              <span class="text-sm text-muted-600">عالی</span>
+              <span class="text-muted-600 text-sm">عالی</span>
             </div>
             <div v-if="feedbackForm.rating > 0" class="text-center">
-              <span class="text-sm text-primary-600 dark:text-primary-400">
+              <span class="text-primary-600 dark:text-primary-400 text-sm">
                 امتیاز شما: {{ feedbackForm.rating }} از 5
               </span>
             </div>
@@ -2572,45 +2839,54 @@ const isAIThinking = ref(false)
 
           <!-- Feedback Type Selection -->
           <div class="space-y-6 text-right">
-            <div class="text-center mb-6">
-              <h5 class="text-lg font-bold text-muted-800 dark:text-white mb-2">نوع بازخورد</h5>
-              <p class="text-muted-500 text-sm">کدام جنبه را می‌خواهید ارزیابی کنید؟</p>
+            <div class="mb-6 text-center">
+              <h5 class="text-muted-800 mb-2 text-lg font-bold dark:text-white">
+                نوع بازخورد
+              </h5>
+              <p class="text-muted-500 text-sm">
+                کدام جنبه را می‌خواهید ارزیابی کنید؟
+              </p>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <!-- Problems Selection -->
               <button
                 type="button"
-                @click="selectedFeedbackType = 'problems'"
-                class="group relative p-6 border-2 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/20"
-                :class="selectedFeedbackType === 'problems' 
-                  ? 'border-danger-500 bg-gradient-to-br from-danger-50 to-red-50 dark:from-danger-900/20 dark:to-red-900/20 shadow-lg shadow-danger-500/10' 
+                class="focus:ring-primary-500/20 group relative rounded-xl border-2 p-6 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4"
+                :class="selectedFeedbackType === 'problems'
+                  ? 'border-danger-500 bg-gradient-to-br from-danger-50 to-red-50 dark:from-danger-900/20 dark:to-red-900/20 shadow-lg shadow-danger-500/10'
                   : 'border-muted-200 dark:border-muted-700 bg-white dark:bg-muted-800 hover:border-danger-300 hover:shadow-md'"
+                @click="selectedFeedbackType = 'problems'"
               >
-                <div class="flex items-center justify-center mb-3">
-                  <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
-                       :class="selectedFeedbackType === 'problems' 
-                         ? 'bg-danger-100 dark:bg-danger-900/40' 
-                         : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-danger-50'"
+                <div class="mb-3 flex items-center justify-center">
+                  <div
+                    class="flex size-12 items-center justify-center rounded-full transition-all duration-300"
+                    :class="selectedFeedbackType === 'problems'
+                      ? 'bg-danger-100 dark:bg-danger-900/40'
+                      : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-danger-50'"
                   >
-                    <Icon name="ph:warning-duotone" 
-                          :class="selectedFeedbackType === 'problems' 
-                            ? 'text-danger-600 dark:text-danger-400' 
-                            : 'text-muted-500 group-hover:text-danger-500'" 
-                          class="size-6" />
+                    <Icon
+                      name="ph:warning-duotone"
+                      :class="selectedFeedbackType === 'problems'
+                        ? 'text-danger-600 dark:text-danger-400'
+                        : 'text-muted-500 group-hover:text-danger-500'"
+                      class="size-6"
+                    />
                   </div>
                 </div>
-                <h6 class="font-bold mb-2" 
-                   :class="selectedFeedbackType === 'problems' 
-                     ? 'text-danger-700 dark:text-danger-300' 
-                     : 'text-muted-800 dark:text-white group-hover:text-danger-600'"
+                <h6
+                  class="mb-2 font-bold"
+                  :class="selectedFeedbackType === 'problems'
+                    ? 'text-danger-700 dark:text-danger-300'
+                    : 'text-muted-800 dark:text-white group-hover:text-danger-600'"
                 >
                   مشکلات موجود
                 </h6>
-                <p class="text-sm" 
-                   :class="selectedFeedbackType === 'problems' 
-                     ? 'text-danger-600 dark:text-danger-400' 
-                     : 'text-muted-500 group-hover:text-danger-500'"
+                <p
+                  class="text-sm"
+                  :class="selectedFeedbackType === 'problems'
+                    ? 'text-danger-600 dark:text-danger-400'
+                    : 'text-muted-500 group-hover:text-danger-500'"
                 >
                   اگر مشکلی در پاسخ دیدید
                 </p>
@@ -2619,36 +2895,41 @@ const isAIThinking = ref(false)
               <!-- Quality Selection -->
               <button
                 type="button"
-                @click="selectedFeedbackType = 'quality'"
-                class="group relative p-6 border-2 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/20"
-                :class="selectedFeedbackType === 'quality' 
-                  ? 'border-success-500 bg-gradient-to-br from-success-50 to-emerald-50 dark:from-success-900/20 dark:to-emerald-900/20 shadow-lg shadow-success-500/10' 
+                class="focus:ring-primary-500/20 group relative rounded-xl border-2 p-6 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4"
+                :class="selectedFeedbackType === 'quality'
+                  ? 'border-success-500 bg-gradient-to-br from-success-50 to-emerald-50 dark:from-success-900/20 dark:to-emerald-900/20 shadow-lg shadow-success-500/10'
                   : 'border-muted-200 dark:border-muted-700 bg-white dark:bg-muted-800 hover:border-success-300 hover:shadow-md'"
+                @click="selectedFeedbackType = 'quality'"
               >
-                <div class="flex items-center justify-center mb-3">
-                  <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
-                       :class="selectedFeedbackType === 'quality' 
-                         ? 'bg-success-100 dark:bg-success-900/40' 
-                         : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-success-50'"
+                <div class="mb-3 flex items-center justify-center">
+                  <div
+                    class="flex size-12 items-center justify-center rounded-full transition-all duration-300"
+                    :class="selectedFeedbackType === 'quality'
+                      ? 'bg-success-100 dark:bg-success-900/40'
+                      : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-success-50'"
                   >
-                    <Icon name="ph:heart-duotone" 
-                          :class="selectedFeedbackType === 'quality' 
-                            ? 'text-success-600 dark:text-success-400' 
-                            : 'text-muted-500 group-hover:text-success-500'" 
-                          class="size-6" />
+                    <Icon
+                      name="ph:heart-duotone"
+                      :class="selectedFeedbackType === 'quality'
+                        ? 'text-success-600 dark:text-success-400'
+                        : 'text-muted-500 group-hover:text-success-500'"
+                      class="size-6"
+                    />
                   </div>
                 </div>
-                <h6 class="font-bold mb-2" 
-                   :class="selectedFeedbackType === 'quality' 
-                     ? 'text-success-700 dark:text-success-300' 
-                     : 'text-muted-800 dark:text-white group-hover:text-success-600'"
+                <h6
+                  class="mb-2 font-bold"
+                  :class="selectedFeedbackType === 'quality'
+                    ? 'text-success-700 dark:text-success-300'
+                    : 'text-muted-800 dark:text-white group-hover:text-success-600'"
                 >
                   نقاط قوت پاسخ
                 </h6>
-                <p class="text-sm" 
-                   :class="selectedFeedbackType === 'quality' 
-                     ? 'text-success-600 dark:text-success-400' 
-                     : 'text-muted-500 group-hover:text-success-500'"
+                <p
+                  class="text-sm"
+                  :class="selectedFeedbackType === 'quality'
+                    ? 'text-success-600 dark:text-success-400'
+                    : 'text-muted-500 group-hover:text-success-500'"
                 >
                   نقاط مثبت و قوت‌های پاسخ
                 </p>
@@ -2658,7 +2939,7 @@ const isAIThinking = ref(false)
 
           <!-- General feedback -->
           <div class="space-y-3 text-right">
-            <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">
+            <label class="text-muted-700 dark:text-muted-300 block text-sm font-medium">
               نظر کلی <span class="text-danger-500">*</span>
             </label>
             <BaseTextarea
@@ -2667,14 +2948,14 @@ const isAIThinking = ref(false)
               :rows="4"
               size="lg"
             />
-            <div class="text-right text-xs text-muted-400">
+            <div class="text-muted-400 text-right text-xs">
               {{ feedbackForm.general_text.length }} کاراکتر
             </div>
           </div>
 
           <!-- Additional comments -->
           <div class="space-y-3 text-right">
-            <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">توضیحات اضافی</label>
+            <label class="text-muted-700 dark:text-muted-300 block text-sm font-medium">توضیحات اضافی</label>
             <BaseTextarea
               v-model="feedbackForm.general_other"
               placeholder="اگر توضیح بیشتری دارید، اینجا بنویسید... (اختیاری)"
@@ -2685,47 +2966,52 @@ const isAIThinking = ref(false)
 
         <!-- Step 2: Selected Category Details -->
         <div v-if="feedbackStep === 2" class="space-y-8">
-          <div class="text-center mb-6">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
-                 :class="selectedFeedbackType === 'problems' 
-                   ? 'bg-danger-100 dark:bg-danger-900/30' 
-                   : 'bg-success-100 dark:bg-success-900/30'"
+          <div class="mb-6 text-center">
+            <div
+              class="mb-4 inline-flex size-16 items-center justify-center rounded-full"
+              :class="selectedFeedbackType === 'problems'
+                ? 'bg-danger-100 dark:bg-danger-900/30'
+                : 'bg-success-100 dark:bg-success-900/30'"
             >
-              <Icon :name="selectedFeedbackType === 'problems' ? 'ph:warning-duotone' : 'ph:heart-duotone'" 
-                    :class="selectedFeedbackType === 'problems' 
-                      ? 'text-danger-600 dark:text-danger-400' 
-                      : 'text-success-600 dark:text-success-400'" 
-                    class="size-8" />
+              <Icon
+                :name="selectedFeedbackType === 'problems' ? 'ph:warning-duotone' : 'ph:heart-duotone'"
+                :class="selectedFeedbackType === 'problems'
+                  ? 'text-danger-600 dark:text-danger-400'
+                  : 'text-success-600 dark:text-success-400'"
+                class="size-8"
+              />
             </div>
-            <h4 class="text-xl font-bold text-muted-800 dark:text-white">
+            <h4 class="text-muted-800 text-xl font-bold dark:text-white">
               {{ selectedFeedbackType === 'problems' ? 'مشکلات موجود' : 'نقاط قوت پاسخ' }}
             </h4>
-            <p class="text-muted-500 text-sm mt-2">
-              {{ selectedFeedbackType === 'problems' 
-                ? 'مشکلات موجود در پاسخ را مشخص کنید' 
+            <p class="text-muted-500 mt-2 text-sm">
+              {{ selectedFeedbackType === 'problems'
+                ? 'مشکلات موجود در پاسخ را مشخص کنید'
                 : 'نقاط قوت و مثبت پاسخ را انتخاب کنید' }}
             </p>
           </div>
 
           <!-- Problems Section -->
-          <div v-if="selectedFeedbackType === 'problems'" class="bg-gradient-to-br from-danger-25 to-orange-25 dark:from-danger-950/20 dark:to-orange-950/20 rounded-2xl p-6 space-y-5">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-danger-100 dark:bg-danger-900/30">
+          <div v-if="selectedFeedbackType === 'problems'" class="from-danger-25 to-orange-25 dark:from-danger-950/20 space-y-5 rounded-2xl bg-gradient-to-br p-6 dark:to-orange-950/20">
+            <div class="mb-4 flex items-center gap-3">
+              <div class="bg-danger-100 dark:bg-danger-900/30 flex size-10 items-center justify-center rounded-xl">
                 <Icon name="ph:warning-duotone" class="text-danger-600 dark:text-danger-400 size-5" />
               </div>
               <div>
-                <label class="block text-danger-800 dark:text-danger-200 font-bold text-base text-right">مشکلات موجود</label>
-                <p class="text-danger-600 dark:text-danger-300 text-sm">در صورت وجود مشکل، انتخاب کنید</p>
+                <label class="text-danger-800 dark:text-danger-200 block text-right text-base font-bold">مشکلات موجود</label>
+                <p class="text-danger-600 dark:text-danger-300 text-sm">
+                  در صورت وجود مشکل، انتخاب کنید
+                </p>
               </div>
               <div class="ml-auto">
-                <div class="text-xs text-danger-600 dark:text-danger-400 bg-danger-100 dark:bg-danger-900/40 px-2 py-1 rounded-full">
+                <div class="text-danger-600 dark:text-danger-400 bg-danger-100 dark:bg-danger-900/40 rounded-full px-2 py-1 text-xs">
                   {{ Object.keys(feedbackForm.problems_categories).filter(k => feedbackForm.problems_categories[k]).length }} انتخاب شده
                 </div>
               </div>
             </div>
 
             <!-- Problem categories with enhanced design -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div
                 v-for="problem in FEEDBACK_CATEGORIES.problems.subcategories"
                 :key="problem.id"
@@ -2733,47 +3019,55 @@ const isAIThinking = ref(false)
               >
                 <button
                   type="button"
-                  class="w-full p-4 rounded-xl border-2 transition-all duration-300 text-right hover:shadow-lg hover:scale-[1.02] relative overflow-hidden"
-                  :class="feedbackForm.problems_categories[problem.id] 
-                    ? 'border-danger-400 bg-gradient-to-br from-danger-50 to-red-50 text-danger-800 dark:from-danger-900/30 dark:to-red-900/30 dark:text-danger-200 shadow-lg shadow-danger-100/50' 
+                  class="relative w-full overflow-hidden rounded-xl border-2 p-4 text-right transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+                  :class="feedbackForm.problems_categories[problem.id]
+                    ? 'border-danger-400 bg-gradient-to-br from-danger-50 to-red-50 text-danger-800 dark:from-danger-900/30 dark:to-red-900/30 dark:text-danger-200 shadow-lg shadow-danger-100/50'
                     : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-danger-300 dark:border-muted-600 hover:bg-danger-25 dark:hover:bg-danger-950/10'"
                   @click="feedbackForm.problems_categories[problem.id] = !feedbackForm.problems_categories[problem.id]"
                 >
                   <!-- Severity indicator -->
-                  <div 
+                  <div
                     v-if="problem.severity"
-                    class="absolute top-2 left-2 w-2 h-2 rounded-full"
+                    class="absolute left-2 top-2 size-2 rounded-full"
                     :class="{
                       'bg-red-500': problem.severity === 'critical',
                       'bg-orange-500': problem.severity === 'high',
                       'bg-yellow-500': problem.severity === 'medium',
                       'bg-blue-500': problem.severity === 'low'
                     }"
-                  ></div>
+                  />
 
-                  <div class="flex items-start justify-between mb-2">
+                  <div class="mb-2 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                       <Icon :name="problem.icon || 'ph:warning-duotone'" class="size-5 opacity-75" />
                       <span class="font-semibold">{{ problem.name }}</span>
                     </div>
-                    <Icon 
-                      v-if="feedbackForm.problems_categories[problem.id]" 
-                      name="ph:check-circle-fill" 
-                      class="size-6 text-danger-500 animate-in zoom-in duration-200" 
+                    <Icon
+                      v-if="feedbackForm.problems_categories[problem.id]"
+                      name="ph:check-circle-fill"
+                      class="text-danger-500 animate-in zoom-in size-6 duration-200"
                     />
-                    <div v-else class="w-6 h-6 border-2 border-muted-300 rounded-full group-hover:border-danger-400 transition-colors"></div>
+                    <div v-else class="border-muted-300 group-hover:border-danger-400 size-6 rounded-full border-2 transition-colors" />
                   </div>
-                  
-                  <p class="text-sm opacity-90 mb-3 leading-relaxed">{{ problem.description }}</p>
-                  
+
+                  <p class="mb-3 text-sm leading-relaxed opacity-90">
+                    {{ problem.description }}
+                  </p>
+
                   <!-- Examples (show on hover or when selected) -->
-                  <div 
+                  <div
                     v-if="problem.examples && (feedbackForm.problems_categories[problem.id] || false)"
-                    class="text-xs bg-white/50 dark:bg-muted-700/50 rounded-lg p-2 space-y-1"
+                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs"
                   >
-                    <div class="font-medium opacity-75">مثال:</div>
+                    <div class="font-medium opacity-75">
+                      مثال:
+                    </div>
                     <ul class="space-y-1">
-                      <li v-for="example in problem.examples" :key="example" class="flex items-start gap-1">
+                      <li
+                        v-for="example in problem.examples"
+                        :key="example"
+                        class="flex items-start gap-1"
+                      >
                         <span class="text-danger-400 mt-0.5">•</span>
                         <span class="opacity-80">{{ example }}</span>
                       </li>
@@ -2785,7 +3079,7 @@ const isAIThinking = ref(false)
 
             <!-- Custom problem input -->
             <div class="mt-6">
-              <label class="block text-danger-700 dark:text-danger-300 text-sm font-medium mb-2 text-right">
+              <label class="text-danger-700 dark:text-danger-300 mb-2 block text-right text-sm font-medium">
                 توضیح بیشتر یا مشکل دیگری؟
               </label>
               <BaseTextarea
@@ -2799,24 +3093,26 @@ const isAIThinking = ref(false)
           </div>
 
           <!-- Quality Section -->
-          <div v-if="selectedFeedbackType === 'quality'" class="bg-gradient-to-br from-success-25 to-emerald-25 dark:from-success-950/20 dark:to-emerald-950/20 rounded-2xl p-6 space-y-5">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-success-100 dark:bg-success-900/30">
+          <div v-if="selectedFeedbackType === 'quality'" class="from-success-25 to-emerald-25 dark:from-success-950/20 space-y-5 rounded-2xl bg-gradient-to-br p-6 dark:to-emerald-950/20">
+            <div class="mb-4 flex items-center gap-3">
+              <div class="bg-success-100 dark:bg-success-900/30 flex size-10 items-center justify-center rounded-xl">
                 <Icon name="ph:heart-duotone" class="text-success-600 dark:text-success-400 size-5" />
               </div>
               <div>
-                <label class="block text-success-800 dark:text-success-200 font-bold text-base text-right">نقاط قوت پاسخ</label>
-                <p class="text-success-600 dark:text-success-300 text-sm">مواردی که در پاسخ خوب بود</p>
+                <label class="text-success-800 dark:text-success-200 block text-right text-base font-bold">نقاط قوت پاسخ</label>
+                <p class="text-success-600 dark:text-success-300 text-sm">
+                  مواردی که در پاسخ خوب بود
+                </p>
               </div>
               <div class="ml-auto">
-                <div class="text-xs text-success-600 dark:text-success-400 bg-success-100 dark:bg-success-900/40 px-2 py-1 rounded-full">
+                <div class="text-success-600 dark:text-success-400 bg-success-100 dark:bg-success-900/40 rounded-full px-2 py-1 text-xs">
                   {{ Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length }} انتخاب شده
                 </div>
               </div>
             </div>
 
             <!-- Quality categories with enhanced design -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div
                 v-for="quality in FEEDBACK_CATEGORIES.quality.subcategories"
                 :key="quality.id"
@@ -2824,46 +3120,54 @@ const isAIThinking = ref(false)
               >
                 <button
                   type="button"
-                  class="w-full p-4 rounded-xl border-2 transition-all duration-300 text-right hover:shadow-lg hover:scale-[1.02] relative overflow-hidden"
+                  class="relative w-full overflow-hidden rounded-xl border-2 p-4 text-right transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                   :class="feedbackForm.quality_categories[quality.id]
                     ? 'border-success-400 bg-gradient-to-br from-success-50 to-emerald-50 text-success-800 dark:from-success-900/30 dark:to-emerald-900/30 dark:text-success-200 shadow-lg shadow-success-100/50'
                     : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-success-300 dark:border-muted-600 hover:bg-success-25 dark:hover:bg-success-950/10'"
                   @click="feedbackForm.quality_categories[quality.id] = !feedbackForm.quality_categories[quality.id]"
                 >
                   <!-- Impact indicator -->
-                  <div 
+                  <div
                     v-if="quality.impact"
-                    class="absolute top-2 left-2 w-2 h-2 rounded-full"
+                    class="absolute left-2 top-2 size-2 rounded-full"
                     :class="{
                       'bg-emerald-500': quality.impact === 'high',
                       'bg-green-500': quality.impact === 'medium',
                       'bg-lime-500': quality.impact === 'low'
                     }"
-                  ></div>
+                  />
 
-                  <div class="flex items-start justify-between mb-2">
+                  <div class="mb-2 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                       <Icon :name="quality.icon || 'ph:heart-duotone'" class="size-5 opacity-75" />
                       <span class="font-semibold">{{ quality.name }}</span>
                     </div>
-                    <Icon 
-                      v-if="feedbackForm.quality_categories[quality.id]" 
-                      name="ph:check-circle-fill" 
-                      class="size-6 text-success-500 animate-in zoom-in duration-200" 
+                    <Icon
+                      v-if="feedbackForm.quality_categories[quality.id]"
+                      name="ph:check-circle-fill"
+                      class="text-success-500 animate-in zoom-in size-6 duration-200"
                     />
-                    <div v-else class="w-6 h-6 border-2 border-muted-300 rounded-full group-hover:border-success-400 transition-colors"></div>
+                    <div v-else class="border-muted-300 group-hover:border-success-400 size-6 rounded-full border-2 transition-colors" />
                   </div>
-                  
-                  <p class="text-sm opacity-90 mb-3 leading-relaxed">{{ quality.description }}</p>
-                  
+
+                  <p class="mb-3 text-sm leading-relaxed opacity-90">
+                    {{ quality.description }}
+                  </p>
+
                   <!-- Examples -->
-                  <div 
+                  <div
                     v-if="quality.examples && (feedbackForm.quality_categories[quality.id] || false)"
-                    class="text-xs bg-white/50 dark:bg-muted-700/50 rounded-lg p-2 space-y-1"
+                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs"
                   >
-                    <div class="font-medium opacity-75">مثال:</div>
+                    <div class="font-medium opacity-75">
+                      مثال:
+                    </div>
                     <ul class="space-y-1">
-                      <li v-for="example in quality.examples" :key="example" class="flex items-start gap-1">
+                      <li
+                        v-for="example in quality.examples"
+                        :key="example"
+                        class="flex items-start gap-1"
+                      >
                         <span class="text-success-400 mt-0.5">•</span>
                         <span class="opacity-80">{{ example }}</span>
                       </li>
@@ -2875,7 +3179,7 @@ const isAIThinking = ref(false)
 
             <!-- Custom quality input -->
             <div class="mt-6">
-              <label class="block text-success-700 dark:text-success-300 text-sm font-medium mb-2 text-right">
+              <label class="text-success-700 dark:text-success-300 mb-2 block text-right text-sm font-medium">
                 نقاط قوت دیگر؟
               </label>
               <BaseTextarea
@@ -2889,8 +3193,8 @@ const isAIThinking = ref(false)
           </div>
 
           <!-- Progress indicator -->
-          <div class="flex items-center justify-center gap-2 mt-8">
-            <div class="flex items-center gap-1 text-xs text-muted-600">
+          <div class="mt-8 flex items-center justify-center gap-2">
+            <div class="text-muted-600 flex items-center gap-1 text-xs">
               <Icon name="ph:info-duotone" class="size-4" />
               <span>انتخاب هیچ‌کدام از گزینه‌ها اختیاری است</span>
             </div>
@@ -2899,37 +3203,43 @@ const isAIThinking = ref(false)
 
         <!-- Step 3: Improvements -->
         <div v-if="feedbackStep === 3" class="space-y-8">
-          <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-warning-100 to-amber-100 dark:from-warning-900/30 dark:to-amber-900/30 mb-4">
-              <Icon name="ph:lightbulb-duotone" class="size-8 text-warning-600 dark:text-warning-400" />
+          <div class="mb-8 text-center">
+            <div class="from-warning-100 dark:from-warning-900/30 mb-4 inline-flex size-16 items-center justify-center rounded-full bg-gradient-to-br to-amber-100 dark:to-amber-900/30">
+              <Icon name="ph:lightbulb-duotone" class="text-warning-600 dark:text-warning-400 size-8" />
             </div>
-            <h4 class="text-xl font-bold text-muted-800 dark:text-white">پیشنهادات بهبود</h4>
-            <p class="text-muted-500 text-sm mt-2">چگونه می‌توان پاسخ‌ها را بهتر کرد؟</p>
-            <div class="inline-flex items-center gap-2 mt-4 px-3 py-1 bg-warning-100 dark:bg-warning-900/30 rounded-full text-xs text-warning-700 dark:text-warning-300">
+            <h4 class="text-muted-800 text-xl font-bold dark:text-white">
+              پیشنهادات بهبود
+            </h4>
+            <p class="text-muted-500 mt-2 text-sm">
+              چگونه می‌توان پاسخ‌ها را بهتر کرد؟
+            </p>
+            <div class="bg-warning-100 dark:bg-warning-900/30 text-warning-700 dark:text-warning-300 mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs">
               <Icon name="ph:rocket-duotone" class="size-4" />
               <span>ایده‌های شما برای بهبود</span>
             </div>
           </div>
 
           <!-- Improvements Section -->
-          <div class="bg-gradient-to-br from-warning-25 to-amber-25 dark:from-warning-950/20 dark:to-amber-950/20 rounded-2xl p-6 space-y-6">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-warning-100 dark:bg-warning-900/30">
+          <div class="from-warning-25 to-amber-25 dark:from-warning-950/20 space-y-6 rounded-2xl bg-gradient-to-br p-6 dark:to-amber-950/20">
+            <div class="mb-6 flex items-center gap-3">
+              <div class="bg-warning-100 dark:bg-warning-900/30 flex size-10 items-center justify-center rounded-xl">
                 <Icon name="ph:lightbulb-duotone" class="text-warning-600 dark:text-warning-400 size-5" />
               </div>
               <div>
-                <label class="block text-warning-800 dark:text-warning-200 font-bold text-base">پیشنهادات شما</label>
-                <p class="text-warning-600 dark:text-warning-300 text-sm">چه چیزی می‌تواند بهتر باشد؟</p>
+                <label class="text-warning-800 dark:text-warning-200 block text-base font-bold">پیشنهادات شما</label>
+                <p class="text-warning-600 dark:text-warning-300 text-sm">
+                  چه چیزی می‌تواند بهتر باشد؟
+                </p>
               </div>
               <div class="ml-auto">
-                <div class="text-xs text-warning-600 dark:text-warning-400 bg-warning-100 dark:bg-warning-900/40 px-2 py-1 rounded-full">
+                <div class="text-warning-600 dark:text-warning-400 bg-warning-100 dark:bg-warning-900/40 rounded-full px-2 py-1 text-xs">
                   {{ Object.keys(feedbackForm.improvements_categories).filter(k => feedbackForm.improvements_categories[k]).length }} انتخاب شده
                 </div>
               </div>
             </div>
 
             <!-- Improvements grid with enhanced design -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div
                 v-for="improvement in FEEDBACK_CATEGORIES.improvements.subcategories"
                 :key="improvement.id"
@@ -2937,46 +3247,54 @@ const isAIThinking = ref(false)
               >
                 <button
                   type="button"
-                  class="w-full p-4 rounded-xl border-2 transition-all duration-300 text-right hover:shadow-lg hover:scale-[1.02] relative overflow-hidden"
+                  class="relative w-full overflow-hidden rounded-xl border-2 p-4 text-right transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                   :class="feedbackForm.improvements_categories[improvement.id]
                     ? 'border-warning-400 bg-gradient-to-br from-warning-50 to-amber-50 text-warning-800 dark:from-warning-900/30 dark:to-amber-900/30 dark:text-warning-200 shadow-lg shadow-warning-100/50'
                     : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-warning-300 dark:border-muted-600 hover:bg-warning-25 dark:hover:bg-warning-950/10'"
                   @click="feedbackForm.improvements_categories[improvement.id] = !feedbackForm.improvements_categories[improvement.id]"
                 >
                   <!-- Priority indicator -->
-                  <div 
+                  <div
                     v-if="improvement.priority"
-                    class="absolute top-2 left-2 w-2 h-2 rounded-full"
+                    class="absolute left-2 top-2 size-2 rounded-full"
                     :class="{
                       'bg-red-400': improvement.priority === 'high',
                       'bg-yellow-400': improvement.priority === 'medium',
                       'bg-blue-400': improvement.priority === 'low'
                     }"
-                  ></div>
+                  />
 
-                  <div class="flex items-start justify-between mb-2">
+                  <div class="mb-2 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                       <Icon :name="improvement.icon || 'ph:lightbulb-duotone'" class="size-5 opacity-75" />
                       <span class="font-semibold">{{ improvement.name }}</span>
                     </div>
-                    <Icon 
-                      v-if="feedbackForm.improvements_categories[improvement.id]" 
-                      name="ph:check-circle-fill" 
-                      class="size-6 text-warning-500 animate-in zoom-in duration-200" 
+                    <Icon
+                      v-if="feedbackForm.improvements_categories[improvement.id]"
+                      name="ph:check-circle-fill"
+                      class="text-warning-500 animate-in zoom-in size-6 duration-200"
                     />
-                    <div v-else class="w-6 h-6 border-2 border-muted-300 rounded-full group-hover:border-warning-400 transition-colors"></div>
+                    <div v-else class="border-muted-300 group-hover:border-warning-400 size-6 rounded-full border-2 transition-colors" />
                   </div>
-                  
-                  <p class="text-sm opacity-90 mb-3 leading-relaxed">{{ improvement.description }}</p>
-                  
+
+                  <p class="mb-3 text-sm leading-relaxed opacity-90">
+                    {{ improvement.description }}
+                  </p>
+
                   <!-- Examples -->
-                  <div 
+                  <div
                     v-if="improvement.examples && (feedbackForm.improvements_categories[improvement.id] || false)"
-                    class="text-xs bg-white/50 dark:bg-muted-700/50 rounded-lg p-2 space-y-1"
+                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs"
                   >
-                    <div class="font-medium opacity-75">مثال:</div>
+                    <div class="font-medium opacity-75">
+                      مثال:
+                    </div>
                     <ul class="space-y-1">
-                      <li v-for="example in improvement.examples" :key="example" class="flex items-start gap-1">
+                      <li
+                        v-for="example in improvement.examples"
+                        :key="example"
+                        class="flex items-start gap-1"
+                      >
                         <span class="text-warning-400 mt-0.5">•</span>
                         <span class="opacity-80">{{ example }}</span>
                       </li>
@@ -2987,8 +3305,8 @@ const isAIThinking = ref(false)
             </div>
 
             <!-- Custom improvement input with enhanced design -->
-            <div class="mt-8 bg-white/50 dark:bg-muted-800/50 rounded-xl p-5">
-              <label class="block text-warning-700 dark:text-warning-300 text-sm font-semibold mb-3 flex items-center gap-2">
+            <div class="dark:bg-muted-800/50 mt-8 rounded-xl bg-white/50 p-5">
+              <label class="text-warning-700 dark:text-warning-300 mb-3 block flex items-center gap-2 text-sm font-semibold">
                 <Icon name="ph:chat-circle-text-duotone" class="size-4" />
                 پیشنهاد خاص شما
               </label>
@@ -2999,40 +3317,44 @@ const isAIThinking = ref(false)
                 size="lg"
                 class="!border-warning-200 focus:!border-warning-400 dark:!border-warning-800"
               />
-              <div class="mt-2 text-xs text-warning-600 dark:text-warning-400 opacity-75">
+              <div class="text-warning-600 dark:text-warning-400 mt-2 text-xs opacity-75">
                 هر ایده‌ای که دارید، هر کوچک که باشد، برای ما ارزشمند است! ✨
               </div>
             </div>
           </div>
 
           <!-- Enhanced Summary Section -->
-          <div class="bg-gradient-to-br from-info-50 via-blue-25 to-indigo-50 dark:from-info-950/20 dark:via-blue-950/10 dark:to-indigo-950/20 rounded-2xl p-6 border border-info-200/50 dark:border-info-800/30">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-info-100 to-blue-100 dark:from-info-900/50 dark:to-blue-900/50">
-                <Icon name="ph:clipboard-text-duotone" class="size-6 text-info-600 dark:text-info-400" />
+          <div class="from-info-50 via-blue-25 dark:from-info-950/20 border-info-200/50 dark:border-info-800/30 rounded-2xl border bg-gradient-to-br to-indigo-50 p-6 dark:via-blue-950/10 dark:to-indigo-950/20">
+            <div class="mb-6 flex items-center gap-3">
+              <div class="from-info-100 dark:from-info-900/50 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br to-blue-100 dark:to-blue-900/50">
+                <Icon name="ph:clipboard-text-duotone" class="text-info-600 dark:text-info-400 size-6" />
               </div>
               <div>
-                <h5 class="font-bold text-info-800 dark:text-info-200 text-lg">خلاصه بازخورد شما</h5>
-                <p class="text-info-600 dark:text-info-300 text-sm">مرور نهایی قبل از ارسال</p>
+                <h5 class="text-info-800 dark:text-info-200 text-lg font-bold">
+                  خلاصه بازخورد شما
+                </h5>
+                <p class="text-info-600 dark:text-info-300 text-sm">
+                  مرور نهایی قبل از ارسال
+                </p>
               </div>
             </div>
-            
+
             <div class="grid gap-4">
               <!-- Rating Summary -->
-              <div class="bg-white/70 dark:bg-muted-800/70 rounded-xl p-4">
+              <div class="dark:bg-muted-800/70 rounded-xl bg-white/70 p-4">
                 <div class="flex items-center justify-between">
-                  <span class="font-medium text-muted-700 dark:text-muted-300">امتیاز کلی:</span>
+                  <span class="text-muted-700 dark:text-muted-300 font-medium">امتیاز کلی:</span>
                   <div class="flex items-center gap-2">
                     <div class="flex">
-                      <Icon 
-                        v-for="star in 5" 
-                        :key="star" 
-                        name="ph:star-fill" 
+                      <Icon
+                        v-for="star in 5"
+                        :key="star"
+                        name="ph:star-fill"
                         class="size-5"
-                        :class="star <= feedbackForm.rating ? 'text-yellow-400' : 'text-muted-300'" 
+                        :class="star <= feedbackForm.rating ? 'text-yellow-400' : 'text-muted-300'"
                       />
                     </div>
-                    <span class="font-bold text-lg text-primary-600 dark:text-primary-400">
+                    <span class="text-primary-600 dark:text-primary-400 text-lg font-bold">
                       {{ feedbackForm.rating }}/5
                     </span>
                   </div>
@@ -3040,24 +3362,24 @@ const isAIThinking = ref(false)
               </div>
 
               <!-- Categories Summary -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <!-- Problems -->
-                <div class="bg-white/70 dark:bg-muted-800/70 rounded-lg p-3">
-                  <div class="flex items-center justify-between mb-2">
+                <div class="dark:bg-muted-800/70 rounded-lg bg-white/70 p-3">
+                  <div class="mb-2 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                      <Icon name="ph:warning-duotone" class="size-4 text-danger-500" />
-                      <span class="text-sm font-medium text-danger-700 dark:text-danger-300">مشکلات</span>
+                      <Icon name="ph:warning-duotone" class="text-danger-500 size-4" />
+                      <span class="text-danger-700 dark:text-danger-300 text-sm font-medium">مشکلات</span>
                     </div>
-                    <span class="text-xs bg-danger-100 dark:bg-danger-900/40 text-danger-600 dark:text-danger-400 px-2 py-0.5 rounded-full">
+                    <span class="bg-danger-100 dark:bg-danger-900/40 text-danger-600 dark:text-danger-400 rounded-full px-2 py-0.5 text-xs">
                       {{ Object.keys(feedbackForm.problems_categories).filter(k => feedbackForm.problems_categories[k]).length }}
                     </span>
                   </div>
-                  <div class="text-xs space-y-1">
-                    <div 
-                      v-for="(selected, key) in feedbackForm.problems_categories" 
-                      :key="key"
+                  <div class="space-y-1 text-xs">
+                    <div
+                      v-for="(selected, key) in feedbackForm.problems_categories"
                       v-if="selected"
-                      class="flex items-center gap-1 text-danger-600 dark:text-danger-400"
+                      :key="key"
+                      class="text-danger-600 dark:text-danger-400 flex items-center gap-1"
                     >
                       <span>•</span>
                       <span>{{ FEEDBACK_CATEGORIES.problems.subcategories.find(p => p.id === key)?.name }}</span>
@@ -3066,22 +3388,22 @@ const isAIThinking = ref(false)
                 </div>
 
                 <!-- Quality -->
-                <div class="bg-white/70 dark:bg-muted-800/70 rounded-lg p-3">
-                  <div class="flex items-center justify-between mb-2">
+                <div class="dark:bg-muted-800/70 rounded-lg bg-white/70 p-3">
+                  <div class="mb-2 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                      <Icon name="ph:heart-duotone" class="size-4 text-success-500" />
-                      <span class="text-sm font-medium text-success-700 dark:text-success-300">نقاط قوت</span>
+                      <Icon name="ph:heart-duotone" class="text-success-500 size-4" />
+                      <span class="text-success-700 dark:text-success-300 text-sm font-medium">نقاط قوت</span>
                     </div>
-                    <span class="text-xs bg-success-100 dark:bg-success-900/40 text-success-600 dark:text-success-400 px-2 py-0.5 rounded-full">
+                    <span class="bg-success-100 dark:bg-success-900/40 text-success-600 dark:text-success-400 rounded-full px-2 py-0.5 text-xs">
                       {{ Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length }}
                     </span>
                   </div>
-                  <div class="text-xs space-y-1">
-                    <div 
-                      v-for="(selected, key) in feedbackForm.quality_categories" 
-                      :key="key"
+                  <div class="space-y-1 text-xs">
+                    <div
+                      v-for="(selected, key) in feedbackForm.quality_categories"
                       v-if="selected"
-                      class="flex items-center gap-1 text-success-600 dark:text-success-400"
+                      :key="key"
+                      class="text-success-600 dark:text-success-400 flex items-center gap-1"
                     >
                       <span>•</span>
                       <span>{{ FEEDBACK_CATEGORIES.quality.subcategories.find(q => q.id === key)?.name }}</span>
@@ -3090,22 +3412,22 @@ const isAIThinking = ref(false)
                 </div>
 
                 <!-- Improvements -->
-                <div class="bg-white/70 dark:bg-muted-800/70 rounded-lg p-3">
-                  <div class="flex items-center justify-between mb-2">
+                <div class="dark:bg-muted-800/70 rounded-lg bg-white/70 p-3">
+                  <div class="mb-2 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                      <Icon name="ph:lightbulb-duotone" class="size-4 text-warning-500" />
-                      <span class="text-sm font-medium text-warning-700 dark:text-warning-300">پیشنهادات</span>
+                      <Icon name="ph:lightbulb-duotone" class="text-warning-500 size-4" />
+                      <span class="text-warning-700 dark:text-warning-300 text-sm font-medium">پیشنهادات</span>
                     </div>
-                    <span class="text-xs bg-warning-100 dark:bg-warning-900/40 text-warning-600 dark:text-warning-400 px-2 py-0.5 rounded-full">
+                    <span class="bg-warning-100 dark:bg-warning-900/40 text-warning-600 dark:text-warning-400 rounded-full px-2 py-0.5 text-xs">
                       {{ Object.keys(feedbackForm.improvements_categories).filter(k => feedbackForm.improvements_categories[k]).length }}
                     </span>
                   </div>
-                  <div class="text-xs space-y-1">
-                    <div 
-                      v-for="(selected, key) in feedbackForm.improvements_categories" 
-                      :key="key"
+                  <div class="space-y-1 text-xs">
+                    <div
+                      v-for="(selected, key) in feedbackForm.improvements_categories"
                       v-if="selected"
-                      class="flex items-center gap-1 text-warning-600 dark:text-warning-400"
+                      :key="key"
+                      class="text-warning-600 dark:text-warning-400 flex items-center gap-1"
                     >
                       <span>•</span>
                       <span>{{ FEEDBACK_CATEGORIES.improvements.subcategories.find(i => i.id === key)?.name }}</span>
@@ -3115,19 +3437,23 @@ const isAIThinking = ref(false)
               </div>
 
               <!-- Custom Comments Summary -->
-              <div v-if="feedbackForm.general_text?.trim() || feedbackForm.problems_other?.trim() || feedbackForm.quality_other?.trim() || feedbackForm.improvements_other?.trim()" class="bg-white/70 dark:bg-muted-800/70 rounded-xl p-4">
-                <h6 class="font-medium text-muted-700 dark:text-muted-300 mb-3 flex items-center gap-2">
+              <div v-if="feedbackForm.general_text?.trim() || feedbackForm.problems_other?.trim() || feedbackForm.quality_other?.trim() || feedbackForm.improvements_other?.trim()" class="dark:bg-muted-800/70 rounded-xl bg-white/70 p-4">
+                <h6 class="text-muted-700 dark:text-muted-300 mb-3 flex items-center gap-2 font-medium">
                   <Icon name="ph:chat-circle-text-duotone" class="size-4" />
                   نظرات تفصیلی
                 </h6>
                 <div class="space-y-2 text-sm">
                   <div v-if="feedbackForm.general_text?.trim()">
-                    <span class="font-medium text-primary-600 text-right">نظر کلی:</span>
-                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">{{ feedbackForm.general_text }}</p>
+                    <span class="text-primary-600 text-right font-medium">نظر کلی:</span>
+                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">
+                      {{ feedbackForm.general_text }}
+                    </p>
                   </div>
                   <div v-if="feedbackForm.improvements_other?.trim()">
-                    <span class="font-medium text-warning-600">پیشنهادات:</span>
-                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">{{ feedbackForm.improvements_other }}</p>
+                    <span class="text-warning-600 font-medium">پیشنهادات:</span>
+                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">
+                      {{ feedbackForm.improvements_other }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -3135,7 +3461,7 @@ const isAIThinking = ref(false)
 
             <!-- Final message -->
             <div class="mt-6 text-center">
-              <div class="inline-flex items-center gap-2 text-sm text-info-700 dark:text-info-300 bg-info-100/50 dark:bg-info-900/30 px-4 py-2 rounded-lg">
+              <div class="text-info-700 dark:text-info-300 bg-info-100/50 dark:bg-info-900/30 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm">
                 <Icon name="ph:heart-duotone" class="size-4" />
                 <span>ممنون از وقتی که برای بازخورد گذاشتید! 🙏</span>
               </div>
@@ -3144,8 +3470,8 @@ const isAIThinking = ref(false)
 
           <!-- Progress hint -->
           <div class="flex items-center justify-center gap-2">
-            <div class="flex items-center gap-1 text-xs text-muted-600">
-              <Icon name="ph:check-circle-duotone" class="size-4 text-success-500" />
+            <div class="text-muted-600 flex items-center gap-1 text-xs">
+              <Icon name="ph:check-circle-duotone" class="text-success-500 size-4" />
               <span>آماده برای ارسال بازخورد</span>
             </div>
           </div>
@@ -3162,7 +3488,7 @@ const isAIThinking = ref(false)
               variant="outline"
               @click="prevFeedbackStep"
             >
-              <Icon name="ph:arrow-right" class="size-4 ml-1" />
+              <Icon name="ph:arrow-right" class="ml-1 size-4" />
               قبلی
             </BaseButton>
           </div>
@@ -3179,7 +3505,7 @@ const isAIThinking = ref(false)
               @click="nextFeedbackStep"
             >
               بعدی
-              <Icon name="ph:arrow-left" class="size-4 mr-1" />
+              <Icon name="ph:arrow-left" class="mr-1 size-4" />
             </BaseButton>
             <BaseButton
               v-else
@@ -3188,7 +3514,7 @@ const isAIThinking = ref(false)
               :disabled="isSubmittingFeedback || feedbackForm.rating === 0"
               @click="submitMessageFeedback"
             >
-              <Icon name="ph:check" class="size-4 ml-1" />
+              <Icon name="ph:check" class="ml-1 size-4" />
               {{ existingFeedback ? 'به‌روزرسانی' : 'ثبت بازخورد' }}
             </BaseButton>
           </div>
@@ -3225,7 +3551,7 @@ const isAIThinking = ref(false)
           تولید پاسخ جدید؟
         </h3>
 
-        <p class="font-alt text-muted-500 dark:text-muted-400 text-sm leading-5 mt-2">
+        <p class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-sm leading-5">
           پاسخ فعلی روانشناس حذف شده و پاسخ جدیدی تولید می‌شود. این عمل قابل بازگشت نیست.
         </p>
 
@@ -3250,7 +3576,7 @@ const isAIThinking = ref(false)
             variant="solid"
             @click="retryLastMessage"
           >
-            <Icon name="ph:arrow-clockwise" class="size-4 ml-1" />
+            <Icon name="ph:arrow-clockwise" class="ml-1 size-4" />
             تولید پاسخ جدید
           </BaseButton>
         </div>
@@ -3276,60 +3602,60 @@ const isAIThinking = ref(false)
     <div class="max-h-[75vh] overflow-y-auto p-4 md:p-6">
       <!-- Goals List -->
       <div v-if="userGoals.length > 0" class="space-y-6">
-        <div 
-          v-for="goal in userGoals" 
+        <div
+          v-for="goal in userGoals"
           :key="goal.id"
-          class="bg-white dark:bg-muted-800 rounded-2xl p-6 border border-muted-200 dark:border-muted-700 shadow-sm hover:shadow-md transition-shadow duration-200"
+          class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 rounded-2xl border bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md"
         >
           <!-- Goal Header -->
-          <div class="flex items-start justify-between mb-4">
+          <div class="mb-4 flex items-start justify-between">
             <div class="flex-1">
               <!-- Goal Title with Icon -->
-              <div class="flex items-center gap-3 mb-3">
-                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                  <Icon name="ph:target-duotone" class="size-5 text-primary-600 dark:text-primary-400" />
+              <div class="mb-3 flex items-center gap-3">
+                <div class="bg-primary-100 dark:bg-primary-900/30 flex size-10 shrink-0 items-center justify-center rounded-full">
+                  <Icon name="ph:target-duotone" class="text-primary-600 dark:text-primary-400 size-5" />
                 </div>
-                <h4 class="font-semibold text-lg text-muted-900 dark:text-white leading-tight">
+                <h4 class="text-muted-900 text-lg font-semibold leading-tight dark:text-white">
                   {{ goal.title }}
                 </h4>
               </div>
-              
+
               <!-- Status and Priority Badges -->
               <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2">
-                  <span 
-                    class="inline-block w-3 h-3 rounded-full border-2 border-white dark:border-muted-800"
+                  <span
+                    class="dark:border-muted-800 inline-block size-3 rounded-full border-2 border-white"
                     :class="{
                       'bg-emerald-500': goal.status === 'completed',
-                      'bg-amber-500': goal.status === 'in_progress', 
+                      'bg-amber-500': goal.status === 'in_progress',
                       'bg-slate-400': goal.status === 'pending'
                     }"
-                  ></span>
-                  <span class="text-sm font-medium text-muted-700 dark:text-muted-300">
-                    {{ goal.status === 'completed' ? 'تکمیل شده' : 
-                       goal.status === 'in_progress' ? 'در حال انجام' : 'در انتظار' }}
+                  />
+                  <span class="text-muted-700 dark:text-muted-300 text-sm font-medium">
+                    {{ goal.status === 'completed' ? 'تکمیل شده' :
+                      goal.status === 'in_progress' ? 'در حال انجام' : 'در انتظار' }}
                   </span>
                 </div>
-                
-                <span 
-                  class="text-xs font-medium px-3 py-1.5 rounded-full border"
+
+                <span
+                  class="rounded-full border px-3 py-1.5 text-xs font-medium"
                   :class="{
-                    'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800': goal.priority === 'high',
-                    'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800': goal.priority === 'medium',
-                    'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900/20 dark:text-slate-300 dark:border-slate-800': goal.priority === 'low'
+                    'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300': goal.priority === 'high',
+                    'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300': goal.priority === 'medium',
+                    'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/20 dark:text-slate-300': goal.priority === 'low'
                   }"
                 >
-                  {{ goal.priority === 'high' ? 'اولویت بالا' : 
-                     goal.priority === 'medium' ? 'اولویت متوسط' : 'اولویت پایین' }}
+                  {{ goal.priority === 'high' ? 'اولویت بالا' :
+                    goal.priority === 'medium' ? 'اولویت متوسط' : 'اولویت پایین' }}
                 </span>
               </div>
             </div>
-            
+
             <!-- Progress Circle -->
-            <div v-if="goal.progress_percentage !== undefined" class="flex-shrink-0 ml-4">
-              <div class="relative w-16 h-16">
+            <div v-if="goal.progress_percentage !== undefined" class="ml-4 shrink-0">
+              <div class="relative size-16">
                 <!-- Background circle -->
-                <svg class="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                <svg class="size-16 -rotate-90" viewBox="0 0 36 36">
                   <path
                     class="text-muted-200 dark:text-muted-700"
                     stroke="currentColor"
@@ -3353,7 +3679,7 @@ const isAIThinking = ref(false)
                 </svg>
                 <!-- Progress percentage text -->
                 <div class="absolute inset-0 flex items-center justify-center">
-                  <span class="text-sm font-bold text-muted-700 dark:text-muted-300">
+                  <span class="text-muted-700 dark:text-muted-300 text-sm font-bold">
                     {{ Math.round(goal.progress_percentage) }}%
                   </span>
                 </div>
@@ -3363,26 +3689,32 @@ const isAIThinking = ref(false)
 
           <!-- Goal Description -->
           <div v-if="goal.description" class="mb-5">
-            <p class="text-muted-600 dark:text-muted-400 leading-relaxed bg-muted-50 dark:bg-muted-900/50 rounded-lg p-4 border-r-4 border-primary-500">
+            <p class="text-muted-600 dark:text-muted-400 bg-muted-50 dark:bg-muted-900/50 border-primary-500 rounded-lg border-r-4 p-4 leading-relaxed">
               {{ goal.description }}
             </p>
           </div>
 
           <!-- Target Behaviors -->
           <div v-if="goal.target_behaviors && goal.target_behaviors.length > 0" class="mb-5">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <div class="mb-4 flex items-center gap-2">
+              <div class="flex size-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
                 <Icon name="ph:list-checks-duotone" class="size-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <h5 class="text-sm font-semibold text-muted-800 dark:text-muted-200">رفتارهای هدف</h5>
+              <h5 class="text-muted-800 dark:text-muted-200 text-sm font-semibold">
+                رفتارهای هدف
+              </h5>
             </div>
-            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800/30">
+            <div class="rounded-xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-800/30 dark:bg-blue-900/20">
               <ul class="space-y-3">
-                <li v-for="behavior in goal.target_behaviors" :key="behavior" class="flex items-start gap-3">
-                  <div class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center mt-0.5">
+                <li
+                  v-for="behavior in goal.target_behaviors"
+                  :key="behavior"
+                  class="flex items-start gap-3"
+                >
+                  <div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-800/50">
                     <Icon name="ph:check" class="size-3 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <span class="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">{{ behavior }}</span>
+                  <span class="text-sm leading-relaxed text-blue-800 dark:text-blue-200">{{ behavior }}</span>
                 </li>
               </ul>
             </div>
@@ -3390,19 +3722,25 @@ const isAIThinking = ref(false)
 
           <!-- Success Criteria -->
           <div v-if="goal.success_criteria && goal.success_criteria.length > 0" class="mb-5">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+            <div class="mb-4 flex items-center gap-2">
+              <div class="flex size-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
                 <Icon name="ph:trophy-duotone" class="size-4 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h5 class="text-sm font-semibold text-muted-800 dark:text-muted-200">معیارهای موفقیت</h5>
+              <h5 class="text-muted-800 dark:text-muted-200 text-sm font-semibold">
+                معیارهای موفقیت
+              </h5>
             </div>
-            <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-100 dark:border-emerald-800/30">
+            <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4 dark:border-emerald-800/30 dark:bg-emerald-900/20">
               <ul class="space-y-3">
-                <li v-for="criteria in goal.success_criteria" :key="criteria" class="flex items-start gap-3">
-                  <div class="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-800/50 flex items-center justify-center mt-0.5">
+                <li
+                  v-for="criteria in goal.success_criteria"
+                  :key="criteria"
+                  class="flex items-start gap-3"
+                >
+                  <div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-800/50">
                     <Icon name="ph:star" class="size-3 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <span class="text-sm text-emerald-800 dark:text-emerald-200 leading-relaxed">{{ criteria }}</span>
+                  <span class="text-sm leading-relaxed text-emerald-800 dark:text-emerald-200">{{ criteria }}</span>
                 </li>
               </ul>
             </div>
@@ -3410,19 +3748,31 @@ const isAIThinking = ref(false)
 
           <!-- DSM-5 Criteria (for diagnostic goals) -->
           <div v-if="goal.dsm5_criteria && goal.dsm5_criteria.length > 0" class="mb-5">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <div class="mb-4 flex items-center gap-2">
+              <div class="flex size-6 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
                 <Icon name="ph:book-open-duotone" class="size-4 text-purple-600 dark:text-purple-400" />
               </div>
-              <h5 class="text-sm font-semibold text-muted-800 dark:text-muted-200">معیارهای DSM-5</h5>
+              <h5 class="text-muted-800 dark:text-muted-200 text-sm font-semibold">
+                معیارهای DSM-5
+              </h5>
             </div>
-            <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-100 dark:border-purple-800/30">
+            <div class="rounded-xl border border-purple-100 bg-purple-50 p-4 dark:border-purple-800/30 dark:bg-purple-900/20">
               <div class="space-y-4">
-                <div v-for="disorder in goal.dsm5_criteria" :key="disorder.code" class="border-b border-purple-200 dark:border-purple-700 last:border-b-0 pb-3 last:pb-0">
-                  <h6 class="font-medium text-purple-800 dark:text-purple-200 mb-2">{{ disorder.name }} ({{ disorder.code }})</h6>
+                <div
+                  v-for="disorder in goal.dsm5_criteria"
+                  :key="disorder.code"
+                  class="border-b border-purple-200 pb-3 last:border-b-0 last:pb-0 dark:border-purple-700"
+                >
+                  <h6 class="mb-2 font-medium text-purple-800 dark:text-purple-200">
+                    {{ disorder.name }} ({{ disorder.code }})
+                  </h6>
                   <ul class="space-y-2">
-                    <li v-for="criteria in disorder.criteria" :key="criteria" class="flex items-start gap-2 text-sm text-purple-700 dark:text-purple-300">
-                      <span class="text-purple-400 mt-1">•</span>
+                    <li
+                      v-for="criteria in disorder.criteria"
+                      :key="criteria"
+                      class="flex items-start gap-2 text-sm text-purple-700 dark:text-purple-300"
+                    >
+                      <span class="mt-1 text-purple-400">•</span>
                       <span>{{ criteria }}</span>
                     </li>
                   </ul>
@@ -3433,19 +3783,31 @@ const isAIThinking = ref(false)
 
           <!-- ICD-11 Criteria (for diagnostic goals) -->
           <div v-if="goal.icd11_criteria && goal.icd11_criteria.length > 0" class="mb-5">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+            <div class="mb-4 flex items-center gap-2">
+              <div class="flex size-6 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
                 <Icon name="ph:hospital-duotone" class="size-4 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <h5 class="text-sm font-semibold text-muted-800 dark:text-muted-200">معیارهای ICD-11</h5>
+              <h5 class="text-muted-800 dark:text-muted-200 text-sm font-semibold">
+                معیارهای ICD-11
+              </h5>
             </div>
-            <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 border border-indigo-100 dark:border-indigo-800/30">
+            <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-4 dark:border-indigo-800/30 dark:bg-indigo-900/20">
               <div class="space-y-4">
-                <div v-for="disorder in goal.icd11_criteria" :key="disorder.code" class="border-b border-indigo-200 dark:border-indigo-700 last:border-b-0 pb-3 last:pb-0">
-                  <h6 class="font-medium text-indigo-800 dark:text-indigo-200 mb-2">{{ disorder.name }} ({{ disorder.code }})</h6>
+                <div
+                  v-for="disorder in goal.icd11_criteria"
+                  :key="disorder.code"
+                  class="border-b border-indigo-200 pb-3 last:border-b-0 last:pb-0 dark:border-indigo-700"
+                >
+                  <h6 class="mb-2 font-medium text-indigo-800 dark:text-indigo-200">
+                    {{ disorder.name }} ({{ disorder.code }})
+                  </h6>
                   <ul class="space-y-2">
-                    <li v-for="criteria in disorder.criteria" :key="criteria" class="flex items-start gap-2 text-sm text-indigo-700 dark:text-indigo-300">
-                      <span class="text-indigo-400 mt-1">•</span>
+                    <li
+                      v-for="criteria in disorder.criteria"
+                      :key="criteria"
+                      class="flex items-start gap-2 text-sm text-indigo-700 dark:text-indigo-300"
+                    >
+                      <span class="mt-1 text-indigo-400">•</span>
                       <span>{{ criteria }}</span>
                     </li>
                   </ul>
@@ -3456,19 +3818,25 @@ const isAIThinking = ref(false)
 
           <!-- Action Plans (for diagnostic goals) -->
           <div v-if="goal.action_plans && goal.action_plans.length > 0">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+            <div class="mb-4 flex items-center gap-2">
+              <div class="flex size-6 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30">
                 <Icon name="ph:clipboard-text-duotone" class="size-4 text-orange-600 dark:text-orange-400" />
               </div>
-              <h5 class="text-sm font-semibold text-muted-800 dark:text-muted-200">برنامه‌های عملی</h5>
+              <h5 class="text-muted-800 dark:text-muted-200 text-sm font-semibold">
+                برنامه‌های عملی
+              </h5>
             </div>
-            <div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 border border-orange-100 dark:border-orange-800/30">
+            <div class="rounded-xl border border-orange-100 bg-orange-50 p-4 dark:border-orange-800/30 dark:bg-orange-900/20">
               <ul class="space-y-3">
-                <li v-for="plan in goal.action_plans" :key="plan" class="flex items-start gap-3">
-                  <div class="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-800/50 flex items-center justify-center mt-0.5">
+                <li
+                  v-for="plan in goal.action_plans"
+                  :key="plan"
+                  class="flex items-start gap-3"
+                >
+                  <div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-800/50">
                     <Icon name="ph:arrow-right" class="size-3 text-orange-600 dark:text-orange-400" />
                   </div>
-                  <span class="text-sm text-orange-800 dark:text-orange-200 leading-relaxed">{{ plan }}</span>
+                  <span class="text-sm leading-relaxed text-orange-800 dark:text-orange-200">{{ plan }}</span>
                 </li>
               </ul>
             </div>
@@ -3477,18 +3845,18 @@ const isAIThinking = ref(false)
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-12">
-        <div class="bg-muted-100 dark:bg-muted-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-          <Icon name="ph:target" class="size-8 text-muted-400" />
+      <div v-else class="py-12 text-center">
+        <div class="bg-muted-100 dark:bg-muted-800 mx-auto mb-4 flex size-16 items-center justify-center rounded-full">
+          <Icon name="ph:target" class="text-muted-400 size-8" />
         </div>
-        <h4 class="font-medium text-muted-900 dark:text-white mb-2">
+        <h4 class="text-muted-900 mb-2 font-medium dark:text-white">
           هنوز هدفی تعریف نشده
         </h4>
-        <p class="text-sm text-muted-600 dark:text-muted-400 mb-4">
+        <p class="text-muted-600 dark:text-muted-400 mb-4 text-sm">
           پس از تکمیل ارزیابی اولیه، اهداف درمانی شما به صورت خودکار تعریف خواهند شد.
         </p>
-        <BaseButton 
-          color="primary" 
+        <BaseButton
+          color="primary"
           size="sm"
           @click="$router.push('/therapy-journey/assessment')"
         >

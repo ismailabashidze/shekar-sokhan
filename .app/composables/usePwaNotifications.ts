@@ -37,10 +37,10 @@ export function usePwaNotifications() {
       && 'PushManager' in window
       && 'Notification' in window
       permission.value = Notification.permission
-      
+
       // Listen for permission changes
       if ('permissions' in navigator) {
-        navigator.permissions.query({ name: 'notifications' }).then(permissionStatus => {
+        navigator.permissions.query({ name: 'notifications' }).then((permissionStatus) => {
           permission.value = permissionStatus.state as NotificationPermission
           permissionStatus.onchange = () => {
             permission.value = permissionStatus.state as NotificationPermission
@@ -151,7 +151,7 @@ export function usePwaNotifications() {
   // Show local notification
   const showLocalNotification = async (options: PwaNotificationOptions): Promise<boolean> => {
     if (!isSupported.value || permission.value !== 'granted') {
-      console.warn('PWA notifications not supported or permission not granted')
+      
       return false
     }
 
@@ -171,25 +171,27 @@ export function usePwaNotifications() {
           timestamp: Date.now(),
           notificationId: options.tag || `local-${Date.now()}`,
         },
-        actions: options.actionText ? [{
-          action: 'open',
-          title: options.actionText,
-          icon: '/pwa-192x192.png'
-        }] : [],
+        actions: options.actionText
+          ? [{
+              action: 'open',
+              title: options.actionText,
+              icon: '/pwa-192x192.png',
+            }]
+          : [],
         requireInteraction: options.priority === 'urgent' || options.priority === 'high',
         silent: options.silent || false,
         vibrate: getVibrationPattern(options.priority),
         dir: 'rtl',
         lang: 'fa',
         renotify: true, // Always show notification even if tag exists
-        timestamp: Date.now()
+        timestamp: Date.now(),
       })
 
-      console.log('PWA notification shown successfully')
+      
       return true
     }
     catch (err: any) {
-      console.error('Error showing PWA notification:', err)
+      
       error.value = err.message || 'خطا در نمایش اعلان محلی'
       return false
     }
@@ -363,7 +365,7 @@ export function usePwaNotifications() {
   // Auto-request permission on user interaction
   const autoRequestPermission = async (): Promise<boolean> => {
     if (!isSupported.value) {
-      console.warn('PWA notifications not supported')
+      
       return false
     }
 
@@ -374,23 +376,23 @@ export function usePwaNotifications() {
 
     // Skip if already granted
     if (permission.value === 'granted') {
-      console.log('PWA notifications already granted')
+      
       await subscribeToPush()
       return true
     }
 
     // Check local storage for previous decision
     const userDecision = localStorage.getItem('pwa-notification-decision')
-    
+
     // If user previously denied, don't ask again unless they reset
     if (userDecision === 'denied' && permission.value === 'default') {
-      console.log('User previously denied PWA notifications')
+      
       return false
     }
 
     // Request permission immediately without delay
     try {
-      console.log('Requesting PWA notification permission immediately...')
+      
       const result = await Notification.requestPermission()
       permission.value = result
 
@@ -399,15 +401,17 @@ export function usePwaNotifications() {
       localStorage.setItem('pwa-permission-timestamp', Date.now().toString())
 
       if (result === 'granted') {
-        console.log('PWA notifications granted - subscribing to push...')
+        
         await subscribeToPush()
         return true
-      } else {
-        console.log('PWA notifications denied or dismissed')
+      }
+      else {
+        
         return false
       }
-    } catch (err: any) {
-      console.error('Error requesting PWA notification permission:', err)
+    }
+    catch (err: any) {
+      
       error.value = err.message || 'خطا در درخواست مجوز اعلان‌ها'
       return false
     }

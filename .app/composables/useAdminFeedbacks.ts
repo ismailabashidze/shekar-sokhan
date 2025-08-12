@@ -68,28 +68,28 @@ const getMockFeedbacks = (): MessageFeedback[] => [
         id: 'user_001',
         name: 'سارا احمدی',
         email: 'sara.ahmadi@example.com',
-        avatar: '/img/avatars/user1.jpg'
+        avatar: '/img/avatars/user1.jpg',
       },
       therapist_id: {
         id: 'therapist_001',
         name: 'دکتر رضا محمدی',
         email: 'reza.mohammadi@example.com',
         avatar: '/img/avatars/therapist1.jpg',
-        specialty: 'روانشناس بالینی'
+        specialty: 'روانشناس بالینی',
       },
       session_id: {
         id: 'session_001',
         session_type: 'therapy',
         status: 'completed',
-        created: new Date(Date.now() - 90000000).toISOString()
+        created: new Date(Date.now() - 90000000).toISOString(),
       },
       message_id: {
         id: 'msg_001',
         text: 'پیام درمانگر بسیار مفید و دلگرم‌کننده بود',
         sender: 'therapist',
-        created: new Date(Date.now() - 87400000).toISOString()
-      }
-    }
+        created: new Date(Date.now() - 87400000).toISOString(),
+      },
+    },
   },
   {
     id: '2',
@@ -110,22 +110,22 @@ const getMockFeedbacks = (): MessageFeedback[] => [
         id: 'user_002',
         name: 'علی رضایی',
         email: 'ali.rezaei@example.com',
-        avatar: '/img/avatars/user2.jpg'
+        avatar: '/img/avatars/user2.jpg',
       },
       therapist_id: {
         id: 'therapist_002',
         name: 'دکتر فاطمه کریمی',
         email: 'fateme.karimi@example.com',
         avatar: '/img/avatars/therapist2.jpg',
-        specialty: 'مشاور خانواده'
+        specialty: 'مشاور خانواده',
       },
       session_id: {
         id: 'session_002',
         session_type: 'counseling',
         status: 'completed',
-        created: new Date(Date.now() - 175000000).toISOString()
-      }
-    }
+        created: new Date(Date.now() - 175000000).toISOString(),
+      },
+    },
   },
   {
     id: '3',
@@ -139,7 +139,7 @@ const getMockFeedbacks = (): MessageFeedback[] => [
     problems_categories: {},
     quality_categories: { good_listening: true, professional_approach: true },
     improvements_categories: { response_speed: true },
-    created: new Date(Date.now() - 259200000).toISOString()
+    created: new Date(Date.now() - 259200000).toISOString(),
   },
   {
     id: '4',
@@ -154,7 +154,7 @@ const getMockFeedbacks = (): MessageFeedback[] => [
     quality_categories: {},
     improvements_categories: { content_depth: true, empathy: true },
     problems_other: 'پاسخ به سوال اصلی داده نشد',
-    created: new Date(Date.now() - 345600000).toISOString()
+    created: new Date(Date.now() - 345600000).toISOString(),
   },
   {
     id: '5',
@@ -168,7 +168,7 @@ const getMockFeedbacks = (): MessageFeedback[] => [
     problems_categories: {},
     quality_categories: { helpful_advice: true, clear_communication: true, supportive_tone: true },
     improvements_categories: {},
-    created: new Date(Date.now() - 432000000).toISOString()
+    created: new Date(Date.now() - 432000000).toISOString(),
   },
   {
     id: '6',
@@ -183,8 +183,8 @@ const getMockFeedbacks = (): MessageFeedback[] => [
     quality_categories: {},
     improvements_categories: { professional_approach: true, content_quality: true },
     problems_other: 'لحن درمانگر قضاوت‌گرانه بود',
-    created: new Date(Date.now() - 518400000).toISOString()
-  }
+    created: new Date(Date.now() - 518400000).toISOString(),
+  },
 ]
 
 export const useAdminFeedbacks = () => {
@@ -231,7 +231,7 @@ export const useAdminFeedbacks = () => {
       const result = await nuxtApp.$pb.collection('message_feedback').getList(currentPage.value, perPage.value, {
         ...(filterString && { filter: filterString }),
         sort: '-created',
-        expand: 'user_id,therapist_id,session_id,message_id'
+        expand: 'user_id,therapist_id,session_id,message_id',
       })
 
       allFeedbacksData.value = result.items as MessageFeedback[]
@@ -239,10 +239,11 @@ export const useAdminFeedbacks = () => {
       totalItems.value = result.totalItems
 
       return result
-    } catch (e: any) {
+    }
+    catch (e: any) {
       error.value = e.message || 'خطا در دریافت بازخوردها'
       console.error('Error fetching feedbacks:', e)
-      
+
       toaster.show({
         title: 'خطا',
         message: error.value,
@@ -255,7 +256,8 @@ export const useAdminFeedbacks = () => {
       allFeedbacksData.value = getMockFeedbacks()
       totalItems.value = allFeedbacksData.value.length
       totalPages.value = Math.ceil(totalItems.value / perPage.value)
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }
@@ -289,7 +291,6 @@ export const useAdminFeedbacks = () => {
     await fetchFeedbacks()
   }
 
-
   const resetFilters = async () => {
     searchQuery.value = ''
     ratingFilter.value = 'all'
@@ -321,6 +322,6 @@ export const useAdminFeedbacks = () => {
     setSearch,
     setRatingFilter,
     resetFilters,
-    refreshFeedbacks
+    refreshFeedbacks,
   }
 }

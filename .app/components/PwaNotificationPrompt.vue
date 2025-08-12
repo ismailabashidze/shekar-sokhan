@@ -102,7 +102,7 @@ const handleEnableNotifications = async () => {
   const success = await requestPermission()
   if (success) {
     showPrompt.value = false
-    console.log('PWA notifications enabled by user')
+    
   }
 }
 

@@ -59,7 +59,7 @@ const avatarUrl = computed(() => getUserAvatarUrl(user.value))
         <BaseAvatar
           v-if="user"
           :src="avatarUrl || '/img/avatars/1.png'"
-          badge-src="/img/logo.png"
+          badge-src="/img/logo.svg"
           size="2xl"
           class="mx-auto"
         />

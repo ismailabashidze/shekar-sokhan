@@ -8,18 +8,18 @@ definePageMeta({
     title: 'سفر درمانی - تعیین اهداف درمانی',
     description: 'تنظیم اهداف درمانی بر اساس ارزیابی اولیه',
     categories: ['therapy', 'goals'],
-    src: '/img/logo.png',
-    srcDark: '/img/logo.png',
+    src: '/img/logo.svg',
+    srcDark: '/img/logo.svg',
     order: 3,
   },
 })
 
-useHead({ 
+useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'سفر درمانی - تعیین اهداف درمانی | ذهنا',
   meta: [
-    { name: 'description', content: 'تنظیم اهداف درمانی شخصی‌سازی شده بر اساس ارزیابی اولیه' }
-  ]
+    { name: 'description', content: 'تنظیم اهداف درمانی شخصی‌سازی شده بر اساس ارزیابی اولیه' },
+  ],
 })
 
 const router = useRouter()
@@ -35,49 +35,49 @@ const assessmentData = ref({
     education: 'bachelor',
     location: 'tehran',
     relationshipStatus: 'single',
-    workStatus: 'employed'
+    workStatus: 'employed',
   },
   presentingProblems: {
     mainConcerns: 'احساس اضطراب شدید در مواقع اجتماعی که مانع از عملکرد طبیعی در محیط کار و روابط شخصی می‌شود',
     onsetDuration: 'few-months',
     triggerEvents: 'تغییر شغل و انتقال به تیم جدید با تعامل بالا',
-    impactOnLife: 'اجتناب از جلسات کاری، کاهش بازدهی، انزوای اجتماعی'
+    impactOnLife: 'اجتناب از جلسات کاری، کاهش بازدهی، انزوای اجتماعی',
   },
   symptoms: {
     anxiety: {
       level: 4,
       frequency: 'daily',
       triggers: ['جلسات کاری', 'صحبت در جمع', 'ملاقات افراد جدید'],
-      physicalSymptoms: ['تپش قلب', 'تعریق', 'لرزش', 'تنگی نفس']
+      physicalSymptoms: ['تپش قلب', 'تعریق', 'لرزش', 'تنگی نفس'],
     },
     mood: 'low',
     sleep: {
       quality: 2,
       duration: 5,
-      difficulties: ['به خواب رفتن', 'بیدار شدن شبانه']
+      difficulties: ['به خواب رفتن', 'بیدار شدن شبانه'],
     },
     stress: {
       level: 5,
-      sources: ['محیط کار', 'روابط اجتماعی', 'آینده شغلی']
+      sources: ['محیط کار', 'روابط اجتماعی', 'آینده شغلی'],
     },
     concentration: 2,
     energy: 2,
-    socialConnection: 1
+    socialConnection: 1,
   },
   riskFactors: {
     selfHarm: false,
     suicidalIdeation: false,
     substanceUse: false,
     socialIsolation: true,
-    workImpairment: true
+    workImpairment: true,
   },
   protectiveFactors: {
     familySupport: true,
     employment: true,
     noSubstanceUse: true,
-    seekingHelp: true
+    seekingHelp: true,
   },
-  providerPreference: 'hybrid'
+  providerPreference: 'hybrid',
 })
 
 // Clinical assessment and diagnostic formulation
@@ -88,29 +88,29 @@ const clinicalAssessment = ref({
       severity: 'شدید',
       frequency: 'روزانه',
       duration: '3 ماه',
-      impact: 'اختلال قابل توجه در عملکرد'
+      impact: 'اختلال قابل توجه در عملکرد',
     },
     {
       symptom: 'اجتناب از موقعیت‌های اجتماعی',
       severity: 'متوسط تا شدید',
       frequency: 'مداوم',
       duration: '2 ماه',
-      impact: 'محدودیت در فعالیت‌های روزانه'
+      impact: 'محدودیت در فعالیت‌های روزانه',
     },
     {
       symptom: 'اختلال خواب',
       severity: 'متوسط',
       frequency: '5-6 شب در هفته',
       duration: '2 ماه',
-      impact: 'خستگی روزانه و کاهش تمرکز'
+      impact: 'خستگی روزانه و کاهش تمرکز',
     },
     {
       symptom: 'کاهش اعتماد به نفس',
       severity: 'متوسط',
       frequency: 'مداوم',
       duration: '3 ماه',
-      impact: 'اجتناب از فرصت‌های شغلی'
-    }
+      impact: 'اجتناب از فرصت‌های شغلی',
+    },
   ],
   mentalStatusExam: {
     appearance: 'مرتب اما نشانه‌هایی از اضطراب',
@@ -120,13 +120,13 @@ const clinicalAssessment = ref({
     affect: 'محدود، مطابق با گزارش',
     thought: {
       process: 'منطقی اما با نگرانی‌های مکرر',
-      content: 'افکار منفی درباره ارزیابی دیگران'
+      content: 'افکار منفی درباره ارزیابی دیگران',
     },
     perception: 'بدون اختلال',
     cognition: 'کاهش تمرکز در موقعیت‌های پراسترس',
     insight: 'خوب - آگاهی از مشکل',
-    judgment: 'سالم'
-  }
+    judgment: 'سالم',
+  },
 })
 
 // Detailed diagnostic formulation
@@ -139,7 +139,7 @@ const detectedConditions = ref({
       'موقعیت‌های اجتماعی تقریباً همیشه ترس ایجاد می‌کنند',
       'اجتناب یا تحمل با اضطراب شدید',
       'اختلال قابل توجه در عملکرد',
-      'مدت حداقل 6 ماه'
+      'مدت حداقل 6 ماه',
     ],
     confidence: 88,
     severity: 'متوسط تا شدید',
@@ -149,8 +149,8 @@ const detectedConditions = ref({
       'اجتناب از جمع و تعامل گروهی',
       'ترس از قضاوت و ارزیابی منفی',
       'علائم جسمانی اضطراب (تپش، تعریق)',
-      'کاهش اعتماد به نفس اجتماعی'
-    ]
+      'کاهش اعتماد به نفس اجتماعی',
+    ],
   },
   comorbidities: [
     {
@@ -161,9 +161,9 @@ const detectedConditions = ref({
         'مشکل در به خواب رفتن (بیش از 30 دقیقه)',
         'بیدار شدن شبانه مکرر',
         'کیفیت پایین خواب',
-        'خستگی صبحگاهی'
+        'خستگی صبحگاهی',
       ],
-      relationship: 'ثانویه به اختلال اضطراب اصلی'
+      relationship: 'ثانویه به اختلال اضطراب اصلی',
     },
     {
       condition: 'علائم افسردگی خفیف (Z73.0)',
@@ -173,9 +173,9 @@ const detectedConditions = ref({
         'کاهش خلق و انرژی',
         'احساس ناامیدی گاه‌به‌گاه',
         'کاهش لذت از فعالیت‌های اجتماعی',
-        'خودانتقادی افزایش یافته'
+        'خودانتقادی افزایش یافته',
       ],
-      relationship: 'واکنش به استرس اجتماعی مداوم'
+      relationship: 'واکنش به استرس اجتماعی مداوم',
     },
     {
       condition: 'اختلال تطبیق با استرس‌ور شغلی (F43.2)',
@@ -185,28 +185,28 @@ const detectedConditions = ref({
         'اضطراب مرتبط با تغییرات شغلی',
         'کاهش عملکرد کاری',
         'اجتناب از مسئولیت‌های جدید',
-        'نگرانی مفرط درباره ارزیابی عملکرد'
+        'نگرانی مفرط درباره ارزیابی عملکرد',
       ],
-      relationship: 'عامل محرک برای اختلال اضطراب اجتماعی'
-    }
+      relationship: 'عامل محرک برای اختلال اضطراب اجتماعی',
+    },
   ],
   differentialDiagnosis: [
     {
       condition: 'اختلال اضطراب فراگیر',
       excluded: true,
-      reason: 'اضطراب محدود به موقعیت‌های اجتماعی'
+      reason: 'اضطراب محدود به موقعیت‌های اجتماعی',
     },
     {
       condition: 'اختلال افسردگی اصلی',
       excluded: true,
-      reason: 'علائم افسردگی ثانویه و خفیف'
+      reason: 'علائم افسردگی ثانویه و خفیف',
     },
     {
       condition: 'اختلال شخصیت اجتنابی',
       excluded: true,
-      reason: 'شروع در بزرگسالی، قبلاً عملکرد اجتماعی طبیعی'
-    }
-  ]
+      reason: 'شروع در بزرگسالی، قبلاً عملکرد اجتماعی طبیعی',
+    },
+  ],
 })
 
 const chiefComplaint = ref({
@@ -221,18 +221,18 @@ const chiefComplaint = ref({
     occupational: 'کاهش 40% بازدهی کار',
     social: 'انزوای اجتماعی کامل',
     personal: 'کاهش اعتماد به نفس',
-    physical: 'اختلال خواب و خستگی'
+    physical: 'اختلال خواب و خستگی',
   },
   precipitatingFactors: [
     'تغییر شغل و محیط کار',
     'افزایش مسئولیت‌های اجتماعی',
-    'قرارگیری در معرض ارزیابی بیشتر'
+    'قرارگیری در معرض ارزیابی بیشتر',
   ],
   perpetuatingFactors: [
     'اجتناب مداوم از موقعیت‌های اجتماعی',
     'افکار منفی درباره توانایی‌های خود',
-    'کمبود مهارت‌های مقابله‌ای'
-  ]
+    'کمبود مهارت‌های مقابله‌ای',
+  ],
 })
 
 // Risk assessment
@@ -240,22 +240,22 @@ const riskAssessment = ref({
   suicideRisk: {
     level: 'پایین',
     factors: ['عدم سابقه', 'حمایت خانوادگی', 'انگیزه درمان'],
-    protective: ['روابط خانوادگی مثبت', 'شغل پایدار', 'آینده‌نگری']
+    protective: ['روابط خانوادگی مثبت', 'شغل پایدار', 'آینده‌نگری'],
   },
   selfHarmRisk: {
     level: 'بسیار پایین',
-    factors: ['عدم سابقه', 'عدم افکار خودآزاری']
+    factors: ['عدم سابقه', 'عدم افکار خودآزاری'],
   },
   functionalImpairment: {
     level: 'متوسط تا بالا',
-    areas: ['عملکرد شغلی', 'روابط اجتماعی', 'کیفیت زندگی']
+    areas: ['عملکرد شغلی', 'روابط اجتماعی', 'کیفیت زندگی'],
   },
   crisisIndicators: [
     'افزایش اجتناب اجتماعی',
     'تشدید علائم جسمانی اضطراب',
     'کاهش بیشتر عملکرد کاری',
-    'افزایش انزوای اجتماعی'
-  ]
+    'افزایش انزوای اجتماعی',
+  ],
 })
 
 // Comprehensive therapeutic goals with detailed clinical protocols
@@ -272,15 +272,15 @@ const therapeuticGoals = ref({
         'استفاده از MINI International Neuropsychiatric Interview',
         'تکمیل Social Phobia Inventory (SPIN)',
         'ارزیابی Mental Status Examination کامل',
-        'بررسی سابقه پزشکی و داروهای مصرفی'
+        'بررسی سابقه پزشکی و داروهای مصرفی',
       ],
       measurable: [
         'تکمیل فرم تشخیصی استاندارد DSM-5',
         'نمره SPIN بالای 19 (تأیید اختلال)',
         'شناسایی حداقل 5 محرک اصلی اضطراب',
-        'مستندسازی کامل Chief Complaint'
+        'مستندسازی کامل Chief Complaint',
       ],
-      tools: ['SPIN Scale', 'GAD-7', 'PHQ-9', 'مصاحبه تشخیصی ساختاریافته']
+      tools: ['SPIN Scale', 'GAD-7', 'PHQ-9', 'مصاحبه تشخیصی ساختاریافته'],
     },
     {
       id: 's2',
@@ -293,14 +293,14 @@ const therapeuticGoals = ref({
         'Columbia Suicide Severity Rating Scale',
         'ارزیابی عوامل خطر و محافظت',
         'طراحی Safety Plan',
-        'تعیین شبکه حمایت اضطراری'
+        'تعیین شبکه حمایت اضطراری',
       ],
       measurable: [
         'تکمیل کامل Safety Plan',
         'شناسایی 3 نفر حمایت‌کننده',
         'آموزش تکنیک‌های فوری مقابله',
-        'تعیین خط قرمز برای مراجعه اورژانسی'
-      ]
+        'تعیین خط قرمز برای مراجعه اورژانسی',
+      ],
     },
     {
       id: 's3',
@@ -313,14 +313,14 @@ const therapeuticGoals = ref({
         'مدل شناختی-رفتاری اضطراب اجتماعی',
         'چرخه معیوب اضطراب-اجتناب',
         'نقش افکار خودکار منفی',
-        'تأثیر اجتناب بر تداوم اختلال'
+        'تأثیر اجتناب بر تداوم اختلال',
       ],
       measurable: [
         'درک صحیح چرخه اضطراب (امتحان کوتاه)',
         'شناسایی افکار منفی شخصی',
         'توانایی توضیح مکانیزم اختلال',
-        'پذیرش نقش اجتناب در تشدید مشکل'
-      ]
+        'پذیرش نقش اجتناب در تشدید مشکل',
+      ],
     },
     {
       id: 's4',
@@ -333,14 +333,14 @@ const therapeuticGoals = ref({
         'Progressive Muscle Relaxation (PMR)',
         'Diaphragmatic Breathing',
         'Mindfulness-based stress reduction',
-        'Grounding techniques (5-4-3-2-1)'
+        'Grounding techniques (5-4-3-2-1)',
       ],
       measurable: [
         'کاهش 30% نمره اضطراب حین تمرین',
         'اجرای صحیح تکنیک تنفس در 90 ثانیه',
         'استفاده موثر از mindfulness روزانه',
-        'کاهش علائم فیزیکی طی حملات اضطراب'
-      ]
+        'کاهش علائم فیزیکی طی حملات اضطراب',
+      ],
     },
     {
       id: 's5',
@@ -353,15 +353,15 @@ const therapeuticGoals = ref({
         'ABC Model (Activating event, Beliefs, Consequences)',
         'Thought Record استاندارد',
         'Cognitive Distortions identification',
-        'Evidence For/Against technique'
+        'Evidence For/Against technique',
       ],
       measurable: [
         'شناسایی 10 نوع cognitive distortion',
         'تکمیل روزانه Thought Record',
         'کاهش 40% باور به افکار منفی',
-        'ایجاد افکار متعادل جایگزین'
-      ]
-    }
+        'ایجاد افکار متعادل جایگزین',
+      ],
+    },
   ],
   patient: [
     {
@@ -375,25 +375,25 @@ const therapeuticGoals = ref({
         spinScore: 42,
         gadScore: 15,
         dailyAnxietyLevel: 7,
-        avoidanceBehaviors: 8
+        avoidanceBehaviors: 8,
       },
       targetMetrics: {
         spinScore: 21,
         gadScore: 8,
         dailyAnxietyLevel: 4,
-        avoidanceBehaviors: 3
+        avoidanceBehaviors: 3,
       },
       measurable: [
         'کاهش 50% نمره SPIN (از 42 به 21)',
         'کاهش GAD-7 از 15 به 8',
         'شرکت در حداقل 3 موقعیت اجتماعی هفتگی',
-        'کاهش رفتارهای اجتنابی از 8 به 3 مورد'
+        'کاهش رفتارهای اجتنابی از 8 به 3 مورد',
       ],
       milestones: [
         { week: 4, target: 'کاهش 25% اضطراب' },
         { week: 8, target: 'شرکت در جلسات کاری' },
-        { week: 12, target: 'رسیدن به سطح متوسط اضطراب' }
-      ]
+        { week: 12, target: 'رسیدن به سطح متوسط اضطراب' },
+      ],
     },
     {
       id: 'p2',
@@ -406,21 +406,21 @@ const therapeuticGoals = ref({
         sleepLatency: 45,
         sleepDuration: 5,
         sleepQuality: 2,
-        nightAwakenings: 3
+        nightAwakenings: 3,
       },
       targetMetrics: {
         sleepLatency: 15,
         sleepDuration: 7,
         sleepQuality: 4,
-        nightAwakenings: 1
+        nightAwakenings: 1,
       },
       measurable: [
         'کاهش زمان به خواب رفتن به کمتر از 15 دقیقه',
         'افزایش مدت خواب به 7-8 ساعت',
         'بهبود کیفیت خواب از 2 به 4 (مقیاس 5)',
-        'کاهش بیداری شبانه به کمتر از 1 بار'
+        'کاهش بیداری شبانه به کمتر از 1 بار',
       ],
-      interventions: ['Sleep Hygiene', 'Progressive Muscle Relaxation', 'Cognitive Defusion']
+      interventions: ['Sleep Hygiene', 'Progressive Muscle Relaxation', 'Cognitive Defusion'],
     },
     {
       id: 'p3',
@@ -433,20 +433,20 @@ const therapeuticGoals = ref({
         workPerformance: 6,
         teamParticipation: 2,
         presentationAnxiety: 9,
-        meetingAvoidance: 80
+        meetingAvoidance: 80,
       },
       targetMetrics: {
         workPerformance: 8,
         teamParticipation: 7,
         presentationAnxiety: 4,
-        meetingAvoidance: 20
+        meetingAvoidance: 20,
       },
       measurable: [
         'شرکت در 90% جلسات تیمی',
         'ارائه حداقل 2 پرزنتیشن کاری',
         'کاهش اضطراب ارائه از 9 به 4',
-        'دریافت بازخورد مثبت از مدیر'
-      ]
+        'دریافت بازخورد مثبت از مدیر',
+      ],
     },
     {
       id: 'p4',
@@ -459,9 +459,9 @@ const therapeuticGoals = ref({
         'برقراری رابطه با حداقل 2 همکار جدید',
         'شرکت در 1 فعالیت اجتماعی ماهانه',
         'برقراری تماس هفتگی با دوستان قدیمی',
-        'عضویت در یک گروه اجتماعی یا ورزشی'
-      ]
-    }
+        'عضویت در یک گروه اجتماعی یا ورزشی',
+      ],
+    },
   ],
   ai: [
     {
@@ -475,21 +475,21 @@ const therapeuticGoals = ref({
         'Real-time mood analysis',
         'Anxiety pattern recognition',
         'Sleep quality tracking',
-        'Social interaction monitoring'
+        'Social interaction monitoring',
       ],
       dataPoints: [
         'نمره اضطراب روزانه (0-10)',
         'کیفیت خواب شبانه',
         'تعداد موقعیت‌های اجتناب شده',
         'استفاده از تکنیک‌های مقابله‌ای',
-        'تعامل اجتماعی روزانه'
+        'تعامل اجتماعی روزانه',
       ],
       measurable: [
         'جمع‌آوری 95% داده‌های روزانه',
         'تحلیل الگوهای هفتگی',
         'شناسایی trigger patterns',
-        'پیش‌بینی وضعیت با دقت 85%'
-      ]
+        'پیش‌بینی وضعیت با دقت 85%',
+      ],
     },
     {
       id: 'ai2',
@@ -502,20 +502,20 @@ const therapeuticGoals = ref({
         'افزایش ناگهانی نمره اضطراب (>2 نقطه)',
         'کاهش کیفیت خواب تا زیر 1',
         'اجتناب کامل از فعالیت‌های اجتماعی',
-        'کلمات کلیدی خطرناک در متن'
+        'کلمات کلیدی خطرناک در متن',
       ],
       responseProtocols: [
         'هشدار فوری به تیم درمانی',
         'فعال‌سازی Safety Plan',
         'ارائه منابع اضطراری',
-        'ارتباط با شبکه حمایت'
+        'ارتباط با شبکه حمایت',
       ],
       measurable: [
         'زمان پاسخ کمتر از 5 دقیقه',
         'دقت تشخیص بحران 95%',
         'کاهش False positive به زیر 5%',
-        'پیگیری 100% موارد پرخطر'
-      ]
+        'پیگیری 100% موارد پرخطر',
+      ],
     },
     {
       id: 'ai3',
@@ -528,14 +528,14 @@ const therapeuticGoals = ref({
         'تولید تمرینات mindfulness شخصی',
         'ایجاد exposure hierarchy فردی',
         'محتوای psychoeducation تطبیقی',
-        'پیشنهاد تکنیک‌های مقابله‌ای'
+        'پیشنهاد تکنیک‌های مقابله‌ای',
       ],
       measurable: [
         'ارائه روزانه 3-5 پیشنهاد شخصی',
         'تطبیق محتوا با سطح پیشرفت',
         'تولید exposure tasks تدریجی',
-        'adaptation rate بالای 90%'
-      ]
+        'adaptation rate بالای 90%',
+      ],
     },
     {
       id: 'ai4',
@@ -548,15 +548,15 @@ const therapeuticGoals = ref({
         'Progress tracking dashboard',
         'Outcome prediction models',
         'Treatment response analysis',
-        'Relapse risk assessment'
+        'Relapse risk assessment',
       ],
       measurable: [
         'گزارش هفتگی پیشرفت',
         'پیش‌بینی نتایج با دقت 80%',
         'شناسایی عوامل موثر بر بهبودی',
-        'تنظیم برنامه درمان بر اساس تحلیل'
-      ]
-    }
+        'تنظیم برنامه درمان بر اساس تحلیل',
+      ],
+    },
   ],
   psychotherapist: [
     {
@@ -570,20 +570,20 @@ const therapeuticGoals = ref({
         'MINI International Neuropsychiatric Interview',
         'Structured Clinical Interview for DSM-5 (SCID-5)',
         'Social Phobia Inventory (SPIN)',
-        'Liebowitz Social Anxiety Scale (LSAS)'
+        'Liebowitz Social Anxiety Scale (LSAS)',
       ],
       assessmentDomains: [
         'تشخیص اختلال اضطراب اجتماعی',
         'ارزیابی کوموربیدیتی‌ها',
         'بررسی عوامل خطر و محافظت',
-        'تعیین شدت و عملکردی بودن اختلال'
+        'تعیین شدت و عملکردی بودن اختلال',
       ],
       measurable: [
         'تکمیل MINI و SCID-5',
         'نمره SPIN >19 (تأیید تشخیص)',
         'تدوین فرمولاسیون 5P (Predisposing, Precipitating, Perpetuating, Protective, Prognosis)',
-        'ارائه case conceptualization مکتوب'
-      ]
+        'ارائه case conceptualization مکتوب',
+      ],
     },
     {
       id: 'pt2',
@@ -597,21 +597,21 @@ const therapeuticGoals = ref({
         'Cognitive Restructuring',
         'Behavioral Experiments',
         'Exposure Therapy (graduated)',
-        'Relapse Prevention'
+        'Relapse Prevention',
       ],
       techniques: [
         'Socratic Questioning',
         'Thought Records',
         'Behavioral Activation',
         'Social Skills Training',
-        'Mindfulness Integration'
+        'Mindfulness Integration',
       ],
       measurable: [
         'تدوین treatment plan مبتنی بر CBT',
         'اجرای 12-16 جلسه ساختاریافته',
         'homework assignments هفتگی',
-        'پیگیری و تنظیم برنامه بر اساس پیشرفت'
-      ]
+        'پیگیری و تنظیم برنامه بر اساس پیشرفت',
+      ],
     },
     {
       id: 'pt3',
@@ -624,14 +624,14 @@ const therapeuticGoals = ref({
         'بررسی هفتگی پیشرفت بیمار',
         'نظارت بر عملکرد AI و feedback',
         'تصمیم‌گیری درباره تغییرات درمانی',
-        'مدیریت موارد بحرانی'
+        'مدیریت موارد بحرانی',
       ],
       measurable: [
         'جلسات بررسی هفتگی',
         'update کردن treatment plan ماهانه',
         'crisis intervention در صورت نیاز',
-        'coordination با سایر متخصصان'
-      ]
+        'coordination با سایر متخصصان',
+      ],
     },
     {
       id: 'pt4',
@@ -644,20 +644,20 @@ const therapeuticGoals = ref({
         'کاهش نمره SPIN به زیر 19',
         'بهبود عملکرد اجتماعی و شغلی',
         'کاهش رفتارهای اجتنابی',
-        'افزایش self-efficacy'
+        'افزایش self-efficacy',
       ],
       relapsePreventionPlan: [
         'شناسایی early warning signs',
         'تدوین coping strategies',
         'برنامه follow-up sessions',
-        'منابع حمایتی مداوم'
+        'منابع حمایتی مداوم',
       ],
       measurable: [
         'pre-post assessment comparison',
         'functional improvement measures',
         'تدوین relapse prevention plan',
-        'قرارداد follow-up sessions'
-      ]
+        'قرارداد follow-up sessions',
+      ],
     },
     {
       id: 'pt5',
@@ -670,40 +670,40 @@ const therapeuticGoals = ref({
         'بررسی accuracy تشخیص‌های AI',
         'feedback به توسعه‌دهندگان سیستم',
         'مشارکت در تحقیقات بالینی',
-        'update کردن evidence-based protocols'
+        'update کردن evidence-based protocols',
       ],
       measurable: [
         'گزارش ماهانه عملکرد AI',
         'پیشنهادات بهبود سیستم',
         'مشارکت در case studies',
-        'آموزش تیم درمانی'
-      ]
-    }
-  ]
+        'آموزش تیم درمانی',
+      ],
+    },
+  ],
 })
 
 const priorityColors = {
   high: 'danger',
-  medium: 'warning', 
-  low: 'info'
+  medium: 'warning',
+  low: 'info',
 }
 
 const typeIcons = {
-  assessment: 'ph:clipboard-text',
-  intervention: 'ph:gear-six',
-  monitoring: 'ph:chart-line',
+  'assessment': 'ph:clipboard-text',
+  'intervention': 'ph:gear-six',
+  'monitoring': 'ph:chart-line',
   'crisis-detection': 'ph:warning-circle',
   'crisis-assessment': 'ph:shield-warning',
   'symptom-reduction': 'ph:trend-down',
-  lifestyle: 'ph:heart',
+  'lifestyle': 'ph:heart',
   'treatment-planning': 'ph:strategy',
-  functional: 'ph:briefcase',
-  social: 'ph:users-three',
+  'functional': 'ph:briefcase',
+  'social': 'ph:users-three',
   'content-generation': 'ph:magic-wand',
-  analytics: 'ph:chart-pie',
-  supervision: 'ph:eye',
+  'analytics': 'ph:chart-pie',
+  'supervision': 'ph:eye',
   'outcome-assessment': 'ph:target',
-  'professional-development': 'ph:graduation-cap'
+  'professional-development': 'ph:graduation-cap',
 }
 
 // Evidence-based treatment protocols
@@ -717,14 +717,14 @@ const treatmentProtocols = ref({
       'Cognitive Restructuring',
       'Exposure Therapy',
       'Social Skills Training',
-      'Relapse Prevention'
-    ]
+      'Relapse Prevention',
+    ],
   },
   assessmentTools: {
     primary: ['SPIN', 'LSAS', 'SIAS'],
     secondary: ['GAD-7', 'PHQ-9', 'WHODAS'],
-    screening: ['Mini-SPIN', 'SPS']
-  }
+    screening: ['Mini-SPIN', 'SPS'],
+  },
 })
 
 // Treatment milestones and benchmarks
@@ -733,44 +733,44 @@ const treatmentMilestones = ref([
     week: 1,
     milestone: 'Complete diagnostic assessment',
     criteria: 'SPIN score >19, DSM-5 criteria met',
-    status: 'pending'
+    status: 'pending',
   },
   {
     week: 2,
     milestone: 'Safety plan established',
     criteria: 'Risk assessment complete, emergency contacts identified',
-    status: 'pending'
+    status: 'pending',
   },
   {
     week: 4,
     milestone: 'Psychoeducation completed',
     criteria: 'Patient understands anxiety cycle, demonstrates knowledge',
-    status: 'pending'
+    status: 'pending',
   },
   {
     week: 6,
     milestone: 'Coping skills acquired',
     criteria: 'Effective use of breathing, relaxation techniques',
-    status: 'pending'
+    status: 'pending',
   },
   {
     week: 8,
     milestone: 'Cognitive restructuring',
     criteria: 'Identifies negative thoughts, uses thought records',
-    status: 'pending'
+    status: 'pending',
   },
   {
     week: 12,
     milestone: 'Exposure therapy progress',
     criteria: 'Completing hierarchy items, reduced avoidance',
-    status: 'pending'
+    status: 'pending',
   },
   {
     week: 16,
     milestone: 'Treatment completion',
     criteria: 'SPIN <19, functional improvement, relapse plan',
-    status: 'pending'
-  }
+    status: 'pending',
+  },
 ])
 
 // Simulate analysis progress
@@ -797,25 +797,25 @@ const goBackToAssessment = () => {
 </script>
 
 <template>
-  <div class="dark:bg-gradient-to-br dark:from-muted-900 dark:to-muted-800 bg-gradient-to-br from-slate-50 to-white min-h-screen">
+  <div class="dark:from-muted-900 dark:to-muted-800 min-h-screen bg-gradient-to-br from-slate-50 to-white dark:bg-gradient-to-br">
     <!-- Background particles -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-primary-300/20 rounded-full animate-pulse"></div>
-      <div class="absolute top-3/4 right-1/3 w-3 h-3 bg-success-300/20 rounded-full animate-pulse delay-500"></div>
-      <div class="absolute top-1/2 right-1/4 w-1 h-1 bg-info-300/20 rounded-full animate-pulse delay-1000"></div>
-      <div class="absolute bottom-1/4 left-1/3 w-2 h-2 bg-warning-300/20 rounded-full animate-pulse delay-700"></div>
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div class="bg-primary-300/20 absolute left-1/4 top-1/4 size-2 animate-pulse rounded-full" />
+      <div class="bg-success-300/20 absolute right-1/3 top-3/4 size-3 animate-pulse rounded-full delay-500" />
+      <div class="bg-info-300/20 absolute right-1/4 top-1/2 size-1 animate-pulse rounded-full delay-1000" />
+      <div class="bg-warning-300/20 absolute bottom-1/4 left-1/3 size-2 animate-pulse rounded-full delay-700" />
     </div>
 
     <div class="relative flex flex-col px-6 py-8">
       <div class="relative mx-auto w-full max-w-6xl">
         <!-- Navigation Header -->
-        <div 
-          class="flex w-full items-center justify-between mb-8 transition-all duration-1000"
-          :class="{ 'opacity-100 translate-y-0': isVisible, 'opacity-0 -translate-y-4': !isVisible }"
+        <div
+          class="mb-8 flex w-full items-center justify-between transition-all duration-1000"
+          :class="{ 'translate-y-0 opacity-100': isVisible, '-translate-y-4 opacity-0': !isVisible }"
         >
           <button
-            @click="goBackToAssessment"
             class="text-muted-400 hover:text-primary-500 flex items-center gap-2 font-sans font-medium transition-all duration-300 hover:gap-3"
+            @click="goBackToAssessment"
           >
             <Icon name="gg:arrow-long-right" class="size-5" />
             <span>بازگشت به ارزیابی</span>
@@ -824,118 +824,154 @@ const goBackToAssessment = () => {
         </div>
 
         <!-- Analysis Progress -->
-        <div v-if="isAnalyzing" class="flex flex-col items-center justify-center min-h-[60vh]">
-          <div class="w-24 h-24 bg-primary-500/10 rounded-full flex items-center justify-center mb-8">
-            <Icon name="ph:brain" class="size-12 text-primary-500 animate-pulse" />
+        <div v-if="isAnalyzing" class="flex min-h-[60vh] flex-col items-center justify-center">
+          <div class="bg-primary-500/10 mb-8 flex size-24 items-center justify-center rounded-full">
+            <Icon name="ph:brain" class="text-primary-500 size-12 animate-pulse" />
           </div>
-          
-          <BaseHeading as="h1" size="3xl" weight="bold" class="text-center mb-4">
+
+          <BaseHeading
+            as="h1"
+            size="3xl"
+            weight="bold"
+            class="mb-4 text-center"
+          >
             در حال تجزیه و تحلیل ارزیابی شما...
           </BaseHeading>
-          
-          <BaseParagraph class="text-center text-muted-600 dark:text-muted-300 mb-8 max-w-md">
+
+          <BaseParagraph class="text-muted-600 dark:text-muted-300 mb-8 max-w-md text-center">
             هوش مصنوعی در حال بررسی پاسخ‌های شما و تنظیم اهداف درمانی شخصی‌سازی شده است
           </BaseParagraph>
 
           <div class="w-full max-w-md">
-            <div class="bg-muted-200 dark:bg-muted-700 h-3 rounded-full overflow-hidden mb-4">
-              <div 
+            <div class="bg-muted-200 dark:bg-muted-700 mb-4 h-3 overflow-hidden rounded-full">
+              <div
                 class="bg-primary-500 h-full rounded-full transition-all duration-300 ease-out"
                 :style="{ width: `${analysisProgress}%` }"
-              ></div>
+              />
             </div>
-            <p class="text-center text-sm text-muted-500">{{ analysisProgress }}% تکمیل شده</p>
+            <p class="text-muted-500 text-center text-sm">
+              {{ analysisProgress }}% تکمیل شده
+            </p>
           </div>
         </div>
 
         <!-- Goals Content -->
-        <div 
+        <div
           v-else
           class="transition-all duration-1000"
-          :class="{ 'opacity-100 translate-y-0': isVisible, 'opacity-0 translate-y-8': !isVisible }"
+          :class="{ 'translate-y-0 opacity-100': isVisible, 'translate-y-8 opacity-0': !isVisible }"
         >
           <!-- Header -->
-          <div class="text-center mb-12">
-            <div class="w-20 h-20 bg-gradient-to-r from-primary-500/10 to-success-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Icon name="ph:target" class="size-10 text-primary-500" />
+          <div class="mb-12 text-center">
+            <div class="from-primary-500/10 to-success-500/10 mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-gradient-to-r">
+              <Icon name="ph:target" class="text-primary-500 size-10" />
             </div>
-            <BaseHeading as="h1" size="4xl" weight="bold" class="mb-4">
+            <BaseHeading
+              as="h1"
+              size="4xl"
+              weight="bold"
+              class="mb-4"
+            >
               اهداف درمانی شما تنظیم شد
             </BaseHeading>
-            <BaseParagraph class="text-muted-600 dark:text-muted-300 max-w-2xl mx-auto text-lg">
+            <BaseParagraph class="text-muted-600 dark:text-muted-300 mx-auto max-w-2xl text-lg">
               بر اساس ارزیابی شما، اهداف درمانی شخصی‌سازی شده‌ای تنظیم کرده‌ایم که در مسیر بهبودی کمکتان خواهد کرد
             </BaseParagraph>
           </div>
 
           <!-- Chief Complaint & Primary Diagnosis -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <div class="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
             <!-- Chief Complaint -->
-            <div class="bg-gradient-to-r from-danger-50 to-warning-50 dark:from-danger-900/10 dark:to-warning-900/10 rounded-2xl p-8">
-              <div class="flex items-center gap-4 mb-6">
-                <div class="w-12 h-12 bg-danger-500/10 rounded-full flex items-center justify-center">
-                  <Icon name="ph:warning-circle" class="size-6 text-danger-500" />
+            <div class="from-danger-50 to-warning-50 dark:from-danger-900/10 dark:to-warning-900/10 rounded-2xl bg-gradient-to-r p-8">
+              <div class="mb-6 flex items-center gap-4">
+                <div class="bg-danger-500/10 flex size-12 items-center justify-center rounded-full">
+                  <Icon name="ph:warning-circle" class="text-danger-500 size-6" />
                 </div>
-                <BaseHeading as="h2" size="xl" weight="bold" class="text-danger-700 dark:text-danger-300">
+                <BaseHeading
+                  as="h2"
+                  size="xl"
+                  weight="bold"
+                  class="text-danger-700 dark:text-danger-300"
+                >
                   شکایت اصلی
                 </BaseHeading>
               </div>
-              
+
               <div class="space-y-4">
                 <div>
-                  <p class="text-sm font-medium text-muted-600 dark:text-muted-300 mb-2">مشکل اصلی:</p>
-                  <p class="text-danger-700 dark:text-danger-300 font-semibold">{{ chiefComplaint.primary }}</p>
+                  <p class="text-muted-600 dark:text-muted-300 mb-2 text-sm font-medium">
+                    مشکل اصلی:
+                  </p>
+                  <p class="text-danger-700 dark:text-danger-300 font-semibold">
+                    {{ chiefComplaint.primary }}
+                  </p>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <p class="text-sm font-medium text-muted-600 dark:text-muted-300 mb-1">مدت زمان:</p>
-                    <p class="text-muted-700 dark:text-muted-200">{{ chiefComplaint.duration }}</p>
+                    <p class="text-muted-600 dark:text-muted-300 mb-1 text-sm font-medium">
+                      مدت زمان:
+                    </p>
+                    <p class="text-muted-700 dark:text-muted-200">
+                      {{ chiefComplaint.duration }}
+                    </p>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-muted-600 dark:text-muted-300 mb-1">شدت:</p>
-                    <p class="text-muted-700 dark:text-muted-200">{{ chiefComplaint.severity }}</p>
+                    <p class="text-muted-600 dark:text-muted-300 mb-1 text-sm font-medium">
+                      شدت:
+                    </p>
+                    <p class="text-muted-700 dark:text-muted-200">
+                      {{ chiefComplaint.severity }}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Primary Diagnosis -->
-            <div class="bg-gradient-to-r from-primary-50 to-info-50 dark:from-primary-900/10 dark:to-info-900/10 rounded-2xl p-8">
-              <div class="flex items-center gap-4 mb-6">
-                <div class="w-12 h-12 bg-primary-500/10 rounded-full flex items-center justify-center">
-                  <Icon name="ph:stethoscope" class="size-6 text-primary-500" />
+            <div class="from-primary-50 to-info-50 dark:from-primary-900/10 dark:to-info-900/10 rounded-2xl bg-gradient-to-r p-8">
+              <div class="mb-6 flex items-center gap-4">
+                <div class="bg-primary-500/10 flex size-12 items-center justify-center rounded-full">
+                  <Icon name="ph:stethoscope" class="text-primary-500 size-6" />
                 </div>
-                <BaseHeading as="h2" size="xl" weight="bold" class="text-primary-700 dark:text-primary-300">
+                <BaseHeading
+                  as="h2"
+                  size="xl"
+                  weight="bold"
+                  class="text-primary-700 dark:text-primary-300"
+                >
                   تشخیص اولیه
                 </BaseHeading>
               </div>
-              
+
               <div class="space-y-4">
                 <div>
-                  <p class="text-primary-700 dark:text-primary-300 font-semibold text-lg">
+                  <p class="text-primary-700 dark:text-primary-300 text-lg font-semibold">
                     {{ detectedConditions.primaryDiagnosis.condition }}
                   </p>
-                  <div class="flex items-center gap-2 mt-2">
-                    <span class="text-sm text-muted-600 dark:text-muted-300">اطمینان:</span>
-                    <div class="flex-1 bg-muted-200 dark:bg-muted-700 h-2 rounded-full">
-                      <div 
+                  <div class="mt-2 flex items-center gap-2">
+                    <span class="text-muted-600 dark:text-muted-300 text-sm">اطمینان:</span>
+                    <div class="bg-muted-200 dark:bg-muted-700 h-2 flex-1 rounded-full">
+                      <div
                         class="bg-primary-500 h-full rounded-full"
                         :style="{ width: `${detectedConditions.primaryDiagnosis.confidence}%` }"
-                      ></div>
+                      />
                     </div>
                     <span class="text-sm font-medium">{{ detectedConditions.primaryDiagnosis.confidence }}%</span>
                   </div>
                 </div>
-                
+
                 <div>
-                  <p class="text-sm font-medium text-muted-600 dark:text-muted-300 mb-2">علائم شناسایی شده:</p>
+                  <p class="text-muted-600 dark:text-muted-300 mb-2 text-sm font-medium">
+                    علائم شناسایی شده:
+                  </p>
                   <div class="space-y-1">
-                    <div 
-                      v-for="symptom in detectedConditions.primaryDiagnosis.symptoms" 
+                    <div
+                      v-for="symptom in detectedConditions.primaryDiagnosis.symptoms"
                       :key="symptom"
                       class="flex items-center gap-2"
                     >
-                      <Icon name="ph:check-circle" class="size-4 text-success-500" />
-                      <span class="text-sm text-muted-700 dark:text-muted-200">{{ symptom }}</span>
+                      <Icon name="ph:check-circle" class="text-success-500 size-4" />
+                      <span class="text-muted-700 dark:text-muted-200 text-sm">{{ symptom }}</span>
                     </div>
                   </div>
                 </div>
@@ -945,31 +981,38 @@ const goBackToAssessment = () => {
 
           <!-- Comorbidities -->
           <div v-if="detectedConditions.comorbidities.length > 0" class="mb-12">
-            <BaseHeading as="h2" size="2xl" weight="bold" class="mb-6 text-center">
+            <BaseHeading
+              as="h2"
+              size="2xl"
+              weight="bold"
+              class="mb-6 text-center"
+            >
               شرایط همراه (کوموربیدیتی)
             </BaseHeading>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div 
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div
                 v-for="comorbidity in detectedConditions.comorbidities"
                 :key="comorbidity.condition"
-                class="bg-slate-100/90 dark:bg-muted-800/60 backdrop-blur-sm rounded-xl p-6 border border-slate-200/40 dark:border-white/20"
+                class="dark:bg-muted-800/60 rounded-xl border border-slate-200/40 bg-slate-100/90 p-6 backdrop-blur-sm dark:border-white/20"
               >
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="font-semibold text-muted-700 dark:text-muted-200">{{ comorbidity.condition }}</h3>
-                  <span class="text-sm px-3 py-1 bg-warning-100 dark:bg-warning-900/20 text-warning-700 dark:text-warning-300 rounded-full">
+                <div class="mb-4 flex items-center justify-between">
+                  <h3 class="text-muted-700 dark:text-muted-200 font-semibold">
+                    {{ comorbidity.condition }}
+                  </h3>
+                  <span class="bg-warning-100 dark:bg-warning-900/20 text-warning-700 dark:text-warning-300 rounded-full px-3 py-1 text-sm">
                     {{ comorbidity.confidence }}% اطمینان
                   </span>
                 </div>
-                
+
                 <div class="space-y-2">
-                  <div 
+                  <div
                     v-for="symptom in comorbidity.symptoms"
                     :key="symptom"
                     class="flex items-center gap-2"
                   >
-                    <Icon name="ph:dot" class="size-4 text-warning-500" />
-                    <span class="text-sm text-muted-600 dark:text-muted-300">{{ symptom }}</span>
+                    <Icon name="ph:dot" class="text-warning-500 size-4" />
+                    <span class="text-muted-600 dark:text-muted-300 text-sm">{{ symptom }}</span>
                   </div>
                 </div>
               </div>
@@ -978,39 +1021,57 @@ const goBackToAssessment = () => {
 
           <!-- Therapeutic Goals -->
           <div class="space-y-12">
-            <BaseHeading as="h2" size="3xl" weight="bold" class="text-center mb-8">
+            <BaseHeading
+              as="h2"
+              size="3xl"
+              weight="bold"
+              class="mb-8 text-center"
+            >
               اهداف درمانی
             </BaseHeading>
 
             <!-- Session Goals -->
-            <div class="bg-gradient-to-r from-success-50 to-teal-50 dark:from-success-900/10 dark:to-teal-900/10 rounded-2xl p-8">
-              <div class="flex items-center gap-4 mb-8">
-                <div class="w-12 h-12 bg-success-500/10 rounded-full flex items-center justify-center">
-                  <Icon name="ph:calendar-check" class="size-6 text-success-500" />
+            <div class="from-success-50 dark:from-success-900/10 rounded-2xl bg-gradient-to-r to-teal-50 p-8 dark:to-teal-900/10">
+              <div class="mb-8 flex items-center gap-4">
+                <div class="bg-success-500/10 flex size-12 items-center justify-center rounded-full">
+                  <Icon name="ph:calendar-check" class="text-success-500 size-6" />
                 </div>
-                <BaseHeading as="h3" size="2xl" weight="bold" class="text-success-700 dark:text-success-300">
+                <BaseHeading
+                  as="h3"
+                  size="2xl"
+                  weight="bold"
+                  class="text-success-700 dark:text-success-300"
+                >
                   اهداف جلسات
                 </BaseHeading>
               </div>
-              
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div 
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div
                   v-for="goal in therapeuticGoals.session"
                   :key="goal.id"
-                  class="bg-white/80 dark:bg-muted-800/80 rounded-xl p-6"
+                  class="dark:bg-muted-800/80 rounded-xl bg-white/80 p-6"
                 >
-                  <div class="flex items-start gap-4 mb-4">
-                    <Icon :name="typeIcons[goal.type]" class="size-6 text-success-500 mt-1" />
+                  <div class="mb-4 flex items-start gap-4">
+                    <Icon :name="typeIcons[goal.type]" class="text-success-500 mt-1 size-6" />
                     <div class="flex-1">
-                      <h4 class="font-semibold text-muted-700 dark:text-muted-200 mb-2">{{ goal.title }}</h4>
-                      <p class="text-sm text-muted-600 dark:text-muted-300 mb-3">{{ goal.description }}</p>
-                      
-                      <div class="flex items-start flex-col gap-4 text-xs">
+                      <h4 class="text-muted-700 dark:text-muted-200 mb-2 font-semibold">
+                        {{ goal.title }}
+                      </h4>
+                      <p class="text-muted-600 dark:text-muted-300 mb-3 text-sm">
+                        {{ goal.description }}
+                      </p>
+
+                      <div class="flex flex-col items-start gap-4 text-xs">
                         <div class="flex items-center gap-2">
                           <Icon name="ph:clock" class="size-4" />
                           <span>{{ goal.timeframe }}</span>
                         </div>
-                        <div v-for="measurable in goal.measurable" :key="measurable" class="flex items-center gap-2">
+                        <div
+                          v-for="measurable in goal.measurable"
+                          :key="measurable"
+                          class="flex items-center gap-2"
+                        >
                           <Icon name="ph:target" class="size-4" />
                           <span>{{ measurable }}</span>
                         </div>
@@ -1025,34 +1086,47 @@ const goBackToAssessment = () => {
             </div>
 
             <!-- Patient Goals -->
-            <div class="bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/10 dark:to-purple-900/10 rounded-2xl p-8">
-              <div class="flex items-center gap-4 mb-8">
-                <div class="w-12 h-12 bg-primary-500/10 rounded-full flex items-center justify-center">
-                  <Icon name="ph:user-focus" class="size-6 text-primary-500" />
+            <div class="from-primary-50 dark:from-primary-900/10 rounded-2xl bg-gradient-to-r to-purple-50 p-8 dark:to-purple-900/10">
+              <div class="mb-8 flex items-center gap-4">
+                <div class="bg-primary-500/10 flex size-12 items-center justify-center rounded-full">
+                  <Icon name="ph:user-focus" class="text-primary-500 size-6" />
                 </div>
-                <BaseHeading as="h3" size="2xl" weight="bold" class="text-primary-700 dark:text-primary-300">
+                <BaseHeading
+                  as="h3"
+                  size="2xl"
+                  weight="bold"
+                  class="text-primary-700 dark:text-primary-300"
+                >
                   اهداف بیمار
                 </BaseHeading>
               </div>
-              
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div 
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div
                   v-for="goal in therapeuticGoals.patient"
                   :key="goal.id"
-                  class="bg-white/80 dark:bg-muted-800/80 rounded-xl p-6"
+                  class="dark:bg-muted-800/80 rounded-xl bg-white/80 p-6"
                 >
-                  <div class="flex items-start gap-4 mb-4">
-                    <Icon :name="typeIcons[goal.type]" class="size-6 text-primary-500 mt-1" />
+                  <div class="mb-4 flex items-start gap-4">
+                    <Icon :name="typeIcons[goal.type]" class="text-primary-500 mt-1 size-6" />
                     <div class="flex-1">
-                      <h4 class="font-semibold text-muted-700 dark:text-muted-200 mb-2">{{ goal.title }}</h4>
-                      <p class="text-sm text-muted-600 dark:text-muted-300 mb-3">{{ goal.description }}</p>
-                      
-                      <div class="flex items-start flex-col gap-4 text-xs">
+                      <h4 class="text-muted-700 dark:text-muted-200 mb-2 font-semibold">
+                        {{ goal.title }}
+                      </h4>
+                      <p class="text-muted-600 dark:text-muted-300 mb-3 text-sm">
+                        {{ goal.description }}
+                      </p>
+
+                      <div class="flex flex-col items-start gap-4 text-xs">
                         <div class="flex items-center gap-2">
                           <Icon name="ph:clock" class="size-4" />
                           <span>{{ goal.timeframe }}</span>
                         </div>
-                        <div v-for="measurable in goal.measurable" :key="measurable" class="flex items-center gap-2">
+                        <div
+                          v-for="measurable in goal.measurable"
+                          :key="measurable"
+                          class="flex items-center gap-2"
+                        >
                           <Icon name="ph:target" class="size-4" />
                           <span>{{ measurable }}</span>
                         </div>
@@ -1067,34 +1141,47 @@ const goBackToAssessment = () => {
             </div>
 
             <!-- AI Goals -->
-            <div class="bg-gradient-to-r from-info-50 to-cyan-50 dark:from-info-900/10 dark:to-cyan-900/10 rounded-2xl p-8">
-              <div class="flex items-center gap-4 mb-8">
-                <div class="w-12 h-12 bg-info-500/10 rounded-full flex items-center justify-center">
-                  <Icon name="ph:robot" class="size-6 text-info-500" />
+            <div class="from-info-50 dark:from-info-900/10 rounded-2xl bg-gradient-to-r to-cyan-50 p-8 dark:to-cyan-900/10">
+              <div class="mb-8 flex items-center gap-4">
+                <div class="bg-info-500/10 flex size-12 items-center justify-center rounded-full">
+                  <Icon name="ph:robot" class="text-info-500 size-6" />
                 </div>
-                <BaseHeading as="h3" size="2xl" weight="bold" class="text-info-700 dark:text-info-300">
+                <BaseHeading
+                  as="h3"
+                  size="2xl"
+                  weight="bold"
+                  class="text-info-700 dark:text-info-300"
+                >
                   اهداف هوش مصنوعی
                 </BaseHeading>
               </div>
-              
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div 
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div
                   v-for="goal in therapeuticGoals.ai"
                   :key="goal.id"
-                  class="bg-white/80 dark:bg-muted-800/80 rounded-xl p-6"
+                  class="dark:bg-muted-800/80 rounded-xl bg-white/80 p-6"
                 >
-                  <div class="flex items-start gap-4 mb-4">
-                    <Icon :name="typeIcons[goal.type]" class="size-6 text-info-500 mt-1" />
+                  <div class="mb-4 flex items-start gap-4">
+                    <Icon :name="typeIcons[goal.type]" class="text-info-500 mt-1 size-6" />
                     <div class="flex-1">
-                      <h4 class="font-semibold text-muted-700 dark:text-muted-200 mb-2">{{ goal.title }}</h4>
-                      <p class="text-sm text-muted-600 dark:text-muted-300 mb-3">{{ goal.description }}</p>
-                      
-                      <div class="flex items-start flex-col gap-4 text-xs">
+                      <h4 class="text-muted-700 dark:text-muted-200 mb-2 font-semibold">
+                        {{ goal.title }}
+                      </h4>
+                      <p class="text-muted-600 dark:text-muted-300 mb-3 text-sm">
+                        {{ goal.description }}
+                      </p>
+
+                      <div class="flex flex-col items-start gap-4 text-xs">
                         <div class="flex items-center gap-2">
                           <Icon name="ph:clock" class="size-4" />
                           <span>{{ goal.timeframe }}</span>
                         </div>
-                        <div v-for="measurable in goal.measurable" :key="measurable" class="flex items-center gap-2">
+                        <div
+                          v-for="measurable in goal.measurable"
+                          :key="measurable"
+                          class="flex items-center gap-2"
+                        >
                           <Icon name="ph:target" class="size-4" />
                           <span>{{ measurable }}</span>
                         </div>
@@ -1109,34 +1196,47 @@ const goBackToAssessment = () => {
             </div>
 
             <!-- Psychotherapist Goals -->
-            <div class="bg-gradient-to-r from-warning-50 to-orange-50 dark:from-warning-900/10 dark:to-orange-900/10 rounded-2xl p-8">
-              <div class="flex items-center gap-4 mb-8">
-                <div class="w-12 h-12 bg-warning-500/10 rounded-full flex items-center justify-center">
-                  <Icon name="ph:user-circle-gear" class="size-6 text-warning-500" />
+            <div class="from-warning-50 dark:from-warning-900/10 rounded-2xl bg-gradient-to-r to-orange-50 p-8 dark:to-orange-900/10">
+              <div class="mb-8 flex items-center gap-4">
+                <div class="bg-warning-500/10 flex size-12 items-center justify-center rounded-full">
+                  <Icon name="ph:user-circle-gear" class="text-warning-500 size-6" />
                 </div>
-                <BaseHeading as="h3" size="2xl" weight="bold" class="text-warning-700 dark:text-warning-300">
+                <BaseHeading
+                  as="h3"
+                  size="2xl"
+                  weight="bold"
+                  class="text-warning-700 dark:text-warning-300"
+                >
                   اهداف روانشناس
                 </BaseHeading>
               </div>
-              
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div 
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div
                   v-for="goal in therapeuticGoals.psychotherapist"
                   :key="goal.id"
-                  class="bg-white/80 dark:bg-muted-800/80 rounded-xl p-6"
+                  class="dark:bg-muted-800/80 rounded-xl bg-white/80 p-6"
                 >
-                  <div class="flex items-start gap-4 mb-4">
-                    <Icon :name="typeIcons[goal.type]" class="size-6 text-warning-500 mt-1" />
+                  <div class="mb-4 flex items-start gap-4">
+                    <Icon :name="typeIcons[goal.type]" class="text-warning-500 mt-1 size-6" />
                     <div class="flex-1">
-                      <h4 class="font-semibold text-muted-700 dark:text-muted-200 mb-2">{{ goal.title }}</h4>
-                      <p class="text-sm text-muted-600 dark:text-muted-300 mb-3">{{ goal.description }}</p>
-                      
-                      <div class="flex items-start flex-col gap-4 text-xs">
+                      <h4 class="text-muted-700 dark:text-muted-200 mb-2 font-semibold">
+                        {{ goal.title }}
+                      </h4>
+                      <p class="text-muted-600 dark:text-muted-300 mb-3 text-sm">
+                        {{ goal.description }}
+                      </p>
+
+                      <div class="flex flex-col items-start gap-4 text-xs">
                         <div class="flex items-center gap-2">
                           <Icon name="ph:clock" class="size-4" />
                           <span>{{ goal.timeframe }}</span>
                         </div>
-                        <div v-for="measurable in goal.measurable" :key="measurable" class="flex items-center gap-2">
+                        <div
+                          v-for="measurable in goal.measurable"
+                          :key="measurable"
+                          class="flex items-center gap-2"
+                        >
                           <Icon name="ph:target" class="size-4" />
                           <span>{{ measurable }}</span>
                         </div>
@@ -1152,28 +1252,33 @@ const goBackToAssessment = () => {
           </div>
 
           <!-- Important Note -->
-          <div class="bg-gradient-to-r from-success-50 to-emerald-50 dark:from-success-900/10 dark:to-emerald-900/10 rounded-2xl p-8 mt-12">
+          <div class="from-success-50 dark:from-success-900/10 mt-12 rounded-2xl bg-gradient-to-r to-emerald-50 p-8 dark:to-emerald-900/10">
             <div class="flex items-start gap-4">
-              <Icon name="ph:lightbulb" class="size-8 text-success-500 mt-1" />
+              <Icon name="ph:lightbulb" class="text-success-500 mt-1 size-8" />
               <div>
-                <BaseHeading as="h3" size="xl" weight="bold" class="text-success-700 dark:text-success-300 mb-4">
+                <BaseHeading
+                  as="h3"
+                  size="xl"
+                  weight="bold"
+                  class="text-success-700 dark:text-success-300 mb-4"
+                >
                   نکات مهم درباره جلسه اول
                 </BaseHeading>
-                <div class="space-y-3 text-success-600 dark:text-success-400">
+                <div class="text-success-600 dark:text-success-400 space-y-3">
                   <p class="flex items-start gap-2">
-                    <Icon name="ph:check-circle" class="size-5 mt-0.5 text-success-500" />
+                    <Icon name="ph:check-circle" class="text-success-500 mt-0.5 size-5" />
                     <span>جلسه اول بر شناسایی دقیق علائم و تأیید تشخیص اولیه متمرکز است</span>
                   </p>
                   <p class="flex items-start gap-2">
-                    <Icon name="ph:check-circle" class="size-5 mt-0.5 text-success-500" />
+                    <Icon name="ph:check-circle" class="text-success-500 mt-0.5 size-5" />
                     <span>شکایت اصلی (Chief Complaint) به طور کامل بررسی و مستند خواهد شد</span>
                   </p>
                   <p class="flex items-start gap-2">
-                    <Icon name="ph:check-circle" class="size-5 mt-0.5 text-success-500" />
+                    <Icon name="ph:check-circle" class="text-success-500 mt-0.5 size-5" />
                     <span>تمام علائم همراه و کوموربیدیتی‌های احتمالی غربالگری می‌شوند</span>
                   </p>
                   <p class="flex items-start gap-2">
-                    <Icon name="ph:check-circle" class="size-5 mt-0.5 text-success-500" />
+                    <Icon name="ph:check-circle" class="text-success-500 mt-0.5 size-5" />
                     <span>برنامه درمانی نهایی پس از تأیید تشخیص تنظیم خواهد شد</span>
                   </p>
                 </div>
@@ -1182,25 +1287,25 @@ const goBackToAssessment = () => {
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex justify-center gap-6 mt-12">
+          <div class="mt-12 flex justify-center gap-6">
             <BaseButton
-              @click="goBackToAssessment"
               variant="pastel"
               color="muted"
               size="lg"
               class="px-8"
+              @click="goBackToAssessment"
             >
-              <Icon name="ph:arrow-right" class="size-5 ml-2" />
+              <Icon name="ph:arrow-right" class="ml-2 size-5" />
               بازنگری ارزیابی
             </BaseButton>
-            
+
             <BaseButton
-              @click="startTherapy"
               color="primary"
               size="lg"
               class="px-12"
+              @click="startTherapy"
             >
-              <Icon name="ph:chat-circle" class="size-5 ml-2" />
+              <Icon name="ph:chat-circle" class="ml-2 size-5" />
               شروع جلسه اول
             </BaseButton>
           </div>

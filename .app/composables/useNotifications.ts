@@ -124,7 +124,7 @@ export function useNotifications() {
       return usePwaNotifications()
     }
     catch (err) {
-      console.warn('PWA notifications not available:', err)
+      
       return null
     }
   })
@@ -149,40 +149,36 @@ export function useNotifications() {
   // اعلانات زمان‌بندی شده که هنوز زمان‌شان نرسیده
   const scheduledNotifications = computed(() => {
     const now = new Date()
-    const scheduled = notifications.value.filter((n) => {
+    return notifications.value.filter((n) => {
       // بررسی وجود و اعتبار announce_time
-      const hasValidAnnounceTime = n.announceTime && 
-        n.announceTime.trim() !== '' && 
-        n.announceTime !== 'null' && 
-        n.announceTime !== 'undefined'
-      
+      const hasValidAnnounceTime = n.announceTime
+        && n.announceTime.trim() !== ''
+        && n.announceTime !== 'null'
+        && n.announceTime !== 'undefined'
+
       if (!hasValidAnnounceTime) return false
-      
+
       const announceTime = new Date(n.announceTime)
-      
+
       // بررسی معتبر بودن تاریخ parsed شده
       if (isNaN(announceTime.getTime())) {
         return false
       }
-      
-      const isScheduled = announceTime > now
-      
-      return isScheduled
-    })
 
-    return scheduled
+      return announceTime > now
+    })
   })
 
   // اعلانات قابل نمایش (فقط اعلاناتی که زمان‌شان رسیده)
   const visibleNotifications = computed(() => {
     const now = new Date()
-    const filtered = notifications.value.filter((n) => {
+    return notifications.value.filter((n) => {
       // بررسی وجود و اعتبار announce_time
-      const hasValidAnnounceTime = n.announceTime && 
-        n.announceTime.trim() !== '' && 
-        n.announceTime !== 'null' && 
-        n.announceTime !== 'undefined'
-      
+      const hasValidAnnounceTime = n.announceTime
+        && n.announceTime.trim() !== ''
+        && n.announceTime !== 'null'
+        && n.announceTime !== 'undefined'
+
       // اگر زمان اعلان تنظیم نشده یا نامعتبر است، همیشه نمایش داده شود
       if (!hasValidAnnounceTime) {
         return true
@@ -190,19 +186,15 @@ export function useNotifications() {
 
       // Parse announce time
       const announceTime = new Date(n.announceTime)
-      
+
       // بررسی معتبر بودن تاریخ parsed شده
       if (isNaN(announceTime.getTime())) {
         return true
       }
-      
-      const shouldShow = announceTime <= now
 
       // اگر زمان اعلان رسیده، نمایش داده شود
-      return shouldShow
+      return announceTime <= now
     })
-
-    return filtered
   })
 
   // بروزرسانی filteredNotifications برای استفاده از visibleNotifications
@@ -232,10 +224,10 @@ export function useNotifications() {
     try {
       // Check if permission is granted, if not request it immediately
       if (Notification.permission !== 'granted') {
-        console.log('PWA permission not granted, requesting now...')
+        
         const granted = await pwa.autoRequestPermission()
         if (!granted) {
-          console.warn('PWA notification permission denied, cannot show notification')
+          
           return
         }
       }
@@ -251,10 +243,10 @@ export function useNotifications() {
         tag: `notification-${notification.id}`,
       })
 
-      console.log('PWA notification shown successfully:', notification.title)
+      
     }
     catch (err) {
-      console.warn('Failed to show PWA notification:', err)
+      
     }
   }
 
@@ -292,7 +284,7 @@ export function useNotifications() {
 
             // Always trigger PWA notification for new notifications (even if read)
             // This ensures the user sees the notification immediately
-            console.log('Triggering PWA notification for new realtime notification:', transformedNotification.title)
+            
             await triggerPwaNotification(transformedNotification)
             break
 
@@ -411,14 +403,14 @@ export function useNotifications() {
       // Check for new notifications to trigger PWA notifications
       if (page === 1 && notifications.value.length > 0) {
         const newNotifications = transformedNotifications.filter(newNotif =>
-          !notifications.value.some(existing => existing.id === newNotif.id)
+          !notifications.value.some(existing => existing.id === newNotif.id),
         )
 
-        console.log('Found', newNotifications.length, 'new notifications to trigger PWA notifications')
+        
 
         // Trigger PWA notifications for all new notifications
         for (const newNotif of newNotifications) {
-          console.log('Triggering PWA notification for fetched notification:', newNotif.title)
+          
           await triggerPwaNotification(newNotif)
         }
       }
@@ -606,7 +598,7 @@ export function useNotifications() {
         notifications.value.unshift(transformedNotification)
 
         // Always trigger PWA notification for new notification
-        console.log('Triggering PWA notification for created notification:', transformedNotification.title)
+        
         await triggerPwaNotification(transformedNotification)
       }
 
@@ -805,13 +797,14 @@ export function useNotifications() {
             try {
               const granted = await pwa.autoRequestPermission()
               if (granted) {
-                console.log('PWA notifications enabled automatically')
-              } else {
-                console.log('PWA notifications not enabled - user may need to manually enable')
+                
+              }
+              else {
+                
               }
             }
             catch (err) {
-              console.warn('Failed to auto-request PWA permission:', err)
+              
             }
           }
         }

@@ -665,11 +665,11 @@ const filterOptions = [
                                 <Icon name="ph:calendar-check" class="size-3" />
                                 اعلان: {{ new Date(notification.announceTime).toLocaleString('fa-IR') }}
                               </span>
-                              
+
                               <!-- Show relative time if notification is scheduled for future -->
                               <span
                                 v-if="new Date(notification.announceTime) > new Date()"
-                                class="text-orange-600 dark:text-orange-400 flex items-center gap-1 text-xs font-medium"
+                                class="flex items-center gap-1 text-xs font-medium text-orange-600 dark:text-orange-400"
                               >
                                 <Icon name="ph:timer" class="size-3" />
                                 {{ getRelativeTimeToAnnounce(notification.announceTime) }}
@@ -739,11 +739,11 @@ const filterOptions = [
                                   <Icon name="ph:calendar-check" class="size-3" />
                                   اعلان: {{ new Date(notification.announceTime).toLocaleString('fa-IR') }}
                                 </span>
-                                
+
                                 <!-- Show relative time if notification is scheduled for future -->
                                 <span
                                   v-if="new Date(notification.announceTime) > new Date()"
-                                  class="text-orange-600 dark:text-orange-400 flex items-center gap-1 font-medium"
+                                  class="flex items-center gap-1 font-medium text-orange-600 dark:text-orange-400"
                                 >
                                   <Icon name="ph:timer" class="size-3" />
                                   {{ getRelativeTimeToAnnounce(notification.announceTime) }}

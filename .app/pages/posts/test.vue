@@ -10,27 +10,29 @@ const testResults = ref<any[]>([])
 
 const testPocketBase = async () => {
   console.log('🧪 Testing PocketBase connection...')
-  
+
   const results = []
-  
+
   // Test 1: Check PocketBase instance
   results.push({
     test: 'PocketBase Instance',
     result: !!pb,
-    details: pb ? 'Available' : 'Not Available'
+    details: pb ? 'Available' : 'Not Available',
   })
-  
+
   // Test 2: Check auth store
   results.push({
     test: 'Auth Store',
     result: !!pb.authStore,
-    details: pb.authStore ? {
-      isValid: pb.authStore.isValid,
-      model: pb.authStore.model ? 'User logged in' : 'No user',
-      token: pb.authStore.token ? 'Token present' : 'No token'
-    } : 'Not Available'
+    details: pb.authStore
+      ? {
+          isValid: pb.authStore.isValid,
+          model: pb.authStore.model ? 'User logged in' : 'No user',
+          token: pb.authStore.token ? 'Token present' : 'No token',
+        }
+      : 'Not Available',
   })
-  
+
   // Test 3: Check PocketBase collections
   try {
     console.log('📋 Checking available collections...')
@@ -40,17 +42,17 @@ const testPocketBase = async () => {
     results.push({
       test: 'Collections List',
       result: true,
-      details: collections?.items?.map((c: any) => c.name) || 'No collections found'
+      details: collections?.items?.map((c: any) => c.name) || 'No collections found',
     })
   }
   catch (err) {
     results.push({
       test: 'Collections List',
       result: false,
-      details: err
+      details: err,
     })
   }
-  
+
   // Test 4: Try to get posts collection info
   try {
     console.log('📝 Checking posts collection...')
@@ -60,17 +62,17 @@ const testPocketBase = async () => {
     results.push({
       test: 'Posts Collection Info',
       result: true,
-      details: postsCollection
+      details: postsCollection,
     })
   }
   catch (err) {
     results.push({
       test: 'Posts Collection Info',
       result: false,
-      details: err
+      details: err,
     })
   }
-  
+
   // Test 5: Try to get posts records
   try {
     console.log('📄 Checking posts records...')
@@ -85,30 +87,30 @@ const testPocketBase = async () => {
           id: item.id,
           title: item.title,
           status: item.status,
-          created: item.created
-        })) || []
-      }
+          created: item.created,
+        })) || [],
+      },
     })
   }
   catch (err) {
     results.push({
       test: 'Posts Records',
       result: false,
-      details: err
+      details: err,
     })
   }
-  
+
   // Test 6: Try usePosts composable
   try {
     console.log('🔧 Testing usePosts composable...')
     const { posts, loading, error, getPosts } = usePosts()
-    
+
     await getPosts({
       page: 1,
       perPage: 5,
-      filters: { status: 'published' }
+      filters: { status: 'published' },
     })
-    
+
     results.push({
       test: 'usePosts Composable',
       result: true,
@@ -119,19 +121,19 @@ const testPocketBase = async () => {
         posts: posts.value?.map((post: any) => ({
           id: post.id,
           title: post.title,
-          status: post.status
-        })) || []
-      }
+          status: post.status,
+        })) || [],
+      },
     })
   }
   catch (err) {
     results.push({
       test: 'usePosts Composable',
       result: false,
-      details: err
+      details: err,
     })
   }
-  
+
   testResults.value = results
   console.log('🧪 Test Results:', results)
 }
@@ -147,7 +149,7 @@ onMounted(() => {
       title="Test Posts Collection"
       subtitle="Testing PocketBase connection and posts collection"
     />
-    
+
     <div class="pb-20">
       <BaseCard class="p-6">
         <div class="mb-6">
@@ -158,23 +160,25 @@ onMounted(() => {
             Run Tests Again
           </BaseButton>
         </div>
-        
+
         <div class="space-y-4">
           <div
             v-for="result in testResults"
             :key="result.test"
-            class="border rounded-lg p-4"
+            class="rounded-lg border p-4"
             :class="result.result ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'"
           >
-            <div class="flex items-center gap-2 mb-2">
-              <Icon 
+            <div class="mb-2 flex items-center gap-2">
+              <Icon
                 :name="result.result ? 'ph:check-circle' : 'ph:warning-circle'"
                 :class="result.result ? 'text-green-600' : 'text-red-600'"
                 class="size-5"
               />
-              <h3 class="font-medium">{{ result.test }}</h3>
+              <h3 class="font-medium">
+                {{ result.test }}
+              </h3>
             </div>
-            
+
             <div class="text-sm text-gray-600">
               <pre class="whitespace-pre-wrap">{{ JSON.stringify(result.details, null, 2) }}</pre>
             </div>
@@ -183,4 +187,4 @@ onMounted(() => {
       </BaseCard>
     </div>
   </div>
-</template> 
+</template>
