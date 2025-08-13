@@ -1,0 +1,92 @@
+# DSM5 Disorder Structure Schema
+# Extracted from sample.json - Panic Disorder structure
+# [x] = Used in Vue component, [ ] = Not used
+
+# Root Level Properties
+[x] Prevalence: string                    # Prevalence information in Persian
+[x] code: string                         # DSM-5 diagnostic code (e.g., "300.02 (F41.0)")
+[ ] collectionId: string                 # Database collection identifier
+[ ] collectionName: string              # Collection name (e.g., "DSM5_disorders")
+[ ] created: string                      # ISO timestamp
+[x] description: string                  # Main disorder description in Persian
+[x] developmentAndCourse: string         # Development and course information
+[ ] id: string                          # Unique identifier
+[x] minimumCriteria: string             # Minimum diagnostic criteria
+[x] specialNote: string                 # Special notes and considerations
+[x] suicideRisk: string                 # Suicide risk assessment
+[x] title: string                       # Disorder title in Persian
+[x] titleEn: string                     # Disorder title in English
+[ ] updated: string                     # ISO timestamp
+
+# Associated Features (Array of objects)
+[x] associated_features:
+  [x] - category: string                 # Category name (e.g., "علائم جسمی", "علائم روانی")
+    [x] items: array[string]             # List of symptoms/features
+    # Additional nested properties used in Vue:
+    [x] supporting_symptoms: array[string]
+    [x] demographic_patterns:
+      [x] age_onset: string
+      [x] gender_distribution: string
+      [x] cultural_variations: string
+    [x] common_comorbidities: array[string]
+    [x] functional_impacts: array[string]
+    [x] developmental_course:
+      [x] typical_progression: string
+      [x] risk_factors: array[string]
+    [x] biological_findings: array[string]
+    [x] cognitive_emotional_patterns: array[object]
+    [x] cultural_manifestations: array[object]
+
+# Culture Related Diagnostic Issues (Array of objects)
+[x] cultureRelatedDiagnosticIssues:
+  [x] - aspect: string                   # Cultural aspect being addressed (e.g., "فرهنگ و مفهوم اضطراب")
+    [x] considerations: array[string]     # List of cultural considerations
+
+# Diagnosis Criteria (Array of objects)
+[x] diagnosisCriteria:
+  [x] - alphabet: string                 # Criteria label (A, B, C, D)
+    [x] description: string              # Criteria description
+    [x] subsets: array[object]           # Sub-criteria (optional)
+      [x] - number: string               # Subset number
+        [x] description: string          # Subset description
+
+# Diagnostic Features (Array of objects)
+[x] diagnosticFeatures:
+  [x] - title: string                    # Feature title
+    [x] description: string              # Feature description
+    # Additional nested properties used:
+    [x] differential_diagnostics: array[object]
+
+# Diagnostic Markers (Array of objects)
+[x] diagnosticMarkers:
+  [x] - category: string                 # Marker category
+    [x] markers: array[string]           # List of diagnostic markers
+
+# Differential Diagnosis (Array of objects)
+[x] differentialDiagnosis:
+  [x] - disorder: string                 # Disorder name in Persian
+    [x] disorderEn: string              # Disorder name in English
+    [x] code: string                    # Diagnostic code
+    [x] differentiatingFeatures: array[string]  # Distinguishing features
+
+# Gender Related Diagnostic Issues (Array of objects)
+[x] genderRelatedDiagnosticIssues:
+  [x] - aspect: string                   # Gender-related aspect
+    [x] considerations: array[string]     # Gender-specific considerations
+
+# Risk and Prognostic Factors (Array of objects)
+[x] riskAndPrognosticFactors:
+  [x] - category: string                 # Factor category (e.g., "عوامل خطر")
+    [x] factors: array[string]           # List of risk/prognostic factors
+
+# Specifiers (Array of objects)
+[x] specifiers:
+  [x] - title: string                    # Specifier title
+    [x] conditions: array[string]        # Conditions for the specifier
+
+# Additional properties referenced in Vue but not in sample.json:
+[x] titleFa: string                     # Alternative Persian title
+[x] icon: string                        # Icon identifier
+[x] ageOfOnset: string                  # Age of onset
+[x] prognosis: string                   # Prognosis information
+[x] prevalence: string                  # Alternative prevalence field

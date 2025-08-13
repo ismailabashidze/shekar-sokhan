@@ -336,16 +336,31 @@
                   </div>
                 </div>
 
-                <!-- Action Button -->
-                <div class="text-center pt-4">
-                  <button
-                    @click="handleDisorderClick(disorder)"
-                    class="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                  >
-                    <Icon name="ph:info" class="size-5" />
-                    <span>مطالعه تخصصی کامل</span>
-                    <Icon name="ph:arrow-left" class="size-4" />
-                  </button>
+                <!-- Action Buttons -->
+                <div class="text-center pt-4 space-y-4">
+                  <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button
+                      @click="handleDisorderClick(disorder)"
+                      class="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                    >
+                      <Icon name="ph:info" class="size-5" />
+                      <span>مطالعه تخصصی کامل</span>
+                      <Icon name="ph:arrow-left" class="size-4" />
+                    </button>
+                    
+                    <button
+                      @click="handleInterviewClick(disorder)"
+                      class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                    >
+                      <Icon name="ph:user-focus" class="size-5" />
+                      <span>مصاحبه تشخیصی</span>
+                      <Icon name="ph:arrow-left" class="size-4" />
+                    </button>
+                  </div>
+                  
+                  <p class="text-xs text-muted-500 dark:text-muted-400">
+                    برای مطالعه کامل اختلال یا شروع مصاحبه تشخیصی گام به گام
+                  </p>
                 </div>
               </div>
             </div>
@@ -437,36 +452,54 @@ onMounted(async () => {
   }
 })
 
-// Navigation helper
+// Helper function to create slug from text
+const createSlug = (text: string) => {
+  return text?.toLowerCase()
+    .trim()
+    .replace(/[\u0600-\u06FF\s]+/g, '-') // Replace Persian/Arabic chars and spaces with hyphens
+    .replace(/[^\w\-]/g, '') // Remove non-word chars except hyphens  
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+}
+
+// Get disorder slug
+const getDisorderSlug = (disorder: any) => {
+  return disorder.slug || 
+         createSlug(disorder.titleEn) ||
+         createSlug(disorder.title) ||
+         createSlug(disorder.titleFa) ||
+         disorder.id ||
+         createSlug(disorder.code) ||
+         'unknown-disorder'
+}
+
+// Navigation helper for disorder details
 const handleDisorderClick = (disorder: any) => {
   const router = useRouter()
   
   console.log('🔍 Full disorder data:', disorder)
   console.log('🔍 Available keys:', Object.keys(disorder))
   
-  // Helper function to create slug from text
-  const createSlug = (text: string) => {
-    return text?.toLowerCase()
-      .trim()
-      .replace(/[\u0600-\u06FF\s]+/g, '-') // Replace Persian/Arabic chars and spaces with hyphens
-      .replace(/[^\w\-]/g, '') // Remove non-word chars except hyphens  
-      .replace(/-+/g, '-') // Replace multiple hyphens with single
-      .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-  }
-  
-  // Try multiple potential slug sources
-  let disorderSlug = disorder.slug || 
-                    createSlug(disorder.titleEn) ||
-                    createSlug(disorder.title) ||
-                    createSlug(disorder.titleFa) ||
-                    disorder.id ||
-                    createSlug(disorder.code) ||
-                    'unknown-disorder'
+  const disorderSlug = getDisorderSlug(disorder)
   
   console.log('🚀 Generated slug:', disorderSlug)
   console.log('🚀 Navigating to:', `/diagnosis/disorders/${disorderSlug}`)
   
   router.push(`/diagnosis/disorders/${disorderSlug}`)
+}
+
+// Navigation helper for interview
+const handleInterviewClick = (disorder: any) => {
+  const router = useRouter()
+  
+  console.log('🎯 Starting interview for disorder:', disorder.title || disorder.titleFa)
+  
+  const disorderSlug = getDisorderSlug(disorder)
+  
+  console.log('🚀 Generated slug for interview:', disorderSlug)
+  console.log('🚀 Navigating to interview:', `/diagnosis/interviewer/${disorderSlug}`)
+  
+  router.push(`/diagnosis/interviewer/${disorderSlug}`)
 }
 
 // Description toggle helper

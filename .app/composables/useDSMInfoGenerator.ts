@@ -1847,11 +1847,11 @@ export const useDSMInfoGenerator = () => {
         suicideRisk: disorderRecord.suicideRisk,
         diagnosisCriteria: safeJSONParse(disorderRecord.diagnosisCriteria, []),
         specifiers: safeJSONParse(disorderRecord.specifiers, []),
-        diagnosticFeatures: transformDiagnosticFeatures(rawDiagnosticFeatures, rawAssociatedFeatures),
+        diagnosticFeatures: rawDiagnosticFeatures,
         associated_features: rawAssociatedFeatures,
         diagnosticMarkers: transformDiagnosticMarkers(rawDiagnosticMarkers),
         differentialDiagnosis: safeJSONParse(disorderRecord.differentialDiagnosis, []),
-        riskAndPrognosticFactors: safeJSONParse(disorderRecord.riskAndPrognosticFactors, {}),
+        riskAndPrognosticFactors: safeJSONParse(disorderRecord.riskAndPrognosticFactors, []),
         cultureRelatedDiagnosticIssues: safeJSONParse(disorderRecord.cultureRelatedDiagnosticIssues, []),
         genderRelatedDiagnosticIssues: safeJSONParse(disorderRecord.genderRelatedDiagnosticIssues, [])
       }
