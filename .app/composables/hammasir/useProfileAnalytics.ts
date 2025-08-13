@@ -352,8 +352,204 @@ export const useProfileAnalytics = () => {
     return 'medium'
   }
 
+  // Generate mock data based on test mode
+  const generateMockProfile = (testMode: string) => {
+    const baseProfile = {
+      personalInfo: {
+        firstName: 'علی',
+        lastName: 'احمدی',
+        email: '',
+        phoneNumber: '',
+        dateOfBirth: '',
+        gender: ''
+      },
+      demographics: {
+        education: [],
+        occupation: [],
+        location: []
+      },
+      preferences: {
+        communication: {
+          email: false,
+          sms: false
+        }
+      },
+      privacySettings: {
+        isProfileVisibleToCounselors: false,
+        isProfileVisibleToOtherUsers: false,
+        allowDataAnalysisForMatching: false
+      },
+      status: 'PENDING_VERIFICATION',
+      createdAt: '2024-01-15T10:00:00Z',
+      updatedAt: '2024-01-15T10:00:00Z'
+    }
+
+    switch (testMode) {
+      case 'fresh-start':
+        // Only basic name info
+        return baseProfile
+
+      case 'partially-1':
+        // Personal info partially filled
+        return {
+          ...baseProfile,
+          personalInfo: {
+            ...baseProfile.personalInfo,
+            email: 'ali@example.com',
+            phoneNumber: '09123456789'
+          }
+        }
+
+      case 'partially-2':
+        // Personal info complete, some demographics
+        return {
+          ...baseProfile,
+          personalInfo: {
+            ...baseProfile.personalInfo,
+            email: 'ali@example.com',
+            phoneNumber: '09123456789',
+            dateOfBirth: '1990-05-15',
+            gender: 'MALE'
+          },
+          demographics: {
+            ...baseProfile.demographics,
+            education: [{
+              id: '1',
+              institutionName: 'دانشگاه تهران',
+              degree: 'کارشناسی ارشد',
+              fieldOfStudy: 'مهندسی کامپیوتر',
+              educationLevel: 'MASTER',
+              startDate: '01-09-2010',
+              endDate: '30-06-2012',
+              isCurrent: false,
+              isGraduated: true
+            }]
+          },
+          preferences: {
+            communication: {
+              email: true,
+              sms: false
+            }
+          }
+        }
+
+      case 'mostly-done':
+        // Most sections complete
+        return {
+          ...baseProfile,
+          personalInfo: {
+            ...baseProfile.personalInfo,
+            email: 'ali@example.com',
+            phoneNumber: '09123456789',
+            dateOfBirth: '1990-05-15',
+            gender: 'MALE'
+          },
+          demographics: {
+            education: [{
+              id: '1',
+              institutionName: 'دانشگاه تهران',
+              degree: 'کارشناسی ارشد',
+              fieldOfStudy: 'مهندسی کامپیوتر',
+              educationLevel: 'MASTER',
+              startDate: '01-09-2010',
+              endDate: '30-06-2012',
+              isCurrent: false,
+              isGraduated: true
+            }],
+            occupation: [{
+              id: '1',
+              currentPosition: 'توسعه‌دهنده نرم‌افزار',
+              companyName: 'شرکت فناوری پارس',
+              industry: 'فناوری اطلاعات',
+              employmentType: 'FULL_TIME',
+              startDate: '01-01-2020',
+              isCurrentJob: true
+            }],
+            location: [{
+              id: '1',
+              city: 'تهران',
+              state: 'تهران',
+              country: 'ایران',
+              isCurrent: true
+            }]
+          },
+          preferences: {
+            communication: {
+              email: true,
+              sms: false
+            }
+          },
+          privacySettings: {
+            isProfileVisibleToCounselors: true,
+            isProfileVisibleToOtherUsers: false,
+            allowDataAnalysisForMatching: true
+          },
+          status: 'UNDER_REVIEW'
+        }
+
+      case 'done':
+        // Everything complete
+        return {
+          ...baseProfile,
+          personalInfo: {
+            ...baseProfile.personalInfo,
+            email: 'ali@example.com',
+            phoneNumber: '09123456789',
+            dateOfBirth: '1990-05-15',
+            gender: 'MALE',
+            profilePicture: '/avatar-placeholder.jpg'
+          },
+          demographics: {
+            education: [{
+              id: '1',
+              institutionName: 'دانشگاه تهران',
+              degree: 'کارشناسی ارشد',
+              fieldOfStudy: 'مهندسی کامپیوتر',
+              educationLevel: 'MASTER',
+              startDate: '01-09-2010',
+              endDate: '30-06-2012',
+              isCurrent: false,
+              isGraduated: true
+            }],
+            occupation: [{
+              id: '1',
+              currentPosition: 'توسعه‌دهنده نرم‌افزار',
+              companyName: 'شرکت فناوری پارس',
+              industry: 'فناوری اطلاعات',
+              employmentType: 'FULL_TIME',
+              startDate: '01-01-2020',
+              isCurrentJob: true
+            }],
+            location: [{
+              id: '1',
+              city: 'تهران',
+              state: 'تهران',
+              country: 'ایران',
+              isCurrent: true
+            }]
+          },
+          preferences: {
+            communication: {
+              email: true,
+              sms: true
+            }
+          },
+          privacySettings: {
+            isProfileVisibleToCounselors: true,
+            isProfileVisibleToOtherUsers: true,
+            allowDataAnalysisForMatching: true
+          },
+          status: 'VERIFIED',
+          updatedAt: '2024-08-13T12:00:00Z'
+        }
+
+      default:
+        return baseProfile
+    }
+  }
+
   // Data loading
-  const loadAnalytics = async (userId?: string): Promise<void> => {
+  const loadAnalytics = async (testMode: string = 'partially-1'): Promise<void> => {
     state.loading = true
     state.error = null
 
@@ -362,29 +558,16 @@ export const useProfileAnalytics = () => {
       // const profileService = getMyProfile()
       // const profile = profileService.profile.value
       
-      // MOCK DATA - TEMPORARY
-      const profile = {
-        personalInfo: {
-          firstName: 'علی',
-          lastName: 'احمدی',
-          email: 'ali@example.com',
-          phoneNumber: '09123456789',
-          dateOfBirth: '1990-05-15',
-          gender: 'MALE'
-        },
-        demographics: {
-          education: [{ institutionName: 'دانشگاه تهران', degree: 'کارشناسی ارشد' }],
-          occupation: [{ currentPosition: 'توسعه‌دهنده', companyName: 'شرکت فناوری' }],
-          location: [{ city: 'تهران', country: 'ایران' }]
-        },
-        status: 'VERIFIED'
-      }
+      // MOCK DATA - GENERATE BASED ON TEST MODE
+      const profile = generateMockProfile(testMode)
       
       if (profile) {
         // Analyze completion status - create simplified structure for pages
         const personalInfoPercentage = calculatePersonalInfoProgress(profile.personalInfo)
-        const educationPercentage = profile.demographics.education?.length > 0 ? 80 : 0
-        const occupationPercentage = profile.demographics.occupation?.length > 0 ? 80 : 0
+        const educationPercentage = profile.demographics.education?.length > 0 ? 
+          (profile.demographics.education[0].institutionName && profile.demographics.education[0].degree ? 100 : 60) : 0
+        const occupationPercentage = profile.demographics.occupation?.length > 0 ? 
+          (profile.demographics.occupation[0].currentPosition && profile.demographics.occupation[0].companyName ? 100 : 60) : 0
         const locationPercentage = profile.demographics.location?.length > 0 ? 100 : 0
         const preferencesPercentage = 100 // Always consider complete
 
@@ -402,11 +585,14 @@ export const useProfileAnalytics = () => {
           preferences: { percentage: preferencesPercentage, isRequired: true }
         }
 
-        // Create analytics for pages
+        // Create analytics for pages with varying data based on profile completeness
+        const verificationBonus = profile.status === 'VERIFIED' ? 15 : 
+                                 profile.status === 'UNDER_REVIEW' ? 8 : 0
+        
         state.analytics = {
           overallScore: overallPercentage / 100,
           completionLevel: overallPercentage,
-          matchingPotential: Math.min(100, overallPercentage + (profile.status === 'VERIFIED' ? 15 : 0)),
+          matchingPotential: Math.min(100, overallPercentage + verificationBonus),
           sectionsAnalyzed: [personalInfoPercentage, educationPercentage, occupationPercentage, locationPercentage].filter(p => p > 0).length,
           recommendationsCount: [personalInfoPercentage, educationPercentage, occupationPercentage].filter(p => p < 100).length,
           dataQualityScore: calculateDataQuality(profile),
@@ -475,8 +661,8 @@ export const useProfileAnalytics = () => {
     }
   }
 
-  const refreshAnalytics = async (): Promise<void> => {
-    await loadAnalytics()
+  const refreshAnalytics = async (testMode: string = 'partially-1'): Promise<void> => {
+    await loadAnalytics(testMode)
   }
 
   // Progress tracking
@@ -534,5 +720,6 @@ export const useProfileAnalytics = () => {
     getSectionProgress,
     isSectionLocked,
     getSectionLockReason,
+    generateMockProfile,
   }
 }

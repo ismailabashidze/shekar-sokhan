@@ -17,19 +17,229 @@ const { profile, loading: profileLoading, error: profileError, refresh: refreshP
 const { state: analyticsState, loadAnalytics } = useProfileAnalytics()
 const { state: formState } = useProfileForm(profile.value)
 
+// Mock profile data for testing
+const mockProfile = ref(null)
+
+// Generate mock data based on test mode
+const generateMockProfile = (testMode: string) => {
+  const baseProfile = {
+    personalInfo: {
+      firstName: 'علی',
+      lastName: 'احمدی',
+      email: '',
+      phoneNumber: '',
+      dateOfBirth: '',
+      gender: ''
+    },
+    demographics: {
+      education: [],
+      occupation: [],
+      location: []
+    },
+    preferences: {
+      communication: {
+        email: false,
+        sms: false
+      }
+    },
+    privacySettings: {
+      isProfileVisibleToCounselors: false,
+      isProfileVisibleToOtherUsers: false,
+      allowDataAnalysisForMatching: false
+    },
+    status: 'PENDING_VERIFICATION',
+    createdAt: '2024-01-15T10:00:00Z',
+    updatedAt: '2024-01-15T10:00:00Z'
+  }
+
+  switch (testMode) {
+    case 'fresh-start':
+      return baseProfile
+
+    case 'partially-1':
+      return {
+        ...baseProfile,
+        personalInfo: {
+          ...baseProfile.personalInfo,
+          email: 'ali@example.com',
+          phoneNumber: '09123456789'
+        }
+      }
+
+    case 'partially-2':
+      return {
+        ...baseProfile,
+        personalInfo: {
+          ...baseProfile.personalInfo,
+          email: 'ali@example.com',
+          phoneNumber: '09123456789',
+          dateOfBirth: '1990-05-15',
+          gender: 'MALE'
+        },
+        demographics: {
+          ...baseProfile.demographics,
+          education: [{
+            id: '1',
+            institutionName: 'دانشگاه تهران',
+            degree: 'کارشناسی ارشد',
+            fieldOfStudy: 'مهندسی کامپیوتر',
+            educationLevel: 'MASTER',
+            startDate: '01-09-2010',
+            endDate: '30-06-2012',
+            isCurrent: false,
+            isGraduated: true
+          }]
+        },
+        preferences: {
+          communication: {
+            email: true,
+            sms: false
+          }
+        }
+      }
+
+    case 'mostly-done':
+      return {
+        ...baseProfile,
+        personalInfo: {
+          ...baseProfile.personalInfo,
+          email: 'ali@example.com',
+          phoneNumber: '09123456789',
+          dateOfBirth: '1990-05-15',
+          gender: 'MALE'
+        },
+        demographics: {
+          education: [{
+            id: '1',
+            institutionName: 'دانشگاه تهران',
+            degree: 'کارشناسی ارشد',
+            fieldOfStudy: 'مهندسی کامپیوتر',
+            educationLevel: 'MASTER',
+            startDate: '01-09-2010',
+            endDate: '30-06-2012',
+            isCurrent: false,
+            isGraduated: true
+          }],
+          occupation: [{
+            id: '1',
+            currentPosition: 'توسعه‌دهنده نرم‌افزار',
+            companyName: 'شرکت فناوری پارس',
+            industry: 'فناوری اطلاعات',
+            employmentType: 'FULL_TIME',
+            startDate: '01-01-2020',
+            isCurrentJob: true
+          }],
+          location: [{
+            id: '1',
+            city: 'تهران',
+            state: 'تهران',
+            country: 'ایران',
+            isCurrent: true
+          }]
+        },
+        preferences: {
+          communication: {
+            email: true,
+            sms: false
+          }
+        },
+        privacySettings: {
+          isProfileVisibleToCounselors: true,
+          isProfileVisibleToOtherUsers: false,
+          allowDataAnalysisForMatching: true
+        },
+        status: 'UNDER_REVIEW'
+      }
+
+    case 'done':
+      return {
+        ...baseProfile,
+        personalInfo: {
+          ...baseProfile.personalInfo,
+          email: 'ali@example.com',
+          phoneNumber: '09123456789',
+          dateOfBirth: '1990-05-15',
+          gender: 'MALE',
+          profilePicture: '/avatar-placeholder.jpg'
+        },
+        demographics: {
+          education: [{
+            id: '1',
+            institutionName: 'دانشگاه تهران',
+            degree: 'کارشناسی ارشد',
+            fieldOfStudy: 'مهندسی کامپیوتر',
+            educationLevel: 'MASTER',
+            startDate: '01-09-2010',
+            endDate: '30-06-2012',
+            isCurrent: false,
+            isGraduated: true
+          }],
+          occupation: [{
+            id: '1',
+            currentPosition: 'توسعه‌دهنده نرم‌افزار',
+            companyName: 'شرکت فناوری پارس',
+            industry: 'فناوری اطلاعات',
+            employmentType: 'FULL_TIME',
+            startDate: '01-01-2020',
+            isCurrentJob: true
+          }],
+          location: [{
+            id: '1',
+            city: 'تهران',
+            state: 'تهران',
+            country: 'ایران',
+            isCurrent: true
+          }]
+        },
+        preferences: {
+          communication: {
+            email: true,
+            sms: true
+          }
+        },
+        privacySettings: {
+          isProfileVisibleToCounselors: true,
+          isProfileVisibleToOtherUsers: true,
+          allowDataAnalysisForMatching: true
+        },
+        status: 'VERIFIED',
+        updatedAt: '2024-08-13T12:00:00Z'
+      }
+
+    default:
+      return baseProfile
+  }
+}
+
 // Reactive state
 const viewMode = ref<'overview' | 'sections' | 'progress'>('overview')
 const sectionLayout = ref<'accordion' | 'tabs' | 'grid'>('accordion')
 const refreshing = ref(false)
 
+// Test data dropdown
+const testDataMode = ref<'fresh-start' | 'partially-1' | 'partially-2' | 'mostly-done' | 'done'>('partially-1')
+
 // Load analytics data
 onMounted(async () => {
   console.log('Page mounted, profile:', profile.value ? 'available' : 'missing')
-  if (profile.value) {
-    console.log('Loading analytics...')
-    await loadAnalytics()
-    console.log('Analytics loaded:', analyticsState.completionStatus ? 'success' : 'failed')
-  }
+  // Initialize with mock data
+  mockProfile.value = generateMockProfile(testDataMode.value)
+  console.log('Loading analytics...')
+  await loadAnalytics(testDataMode.value)
+  console.log('Analytics loaded:', analyticsState.completionStatus ? 'success' : 'failed')
+})
+
+// Watch test data mode changes
+watch(testDataMode, async (newMode) => {
+  console.log('Test data mode changed to:', newMode)
+  // Update mock profile data
+  mockProfile.value = generateMockProfile(newMode)
+  await loadAnalytics(newMode)
+})
+
+// Computed profile that uses mock data in test mode
+const currentProfile = computed(() => {
+  return mockProfile.value || profile.value
 })
 
 // Handle refresh
@@ -38,7 +248,7 @@ const handleRefresh = async () => {
   try {
     await Promise.all([
       refreshProfile(),
-      loadAnalytics()
+      loadAnalytics(testDataMode.value)
     ])
   } finally {
     refreshing.value = false
@@ -149,7 +359,7 @@ watch(profile, async (newProfile) => {
   console.log('Profile changed:', newProfile ? 'available' : 'missing')
   if (newProfile) {
     console.log('Loading analytics from watcher...')
-    await loadAnalytics()
+    await loadAnalytics(testDataMode.value)
     console.log('Analytics loaded from watcher:', analyticsState.completionStatus ? 'success' : 'failed')
   }
 })
@@ -249,11 +459,11 @@ useHead({
     </div>
 
     <!-- Main Content -->
-    <div v-else-if="profile" class="container mx-auto px-4 py-8">
+    <div v-else-if="currentProfile" class="container mx-auto px-4 py-8">
       <div class="max-w-6xl mx-auto space-y-8 animate-fade-in">
         <!-- Profile Header -->
         <HammasirProfileProfileHeader
-          :profile="profile"
+          :profile="currentProfile"
           :completion-status="analyticsState.completionStatus"
           variant="hero"
           :loading="refreshing"
@@ -324,6 +534,21 @@ useHead({
 
             <!-- Quick Actions -->
             <div class="flex items-center gap-3">
+              <!-- Test Data Dropdown -->
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">آزمایش داده:</span>
+                <select
+                  v-model="testDataMode"
+                  class="text-sm border-0 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-xl px-4 py-2 shadow-inner focus:ring-2 focus:ring-yellow-500 transition-all duration-200 min-w-[160px] border border-yellow-200/50 dark:border-yellow-700/50"
+                >
+                  <option value="fresh-start">🆕 شروع جدید</option>
+                  <option value="partially-1">📝 نیمه‌کامل ۱</option>
+                  <option value="partially-2">📋 نیمه‌کامل ۲</option>
+                  <option value="mostly-done">✅ تقریباً تمام</option>
+                  <option value="done">🎉 کامل</option>
+                </select>
+              </div>
+              
               <BaseButton
                 variant="outline"
                 size="sm"
@@ -345,7 +570,7 @@ useHead({
             <!-- Overview Mode -->
             <div v-if="viewMode === 'overview'">
               <HammasirDisplayProfileDisplay
-                :profile="profile"
+                :profile="currentProfile"
                 :show-actions="true"
                 :show-progress="true"
                 @edit="navigateToEdit"
@@ -358,14 +583,14 @@ useHead({
             <div v-else-if="viewMode === 'sections'">
               <!-- Debug info -->
               <div v-if="false" class="mb-4 p-4 bg-yellow-100 rounded">
-                <div>Profile: {{ profile ? 'Available' : 'Missing' }}</div>
+                <div>Profile: {{ currentProfile ? 'Available' : 'Missing' }}</div>
                 <div>Completion Status: {{ analyticsState.completionStatus ? 'Available' : 'Missing' }}</div>
                 <div>Analytics State: {{ analyticsState ? 'Available' : 'Missing' }}</div>
               </div>
               
               <HammasirProfileProfileSections
-                v-if="profile"
-                :profile="profile"
+                v-if="currentProfile"
+                :profile="currentProfile"
                 :completion-status="analyticsState.completionStatus"
                 :layout="sectionLayout"
                 :show-progress="true"
@@ -404,7 +629,7 @@ useHead({
 
             <!-- Profile Actions -->
             <HammasirProfileProfileActions
-              :profile="profile"
+              :profile="currentProfile"
               :completion-status="analyticsState.completionStatus"
               layout="vertical"
               variant="card"

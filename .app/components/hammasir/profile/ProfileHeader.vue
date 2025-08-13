@@ -246,47 +246,66 @@ const getCompletionDescription = (percentage: number) => {
                 </BaseHeading>
                 
                 <!-- Contact Information -->
-                <div class="flex flex-wrap items-center gap-4 text-white/90 text-sm mb-4">
-                  <div v-if="profile.personalInfo.email" class="flex items-center">
-                    <Icon name="ph:envelope" class="w-4 h-4 me-1" />
-                    <span>{{ profile.personalInfo.email }}</span>
+                <div class="flex flex-wrap items-center gap-6 text-white/90 text-sm mb-6">
+                  <div v-if="profile.personalInfo.email" class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-full border border-white/20">
+                    <div class="w-6 h-6 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full flex items-center justify-center">
+                      <Icon name="ph:envelope-simple" class="w-3 h-3 text-white" />
+                    </div>
+                    <span class="text-xs font-medium">{{ profile.personalInfo.email }}</span>
                   </div>
-                  <div v-if="profile.personalInfo.phoneNumber" class="flex items-center">
-                    <Icon name="ph:phone" class="w-4 h-4 me-1" />
-                    <span>{{ profile.personalInfo.phoneNumber }}</span>
+                  <div v-if="profile.personalInfo.phoneNumber" class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-full border border-white/20">
+                    <div class="w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
+                      <Icon name="ph:phone-call" class="w-3 h-3 text-white" />
+                    </div>
+                    <span class="text-xs font-medium">{{ profile.personalInfo.phoneNumber }}</span>
                   </div>
-                  <div class="flex items-center">
-                    <Icon name="ph:calendar" class="w-4 h-4 me-1" />
-                    <span>عضو از {{ formatLastUpdated(profile.createdAt) }}</span>
+                  <div class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-full border border-white/20">
+                    <div class="w-6 h-6 bg-gradient-to-br from-purple-400 to-violet-500 rounded-full flex items-center justify-center">
+                      <Icon name="ph:calendar-check" class="w-3 h-3 text-white" />
+                    </div>
+                    <span class="text-xs font-medium">عضو از {{ formatLastUpdated(profile.createdAt) }}</span>
                   </div>
                 </div>
 
                 <!-- Status and Last Updated -->
-                <div class="flex flex-wrap items-center gap-4 mb-4">
-                  <HammasirCommonStatusBadge
-                    :status="verificationStatus"
-                    size="sm"
-                    class="bg-white/20 border-white/30"
-                  />
-                  <div class="text-white/80 text-sm flex items-center">
-                    <Icon name="ph:clock" class="w-4 h-4 me-1" />
-                    <span>آخرین بروزرسانی: {{ formatLastUpdated(profile.updatedAt) }}</span>
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                  <div class="flex items-center gap-3">
+                    <HammasirCommonStatusBadge
+                      :status="verificationStatus"
+                      size="sm"
+                      class="bg-white/20 border-white/30 shadow-lg"
+                    />
+                    <div class="flex items-center gap-2 text-white/80 text-sm bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
+                      <div class="w-5 h-5 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center">
+                        <Icon name="ph:clock-clockwise" class="w-3 h-3 text-white" />
+                      </div>
+                      <span class="text-xs font-medium">بروزرسانی: {{ formatLastUpdated(profile.updatedAt) }}</span>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Quick Stats -->
+                <!-- Enhanced Quick Stats -->
                 <div class="grid grid-cols-3 gap-4">
-                  <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center border border-white/20">
-                    <div class="text-lg font-bold text-white">{{ profile.demographics.education?.length || 0 }}</div>
-                    <div class="text-xs text-white/80">تحصیلات</div>
+                  <div class="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-xl p-4 text-center border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full mx-auto mb-2 flex items-center justify-center shadow-md">
+                      <Icon name="ph:graduation-cap" class="w-5 h-5 text-white" />
+                    </div>
+                    <div class="text-xl font-bold text-white mb-1">{{ profile.demographics.education?.length || 0 }}</div>
+                    <div class="text-xs text-white/90 font-medium">تحصیلات</div>
                   </div>
-                  <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center border border-white/20">
-                    <div class="text-lg font-bold text-white">{{ profile.demographics.occupation?.length || 0 }}</div>
-                    <div class="text-xs text-white/80">شغل</div>
+                  <div class="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-xl p-4 text-center border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full mx-auto mb-2 flex items-center justify-center shadow-md">
+                      <Icon name="ph:briefcase" class="w-5 h-5 text-white" />
+                    </div>
+                    <div class="text-xl font-bold text-white mb-1">{{ profile.demographics.occupation?.length || 0 }}</div>
+                    <div class="text-xs text-white/90 font-medium">شغل</div>
                   </div>
-                  <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center border border-white/20">
-                    <div class="text-lg font-bold text-white">{{ profile.demographics.location?.length || 0 }}</div>
-                    <div class="text-xs text-white/80">مکان</div>
+                  <div class="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm rounded-xl p-4 text-center border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <div class="w-10 h-10 bg-gradient-to-br from-red-400 to-pink-500 rounded-full mx-auto mb-2 flex items-center justify-center shadow-md">
+                      <Icon name="ph:map-pin" class="w-5 h-5 text-white" />
+                    </div>
+                    <div class="text-xl font-bold text-white mb-1">{{ profile.demographics.location?.length || 0 }}</div>
+                    <div class="text-xs text-white/90 font-medium">مکان</div>
                   </div>
                 </div>
               </div>
@@ -295,38 +314,53 @@ const getCompletionDescription = (percentage: number) => {
 
           <!-- Progress & Actions Sidebar -->
           <div class="flex-shrink-0">
-            <!-- Progress Circle -->
-            <div v-if="showProgress" class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 mb-6">
+            <!-- Enhanced Progress Circle -->
+            <div v-if="showProgress" class="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/30 mb-6 shadow-xl">
               <div class="text-center">
-                <BaseParagraph class="text-white/80 mb-3">تکمیل پروفایل</BaseParagraph>
-                <div class="relative w-20 h-20 mx-auto mb-3">
-                  <svg class="w-20 h-20 transform -rotate-90">
+                <div class="flex items-center justify-center gap-2 mb-4">
+                  <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-md">
+                    <Icon name="ph:chart-pie-slice" class="w-3 h-3 text-white" />
+                  </div>
+                  <BaseParagraph class="text-white font-semibold">تکمیل پروفایل</BaseParagraph>
+                </div>
+                <div class="relative w-24 h-24 mx-auto mb-4">
+                  <!-- Background Circle -->
+                  <svg class="w-24 h-24 transform -rotate-90">
                     <circle
-                      cx="40"
-                      cy="40"
-                      r="35"
+                      cx="48"
+                      cy="48"
+                      r="40"
                       stroke="rgba(255,255,255,0.2)"
-                      stroke-width="6"
+                      stroke-width="8"
                       fill="transparent"
                     />
+                    <!-- Progress Circle -->
                     <circle
-                      cx="40"
-                      cy="40"
-                      r="35"
-                      stroke="white"
-                      stroke-width="6"
+                      cx="48"
+                      cy="48"
+                      r="40"
+                      stroke="url(#progressGradient)"
+                      stroke-width="8"
                       fill="transparent"
                       stroke-linecap="round"
-                      :stroke-dasharray="220"
-                      :stroke-dashoffset="220 - (220 * completionPercentage) / 100"
-                      class="transition-all duration-500"
+                      :stroke-dasharray="251"
+                      :stroke-dashoffset="251 - (251 * completionPercentage) / 100"
+                      class="transition-all duration-1000 ease-out"
                     />
+                    <!-- Gradient Definition -->
+                    <defs>
+                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#22d3ee" />
+                        <stop offset="50%" stop-color="#3b82f6" />
+                        <stop offset="100%" stop-color="#8b5cf6" />
+                      </linearGradient>
+                    </defs>
                   </svg>
-                  <div class="absolute inset-0 flex items-center justify-center">
-                    <span class="text-xl font-bold text-white">{{ completionPercentage }}%</span>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-2xl font-bold text-white drop-shadow-md">{{ completionPercentage }}%</span>
                   </div>
                 </div>
-                <div class="text-xs text-white/80">{{ getCompletionDescription(completionPercentage) }}</div>
+                <div class="text-sm text-white/90 font-medium bg-white/20 rounded-full px-3 py-1">{{ getCompletionDescription(completionPercentage) }}</div>
               </div>
             </div>
 

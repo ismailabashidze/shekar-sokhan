@@ -117,14 +117,14 @@ const iconSizes = {
   lg: 'w-5 h-5'
 }
 
-// Variant classes
+// Enhanced Variant classes with gradients and shadows
 const variantClasses = {
-  default: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200',
-  success: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
-  warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200',
-  error: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200',
-  info: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200',
-  gray: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+  default: 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 dark:from-blue-900/40 dark:to-blue-800/40 dark:text-blue-200 border border-blue-200/50 dark:border-blue-700/50 shadow-sm',
+  success: 'bg-gradient-to-r from-green-100 to-emerald-200 text-green-800 dark:from-green-900/40 dark:to-emerald-800/40 dark:text-green-200 border border-green-200/50 dark:border-green-700/50 shadow-sm shadow-green-100/50 dark:shadow-green-900/20',
+  warning: 'bg-gradient-to-r from-yellow-100 to-orange-200 text-orange-800 dark:from-yellow-900/40 dark:to-orange-800/40 dark:text-yellow-200 border border-orange-200/50 dark:border-orange-700/50 shadow-sm shadow-orange-100/50 dark:shadow-orange-900/20',
+  error: 'bg-gradient-to-r from-red-100 to-rose-200 text-red-800 dark:from-red-900/40 dark:to-rose-800/40 dark:text-red-200 border border-red-200/50 dark:border-red-700/50 shadow-sm shadow-red-100/50 dark:shadow-red-900/20',
+  info: 'bg-gradient-to-r from-indigo-100 to-purple-200 text-indigo-800 dark:from-indigo-900/40 dark:to-purple-800/40 dark:text-indigo-200 border border-indigo-200/50 dark:border-indigo-700/50 shadow-sm shadow-indigo-100/50 dark:shadow-indigo-900/20',
+  gray: 'bg-gradient-to-r from-gray-100 to-slate-200 text-gray-800 dark:from-gray-700/80 dark:to-slate-700/80 dark:text-gray-200 border border-gray-200/50 dark:border-gray-600/50 shadow-sm'
 }
 
 // Status text mapping for Persian
@@ -167,12 +167,13 @@ const displayText = computed(() => {
 
 <template>
   <span 
-    class="inline-flex items-center font-medium rounded-full transition-colors duration-200"
+    class="inline-flex items-center font-semibold rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-sm"
     :class="[
       sizeClasses[size],
       variantClasses[computedVariant],
       {
-        'animate-pulse': pulse
+        'animate-pulse': pulse,
+        'hover:shadow-lg': !pulse
       }
     ]"
   >
@@ -183,11 +184,12 @@ const displayText = computed(() => {
         iconSizes[size],
         {
           'animate-spin': computedIcon === 'ph:spinner',
-          'me-1': displayText
+          'me-1.5': displayText,
+          'drop-shadow-sm': true
         }
       ]"
     />
     
-    {{ displayText }}
+    <span class="drop-shadow-sm">{{ displayText }}</span>
   </span>
 </template>
