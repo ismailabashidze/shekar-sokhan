@@ -1,0 +1,4938 @@
+openapi: 3.0.3
+info:
+  title: Hammasir Platform - All Services
+  description: This is a bundled API documentation for all services in the Hammasir platform.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: Main API Gateway
+paths:
+  /profile/me:
+    get:
+      tags:
+        - Applicant Profile Service
+        - My Profile
+      summary: دریافت پروفایل کاربر لاگین کرده
+      description: اطلاعات کامل پروفایل کاربری که احراز هویت شده را برمی‌گرداند.
+      operationId: getMyProfile
+      security:
+        - bearerAuth:
+            - user
+      responses:
+        '200':
+          description: پروفایل کاربر با موفقیت بازگردانده شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Applicant Profile Service
+        - My Profile
+      summary: به‌روزرسانی کامل پروفایل کاربر لاگین کرده
+      description: کل آبجکت پروفایل کاربر را دریافت و جایگزین پروفایل فعلی او می‌کند.
+      operationId: updateMyProfile
+      security:
+        - bearerAuth:
+            - user
+      requestBody:
+        description: آبجکت کامل و جدید پروفایل کاربر.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+      responses:
+        '200':
+          description: پروفایل با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /profiles:
+    get:
+      tags:
+        - Applicant Profile Service
+        - User Profile
+      summary: (Admin/Counselor) لیست و جستجوی پروفایل کاربران
+      description: دریافت لیستی از کاربران با قابلیت فیلتر و صفحه‌بندی.
+      operationId: listUsers
+      security:
+        - bearerAuth:
+            - counselor
+            - admin
+      parameters:
+        - name: page
+          in: query
+          description: شماره صفحه
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: تعداد موارد در هر صفحه
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          description: معیار مرتب‌سازی
+          schema:
+            type: string
+            example: personalInfo.lastName,asc
+        - name: status
+          in: query
+          description: فیلتر بر اساس وضعیت کاربر
+          schema:
+            $ref: '#/components/schemas/UserStatus'
+        - name: name
+          in: query
+          description: جستجو در نام و نام خانوادگی
+          schema:
+            type: string
+      responses:
+        '200':
+          description: لیستی از پروفایل‌ها.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /profiles/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    get:
+      tags:
+        - Applicant Profile Service
+        - User Profile
+      summary: دریافت پروفایل کامل یک کاربر
+      operationId: getProfileByUserId
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+            - admin
+      responses:
+        '200':
+          description: پروفایل کاربر با موفقیت بازگردانده شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Applicant Profile Service
+        - User Profile
+      summary: به‌روزرسانی کامل پروفایل کاربر
+      description: این endpoint برای به‌روزرسانی کلیت آبجکت پروفایل استفاده می‌شود. برای تغییرات جزئی، از endpoint های PATCH استفاده کنید.
+      operationId: updateUserProfile
+      security:
+        - bearerAuth:
+            - user
+            - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+      responses:
+        '200':
+          description: پروفایل با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /profiles/{userId}/status:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    patch:
+      tags:
+        - Applicant Profile Service
+        - User Profile
+      summary: (Admin) به‌روزرسانی وضعیت یک کاربر
+      description: به ادمین اجازه می‌دهد تا وضعیت یک کاربر را تغییر دهد (مثلاً فعال یا معلق کند).
+      operationId: updateUserStatus
+      security:
+        - bearerAuth:
+            - admin
+      requestBody:
+        description: وضعیت جدید کاربر.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  $ref: '#/components/schemas/UserStatus'
+      responses:
+        '200':
+          description: وضعیت با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /profiles/{userId}/handbook:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    get:
+      tags:
+        - Applicant Profile Service
+        - Handbook
+      summary: دریافت دفترچه راهنمای انسانی کاربر
+      operationId: getHumanHandbook
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+            - admin
+      responses:
+        '200':
+          description: دفترچه راهنمای کاربر.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HumanHandbook'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Applicant Profile Service
+        - Handbook
+      summary: به‌روزرسانی دفترچه راهنمای انسانی کاربر
+      description: به کاربر یا مشاور اجازه می‌دهد تا دفترچه راهنما را ویرایش کند.
+      operationId: updateHumanHandbook
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+      requestBody:
+        description: آبجکت کامل و جدید دفترچه راهنما.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HumanHandbook'
+      responses:
+        '200':
+          description: دفترچه راهنما با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HumanHandbook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /profiles/{userId}/progress-summary:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    get:
+      tags:
+        - Applicant Profile Service
+        - Progress
+      summary: دریافت خلاصه پیشرفت تجمیعی کاربر
+      description: این سرویس داده‌های پیشرفت را از سایر سرویس‌ها دریافت، تجمیع و نمایش می‌دهد اما آن‌ها را ذخیره نمی‌کند.
+      operationId: getProgressSummary
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+            - admin
+      responses:
+        '200':
+          description: خلاصه پیشرفت کاربر.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgressSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /internal/profiles/{userId}/sync/keycloak:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    post:
+      tags:
+        - Applicant Profile Service
+        - Internal
+      summary: (داخلی) همگام‌سازی پروفایل با Keycloak
+      description: این endpoint برای استفاده داخلی توسط سایر سرویس‌ها (مانند Auth Service) یا جاب‌های زمان‌بندی شده است.
+      operationId: syncWithKeycloak
+      security:
+        - bearerAuth:
+            - admin
+            - service-account
+      responses:
+        '200':
+          description: همگام‌سازی با موفقیت انجام شد.
+        '500':
+          description: خطای داخلی سرور در هنگام همگام‌سازی.
+  /templates:
+    get:
+      tags:
+        - Onboarding Service
+        - Roadmap Templates
+      summary: (Admin) دریافت لیست تمام قالب‌های نقشه راه
+      operationId: listRoadmapTemplates
+      security:
+        - bearerAuth:
+            - admin
+      responses:
+        '200':
+          description: لیستی از تمام قالب‌ها.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoadmapTemplate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+        - Onboarding Service
+        - Roadmap Templates
+      summary: (Admin) ایجاد یک قالب نقشه راه جدید
+      operationId: createRoadmapTemplate
+      security:
+        - bearerAuth:
+            - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoadmapTemplate'
+      responses:
+        '201':
+          description: قالب با موفقیت ایجاد شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoadmapTemplate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /templates/{templateId}:
+    parameters:
+      - name: templateId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Onboarding Service
+        - Roadmap Templates
+      summary: (Admin) دریافت جزئیات یک قالب نقشه راه
+      operationId: getRoadmapTemplateById
+      security:
+        - bearerAuth:
+            - admin
+      responses:
+        '200':
+          description: جزئیات قالب.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoadmapTemplate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Onboarding Service
+        - Roadmap Templates
+      summary: (Admin) به‌روزرسانی یک قالب نقشه راه
+      operationId: updateRoadmapTemplate
+      security:
+        - bearerAuth:
+            - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoadmapTemplate'
+      responses:
+        '200':
+          description: قالب با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoadmapTemplate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Onboarding Service
+        - Roadmap Templates
+      summary: (Admin) حذف یک قالب نقشه راه
+      operationId: deleteRoadmapTemplate
+      security:
+        - bearerAuth:
+            - admin
+      responses:
+        '204':
+          description: قالب با موفقیت حذف شد.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /assessments/me:
+    get:
+      tags:
+        - Assessment Service
+        - Assessment Instances
+      summary: (Applicant) دریافت لیست ارزیابی‌های من
+      operationId: getMyAssessments
+      security:
+        - bearerAuth:
+            - user
+      responses:
+        '200':
+          description: لیستی از ارزیابی‌های کاربر.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssessmentInstance'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/{userId}/assessments:
+    get:
+      tags:
+        - Assessment Service
+        - Assessment Instances
+      summary: (Admin/Counselor) دریافت ارزیابی‌های یک کاربر
+      operationId: getUserAssessments
+      security:
+        - bearerAuth:
+            - admin
+            - counselor
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: لیستی از ارزیابی‌های کاربر.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssessmentInstance'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /assessments/{assessmentId}:
+    get:
+      tags:
+        - Assessment Service
+        - Assessment Instances
+      summary: دریافت جزئیات یک ارزیابی
+      operationId: getAssessmentInstance
+      security:
+        - bearerAuth:
+            - user
+            - admin
+            - counselor
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: جزئیات کامل ارزیابی.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentInstance'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /assessments/{assessmentId}/submit:
+    post:
+      tags:
+        - Assessment Service
+        - Assessment Instances
+      summary: (Applicant) ارسال پاسخ‌های ارزیابی
+      operationId: submitAssessment
+      security:
+        - bearerAuth:
+            - user
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                responses:
+                  type: object
+                  description: پاسخ‌های خام کاربر مطابق ساختار قالب
+      responses:
+        '200':
+          description: پاسخ‌ها با موفقیت ثبت شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentInstance'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /assessments/{assessmentId}/results:
+    get:
+      tags:
+        - Assessment Service
+        - Assessment Instances
+      summary: دریافت نتایج یک ارزیابی
+      operationId: getAssessmentResults
+      security:
+        - bearerAuth:
+            - user
+            - admin
+            - counselor
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: نتایج تحلیل شده ارزیابی.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /submissions:
+    get:
+      tags:
+        - Assessment Service
+        - Assessment Instances
+      summary: (Admin/Counselor) لیست نتایج خام ارسال‌شده
+      operationId: listSubmissions
+      security:
+        - bearerAuth:
+            - admin
+            - counselor
+      parameters:
+        - name: templateId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/AssessmentStatus'
+      responses:
+        '200':
+          description: لیست Submission ها.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssessmentInstance'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /analysis:
+    get:
+      tags:
+        - Assessment Service
+        - Assessment Instances
+      summary: (Admin/Counselor) لیست تحلیل‌های ارزیابی
+      operationId: listAnalyses
+      security:
+        - bearerAuth:
+            - admin
+            - counselor
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: templateId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: لیست تحلیل‌ها.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssessmentResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /progress/me:
+    get:
+      tags:
+        - Assessment Service
+        - Assessment Instances
+      summary: (Applicant) دریافت پیشرفت من در پرسشنامه‌ها
+      operationId: getMyAssessmentProgress
+      security:
+        - bearerAuth:
+            - user
+      responses:
+        '200':
+          description: پیشرفت کاربر.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentProgress'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/{userId}/progress:
+    get:
+      tags:
+        - Assessment Service
+        - Assessment Instances
+      summary: (Admin/Counselor) دریافت پیشرفت یک کاربر
+      operationId: getUserAssessmentProgress
+      security:
+        - bearerAuth:
+            - admin
+            - counselor
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: پیشرفت کاربر.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentProgress'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /register:
+    post:
+      tags:
+        - Auth Service
+        - Auth
+      summary: ثبت‌نام کاربر (Applicant)
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                acceptTerms:
+                  type: boolean
+                  default: true
+      responses:
+        '201':
+          description: کاربر ایجاد شد.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    format: uuid
+                  emailVerificationRequired:
+                    type: boolean
+                    default: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /login:
+    post:
+      tags:
+        - Auth Service
+        - Auth
+      summary: ورود با ایمیل/رمز عبور
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: ورود موفق و صدور توکن‌ها
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /refresh:
+    post:
+      tags:
+        - Auth Service
+        - Auth
+      summary: دریافت توکن جدید با refresh_token
+      operationId: refreshTokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: صدور توکن‌های جدید
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /logout:
+    post:
+      tags:
+        - Auth Service
+        - Auth
+      summary: خروج (ابطال refresh_token)
+      operationId: logout
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '204':
+          description: خروج انجام شد.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /request-password-reset:
+    post:
+      tags:
+        - Auth Service
+        - Auth
+      summary: درخواست بازیابی رمز عبور
+      operationId: requestPasswordReset
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: اگر ایمیل معتبر باشد، لینک بازیابی ارسال می‌شود.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /reset-password:
+    post:
+      tags:
+        - Auth Service
+        - Auth
+      summary: تنظیم رمز عبور جدید با توکن بازیابی
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - newPassword
+              properties:
+                token:
+                  type: string
+                newPassword:
+                  type: string
+                  format: password
+      responses:
+        '204':
+          description: رمز عبور با موفقیت تغییر کرد.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /oauth/google/url:
+    get:
+      tags:
+        - Auth Service
+        - Auth
+      summary: دریافت URL برای شروع فرآیند لاگین با گوگل
+      operationId: getGoogleOAuthURL
+      security: []
+      responses:
+        '200':
+          description: URL برای ریدایرکت کاربر به صفحه لاگین گوگل.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    example: https://accounts.google.com/o/oauth2/v2/auth?...
+  /oauth/google/callback:
+    post:
+      tags:
+        - Auth Service
+        - Auth
+      summary: مدیریت callback لاگین گوگل
+      description: این اندپوینت `code` دریافت شده از گوگل را پردازش کرده و توکن‌های اپلیکیشن را برمی‌گرداند.
+      operationId: handleGoogleOAuthCallback
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+                  description: Authorization code بازگشتی از سمت گوگل.
+      responses:
+        '200':
+          description: ورود/ثبت‌نام موفق و صدور توکن‌ها.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /verify-email:
+    post:
+      tags:
+        - Auth Service
+        - Auth
+      summary: تأیید ایمیل با توکن
+      operationId: verifyEmail
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+      responses:
+        '204':
+          description: ایمیل با موفقیت تأیید شد.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /me:
+    get:
+      tags:
+        - Auth Service
+        - Auth
+      summary: دریافت اطلاعات هویتی کاربر فعلی از روی توکن
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: اطلاعات حداقلی هویت (بدون نقش/پروفایل)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    format: uuid
+                  email:
+                    type: string
+                    format: email
+                  emailVerified:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /.well-known/jwks.json:
+    get:
+      tags:
+        - Auth Service
+        - Auth
+      summary: کلیدهای عمومی برای اعتبارسنجی امضا (JWKS)
+      operationId: getJwks
+      security: []
+      responses:
+        '200':
+          description: JWKS
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+  /sessions:
+    get:
+      tags:
+        - Counseling Service
+        - Sessions
+      summary: فهرست جلسات
+      description: فهرست تمام جلسات با قابلیت فیلترینگ برای ادمین، یا جلسات مرتبط با کاربر فعلی (متقاضی یا مشاور).
+      operationId: listSessions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: applicantId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: counselorId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/SessionStatus'
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: لیست جلسات
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CounselingSession'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Counseling Service
+        - Sessions
+      summary: ایجاد جلسه جدید (پس از رزرو)
+      operationId: createSession
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: اطلاعات لازم برای ایجاد یک جلسه که معمولاً از یک AppointmentRequest تأیید شده می‌آید.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                appointmentRequestId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: جلسه با موفقیت ایجاد و لینک پرداخت (در صورت نیاز) صادر شد.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    $ref: '#/components/schemas/CounselingSession'
+                  paymentUrl:
+                    type: string
+                    format: uri
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /sessions/{sessionId}:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Counseling Service
+        - Sessions
+      summary: دریافت جزئیات جلسه
+      operationId: getSessionById
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: جزئیات کامل جلسه.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounselingSession'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Counseling Service
+        - Sessions
+      summary: به‌روزرسانی بخشی از جلسه
+      description: برای تغییر وضعیت، افزودن لینک جلسه، و...
+      operationId: updateSession
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/SessionStatus'
+                meetingUrl:
+                  type: string
+                  format: uri
+      responses:
+        '200':
+          description: جلسه آپدیت شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounselingSession'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /scheduling/counselors/{counselorId}/availability:
+    get:
+      tags:
+        - Counseling Service
+        - Scheduling
+      summary: دریافت زمان‌های خالی مشاور
+      operationId: getCounselorAvailability
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: counselorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: لیست اسلات‌های زمانی آزاد.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeSlot'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /scheduling/appointments/request:
+    post:
+      tags:
+        - Counseling Service
+        - Scheduling
+      summary: ثبت درخواست رزرو جلسه
+      operationId: requestAppointment
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+      responses:
+        '202':
+          description: درخواست رزرو ثبت شد و منتظر تأیید مشاور است.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /sessions/{sessionId}/notes:
+    get:
+      tags:
+        - Counseling Service
+        - Notes
+      summary: دریافت یادداشت‌های یک جلسه
+      operationId: getSessionNotes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: لیست یادداشت‌ها.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SessionNote'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+        - Counseling Service
+        - Notes
+      summary: افزودن یادداشت جدید به جلسه
+      operationId: addSessionNote
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionNote'
+      responses:
+        '201':
+          description: یادداشت ایجاد شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionNote'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /sessions/{sessionId}/report:
+    post:
+      tags:
+        - Counseling Service
+        - Reports & Analysis
+      summary: تولید و ارسال گزارش جلسه برای تحلیل
+      operationId: generateSessionReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: درخواست تحلیل گزارش ثبت شد.
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /sessions/{sessionId}/analysis:
+    get:
+      tags:
+        - Counseling Service
+        - Reports & Analysis
+      summary: دریافت نتایج تحلیل جلسه
+      operationId: getSessionAnalysis
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: نتیجه تحلیل.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionAnalysis'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /internal/payments/callback:
+    post:
+      tags:
+        - Counseling Service
+        - Internal
+      summary: وبهوک برای آپدیت وضعیت پرداخت از سرویس مالی
+      operationId: paymentStatusCallback
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paymentId:
+                  type: string
+                sessionId:
+                  type: string
+                status:
+                  $ref: '#/components/schemas/PaymentStatus'
+      responses:
+        '200':
+          description: وضعیت پرداخت آپدیت شد.
+  /counselors:
+    get:
+      tags:
+        - Counselor Profile Service
+        - Public Counselors
+      summary: لیست و جستجوی مشاوران
+      operationId: listCounselors
+      security: []
+      parameters:
+        - name: specialization
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: لیستی از پروفایل‌های عمومی مشاوران.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CounselorPublicProfile'
+  /counselors/{counselorId}:
+    get:
+      tags:
+        - Counselor Profile Service
+        - Public Counselors
+      summary: دریافت پروفایل عمومی یک مشاور
+      operationId: getCounselorPublicProfile
+      security: []
+      parameters:
+        - name: counselorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: پروفایل عمومی مشاور.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounselorPublicProfile'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /counselors/{counselorId}/availability:
+    get:
+      tags:
+        - Counselor Profile Service
+        - Public Counselors
+      summary: دریافت زمان‌های در دسترس مشاور
+      operationId: getCounselorPublicAvailability
+      security: []
+      parameters:
+        - name: counselorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: زمان‌های در دسترس مشاور.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Availability'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /counselor/me:
+    get:
+      tags:
+        - Counselor Profile Service
+        - My Profile (Counselor)
+      summary: دریافت پروفایل کامل من
+      operationId: getMyCounselorProfile
+      security:
+        - bearerAuth:
+            - counselor
+      responses:
+        '200':
+          description: پروفایل کامل مشاور.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounselorProfile'
+    put:
+      tags:
+        - Counselor Profile Service
+        - My Profile (Counselor)
+      summary: به‌روزرسانی پروفایل من
+      operationId: updateMyCounselorProfile
+      security:
+        - bearerAuth:
+            - counselor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CounselorProfile'
+      responses:
+        '200':
+          description: پروفایل با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounselorProfile'
+  /counselor/me/availability:
+    put:
+      tags:
+        - Counselor Profile Service
+        - My Profile (Counselor)
+      summary: به‌روزرسانی زمان‌های کاری من
+      operationId: updateMyAvailability
+      security:
+        - bearerAuth:
+            - counselor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Availability'
+      responses:
+        '200':
+          description: زمان‌های کاری با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Availability'
+  /counselor/me/documents:
+    post:
+      tags:
+        - Counselor Profile Service
+        - Verification
+      summary: ثبت مرجع مدرک (fileId) برای تأیید صلاحیت
+      operationId: registerVerificationDocument
+      security:
+        - bearerAuth:
+            - counselor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificationDocument'
+      responses:
+        '201':
+          description: مدرک با موفقیت ثبت شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationDocument'
+  /counselor/me/rates:
+    put:
+      tags:
+        - Counselor Profile Service
+        - My Profile (Counselor)
+      summary: به‌روزرسانی تعرفه‌های من
+      operationId: updateMyRates
+      security:
+        - bearerAuth:
+            - counselor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RateInfo'
+      responses:
+        '200':
+          description: تعرفه‌ها با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RateInfo'
+  /clients/me/{clientId}/notes:
+    post:
+      tags:
+        - Counselor Profile Service
+        - My Clients (Counselor)
+      summary: افزودن یادداشت برای مراجع
+      operationId: addClientNote
+      security:
+        - bearerAuth:
+            - counselor
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientNote'
+      responses:
+        '201':
+          description: یادداشت ثبت شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientNote'
+  /clients/me/{clientId}/goals:
+    post:
+      tags:
+        - Counselor Profile Service
+        - My Clients (Counselor)
+      summary: ثبت هدف برای مراجع
+      operationId: addClientGoal
+      security:
+        - bearerAuth:
+            - counselor
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientGoal'
+      responses:
+        '201':
+          description: هدف ثبت شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientGoal'
+  /verification/me:
+    post:
+      tags:
+        - Counselor Profile Service
+        - Verification
+      summary: ارسال درخواست تأیید صلاحیت
+      operationId: submitVerificationRequest
+      security:
+        - bearerAuth:
+            - counselor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificationRequest'
+      responses:
+        '202':
+          description: درخواست ثبت شد.
+    get:
+      tags:
+        - Counselor Profile Service
+        - Verification
+      summary: دریافت وضعیت تأیید صلاحیت من
+      operationId: getMyVerificationStatus
+      security:
+        - bearerAuth:
+            - counselor
+      responses:
+        '200':
+          description: وضعیت تأیید صلاحیت.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationStatus'
+  /admin/verifications:
+    get:
+      tags:
+        - Counselor Profile Service
+        - Admin
+      summary: (Admin) دریافت تمام درخواست‌های تأیید
+      operationId: listAllVerificationRequests
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/VerificationState'
+      responses:
+        '200':
+          description: لیست درخواست‌های تأیید.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VerificationRequest'
+  /admin/verifications/{verificationId}/status:
+    put:
+      tags:
+        - Counselor Profile Service
+        - Admin
+      summary: (Admin) تأیید یا رد یک درخواست
+      operationId: updateVerificationStatus
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: verificationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/VerificationState'
+                rejectionReason:
+                  type: string
+      responses:
+        '200':
+          description: درخواست با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationRequest'
+  /admin/counselors:
+    get:
+      tags:
+        - Counselor Profile Service
+        - Admin
+      summary: (Admin) لیست کامل مشاوران با فیلتر
+      operationId: listAllCounselorsAdmin
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: verificationStatus
+          in: query
+          schema:
+            $ref: '#/components/schemas/VerificationState'
+        - name: specialization
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: لیست کامل مشاوران.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CounselorProfile'
+  /admin/counselors/{counselorId}:
+    get:
+      tags:
+        - Counselor Profile Service
+        - Admin
+      summary: (Admin) دریافت پروفایل کامل یک مشاور
+      operationId: getCounselorByIdAdmin
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: counselorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: پروفایل کامل مشاور.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounselorProfile'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /internal/counselors/{counselorId}/sync/keycloak:
+    post:
+      tags:
+        - Counselor Profile Service
+        - Admin
+      summary: (Internal) همگام‌سازی پروفایل مشاور با Keycloak
+      operationId: syncCounselorKeycloak
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: counselorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: عملیات همگام‌سازی انجام شد.
+  /internal/counselors/{counselorId}/validate/keycloak-consistency:
+    get:
+      tags:
+        - Counselor Profile Service
+        - Admin
+      summary: (Internal) اعتبارسنجی یکپارچگی داده با Keycloak
+      operationId: validateCounselorKeycloakConsistency
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: counselorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: نتیجه اعتبارسنجی یکپارچگی.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeycloakConsistencyValidation'
+        '404':
+          description: مشاور یافت نشد.
+  /internal/counselors/{counselorId}/sync/status:
+    get:
+      tags:
+        - Counselor Profile Service
+        - Admin
+      summary: (Internal) دریافت وضعیت آخرین همگام‌سازی با Keycloak
+      operationId: getCounselorSyncStatus
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: counselorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: وضعیت همگام‌سازی.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncStatus'
+        '404':
+          description: مشاور یافت نشد.
+  /education/courses:
+    get:
+      tags:
+        - Education Service
+        - Courses
+      summary: دریافت فهرست عمومی دوره‌ها
+      operationId: listCourses
+      security: []
+      parameters:
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/CourseCategory'
+        - name: level
+          in: query
+          schema:
+            $ref: '#/components/schemas/CourseLevel'
+      responses:
+        '200':
+          description: لیست دوره‌ها.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+    post:
+      tags:
+        - Education Service
+        - Courses
+      summary: (Admin) ایجاد دوره جدید
+      operationId: createCourse
+      security:
+        - bearerAuth:
+            - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+      responses:
+        '201':
+          description: دوره ایجاد شد.
+  /education/courses/{courseId}:
+    get:
+      tags:
+        - Education Service
+        - Courses
+      summary: دریافت جزئیات یک دوره
+      operationId: getCourseById
+      security: []
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: اطلاعات دوره.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+    put:
+      tags:
+        - Education Service
+        - Courses
+      summary: (Admin) به‌روزرسانی کامل دوره
+      operationId: updateCourse
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+      responses:
+        '200':
+          description: دوره به‌روزرسانی شد.
+    delete:
+      tags:
+        - Education Service
+        - Courses
+      summary: (Admin) حذف دوره
+      operationId: deleteCourse
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: دوره حذف شد.
+  /education/enrollments:
+    post:
+      tags:
+        - Education Service
+        - Enrollments
+      summary: (Applicant) ثبت‌نام در یک دوره
+      operationId: enrollInCourse
+      security:
+        - bearerAuth:
+            - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                courseId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: ثبت‌نام موفق.
+    get:
+      tags:
+        - Education Service
+        - Enrollments
+      summary: (Admin) فهرست تمام ثبت‌نام‌ها
+      operationId: listAllEnrollments
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+        - name: courseId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: لیست ثبت‌نام‌ها.
+  /education/me/enrollments:
+    get:
+      tags:
+        - Education Service
+        - Enrollments
+      summary: (Applicant) دریافت ثبت‌نام‌های من
+      operationId: getMyEnrollments
+      security:
+        - bearerAuth:
+            - user
+      responses:
+        '200':
+          description: لیست ثبت‌نام‌های من.
+  /education/me/progress:
+    get:
+      tags:
+        - Education Service
+        - Progress
+      summary: (Applicant) دریافت پیشرفت یادگیری من
+      operationId: getMyLearningProgress
+      security:
+        - bearerAuth:
+            - user
+      parameters:
+        - name: courseId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: داده‌های پیشرفت.
+  /education/me/progress/lessons/{lessonId}:
+    put:
+      tags:
+        - Education Service
+        - Progress
+      summary: (Applicant) به‌روزرسانی وضعیت پیشرفت یک درس
+      operationId: updateMyLessonProgress
+      security:
+        - bearerAuth:
+            - user
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/LessonStatus'
+      responses:
+        '200':
+          description: پیشرفت درس آپدیت شد.
+  /education/notes:
+    post:
+      tags:
+        - Education Service
+        - Notes
+      summary: (Counselor/Admin) ثبت یادداشت برای شرکت‌کننده
+      operationId: createNoteForParticipant
+      security:
+        - bearerAuth:
+            - counselor
+            - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseNote'
+      responses:
+        '201':
+          description: یادداشت ثبت شد.
+    get:
+      tags:
+        - Education Service
+        - Notes
+      summary: (Counselor/Admin) مشاهده یادداشت‌ها
+      operationId: getNotes
+      security:
+        - bearerAuth:
+            - counselor
+            - admin
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: courseId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: لیست یادداشت‌ها.
+  /education/reports:
+    get:
+      tags:
+        - Education Service
+        - Reports
+      summary: دریافت گزارش‌های یادگیری
+      description: متقاضی گزارش‌های خودش را می‌بیند. مشاور و ادمین می‌توانند با userId فیلتر کنند.
+      operationId: getLearningReports
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+            - admin
+      parameters:
+        - name: userId
+          in: query
+          description: (Admin/Counselor) برای فیلتر کردن بر اساس کاربر
+          schema:
+            type: string
+      responses:
+        '200':
+          description: لیست گزارش‌ها.
+  /files/upload-token:
+    post:
+      tags:
+        - File Service
+        - Files
+      summary: تولید توکن موقت برای آپلود مستقیم فایل به S3
+      operationId: generateUploadToken
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+            - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadTokenRequest'
+      responses:
+        '200':
+          description: توکن آپلود موفق تولید شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadTokenResponse'
+        '400':
+          description: خطا در اعتبارسنجی ورودی.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: احراز هویت ناموفق.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /files/download-token:
+    post:
+      tags:
+        - File Service
+        - Files
+      summary: تولید توکن موقت برای دانلود فایل از S3
+      operationId: generateDownloadToken
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+            - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DownloadTokenRequest'
+      responses:
+        '200':
+          description: توکن دانلود موفق تولید شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadTokenResponse'
+        '400':
+          description: خطا در ورودی.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: احراز هویت ناموفق.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /files/{fileId}:
+    parameters:
+      - name: fileId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - File Service
+        - Files
+      summary: دریافت متادیتای یک فایل
+      operationId: getFileMetadata
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+            - admin
+      responses:
+        '200':
+          description: متادیتا بازیابی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadata'
+        '404':
+          description: فایل پیدا نشد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - File Service
+        - Files
+      summary: (Admin) حذف فایل و متادیتای آن
+      operationId: deleteFile
+      security:
+        - bearerAuth:
+            - admin
+      responses:
+        '204':
+          description: فایل حذف شد.
+        '404':
+          description: فایل پیدا نشد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /files/{fileId}/access:
+    parameters:
+      - name: fileId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - File Service
+        - Files
+      summary: بررسی دسترسی کاربر به فایل
+      operationId: validateFileAccess
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+            - admin
+      responses:
+        '200':
+          description: نتیجه اعتبارسنجی دسترسی.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileAccessValidation'
+        '403':
+          description: دسترسی غیرمجاز.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /admin/files:
+    get:
+      tags:
+        - File Service
+        - Files
+      summary: (Admin) فهرست فایل‌ها با امکان فیلتر
+      operationId: listFilesAdmin
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+        - name: fileType
+          in: query
+          schema:
+            $ref: '#/components/schemas/FileType'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/FileStatus'
+      responses:
+        '200':
+          description: لیست فایل‌ها.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileMetadata'
+  /matchmaking/suggestions:
+    get:
+      tags:
+        - Matchmaking Service
+        - Suggestions
+      summary: دریافت پیشنهادات کاربر لاگین‌کرده
+      operationId: listSuggestions
+      security:
+        - bearerAuth:
+            - user
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/SuggestionStatus'
+        - name: minScore
+          in: query
+          schema:
+            type: number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: فهرست پیشنهادات.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestionList'
+  /matchmaking/suggestions/{suggestionId}:
+    parameters:
+      - name: suggestionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags:
+        - Matchmaking Service
+        - Suggestions
+      summary: به‌روزرسانی وضعیت/عمل پیشنهاد
+      operationId: updateSuggestionStatus
+      security:
+        - bearerAuth:
+            - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSuggestionRequest'
+      responses:
+        '200':
+          description: پیشنهاد به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchSuggestion'
+  /matchmaking/analysis:
+    get:
+      tags:
+        - Matchmaking Service
+        - Analysis
+      summary: دریافت تمام تحلیل‌های یک کاربر
+      operationId: listMatchmakingAnalyses
+      security:
+        - bearerAuth:
+            - user
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: لیست تحلیل‌های کاربر با دیگران (فقط تحلیل قابل نمایش به خود کاربر).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisViewList'
+  /matchmaking/analysis/pairs/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Matchmaking Service
+        - Analysis
+      summary: دریافت تحلیل سازگاری با یک کاربر مشخص (فقط تحلیل قابل نمایش به خود کاربر)
+      operationId: getPairAnalysis
+      security:
+        - bearerAuth:
+            - user
+      responses:
+        '200':
+          description: تحلیل سازگاری زوج (نمایش دید کاربر).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PairAnalysisView'
+  /matchmaking/requests:
+    post:
+      tags:
+        - Matchmaking Service
+        - IntroductionRequests
+      summary: ارسال درخواست معرفی به کاربر دیگر
+      operationId: createIntroductionRequest
+      security:
+        - bearerAuth:
+            - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIntroductionRequest'
+      responses:
+        '201':
+          description: درخواست ایجاد شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntroductionRequest'
+    get:
+      tags:
+        - Matchmaking Service
+        - IntroductionRequests
+      summary: فهرست درخواست‌های معرفی کاربر لاگین‌کرده
+      operationId: listIntroductionRequests
+      security:
+        - bearerAuth:
+            - user
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/RequestStatus'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: فهرست درخواست‌ها.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntroductionRequestList'
+  /matchmaking/requests/{requestId}/respond:
+    parameters:
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags:
+        - Matchmaking Service
+        - IntroductionRequests
+      summary: پاسخ به درخواست معرفی (قبول یا رد)
+      operationId: respondToRequest
+      security:
+        - bearerAuth:
+            - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondRequest'
+      responses:
+        '200':
+          description: وضعیت درخواست به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntroductionRequest'
+  /matchmaking/module/status:
+    get:
+      tags:
+        - Matchmaking Service
+        - Module
+      summary: دریافت وضعیت ماژول کاربر لاگین‌کرده
+      operationId: getModuleStatus
+      security:
+        - bearerAuth:
+            - user
+      responses:
+        '200':
+          description: وضعیت ماژول.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchmakingModule'
+  /matchmaking/module/disable:
+    put:
+      tags:
+        - Matchmaking Service
+        - Module
+      summary: غیرفعال‌کردن ماژول توسط کاربر
+      operationId: disableModule
+      security:
+        - bearerAuth:
+            - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: ماژول غیرفعال شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchmakingModule'
+  /admin/matchmaking/modules:
+    get:
+      tags:
+        - Matchmaking Service
+        - Module
+      summary: (Admin) فهرست وضعیت ماژول کاربران
+      operationId: listModulesAdmin
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ModuleStatus'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: فهرست ماژول‌ها.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MatchmakingModule'
+  /admin/matchmaking/modules/{userId}/status:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags:
+        - Matchmaking Service
+        - Module
+      summary: (Admin) تغییر وضعیت ماژول یک کاربر
+      operationId: updateModuleStatusAdmin
+      security:
+        - bearerAuth:
+            - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/ModuleStatus'
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: وضعیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchmakingModule'
+  /notifications:
+    get:
+      tags:
+        - Notification Service
+        - Notifications
+      summary: دریافت لیست اعلان‌های کاربر لاگین‌کرده
+      operationId: listUserNotifications
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/NotificationStatus'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: فهرست اعلان‌ها.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+  /notifications/unread-count:
+    get:
+      tags:
+        - Notification Service
+        - Notifications
+      summary: دریافت تعداد اعلان‌های خوانده‌نشده
+      operationId: getUnreadCount
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+      responses:
+        '200':
+          description: تعداد اعلان‌های خوانده‌نشده.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+  /notifications/read:
+    patch:
+      tags:
+        - Notification Service
+        - Notifications
+      summary: علامت‌زدن دسته‌ای اعلان‌ها به عنوان خوانده‌شده
+      operationId: markNotificationsReadBulk
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '204':
+          description: اعلان‌ها خوانده شدند.
+  /notifications/{notificationId}/read:
+    parameters:
+      - name: notificationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags:
+        - Notification Service
+        - Notifications
+      summary: علامت‌زدن اعلان به عنوان خوانده‌شده
+      operationId: markNotificationRead
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+      responses:
+        '204':
+          description: اعلان خوانده شد.
+  /me/notification-preferences:
+    get:
+      tags:
+        - Notification Service
+        - Notifications
+      summary: دریافت تنظیمات اعلان کاربر
+      operationId: getMyNotificationPreferences
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+      responses:
+        '200':
+          description: تنظیمات اعلان.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+    put:
+      tags:
+        - Notification Service
+        - Notifications
+      summary: بروزرسانی تنظیمات اعلان کاربر
+      operationId: updateMyNotificationPreferences
+      security:
+        - bearerAuth:
+            - user
+            - counselor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferences'
+      responses:
+        '200':
+          description: تنظیمات ذخیره شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+  /admin/notifications:
+    get:
+      tags:
+        - Notification Service
+        - Admin Notifications
+      summary: (Admin) فهرست اعلان‌های سیستم
+      operationId: listSystemNotifications
+      security:
+        - bearerAuth:
+            - admin
+      parameters:
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/NotificationType'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: لیست اعلان‌های سیستمی.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemNotificationList'
+    post:
+      tags:
+        - Notification Service
+        - Admin Notifications
+      summary: (Admin) ایجاد اعلان سیستمی جدید (In-App)
+      operationId: createSystemNotification
+      security:
+        - bearerAuth:
+            - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotification'
+      responses:
+        '201':
+          description: اعلان ایجاد شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemNotification'
+  /journey:
+    get:
+      tags:
+        - Onboarding Service
+        - User Journey
+      summary: دریافت نمای کلی از مسیر رشد کاربر فعلی
+      description: این Endpoint یک نمای بهینه‌سازی‌شده و کامل از وضعیت فعلی، وظایف پیش رو و نقشه راه کلی کاربر لاگین‌کرده را برمی‌گرداند.
+      operationId: getMyJourneyView
+      security:
+        - bearerAuth:
+            - user
+      responses:
+        '200':
+          description: موفقیت‌آمیز. نمای مسیر رشد کاربر بازگردانده شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JourneyView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /journey/tasks/{taskId}:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags:
+        - Onboarding Service
+        - User Journey
+      summary: (Applicant) به‌روزرسانی وضعیت یک تسک در مسیر کاربر
+      operationId: updateMyJourneyTask
+      security:
+        - bearerAuth:
+            - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - NOT_STARTED
+                    - IN_PROGRESS
+                    - COMPLETED
+                    - BLOCKED
+                progress:
+                  type: integer
+                  format: int32
+                  minimum: 0
+                  maximum: 100
+      responses:
+        '204':
+          description: وضعیت تسک به‌روزرسانی شد.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /users/{userId}/roadmap:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        description: شناسه کاربر
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - Onboarding Service
+        - Roadmap Management
+      summary: (Admin/Counselor) ایجاد نقشه راه جدید برای کاربر
+      description: یک نقشه راه جدید برای کاربر بر اساس یک قالب از پیش تعریف‌شده یا یک ساختار سفارشی ایجاد می‌کند.
+      operationId: createUserRoadmap
+      security:
+        - bearerAuth:
+            - counselor
+            - admin
+      requestBody:
+        description: اطلاعات اولیه برای ساخت نقشه راه.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                templateId:
+                  type: string
+                  description: شناسه قالب نقشه راه برای استفاده (اختیاری).
+                customRoadmap:
+                  $ref: '#/components/schemas/UserRoadmap'
+                  description: آبجکت کامل نقشه راه سفارشی (در صورت عدم استفاده از قالب).
+      responses:
+        '201':
+          description: نقشه راه با موفقیت ایجاد شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoadmap'
+        '400':
+          description: درخواست نامعتبر است.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: عدم احراز هویت.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: عدم دسترسی کافی.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: برای این کاربر از قبل یک نقشه راه وجود دارد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - Onboarding Service
+        - Roadmap Management
+      summary: دریافت کامل آبجکت نقشه راه یک کاربر خاص
+      description: این Endpoint آبجکت کامل و خام `UserRoadmap` را برای یک کاربر مشخص برمی‌گرداند. این API برای مشاوران و ادمین‌ها جهت مشاهده جزئیات دقیق مسیر کاربر طراحی شده است.
+      operationId: getUserRoadmap
+      security:
+        - bearerAuth:
+            - counselor
+            - admin
+      responses:
+        '200':
+          description: آبجکت کامل نقشه راه کاربر.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoadmap'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: عدم دسترسی کافی (کاربر باید مشاور یا ادمین باشد).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: کاربر یا نقشه راه او یافت نشد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Onboarding Service
+        - Roadmap Management
+      summary: (Admin/Counselor) به‌روزرسانی کامل نقشه راه کاربر
+      description: کل آبجکت نقشه راه یک کاربر را دریافت و جایگزین نقشه راه فعلی او می‌کند. این عملیات اتمی است.
+      operationId: updateUserRoadmap
+      security:
+        - bearerAuth:
+            - counselor
+            - admin
+      requestBody:
+        description: آبجکت کامل و جدید نقشه راه.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoadmap'
+      responses:
+        '200':
+          description: نقشه راه با موفقیت به‌روزرسانی شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoadmap'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /roadmaps:
+    get:
+      tags:
+        - Onboarding Service
+        - Roadmap Management
+      summary: (Admin/Counselor) فهرست نقشه‌راه کاربران با فیلتر
+      operationId: listUserRoadmaps
+      security:
+        - bearerAuth:
+            - counselor
+            - admin
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: لیست رودمپ‌ها.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserRoadmap'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  schemas:
+    Gender:
+      type: string
+      enum:
+        - MALE
+        - FEMALE
+    UserStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - PENDING_VERIFICATION
+        - SUSPENDED
+        - DEACTIVATED
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: زمان وقوع خطا
+        status:
+          type: integer
+          description: کد وضعیت HTTP
+        error:
+          type: string
+          description: پیام کوتاه خطا (مانند "Not Found")
+        message:
+          type: string
+          description: توضیحات کامل و قابل فهم برای خطا
+        path:
+          type: string
+          description: مسیری که در آن خطا رخ داده است
+      $ref: shared/schemas.yaml#/components/schemas/ErrorResponse
+    AssessmentStatus:
+      type: string
+      enum:
+        - PENDING
+        - IN_PROGRESS
+        - COMPLETED
+        - EXPIRED
+    SessionStatus:
+      type: string
+      enum:
+        - REQUESTED
+        - ACCEPTED
+        - REJECTED
+        - CANCELLED_BY_APPLICANT
+        - CANCELLED_BY_COUNSELOR
+        - COMPLETED
+        - CONFIRMED
+        - IN_PROGRESS
+        - NO_SHOW
+    PaymentStatus:
+      type: string
+      enum:
+        - PENDING
+        - SUCCESSFUL
+        - FAILED
+        - FAILED
+        - CANCELLED
+        - REFUNDED
+    SessionType:
+      type: string
+      enum:
+        - INITIAL_CONSULTATION
+        - FOLLOW_UP
+        - CRISIS_INTERVENTION
+        - ASSESSMENT_SESSION
+        - PROGRESS_REVIEW
+        - TERMINATION
+    NoteType:
+      type: string
+      enum:
+        - OBSERVATION
+        - RECOMMENDATION
+        - ISSUE
+        - ISSUE
+        - GOAL
+    NotePriority:
+      type: string
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+    AnalysisStatus:
+      type: string
+      enum:
+        - QUEUED
+        - PROCESSING
+        - COMPLETED
+        - FAILED
+        - CANCELLED
+    VerificationState:
+      type: string
+      enum:
+        - NOT_SUBMITTED
+        - PENDING
+        - UNDER_REVIEW
+        - APPROVED
+        - REJECTED
+    RelationshipStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - PENDING
+    ExpertiseLevel:
+      type: string
+      enum:
+        - COMPETENT
+        - PROFICIENT
+        - EXPERT
+    RateUnit:
+      type: string
+      enum:
+        - PER_SESSION
+        - PER_HOUR
+    GoalStatus:
+      type: string
+      enum:
+        - NOT_STARTED
+        - IN_PROGRESS
+        - COMPLETED
+        - ARCHIVED
+    DocumentType:
+      type: string
+      enum:
+        - ID
+        - DEGREE_CERTIFICATE
+        - LICENSE
+        - OTHER
+    CourseCategory:
+      type: string
+      enum:
+        - PERSONALITY_DEVELOPMENT
+        - RELATIONSHIP_SKILLS
+        - EMOTIONAL_INTELLIGENCE
+        - COMMUNICATION_SKILLS
+        - SELF_AWARENESS
+        - STRESS_MANAGEMENT
+    CourseLevel:
+      type: string
+      enum:
+        - BEGINNER
+        - INTERMEDIATE
+        - ADVANCED
+        - EXPERT
+    CourseStatus:
+      type: string
+      enum:
+        - DRAFT
+        - ACTIVE
+        - ARCHIVED
+        - ARCHIVED
+    EnrollmentStatus:
+      type: string
+      enum:
+        - IN_PROGRESS
+        - COMPLETED
+        - COMPLETED
+        - CANCELLED
+    LessonStatus:
+      type: string
+      enum:
+        - NOT_STARTED
+        - IN_PROGRESS
+        - COMPLETED
+    ReportType:
+      type: string
+      enum:
+        - LEARNING_PROGRESS
+        - KNOWLEDGE_GAPS
+        - PERFORMANCE_EVALUATION
+        - KNOWLEDGE_GAPS
+    FileStatus:
+      type: string
+      enum:
+        - PENDING
+        - UPLOADED
+        - PROCESSING
+        - READY
+        - ERROR
+        - DELETED
+    FileType:
+      type: string
+      enum:
+        - PROFILE_IMAGE
+        - DOCUMENT
+        - SESSION_RECORDING
+        - COURSE_MATERIAL
+        - ASSESSMENT_FILE
+        - MESSAGE_ATTACHMENT
+        - NOTIFICATION_ATTACHMENT
+    SuggestionStatus:
+      type: string
+      enum:
+        - NEW
+        - VIEWED
+        - LIKED
+        - REQUESTED
+        - EXPIRED
+      $ref: ./shared/schemas.yaml#/components/schemas/SuggestionStatus
+    SuggestionAction:
+      type: string
+      enum:
+        - LIKED
+        - DISMISSED
+      $ref: ./shared/schemas.yaml#/components/schemas/SuggestionAction
+    RequestStatus:
+      type: string
+      enum:
+        - PENDING
+        - ACCEPTED
+        - REJECTED
+        - EXPIRED
+      $ref: ./shared/schemas.yaml#/components/schemas/RequestStatus
+    ModuleStatus:
+      type: string
+      enum:
+        - ENABLED
+        - DISABLED_BY_USER
+        - DISABLED_BY_ADMIN
+        - PENDING
+      $ref: ./shared/schemas.yaml#/components/schemas/ModuleStatus
+    Insight:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        score:
+          type: number
+    Priority:
+      type: string
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+    FactorValueType:
+      type: string
+      enum:
+        - NUMBER
+        - STRING
+        - BOOLEAN
+        - OBJECT
+        - ARRAY
+    Resource:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - ARTICLE
+            - VIDEO
+            - BOOK
+            - COURSE
+            - TOOL
+            - EXPERT
+        title:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+          format: uri
+        tags:
+          type: array
+          items:
+            type: string
+    Recommendation:
+      type: object
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        priority:
+          $ref: '#/components/schemas/Priority'
+        actionable:
+          type: boolean
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Resource'
+        metadata:
+          type: object
+    AnalysisFactor:
+      type: object
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        title:
+          type: string
+        value:
+          nullable: true
+        valueType:
+          $ref: '#/components/schemas/FactorValueType'
+        unit:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        confidence:
+          type: number
+        implications:
+          type: array
+          items:
+            type: string
+        factors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisFactor'
+        metadata:
+          type: object
+    AnalysisMetadata:
+      type: object
+      properties:
+        version:
+          type: string
+        modelVersion:
+          type: string
+        processingTime:
+          type: number
+        tags:
+          type: array
+          items:
+            type: string
+        customFields:
+          type: object
+    AnalysisError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+        retryable:
+          type: boolean
+    Analysis:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        sourceId:
+          type: string
+        analysisType:
+          type: string
+        status:
+          $ref: '#/components/schemas/AnalysisStatus'
+        factors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisFactor'
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/Insight'
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        metadata:
+          $ref: '#/components/schemas/AnalysisMetadata'
+        error:
+          $ref: '#/components/schemas/AnalysisError'
+      $ref: ./shared/schemas.yaml#/components/schemas/Analysis
+    NotificationType:
+      type: string
+      enum:
+        - SYSTEM
+        - MATCHMAKING
+        - COUNSELING
+        - EDUCATION
+        - REMINDER
+    NotificationChannel:
+      type: string
+      enum:
+        - IN_APP
+        - EMAIL
+        - SMS
+        - PUSH
+    NotificationStatus:
+      type: string
+      enum:
+        - NEW
+        - DELIVERED
+        - READ
+    NotificationPreferences:
+      type: object
+      properties:
+        inApp:
+          type: boolean
+          default: true
+        email:
+          type: boolean
+          default: false
+        sms:
+          type: boolean
+          default: false
+        push:
+          type: boolean
+          default: false
+    AnalysisSourceType:
+      type: string
+      enum:
+        - QUESTIONNAIRE
+        - EDUCATION
+        - COUNSELING
+    EducationLevel:
+      type: string
+      enum:
+        - HIGH_SCHOOL
+        - BACHELOR
+        - MASTER
+        - PHD
+        - VOCATIONAL
+        - OTHER
+    EmploymentType:
+      type: string
+      enum:
+        - FULL_TIME
+        - PART_TIME
+        - CONTRACT
+        - FREELANCE
+        - INTERNSHIP
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        personalInfo:
+          $ref: '#/components/schemas/PersonalInfo'
+        demographics:
+          $ref: '#/components/schemas/Demographics'
+        preferences:
+          $ref: '#/components/schemas/Preferences'
+        privacySettings:
+          $ref: '#/components/schemas/PrivacySettings'
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PersonalInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNumber:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          $ref: '#/components/schemas/Gender'
+        profilePicture:
+          type: string
+          format: uri
+    Demographics:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationInfo'
+        occupation:
+          type: array
+          items:
+            $ref: '#/components/schemas/OccupationInfo'
+        location:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocationInfo'
+    EducationInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        institutionName:
+          type: string
+        degree:
+          type: string
+        fieldOfStudy:
+          type: string
+        educationLevel:
+          $ref: '#/components/schemas/EducationLevel'
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isCurrent:
+          type: boolean
+        isGraduated:
+          type: boolean
+    OccupationInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        currentPosition:
+          type: string
+        companyName:
+          type: string
+        industry:
+          type: string
+        employmentType:
+          $ref: '#/components/schemas/EmploymentType'
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isCurrentJob:
+          type: boolean
+    LocationInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        isCurrent:
+          type: boolean
+    Preferences:
+      type: object
+      description: تنظیمات و ترجیحات کاربر.
+      properties:
+        id:
+          type: string
+          format: uuid
+        communication:
+          $ref: '#/components/schemas/CommunicationPreferences'
+    CommunicationPreferences:
+      type: object
+      description: ترجیحات مربوط به روش‌های ارتباطی.
+      properties:
+        email:
+          type: boolean
+          default: true
+          description: دریافت اعلان‌ها از طریق ایمیل.
+        sms:
+          type: boolean
+          default: false
+          description: دریافت اعلان‌ها از طریق پیامک.
+    PrivacySettings:
+      type: object
+      description: تنظیمات مربوط به حریم خصوصی.
+      properties:
+        id:
+          type: string
+          format: uuid
+        isProfileVisibleToCounselors:
+          type: boolean
+          default: true
+          description: آیا پروفایل برای مشاوران قابل مشاهده باشد.
+        isProfileVisibleToOtherUsers:
+          type: boolean
+          default: false
+          description: آیا پروفایل برای سایر کاربران (متقاضیان) قابل مشاهده باشد.
+        allowDataAnalysisForMatching:
+          type: boolean
+          default: true
+          description: اجازه تحلیل داده‌ها برای بهبود فرآیند انطباق‌یابی.
+    HumanHandbook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/HandbookSection'
+        lastUpdated:
+          type: string
+          format: date-time
+        version:
+          type: integer
+    HandbookSection:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        analysisType:
+          type: string
+        source:
+          $ref: '#/components/schemas/AnalysisSource'
+        analysis:
+          $ref: ./shared/schemas.yaml#/components/schemas/Analysis
+        createdAt:
+          type: string
+          format: date-time
+    AnalysisSource:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/AnalysisSourceType'
+        sourceId:
+          type: string
+        analysisDate:
+          type: string
+          format: date-time
+    ProgressSummary:
+      type: object
+      description: Display-only model, aggregated from other services.
+      properties:
+        userId:
+          type: string
+          format: uuid
+        overallProgress:
+          type: number
+          format: float
+        lastUpdated:
+          type: string
+          format: date-time
+    AssessmentTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        version:
+          type: integer
+        formSchema:
+          type: object
+          description: ساختار کامل قالب (JSON Schema یا ساختار سفارشی)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    AssessmentInstance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        templateId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/AssessmentStatus'
+        templateSnapshot:
+          type: object
+          description: کپی غیرقابل‌تغییر از ساختار قالب در زمان تخصیص
+        responses:
+          type: object
+          description: پاسخ‌های خام کاربر مطابق ساختار قالب
+        assignedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+    AssessmentResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        assessmentId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        summary:
+          type: string
+          description: خلاصه کلی از نتایج.
+        scores:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+              score:
+                type: number
+        analysis:
+          $ref: ./shared/schemas.yaml#/components/schemas/Analysis
+        generatedAt:
+          type: string
+          format: date-time
+    QuestionnaireProgress:
+      type: object
+      properties:
+        questionnaireId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+          enum:
+            - NOT_STARTED
+            - IN_PROGRESS
+            - COMPLETED
+        progress:
+          type: number
+          description: درصد پیشرفت از 0 تا 100
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+    AssessmentProgress:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        questionnaires:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionnaireProgress'
+        overallProgress:
+          type: number
+        totalCompleted:
+          type: integer
+        totalInProgress:
+          type: integer
+    AuthTokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          description: مدت اعتبار access token (ثانیه)
+    CounselingSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        applicantId:
+          type: string
+          format: uuid
+        counselorId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/SessionStatus'
+        type:
+          $ref: '#/components/schemas/SessionType'
+        scheduledAt:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+        paymentStatus:
+          $ref: '#/components/schemas/PaymentStatus'
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionNote'
+        report:
+          $ref: '#/components/schemas/SessionReport'
+        analysis:
+          $ref: '#/components/schemas/SessionAnalysis'
+        metadata:
+          $ref: '#/components/schemas/SessionMetadata'
+    SessionMetadata:
+      type: object
+      properties:
+        platform:
+          type: string
+          example: Google Meet
+        meetingUrl:
+          type: string
+          format: uri
+        recordingUrl:
+          type: string
+          format: uri
+    SessionNote:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        isPrivate:
+          type: boolean
+          default: true
+        type:
+          $ref: '#/components/schemas/NoteType'
+        priority:
+          $ref: '#/components/schemas/NotePriority'
+        tags:
+          type: array
+          items:
+            type: string
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoteAttachment'
+    NoteAttachment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileId:
+          type: string
+          description: ID from File Service
+        fileName:
+          type: string
+    SessionReport:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        summary:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+    SessionAnalysis:
+      allOf:
+        - $ref: ./shared/schemas.yaml#/components/schemas/Analysis
+        - type: object
+          properties:
+            status:
+              $ref: '#/components/schemas/AnalysisStatus'
+            completedAt:
+              type: string
+              format: date-time
+    TimeSlot:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          example: '09:00'
+        endTime:
+          type: string
+          format: date-time
+          example: '17:00'
+        isAvailable:
+          type: boolean
+        dayOfWeek:
+          type: integer
+    AppointmentRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        counselorId:
+          type: string
+          format: uuid
+        sessionType:
+          $ref: '#/components/schemas/SessionType'
+        preferredTimeSlots:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeSlot'
+        status:
+          type: string
+          enum:
+            - PENDING_APPROVAL
+            - CONFIRMED
+            - REJECTED
+    CounselorProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        personalInfo:
+          $ref: '#/components/schemas/CounselorPersonalInfo'
+        professionalInfo:
+          $ref: '#/components/schemas/ProfessionalInfo'
+        specializations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Specialization'
+        availability:
+          $ref: '#/components/schemas/Availability'
+        rates:
+          type: array
+          items:
+            $ref: '#/components/schemas/RateInfo'
+        verificationStatus:
+          $ref: '#/components/schemas/VerificationState'
+    CounselorPublicProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        profilePicture:
+          type: string
+          format: uri
+        bio:
+          type: string
+        specializations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Specialization'
+        yearsOfExperience:
+          type: integer
+    CounselorPersonalInfo:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        gender:
+          $ref: '#/components/schemas/Gender'
+        bio:
+          type: string
+    ProfessionalInfo:
+      type: object
+      properties:
+        certifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certification'
+        yearsOfExperience:
+          type: integer
+    Certification:
+      type: object
+      properties:
+        name:
+          type: string
+        issuingOrg:
+          type: string
+        issueDate:
+          type: string
+          format: date
+    Specialization:
+      type: object
+      properties:
+        name:
+          type: string
+        level:
+          $ref: '#/components/schemas/ExpertiseLevel'
+    Availability:
+      type: object
+      properties:
+        timeSlots:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeSlot'
+        timezone:
+          type: string
+          example: Asia/Tehran
+    RateInfo:
+      type: object
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+          example: IRR
+        unit:
+          $ref: '#/components/schemas/RateUnit'
+    ClientRelationship:
+      type: object
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/RelationshipStatus'
+    ClientNote:
+      type: object
+      properties:
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    ClientGoal:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/GoalStatus'
+        targetDate:
+          type: string
+          format: date
+    VerificationRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        counselorId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/VerificationState'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationDocument'
+    VerificationDocument:
+      type: object
+      properties:
+        fileId:
+          type: string
+        type:
+          $ref: '#/components/schemas/DocumentType'
+    VerificationStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/VerificationState'
+        submittedAt:
+          type: string
+          format: date-time
+    DataInconsistency:
+      type: object
+      properties:
+        field:
+          type: string
+        keycloakValue:
+          nullable: true
+        profileValue:
+          nullable: true
+        severity:
+          type: string
+          enum:
+            - LOW
+            - MEDIUM
+            - HIGH
+        recommendation:
+          type: string
+    SyncHistoryEntry:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - SUCCESS
+            - ERROR
+            - PARTIAL
+        syncedFields:
+          type: array
+          items:
+            type: string
+        errorMessage:
+          type: string
+          nullable: true
+        duration:
+          type: integer
+          description: مدت زمان عملیات بر حسب میلی‌ثانیه
+    SyncStatus:
+      type: object
+      properties:
+        keycloakLastUpdate:
+          type: string
+          format: date-time
+        profileLastUpdate:
+          type: string
+          format: date-time
+        syncStatus:
+          type: string
+          enum:
+            - SYNCED
+            - PENDING
+            - ERROR
+        lastSyncAttempt:
+          type: string
+          format: date-time
+        syncHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncHistoryEntry'
+    KeycloakConsistencyValidation:
+      type: object
+      properties:
+        isConsistent:
+          type: boolean
+        inconsistencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataInconsistency'
+        lastSyncAt:
+          type: string
+          format: date-time
+        recommendations:
+          type: array
+          items:
+            type: string
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        thumbnail:
+          type: string
+          format: uri
+        lessons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lesson'
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+    Enrollment:
+      type: object
+      properties:
+        id:
+          type: string
+        courseId:
+          type: string
+        status:
+          $ref: '#/components/schemas/EnrollmentStatus'
+        paymentStatus:
+          $ref: '#/components/schemas/PaymentStatus'
+        metadata:
+          $ref: '#/components/schemas/EnrollmentMetadata'
+    EnrollmentMetadata:
+      type: object
+      properties:
+        couponCode:
+          type: string
+    LearningProgress:
+      type: object
+      properties:
+        courseId:
+          type: string
+        overallProgress:
+          type: number
+        assessmentsCompleted:
+          type: array
+          items:
+            type: object
+        achievements:
+          type: array
+          items:
+            type: object
+    CourseNote:
+      type: object
+      properties:
+        userId:
+          type: string
+        courseId:
+          type: string
+        content:
+          type: string
+    LearningReport:
+      type: object
+      properties:
+        id:
+          type: string
+        reportType:
+          $ref: '#/components/schemas/ReportType'
+        content:
+          type: object
+        analysis:
+          $ref: ./shared/schemas.yaml#/components/schemas/Analysis
+    UploadTokenRequest:
+      type: object
+      required:
+        - fileType
+        - fileName
+        - fileSize
+      properties:
+        fileType:
+          $ref: '#/components/schemas/FileType'
+        fileName:
+          type: string
+        fileSize:
+          type: integer
+          description: اندازه فایل به بایت
+    UploadTokenResponse:
+      type: object
+      properties:
+        uploadUrl:
+          type: string
+          format: uri
+        fileId:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+    DownloadTokenRequest:
+      type: object
+      required:
+        - fileId
+      properties:
+        fileId:
+          type: string
+          format: uuid
+    DownloadTokenResponse:
+      type: object
+      properties:
+        downloadUrl:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+    FileAccessValidation:
+      type: object
+      properties:
+        hasAccess:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            type: string
+    FileMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+        fileId:
+          type: string
+        userId:
+          type: string
+        fileName:
+          type: string
+        fileType:
+          $ref: '#/components/schemas/FileType'
+        fileSize:
+          type: integer
+        mimeType:
+          type: string
+        status:
+          $ref: '#/components/schemas/FileStatus'
+        s3Key:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: string
+          format: date-time
+    MatchSuggestion:
+      type: object
+      properties:
+        id:
+          type: string
+        suggestedUserId:
+          type: string
+        compatibilityScore:
+          type: number
+        analysis:
+          $ref: '#/components/schemas/Analysis'
+        status:
+          $ref: '#/components/schemas/SuggestionStatus'
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+    SuggestionList:
+      type: object
+      properties:
+        suggestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchSuggestion'
+        total:
+          type: integer
+        page:
+          type: integer
+    UpdateSuggestionRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          $ref: '#/components/schemas/SuggestionAction'
+        feedback:
+          type: string
+    IntroductionRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        requesterId:
+          type: string
+        targetId:
+          type: string
+        status:
+          $ref: '#/components/schemas/RequestStatus'
+        message:
+          type: string
+        requestedAt:
+          type: string
+          format: date-time
+        respondedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+    IntroductionRequestList:
+      type: object
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntroductionRequest'
+        total:
+          type: integer
+        page:
+          type: integer
+    CreateIntroductionRequest:
+      type: object
+      required:
+        - targetId
+      properties:
+        targetId:
+          type: string
+        message:
+          type: string
+    RespondRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum:
+            - ACCEPTED
+            - REJECTED
+        message:
+          type: string
+    MatchmakingModule:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        status:
+          $ref: '#/components/schemas/ModuleStatus'
+        enabledAt:
+          type: string
+          format: date-time
+        disabledAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CompatibilityAnalysis:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId1:
+          type: string
+        userId2:
+          type: string
+        compatibilityScore:
+          type: number
+        analysisForUser1:
+          $ref: '#/components/schemas/Analysis'
+        analysisForUser2:
+          $ref: '#/components/schemas/Analysis'
+        algorithmVersion:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    AnalysisViewList:
+      type: object
+      properties:
+        analyses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PairAnalysisView'
+        total:
+          type: integer
+        page:
+          type: integer
+    PairAnalysisView:
+      type: object
+      description: نمای تحلیل مخصوص مشاهده‌کننده (بدون نمایش تحلیل طرف مقابل)
+      properties:
+        userId:
+          type: string
+          description: شناسه کاربر مقابل
+        compatibilityScore:
+          type: number
+        analysis:
+          $ref: '#/components/schemas/Analysis'
+        createdAt:
+          type: string
+          format: date-time
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          $ref: ./shared/schemas.yaml#/components/schemas/NotificationType
+        channel:
+          $ref: ./shared/schemas.yaml#/components/schemas/NotificationChannel
+        title:
+          type: string
+        message:
+          type: string
+        data:
+          type: object
+        status:
+          $ref: ./shared/schemas.yaml#/components/schemas/NotificationStatus
+        createdAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+    NotificationList:
+      type: object
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        total:
+          type: integer
+        page:
+          type: integer
+    SystemNotification:
+      allOf:
+        - $ref: '#/components/schemas/Notification'
+        - type: object
+          properties:
+            recipients:
+              type: array
+              items:
+                type: string
+    SystemNotificationList:
+      type: object
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/SystemNotification'
+        total:
+          type: integer
+        page:
+          type: integer
+    CreateNotification:
+      type: object
+      required:
+        - title
+        - message
+      properties:
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          $ref: ./shared/schemas.yaml#/components/schemas/NotificationType
+        recipients:
+          type: array
+          items:
+            type: string
+        data:
+          type: object
+    UserRoadmap:
+      type: object
+      description: نقشه راه کامل و مستقل برای یک کاربر.
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        startStateId:
+          type: string
+          description: شناسه node شروع
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserStateNode'
+        transitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransitionDefinition'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    RoadmapTemplate:
+      type: object
+      description: تعریف یک قالب استاندارد برای نقشه راه.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: نام قالب (مانند "مسیر پیش‌فرض توسعه‌دهندگان نرم‌افزار").
+        description:
+          type: string
+        startStateId:
+          type: string
+          description: شناسه node شروع در این قالب.
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserStateNode'
+        transitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransitionDefinition'
+        version:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UserStateNode:
+      type: object
+      description: هر مرحله یا گره در مسیر رشد کاربر.
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+          description: کلید ثابت و قابل فهم برای state (مانند PROFILE_COMPLETION)
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/NodeStatus'
+        progress:
+          type: integer
+          format: int32
+          description: 0-100
+        order:
+          type: integer
+          description: ترتیب نمایش در UI
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/StateTaskAssignment'
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        changeLog:
+          type: array
+          items:
+            $ref: '#/components/schemas/StateChangeLog'
+    TransitionDefinition:
+      type: object
+      description: تعریف یک انتقال (گذار) بین دو مرحله.
+      properties:
+        id:
+          type: string
+        fromStateId:
+          type: string
+        toStateId:
+          type: string
+        auto:
+          type: boolean
+          description: آیا انتقال خودکار پس از تکمیل مبدأ انجام شود؟
+        conditions:
+          type: array
+          items:
+            type: object
+    StateTaskAssignment:
+      type: object
+      description: تعریف یک وظیفه در یک مرحله.
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - COURSE
+            - QUESTIONNAIRE
+            - CUSTOM
+        refId:
+          type: string
+          description: شناسه خارجی (مثلاً ID دوره در سرویس آموزش)
+        required:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - NOT_STARTED
+            - IN_PROGRESS
+            - COMPLETED
+            - BLOCKED
+        progress:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+    StateChangeLog:
+      type: object
+      description: برای ردیابی تغییرات در یک node خاص.
+      properties:
+        id:
+          type: string
+        at:
+          type: string
+          format: date-time
+        actor:
+          type: string
+          enum:
+            - SYSTEM
+            - ADMIN
+            - COUNSELOR
+        action:
+          type: string
+          enum:
+            - ADD
+            - REMOVE
+            - UPDATE
+        field:
+          type: string
+        before:
+          type: object
+        after:
+          type: object
+        reason:
+          type: string
+    NodeStatus:
+      type: string
+      enum:
+        - NOT_STARTED
+        - IN_PROGRESS
+        - COMPLETED
+        - SKIPPED
+        - BLOCKED
+    JourneyView:
+      type: object
+      description: نمای بهینه‌شده از مسیر رشد برای نمایش به کاربر.
+      properties:
+        currentState:
+          $ref: '#/components/schemas/CurrentState'
+        overallProgress:
+          $ref: '#/components/schemas/OverallProgress'
+        currentTasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrentTask'
+        nextState:
+          $ref: '#/components/schemas/NextState'
+        roadmapView:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoadmapViewItem'
+    CurrentState:
+      type: object
+      properties:
+        stateKey:
+          type: string
+        title:
+          type: string
+        status:
+          $ref: '#/components/schemas/NodeStatus'
+        progress:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time
+    OverallProgress:
+      type: object
+      properties:
+        percentage:
+          type: integer
+        completedNodes:
+          type: integer
+        totalNodes:
+          type: integer
+    CurrentTask:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum:
+            - COURSE
+            - QUESTIONNAIRE
+            - CUSTOM
+        status:
+          type: string
+          enum:
+            - IN_PROGRESS
+            - NOT_STARTED
+        priority:
+          type: string
+          enum:
+            - HIGH
+            - MEDIUM
+            - LOW
+        metadata:
+          type: object
+    NextState:
+      type: object
+      properties:
+        stateKey:
+          type: string
+        title:
+          type: string
+    RoadmapViewItem:
+      type: object
+      description: یک آیتم ساده‌شده از نقشه راه برای نمایش گرافیکی.
+      properties:
+        stateKey:
+          type: string
+        title:
+          type: string
+        status:
+          $ref: '#/components/schemas/NodeStatus'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Authentication via JWT token in Authorization header.
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: شناسه کاربر
+      schema:
+        type: string
+        format: uuid
+  responses:
+    Unauthorized:
+      description: عدم احراز هویت.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: عدم دسترسی کافی.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: منبع مورد نظر یافت نشد.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: درخواست نامعتبر است.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+tags:
+  - name: Applicant Profile Service
+    description: Endpoints from the Applicant Profile Service
+  - name: Assessment Service
+    description: Endpoints from the Assessment Service
+  - name: Auth Service
+    description: Endpoints from the Auth Service
+  - name: Counseling Service
+    description: Endpoints from the Counseling Service
+  - name: Counselor Profile Service
+    description: Endpoints from the Counselor Profile Service
+  - name: Education Service
+    description: Endpoints from the Education Service
+  - name: File Service
+    description: Endpoints from the File Service
+  - name: Matchmaking Service
+    description: Endpoints from the Matchmaking Service
+  - name: Notification Service
+    description: Endpoints from the Notification Service
+  - name: Onboarding Service
+    description: Endpoints from the Onboarding Service
