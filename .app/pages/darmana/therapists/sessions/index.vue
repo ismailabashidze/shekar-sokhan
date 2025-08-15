@@ -266,7 +266,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="mb-5">
     <TairoContentWrapper>
       <div class="flex items-center justify-between">
         <div class="flex items-center">
