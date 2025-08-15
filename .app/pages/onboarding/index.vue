@@ -216,7 +216,7 @@ const pasteCouponCode = () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center py-8 md:bg-gradient-to-br md:from-blue-500 md:via-purple-500 md:to-pink-500 dark:md:from-blue-600 dark:md:via-purple-600 dark:md:to-pink-600" data-tour="welcome">
+  <div class="animated-gradient-bg flex min-h-screen items-center justify-center py-8" data-tour="welcome">
     <div class="mx-auto w-full max-w-4xl">
       <BaseCard>
         <div
@@ -512,3 +512,72 @@ const pasteCouponCode = () => {
   <!-- Tour Component -->
   <TourButton />
 </template>
+
+<style scoped>
+.animated-gradient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(-45deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b, #10b981, #06b6d4);
+  background-size: 400% 400%;
+  animation: gradientShift 30s ease infinite;
+  overflow: hidden;
+}
+
+.dark .animated-gradient-bg {
+  background: linear-gradient(-45deg, #1e40af, #7c3aed, #be185d, #d97706, #059669, #0284c7);
+  background-size: 400% 400%;
+  animation: gradientShift 30s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Add some subtle floating animation for enhanced effect */
+.animated-gradient-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  animation: floatingBubbles 45s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes floatingBubbles {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.3;
+  }
+  33% {
+    transform: translate(15px, -15px) rotate(60deg);
+    opacity: 0.4;
+  }
+  66% {
+    transform: translate(-10px, 10px) rotate(120deg);
+    opacity: 0.35;
+  }
+}
+
+/* Ensure content stays above the animated background */
+.animated-gradient-bg > * {
+  position: relative;
+  z-index: 1;
+}
+</style>

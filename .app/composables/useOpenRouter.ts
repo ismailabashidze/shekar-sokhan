@@ -3,6 +3,403 @@ interface ChatMessage {
   content: string
 }
 
+// Advanced AI Settings Configuration System
+interface AIResponseConfig {
+  max_tokens: number
+  temperature: number
+  response_format?: { type: string }
+  system_prompt_additions: string
+  post_processing: {
+    enable_emoji_injection: boolean
+    emoji_density: number
+    enable_formatting: boolean
+    format_type: string
+  }
+}
+
+// Calculate dynamic max_tokens based on length preference
+function calculateMaxTokens(lengthPref: string, isPremium: boolean): number {
+  const baseTokens = {
+    short: isPremium ? 200 : 150,
+    medium: isPremium ? 400 : 300,
+    long: isPremium ? 800 : 600
+  }
+  return baseTokens[lengthPref] || baseTokens.medium
+}
+
+// Map creativity to temperature (0-2 scale)
+function mapCreativityToTemperature(creativity: string): number {
+  const mapping = {
+    '0': 0.2,  // Very focused and deterministic
+    '1': 0.7,  // Balanced
+    '2': 1.2   // Highly creative
+  }
+  return mapping[creativity] || 0.7
+}
+
+// Generate random message count with preference for 2-3 messages
+function generateRandomMessageCount(): number {
+  const random = Math.random()
+  
+  // Weighted randomization favoring 2-3 messages
+  if (random < 0.15) return 1      // 15% chance for 1 message
+  if (random < 0.50) return 2      // 35% chance for 2 messages  
+  if (random < 0.85) return 3      // 35% chance for 3 messages
+  return 4                         // 15% chance for 4 messages
+}
+
+// Generate AI configuration from settings
+function generateAIConfig(aiSettings: any, isConversationStarter: boolean = false): AIResponseConfig {
+  // Special configuration for conversation starters (AI-initiated messages with session summaries)
+  if (isConversationStarter) {
+    return {
+      max_tokens: 1200, // Always use high token count for comprehensive summaries
+      temperature: 0.7, // Balanced creativity for welcoming but informative tone
+      system_prompt_additions: generateConversationStarterPrompt(aiSettings),
+      post_processing: {
+        enable_emoji_injection: true, // Always use emojis for warmth
+        emoji_density: 0.08, // Medium emoji density
+        enable_formatting: true, // Enable formatting for better readability
+        format_type: 'bullets' // Use bullet points for organized summary
+      }
+      // Note: NEVER use json_object response format for conversation starters
+      // Note: NEVER use multi-message for conversation starters - keep it as one comprehensive message
+    }
+  }
+
+  // Regular user-response configuration
+  const config: AIResponseConfig = {
+    max_tokens: calculateMaxTokens(aiSettings.lengthPref, aiSettings.isPremium),
+    temperature: mapCreativityToTemperature(aiSettings.creativity),
+    system_prompt_additions: generateAdvancedSystemPrompt(aiSettings),
+    post_processing: {
+      enable_emoji_injection: aiSettings.emojiLevel !== 'none',
+      emoji_density: getEmojiDensity(aiSettings.emojiLevel),
+      enable_formatting: aiSettings.formatting !== 'none',
+      format_type: aiSettings.formatting
+    }
+  }
+
+  // Multi-message mode requires JSON response format
+  if (aiSettings.multiMsgMode !== 'single') {
+    config.response_format = { type: "json_object" }
+  }
+  // Single message mode uses regular string response (no response_format specified)
+
+  return config
+}
+
+// Advanced system prompt generation
+function generateAdvancedSystemPrompt(aiSettings: any): string {
+  let prompt = '\n\n=== تنظیمات پیشرفته پاسخ‌دهی ===\n'
+  
+  // UX instruction: Use natural language instead of template placeholders
+  prompt += `
+=== دستورالعمل مهم برای تجربه کاربری ===
+CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ندارید (مانند نام مراجع، سن، یا جزئیات شخصی)، از کلمات طبیعی و دوستانه استفاده کنید به جای قالب‌های خالی یا placeholder ها.
+
+مثال‌های درست:
+- به جای [نام مراجع] از "دوست من" یا "عزیز من" استفاده کنید
+- به جای [سن] از عبارات کلی مثل "در این سن" یا "در دوره‌ای از زندگی که هستید" استفاده کنید
+- به جای [موقعیت] از "در شرایط فعلی" یا "در وضعیت کنونی" استفاده کنید
+
+این کار باعث احساس طبیعی‌تر و دوستانه‌تر شدن گفتگو می‌شود و تجربه کاربری بهتری ایجاد می‌کند.
+`
+
+  // Multi-message handling with randomization
+  if (aiSettings.multiMsgMode !== 'single') {
+    // Generate random number of messages (2-4, with preference for 2-3)
+    const randomMessageCount = generateRandomMessageCount()
+    
+    prompt += `
+CRITICAL INSTRUCTION - MULTI-MESSAGE MODE:
+You must break your response into ${randomMessageCount} separate message${randomMessageCount > 1 ? 's' : ''}.
+Each message should be ${aiSettings.multiMsgMode === 'multi_short' ? 'short (20-50 words)' : 'medium length (50-100 words)'}.
+
+IMPORTANT: Respond with a simple JSON object in this format:
+{
+  "messages": [
+    "first message content here",
+    "second message content here"
+  ]
+}
+
+DO NOT use function calls or complex JSON structures. Just return a simple object with a "messages" array containing ${randomMessageCount} text string${randomMessageCount > 1 ? 's' : ''}.
+`
+  }
+
+  // Tone and style instructions
+  const toneInstructions = {
+    formal: 'استفاده از زبان رسمی، اصطلاحات تخصصی مناسب، و ساختار جملات منظم.',
+    casual: 'استفاده از زبان محاورهای، کلمات ساده، و لحن دوستانه و صمیمی.',
+    neutral: 'حفظ تعادل بین رسمی و غیررسمی، استفاده از زبان روان و قابل فهم.'
+  }
+
+  const kindnessInstructions = {
+    very_kind: 'نشان دادن همدردی عمیق، استفاده از کلمات تسلی‌دهنده، و ایجاد احساس امنیت کامل.',
+    kind: 'ابراز مهربانی و درک، گوش دادن فعال، و ارائه حمایت عاطفی.',
+    neutral: 'حفظ حرفه‌ای بودن همراه با گرمی، ارائه کمک بدون احساساتی شدن.',
+    direct: 'صادق و مستقیم بودن، تمرکز بر راه‌حل‌های عملی، اجتناب از تعارف.'
+  }
+
+  if (aiSettings.tone && toneInstructions[aiSettings.tone]) {
+    prompt += `\nسبک گفتار: ${toneInstructions[aiSettings.tone]}\n`
+  }
+
+  if (aiSettings.kindness && kindnessInstructions[aiSettings.kindness]) {
+    prompt += `سطح مهربانی: ${kindnessInstructions[aiSettings.kindness]}\n`
+  }
+
+  // Language style
+  const languageStyles = {
+    professional: 'استفاده از واژگان تخصصی روانشناسی، ساختار منطقی، و ارجاع به مفاهیم علمی.',
+    casual: 'استفاده از زبان روزمره، مثال‌های از زندگی عادی، و توضیحات ساده.',
+    friendly: 'ایجاد حس صمیمیت، استفاده از تشبیهات دوستانه، و لحن گرم و دعوت‌کننده.'
+  }
+
+  if (aiSettings.languageStyle && languageStyles[aiSettings.languageStyle]) {
+    prompt += `سبک زبان: ${languageStyles[aiSettings.languageStyle]}\n`
+  }
+
+  // Premium enhancements
+  if (aiSettings.isPremium) {
+    prompt += `
+PREMIUM FEATURES ENABLED:
+- ارائه تحلیل‌های عمیق‌تر و چندبعدی
+- استفاده از تکنیک‌های پیشرفته روان‌درمانی
+- ارائه تمرین‌های عملی و راهکارهای تخصصی
+- پیگیری مراحل پیشرفت و ارائه بازخورد دقیق
+`
+  }
+
+  return prompt
+}
+
+// Generate conversation starter prompt (ignores user settings for comprehensive summaries)
+function generateConversationStarterPrompt(aiSettings: any): string {
+  let prompt = '\n\n=== تنظیمات ویژه پیام آغازین ===\n'
+  
+  // UX instruction: Use natural language instead of template placeholders
+  prompt += `
+=== دستورالعمل مهم برای تجربه کاربری ===
+CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ندارید (مانند نام مراجع، سن، یا جزئیات شخصی)، از کلمات طبیعی و دوستانه استفاده کنید به جای قالب‌های خالی یا placeholder ها.
+
+مثال‌های درست:
+- به جای [نام مراجع] از "دوست من" یا "عزیز من" استفاده کنید
+- به جای [سن] از عبارات کلی مثل "در این سن" یا "در دوره‌ای از زندگی که هستید" استفاده کنید
+- به جای [موقعیت] از "در شرایط فعلی" یا "در وضعیت کنونی" استفاده کنید
+
+این کار باعث احساس طبیعی‌تر و دوستانه‌تر شدن گفتگو می‌شود و تجربه کاربری بهتری ایجاد می‌کند.
+`
+
+  prompt += `
+CONVERSATION STARTER MODE - COMPREHENSIVE SINGLE MESSAGE:
+CRITICAL: This is a conversation starter - ALWAYS respond as a SINGLE comprehensive message, NEVER in multi-message format.
+Ignore any multi-message settings from the user for this conversation starter.
+
+- ارائه خلاصه‌ای جامع و کامل از جلسات قبلی
+- استفاده از لحن گرم، مهربان و حرفه‌ای
+- سازماندهی اطلاعات با استفاده از نقاط و فهرست‌ها
+- حداکثر طول پاسخ برای ارائه تمام جزئیات مهم
+- تمرکز بر ایجاد احساس امنیت و اعتماد در مراجع
+- ترغیب به ادامه گفتگو و صحبت درباره وضعیت فعلی
+
+سبک گفتار: گرم، دلسوزانه، و حرفه‌ای - ترکیبی از صمیمیت و تخصص
+استفاده از ایموجی‌های مناسب برای ایجاد فضای دوستانه
+قالب‌بندی با نقاط و فهرست‌ها برای خوانایی بهتر
+
+تأکید: این پیام باید جامع و کامل باشد - نادیده گیری تنظیمات کاربر برای طول و جزئیات
+NEVER break this into multiple messages - it must be ONE complete message.
+`
+
+  // Always include premium features for conversation starters regardless of user's premium status
+  prompt += `
+PREMIUM FEATURES ENABLED FOR CONVERSATION STARTERS:
+- ارائه تحلیل‌های عمیق از الگوهای رفتاری مراجع
+- استفاده از تکنیک‌های پیشرفته روان‌درمانی در خلاصه‌سازی
+- ارائه بینش‌های تخصصی درباره پیشرفت مراجع
+- پیشنهاد موضوعات و سؤالات هدفمند برای جلسه جدید
+`
+
+  return prompt
+}
+
+// Get emoji density based on level
+function getEmojiDensity(emojiLevel: string): number {
+  const densities = {
+    high: 0.15,    // ~15% of words can have emoji
+    medium: 0.08,  // ~8% of words can have emoji  
+    low: 0.03,     // ~3% of words can have emoji
+    none: 0
+  }
+  return densities[emojiLevel] || 0
+}
+
+// Post-process response based on settings
+function postProcessResponse(response: string, config: AIResponseConfig): string {
+  let processedResponse = response
+
+  // Emoji injection
+  if (config.post_processing.enable_emoji_injection && config.post_processing.emoji_density > 0) {
+    processedResponse = injectEmojis(processedResponse, config.post_processing.emoji_density)
+  }
+
+  // Formatting
+  if (config.post_processing.enable_formatting) {
+    processedResponse = applyFormatting(processedResponse, config.post_processing.format_type)
+  }
+
+  return processedResponse
+}
+
+// Inject contextual emojis
+function injectEmojis(text: string, density: number): string {
+  const emotionEmojis = {
+    'خوشحال|شاد|خوش': '😊',
+    'غمگین|ناراحت|غم': '😔', 
+    'عصبانی|خشمگین': '😠',
+    'نگران|اضطراب': '😰',
+    'آرام|راحت': '😌',
+    'امید|امیدوار': '🌟',
+    'قوی|قدرت': '💪',
+    'عشق|محبت': '❤️',
+    'فکر|تفکر': '🤔',
+    'موفقیت|پیروز': '🎉'
+  }
+
+  const sentences = text.split('.')
+  const targetSentences = Math.floor(sentences.length * density)
+  
+  for (let i = 0; i < targetSentences && i < sentences.length; i++) {
+    const sentence = sentences[i]
+    
+    for (const [pattern, emoji] of Object.entries(emotionEmojis)) {
+      const regex = new RegExp(pattern, 'gi')
+      if (sentence.match(regex)) {
+        sentences[i] = sentence + ' ' + emoji
+        break
+      }
+    }
+  }
+
+  return sentences.join('.')
+}
+
+// Apply formatting based on type
+function applyFormatting(text: string, formatType: string): string {
+  switch (formatType) {
+    case 'bullets':
+      return text.replace(/(\d+[\.\-\:]|[\-\*])\s*/g, '• ')
+    case 'numbers':
+      let counter = 1
+      return text.replace(/[\-\*•]\s*/g, () => `${counter++}. `)
+    case 'markdown':
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '**$1**')
+        .replace(/\*(.*?)\*/g, '*$1*')
+    case 'rich':
+      return text
+        .replace(/(نکته مهم|توجه|هشدار)/gi, '🔔 **$1**')
+        .replace(/(راه[‌\s]?حل|پیشنهاد)/gi, '💡 **$1**')
+    default:
+      return text
+  }
+}
+
+// Handle multi-message JSON responses with delays
+async function handleMultiMessageResponse(response: string, config: AIResponseConfig, onChunk: (chunk: any) => void) {
+  try {
+    console.log('🔄 Processing multi-message response:', response)
+    console.log('📏 Raw response length:', response.length)
+    console.log('🧾 First 200 chars:', response.substring(0, 200))
+    
+    // Clean the response and try to parse JSON
+    let cleanResponse = response.trim()
+    
+    // Remove any markdown code blocks if present
+    cleanResponse = cleanResponse.replace(/```json\s*\n?/g, '').replace(/```\s*$/g, '')
+    
+    console.log('🧽 Cleaned response:', cleanResponse)
+    console.log('📏 Cleaned response length:', cleanResponse.length)
+    
+    let parsedResponse: any
+    try {
+      parsedResponse = JSON.parse(cleanResponse)
+      console.log('✅ Successfully parsed JSON:', parsedResponse)
+      console.log('🔑 Parsed response keys:', Object.keys(parsedResponse))
+    } catch (parseError) {
+      console.error('❌ JSON Parse Error:', parseError)
+      console.log('💥 Failed to parse this response:', cleanResponse)
+      
+      // Fallback: treat as single message
+      onChunk(postProcessResponse(cleanResponse, config))
+      return
+    }
+
+    if (parsedResponse.messages && Array.isArray(parsedResponse.messages)) {
+      console.log('🔍 Found messages array:', parsedResponse.messages)
+      console.log('📊 Messages array length:', parsedResponse.messages.length)
+      console.log('📝 Messages content:', parsedResponse.messages.map((msg, idx) => `${idx + 1}: "${msg}"`))
+      
+      // Validate messages array
+      if (parsedResponse.messages.length === 0) {
+        console.warn('⚠️ Empty messages array, falling back to single message')
+        onChunk(postProcessResponse(response, config))
+        return
+      }
+
+      // Validate each message is a string
+      const validMessages = parsedResponse.messages.filter(msg => 
+        typeof msg === 'string' && msg.trim().length > 0
+      )
+
+      console.log('✅ Valid messages after filtering:', validMessages)
+      console.log('📊 Valid messages count:', validMessages.length)
+
+      if (validMessages.length === 0) {
+        console.warn('⚠️ No valid messages found, falling back to single message')
+        onChunk(postProcessResponse(response, config))
+        return
+      }
+
+      console.log(`📨 Processing ${validMessages.length} valid messages`)
+      
+      // Send messages with delays
+      for (let i = 0; i < validMessages.length; i++) {
+        const message = validMessages[i]
+        const processedMessage = postProcessResponse(message, config)
+        
+        console.log(`📤 Sending message ${i + 1}:`, processedMessage.substring(0, 50) + '...')
+        
+        // Validate processed message
+        if (!processedMessage.trim()) {
+          console.warn(`⚠️ Empty processed message ${i + 1}, skipping`)
+          continue
+        }
+
+        // For the first message, send immediately
+        if (i === 0) {
+          onChunk({ type: 'multi_message', message: processedMessage, index: i, total: validMessages.length })
+        } else {
+          // Add delay for subsequent messages (1.5-3 seconds based on message length)
+          const delay = Math.min(Math.max(message.length * 20, 1500), 3000)
+          
+          setTimeout(() => {
+            onChunk({ type: 'multi_message', message: processedMessage, index: i, total: validMessages.length })
+          }, delay * i) // Cumulative delays
+        }
+      }
+    } else {
+      console.warn('⚠️ Invalid multi-message format, falling back to single message')
+      onChunk(postProcessResponse(response, config))
+    }
+  } catch (error) {
+    console.error('❌ Error processing multi-message response:', error)
+    // Fallback to single message
+    onChunk(postProcessResponse(response, config))
+  }
+}
+
 interface OpenRouterModel {
   id: string
   name: string
@@ -42,6 +439,8 @@ interface OpenRouterOptions {
     approach: string
     expertise: string
   }
+  aiResponseSettings?: AiResponseSettings
+  isConversationStarter?: boolean
 }
 
 export interface PatientGenerateInput {
@@ -61,6 +460,7 @@ export interface PatientGenerateOutput {
 }
 
 import type { TherapistGenerateInput, TherapistGenerateOutput } from '~/types'
+import type { AiResponseSettings } from './useAIResponseSettings'
 
 export function useOpenRouter() {
   const config = useRuntimeConfig()
@@ -124,7 +524,6 @@ export function useOpenRouter() {
   ) => {
     processing.value = true
     error.value = null
-
     try {
       // Add system message with patient/therapist details at the beginning
       const systemMessage = messages[0]?.role === 'system' ? messages[0] : null
@@ -184,6 +583,17 @@ export function useOpenRouter() {
 `
       }
 
+      // Generate advanced AI configuration from settings
+      const aiSettings = options.aiResponseSettings
+      const isConversationStarter = options.isConversationStarter || false
+      let aiConfig: AIResponseConfig | null = null
+      
+      if (aiSettings && therapistDetails) {
+        aiConfig = generateAIConfig(aiSettings, isConversationStarter)
+        systemPrompt += aiConfig.system_prompt_additions
+        console.log(`🤖 AI Config Generated (${isConversationStarter ? 'CONVERSATION STARTER' : 'REGULAR'}):`, aiConfig)
+      }
+
       const messagesWithSystem = systemMessage
         ? messages
         : [{ role: 'system', content: systemPrompt }, ...messages]
@@ -200,9 +610,9 @@ export function useOpenRouter() {
           model: options.model || selectedModel.value,
           messages: messagesWithSystem,
           stream: true,
-          temperature: options.temperature || 0.7,
-          max_tokens: options.max_tokens || 0,
-          include_reasoning: true,
+          temperature: aiConfig?.temperature || options.temperature || 0.7,
+          max_tokens: aiConfig?.max_tokens || options.max_tokens || 400,
+          ...(aiConfig?.response_format && { response_format: aiConfig.response_format }),
           plugins: [],
           transforms: ['middle-out'],
         }),
@@ -242,6 +652,8 @@ export function useOpenRouter() {
       }
 
       let buffer = ''
+      let fullResponse = ''
+      
       // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read()
@@ -268,15 +680,62 @@ export function useOpenRouter() {
 
           try {
             const parsed = JSON.parse(data)
-            // Extract the text content from the delta
             const textChunk = parsed?.choices?.[0]?.delta?.content
             if (textChunk) {
-              onChunk(textChunk)
+              fullResponse += textChunk
+              
+              // For multi-message mode, collect full response before processing
+              if (aiConfig?.response_format?.type === 'json_object') {
+                // Don't stream individual chunks for JSON responses, wait for complete
+                continue
+              } else {
+                // Stream normally for single message mode
+                onChunk(textChunk)
+              }
             }
           }
           catch (e: any) {
             throw new Error(`Invalid response format: ${e.message}`)
           }
+        }
+      }
+
+      // Post-process the complete response with validation
+      if (aiConfig && fullResponse) {
+        try {
+          if (aiConfig.response_format?.type === 'json_object') {
+            console.log('🔍 Validating JSON response length:', fullResponse.length)
+            
+            // Validate response is not empty
+            if (!fullResponse.trim()) {
+              console.error('❌ Empty JSON response received')
+              onChunk('متاسفانه پاسخی دریافت نشد. لطفا دوباره تلاش کنید.')
+              return
+            }
+            
+            // Handle multi-message JSON response
+            await handleMultiMessageResponse(fullResponse, aiConfig, onChunk)
+          } else {
+            // Apply post-processing for single message with validation
+            if (!fullResponse.trim()) {
+              console.error('❌ Empty single message response received')
+              onChunk('متاسفانه پاسخی دریافت نشد. لطفا دوباره تلاش کنید.')
+              return
+            }
+            
+            const processedResponse = postProcessResponse(fullResponse, aiConfig)
+            
+            // Send additional processed content if it was added
+            if (processedResponse !== fullResponse) {
+              const additionalContent = processedResponse.replace(fullResponse, '')
+              if (additionalContent.trim()) {
+                onChunk(additionalContent)
+              }
+            }
+          }
+        } catch (processingError) {
+          console.error('❌ Error in response processing:', processingError)
+          onChunk('\nخطا در پردازش پاسخ. لطفا دوباره تلاش کنید.')
         }
       }
     }
@@ -365,7 +824,6 @@ export function useOpenRouter() {
           },
           temperature: 0.7,
           max_tokens: 0,
-          include_reasoning: true,
           plugins: [],
           transforms: ['middle-out'],
         }),
@@ -511,7 +969,6 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
           },
           temperature: 0.7,
           max_tokens: 0,
-          include_reasoning: true,
           plugins: [],
           transforms: ['middle-out'],
         }),
@@ -644,7 +1101,6 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
           },
           temperature: 0.7,
           max_tokens: 0,
-          include_reasoning: true,
           plugins: [],
           transforms: ['middle-out'],
         }),

@@ -13,6 +13,7 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 
 import { computed, reactive, watch, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAIResponseSettings } from '@/composables/useAIResponseSettings'
 
 type EmojiLevel = 'high' | 'medium' | 'low' | 'none'
 type Tone = 'formal' | 'neutral' | 'casual'
@@ -89,9 +90,15 @@ watch(
 
 const router = useRouter()
 
-// Premium features
-const isPremiumUser = ref(false) // This would come from your auth/user store
+// Premium features - integrated with our composable
+const { settings: aiResponseSettings, setPremiumStatus } = useAIResponseSettings()
+const isPremiumUser = computed(() => aiResponseSettings.value.isPremium)
 const showPremiumModal = ref(false)
+
+// Toggle premium status
+const togglePremiumStatus = () => {
+  setPremiumStatus(!isPremiumUser.value)
+}
 
 // Debug modal state changes
 watch(showPremiumModal, (newValue, oldValue) => {
@@ -208,6 +215,20 @@ function goBack() {
             </div>
           </div>
           <div class="flex items-center gap-3">
+            <!-- Premium Toggle Button -->
+            <BaseButton
+              :color="isPremiumUser ? 'warning' : 'white'"
+              :variant="isPremiumUser ? 'solid' : 'outline'"
+              size="sm"
+              @click="togglePremiumStatus"
+              class="transition-all duration-200"
+              :class="isPremiumUser 
+                ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
+                : 'border-white/30 text-white hover:bg-white/10'"
+            >
+              <Icon :name="isPremiumUser ? 'ph:crown-fill' : 'ph:crown'" class="ml-2 size-4" />
+              {{ isPremiumUser ? 'پریمیوم' : 'عادی' }}
+            </BaseButton>
             <BaseButton
               color="white"
               variant="outline"

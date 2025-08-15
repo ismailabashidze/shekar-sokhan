@@ -7,6 +7,59 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 3.0.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 3.0.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              15 اوت 2025
+            </p>
+
+            <h3 class="text-warning-500 mb-2 text-lg font-medium">
+              تغییرات بزرگ
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>بازطراحی کامل سیستم تنظیمات پاسخ‌های هوش مصنوعی</li>
+              <li>پیاده‌سازی سیستم چند پیامه با ساختار JSON و نمایش متوالی</li>
+              <li>حذف دستورالعمل‌های سخت و غیرقابل تشخیص قبلی</li>
+            </ul>
+
+            <h3 class="text-success-500 mb-2 mt-4 text-lg font-medium">
+              ویژگی‌های جدید
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>سیستم پیشرفته کنترل پارامترهای API (max_tokens، temperature)</li>
+              <li>حالت چند پیامه با JSON response و نمایش تأخیری پیام‌ها</li>
+              <li>پردازش پس از تولید برای تزریق ایموجی و قالب‌بندی</li>
+              <li>محاسبه دینامیک تعداد پیام‌ها با تصادف‌سازی وزنی</li>
+              <li>حالت استثنای آغازگر مکالمه برای خلاصه‌های جامع</li>
+              <li>دکمه وضعیت پریمیوم در نوار کناری و مودال اطلاعات</li>
+            </ul>
+
+            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
+              بهبود‌های تجربه کاربری
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>استفاده از زبان طبیعی به جای placeholder های قالبی</li>
+              <li>نمایش درست نقشه ایموجی‌ها شامل سطح very_high</li>
+              <li>حذف نمایش reasoning/thoughts از پاسخ‌های AI</li>
+              <li>مودال قابل اسکرول برای نمایش اطلاعات کامل</li>
+              <li>چینش بهتر دکمه‌های نوار کناری با grid layout</li>
+            </ul>
+
+            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
+              تغییرات فنی
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>واسط AIResponseConfig پیشرفته برای کنترل پاسخ‌ها</li>
+              <li>الگوریتم‌های پردازش چندپیامه با validation کامل</li>
+              <li>سیستم fallback برای مدیریت خطاهای JSON parsing</li>
+              <li>تنظیمات جداگانه برای آغازگرهای مکالمه</li>
+              <li>لاگ‌گذاری جامع برای debugging و monitoring</li>
+            </ul>
+          </div>
+
           <!-- Version 2.13.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">
