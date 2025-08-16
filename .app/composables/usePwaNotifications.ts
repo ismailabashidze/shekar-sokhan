@@ -97,21 +97,6 @@ export function usePwaNotifications() {
 
       // const registration = await navigator.serviceWorker.ready
 
-<<<<<<< Updated upstream
-      // Check if already subscribed
-      const existingSubscription = await registration.pushManager.getSubscription()
-      if (existingSubscription) {
-        subscription.value = existingSubscription
-        isSubscribed.value = true
-        // Save existing subscription to backend (non-blocking) - only if user is logged in
-        if ($pb.authStore.isValid && $pb.authStore.model?.id) {
-          saveSubscriptionToBackend(existingSubscription).catch(err => {
-            console.error('Failed to save existing subscription to backend:', err)
-          })
-        }
-        return true
-      }
-=======
       // // Check if already subscribed
       // const existingSubscription = await registration.pushManager.getSubscription()
       // if (existingSubscription) {
@@ -120,7 +105,6 @@ export function usePwaNotifications() {
       //   await saveSubscriptionToBackend(existingSubscription)
       //   return true
       // }
->>>>>>> Stashed changes
 
       // // Create new subscription
       // const vapidPublicKey = await getVapidPublicKey()
@@ -132,18 +116,7 @@ export function usePwaNotifications() {
       // subscription.value = newSubscription
       isSubscribed.value = true
 
-<<<<<<< Updated upstream
-      // Save subscription to backend (non-blocking) - only if user is logged in
-      if ($pb.authStore.isValid && $pb.authStore.model?.id) {
-        saveSubscriptionToBackend(newSubscription).catch(err => {
-          console.error('Failed to save subscription to backend, but subscription is active locally:', err)
-        })
-      } else {
-        console.log('User not authenticated, skipping backend subscription save')
-      }
-=======
       // await saveSubscriptionToBackend(newSubscription)
->>>>>>> Stashed changes
       return true
     }
     catch (err: any) {

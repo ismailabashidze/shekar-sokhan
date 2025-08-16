@@ -441,24 +441,31 @@ async function submitMessage() {
     // Show streaming response in real time
     isAIThinking.value = true
     thinkingResponse.value = ''
+    streamingBuffer.value = '' // Reset buffer for new message
     
     // Debug: Log AI settings before sending
     console.log('AI Settings from messaging.vue (line 443):', aiSettings.value)
     console.log('AI Settings isPremium:', aiSettings.value.isPremium)
     console.log('AI Settings lengthPref:', aiSettings.value.lengthPref)
     
-    await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value }, (chunk) => {
+    await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value, typingConfig: typingConfig.value }, (chunk) => {
       // Handle multi-message responses
       if (typeof chunk === 'object' && chunk.type === 'multi_message') {
         isMultiMessageMode.value = true
         handleMultiMessageChunk(chunk)
       } else {
-        // Handle regular single message streaming
+        // Handle regular single message streaming with typing effect
         isMultiMessageMode.value = false
         aiResponse += chunk
-        thinkingResponse.value = aiResponse
+        handleStreamingChunk(chunk)
       }
     })
+    
+    // Mark streaming as complete for typing effect
+    if (!isMultiMessageMode.value && streamingBuffer.value) {
+      handleStreamingChunk('', true) // Mark as complete
+    }
+    
     isAIThinking.value = false
 
     // Remove any temporary typing indicators
@@ -877,17 +884,24 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 
     // Generate initial AI message
     let aiResponse = ''
+    streamingBuffer.value = '' // Reset buffer
 
     // Call the OpenRouter API with the system context (CONVERSATION STARTER MODE)
     await streamChat([systemContext], { 
       therapistDetails: therapist, 
       aiResponseSettings: aiSettings.value, 
-      isConversationStarter: true  // Enable comprehensive summary mode
+      isConversationStarter: true,  // Enable comprehensive summary mode
+      typingConfig: typingConfig.value
     }, (chunk) => {
       // Conversation starters are ALWAYS single message - no multi-message handling
       aiResponse += chunk
-      thinkingResponse.value = aiResponse
+      handleStreamingChunk(chunk)
     })
+
+    // Mark streaming as complete for typing effect
+    if (streamingBuffer.value) {
+      handleStreamingChunk('', true)
+    }
 
     isAIThinking.value = false
 
@@ -1208,14 +1222,20 @@ const retryLastMessage = async () => {
     isAIThinking.value = true
     thinkingResponse.value = ''
     
-    await streamChat(contextMessages, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value }, (chunk) => {
+    await streamChat(contextMessages, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value, typingConfig: typingConfig.value }, (chunk) => {
       // Handle multi-message responses
       if (typeof chunk === 'object' && chunk.type === 'multi_message') {
         handleMultiMessageChunk(chunk)
       } else {
-        // Handle regular single message streaming
+        // Handle regular single message streaming with typing effect
         aiResponse += chunk
-        thinkingResponse.value = aiResponse
+        
+        // Apply typing effect for retry messages too
+        if (typingConfig.value.enableTypingEffect) {
+          startTypingEffect(aiResponse)
+        } else {
+          thinkingResponse.value = aiResponse
+        }
       }
     })
     
@@ -1479,6 +1499,71 @@ const handleTextareaClick = () => {
 const thinkingResponse = ref('')
 const isAIThinking = ref(false)
 
+// Typing effect for single messages
+const typingQueue = ref('')
+const displayedResponse = ref('')
+const isTypingActive = ref(false)
+
+// Function to start typing effect for single messages
+const startTypingEffect = (fullText: string) => {
+  if (!typingConfig.value.enableTypingEffect) {
+    thinkingResponse.value = fullText
+    return
+  }
+
+  // Stop any current typing
+  isTypingActive.value = false
+  
+  // Start new typing effect
+  typingQueue.value = fullText
+  displayedResponse.value = ''
+  isTypingActive.value = true
+  
+  let currentIndex = 0
+  const typeNextChar = () => {
+    if (currentIndex < typingQueue.value.length && isTypingActive.value) {
+      displayedResponse.value += typingQueue.value[currentIndex]
+      thinkingResponse.value = displayedResponse.value
+      currentIndex++
+      
+      // Random delay between 20-50ms for natural typing
+      const delay = Math.random() * 30 + 20
+      setTimeout(typeNextChar, delay)
+    } else {
+      isTypingActive.value = false
+    }
+  }
+  
+  typeNextChar()
+}
+
+// For streaming, we need to handle typing differently
+let streamingBuffer = ref('')
+let streamingTypingTimeout: NodeJS.Timeout | null = null
+
+const handleStreamingChunk = (chunk: string, isComplete: boolean = false) => {
+  streamingBuffer.value += chunk
+  
+  if (typingConfig.value.enableTypingEffect) {
+    // Clear previous timeout
+    if (streamingTypingTimeout) {
+      clearTimeout(streamingTypingTimeout)
+    }
+    
+    // If this is the final chunk or enough delay, start typing
+    if (isComplete) {
+      startTypingEffect(streamingBuffer.value)
+    } else {
+      // Debounce typing effect - only start if no new chunks for 100ms
+      streamingTypingTimeout = setTimeout(() => {
+        startTypingEffect(streamingBuffer.value)
+      }, 100)
+    }
+  } else {
+    thinkingResponse.value = streamingBuffer.value
+  }
+}
+
 // Multi-message handling state
 const pendingMultiMessages = ref<any[]>([])
 const isMultiMessageMode = ref(false)
@@ -1530,8 +1615,8 @@ const handleMultiMessageChunk = async (chunk: any) => {
       messages.value.push(messageData)
       scrollToBottom()
     } else {
-      // Subsequent messages appear with delay
-      const delay = Math.max(chunk.index * 1000, 500) // Minimum 500ms delay
+      // Subsequent messages appear with configurable delay
+      const delay = typingConfig.value.messageDelay
       
       setTimeout(() => {
         messages.value.push(messageData)
@@ -1542,18 +1627,19 @@ const handleMultiMessageChunk = async (chunk: any) => {
           isAIThinking.value = true
           thinkingResponse.value = 'در حال نوشتن پیام بعدی...'
           
+          // Keep typing indicator for a reasonable time before next message
           setTimeout(() => {
             isAIThinking.value = false
             thinkingResponse.value = ''
           }, Math.min(800, delay - 200)) // Typing indicator duration
         }
-      }, delay)
+      }, delay * chunk.index) // Use cumulative delays like in backend
     }
 
     // Update final response for database consistency
     if (chunk.index === chunk.total - 1) {
       // Last message, set final state
-      const finalDelay = Math.max(chunk.index * 1000 + 500, 1000)
+      const finalDelay = typingConfig.value.messageDelay * chunk.index + 500
       
       setTimeout(() => {
         isAIResponding.value = false
@@ -1579,6 +1665,19 @@ const handleMultiMessageChunk = async (chunk: any) => {
 }
 
 const testMessageInput = ref('نام من علی است و 25 ساله هستم و می‌خواهم اضطراب خودم را کنترل کنم')
+
+// Configurable typing settings - easily customizable delays
+const typingConfig = ref({
+  messageDelay: 2000, // Delay between multi-messages in milliseconds (change this number to adjust speed)
+  enableTypingEffect: true
+})
+
+// To customize delay: Change messageDelay value above
+// Examples:
+// - 1000 = 1 second delay (faster)
+// - 2000 = 2 second delay (default)
+// - 3000 = 3 second delay (slower)
+
 // --- Ensure no 'thinking' message is pushed to messages ---
 // In submitMessage or any streaming logic, do not push a 'thinking' or empty message to messages array.
 // Only use isAIThinking and thinkingResponse for the typing indicator.

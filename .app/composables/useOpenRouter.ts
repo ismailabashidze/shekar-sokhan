@@ -197,18 +197,22 @@ CONVERSATION STARTER MODE - COMPREHENSIVE SINGLE MESSAGE:
 CRITICAL: This is a conversation starter - ALWAYS respond as a SINGLE comprehensive message, NEVER in multi-message format.
 Ignore any multi-message settings from the user for this conversation starter.
 
-- ارائه خلاصه‌ای جامع و کامل از جلسات قبلی
+IMPORTANT: The previous session summaries are already provided in the system context above. DO NOT repeat or duplicate them.
+Instead, reference them naturally in your greeting and use them to create a welcoming conversation starter.
+
+- استفاده از اطلاعات جلسات قبلی که در سیستم ارائه شده (بدون تکرار کامل آنها)
 - استفاده از لحن گرم، مهربان و حرفه‌ای
 - سازماندهی اطلاعات با استفاده از نقاط و فهرست‌ها
-- حداکثر طول پاسخ برای ارائه تمام جزئیات مهم
 - تمرکز بر ایجاد احساس امنیت و اعتماد در مراجع
 - ترغیب به ادامه گفتگو و صحبت درباره وضعیت فعلی
+- ارجاع طبیعی به جلسات قبلی بدون تکرار کامل خلاصه‌ها
 
 سبک گفتار: گرم، دلسوزانه، و حرفه‌ای - ترکیبی از صمیمیت و تخصص
 استفاده از ایموجی‌های مناسب برای ایجاد فضای دوستانه
-قالب‌بندی با نقاط و فهرست‌ها برای خوانایی بهتر
+قالب‌بندی مناسب برای خوانایی بهتر
 
-تأکید: این پیام باید جامع و کامل باشد - نادیده گیری تنظیمات کاربر برای طول و جزئیات
+CRITICAL: DO NOT duplicate or repeat the full session summaries that are already provided in the system context.
+Reference them naturally and focus on creating a warm, welcoming atmosphere for the new session.
 NEVER break this into multiple messages - it must be ONE complete message.
 `
 
@@ -306,8 +310,30 @@ function applyFormatting(text: string, formatType: string): string {
   }
 }
 
+// Configurable delays for typing effects
+interface TypingConfig {
+  messageDelay: number // delay between multi-messages (default 2000ms)
+  enableTypingEffect: boolean // enable typing effect for multi-messages
+}
+
+const defaultTypingConfig: TypingConfig = {
+  messageDelay: 2000, // 2 seconds between multi-messages
+  enableTypingEffect: true
+}
+
+// Handle typing effect for multi-message by sending to UI with typing indicator
+async function handleMessageWithTyping(message: string, messageIndex: number, totalMessages: number, onChunk: (chunk: any) => void, typingConfig: TypingConfig = defaultTypingConfig) {
+  if (!typingConfig.enableTypingEffect) {
+    onChunk({ type: 'multi_message', message, index: messageIndex, total: totalMessages })
+    return
+  }
+
+  // Send the message immediately for typing effect display
+  onChunk({ type: 'multi_message', message, index: messageIndex, total: totalMessages })
+}
+
 // Handle multi-message JSON responses with delays
-async function handleMultiMessageResponse(response: string, config: AIResponseConfig, onChunk: (chunk: any) => void) {
+async function handleMultiMessageResponse(response: string, config: AIResponseConfig, onChunk: (chunk: any) => void, typingConfig: TypingConfig = defaultTypingConfig) {
   try {
     console.log('🔄 Processing multi-message response:', response)
     console.log('📏 Raw response length:', response.length)
@@ -364,7 +390,7 @@ async function handleMultiMessageResponse(response: string, config: AIResponseCo
 
       console.log(`📨 Processing ${validMessages.length} valid messages`)
       
-      // Send messages with delays
+      // Send messages with delays and typing effect
       for (let i = 0; i < validMessages.length; i++) {
         const message = validMessages[i]
         const processedMessage = postProcessResponse(message, config)
@@ -379,13 +405,13 @@ async function handleMultiMessageResponse(response: string, config: AIResponseCo
 
         // For the first message, send immediately
         if (i === 0) {
-          onChunk({ type: 'multi_message', message: processedMessage, index: i, total: validMessages.length })
+          await handleMessageWithTyping(processedMessage, i, validMessages.length, onChunk, typingConfig)
         } else {
-          // Add delay for subsequent messages (1.5-3 seconds based on message length)
-          const delay = Math.min(Math.max(message.length * 20, 1500), 3000)
+          // Use configurable delay for subsequent messages
+          const delay = typingConfig.messageDelay
           
-          setTimeout(() => {
-            onChunk({ type: 'multi_message', message: processedMessage, index: i, total: validMessages.length })
+          setTimeout(async () => {
+            await handleMessageWithTyping(processedMessage, i, validMessages.length, onChunk, typingConfig)
           }, delay * i) // Cumulative delays
         }
       }
@@ -441,6 +467,7 @@ interface OpenRouterOptions {
   }
   aiResponseSettings?: AiResponseSettings
   isConversationStarter?: boolean
+  typingConfig?: TypingConfig
 }
 
 export interface PatientGenerateInput {
@@ -586,6 +613,7 @@ export function useOpenRouter() {
       // Generate advanced AI configuration from settings
       const aiSettings = options.aiResponseSettings
       const isConversationStarter = options.isConversationStarter || false
+      const typingConfig = options.typingConfig || defaultTypingConfig
       let aiConfig: AIResponseConfig | null = null
       
       if (aiSettings && therapistDetails) {
@@ -714,7 +742,7 @@ export function useOpenRouter() {
             }
             
             // Handle multi-message JSON response
-            await handleMultiMessageResponse(fullResponse, aiConfig, onChunk)
+            await handleMultiMessageResponse(fullResponse, aiConfig, onChunk, typingConfig)
           } else {
             // Apply post-processing for single message with validation
             if (!fullResponse.trim()) {
