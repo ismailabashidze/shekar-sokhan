@@ -95,8 +95,9 @@ export function usePwaNotifications() {
       isLoading.value = true
       error.value = null
 
-      const registration = await navigator.serviceWorker.ready
+      // const registration = await navigator.serviceWorker.ready
 
+<<<<<<< Updated upstream
       // Check if already subscribed
       const existingSubscription = await registration.pushManager.getSubscription()
       if (existingSubscription) {
@@ -110,17 +111,28 @@ export function usePwaNotifications() {
         }
         return true
       }
+=======
+      // // Check if already subscribed
+      // const existingSubscription = await registration.pushManager.getSubscription()
+      // if (existingSubscription) {
+      //   subscription.value = existingSubscription
+      //   isSubscribed.value = true
+      //   await saveSubscriptionToBackend(existingSubscription)
+      //   return true
+      // }
+>>>>>>> Stashed changes
 
-      // Create new subscription
-      const vapidPublicKey = await getVapidPublicKey()
-      const newSubscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-      })
+      // // Create new subscription
+      // const vapidPublicKey = await getVapidPublicKey()
+      // const newSubscription = await registration.pushManager.subscribe({
+      //   userVisibleOnly: true,
+      //   applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      // })
 
-      subscription.value = newSubscription
+      // subscription.value = newSubscription
       isSubscribed.value = true
 
+<<<<<<< Updated upstream
       // Save subscription to backend (non-blocking) - only if user is logged in
       if ($pb.authStore.isValid && $pb.authStore.model?.id) {
         saveSubscriptionToBackend(newSubscription).catch(err => {
@@ -129,6 +141,9 @@ export function usePwaNotifications() {
       } else {
         console.log('User not authenticated, skipping backend subscription save')
       }
+=======
+      // await saveSubscriptionToBackend(newSubscription)
+>>>>>>> Stashed changes
       return true
     }
     catch (err: any) {
