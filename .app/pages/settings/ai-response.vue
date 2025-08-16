@@ -13,6 +13,7 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 
 import { computed, reactive, watch, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAIResponseSettings } from '@/composables/useAIResponseSettings'
 
 type EmojiLevel = 'high' | 'medium' | 'low' | 'none'
 type Tone = 'formal' | 'neutral' | 'casual'
@@ -48,8 +49,8 @@ type AiResponseSettings = {
 }
 
 const defaults: AiResponseSettings = {
-  multiMsgMode: 'single',
-  lengthPref: 'medium',
+  multiMsgMode: 'multi_short',
+  lengthPref: 'short',
   emojiLevel: 'medium',
   tone: 'neutral',
   kindness: 'kind',
@@ -89,9 +90,15 @@ watch(
 
 const router = useRouter()
 
-// Premium features
-const isPremiumUser = ref(false) // This would come from your auth/user store
+// Premium features - integrated with our composable
+const { settings: aiResponseSettings, setPremiumStatus } = useAIResponseSettings()
+const isPremiumUser = computed(() => aiResponseSettings.value.isPremium)
 const showPremiumModal = ref(false)
+
+// Toggle premium status
+const togglePremiumStatus = () => {
+  setPremiumStatus(!isPremiumUser.value)
+}
 
 // Debug modal state changes
 watch(showPremiumModal, (newValue, oldValue) => {
@@ -102,8 +109,8 @@ watch(showPremiumModal, (newValue, oldValue) => {
 const premiumFeatures = {
   emojiLevel: ['high', 'very_high'], // High emoji and very high emoji require premium
   tone: ['formal', 'casual'], // Formal tone and casual tone require premium  
-  lengthPref: ['long', 'short'], // Long and short responses require premium
-  multiMsgMode: ['multi_short'], // Short messages require premium
+  lengthPref: ['long'], // Only long responses require premium (short is now free)
+  multiMsgMode: [], // Multi-message modes are now free
   kindness: ['very_kind'], // Very kind requires premium
   replySpeedMs: ['150'], // Fast speed requires premium
   creativity: ['2'], // Max creativity requires premium
@@ -208,6 +215,20 @@ function goBack() {
             </div>
           </div>
           <div class="flex items-center gap-3">
+            <!-- Premium Toggle Button -->
+            <BaseButton
+              :color="isPremiumUser ? 'warning' : 'white'"
+              :variant="isPremiumUser ? 'solid' : 'outline'"
+              size="sm"
+              @click="togglePremiumStatus"
+              class="transition-all duration-200"
+              :class="isPremiumUser 
+                ? 'bg-yellow-500 text-white hover:bg-yellow-600' 
+                : 'border-white/30 text-white hover:bg-white/10'"
+            >
+              <Icon :name="isPremiumUser ? 'ph:crown-fill' : 'ph:crown'" class="ml-2 size-4" />
+              {{ isPremiumUser ? 'پریمیوم' : 'عادی' }}
+            </BaseButton>
             <BaseButton
               color="white"
               variant="outline"
@@ -234,48 +255,37 @@ function goBack() {
         <div class="absolute -top-8 -right-8 size-24 rounded-full bg-white/10"></div>
       </div>
 
-      <!-- Premium Banner -->
-      <BaseCard v-if="!isPremiumUser" class="overflow-hidden border-2 border-yellow-200 bg-gradient-to-l from-yellow-50 via-amber-50 to-orange-50 dark:border-yellow-800 dark:from-yellow-950/30 dark:via-amber-950/30 dark:to-orange-950/30" rounded="xl">
+      <!-- Experimental Premium Banner -->
+      <BaseCard class="overflow-hidden border-2 border-orange-200 bg-gradient-to-l from-orange-50 via-yellow-50 to-red-50 dark:border-orange-800 dark:from-orange-950/30 dark:via-yellow-950/30 dark:to-red-950/30" rounded="xl">
         <div class="flex flex-col gap-4 p-6 sm:flex-row sm:items-center">
           <div class="flex items-center gap-4 flex-1">
-            <div class="flex size-14 items-center justify-center rounded-2xl bg-yellow-500 shadow-lg shadow-yellow-500/20">
-              <Icon name="ph:crown-duotone" class="size-7 text-white" />
+            <div class="flex size-14 items-center justify-center rounded-2xl bg-orange-500 shadow-lg shadow-orange-500/20">
+              <Icon name="ph:flask-duotone" class="size-7 text-white" />
             </div>
             <div class="flex-1">
-              <h3 class="text-xl font-bold text-yellow-800 dark:text-yellow-200">ویژگی‌های پیشرفته محدودشده</h3>
-              <p class="text-sm text-yellow-600 dark:text-yellow-300 mt-1">برای دسترسی به تمام قابلیت‌های هوش مصنوعی، به نسخه پرمیوم ارتقا دهید</p>
-              <div class="flex items-center gap-4 mt-3 text-xs text-yellow-600 dark:text-yellow-300">
+              <h3 class="text-xl font-bold text-orange-800 dark:text-orange-200">ویژگی‌های پریمیوم در حالت آزمایشی</h3>
+              <p class="text-sm text-orange-600 dark:text-orange-300 mt-1">برخی ویژگی‌های پریمیوم در حال آزمایش هستند. می‌توانید بین حالت عادی و پریمیوم جابه‌جا شوید.</p>
+              <div class="flex items-center gap-4 mt-3 text-xs text-orange-600 dark:text-orange-300">
                 <div class="flex items-center gap-1">
-                  <Icon name="ph:lock-duotone" class="size-3" />
-                  سبک‌های خاص
+                  <Icon name="ph:warning-duotone" class="size-3" />
+                  حالت آزمایشی
                 </div>
                 <div class="flex items-center gap-1">
-                  <Icon name="ph:lock-duotone" class="size-3" />
-                  قالب‌بندی پیشرفته
-                </div>
-                <div class="flex items-center gap-1">
-                  <Icon name="ph:lock-duotone" class="size-3" />
-                  حداکثر خلاقیت
+                  <Icon name="ph:toggle-right-duotone" class="size-3" />
+                  قابلیت تغییر
                 </div>
               </div>
             </div>
           </div>
           <div class="flex items-center gap-3">
             <BaseButton
-              color="muted"
+              :color="isPremiumUser ? 'warning' : 'primary'"
               size="sm"
-              @click="() => {}"
-              class="text-xs"
+              @click="togglePremiumStatus"
+              class="transition-all duration-200"
             >
-              بعداً
-            </BaseButton>
-            <BaseButton
-              @click="showPremiumUpgrade"
-              class="bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-semibold shadow-lg shadow-yellow-500/25 hover:shadow-xl hover:shadow-yellow-500/30 transition-all duration-300"
-              size="sm"
-            >
-              <Icon name="ph:crown-duotone" class="ml-2 size-4" />
-              ارتقا به پرمیوم
+              <Icon :name="isPremiumUser ? 'ph:crown-fill' : 'ph:crown'" class="ml-2 size-4" />
+              {{ isPremiumUser ? 'تغییر به عادی' : 'تغییر به پریمیوم' }}
             </BaseButton>
           </div>
         </div>

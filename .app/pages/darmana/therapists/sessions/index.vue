@@ -578,6 +578,7 @@ onMounted(() => {
                         :color="getTrustLevelColor(session.expand.session_analysis_for_system.finalTrustAndOppennessOfUser)"
                         shape="curved"
                         size="sm"
+                        class="trust-level-badge"
                       >
                         {{ getTrustLevelText(session.expand.session_analysis_for_system.finalTrustAndOppennessOfUser) }}
                       </BaseTag>
@@ -720,13 +721,22 @@ onMounted(() => {
 }
 
 /* Remove the margin-bottom that was causing the issue */
-.flex.items-center:not(.nui-tag .flex.items-center) {
-  margin-bottom: 0.5rem;
+.flex.items-center:not(.nui-tag .flex.items-center):not(.bg-info-100 + div .flex.items-center) {
+  margin-bottom: 0;
 }
 
 /* Ensure tag content is visible */
 .nui-tag .flex.items-center {
   line-height: normal;
+  margin-bottom: 0;
+}
+
+/* Fix icon container margin in analysis section */
+.bg-info-100 {
+  margin-bottom: 0 !important;
+}
+
+.bg-info-100 + div {
   margin-bottom: 0;
 }
 
@@ -742,5 +752,20 @@ onMounted(() => {
 .bg-muted-100 .flex-col span {
   line-height: 1.6;
   padding: 0.125rem 0;
+}
+
+/* Fix trust level badge spacing */
+.trust-level-badge {
+  margin: 0 !important;
+  padding: 0.25rem 0.75rem !important;
+}
+
+/* Fix trust level container spacing */
+.flex.items-center.justify-between {
+  margin-bottom: 0.75rem;
+}
+
+.flex.items-center.justify-between:last-child {
+  margin-bottom: 0;
 }
 </style>

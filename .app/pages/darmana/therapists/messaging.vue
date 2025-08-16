@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useOpenRouter } from '@/composables/useOpenRouter'
+import { useAIResponseSettings } from '@/composables/useAIResponseSettings'
 import { convertToEmotionWheel } from '@/utils/emotion-mapper'
 
 definePageMeta({
@@ -48,8 +49,54 @@ const {
   FEEDBACK_CATEGORIES 
 } = useMessageFeedback()
 
+// AI Response Settings
+const { settings: aiSettings, setPremiumStatus } = useAIResponseSettings()
+
+// AI Settings Display Computed
+const aiSettingsDisplayText = computed(() => {
+  const settings = aiSettings.value
+  
+  const emojiMap = {
+    very_high: '🤩',
+    high: '😊😊',
+    medium: '🙂',
+    low: '😐',
+    none: '🚫'
+  }
+  
+  const lengthMap = {
+    short: 'کوتاه',
+    medium: 'متوسط', 
+    long: 'بلند'
+  }
+  
+  const toneMap = {
+    formal: 'رسمی',
+    neutral: 'خنثی',
+    casual: 'راحت'
+  }
+  
+  const creativityMap = {
+    '0': 'دقیق',
+    '1': 'متعادل',
+    '2': 'خلاق'
+  }
+  
+  return [
+    `${settings.isPremium ? '👑' : '🔓'} ${settings.isPremium ? 'پریمیوم' : 'عادی'}`,
+    `طول: ${lengthMap[settings.lengthPref]}`,
+    `ایموجی: ${emojiMap[settings.emojiLevel]}`,
+    `لحن: ${toneMap[settings.tone]}`,
+    `خلاقیت: ${creativityMap[settings.creativity]}`
+  ].join(' • ')
+})
+
 const toggleAudioUser = () => {
   showAudioUser.value = !showAudioUser.value
+}
+
+const togglePremiumStatus = () => {
+  setPremiumStatus(!aiSettings.value.isPremium)
 }
 
 const emojiCategories = [
@@ -394,25 +441,49 @@ async function submitMessage() {
     // Show streaming response in real time
     isAIThinking.value = true
     thinkingResponse.value = ''
-    await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user }, (chunk) => {
-      aiResponse += chunk
-      thinkingResponse.value = aiResponse
+    streamingBuffer.value = '' // Reset buffer for new message
+    
+    // Debug: Log AI settings before sending
+    console.log('AI Settings from messaging.vue (line 443):', aiSettings.value)
+    console.log('AI Settings isPremium:', aiSettings.value.isPremium)
+    console.log('AI Settings lengthPref:', aiSettings.value.lengthPref)
+    
+    await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value, typingConfig: typingConfig.value }, (chunk) => {
+      // Handle multi-message responses
+      if (typeof chunk === 'object' && chunk.type === 'multi_message') {
+        isMultiMessageMode.value = true
+        handleMultiMessageChunk(chunk)
+      } else {
+        // Handle regular single message streaming with typing effect
+        isMultiMessageMode.value = false
+        aiResponse += chunk
+        handleStreamingChunk(chunk)
+      }
     })
+    
+    // Mark streaming as complete for typing effect
+    if (!isMultiMessageMode.value && streamingBuffer.value) {
+      handleStreamingChunk('', true) // Mark as complete
+    }
+    
     isAIThinking.value = false
 
     // Remove any temporary typing indicators
     messages.value = messages.value.filter(msg => !msg.isTyping)
 
-    // Save AI response to PocketBase
-    const savedAIMessage = await sendMessage(currentTherapist.id, session.id, aiResponse, 'received')
+    // Save AI response to PocketBase (only for single message mode)
+    if (aiResponse && !isMultiMessageMode.value) {
+      const savedAIMessage = await sendMessage(currentTherapist.id, session.id, aiResponse, 'received')
 
-    // Add AI response to messages with the correct ID
-    messages.value.push({
-      type: 'received',
-      text: aiResponse,
-      timestamp: savedAIMessage.time, // Use timestamp from saved message
-      id: savedAIMessage.id, // Use ID from saved message
-    })
+      // Add AI response to messages with the correct ID
+      messages.value.push({
+        type: 'received',
+        text: aiResponse,
+        timestamp: savedAIMessage.time, // Use timestamp from saved message
+        id: savedAIMessage.id, // Use ID from saved message
+      })
+    }
+    // Multi-message responses are already saved individually in handleMultiMessageChunk
     checkIfScrolledToBottom()
     isAIResponding.value = false
   }
@@ -793,28 +864,51 @@ ${report.possibleRiskFactors?.flat().map((risk: any) =>
 همچنین ممکن است اطلاعات دموگرافیک ارائه شده باشند: ${report.finalDemographicProfile}
 اگر مقادیر مشخص نیستند، یعنی کاربر اطلاعات دموگرافیک را ارائه نکرده است.
 از اطلاعاتی استفاده کن که کاربر وارد کرده است.
- با توجه به اطلاعات بالا، جلسه جدید را با یک خلاصه از جلسات قبلی و وضعیت مراجع شروع کن و از مراجع بپرس که امروز حالش چطور است و میخواهد درباره چه مسائلی صحبت کند. لحن باید گرم و حرفه‌ای باشد.
- همین طور از اهداف عمیق تر احتمالی نیز استفاده کن.  کاربر را ترغیب به دادن پاسخ در مورد موضوعات احتمالی کن.
- از ایموجی های خوب و جذاب استفاده کن.
+
+=== دستورالعمل مهم برای تجربه کاربری ===
+CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ندارید (مانند نام مراجع، سن، یا جزئیات شخصی)، از کلمات طبیعی و دوستانه استفاده کنید به جای قالب‌های خالی یا placeholder ها.
+
+مثال‌های درست:
+- به جای [نام مراجع] از "دوست من" یا "عزیز من" استفاده کنید
+- به جای [سن] از عبارات کلی مثل "در این سن" یا "در دوره‌ای از زندگی که هستید" استفاده کنید
+- به جای [موقعیت] از "در شرایط فعلی" یا "در وضعیت کنونی" استفاده کنید
+
+این کار باعث احساس طبیعی‌تر و دوستانه‌تر شدن گفتگو می‌شود و تجربه کاربری بهتری ایجاد می‌کند.
+
+با توجه به اطلاعات بالا، جلسه جدید را با یک خلاصه از جلسات قبلی و وضعیت مراجع شروع کن و از مراجع بپرس که امروز حالش چطور است و میخواهد درباره چه مسائلی صحبت کند. لحن باید گرم و حرفه‌ای باشد.
+همین طور از اهداف عمیق تر احتمالی نیز استفاده کن. کاربر را ترغیب به دادن پاسخ در مورد موضوعات احتمالی کن.
+از ایموجی های خوب و جذاب استفاده کن.
  `,
     }
     console.log('report', report)
 
     // Generate initial AI message
     let aiResponse = ''
+    streamingBuffer.value = '' // Reset buffer
 
-    // Call the OpenRouter API with the system context
-    await streamChat([systemContext], { therapistDetails: therapist }, (chunk) => {
+    // Call the OpenRouter API with the system context (CONVERSATION STARTER MODE)
+    await streamChat([systemContext], { 
+      therapistDetails: therapist, 
+      aiResponseSettings: aiSettings.value, 
+      isConversationStarter: true,  // Enable comprehensive summary mode
+      typingConfig: typingConfig.value
+    }, (chunk) => {
+      // Conversation starters are ALWAYS single message - no multi-message handling
       aiResponse += chunk
-      thinkingResponse.value = aiResponse
+      handleStreamingChunk(chunk)
     })
+
+    // Mark streaming as complete for typing effect
+    if (streamingBuffer.value) {
+      handleStreamingChunk('', true)
+    }
 
     isAIThinking.value = false
 
     // Remove the temporary typing message
     messages.value = messages.value.filter(msg => !msg.isTyping)
 
-    // Save AI response to PocketBase
+    // Save AI response to PocketBase (conversation starters are always single messages)
     const savedAIMessage = await sendMessage(therapist.id, sessionId, aiResponse, 'received')
 
     // Add AI response to messages with the correct ID
@@ -845,9 +939,18 @@ ${report.possibleRiskFactors?.flat().map((risk: any) =>
 }
 
 const isReportModalOpen = ref(false)
+const isPremiumModalOpen = ref(false)
 
 const openReportModal = () => {
   isReportModalOpen.value = true
+}
+
+const openPremiumModal = () => {
+  isPremiumModalOpen.value = true
+}
+
+const closePremiumModal = () => {
+  isPremiumModalOpen.value = false
 }
 
 const closeReportModal = () => {
@@ -1119,9 +1222,21 @@ const retryLastMessage = async () => {
     isAIThinking.value = true
     thinkingResponse.value = ''
     
-    await streamChat(contextMessages, { therapistDetails: selectedConversationComputed.value?.user }, (chunk) => {
-      aiResponse += chunk
-      thinkingResponse.value = aiResponse
+    await streamChat(contextMessages, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value, typingConfig: typingConfig.value }, (chunk) => {
+      // Handle multi-message responses
+      if (typeof chunk === 'object' && chunk.type === 'multi_message') {
+        handleMultiMessageChunk(chunk)
+      } else {
+        // Handle regular single message streaming with typing effect
+        aiResponse += chunk
+        
+        // Apply typing effect for retry messages too
+        if (typingConfig.value.enableTypingEffect) {
+          startTypingEffect(aiResponse)
+        } else {
+          thinkingResponse.value = aiResponse
+        }
+      }
     })
     
     isAIThinking.value = false
@@ -1384,7 +1499,185 @@ const handleTextareaClick = () => {
 const thinkingResponse = ref('')
 const isAIThinking = ref(false)
 
+// Typing effect for single messages
+const typingQueue = ref('')
+const displayedResponse = ref('')
+const isTypingActive = ref(false)
+
+// Function to start typing effect for single messages
+const startTypingEffect = (fullText: string) => {
+  if (!typingConfig.value.enableTypingEffect) {
+    thinkingResponse.value = fullText
+    return
+  }
+
+  // Stop any current typing
+  isTypingActive.value = false
+  
+  // Start new typing effect
+  typingQueue.value = fullText
+  displayedResponse.value = ''
+  isTypingActive.value = true
+  
+  let currentIndex = 0
+  const typeNextChar = () => {
+    if (currentIndex < typingQueue.value.length && isTypingActive.value) {
+      displayedResponse.value += typingQueue.value[currentIndex]
+      thinkingResponse.value = displayedResponse.value
+      currentIndex++
+      
+      // Random delay between 20-50ms for natural typing
+      const delay = Math.random() * 30 + 20
+      setTimeout(typeNextChar, delay)
+    } else {
+      isTypingActive.value = false
+    }
+  }
+  
+  typeNextChar()
+}
+
+// For streaming, we need to handle typing differently
+let streamingBuffer = ref('')
+let streamingTypingTimeout: NodeJS.Timeout | null = null
+
+const handleStreamingChunk = (chunk: string, isComplete: boolean = false) => {
+  streamingBuffer.value += chunk
+  
+  if (typingConfig.value.enableTypingEffect) {
+    // Clear previous timeout
+    if (streamingTypingTimeout) {
+      clearTimeout(streamingTypingTimeout)
+    }
+    
+    // If this is the final chunk or enough delay, start typing
+    if (isComplete) {
+      startTypingEffect(streamingBuffer.value)
+    } else {
+      // Debounce typing effect - only start if no new chunks for 100ms
+      streamingTypingTimeout = setTimeout(() => {
+        startTypingEffect(streamingBuffer.value)
+      }, 100)
+    }
+  } else {
+    thinkingResponse.value = streamingBuffer.value
+  }
+}
+
+// Multi-message handling state
+const pendingMultiMessages = ref<any[]>([])
+const isMultiMessageMode = ref(false)
+
+// Handle multi-message chunks
+const handleMultiMessageChunk = async (chunk: any) => {
+  console.log(`📨 Received multi-message chunk ${chunk.index + 1}/${chunk.total}:`, chunk.message)
+  
+  // Validate chunk structure
+  if (!chunk || typeof chunk.index !== 'number' || typeof chunk.total !== 'number' || !chunk.message) {
+    console.error('❌ Invalid multi-message chunk structure:', chunk)
+    return
+  }
+
+  const currentTherapist = selectedConversationComputed.value?.user
+  if (!currentTherapist?.id || !activeSession.value?.id) {
+    console.error('❌ Missing therapist or session for multi-message chunk')
+    return
+  }
+
+  try {
+    // Validate message content
+    if (!chunk.message.trim()) {
+      console.warn(`⚠️ Empty message in chunk ${chunk.index + 1}, skipping`)
+      return
+    }
+
+    // Save each message to database
+    const savedAIMessage = await sendMessage(currentTherapist.id, activeSession.value.id, chunk.message, 'received')
+    
+    if (!savedAIMessage?.id) {
+      console.error('❌ Failed to save multi-message chunk to database')
+      return
+    }
+
+    // Add to messages with delay for visual effect
+    const messageData = {
+      type: 'received',
+      text: chunk.message,
+      timestamp: savedAIMessage.time,
+      id: savedAIMessage.id,
+      isMultiMessage: true,
+      multiMessageIndex: chunk.index,
+      multiMessageTotal: chunk.total
+    }
+
+    if (chunk.index === 0) {
+      // First message shows immediately
+      messages.value.push(messageData)
+      scrollToBottom()
+    } else {
+      // Subsequent messages appear with configurable delay
+      const delay = typingConfig.value.messageDelay
+      
+      setTimeout(() => {
+        messages.value.push(messageData)
+        scrollToBottom()
+        
+        // Show typing indicator before each message (except the last one)
+        if (chunk.index < chunk.total - 1) {
+          isAIThinking.value = true
+          thinkingResponse.value = 'در حال نوشتن پیام بعدی...'
+          
+          // Keep typing indicator for a reasonable time before next message
+          setTimeout(() => {
+            isAIThinking.value = false
+            thinkingResponse.value = ''
+          }, Math.min(800, delay - 200)) // Typing indicator duration
+        }
+      }, delay * chunk.index) // Use cumulative delays like in backend
+    }
+
+    // Update final response for database consistency
+    if (chunk.index === chunk.total - 1) {
+      // Last message, set final state
+      const finalDelay = typingConfig.value.messageDelay * chunk.index + 500
+      
+      setTimeout(() => {
+        isAIResponding.value = false
+        isMultiMessageMode.value = false
+        console.log('✅ Multi-message sequence completed')
+      }, finalDelay)
+    }
+
+  } catch (error) {
+    console.error('❌ Error handling multi-message chunk:', error)
+    
+    // Fallback: show error message
+    messages.value.push({
+      type: 'received',
+      text: 'خطا در دریافت پیام. لطفا دوباره تلاش کنید.',
+      timestamp: new Date().toISOString(),
+      id: 'error-multi-' + Date.now(),
+    })
+    
+    isAIResponding.value = false
+    isMultiMessageMode.value = false
+  }
+}
+
 const testMessageInput = ref('نام من علی است و 25 ساله هستم و می‌خواهم اضطراب خودم را کنترل کنم')
+
+// Configurable typing settings - easily customizable delays
+const typingConfig = ref({
+  messageDelay: 2000, // Delay between multi-messages in milliseconds (change this number to adjust speed)
+  enableTypingEffect: true
+})
+
+// To customize delay: Change messageDelay value above
+// Examples:
+// - 1000 = 1 second delay (faster)
+// - 2000 = 2 second delay (default)
+// - 3000 = 3 second delay (slower)
+
 // --- Ensure no 'thinking' message is pushed to messages ---
 // In submitMessage or any streaming logic, do not push a 'thinking' or empty message to messages array.
 // Only use isAIThinking and thinkingResponse for the typing indicator.
@@ -1392,6 +1685,7 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
 </script>
 
 <template>
+  <HorizontalSideBar />
   <div class="relative">
     <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen overflow-hidden">
       <!-- Sidebar -->
@@ -1446,6 +1740,25 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                 <Icon name="ph:trash-duotone" class="size-5" />
               </button>
             </div>
+            
+            <!-- Premium Status Button -->
+            <div class="flex h-16 w-full items-center justify-center">
+              <button
+                type="button"
+                class="flex size-12 items-center justify-center rounded-2xl transition-all duration-300 transform hover:scale-105"
+                :class="aiSettings.isPremium 
+                  ? 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-500/20 bg-yellow-500/10' 
+                  : 'text-gray-500 hover:text-gray-600 hover:bg-gray-500/20 bg-gray-500/10'"
+                :title="aiSettings.isPremium ? 'وضعیت پریمیوم' : 'وضعیت عادی'"
+                @click="openPremiumModal()"
+              >
+                <Icon 
+                  :name="aiSettings.isPremium ? 'ph:crown-fill' : 'ph:crown'" 
+                  class="size-5" 
+                />
+              </button>
+            </div>
+            
             <div class="flex h-16 w-full items-center justify-center">
               <DemoAccountMenu />
             </div>
@@ -1513,7 +1826,7 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
               />
             </button>
             <button
-              class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+              class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-2 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
               title="پایان جلسه"
               @click="handleEndSession"
             >
@@ -1522,6 +1835,18 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                 class="size-5"
               />
             </button>
+            <div class="-mr-1">
+              <NuxtLink
+                      to="/settings/ai-response"
+                      class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300 "
+                      title="AI Controls"
+                    >
+                      <Icon
+                        name="ph:sliders-duotone"
+                        class="size-5"
+                      />
+                    </NuxtLink>
+            </div>
           </div>
         </div>
       </div>
@@ -1602,6 +1927,8 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                     />
                   </NuxtLink>
                 </div>
+                
+              
               </div>
             </div>
 
@@ -1714,8 +2041,9 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                               : 'items-start',
                           ]"
                         >
+                          <!-- Message bubble and buttons on desktop -->
                           <div
-                            class="flex items-start gap-2"
+                            class="hidden sm:flex items-start gap-2"
                             :class="[
                               item.type === 'sent'
                                 ? 'flex-row-reverse'
@@ -1742,7 +2070,7 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                               </span>
                             </div>
 
-                            <!-- Detail button for sent messages -->
+                            <!-- Desktop buttons - next to message bubble -->
                             <BaseButton
                               v-if="item.type === 'sent'"
                               rounded="full"
@@ -1753,7 +2081,6 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                             >
                               <Icon name="ph:magnifying-glass-duotone" class="size-4" />
                             </BaseButton>
-                            <!-- Feedback button for received messages -->
                             <BaseButton
                               v-if="item.type === 'received'"
                               rounded="full"
@@ -1764,7 +2091,6 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                             >
                               <Icon name="ph:magnifying-glass-duotone" class="size-4" />
                             </BaseButton>
-                            <!-- Retry button for last received message -->
                             <BaseButton
                               v-if="item.type === 'received' && item.id === [...messages].reverse().find(msg => msg.type === 'received')?.id"
                               rounded="full"
@@ -1777,9 +2103,88 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
                               <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
                             </BaseButton>
                           </div>
-                          <span class="text-muted-400 font-sans text-xs">
-                            {{ formatTime(item.timestamp) }}
-                          </span>
+                          
+                          <!-- Message bubble only on mobile -->
+                          <div class="block sm:hidden">
+                            <div
+                              class="rounded-xl px-4 py-2"
+                              :class="[
+                                item.type === 'sent'
+                                  ? 'bg-primary-500 prose-p:text-white text-white'
+                                  : 'bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                              ]"
+                            >
+                              <span
+                                class="block font-sans"
+                                :class="[
+                                  item.type === 'sent'
+                                    ? 'prose-p:text-white text-white'
+                                    : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                                ]"
+                              >
+                                <AddonMarkdownRemark :source="item.text" />
+                              </span>
+                            </div>
+                          </div>
+
+                          <!-- Timestamp and mobile buttons -->
+                          <div 
+                            class="flex items-center gap-2 mt-1"
+                            :class="[
+                              item.type === 'sent' ? 'justify-end' : 'justify-start'
+                            ]"
+                          >
+                            <!-- Desktop timestamp -->
+                            <span class="hidden sm:block text-muted-400 font-sans text-xs">
+                              {{ formatTime(item.timestamp) }}
+                            </span>
+                            
+                            <!-- Mobile: sent messages - button on right of timestamp -->
+                            <template v-if="item.type === 'sent'">
+                              <span class="block sm:hidden text-muted-400 font-sans text-xs">
+                                {{ formatTime(item.timestamp) }}
+                              </span>
+                              <BaseButton
+                                class="block sm:hidden"
+                                rounded="full"
+                                title="مشاهده جزئیات"
+                                size="sm"
+                                color="primary"
+                                @click="openMessageDetailModal(item)"
+                              >
+                                <Icon name="ph:magnifying-glass-duotone" class="size-4" />
+                              </BaseButton>
+                            </template>
+                            
+                            <!-- Mobile: received messages - buttons on left of timestamp -->
+                            <template v-if="item.type === 'received'">
+                              <div class="flex gap-2 sm:hidden">
+                                <BaseButton
+                                  rounded="full"
+                                  title="ثبت بازخورد"
+                                  size="sm"
+                                  color="info"
+                                  @click="openFeedbackModal(item)"
+                                >
+                                  <Icon name="ph:magnifying-glass-duotone" class="size-4" />
+                                </BaseButton>
+                                <BaseButton
+                                  v-if="item.id === [...messages].reverse().find(msg => msg.type === 'received')?.id"
+                                  rounded="full"
+                                  title="تولید پاسخ جدید"
+                                  size="sm"
+                                  color="warning"
+                                  :disabled="messageLoading || isAIResponding"
+                                  @click="confirmRetryMessage"
+                                >
+                                  <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
+                                </BaseButton>
+                              </div>
+                              <span class="block sm:hidden text-muted-400 font-sans text-xs">
+                                {{ formatTime(item.timestamp) }}
+                              </span>
+                            </template>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -2152,17 +2557,32 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
             <BaseMessage class="mt-5" color="warning">
               استفاده شما از سامانه به معنای پذیرش قوانین استفاده و حریم خصوصی است.
             </BaseMessage>
+            <div class="grid grid-cols-2 gap-3">
+              <BaseButton
+                type="button"
+                color="primary"
+                class="w-full"
+                @click="gotoReport()"
+              >
+                نمایش پیشینه
+                <Icon name="ph:address-book-tabs" class="mr-2 size-5" />
+              </BaseButton>
+              <BaseButton
+                type="button"
+                :color="aiSettings.isPremium ? 'warning' : 'muted'"
+                class="w-full"
+                @click="openPremiumModal()"
+              >
+                <Icon 
+                  name="ph:gear-duotone" 
+                  class="mr-2 size-5" 
+                />
+                تنظیمات حاضر
+              </BaseButton>
+            </div>
             <BaseButton
               type="button"
-              class="ml-3"
-              color="primary"
-              @click="gotoReport()"
-            >
-              نمایش پیشینه
-              <Icon name="ph:address-book-tabs" class="mr-2 size-5" />
-            </BaseButton>
-            <BaseButton
-              type="button"
+              class="mt-3"
               @click="expanded = true"
             >
               بستن پنل
@@ -3249,6 +3669,110 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
         </div>
       </div>
     </template>
+  </TairoModal>
+
+  <!-- Premium Status Modal -->
+  <TairoModal
+    :open="isPremiumModalOpen"
+    size="md"
+    @close="closePremiumModal"
+  >
+    <template #header>
+      <div class="flex w-full items-center justify-between p-4 md:p-6">
+        <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+          {{ aiSettings.isPremium ? 'وضعیت پریمیوم' : 'وضعیت عادی' }}
+        </h3>
+        <BaseButtonClose @click="closePremiumModal" />
+      </div>
+    </template>
+
+    <div class="max-h-[70vh] overflow-y-auto p-4 md:p-6">
+      <div class="space-y-6">
+        <!-- Premium Status Card -->
+        <div class="rounded-xl p-6" :class="aiSettings.isPremium 
+          ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 dark:from-yellow-950/30 dark:to-orange-950/30 dark:border-yellow-800/30' 
+          : 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 dark:from-gray-900/30 dark:to-gray-800/30 dark:border-gray-700/30'">
+          
+          <div class="flex items-center gap-4 mb-4">
+            <div class="flex items-center justify-center size-12 rounded-xl" :class="aiSettings.isPremium 
+              ? 'bg-yellow-500/20 text-yellow-600' 
+              : 'bg-gray-500/20 text-gray-600'">
+              <Icon :name="aiSettings.isPremium ? 'ph:crown-fill' : 'ph:crown'" class="size-6" />
+            </div>
+            <div>
+              <h4 class="font-semibold text-lg" :class="aiSettings.isPremium ? 'text-yellow-800 dark:text-yellow-200' : 'text-gray-800 dark:text-gray-200'">
+                {{ aiSettings.isPremium ? 'کاربر پریمیوم' : 'کاربر عادی' }}
+              </h4>
+              <p class="text-sm" :class="aiSettings.isPremium ? 'text-yellow-600 dark:text-yellow-300' : 'text-gray-600 dark:text-gray-300'">
+                {{ aiSettings.isPremium ? 'تمام امکانات فعال است' : 'دسترسی محدود به امکانات' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Toggle Premium Button -->
+          <div class="mb-4">
+            <button
+              @click="togglePremiumStatus"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
+              :class="aiSettings.isPremium 
+                ? 'bg-gray-500/20 text-gray-700 dark:text-gray-300 hover:bg-gray-500/30' 
+                : 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-500/30'"
+            >
+              <Icon :name="aiSettings.isPremium ? 'ph:crown' : 'ph:crown-fill'" class="size-4" />
+              {{ aiSettings.isPremium ? 'تبدیل به عادی' : 'فعال‌سازی پریمیوم' }}
+            </button>
+          </div>
+        </div>
+        <!-- AI Settings Summary -->
+        <div class="rounded-xl p-6 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 dark:from-purple-950/30 dark:to-pink-950/30 dark:border-purple-800/30">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center justify-center size-10 rounded-lg bg-purple-500/20 text-purple-600">
+              <Icon name="ph:robot" class="size-5" />
+            </div>
+            <h4 class="font-semibold text-lg text-purple-800 dark:text-purple-200">
+              تنظیمات AI فعلی
+            </h4>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div class="flex items-center gap-2">
+              <Icon name="ph:chat-circle" class="size-4 text-purple-500" />
+              <span class="text-purple-700 dark:text-purple-300">
+                {{ aiSettings.multiMsgMode === 'single' ? 'تک پیام' : aiSettings.multiMsgMode === 'multi_short' ? 'چند پیام کوتاه' : 'چند پیام متوسط' }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <Icon name="ph:text-aa" class="size-4 text-purple-500" />
+              <span class="text-purple-700 dark:text-purple-300">
+                {{ aiSettings.lengthPref === 'short' ? 'کوتاه' : aiSettings.lengthPref === 'medium' ? 'متوسط' : 'بلند' }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <Icon name="ph:smiley" class="size-4 text-purple-500" />
+              <span class="text-purple-700 dark:text-purple-300">
+                {{ aiSettings.emojiLevel === 'very_high' ? 'فوق‌العاده' : aiSettings.emojiLevel === 'high' ? 'زیاد' : aiSettings.emojiLevel === 'medium' ? 'متعادل' : aiSettings.emojiLevel === 'low' ? 'کم' : 'بدون ایموجی' }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <Icon name="ph:sparkle" class="size-4 text-purple-500" />
+              <span class="text-purple-700 dark:text-purple-300">
+                {{ aiSettings.creativity === '0' ? 'دقیق' : aiSettings.creativity === '1' ? 'متعادل' : 'خلاق' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-purple-200 dark:border-purple-700">
+            <NuxtLink
+              to="/settings/ai-response"
+              class="inline-flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200 transition-colors"
+            >
+              <Icon name="ph:gear" class="size-4" />
+              تغییر تنظیمات AI
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </div>
   </TairoModal>
 </template>
 
