@@ -195,6 +195,118 @@ export function usePwaNotifications() {
     }
   }
 
+  // Schedule notification for future display
+  const scheduleLocalNotification = async (options: PwaNotificationOptions, scheduleDate: Date): Promise<string | null> => {
+    if (!isSupported.value) {
+      console.warn('PWA notifications not supported')
+      return null
+    }
+
+    // Check if scheduled time is in the future
+    const now = new Date()
+    if (scheduleDate <= now) {
+      console.log('Scheduled time is in the past or now, showing immediately')
+      await showLocalNotification(options)
+      return null
+    }
+
+    const delay = scheduleDate.getTime() - now.getTime()
+    const notificationId = options.tag || `scheduled-${Date.now()}`
+    
+    console.log(`Scheduling PWA notification "${options.title}" to show in ${Math.round(delay / 1000 / 60)} minutes`)
+
+    // Use setTimeout to schedule the notification
+    const timeoutId = setTimeout(async () => {
+      try {
+        console.log(`Showing scheduled PWA notification: ${options.title}`)
+        await showLocalNotification(options)
+        
+        // Remove from scheduled notifications store
+        if (process.client && window.localStorage) {
+          const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
+          delete scheduled[notificationId]
+          localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
+        }
+      } catch (err) {
+        console.error('Error showing scheduled PWA notification:', err)
+      }
+    }, delay)
+
+    // Store scheduled notification info for cleanup and persistence
+    if (process.client && window.localStorage) {
+      const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
+      scheduled[notificationId] = {
+        options,
+        scheduleDate: scheduleDate.toISOString(),
+        timeoutId,
+        created: now.toISOString()
+      }
+      localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
+    }
+
+    return notificationId
+  }
+
+  // Cancel scheduled notification
+  const cancelScheduledNotification = (notificationId: string): boolean => {
+    if (!process.client) return false
+
+    try {
+      const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
+      
+      if (scheduled[notificationId]) {
+        // Clear the timeout
+        if (scheduled[notificationId].timeoutId) {
+          clearTimeout(scheduled[notificationId].timeoutId)
+        }
+        
+        // Remove from storage
+        delete scheduled[notificationId]
+        localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
+        
+        console.log(`Cancelled scheduled PWA notification: ${notificationId}`)
+        return true
+      }
+
+      return false
+    } catch (err) {
+      console.error('Error cancelling scheduled notification:', err)
+      return false
+    }
+  }
+
+  // Cleanup expired scheduled notifications on page load
+  const cleanupExpiredScheduledNotifications = () => {
+    if (!process.client) return
+
+    try {
+      const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
+      const now = new Date()
+      let hasChanges = false
+
+      Object.keys(scheduled).forEach(notificationId => {
+        const notification = scheduled[notificationId]
+        const scheduleDate = new Date(notification.scheduleDate)
+        
+        // Clean up notifications that are more than 1 hour past their scheduled time
+        if (now.getTime() - scheduleDate.getTime() > 3600000) {
+          if (notification.timeoutId) {
+            clearTimeout(notification.timeoutId)
+          }
+          delete scheduled[notificationId]
+          hasChanges = true
+        }
+      })
+
+      if (hasChanges) {
+        localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
+        console.log('Cleaned up expired scheduled PWA notifications')
+      }
+    } catch (err) {
+      console.error('Error cleaning up scheduled notifications:', err)
+    }
+  }
+
   // Helper function for vibration patterns
   const getVibrationPattern = (priority?: string): number[] => {
     switch (priority) {
@@ -444,6 +556,7 @@ export function usePwaNotifications() {
   onMounted(() => {
     setupServiceWorkerListener()
     checkSubscriptionStatus()
+    cleanupExpiredScheduledNotifications()
   })
 
   return {
@@ -459,6 +572,8 @@ export function usePwaNotifications() {
     subscribeToPush,
     unsubscribeFromPush,
     showLocalNotification,
+    scheduleLocalNotification,
+    cancelScheduledNotification,
     sendPushNotification,
     testNotification,
     checkSubscriptionStatus,
@@ -467,5 +582,6 @@ export function usePwaNotifications() {
 
     // Utilities
     checkSupport,
+    cleanupExpiredScheduledNotifications,
   }
 }

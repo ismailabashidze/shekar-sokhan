@@ -82,7 +82,7 @@
                 </div>
               </template>
               <BaseDropdownItem
-                to="/layouts/profile"
+                to="/report"
                 title="مشاهده پروفایل"
                 :text="displayName"
                 rounded="sm"

@@ -222,7 +222,7 @@ export function useNotifications() {
     return visibleNotifications.value.filter(n => !n.isRead && n.priority === 'urgent')
   })
 
-  // PWA notification helper
+  // PWA notification helper - handles both immediate and scheduled notifications
   const triggerPwaNotification = async (notification: Notification) => {
     if (!process.client) return
 
@@ -245,8 +245,7 @@ export function useNotifications() {
         }
       }
 
-      // Show the notification
-      await pwa.showLocalNotification({
+      const notificationOptions = {
         title: notification.title,
         message: notification.message,
         type: notification.type,
@@ -254,9 +253,28 @@ export function useNotifications() {
         url: notification.actionUrl || '/notifications',
         actionText: notification.actionText,
         tag: `notification-${notification.id}`,
-      })
+      }
 
-      console.log('PWA notification shown successfully:', notification.title)
+      // Check if this notification should be scheduled for the future
+      if (notification.announceTime) {
+        const announceDate = new Date(notification.announceTime)
+        const now = new Date()
+
+        if (announceDate > now) {
+          // This is a future notification - schedule it instead of showing immediately
+          console.log(`Scheduling PWA notification "${notification.title}" for ${announceDate.toLocaleString('fa-IR')}`)
+          const scheduledId = await pwa.scheduleLocalNotification(notificationOptions, announceDate)
+          
+          if (scheduledId) {
+            console.log(`PWA notification scheduled successfully with ID: ${scheduledId}`)
+          }
+          return
+        }
+      }
+
+      // Show immediate notification for current/past announcements
+      await pwa.showLocalNotification(notificationOptions)
+      console.log('PWA notification shown immediately:', notification.title)
     }
     catch (err) {
       console.warn('Failed to show PWA notification:', err)

@@ -2,11 +2,11 @@ import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
 // خواندن ورژن از package.json
-let appVersion = '3.0.0'
+let appVersion = '3.0.1'
 try {
   const packagePath = resolve(__dirname, './package.json')
   const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'))
-  appVersion = packageJson.version || '3.0.0'
+  appVersion = packageJson.version || '3.0.1'
 }
 catch (error) {
   console.warn('Could not read version from package.json, using fallback:', appVersion)

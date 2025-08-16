@@ -7,6 +7,24 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 3.0.1 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 3.0.1
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              16 اوت 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              بهبود‌ها
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>تصحیح تنظیم پیش‌فرض برای حالت چند پیامه - حالا "چند پیام کوتاه" به جای "تک پیام" به عنوان پیش‌فرض انتخاب می‌شود</li>
+              <li>بهبود تجربه کاربری هنگام پاک کردن داده‌های مرورگر و ورود مجدد</li>
+            </ul>
+          </div>
+
           <!-- Version 3.0.0 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">
