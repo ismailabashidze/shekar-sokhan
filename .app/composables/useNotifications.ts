@@ -698,20 +698,7 @@ export function useNotifications() {
     }
   }
 
-  // Auto-refresh notifications every 30 seconds - DEPRECATED: Using realtime instead
-  let refreshInterval: NodeJS.Timeout | null = null
-
-  const startAutoRefresh = () => {
-    // DEPRECATED: Realtime subscription handles updates automatically
-    console.warn('Auto-refresh is deprecated. Using realtime subscriptions instead.')
-  }
-
-  const stopAutoRefresh = () => {
-    if (refreshInterval) {
-      clearInterval(refreshInterval)
-      refreshInterval = null
-    }
-  }
+  // NOTE: Auto-refresh is deprecated - using realtime subscriptions instead
 
   // Setup auth state management - call this from app initialization
   const setupAuthManagement = async () => {
@@ -874,7 +861,6 @@ export function useNotifications() {
 
   // Global cleanup function
   const globalCleanup = () => {
-    stopAutoRefresh()
     unsubscribeFromNotifications()
 
     // Cancel any pending fetch requests
@@ -936,8 +922,6 @@ export function useNotifications() {
     initialize,
     reinitialize,
     setupAuthManagement,
-    startAutoRefresh,
-    stopAutoRefresh,
 
     // Realtime
     subscribeToNotifications,
