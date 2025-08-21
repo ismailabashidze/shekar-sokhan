@@ -233,7 +233,7 @@ const closeAlphaModal = () => {
 
     <!-- Bug Report Icon - Only visible when Alpha modal is showing -->
     <div class="fixed bottom-6 right-6 z-50">
-      <GlobalBugReportIcon :visible="showAlphaModal" />
+      <BugReportIcon :visible="showAlphaModal" />
     </div>
 
     <div>

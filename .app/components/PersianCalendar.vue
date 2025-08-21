@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed, watch, defineEmits, defineProps, defineExpose } from 'vue'
 import jalaali from 'jalaali-js'
 
 const props = defineProps({
