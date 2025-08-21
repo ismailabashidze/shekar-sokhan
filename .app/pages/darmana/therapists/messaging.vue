@@ -2,6 +2,7 @@
 import { useOpenRouter } from '@/composables/useOpenRouter'
 import { useAIResponseSettings } from '@/composables/useAIResponseSettings'
 import { convertToEmotionWheel } from '@/utils/emotion-mapper'
+import { useOpenAITTS } from '@/composables/useOpenAITTS'
 
 definePageMeta({
   title: 'گفتگو با روانشناس',
@@ -36,9 +37,32 @@ const userSubscription = ref<any>(null) // Initialize with null
 const currentLoadingTherapistId = ref<string | null>(null)
 const showScrollButton = ref(false)
 const isAIResponding = ref(false)
+const ttsLoadingMessageId = ref<string | null>(null)
+
+const { play, isLoading: isTTSLoading, error: ttsError } = useOpenAITTS()
 
 const userReport = ref<Report | null>(null)
 const hasPreviousData = ref(false)
+
+const playMessageTTS = async (message: any) => {
+  if (!message || !message.text) return
+  
+  ttsLoadingMessageId.value = message.id
+  try {
+    await play(message.text)
+  } catch (error) {
+    console.error('Error playing TTS:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در پخش صوتی پیام',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+  } finally {
+    ttsLoadingMessageId.value = null
+  }
+}
 
 const { generateAnalysis, createAnalysis, getAnalysisForSession } = useSessionAnalysis()
 const { createAndLinkAnalysis, getMessageAnalysis } = useMessageAnalysis()
@@ -923,13 +947,25 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
   }
   catch (e) {
     console.error('Error starting AI conversation with summary:', e)
-    // Add fallback message if the summary fails
-    messages.value.push({
-      type: 'received',
-      text: 'سلام، من روانشناس شما هستم. به نظر می‌رسد جلسات قبلی با هم داشته‌ایم. امروز حالتان چطور است و درباره چه چیزی می‌خواهید صحبت کنیم؟',
-      timestamp: new Date().toISOString(),
-      id: 'auto-' + Date.now(),
-    })
+    
+    // Check if it's an authentication error
+    if (e.message && e.message.includes('No auth credentials found')) {
+      toaster.show({
+        title: 'خطا در احراز هویت',
+        message: 'مشکلی در احراز هویت رخ داد. لطفاً مجدداً وارد شوید.',
+        color: 'danger',
+        icon: 'ph:warning-circle-fill',
+        closable: true,
+      })
+    } else {
+      // Add fallback message if the summary fails
+      messages.value.push({
+        type: 'received',
+        text: 'سلام، من روانشناس شما هستم. به نظر می‌رسد جلسات قبلی با هم داشته‌ایم. امروز حالتان چطور است و درباره چه چیزی می‌خواهید صحبت کنیم؟',
+        timestamp: new Date().toISOString(),
+        id: 'auto-' + Date.now(),
+      })
+    }
     scrollToBottom()
   }
   finally {
@@ -2101,6 +2137,18 @@ const typingConfig = ref({
                               @click="confirmRetryMessage"
                             >
                               <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
+                            </BaseButton>
+                            <BaseButton
+                              v-if="item.type === 'received'"
+                              rounded="full"
+                              title="پخش صوتی"
+                              size="sm"
+                              color="info"
+                              :loading="ttsLoadingMessageId === item.id"
+                              @click="playMessageTTS(item)"
+                            >
+                              <Icon v-if="ttsLoadingMessageId === item.id" name="ph:spinner" class="size-4 animate-spin" />
+                              <Icon v-else name="ph:play" class="size-4" />
                             </BaseButton>
                           </div>
                           

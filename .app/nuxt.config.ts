@@ -45,6 +45,7 @@ export default defineNuxtConfig({
       appVersion,
       appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:3000',
       openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
+      openaiApiKey: process.env.OPENAI_API_KEY || '',
       dargahMerchantId: process.env.DARGAH_MERCHANT_ID || '',
       dargahBaseUrl: process.env.DARGAH_BASE_URL || 'https://dargahno.net',
       dargahUsername: process.env.DARGAH_USERNAME || '',
@@ -155,7 +156,6 @@ export default defineNuxtConfig({
   // Experimental features for faster builds
   experimental: {
     payloadExtraction: false,
-    inlineSSRStyles: false,
     renderJsonPayloads: true,
     typedPages: false,
   },
