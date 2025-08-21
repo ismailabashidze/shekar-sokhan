@@ -656,6 +656,12 @@ export function useOpenRouter() {
         catch {
           errorMessage = errorText
         }
+        
+        // Handle authentication errors specifically
+        if (errorMessage.includes('No auth credentials found')) {
+          throw new Error(`Chat error: No auth credentials found`)
+        }
+        
         throw new Error(`Chat error: ${errorMessage}`)
       }
 
