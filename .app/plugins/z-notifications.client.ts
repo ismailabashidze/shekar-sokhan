@@ -1,24 +1,33 @@
 // Plugin to setup global notification auth management
-export default defineNuxtPlugin(async (nuxtApp) => {
+export default defineNuxtPlugin((nuxtApp) => {
   // Only run on client side
   if (!process.client) return
 
-  console.log('Setting up notifications auth management...')
-  console.log('Nuxt app context available:', !!nuxtApp)
-  console.log('PocketBase available:', !!nuxtApp.$pb)
+  // Setup auth management without delay in development
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      // Get the notifications instance and setup auth management
+      const { setupAuthManagement } = useNotifications()
+      
+      // Setup auth state management at app level (without delay in dev)
+      setupAuthManagement()
+    }
+    catch (error) {
+      console.error('Failed to setup notifications auth management:', error)
+    }
+  } else {
+    // In production, use a small delay to ensure everything is ready
+    setTimeout(async () => {
+      try {
+        // Get the notifications instance and setup auth management
+        const { setupAuthManagement } = useNotifications()
 
-  // Wait a bit to ensure everything is ready
-  await new Promise(resolve => setTimeout(resolve, 100))
-
-  try {
-    // Get the notifications instance and setup auth management
-    const { setupAuthManagement } = useNotifications()
-
-    // Setup auth state management at app level
-    await setupAuthManagement()
-    console.log('Notifications auth management initialized successfully')
-  }
-  catch (error) {
-    console.error('Failed to setup notifications auth management:', error)
+        // Setup auth state management at app level
+        await setupAuthManagement()
+      }
+      catch (error) {
+        console.error('Failed to setup notifications auth management:', error)
+      }
+    }, 100)
   }
 })

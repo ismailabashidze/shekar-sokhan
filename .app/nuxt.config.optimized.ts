@@ -46,7 +46,7 @@ export default defineNuxtConfig({
   sourcemap: {
     server: false,
     client: false,
-  },
+    },
 
   // Disable devtools in production
   devtools: { enabled: process.env.NODE_ENV === 'development' },
@@ -94,6 +94,83 @@ export default defineNuxtConfig({
     '~/assets/css/tour.css',
   ],
 
+  // Modules configuration for PWA
+  modules: [
+    '@vite-pwa/nuxt'
+  ],
+
+  // PWA configuration
+  pwa: {
+    registerType: 'autoUpdate',
+    workbox: {
+      globPatterns: ['**/*.{js,css,html,png,svg,ico,jpg,jpeg,webp}'],
+      navigateFallback: null,
+      cleanupOutdatedCaches: true,
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/fonts.googleapis.com\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'google-fonts-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        },
+        {
+          urlPattern: /^https:\/\/fonts.gstatic.com\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'gstatic-fonts-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        }
+      ]
+    },
+    manifest: {
+      name: 'ذهنا - پلتفرم روانشناسی',
+      short_name: 'ذهنا',
+      theme_color: '#4F46E5',
+      icons: [
+        {
+          src: 'pwa-192x192.png',
+          sizes: '192x192',
+          type: 'image/png'
+        },
+        {
+          src: 'pwa-512x512.png',
+          sizes: '512x512',
+          type: 'image/png'
+        },
+        {
+          src: 'pwa-192x192.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'maskable'
+        }
+      ]
+    },
+    client: {
+      installPrompt: true,
+    },
+    devOptions: {
+      enabled: false,
+      suppressWarnings: true,
+      navigateFallback: '/',
+      navigateFallbackAllowlist: [/^\/$/],
+    },
+  },
+
   nitro: {
     devProxy: {
       '/api/openrouter': {
@@ -127,7 +204,7 @@ export default defineNuxtConfig({
     build: {
       target: 'es2022',
       minify: process.env.NODE_ENV === 'production' ? 'esbuild' : false,
-      sourcemap: false, // Always disable for faster builds
+      sourcemap: process.env.NODE_ENV === 'development',
       // External heavy dependencies for production builds
       rollupOptions: {
         external: process.env.NODE_ENV === 'production'
@@ -138,6 +215,17 @@ export default defineNuxtConfig({
             ]
           : [],
       },
+      // Speed up production builds
+      chunkSizeWarningLimit: 2000,
+      // Enable CSS code splitting
+      cssCodeSplit: true,
+      // Reduce bundle size with terser (alternative to esbuild)
+      // terserOptions: {
+      //   compress: {
+      //     drop_console: true,
+      //     drop_debugger: true
+      //   }
+      // }
     },
     // Optimize deps for faster builds
     optimizeDeps: {
@@ -146,13 +234,13 @@ export default defineNuxtConfig({
         '@anthropic-ai/sdk',
         '@gradio/client',
       ],
-      // Include frequently used deps for pre-bundling
+      // Include commonly used dependencies for faster cold starts
       include: [
+        'vue',
+        'vue-router',
+        '@vueuse/core',
         'driver.js',
-        'pocketbase',
-        '@iconify/vue',
-        'jalaali-js',
-        'quill'
+        'pocketbase'
       ]
     },
     // Enable faster builds
@@ -165,27 +253,17 @@ export default defineNuxtConfig({
     ssr: {
       external: ['chromadb', '@anthropic-ai/sdk', '@gradio/client'],
     },
-    // Dev server optimizations
-    server: {
-      watch: {
-        // Ignore large files that don't change often
-        ignored: [
-          '**/node_modules/**',
-          '**/.git/**',
-          '**/dist/**',
-          '**/.nuxt/**'
-        ]
-      },
-      // Increase hmr performance
-      hmr: {
-        overlay: false
-      }
-    }
+    // Enable caching for faster rebuilds
+    cacheDir: '.vite-cache',
   },
 
   // Build optimizations
   build: {
-    transpile: process.env.NODE_ENV === 'production' ? [] : ['@iconify/vue'],
+    transpile: process.env.NODE_ENV === 'production' ? [
+      // Only transpile specific heavy libraries in production
+      '@vueup/vue-quill',
+      'quill'
+    ] : ['@iconify/vue'],
   },
 
   // Experimental features for faster builds
@@ -194,6 +272,10 @@ export default defineNuxtConfig({
     inlineSSRStyles: false,
     renderJsonPayloads: true,
     typedPages: false,
+    // Enable faster component initialization
+    componentIslands: true,
+    // Enable faster async context
+    asyncContext: true,
   },
 
   // TypeScript optimizations
@@ -201,11 +283,33 @@ export default defineNuxtConfig({
     typeCheck: false,
   },
 
-  // Development optimizations
-  dev: true,
-  devServer: {
-    port: 3000,
-    host: 'localhost',
+  // Performance optimizations
+  performance: {
+    // Enable tree-shaking for better bundle optimization
+    treeShake: true,
   },
-  watch: false, // Disable file watching for faster startup
+
+  // Optimization for faster builds
+  optimization: {
+    // Split chunks for better caching
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        // Create a vendor chunk for node_modules
+        vendor: {
+          name: 'vendor',
+          test: /[\\/]node_modules[\\/]/,
+          priority: 10,
+          chunks: 'all',
+        },
+        // Create separate chunks for Tairo components
+        tairo: {
+          name: 'tairo',
+          test: /[\\/]layers[\\/]/,
+          priority: 20,
+          chunks: 'all',
+        }
+      }
+    }
+  }
 })

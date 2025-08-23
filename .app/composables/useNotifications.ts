@@ -729,7 +729,7 @@ export function useNotifications() {
     }
 
     // Handle auth state changes
-    $pb.authStore.onChange(async (token, model) => {
+    $pb.authStore.onChange((token, model) => {
       if (!token || !model) {
         // User logged out
         console.log('User logged out, cleaning up notifications')
@@ -741,15 +741,18 @@ export function useNotifications() {
         // User logged in, reinitialize
         console.log('User authenticated, reinitializing notifications for:', model.id)
 
-        try {
-          await reinitialize()
-          isInitialized = true
-        }
-        catch (error) {
-          console.error('Failed to reinitialize notifications:', error)
-          isInitialized = false
-          initPromise = null
-        }
+        // Use a small delay to ensure everything is ready
+        setTimeout(async () => {
+          try {
+            await reinitialize()
+            isInitialized = true
+          }
+          catch (error) {
+            console.error('Failed to reinitialize notifications:', error)
+            isInitialized = false
+            initPromise = null
+          }
+        }, 100)
       }
     })
   }
@@ -786,7 +789,9 @@ export function useNotifications() {
         isLoading.value = true
         error.value = null
 
-        await fetchNotifications()
+        // In development, fetch fewer notifications for faster startup
+        const fetchCount = process.env.NODE_ENV === 'development' ? 20 : 50
+        await fetchNotifications(1, fetchCount)
         await subscribeToNotifications()
 
         // Auto-request PWA notification permission on first initialization

@@ -17,6 +17,8 @@
   "scripts": {
     "dev": "pnpm --filter=app dev",
     "build": "cross-env NODE_OPTIONS=\"--no-deprecation\" pnpm --filter=app build",
+    "build:fast": "cross-env NODE_OPTIONS=\"--no-deprecation\" pnpm --filter=app build:fast",
+    "build:ultra": "cross-env NODE_OPTIONS=\"--no-deprecation\" pnpm --filter=app build:ultra",
     "generate": "cross-env NODE_OPTIONS=\"--no-deprecation\" pnpm --filter=app generate",
     "demo:dev": "pnpm --filter=demo dev",
     "demo:build": "pnpm --filter=demo build",

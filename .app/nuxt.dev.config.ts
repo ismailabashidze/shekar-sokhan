@@ -48,8 +48,8 @@ export default defineNuxtConfig({
     client: false,
   },
 
-  // Disable devtools in production
-  devtools: { enabled: process.env.NODE_ENV === 'development' },
+  // Disable devtools in production but enable in development
+  devtools: { enabled: true },
 
   // Runtime environment variables
   runtimeConfig: {
@@ -94,6 +94,53 @@ export default defineNuxtConfig({
     '~/assets/css/tour.css',
   ],
 
+  // Modules configuration for PWA
+  modules: [
+    '@vite-pwa/nuxt'
+  ],
+
+  // PWA configuration for development
+  pwa: {
+    registerType: 'autoUpdate',
+    workbox: {
+      globPatterns: ['**/*.{js,css,html,png,svg,ico,jpg,jpeg,webp}'],
+      navigateFallback: null,
+      cleanupOutdatedCaches: true,
+    },
+    manifest: {
+      name: 'ذهنا - پلتفرم روانشناسی',
+      short_name: 'ذهنا',
+      theme_color: '#4F46E5',
+      icons: [
+        {
+          src: 'pwa-192x192.png',
+          sizes: '192x192',
+          type: 'image/png'
+        },
+        {
+          src: 'pwa-512x512.png',
+          sizes: '512x512',
+          type: 'image/png'
+        },
+        {
+          src: 'pwa-192x192.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'maskable'
+        }
+      ]
+    },
+    client: {
+      installPrompt: true,
+    },
+    devOptions: {
+      enabled: true,
+      type: 'module',
+      suppressWarnings: true,
+      navigateFallback: '/',
+    },
+  },
+
   nitro: {
     devProxy: {
       '/api/openrouter': {
@@ -108,92 +155,73 @@ export default defineNuxtConfig({
     },
     // Bundle server dependencies separately
     bundledStorage: ['redis'],
-    // Minify output for production
-    minify: process.env.NODE_ENV === 'production',
-    // Use esbuild for faster builds
-    esbuild: {
-      options: {
-        target: 'es2022',
-        minify: process.env.NODE_ENV === 'production',
-      },
-    },
+    // Don't minify in development for faster builds
+    minify: false,
   },
 
   // Server-side rendering optimizations
   ssr: true,
 
-  // Vite build optimizations
+  // Vite build optimizations for development
   vite: {
     build: {
       target: 'es2022',
-      minify: process.env.NODE_ENV === 'production' ? 'esbuild' : false,
-      sourcemap: false, // Always disable for faster builds
-      // External heavy dependencies for production builds
+      minify: false,
+      sourcemap: true,
+      // External heavy dependencies for development
       rollupOptions: {
-        external: process.env.NODE_ENV === 'production'
-          ? [
-              'chromadb',
-              '@anthropic-ai/sdk',
-              '@gradio/client',
-            ]
-          : [],
+        external: [
+          'chromadb',
+          '@anthropic-ai/sdk',
+          '@gradio/client',
+        ]
       },
     },
-    // Optimize deps for faster builds
+    // Optimize deps for faster development
     optimizeDeps: {
       exclude: [
         'chromadb',
         '@anthropic-ai/sdk',
         '@gradio/client',
       ],
-      // Include frequently used deps for pre-bundling
+      // Include commonly used dependencies for faster cold starts
       include: [
+        'vue',
+        'vue-router',
+        '@vueuse/core',
         'driver.js',
-        'pocketbase',
-        '@iconify/vue',
-        'jalaali-js',
-        'quill'
+        'pocketbase'
       ]
     },
     // Enable faster builds
     define: {
       __VUE_OPTIONS_API__: false,
-      __VUE_PROD_DEVTOOLS__: false,
+      __VUE_PROD_DEVTOOLS__: true,
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
     },
     // Server-side externals
     ssr: {
       external: ['chromadb', '@anthropic-ai/sdk', '@gradio/client'],
     },
-    // Dev server optimizations
-    server: {
-      watch: {
-        // Ignore large files that don't change often
-        ignored: [
-          '**/node_modules/**',
-          '**/.git/**',
-          '**/dist/**',
-          '**/.nuxt/**'
-        ]
-      },
-      // Increase hmr performance
-      hmr: {
-        overlay: false
-      }
-    }
+    // Enable caching for faster rebuilds
+    cacheDir: '.vite-cache',
   },
 
   // Build optimizations
   build: {
-    transpile: process.env.NODE_ENV === 'production' ? [] : ['@iconify/vue'],
+    transpile: ['@iconify/vue'],
   },
 
-  // Experimental features for faster builds
+  // Experimental features for faster development
   experimental: {
     payloadExtraction: false,
     inlineSSRStyles: false,
     renderJsonPayloads: true,
     typedPages: false,
+    // Enable faster component initialization
+    componentIslands: true,
+    // Enable faster async context
+    asyncContext: true,
   },
 
   // TypeScript optimizations
@@ -201,11 +229,9 @@ export default defineNuxtConfig({
     typeCheck: false,
   },
 
-  // Development optimizations
-  dev: true,
-  devServer: {
-    port: 3000,
-    host: 'localhost',
-  },
-  watch: false, // Disable file watching for faster startup
+  // Performance optimizations
+  performance: {
+    // Enable tree-shaking for better bundle optimization
+    treeShake: false, // Disable in dev for faster builds
+  }
 })

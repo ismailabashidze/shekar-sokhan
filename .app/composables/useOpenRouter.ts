@@ -715,9 +715,17 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
     return result
   }
 
-  // Initialize models on composable creation
+  // Initialize models on composable creation (only in development)
   onMounted(() => {
-    fetchModels()
+    // Only fetch models in development when actually needed
+    if (process.env.NODE_ENV === 'development' && allModels.value.length === 0) {
+      // Use nextTick to avoid blocking the main thread
+      nextTick(() => {
+        setTimeout(() => {
+          fetchModels()
+        }, 5000)
+      })
+    }
   })
 
   return {
