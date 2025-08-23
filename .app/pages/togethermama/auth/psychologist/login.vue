@@ -24,7 +24,7 @@ const login = () => {
       >
         <img
           class="mx-auto max-w-xl rounded-md"
-          src="/img/illustrations/login-psychologist.png"
+          src="/img/illustrations/login.png"
           alt="ورود روانشناس به TogetherMama"
           width="619"
           height="594"

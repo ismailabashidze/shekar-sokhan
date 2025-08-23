@@ -24,7 +24,7 @@ const register = () => {
       >
         <img
           class="mx-auto max-w-xl rounded-md"
-          src="/img/illustrations/signup-mother.png"
+          src="/img/illustrations/login.png"
           alt="ثبت‌نام مادر در TogetherMama"
           width="619"
           height="594"

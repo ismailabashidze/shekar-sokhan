@@ -80,7 +80,7 @@ export interface AreaExplored {
   next_steps: string
 }
 
-export interface TherapyGoal {
+export interface ReportTherapyGoal {
   id: string
   title: string
   progress_percentage: number
@@ -98,7 +98,7 @@ export interface SessionReportData {
   therapistId: string
   sessionDuration: number
   messageCount: number
-  goals: TherapyGoal[]
+  goals: ReportTherapyGoal[]
   conversationSummary: string
   emotionalProgression: any[]
   riskAssessment: 'low' | 'moderate' | 'high'
@@ -521,7 +521,7 @@ Avoid diagnostic labels - focus on growth and healing.
     return null
   }
 
-  const extractDSM5Assessments = (content: string, goals: TherapyGoal[]) => {
+  const extractDSM5Assessments = (content: string, goals: ReportTherapyGoal[]) => {
     return goals.map(goal => ({
       category: goal.dsm5_aspects?.dsm5_category || '',
       confidence: goal.dsm5_aspects?.diagnostic_confidence || 0,
@@ -559,7 +559,7 @@ Avoid diagnostic labels - focus on growth and healing.
     return 'Building rapport'
   }
 
-  const simplifyGoalDescription = (goal: TherapyGoal): string => {
+  const simplifyGoalDescription = (goal: ReportTherapyGoal): string => {
     // Convert clinical goal to patient-friendly description
     const category = goal.dsm5_aspects?.dsm5_category || ''
 
@@ -571,7 +571,7 @@ Avoid diagnostic labels - focus on growth and healing.
     return goal.title
   }
 
-  const calculateProgressPercentage = (goal: TherapyGoal): number => {
+  const calculateProgressPercentage = (goal: ReportTherapyGoal): number => {
     return goal.progress_percentage || goal.dsm5_aspects?.diagnostic_confidence || 0
   }
 
