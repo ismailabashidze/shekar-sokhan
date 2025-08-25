@@ -1,0 +1,21 @@
+erDiagram
+    users ||--o{ addresses : has
+    users ||--|| buyer_profiles : is
+    users ||--|| distributor_profiles : is
+    users ||--|| provider_profiles : is
+    users ||--o{ tickets : creates
+    users ||--o{ notifications : receives
+    users ||--o{ settlements : "is_settled_with"
+
+    provider_profiles ||--o{ loads : offers
+    products ||--o{ loads : categorized_as
+
+    loads ||--o{ orders : contains
+    buyer_profiles ||--o{ orders : places
+    distributor_profiles ||--o{ orders : distributes
+    addresses ||--o{ orders : delivered_to
+
+    orders ||--|| payments : has
+    orders ||--o{ settlements : generate
+
+    tickets }|--|| users : assigned_to

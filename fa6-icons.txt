@@ -1,0 +1,118 @@
+.app\pages\baham\buyer\distributors\[id]\index.vue:          <Icon name="fa6-solid:arrow-right" class="size-5 ml-2" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:          <Icon name="fa6-solid:envelope" class="size-5 ml-2" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                <Icon name="fa6-solid:truck" class="size-10 text-muted-400 dark:text-muted-500" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                    <Icon name="fa6-solid:star" class="size-4 ml-2" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                    <Icon name="fa6-solid:check-circle" class="size-4 ml-2" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                    <Icon name="fa6-solid:calendar-plus" class="size-4 ml-2" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:link" class="size-5 ml-2" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:unlink" class="size-5 ml-2" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:clock" class="size-5 ml-2" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:user" class="size-6 text-muted-400 dark:text-muted-500 ml-4 mt-1" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:phone" class="size-6 text-muted-400 dark:text-muted-500 ml-4 mt-1" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:mobile" class="size-6 text-muted-400 dark:text-muted-500 ml-4 mt-1" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:envelope" class="size-6 text-muted-400 dark:text-muted-500 ml-4 mt-1" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:location-dot" class="size-6 text-muted-400 dark:text-muted-500 ml-4 mt-1" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:map" class="size-6 text-muted-400 dark:text-muted-500 ml-4 mt-1" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:clock" class="size-6 text-muted-400 dark:text-muted-500 ml-4 mt-1" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:check" class="size-5 text-success-500 ml-3" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                  <Icon name="fa6-solid:certificate" class="size-5 text-info-500 ml-3" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:              <Icon name="fa6-solid:map-location-dot" class="size-14 text-muted-400 dark:text-muted-500 mx-auto mb-3" />
+.app\pages\baham\buyer\distributors\[id]\index.vue:                    name="fa6-solid:star" 
+.app\pages\baham\buyer\fresh.vue:  { id: 1, title: 'ثبت اولین سفارش', icon: 'fa6-solid:cart-plus', color: 'primary', action: () => router.push('/baham/buyer/marketplace') },
+.app\pages\baham\buyer\fresh.vue:  { id: 2, title: 'آموزش استفاده', icon: 'fa6-solid:book', color: 'info', action: () => router.push('/baham/buyer/guide') },
+.app\pages\baham\buyer\fresh.vue:  { id: 3, title: 'پرسش‌های متداول', icon: 'fa6-solid:circle-question', color: 'success', action: () => router.push('/faq') },
+.app\pages\baham\buyer\fresh.vue:  { id: 4, title: 'پشتیبانی', icon: 'fa6-solid:headset', color: 'warning', action: () => router.push('/baham/buyer/support') }
+.app\pages\baham\buyer\fresh.vue:          <Icon name="fa6-solid:cart-plus" class="size-5 ml-2" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:box-open" class="size-7 text-primary-500" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:clock" class="size-7 text-warning-500" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:money-bill" class="size-7 text-success-500" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:chart-line" class="size-7 text-amber-500" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:percent" class="size-7 text-info-500" />
+.app\pages\baham\buyer\fresh.vue:                <Icon name="fa6-solid:chart-line" class="size-4 text-success-500 mr-2" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:heart" class="size-7 text-danger-500" />
+.app\pages\baham\buyer\fresh.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\fresh.vue:            <Icon name="fa6-solid:user-plus" class="size-4 ml-2" />
+.app\pages\baham\buyer\fresh.vue:            <Icon name="fa6-solid:shield" class="size-4 ml-2" />
+.app\pages\baham\buyer\index.vue:  { id: 1, title: 'ثبت سفارش', icon: 'fa6-solid:cart-plus', color: 'primary', action: () => router.push('/baham/buyer/marketplace') },
+.app\pages\baham\buyer\index.vue:  { id: 2, title: 'سفارشات', icon: 'fa6-solid:box-open', color: 'info', action: () => router.push('/baham/buyer/orders') },
+.app\pages\baham\buyer\index.vue:  { id: 3, title: 'محصولات', icon: 'fa6-solid:carrot', color: 'success', action: () => router.push('/baham/buyer/products') },
+.app\pages\baham\buyer\index.vue:  { id: 4, title: 'پیام‌ها', icon: 'fa6-solid:comments', color: 'warning', action: () => router.push('/baham/buyer/messages') }
+.app\pages\baham\buyer\index.vue:          <Icon name="fa6-solid:cart-plus" class="size-5 ml-2" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:box-open" class="size-7 text-primary-500" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:clock" class="size-7 text-warning-500" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:money-bill" class="size-7 text-success-500" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:chart-line" class="size-7 text-amber-500" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:percent" class="size-7 text-info-500" />
+.app\pages\baham\buyer\index.vue:                <Icon name="fa6-solid:chart-line" class="size-4 text-success-500 mr-2" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:heart" class="size-7 text-danger-500" />
+.app\pages\baham\buyer\index.vue:              <Icon name="fa6-solid:arrow-left" class="size-3 mr-2" />
+.app\pages\baham\buyer\index.vue:            <Icon name="fa6-solid:star" class="size-4 ml-2" />
+.app\pages\baham\buyer\index.vue:            <Icon name="fa6-solid:shield" class="size-4 ml-2" />
+.app\pages\baham\buyer\index.vue:          <Icon name="fa6-solid:box-open" class="size-16 text-muted-400 mx-auto mb-5" />
+.app\pages\baham\buyer\index.vue:          <Icon name="fa6-solid:truck-ramp-box" class="size-16 text-muted-400 mx-auto mb-5" />
+.app\pages\baham\buyer\marketplace.vue:            <Icon name="fa6-solid:cart-shopping" class="h-4 w-4 ml-2" />
+.app\pages\baham\buyer\marketplace.vue:            <Icon name="fa6-solid:boxes-stacked" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+.app\pages\baham\buyer\marketplace.vue:            <Icon name="fa6-solid:seedling" class="h-6 w-6 text-green-600 dark:text-green-400" />
+.app\pages\baham\buyer\marketplace.vue:            <Icon name="fa6-solid:users" class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+.app\pages\baham\buyer\marketplace.vue:            <Icon name="fa6-solid:tag" class="h-6 w-6 text-orange-600 dark:text-orange-400" />
+.app\pages\baham\buyer\marketplace.vue:            icon="fa6-solid:magnifying-glass"
+.app\pages\baham\buyer\marketplace.vue:            <Icon name="fa6-solid:rotate" class="h-4 w-4 ml-2" />
+.app\pages\baham\buyer\marketplace.vue:          <Icon name="fa6-solid:download" class="h-4 w-4 ml-2" />
+.app\pages\baham\buyer\marketplace.vue:              <Icon name="fa6-solid:cart-plus" class="h-4 w-4 ml-2" />
+.app\pages\baham\buyer\marketplace.vue:      <Icon name="fa6-solid:box-open" class="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+.app\pages\baham\buyer\marketplace.vue:        <Icon name="fa6-solid:rotate" class="h-4 w-4 ml-2" />
+.app\pages\baham\buyer\marketplace.vue:            <Icon name="fa6-solid:chart-line" class="h-5 w-5 text-blue-600 dark:text-blue-400 ml-2" />
+.app\pages\baham\buyer\marketplace.vue:            <Icon name="fa6-solid:calendar-days" class="h-5 w-5 text-green-600 dark:text-green-400 ml-2" />
+.app\pages\baham\buyer\marketplace.vue:            <Icon name="fa6-solid:fire" class="h-5 w-5 text-purple-600 dark:text-purple-400 ml-2" />
+.app\pages\baham\buyer\support\index.vue:          <Icon name="fa6-solid:plus" class="h-4 w-4 ml-2" />
+.app\pages\baham\buyer\support\index.vue:            <Icon name="fa6-solid:ticket" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+.app\pages\baham\buyer\support\index.vue:            <Icon name="fa6-solid:exclamation-circle" class="h-6 w-6 text-red-600 dark:text-red-400" />
+.app\pages\baham\buyer\support\index.vue:            <Icon name="fa6-solid:sync" class="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+.app\pages\baham\buyer\support\index.vue:            <Icon name="fa6-solid:check-circle" class="h-6 w-6 text-green-600 dark:text-green-400" />
+.app\pages\baham\buyer\support\index.vue:            icon="fa6-solid:magnifying-glass"
+.app\pages\baham\buyer\support\index.vue:            <Icon name="fa6-solid:rotate" class="h-4 w-4 ml-2" />
+.app\pages\baham\buyer\support\index.vue:          <Icon name="fa6-solid:download" class="h-4 w-4 ml-2" />
+.app\pages\baham\buyer\support\index.vue:        <Icon name="fa6-solid:ticket" class="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+.app\pages\baham\buyer\support\index.vue:          <Icon name="fa6-solid:rotate" class="h-4 w-4 ml-2" />
+.app\pages\baham\buyer\support\index.vue:          <Icon name="fa6-solid:phone" class="h-8 w-8 text-blue-600 dark:text-blue-400 mx-auto mb-3" />
+.app\pages\baham\buyer\support\index.vue:          <Icon name="fa6-solid:envelope" class="h-8 w-8 text-green-600 dark:text-green-400 mx-auto mb-3" />
+.app\pages\baham\buyer\support\index.vue:          <Icon name="fa6-solid:comments" class="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
+.app\pages\baham\buyer\transactions.vue:          icon="fa6-solid:magnifying-glass"
+.app\pages\baham\buyer\transactions.vue:          <Icon name="fa6-solid:rotate-left" class="h-4 w-4" />
+.app\pages\baham\buyer\transactions.vue:          <Icon name="fa6-solid:download" class="h-4 w-4" />
+.app\pages\baham\buyer\transactions.vue:            <Icon name="fa6-solid:arrow-down" class="h-6 w-6 text-green-600 dark:text-green-400" />
+.app\pages\baham\buyer\transactions.vue:            <Icon name="fa6-solid:arrow-up" class="h-6 w-6 text-red-600 dark:text-red-400" />
+.app\pages\baham\buyer\transactions.vue:            <Icon name="fa6-solid:wallet" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+.app\pages\baham\buyer\transactions.vue:                    :name="sortOrder === 'asc' ? 'fa6-solid:sort-up' : 'fa6-solid:sort-down'" 
+.app\pages\baham\buyer\transactions.vue:                    :name="sortOrder === 'asc' ? 'fa6-solid:sort-up' : 'fa6-solid:sort-down'" 
+.app\pages\baham\buyer\transactions.vue:                    :name="sortOrder === 'asc' ? 'fa6-solid:sort-up' : 'fa6-solid:sort-down'" 
+.app\pages\baham\buyer\transactions.vue:                <Icon name="fa6-solid:money-bill" class="h-12 w-12 text-gray-400 mx-auto mb-4" />
+.demo\pages\dashboards\hobbies.vue:                    name="fa6-solid:compass"
+layers\documentation\examples\icons\fa.vue:      name="fa6-solid:computer-mouse"
+layers\documentation\examples\icons\fa.vue:      name="fa6-solid:computer-mouse"
+layers\documentation\examples\icons\fa.vue:      name="fa6-solid:computer-mouse"
+layers\documentation\examples\icons\fa.vue:      name="fa6-solid:computer-mouse"
+layers\documentation\examples\icons\fa.vue:      name="fa6-solid:computer-mouse"
+layers\documentation\examples\icons\fa.vue:    <Icon name="fa6-solid:computer-mouse" class="block size-12 text-fuchsia-500" />
+layers\documentation\examples\select\disabled.vue:      icon="fa6-solid:mask"
+layers\documentation\examples\select\disabled.vue:      icon="fa6-solid:mask"
+layers\documentation\examples\select\disabled.vue:      icon="fa6-solid:mask"
+layers\documentation\examples\select\float-label.vue:      icon="fa6-solid:mask"
+layers\documentation\examples\select\float-label.vue:      icon="fa6-solid:mask"
+layers\documentation\examples\select\float-label.vue:      icon="fa6-solid:mask"
+layers\documentation\examples\select\icon.vue:        icon="fa6-solid:mask"
+layers\documentation\examples\select\icon.vue:        icon="fa6-solid:mask"
+layers\documentation\examples\select\icon.vue:        icon="fa6-solid:mask"
+layers\documentation\examples\select\loading.vue:      icon="fa6-solid:mask"
+layers\documentation\examples\select\loading.vue:      icon="fa6-solid:mask"
+layers\documentation\examples\select\loading.vue:      icon="fa6-solid:mask"
