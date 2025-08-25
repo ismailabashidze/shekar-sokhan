@@ -39,7 +39,7 @@ const showScrollButton = ref(false)
 const isAIResponding = ref(false)
 const ttsLoadingMessageId = ref<string | null>(null)
 
-const { play, isLoading: isTTSLoading, error: ttsError } = useOpenAITTS()
+const { play, generateSpeech, isLoading: isTTSLoading, error: ttsError } = useOpenAITTS()
 
 const userReport = ref<Report | null>(null)
 const hasPreviousData = ref(false)
@@ -49,7 +49,66 @@ const playMessageTTS = async (message: any) => {
   
   ttsLoadingMessageId.value = message.id
   try {
-    await play(message.text)
+    // Check if the message already has a voice_file
+    if (message.voice_file) {
+      // If voice_file exists, play it directly
+      const audioUrl = `https://pocket.zehna.ir/api/files/therapists_messages/${message.id}/${message.voice_file}`
+      const audio = new Audio(audioUrl)
+      audio.addEventListener('error', (e) => {
+        console.error('Audio playback error:', e)
+        toaster.show({
+          title: 'خطا',
+          message: 'خطا در پخش صوتی پیام',
+          color: 'danger',
+          icon: 'ph:warning-circle-fill',
+          closable: true,
+        })
+      })
+      await audio.play()
+    } else {
+      // If no voice_file, generate it
+      const audioUrl = await generateSpeech({
+        text: message.text, 
+        model: 'gpt-4o-mini-tts', 
+        voice: 'echo', 
+        speed: 1, 
+        instructions: 'friendly, calm and kind'
+      })
+      
+      // Play the generated audio
+      const audio = new Audio(audioUrl)
+      audio.addEventListener('error', (e) => {
+        console.error('Audio playback error:', e)
+        toaster.show({
+          title: 'خطا',
+          message: 'خطا در پخش صوتی پیام',
+          color: 'danger',
+          icon: 'ph:warning-circle-fill',
+          closable: true,
+        })
+      })
+      await audio.play()
+      
+      // Convert audio URL to blob for saving
+      const response = await fetch(audioUrl)
+      const audioBlob = await response.blob()
+      
+      // Create a filename for the voice file
+      const filename = `voice_${Date.now()}.mp3`
+      
+      // Create FormData and append the audio file
+      const formData = new FormData()
+      formData.append('voice_file', audioBlob, filename)
+      
+      // Update the message with the voice file
+      try {
+        await nuxtApp.$pb.collection('therapists_messages').update(message.id, formData)
+        console.log('Voice file saved to message:', message.id)
+      } catch (updateError) {
+        console.error('Error saving voice file to message:', updateError)
+        // Continue playing even if save fails
+      }
+    }
   } catch (error) {
     console.error('Error playing TTS:', error)
     toaster.show({
