@@ -127,11 +127,9 @@ const loginWithGoogle = async () => {
       closable: true,
     })
 
-    // Redirect based on user role
-    const userRole = record.role || 'buyer' // default to buyer if no role is set
+    
     setTimeout(() => {
-      // Redirect to regular buyer dashboard, middleware will handle fresh redirect
-      router.push(`/baham/${userRole}`)
+      router.push('/dashboard')
     }, 1000)
   }
   catch (error) {
