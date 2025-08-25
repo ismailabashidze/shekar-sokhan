@@ -82,6 +82,7 @@ const playMessageTTS = async (message: any) => {
         
         audio.addEventListener('error', (e) => {
           console.error('Audio playback error:', e)
+          // Try to refetch the message in case the file was just uploaded
           toaster.show({
             title: 'خطا',
             message: 'خطا در پخش صوتی پیام',
@@ -90,6 +91,16 @@ const playMessageTTS = async (message: any) => {
             closable: true,
           })
         })
+        
+        // Add load event listener to ensure the file is ready
+        audio.addEventListener('loadstart', () => {
+          console.log('Audio loading started')
+        })
+        
+        audio.addEventListener('canplay', () => {
+          console.log('Audio can play')
+        })
+        
         await audio.play()
         return
       }
@@ -106,20 +117,6 @@ const playMessageTTS = async (message: any) => {
       instructions: 'friendly, calm and kind'
     })
     
-    // Play the generated audio
-    const audio = new Audio(audioUrl)
-    audio.addEventListener('error', (e) => {
-      console.error('Audio playback error:', e)
-      toaster.show({
-        title: 'خطا',
-        message: 'خطا در پخش صوتی پیام',
-        color: 'danger',
-        icon: 'ph:warning-circle-fill',
-        closable: true,
-      })
-    })
-    await audio.play()
-    
     // Convert audio URL to blob for saving
     const response = await fetch(audioUrl)
     const audioBlob = await response.blob()
@@ -133,15 +130,51 @@ const playMessageTTS = async (message: any) => {
     
     // Update the message with the voice file
     try {
-      await nuxtApp.$pb.collection('therapists_messages').update(message.id, formData)
-      console.log('Voice file saved to message:', message.id)
+      const updatedMessage = await nuxtApp.$pb.collection('therapists_messages').update(message.id, formData)
+      console.log('Voice file saved to message:', message.id, updatedMessage)
       
-      // Cache the URL in our message object for future plays
-      const savedAudioUrl = `https://pocket.zehna.ir/api/files/therapists_messages/${message.id}/${filename}`
+      // Use the actual filename from the updated message
+      const savedAudioUrl = `https://pocket.zehna.ir/api/files/therapists_messages/${message.id}/${updatedMessage.voice_file}`
       message.voiceFileUrl = savedAudioUrl
+      
+      // Play the saved audio
+      const audio = new Audio(savedAudioUrl)
+      audio.addEventListener('error', (e) => {
+        console.error('Audio playback error:', e)
+        toaster.show({
+          title: 'خطا',
+          message: 'خطا در پخش صوتی پیام',
+          color: 'danger',
+          icon: 'ph:warning-circle-fill',
+          closable: true,
+        })
+      })
+      
+      // Add load event listener to ensure the file is ready
+      audio.addEventListener('loadstart', () => {
+        console.log('Audio loading started')
+      })
+      
+      audio.addEventListener('canplay', () => {
+        console.log('Audio can play')
+      })
+      
+      await audio.play()
     } catch (updateError) {
       console.error('Error saving voice file to message:', updateError)
-      // Continue playing even if save fails
+      // Play the generated audio directly if save fails
+      const audio = new Audio(audioUrl)
+      audio.addEventListener('error', (e) => {
+        console.error('Audio playback error:', e)
+        toaster.show({
+          title: 'خطا',
+          message: 'خطا در پخش صوتی پیام',
+          color: 'danger',
+          icon: 'ph:warning-circle-fill',
+          closable: true,
+        })
+      })
+      await audio.play()
     }
   } catch (error) {
     console.error('Error playing TTS:', error)
