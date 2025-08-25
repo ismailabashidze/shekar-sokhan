@@ -49,11 +49,11 @@ const playMessageTTS = async (message: any) => {
   
   ttsLoadingMessageId.value = message.id
   try {
-    // Check if the message already has a voice_file
-    if (message.voice_file) {
-      // If voice_file exists, play it directly
-      const audioUrl = `https://pocket.zehna.ir/api/files/therapists_messages/${message.id}/${message.voice_file}`
-      const audio = new Audio(audioUrl)
+    // First, check if we've already determined this message has a voice file
+    // by checking if we've added the voiceFileUrl property to it
+    if (message.voiceFileUrl) {
+      // Play the cached audio URL
+      const audio = new Audio(message.voiceFileUrl)
       audio.addEventListener('error', (e) => {
         console.error('Audio playback error:', e)
         toaster.show({
@@ -65,49 +65,83 @@ const playMessageTTS = async (message: any) => {
         })
       })
       await audio.play()
-    } else {
-      // If no voice_file, generate it
-      const audioUrl = await generateSpeech({
-        text: message.text, 
-        model: 'gpt-4o-mini-tts', 
-        voice: 'echo', 
-        speed: 1, 
-        instructions: 'friendly, calm and kind'
-      })
-      
-      // Play the generated audio
-      const audio = new Audio(audioUrl)
-      audio.addEventListener('error', (e) => {
-        console.error('Audio playback error:', e)
-        toaster.show({
-          title: 'خطا',
-          message: 'خطا در پخش صوتی پیام',
-          color: 'danger',
-          icon: 'ph:warning-circle-fill',
-          closable: true,
+      return
+    }
+    
+    // Check if the message already has a voice_file in the database
+    // We need to fetch the full record to check for the file
+    try {
+      const fullMessage = await nuxtApp.$pb.collection('therapists_messages').getOne(message.id)
+      if (fullMessage.voice_file) {
+        // If voice_file exists, play it directly
+        const audioUrl = `https://pocket.zehna.ir/api/files/therapists_messages/${message.id}/${fullMessage.voice_file}`
+        const audio = new Audio(audioUrl)
+        
+        // Cache the URL in our message object for future plays
+        message.voiceFileUrl = audioUrl
+        
+        audio.addEventListener('error', (e) => {
+          console.error('Audio playback error:', e)
+          toaster.show({
+            title: 'خطا',
+            message: 'خطا در پخش صوتی پیام',
+            color: 'danger',
+            icon: 'ph:warning-circle-fill',
+            closable: true,
+          })
         })
-      })
-      await audio.play()
-      
-      // Convert audio URL to blob for saving
-      const response = await fetch(audioUrl)
-      const audioBlob = await response.blob()
-      
-      // Create a filename for the voice file
-      const filename = `voice_${Date.now()}.mp3`
-      
-      // Create FormData and append the audio file
-      const formData = new FormData()
-      formData.append('voice_file', audioBlob, filename)
-      
-      // Update the message with the voice file
-      try {
-        await nuxtApp.$pb.collection('therapists_messages').update(message.id, formData)
-        console.log('Voice file saved to message:', message.id)
-      } catch (updateError) {
-        console.error('Error saving voice file to message:', updateError)
-        // Continue playing even if save fails
+        await audio.play()
+        return
       }
+    } catch (fetchError) {
+      console.warn('Could not fetch full message, proceeding with TTS generation:', fetchError)
+    }
+    
+    // If no voice_file exists, generate it
+    const audioUrl = await generateSpeech({
+      text: message.text, 
+      model: 'gpt-4o-mini-tts', 
+      voice: 'echo', 
+      speed: 1, 
+      instructions: 'friendly, calm and kind'
+    })
+    
+    // Play the generated audio
+    const audio = new Audio(audioUrl)
+    audio.addEventListener('error', (e) => {
+      console.error('Audio playback error:', e)
+      toaster.show({
+        title: 'خطا',
+        message: 'خطا در پخش صوتی پیام',
+        color: 'danger',
+        icon: 'ph:warning-circle-fill',
+        closable: true,
+      })
+    })
+    await audio.play()
+    
+    // Convert audio URL to blob for saving
+    const response = await fetch(audioUrl)
+    const audioBlob = await response.blob()
+    
+    // Create a filename for the voice file
+    const filename = `voice_${Date.now()}.mp3`
+    
+    // Create FormData and append the audio file
+    const formData = new FormData()
+    formData.append('voice_file', audioBlob, filename)
+    
+    // Update the message with the voice file
+    try {
+      await nuxtApp.$pb.collection('therapists_messages').update(message.id, formData)
+      console.log('Voice file saved to message:', message.id)
+      
+      // Cache the URL in our message object for future plays
+      const savedAudioUrl = `https://pocket.zehna.ir/api/files/therapists_messages/${message.id}/${filename}`
+      message.voiceFileUrl = savedAudioUrl
+    } catch (updateError) {
+      console.error('Error saving voice file to message:', updateError)
+      // Continue playing even if save fails
     }
   } catch (error) {
     console.error('Error playing TTS:', error)
