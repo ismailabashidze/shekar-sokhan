@@ -29,15 +29,15 @@ const pricingPlans = [
       'دسترسی به آزمون‌های روان‌شناختی',
       '1 جلسه مشاوره آنلاین',
       'پشتیبانی تلگرامی',
-      'دسترسی 2 ماهه'
+      'دسترسی 2 ماهه',
     ],
     notIncluded: [
       'دوره‌های تخصصی',
       'مشاوره حضوری',
-      'همسان‌یابی پیشرفته'
+      'همسان‌یابی پیشرفته',
     ],
     badge: null,
-    color: 'blue'
+    color: 'blue',
   },
   {
     id: 'standard',
@@ -56,14 +56,14 @@ const pricingPlans = [
       'تحلیل عمیق شخصیت',
       'برنامه شخصی‌سازی شده',
       'پشتیبانی اولویت‌دار',
-      'دسترسی 4 ماهه'
+      'دسترسی 4 ماهه',
     ],
     notIncluded: [
       'همسان‌یابی پیشرفته',
-      'مشاوره نامحدود'
+      'مشاوره نامحدود',
     ],
     badge: 'محبوب‌ترین',
-    color: 'purple'
+    color: 'purple',
   },
   {
     id: 'premium',
@@ -83,12 +83,12 @@ const pricingPlans = [
       'برنامه‌ریزی زندگی زناشویی',
       'پشتیبانی 24/7',
       'ضمانت بازگشت وجه',
-      'دسترسی 6 ماهه'
+      'دسترسی 6 ماهه',
     ],
     notIncluded: [],
     badge: 'پیشرفته',
-    color: 'emerald'
-  }
+    color: 'emerald',
+  },
 ]
 
 const paymentMethods = [
@@ -104,8 +104,8 @@ const paymentMethods = [
       bankName: 'بانک ملی ایران',
       accountNumber: '1234567890123456',
       cardNumber: '6274-1211-2345-6789',
-      accountHolder: 'شرکت فناوری ذهنا'
-    }
+      accountHolder: 'شرکت فناوری ذهنا',
+    },
   },
   {
     id: 'gateway',
@@ -115,8 +115,8 @@ const paymentMethods = [
     available: false,
     processingTime: 'فوری',
     fee: 'کارمزد درگاه',
-    comingSoon: true
-  }
+    comingSoon: true,
+  },
 ]
 
 const selectedPlan = ref(null)
@@ -128,7 +128,7 @@ const orderForm = ref({
   fullName: '',
   phoneNumber: '',
   email: '',
-  agreement: false
+  agreement: false,
 })
 
 function selectPlan(plan) {
@@ -167,7 +167,7 @@ function closeModal() {
     fullName: '',
     phoneNumber: '',
     email: '',
-    agreement: false
+    agreement: false,
   }
 }
 
@@ -175,42 +175,42 @@ const benefits = [
   {
     icon: 'ph:shield-check',
     title: 'تضمین کیفیت',
-    description: 'ضمانت بازگشت وجه در صورت عدم رضایت'
+    description: 'ضمانت بازگشت وجه در صورت عدم رضایت',
   },
   {
     icon: 'ph:users-three',
     title: 'روان‌شناسان متخصص',
-    description: 'مشاوره با بهترین متخصصان کشور'
+    description: 'مشاوره با بهترین متخصصان کشور',
   },
   {
     icon: 'ph:clock',
     title: 'پشتیبانی 24/7',
-    description: 'پاسخگویی در تمام ساعات شبانه‌روز'
+    description: 'پاسخگویی در تمام ساعات شبانه‌روز',
   },
   {
     icon: 'ph:chart-line-up',
     title: 'پیشرفت قابل اندازه‌گیری',
-    description: 'رصد دقیق پیشرفت در تمام مراحل'
-  }
+    description: 'رصد دقیق پیشرفت در تمام مراحل',
+  },
 ]
 
 const faqs = [
   {
     question: 'آیا می‌توانم بسته‌ام را تغییر دهم؟',
-    answer: 'بله، تا 7 روز پس از خرید امکان تغییر بسته وجود دارد.'
+    answer: 'بله، تا 7 روز پس از خرید امکان تغییر بسته وجود دارد.',
   },
   {
     question: 'مدت زمان دسترسی چقدر است؟',
-    answer: 'بسته به نوع بسته انتخابی، از 2 تا 6 ماه دسترسی خواهید داشت.'
+    answer: 'بسته به نوع بسته انتخابی، از 2 تا 6 ماه دسترسی خواهید داشت.',
   },
   {
     question: 'آیا امکان بازپرداخت وجود دارد؟',
-    answer: 'در صورت عدم رضایت تا 14 روز پس از خرید، کل مبلغ بازگردانده می‌شود.'
+    answer: 'در صورت عدم رضایت تا 14 روز پس از خرید، کل مبلغ بازگردانده می‌شود.',
   },
   {
     question: 'چطور به مشاور دسترسی پیدا کنم؟',
-    answer: 'پس از خرید، از طریق پنل کاربری می‌توانید جلسه رزرو کنید.'
-  }
+    answer: 'پس از خرید، از طریق پنل کاربری می‌توانید جلسه رزرو کنید.',
+  },
 ]
 
 const openFaq = ref(null)
@@ -223,46 +223,58 @@ function toggleFaq(index) {
 <template>
   <div>
     <!-- Hero Section -->
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-blue-700 to-indigo-800 p-1 shadow-2xl shadow-purple-500/25 mb-12">
-      <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
-      <div class="relative rounded-3xl bg-gradient-to-br from-purple-600/90 via-blue-700/90 to-indigo-800/90 backdrop-blur-xl px-8 py-16">
+    <div class="relative mb-12 overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-blue-700 to-indigo-800 p-1 shadow-2xl shadow-purple-500/25">
+      <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+      <div class="relative rounded-3xl bg-gradient-to-br from-purple-600/90 via-blue-700/90 to-indigo-800/90 px-8 py-16 backdrop-blur-xl">
         <!-- Floating decorative elements -->
-        <div class="absolute top-8 right-12 w-24 h-24 bg-white/5 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-12 left-16 w-32 h-32 bg-blue-400/10 rounded-full blur-3xl"></div>
-        
-        <div class="relative text-center max-w-4xl mx-auto">
+        <div class="absolute right-12 top-8 size-24 rounded-full bg-white/5 blur-3xl" />
+        <div class="absolute bottom-12 left-16 size-32 rounded-full bg-blue-400/10 blur-3xl" />
+
+        <div class="relative mx-auto max-w-4xl text-center">
           <BaseHeading
             as="h1"
             size="5xl"
             weight="bold"
             lead="tight"
-            class="text-white drop-shadow-lg mb-6"
+            class="mb-6 text-white drop-shadow-lg"
           >
             <span class="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
               قیمت‌گذاری همسیر
             </span>
           </BaseHeading>
-          
-          <BaseParagraph class="text-white/90 text-xl leading-relaxed max-w-3xl mx-auto mb-8">
+
+          <BaseParagraph class="mx-auto mb-8 max-w-3xl text-xl leading-relaxed text-white/90">
             <span>
-              بسته‌های مختلفی برای مسیر خودشناسی و آمادگی ازدواج شما طراحی کرده‌ایم. 
+              بسته‌های مختلفی برای مسیر خودشناسی و آمادگی ازدواج شما طراحی کرده‌ایم.
               بسته مناسب خود را انتخاب کنید و مسیر رشد شخصی خود را آغاز کنید.
             </span>
           </BaseParagraph>
 
           <!-- Quick Stats -->
           <div class="flex justify-center gap-8 text-center">
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-              <div class="text-2xl font-bold text-white mb-1">+1000</div>
-              <div class="text-white/80 text-sm">کاربر موفق</div>
+            <div class="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+              <div class="mb-1 text-2xl font-bold text-white">
+                +1000
+              </div>
+              <div class="text-sm text-white/80">
+                کاربر موفق
+              </div>
             </div>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-              <div class="text-2xl font-bold text-white mb-1">95%</div>
-              <div class="text-white/80 text-sm">رضایت کاربران</div>
+            <div class="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+              <div class="mb-1 text-2xl font-bold text-white">
+                95%
+              </div>
+              <div class="text-sm text-white/80">
+                رضایت کاربران
+              </div>
             </div>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-              <div class="text-2xl font-bold text-white mb-1">24/7</div>
-              <div class="text-white/80 text-sm">پشتیبانی</div>
+            <div class="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+              <div class="mb-1 text-2xl font-bold text-white">
+                24/7
+              </div>
+              <div class="text-sm text-white/80">
+                پشتیبانی
+              </div>
             </div>
           </div>
         </div>
@@ -271,61 +283,72 @@ function toggleFaq(index) {
 
     <!-- Pricing Plans -->
     <div class="mb-16">
-      <div class="text-center mb-12">
-        <BaseHeading as="h2" size="3xl" weight="bold" class="text-gray-900 dark:text-white mb-4">
+      <div class="mb-12 text-center">
+        <BaseHeading
+          as="h2"
+          size="3xl"
+          weight="bold"
+          class="mb-4 text-gray-900 dark:text-white"
+        >
           <span>بسته‌های خدماتی</span>
         </BaseHeading>
-        <BaseParagraph class="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
+        <BaseParagraph class="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
           <span>بسته مناسب نیاز و بودجه خود را انتخاب کنید</span>
         </BaseParagraph>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-        <div 
-          v-for="plan in pricingPlans" 
+      <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-3">
+        <div
+          v-for="plan in pricingPlans"
           :key="plan.id"
-          class="relative group"
+          class="group relative"
         >
           <!-- Popular badge -->
-          <div 
+          <div
             v-if="plan.popular"
-            class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10"
+            class="absolute -top-4 left-1/2 z-10 -translate-x-1/2"
           >
-            <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+            <div class="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-2 text-sm font-bold text-white shadow-lg">
               {{ plan.badge }}
             </div>
           </div>
 
-          <div 
+          <div
             class="relative overflow-hidden rounded-3xl transition-all duration-300 hover:scale-105 group-hover:shadow-2xl"
             :class="{
-              'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200': plan.color === 'blue',
-              'bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-300': plan.color === 'purple',
-              'bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/20 border-2 border-emerald-300': plan.color === 'emerald'
+              'border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20': plan.color === 'blue',
+              'border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20': plan.color === 'purple',
+              'border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/20': plan.color === 'emerald'
             }"
           >
             <!-- Background decorations -->
-            <div class="absolute top-0 right-0 w-32 h-32 opacity-20 blur-2xl"
+            <div
+              class="absolute right-0 top-0 size-32 opacity-20 blur-2xl"
               :class="{
                 'bg-gradient-to-br from-blue-400 to-indigo-500': plan.color === 'blue',
                 'bg-gradient-to-br from-purple-400 to-pink-500': plan.color === 'purple',
                 'bg-gradient-to-br from-emerald-400 to-teal-500': plan.color === 'emerald'
               }"
-            ></div>
-            
+            />
+
             <div class="relative p-8">
               <!-- Plan Header -->
-              <div class="text-center mb-8">
-                <BaseHeading as="h3" size="xl" weight="bold" class="text-gray-900 dark:text-white mb-2">
+              <div class="mb-8 text-center">
+                <BaseHeading
+                  as="h3"
+                  size="xl"
+                  weight="bold"
+                  class="mb-2 text-gray-900 dark:text-white"
+                >
                   <span>{{ plan.name }}</span>
                 </BaseHeading>
-                <BaseParagraph size="sm" class="text-gray-600 dark:text-gray-300 mb-4">
+                <BaseParagraph size="sm" class="mb-4 text-gray-600 dark:text-gray-300">
                   <span>{{ plan.subtitle }}</span>
                 </BaseParagraph>
-                
+
                 <!-- Price -->
                 <div class="mb-6">
-                  <div class="flex items-center justify-center gap-3 mb-2">
+                  <div class="mb-2 flex items-center justify-center gap-3">
                     <div class="text-4xl font-bold text-gray-900 dark:text-white">
                       {{ formatPrice(plan.price) }}
                     </div>
@@ -333,21 +356,21 @@ function toggleFaq(index) {
                       تومان
                     </div>
                   </div>
-                  
-                  <div class="flex items-center justify-center gap-2 mb-2">
-                    <span class="text-lg text-gray-500 dark:text-gray-400 line-through">
+
+                  <div class="mb-2 flex items-center justify-center gap-2">
+                    <span class="text-lg text-gray-500 line-through dark:text-gray-400">
                       {{ formatPrice(plan.originalPrice) }}
                     </span>
-                    <div class="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                    <div class="rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">
                       {{ getDiscountPercentage(plan.originalPrice, plan.price) }}% تخفیف
                     </div>
                   </div>
-                  
+
                   <div class="text-sm text-gray-500 dark:text-gray-400">
                     {{ plan.duration }}
                   </div>
                 </div>
-                
+
                 <BaseParagraph size="sm" class="text-gray-600 dark:text-gray-300">
                   <span>{{ plan.description }}</span>
                 </BaseParagraph>
@@ -356,31 +379,32 @@ function toggleFaq(index) {
               <!-- Features -->
               <div class="mb-8">
                 <div class="space-y-4">
-                  <div 
-                    v-for="feature in plan.features" 
+                  <div
+                    v-for="feature in plan.features"
                     :key="feature"
                     class="flex items-start gap-3"
                   >
-                    <div class="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5"
+                    <div
+                      class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
                       :class="{
                         'bg-blue-500': plan.color === 'blue',
                         'bg-purple-500': plan.color === 'purple',
                         'bg-emerald-500': plan.color === 'emerald'
                       }"
                     >
-                      <Icon name="ph:check" class="w-3 h-3 text-white" />
+                      <Icon name="ph:check" class="size-3 text-white" />
                     </div>
-                    <span class="text-sm text-gray-700 dark:text-gray-200 font-medium">{{ feature }}</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ feature }}</span>
                   </div>
-                  
+
                   <!-- Not included features -->
-                  <div 
-                    v-for="notIncluded in plan.notIncluded" 
+                  <div
+                    v-for="notIncluded in plan.notIncluded"
                     :key="notIncluded"
                     class="flex items-start gap-3 opacity-50"
                   >
-                    <div class="flex-shrink-0 w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center mt-0.5">
-                      <Icon name="ph:x" class="w-3 h-3 text-white" />
+                    <div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-gray-300">
+                      <Icon name="ph:x" class="size-3 text-white" />
                     </div>
                     <span class="text-sm text-gray-500 dark:text-gray-400">{{ notIncluded }}</span>
                   </div>
@@ -388,16 +412,16 @@ function toggleFaq(index) {
               </div>
 
               <!-- CTA Button -->
-              <BaseButton 
-                @click="selectPlan(plan)"
-                class="w-full relative overflow-hidden group transition-all duration-300 hover:scale-105"
+              <BaseButton
+                class="group relative w-full overflow-hidden transition-all duration-300 hover:scale-105"
                 :class="{
-                  'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-lg shadow-blue-500/25': plan.color === 'blue',
-                  'bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 text-white shadow-lg shadow-purple-500/25': plan.color === 'purple',
-                  'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-lg shadow-emerald-500/25': plan.color === 'emerald'
+                  'bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/25 hover:from-blue-700 hover:to-indigo-800': plan.color === 'blue',
+                  'bg-gradient-to-r from-purple-600 to-pink-700 text-white shadow-lg shadow-purple-500/25 hover:from-purple-700 hover:to-pink-800': plan.color === 'purple',
+                  'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-700 hover:to-teal-800': plan.color === 'emerald'
                 }"
+                @click="selectPlan(plan)"
               >
-                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 <span class="relative z-10 font-bold">انتخاب بسته {{ plan.name }}</span>
               </BaseButton>
             </div>
@@ -408,24 +432,34 @@ function toggleFaq(index) {
 
     <!-- Benefits Section -->
     <div class="mb-16">
-      <div class="text-center mb-12">
-        <BaseHeading as="h2" size="3xl" weight="bold" class="text-gray-900 dark:text-white mb-4">
+      <div class="mb-12 text-center">
+        <BaseHeading
+          as="h2"
+          size="3xl"
+          weight="bold"
+          class="mb-4 text-gray-900 dark:text-white"
+        >
           <span>مزایای همسیر</span>
         </BaseHeading>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <div 
-          v-for="benefit in benefits" 
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div
+          v-for="benefit in benefits"
           :key="benefit.title"
           class="group text-center"
         >
           <div class="relative mb-6">
-            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/25 group-hover:scale-110 transition-all duration-300">
-              <Icon :name="benefit.icon" class="w-8 h-8 text-white" />
+            <div class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 shadow-lg shadow-purple-500/25 transition-all duration-300 group-hover:scale-110">
+              <Icon :name="benefit.icon" class="size-8 text-white" />
             </div>
           </div>
-          <BaseHeading as="h3" size="md" weight="semibold" class="text-gray-900 dark:text-white mb-3">
+          <BaseHeading
+            as="h3"
+            size="md"
+            weight="semibold"
+            class="mb-3 text-gray-900 dark:text-white"
+          >
             <span>{{ benefit.title }}</span>
           </BaseHeading>
           <BaseParagraph size="sm" class="text-gray-600 dark:text-gray-300">
@@ -437,35 +471,45 @@ function toggleFaq(index) {
 
     <!-- FAQ Section -->
     <div class="mb-16">
-      <div class="text-center mb-12">
-        <BaseHeading as="h2" size="3xl" weight="bold" class="text-gray-900 dark:text-white mb-4">
+      <div class="mb-12 text-center">
+        <BaseHeading
+          as="h2"
+          size="3xl"
+          weight="bold"
+          class="mb-4 text-gray-900 dark:text-white"
+        >
           <span>سوالات متداول</span>
         </BaseHeading>
       </div>
 
-      <div class="max-w-3xl mx-auto">
+      <div class="mx-auto max-w-3xl">
         <div class="space-y-4">
-          <div 
-            v-for="(faq, index) in faqs" 
+          <div
+            v-for="(faq, index) in faqs"
             :key="index"
-            class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden"
+            class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700"
           >
-            <button 
+            <button
+              class="flex w-full items-center justify-between bg-white px-6 py-4 text-right transition-colors hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700"
               @click="toggleFaq(index)"
-              class="w-full px-6 py-4 text-right flex items-center justify-between bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
-              <BaseHeading as="h4" size="md" weight="medium" class="text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h4"
+                size="md"
+                weight="medium"
+                class="text-gray-900 dark:text-white"
+              >
                 <span>{{ faq.question }}</span>
               </BaseHeading>
-              <Icon 
-                :name="openFaq === index ? 'ph:minus' : 'ph:plus'" 
-                class="w-5 h-5 text-gray-500 transition-transform duration-200"
+              <Icon
+                :name="openFaq === index ? 'ph:minus' : 'ph:plus'"
+                class="size-5 text-gray-500 transition-transform duration-200"
                 :class="{ 'rotate-180': openFaq === index }"
               />
             </button>
-            <div 
+            <div
               v-if="openFaq === index"
-              class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
+              class="border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900"
             >
               <BaseParagraph class="text-gray-600 dark:text-gray-300">
                 <span>{{ faq.answer }}</span>
@@ -477,16 +521,29 @@ function toggleFaq(index) {
     </div>
 
     <!-- Payment Modal -->
-    <TairoModal :open="showPaymentModal" size="xl" @close="closeModal">
+    <TairoModal
+      :open="showPaymentModal"
+      size="xl"
+      @close="closeModal"
+    >
       <template #header>
         <div class="flex items-center justify-between">
-          <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
+          <BaseHeading
+            as="h3"
+            size="lg"
+            weight="semibold"
+            class="text-gray-900 dark:text-white"
+          >
             <span v-if="orderStep === 1">انتخاب بسته</span>
             <span v-else-if="orderStep === 2">تکمیل اطلاعات</span>
             <span v-else>پرداخت نهایی</span>
           </BaseHeading>
-          <BaseButton @click="closeModal" variant="ghost" size="sm">
-            <Icon name="ph:x" class="w-5 h-5" />
+          <BaseButton
+            variant="ghost"
+            size="sm"
+            @click="closeModal"
+          >
+            <Icon name="ph:x" class="size-5" />
           </BaseButton>
         </div>
       </template>
@@ -495,9 +552,14 @@ function toggleFaq(index) {
         <!-- Step 2: Order Information -->
         <div v-if="orderStep === 2">
           <div class="mb-6">
-            <div class="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-2xl p-6 border border-purple-200/50">
-              <div class="flex items-center justify-between mb-4">
-                <BaseHeading as="h4" size="md" weight="semibold" class="text-gray-900 dark:text-white">
+            <div class="rounded-2xl border border-purple-200/50 bg-gradient-to-r from-purple-50 to-blue-50 p-6 dark:from-purple-900/20 dark:to-blue-900/20">
+              <div class="mb-4 flex items-center justify-between">
+                <BaseHeading
+                  as="h4"
+                  size="md"
+                  weight="semibold"
+                  class="text-gray-900 dark:text-white"
+                >
                   <span>{{ selectedPlan?.name }}</span>
                 </BaseHeading>
                 <div class="text-2xl font-bold text-purple-600">
@@ -511,7 +573,7 @@ function toggleFaq(index) {
           </div>
 
           <form @submit.prevent="proceedToPayment">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
               <BaseInput
                 v-model="orderForm.fullName"
                 label="نام و نام خانوادگی"
@@ -526,7 +588,7 @@ function toggleFaq(index) {
                 required
               />
             </div>
-            
+
             <div class="mb-6">
               <BaseInput
                 v-model="orderForm.email"
@@ -541,15 +603,19 @@ function toggleFaq(index) {
               <label class="flex items-start gap-3">
                 <BaseCheckbox v-model="orderForm.agreement" required />
                 <span class="text-sm text-gray-600 dark:text-gray-300">
-                  <a href="#" class="text-purple-600 hover:underline">قوانین و مقررات</a> و 
-                  <a href="#" class="text-purple-600 hover:underline">سیاست حفظ حریم خصوصی</a> 
+                  <a href="#" class="text-purple-600 hover:underline">قوانین و مقررات</a> و
+                  <a href="#" class="text-purple-600 hover:underline">سیاست حفظ حریم خصوصی</a>
                   را مطالعه کرده و با آن موافقم.
                 </span>
               </label>
             </div>
 
             <div class="flex gap-4">
-              <BaseButton @click="closeModal" variant="outline" class="flex-1">
+              <BaseButton
+                variant="outline"
+                class="flex-1"
+                @click="closeModal"
+              >
                 انصراف
               </BaseButton>
               <BaseButton type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
@@ -562,45 +628,55 @@ function toggleFaq(index) {
         <!-- Step 3: Payment Methods -->
         <div v-if="orderStep === 3">
           <div class="mb-6">
-            <BaseHeading as="h4" size="md" weight="semibold" class="text-gray-900 dark:text-white mb-4">
+            <BaseHeading
+              as="h4"
+              size="md"
+              weight="semibold"
+              class="mb-4 text-gray-900 dark:text-white"
+            >
               <span>روش پرداخت</span>
             </BaseHeading>
-            
+
             <div class="space-y-4">
-              <div 
-                v-for="method in paymentMethods" 
+              <div
+                v-for="method in paymentMethods"
                 :key="method.id"
                 class="relative"
               >
-                <label 
+                <label
                   class="block cursor-pointer"
-                  :class="{ 'opacity-50 cursor-not-allowed': !method.available }"
+                  :class="{ 'cursor-not-allowed opacity-50': !method.available }"
                 >
-                  <input 
-                    v-model="selectedPaymentMethod" 
+                  <input
+                    v-model="selectedPaymentMethod"
                     :value="method.id"
                     type="radio"
                     class="sr-only"
                     :disabled="!method.available"
-                  />
-                  <div 
-                    class="border-2 rounded-2xl p-6 transition-all duration-200"
+                  >
+                  <div
+                    class="rounded-2xl border-2 p-6 transition-all duration-200"
                     :class="selectedPaymentMethod === method.id ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'"
                   >
                     <div class="flex items-start gap-4">
-                      <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
-                        <Icon :name="method.icon" class="w-6 h-6 text-white" />
+                      <div class="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-blue-600">
+                        <Icon :name="method.icon" class="size-6 text-white" />
                       </div>
                       <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-2">
-                          <BaseHeading as="h5" size="sm" weight="semibold" class="text-gray-900 dark:text-white">
+                        <div class="mb-2 flex items-center gap-2">
+                          <BaseHeading
+                            as="h5"
+                            size="sm"
+                            weight="semibold"
+                            class="text-gray-900 dark:text-white"
+                          >
                             <span>{{ method.name }}</span>
                           </BaseHeading>
-                          <span v-if="method.comingSoon" class="bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full">
+                          <span v-if="method.comingSoon" class="rounded-full bg-orange-100 px-2 py-1 text-xs text-orange-600">
                             به‌زودی
                           </span>
                         </div>
-                        <BaseParagraph size="sm" class="text-gray-600 dark:text-gray-300 mb-3">
+                        <BaseParagraph size="sm" class="mb-3 text-gray-600 dark:text-gray-300">
                           <span>{{ method.description }}</span>
                         </BaseParagraph>
                         <div class="flex gap-4 text-xs text-gray-500">
@@ -617,33 +693,38 @@ function toggleFaq(index) {
 
           <!-- Bank Transfer Details -->
           <div v-if="selectedPaymentMethod === 'bank_transfer'" class="mb-6">
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200/50">
-              <BaseHeading as="h5" size="md" weight="semibold" class="text-gray-900 dark:text-white mb-4">
+            <div class="rounded-2xl border border-blue-200/50 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:from-blue-900/20 dark:to-indigo-900/20">
+              <BaseHeading
+                as="h5"
+                size="md"
+                weight="semibold"
+                class="mb-4 text-gray-900 dark:text-white"
+              >
                 <span>اطلاعات انتقال بانکی</span>
               </BaseHeading>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+
+              <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
                 <div>
                   <span class="font-medium text-gray-700 dark:text-gray-300">بانک:</span>
-                  <span class="text-gray-900 dark:text-white mr-2">{{ paymentMethods[0].details.bankName }}</span>
+                  <span class="mr-2 text-gray-900 dark:text-white">{{ paymentMethods[0].details.bankName }}</span>
                 </div>
                 <div>
                   <span class="font-medium text-gray-700 dark:text-gray-300">صاحب حساب:</span>
-                  <span class="text-gray-900 dark:text-white mr-2">{{ paymentMethods[0].details.accountHolder }}</span>
+                  <span class="mr-2 text-gray-900 dark:text-white">{{ paymentMethods[0].details.accountHolder }}</span>
                 </div>
                 <div>
                   <span class="font-medium text-gray-700 dark:text-gray-300">شماره حساب:</span>
-                  <span class="text-gray-900 dark:text-white mr-2 font-mono">{{ paymentMethods[0].details.accountNumber }}</span>
+                  <span class="mr-2 font-mono text-gray-900 dark:text-white">{{ paymentMethods[0].details.accountNumber }}</span>
                 </div>
                 <div>
                   <span class="font-medium text-gray-700 dark:text-gray-300">شماره کارت:</span>
-                  <span class="text-gray-900 dark:text-white mr-2 font-mono">{{ paymentMethods[0].details.cardNumber }}</span>
+                  <span class="mr-2 font-mono text-gray-900 dark:text-white">{{ paymentMethods[0].details.cardNumber }}</span>
                 </div>
               </div>
 
-              <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200">
+              <div class="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 dark:bg-yellow-900/20">
                 <div class="flex items-start gap-2">
-                  <Icon name="ph:info" class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <Icon name="ph:info" class="mt-0.5 size-5 shrink-0 text-yellow-600" />
                   <div class="text-sm text-yellow-800 dark:text-yellow-200">
                     <strong>مهم:</strong> پس از انتقال وجه، رسید پرداخت را از طریق تلگرام یا ایمیل برای ما ارسال کنید تا حساب شما فعال شود.
                   </div>
@@ -654,11 +735,16 @@ function toggleFaq(index) {
 
           <!-- Order Summary -->
           <div class="mb-6">
-            <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6">
-              <BaseHeading as="h5" size="md" weight="semibold" class="text-gray-900 dark:text-white mb-4">
+            <div class="rounded-2xl bg-gray-50 p-6 dark:bg-gray-800">
+              <BaseHeading
+                as="h5"
+                size="md"
+                weight="semibold"
+                class="mb-4 text-gray-900 dark:text-white"
+              >
                 <span>خلاصه سفارش</span>
               </BaseHeading>
-              
+
               <div class="space-y-3">
                 <div class="flex justify-between">
                   <span class="text-gray-600 dark:text-gray-300">بسته انتخابی:</span>
@@ -670,7 +756,7 @@ function toggleFaq(index) {
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600 dark:text-gray-300">تخفیف:</span>
-                  <span class="text-green-600 font-medium">{{ formatPrice(selectedPlan?.originalPrice - selectedPlan?.price) }} تومان</span>
+                  <span class="font-medium text-green-600">{{ formatPrice(selectedPlan?.originalPrice - selectedPlan?.price) }} تومان</span>
                 </div>
                 <hr class="border-gray-200 dark:border-gray-700">
                 <div class="flex justify-between text-lg font-bold">
@@ -682,10 +768,14 @@ function toggleFaq(index) {
           </div>
 
           <div class="flex gap-4">
-            <BaseButton @click="orderStep = 2" variant="outline" class="flex-1">
+            <BaseButton
+              variant="outline"
+              class="flex-1"
+              @click="orderStep = 2"
+            >
               بازگشت
             </BaseButton>
-            <BaseButton @click="submitOrder" class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+            <BaseButton class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white" @click="submitOrder">
               تأیید و ثبت سفارش
             </BaseButton>
           </div>

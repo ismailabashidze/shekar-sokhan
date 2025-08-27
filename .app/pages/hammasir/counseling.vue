@@ -1,123 +1,227 @@
 <template>
   <div class="py-8">
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">ماژول مشاوره</h1>
-      <p class="text-gray-600 dark:text-gray-300">درخواست مشاوره حرفه‌ای و پیگیری وضعیت جلسات</p>
+      <h1 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+        ماژول مشاوره
+      </h1>
+      <p class="text-gray-600 dark:text-gray-300">
+        درخواست مشاوره حرفه‌ای و پیگیری وضعیت جلسات
+      </p>
     </div>
 
     <!-- کارت‌های آماری جلسات -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
       <!-- درخواست مشاوره -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
-        <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      <div class="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
+          <svg
+            class="size-8 text-purple-600 dark:text-purple-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
           </svg>
         </div>
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">درخواست مشاوره</h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">زمان‌بندی جلسه با یکی از مشاوران حرفه‌ای ما</p>
-        <button @click="showNewRequestForm = !showNewRequestForm" class="w-full bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors">
+        <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">
+          درخواست مشاوره
+        </h3>
+        <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+          زمان‌بندی جلسه با یکی از مشاوران حرفه‌ای ما
+        </p>
+        <button class="w-full rounded-lg bg-purple-600 py-2 font-medium text-white transition-colors hover:bg-purple-700" @click="showNewRequestForm = !showNewRequestForm">
           {{ showNewRequestForm ? 'بستن فرم' : 'درخواست جدید' }}
         </button>
       </div>
 
       <!-- جلسات فعال -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
-        <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      <div class="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+          <svg
+            class="size-8 text-green-600 dark:text-green-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         </div>
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">جلسات فعال</h3>
-        <div class="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">{{ activeRequests.length }}</div>
-        <p class="text-sm text-gray-600 dark:text-gray-400">مشاوره‌های آینده</p>
+        <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">
+          جلسات فعال
+        </h3>
+        <div class="mb-1 text-3xl font-bold text-green-600 dark:text-green-400">
+          {{ activeRequests.length }}
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          مشاوره‌های آینده
+        </p>
       </div>
 
       <!-- جلسات تکمیل شده -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
-        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      <div class="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+          <svg
+            class="size-8 text-blue-600 dark:text-blue-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         </div>
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">تکمیل شده</h3>
-        <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">{{ userStats.completedSessions }}</div>
-        <p class="text-sm text-gray-600 dark:text-gray-400">کل جلسات انجام شده</p>
+        <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">
+          تکمیل شده
+        </h3>
+        <div class="mb-1 text-3xl font-bold text-blue-600 dark:text-blue-400">
+          {{ userStats.completedSessions }}
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          کل جلسات انجام شده
+        </p>
       </div>
     </div>
 
     <!-- فرم درخواست مشاوره جدید -->
-    <div v-if="showNewRequestForm" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
-      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">درخواست مشاوره جدید</h2>
-      <form @submit.prevent="submitCounselingRequest" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div v-if="showNewRequestForm" class="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <h2 class="mb-6 text-xl font-bold text-gray-900 dark:text-white">
+        درخواست مشاوره جدید
+      </h2>
+      <form class="space-y-6" @submit.prevent="submitCounselingRequest">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نوع مشاوره</label>
-            <select v-model="newRequest.type" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-              <option value="">انتخاب کنید</option>
-              <option value="individual">مشاوره فردی</option>
-              <option value="couple">مشاوره زوجین</option>
-              <option value="family">مشاوره خانوادگی</option>
-              <option value="premarital">مشاوره پیش از ازدواج</option>
+            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">نوع مشاوره</label>
+            <select v-model="newRequest.type" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+              <option value="">
+                انتخاب کنید
+              </option>
+              <option value="individual">
+                مشاوره فردی
+              </option>
+              <option value="couple">
+                مشاوره زوجین
+              </option>
+              <option value="family">
+                مشاوره خانوادگی
+              </option>
+              <option value="premarital">
+                مشاوره پیش از ازدواج
+              </option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">اولویت</label>
-            <select v-model="newRequest.priority" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-              <option value="normal">عادی</option>
-              <option value="urgent">فوری</option>
-              <option value="emergency">اورژانس</option>
+            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">اولویت</label>
+            <select v-model="newRequest.priority" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+              <option value="normal">
+                عادی
+              </option>
+              <option value="urgent">
+                فوری
+              </option>
+              <option value="emergency">
+                اورژانس
+              </option>
             </select>
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">موضوع مشاوره</label>
-          <input v-model="newRequest.subject" type="text" placeholder="عنوان کوتاه از موضوع مشاوره" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+          <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">موضوع مشاوره</label>
+          <input
+            v-model="newRequest.subject"
+            type="text"
+            placeholder="عنوان کوتاه از موضوع مشاوره"
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          >
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">شرح مسئله</label>
-          <textarea v-model="newRequest.description" rows="4" placeholder="لطفاً مسئله خود را به طور کامل شرح دهید" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
+          <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">شرح مسئله</label>
+          <textarea
+            v-model="newRequest.description"
+            rows="4"
+            placeholder="لطفاً مسئله خود را به طور کامل شرح دهید"
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          />
         </div>
         <div class="flex items-center justify-end space-x-4 space-x-reverse">
-          <button type="button" @click="showNewRequestForm = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <button
+            type="button"
+            class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            @click="showNewRequestForm = false"
+          >
             انصراف
           </button>
-          <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors">
+          <button type="submit" class="rounded-lg bg-purple-600 px-6 py-2 font-medium text-white transition-colors hover:bg-purple-700">
             ارسال درخواست
           </button>
         </div>
       </form>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
       <!-- درخواست‌های فعال -->
       <div class="lg:col-span-2">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">درخواست‌های فعال</h3>
-          
-          <div v-if="activeRequests.length === 0" class="text-center py-8">
-            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.471L3 21l2.471-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"></path>
+        <div class="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h3 class="mb-6 text-xl font-bold text-gray-900 dark:text-white">
+            درخواست‌های فعال
+          </h3>
+
+          <div v-if="activeRequests.length === 0" class="py-8 text-center">
+            <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+              <svg
+                class="size-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.471L3 21l2.471-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"
+                />
               </svg>
             </div>
-            <p class="text-gray-500 dark:text-gray-400">هیچ درخواست فعالی ندارید</p>
+            <p class="text-gray-500 dark:text-gray-400">
+              هیچ درخواست فعالی ندارید
+            </p>
           </div>
 
           <div v-else class="space-y-4">
-            <div v-for="request in activeRequests" :key="request.id" class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <div
+              v-for="request in activeRequests"
+              :key="request.id"
+              class="rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+            >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
-                  <div class="flex items-center space-x-3 space-x-reverse mb-2">
-                    <h4 class="font-medium text-gray-900 dark:text-white">{{ request.subject }}</h4>
-                    <span :class="getStatusBadge(request.status)" class="px-2 py-1 rounded-full text-xs font-medium">
+                  <div class="mb-2 flex items-center space-x-3 space-x-reverse">
+                    <h4 class="font-medium text-gray-900 dark:text-white">
+                      {{ request.subject }}
+                    </h4>
+                    <span :class="getStatusBadge(request.status)" class="rounded-full px-2 py-1 text-xs font-medium">
                       {{ getStatusText(request.status) }}
                     </span>
-                    <span :class="getPriorityBadge(request.priority)" class="px-2 py-1 rounded-full text-xs font-medium">
+                    <span :class="getPriorityBadge(request.priority)" class="rounded-full px-2 py-1 text-xs font-medium">
                       {{ getPriorityText(request.priority) }}
                     </span>
                   </div>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">{{ request.description }}</p>
+                  <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">
+                    {{ request.description }}
+                  </p>
                   <div class="flex items-center space-x-4 space-x-reverse text-xs text-gray-500 dark:text-gray-400">
                     <span>📅 {{ request.createdAt }}</span>
                     <span>👨‍⚕️ {{ request.counselor || 'در انتظار تخصیص' }}</span>
@@ -125,12 +229,22 @@
                   </div>
                 </div>
                 <div class="flex items-center space-x-2 space-x-reverse">
-                  <button v-if="request.status === 'confirmed' && request.meetingLink" class="text-sm bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition-colors">
+                  <button v-if="request.status === 'confirmed' && request.meetingLink" class="rounded-lg bg-green-600 px-3 py-1 text-sm text-white transition-colors hover:bg-green-700">
                     ورود به جلسه
                   </button>
                   <button class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                    <svg
+                      class="size-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -140,20 +254,30 @@
         </div>
 
         <!-- تاریخچه درخواست‌ها -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">تاریخچه درخواست‌ها</h3>
-          
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h3 class="mb-6 text-xl font-bold text-gray-900 dark:text-white">
+            تاریخچه درخواست‌ها
+          </h3>
+
           <div class="space-y-4">
-            <div v-for="request in pastRequests" :key="request.id" class="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+            <div
+              v-for="request in pastRequests"
+              :key="request.id"
+              class="rounded-lg border border-gray-200 p-4 dark:border-gray-600"
+            >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
-                  <div class="flex items-center space-x-3 space-x-reverse mb-2">
-                    <h4 class="font-medium text-gray-900 dark:text-white">{{ request.subject }}</h4>
-                    <span :class="getStatusBadge(request.status)" class="px-2 py-1 rounded-full text-xs font-medium">
+                  <div class="mb-2 flex items-center space-x-3 space-x-reverse">
+                    <h4 class="font-medium text-gray-900 dark:text-white">
+                      {{ request.subject }}
+                    </h4>
+                    <span :class="getStatusBadge(request.status)" class="rounded-full px-2 py-1 text-xs font-medium">
                       {{ getStatusText(request.status) }}
                     </span>
                   </div>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">{{ request.description }}</p>
+                  <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">
+                    {{ request.description }}
+                  </p>
                   <div class="flex items-center space-x-4 space-x-reverse text-xs text-gray-500 dark:text-gray-400">
                     <span>📅 {{ request.createdAt }}</span>
                     <span>👨‍⚕️ {{ request.counselor }}</span>
@@ -161,7 +285,7 @@
                   </div>
                 </div>
                 <div class="flex items-center space-x-2 space-x-reverse">
-                  <button v-if="request.status === 'completed' && !request.rating" class="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors">
+                  <button v-if="request.status === 'completed' && !request.rating" class="rounded-lg bg-blue-600 px-3 py-1 text-sm text-white transition-colors hover:bg-blue-700">
                     امتیازدهی
                   </button>
                 </div>
@@ -173,34 +297,50 @@
 
       <!-- لیست مشاوران -->
       <div class="space-y-6">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">مشاوران</h3>
-          
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h3 class="mb-6 text-lg font-bold text-gray-900 dark:text-white">
+            مشاوران
+          </h3>
+
           <div class="space-y-4">
-            <div v-for="counselor in counselors" :key="counselor.id" class="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+            <div
+              v-for="counselor in counselors"
+              :key="counselor.id"
+              class="rounded-lg border border-gray-200 p-4 dark:border-gray-600"
+            >
               <div class="flex items-start space-x-4 space-x-reverse">
-                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
+                <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
                   <span class="text-lg font-medium text-gray-600 dark:text-gray-300">{{ counselor.name.charAt(0) }}</span>
                 </div>
                 <div class="flex-1">
-                  <div class="flex items-center justify-between mb-1">
-                    <h4 class="font-medium text-gray-900 dark:text-white">{{ counselor.name }}</h4>
+                  <div class="mb-1 flex items-center justify-between">
+                    <h4 class="font-medium text-gray-900 dark:text-white">
+                      {{ counselor.name }}
+                    </h4>
                     <div class="flex items-center space-x-1 space-x-reverse">
                       <span class="text-sm font-medium text-gray-900 dark:text-white">{{ counselor.rating }}</span>
                       <div class="flex text-yellow-400">
-                        <svg v-for="i in 5" :key="i" class="w-4 h-4 fill-current" :class="i <= counselor.rating ? 'text-yellow-400' : 'text-gray-300'" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                        <svg
+                          v-for="i in 5"
+                          :key="i"
+                          class="size-4 fill-current"
+                          :class="i <= counselor.rating ? 'text-yellow-400' : 'text-gray-300'"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                       </div>
                     </div>
                   </div>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">{{ counselor.speciality }}</p>
+                  <p class="mb-2 text-sm text-gray-600 dark:text-gray-300">
+                    {{ counselor.speciality }}
+                  </p>
                   <div class="flex items-center justify-between">
                     <div class="text-xs text-gray-500 dark:text-gray-400">
                       {{ counselor.experience }} سال تجربه • {{ counselor.sessionCount }} جلسه
                     </div>
                     <div class="flex items-center space-x-1 space-x-reverse">
-                      <div :class="counselor.isOnline ? 'bg-green-400' : 'bg-gray-400'" class="w-2 h-2 rounded-full"></div>
+                      <div :class="counselor.isOnline ? 'bg-green-400' : 'bg-gray-400'" class="size-2 rounded-full" />
                       <span class="text-xs text-gray-500 dark:text-gray-400">
                         {{ counselor.isOnline ? 'آنلاین' : 'آفلاین' }}
                       </span>
@@ -213,8 +353,10 @@
         </div>
 
         <!-- آمار مشاوره -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">آمار شما</h3>
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h3 class="mb-4 text-lg font-bold text-gray-900 dark:text-white">
+            آمار شما
+          </h3>
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <span class="text-gray-600 dark:text-gray-400">کل جلسات</span>
@@ -263,7 +405,7 @@ const newRequest = ref({
   type: '',
   priority: 'normal',
   subject: '',
-  description: ''
+  description: '',
 })
 
 const activeRequests = ref([
@@ -276,7 +418,7 @@ const activeRequests = ref([
     status: 'confirmed',
     counselor: 'دکتر سارا احمدی',
     createdAt: '1403/05/15',
-    meetingLink: 'https://meet.example.com/abc123'
+    meetingLink: 'https://meet.example.com/abc123',
   },
   {
     id: 2,
@@ -286,8 +428,8 @@ const activeRequests = ref([
     priority: 'normal',
     status: 'pending',
     counselor: null,
-    createdAt: '1403/05/18'
-  }
+    createdAt: '1403/05/18',
+  },
 ])
 
 const pastRequests = ref([
@@ -300,7 +442,7 @@ const pastRequests = ref([
     status: 'completed',
     counselor: 'دکتر رضا محمدی',
     createdAt: '1403/04/10',
-    rating: 5
+    rating: 5,
   },
   {
     id: 4,
@@ -311,8 +453,8 @@ const pastRequests = ref([
     status: 'completed',
     counselor: 'دکتر مریم کریمی',
     createdAt: '1403/03/25',
-    rating: null
-  }
+    rating: null,
+  },
 ])
 
 const counselors = ref([
@@ -323,7 +465,7 @@ const counselors = ref([
     experience: 8,
     sessionCount: 245,
     rating: 4.8,
-    isOnline: true
+    isOnline: true,
   },
   {
     id: 2,
@@ -332,7 +474,7 @@ const counselors = ref([
     experience: 12,
     sessionCount: 380,
     rating: 4.9,
-    isOnline: false
+    isOnline: false,
   },
   {
     id: 3,
@@ -341,7 +483,7 @@ const counselors = ref([
     experience: 6,
     sessionCount: 156,
     rating: 4.7,
-    isOnline: true
+    isOnline: true,
   },
   {
     id: 4,
@@ -350,15 +492,15 @@ const counselors = ref([
     experience: 10,
     sessionCount: 290,
     rating: 4.6,
-    isOnline: false
-  }
+    isOnline: false,
+  },
 ])
 
 const userStats = ref({
   totalSessions: 8,
   completedSessions: 6,
   averageRating: 4.7,
-  totalHours: 12
+  totalHours: 12,
 })
 
 const submitCounselingRequest = () => {
@@ -370,7 +512,7 @@ const submitCounselingRequest = () => {
     type: '',
     priority: 'normal',
     subject: '',
-    description: ''
+    description: '',
   }
 }
 

@@ -64,7 +64,8 @@ export const useOpenAITTS = () => {
       // Create blob URL for the audio
       const audioBlob = new Blob([response], { type: `audio/${response_format}` })
       return URL.createObjectURL(audioBlob)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error generating speech:', error)
       throw new Error('Failed to generate speech audio')
     }
@@ -85,7 +86,7 @@ export const useOpenAITTS = () => {
       })
 
       state.audio = new Audio(audioUrl)
-      
+
       state.audio.addEventListener('ended', () => {
         state.isPlaying = false
       })
@@ -98,10 +99,12 @@ export const useOpenAITTS = () => {
 
       await state.audio.play()
       state.isPlaying = true
-    } catch (error) {
+    }
+    catch (error) {
       state.error = error instanceof Error ? error.message : 'Unknown error'
       console.error('Error playing audio:', error)
-    } finally {
+    }
+    finally {
       state.isLoading = false
     }
   }
@@ -141,7 +144,7 @@ export const useOpenAITTS = () => {
     isPlaying: readonly(toRef(state, 'isPlaying')),
     isLoading: readonly(toRef(state, 'isLoading')),
     error: readonly(toRef(state, 'error')),
-    
+
     // Methods
     play,
     stop,

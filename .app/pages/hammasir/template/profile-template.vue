@@ -26,9 +26,9 @@ const userProfile = ref({
     education: 'کارشناسی ارشد',
     completedAt: '1403/03/10',
     verified: true,
-    verifiedBy: 'دکتر مریم احمدی'
+    verifiedBy: 'دکتر مریم احمدی',
   },
-  
+
   // Analytical information from assessments
   analytics: {
     personality: {
@@ -38,48 +38,48 @@ const userProfile = ref({
         agreeableness: 83,
         conscientiousness: 69,
         neuroticism: 58,
-        openness: 76
+        openness: 76,
       },
       lastUpdated: '1403/03/15',
-      source: 'آزمون NEO'
+      source: 'آزمون NEO',
     },
     goals: {
       primary: 'تشکیل خانواده مستحکم',
       secondary: ['رشد شخصی', 'استقلال مالی', 'تعادل کار و زندگی'],
       motivations: ['عشق و صمیمیت', 'امنیت عاطفی', 'رشد مشترک'],
       lastUpdated: '1403/03/12',
-      source: 'آزمون ارزش‌های زندگی'
+      source: 'آزمون ارزش‌های زندگی',
     },
     compatibility: {
       score: 82,
       preferredTraits: ['صداقت', 'همدلی', 'مسئولیت‌پذیری'],
       lifestyle: 'متعادل و فعال',
       lastUpdated: '1403/03/18',
-      source: 'تحلیل جامع سازگاری'
-    }
+      source: 'تحلیل جامع سازگاری',
+    },
   },
-  
+
   // Counselor notes and professional insights
   counselorNotes: {
     strengths: [
       'توانایی ارتباطی بالا',
       'انعطاف‌پذیری در مواجهه با تغییرات',
-      'تعهد قوی به اهداف شخصی'
+      'تعهد قوی به اهداف شخصی',
     ],
     criticalAreas: [
       'مدیریت استرس در شرایط چالش‌برانگیز',
-      'تقویت اعتماد به نفس در تصمیم‌گیری‌های مهم'
+      'تقویت اعتماد به نفس در تصمیم‌گیری‌های مهم',
     ],
     recommendations: [
       'شرکت در دوره مدیریت استرس',
       'تمرین تکنیک‌های مدیتیشن',
-      'توسعه مهارت‌های حل مسئله'
+      'توسعه مهارت‌های حل مسئله',
     ],
     nextSession: '1403/04/20',
     counselor: 'دکتر مریم احمدی',
-    lastUpdated: '1403/04/10'
+    lastUpdated: '1403/04/10',
   },
-  
+
   // Additional analytical data
   communication: {
     style: 'فعال و همدلانه',
@@ -87,18 +87,18 @@ const userProfile = ref({
     emotionalExpression: 'بالا',
     listeningSkills: 78,
     lastUpdated: '1403/03/20',
-    source: 'آزمون مهارت‌های ارتباطی'
+    source: 'آزمون مهارت‌های ارتباطی',
   },
-  
+
   financialProfile: {
     managementStyle: 'محتاط و برنامه‌ریز',
     riskTolerance: 'متوسط',
     savingsGoals: ['خانه', 'تحصیل فرزندان', 'بازنشستگی'],
     monthlyBudget: 'تنظیم شده',
     lastUpdated: '1403/03/22',
-    source: 'مشاوره مالی'
+    source: 'مشاوره مالی',
   },
-  
+
   lifestylePreferences: {
     workLifeBalance: 'بالا',
     socialActivity: 'فعال',
@@ -106,9 +106,9 @@ const userProfile = ref({
     familyOrientation: 'بالا',
     healthFocus: 'متوسط تا بالا',
     lastUpdated: '1403/03/25',
-    source: 'پرسش‌نامه سبک زندگی'
+    source: 'پرسش‌نامه سبک زندگی',
   },
-  
+
   // Completion tracking
   completionStatus: {
     demographics: { completed: true, score: 100, lastUpdated: '1403/03/10' },
@@ -119,9 +119,9 @@ const userProfile = ref({
     financial: { completed: true, score: 88, lastUpdated: '1403/03/22' },
     lifestyle: { completed: true, score: 92, lastUpdated: '1403/03/25' },
     compatibility: { completed: true, score: 95, lastUpdated: '1403/03/18' },
-    readiness: { completed: false, score: 30, locked: true, requires: 'تکمیل بخش اهداف' }
+    readiness: { completed: false, score: 30, locked: true, requires: 'تکمیل بخش اهداف' },
   },
-  
+
   // Assessment history
   assessmentHistory: [
     {
@@ -131,7 +131,7 @@ const userProfile = ref({
       completedAt: '1403/03/15',
       score: 85,
       status: 'completed',
-      resultSummary: 'شخصیت برون‌گرا با ثبات عاطفی مناسب'
+      resultSummary: 'شخصیت برون‌گرا با ثبات عاطفی مناسب',
     },
     {
       id: 2,
@@ -140,7 +140,7 @@ const userProfile = ref({
       completedAt: '1403/03/12',
       score: 90,
       status: 'completed',
-      resultSummary: 'اولویت بالا برای خانواده و رشد شخصی'
+      resultSummary: 'اولویت بالا برای خانواده و رشد شخصی',
     },
     {
       id: 3,
@@ -149,7 +149,7 @@ const userProfile = ref({
       completedAt: '1403/03/20',
       score: 78,
       status: 'completed',
-      resultSummary: 'مهارت‌های قوی گوش دادن، نیاز به تقویت بیان احساسات'
+      resultSummary: 'مهارت‌های قوی گوش دادن، نیاز به تقویت بیان احساسات',
     },
     {
       id: 4,
@@ -158,7 +158,7 @@ const userProfile = ref({
       completedAt: '1403/03/22',
       score: 88,
       status: 'completed',
-      resultSummary: 'آگاهی مالی خوب، برنامه‌ریزی مناسب'
+      resultSummary: 'آگاهی مالی خوب، برنامه‌ریزی مناسب',
     },
     {
       id: 5,
@@ -167,10 +167,10 @@ const userProfile = ref({
       completedAt: '1403/03/18',
       score: 95,
       status: 'completed',
-      resultSummary: 'آمادگی بالا برای روابط طولانی‌مدت'
-    }
+      resultSummary: 'آمادگی بالا برای روابط طولانی‌مدت',
+    },
   ],
-  
+
   // Growth tracking
   growthMetrics: {
     personalGrowth: 78,
@@ -181,9 +181,9 @@ const userProfile = ref({
     improvementAreas: [
       { area: 'مدیریت استرس', current: 65, target: 80, priority: 'بالا' },
       { area: 'بیان احساسات', current: 70, target: 85, priority: 'متوسط' },
-      { area: 'حل تعارض', current: 75, target: 90, priority: 'متوسط' }
-    ]
-  }
+      { area: 'حل تعارض', current: 75, target: 90, priority: 'متوسط' },
+    ],
+  },
 })
 
 // Edit state
@@ -266,7 +266,8 @@ function navigateToAssessment(section: string) {
   if (section === 'goals') {
     // Navigate to goals assessment
     console.log('Navigate to goals assessment')
-  } else if (section === 'lifestyle') {
+  }
+  else if (section === 'lifestyle') {
     alert('برای دسترسی به این بخش، ابتدا بخش اهداف را تکمیل کنید.')
   }
 }
@@ -275,59 +276,66 @@ function navigateToAssessment(section: string) {
 <template>
   <div>
     <!-- Header -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 via-indigo-600 to-blue-700 p-1 shadow-2xl shadow-purple-500/25 mb-8">
-      <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
-      <div class="relative rounded-2xl bg-gradient-to-br from-purple-600/90 via-indigo-700/90 to-blue-700/90 backdrop-blur-xl px-8 py-12">
+    <div class="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 via-indigo-600 to-blue-700 p-1 shadow-2xl shadow-purple-500/25">
+      <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+      <div class="relative rounded-2xl bg-gradient-to-br from-purple-600/90 via-indigo-700/90 to-blue-700/90 px-8 py-12 backdrop-blur-xl">
         <!-- Floating decorative elements -->
-        <div class="absolute top-6 right-8 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
-        <div class="absolute bottom-8 left-12 w-32 h-32 bg-blue-400/10 rounded-full blur-3xl"></div>
-        
+        <div class="absolute right-8 top-6 size-24 rounded-full bg-white/5 blur-2xl" />
+        <div class="absolute bottom-8 left-12 size-32 rounded-full bg-blue-400/10 blur-3xl" />
+
         <div class="relative">
           <!-- Profile Header -->
-          <div class="flex items-start justify-between mb-8">
+          <div class="mb-8 flex items-start justify-between">
             <div class="flex items-start">
-              <div class="w-20 h-20 bg-gradient-to-br from-white/20 to-white/10 rounded-2xl flex items-center justify-center me-6 shadow-xl">
-                <Icon name="ph:user-circle" class="w-12 h-12 text-white" />
+              <div class="me-6 flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-white/20 to-white/10 shadow-xl">
+                <Icon name="ph:user-circle" class="size-12 text-white" />
               </div>
-              
+
               <div>
-                <BaseHeading as="h1" size="3xl" weight="bold" class="text-white drop-shadow-lg mb-2">
+                <BaseHeading
+                  as="h1"
+                  size="3xl"
+                  weight="bold"
+                  class="mb-2 text-white drop-shadow-lg"
+                >
                   <span>{{ userProfile.demographics.firstName }} {{ userProfile.demographics.lastName }}</span>
                 </BaseHeading>
-                <BaseParagraph class="text-white/90 mb-3">
+                <BaseParagraph class="mb-3 text-white/90">
                   <span>پروفایل شخصی و نتایج ارزیابی‌ها</span>
                 </BaseParagraph>
-                <div class="flex items-center gap-4 text-white/80 text-sm">
+                <div class="flex items-center gap-4 text-sm text-white/80">
                   <div class="flex items-center">
-                    <Icon name="ph:map-pin" class="w-4 h-4 me-1" />
+                    <Icon name="ph:map-pin" class="me-1 size-4" />
                     <span>{{ userProfile.demographics.currentLocation }}</span>
                   </div>
                   <div class="flex items-center">
-                    <Icon name="ph:graduation-cap" class="w-4 h-4 me-1" />
+                    <Icon name="ph:graduation-cap" class="me-1 size-4" />
                     <span>{{ userProfile.demographics.education }}</span>
                   </div>
                   <div v-if="userProfile.demographics.verified" class="flex items-center text-green-300">
-                    <Icon name="ph:check-circle" class="w-4 h-4 me-1" />
+                    <Icon name="ph:check-circle" class="me-1 size-4" />
                     <span>تأیید شده</span>
                   </div>
                 </div>
               </div>
             </div>
-            
+
             <!-- Overall Completion -->
             <div class="text-center">
-              <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/30">
-                <BaseParagraph class="text-white/80 mb-2">
+              <div class="rounded-2xl border border-white/30 bg-white/20 p-6 backdrop-blur-sm">
+                <BaseParagraph class="mb-2 text-white/80">
                   <span>تکمیل پروفایل</span>
                 </BaseParagraph>
-                <div class="text-4xl font-bold text-white mb-2">{{ overallCompletion }}%</div>
-                <div class="w-16 h-2 bg-white/20 rounded-full mx-auto mb-2">
-                  <div 
-                    class="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-700"
-                    :style="{ width: `${overallCompletion}%` }"
-                  ></div>
+                <div class="mb-2 text-4xl font-bold text-white">
+                  {{ overallCompletion }}%
                 </div>
-                <BaseParagraph class="text-white/70 text-xs">
+                <div class="mx-auto mb-2 h-2 w-16 rounded-full bg-white/20">
+                  <div
+                    class="h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-700"
+                    :style="{ width: `${overallCompletion}%` }"
+                  />
+                </div>
+                <BaseParagraph class="text-xs text-white/70">
                   <span>از 6 بخش</span>
                 </BaseParagraph>
               </div>
@@ -338,19 +346,28 @@ function navigateToAssessment(section: string) {
     </div>
 
     <!-- Promoted Sections Alert -->
-    <div v-if="promotedSections.length > 0" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 mb-8">
+    <div v-if="promotedSections.length > 0" class="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-800 dark:bg-amber-900/20">
       <div class="flex items-start">
-        <Icon name="ph:warning" class="w-6 h-6 text-amber-600 me-3 mt-0.5" />
+        <Icon name="ph:warning" class="me-3 mt-0.5 size-6 text-amber-600" />
         <div class="flex-1">
-          <BaseHeading as="h3" size="lg" weight="semibold" class="text-amber-800 dark:text-amber-200 mb-2">
+          <BaseHeading
+            as="h3"
+            size="lg"
+            weight="semibold"
+            class="mb-2 text-amber-800 dark:text-amber-200"
+          >
             <span>بخش‌های نیازمند تکمیل</span>
           </BaseHeading>
           <div class="space-y-2">
-            <div v-for="section in promotedSections" :key="section.key" class="flex items-center justify-between p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+            <div
+              v-for="section in promotedSections"
+              :key="section.key"
+              class="flex items-center justify-between rounded-lg bg-amber-100 p-3 dark:bg-amber-900/30"
+            >
               <div class="flex items-center">
-                <Icon :name="getSectionIcon(section.key)" class="w-4 h-4 text-amber-600 me-2" />
+                <Icon :name="getSectionIcon(section.key)" class="me-2 size-4 text-amber-600" />
                 <span class="font-medium text-amber-800 dark:text-amber-200">{{ getSectionTitle(section.key) }}</span>
-                <span v-if="section.deadline" class="text-xs text-amber-600 ms-2">
+                <span v-if="section.deadline" class="ms-2 text-xs text-amber-600">
                   (مهلت: {{ section.deadline }})
                 </span>
               </div>
@@ -370,19 +387,24 @@ function navigateToAssessment(section: string) {
     <!-- Profile Sections -->
     <div class="grid gap-8">
       <!-- Self-Reported Demographics -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-        <div class="flex items-center justify-between mb-6">
+      <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <div class="mb-6 flex items-center justify-between">
           <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center me-4">
-              <Icon name="ph:user" class="w-6 h-6 text-white" />
+            <div class="me-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600">
+              <Icon name="ph:user" class="size-6 text-white" />
             </div>
             <div>
-              <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-800 dark:text-white mb-1">
+              <BaseHeading
+                as="h2"
+                size="xl"
+                weight="semibold"
+                class="mb-1 text-gray-800 dark:text-white"
+              >
                 <span>اطلاعات جمعیت‌شناختی خوداظهاری</span>
               </BaseHeading>
               <div class="flex items-center gap-2">
                 <div class="flex items-center text-green-600">
-                  <Icon name="ph:check-circle" class="w-4 h-4 me-1" />
+                  <Icon name="ph:check-circle" class="me-1 size-4" />
                   <span class="text-sm">تکمیل شده</span>
                 </div>
                 <span class="text-gray-400">•</span>
@@ -390,13 +412,13 @@ function navigateToAssessment(section: string) {
               </div>
             </div>
           </div>
-          
+
           <div class="flex items-center gap-3">
-            <div v-if="userProfile.demographics.verified" class="flex items-center text-green-600 text-sm">
-              <Icon name="ph:shield-check" class="w-4 h-4 me-1" />
+            <div v-if="userProfile.demographics.verified" class="flex items-center text-sm text-green-600">
+              <Icon name="ph:shield-check" class="me-1 size-4" />
               <span>تأیید شده توسط {{ userProfile.demographics.verifiedBy }}</span>
             </div>
-            
+
             <BaseButton
               v-if="editingSection !== 'demographics'"
               size="sm"
@@ -404,58 +426,63 @@ function navigateToAssessment(section: string) {
               class="border-gray-300 text-gray-700 hover:bg-gray-50"
               @click="startEditing('demographics')"
             >
-              <Icon name="ph:pencil" class="w-4 h-4 me-2" />
+              <Icon name="ph:pencil" class="me-2 size-4" />
               <span>ویرایش</span>
             </BaseButton>
           </div>
         </div>
-        
-        <div v-if="editingSection === 'demographics'" class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 mb-6">
-          <BaseHeading as="h3" size="md" weight="semibold" class="text-gray-800 dark:text-white mb-4">
+
+        <div v-if="editingSection === 'demographics'" class="mb-6 rounded-xl bg-gray-50 p-6 dark:bg-gray-700/50">
+          <BaseHeading
+            as="h3"
+            size="md"
+            weight="semibold"
+            class="mb-4 text-gray-800 dark:text-white"
+          >
             <span>ویرایش اطلاعات شخصی</span>
           </BaseHeading>
-          
-          <div class="grid md:grid-cols-2 gap-4 mb-6">
+
+          <div class="mb-6 grid gap-4 md:grid-cols-2">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نام</label>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">نام</label>
               <input
                 v-model="editForm.firstName"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              >
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نام خانوادگی</label>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">نام خانوادگی</label>
               <input
                 v-model="editForm.lastName"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              >
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">محل تولد</label>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">محل تولد</label>
               <input
                 v-model="editForm.birthPlace"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              >
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">محل سکونت</label>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">محل سکونت</label>
               <input
                 v-model="editForm.currentLocation"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              >
             </div>
           </div>
-          
+
           <div class="flex gap-3">
             <BaseButton
               class="bg-green-500 text-white hover:bg-green-600"
               @click="saveSection"
             >
-              <Icon name="ph:check" class="w-4 h-4 me-2" />
+              <Icon name="ph:check" class="me-2 size-4" />
               <span>ذخیره</span>
             </BaseButton>
             <BaseButton
@@ -468,46 +495,69 @@ function navigateToAssessment(section: string) {
           </div>
         </div>
 
-        <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div class="space-y-1">
-            <div class="text-sm text-gray-500">جنسیت</div>
+            <div class="text-sm text-gray-500">
+              جنسیت
+            </div>
             <div class="font-medium text-gray-800 dark:text-white">
               {{ userProfile.demographics.gender === 'female' ? 'زن' : 'مرد' }}
             </div>
           </div>
-          
+
           <div class="space-y-1">
-            <div class="text-sm text-gray-500">محدوده سنی</div>
-            <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.demographics.ageRange }} سال</div>
+            <div class="text-sm text-gray-500">
+              محدوده سنی
+            </div>
+            <div class="font-medium text-gray-800 dark:text-white">
+              {{ userProfile.demographics.ageRange }} سال
+            </div>
           </div>
-          
+
           <div class="space-y-1">
-            <div class="text-sm text-gray-500">محل تولد</div>
-            <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.demographics.birthPlace }}</div>
+            <div class="text-sm text-gray-500">
+              محل تولد
+            </div>
+            <div class="font-medium text-gray-800 dark:text-white">
+              {{ userProfile.demographics.birthPlace }}
+            </div>
           </div>
-          
+
           <div class="space-y-1">
-            <div class="text-sm text-gray-500">محل سکونت</div>
-            <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.demographics.currentLocation }}</div>
+            <div class="text-sm text-gray-500">
+              محل سکونت
+            </div>
+            <div class="font-medium text-gray-800 dark:text-white">
+              {{ userProfile.demographics.currentLocation }}
+            </div>
           </div>
-          
+
           <div class="space-y-1">
-            <div class="text-sm text-gray-500">تحصیلات</div>
-            <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.demographics.education }}</div>
+            <div class="text-sm text-gray-500">
+              تحصیلات
+            </div>
+            <div class="font-medium text-gray-800 dark:text-white">
+              {{ userProfile.demographics.education }}
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Analytical Information from Assessments -->
-      <div class="grid md:grid-cols-2 gap-6">
+      <div class="grid gap-6 md:grid-cols-2">
         <!-- Personality Analysis -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center me-4">
-              <Icon name="ph:user-circle" class="w-6 h-6 text-white" />
+        <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+          <div class="mb-6 flex items-center">
+            <div class="me-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-400 to-purple-600">
+              <Icon name="ph:user-circle" class="size-6 text-white" />
             </div>
             <div>
-              <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-800 dark:text-white mb-1">
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="semibold"
+                class="mb-1 text-gray-800 dark:text-white"
+              >
                 <span>تحلیل شخصیت</span>
               </BaseHeading>
               <div class="text-sm text-gray-500">
@@ -515,32 +565,36 @@ function navigateToAssessment(section: string) {
               </div>
             </div>
           </div>
-          
+
           <div class="space-y-4">
-            <div class="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+            <div class="flex items-center justify-between rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
               <span class="font-medium text-purple-800 dark:text-purple-200">نوع شخصیت</span>
-              <span class="text-purple-600 font-bold">{{ userProfile.analytics.personality.type }}</span>
+              <span class="font-bold text-purple-600">{{ userProfile.analytics.personality.type }}</span>
             </div>
-            
+
             <div class="space-y-3">
-              <div v-for="(score, factor) in userProfile.analytics.personality.factors" :key="factor" class="space-y-2">
+              <div
+                v-for="(score, factor) in userProfile.analytics.personality.factors"
+                :key="factor"
+                class="space-y-2"
+              >
                 <div class="flex items-center justify-between text-sm">
                   <span class="text-gray-600 dark:text-gray-400">
-                    {{ factor === 'extraversion' ? 'برون‌گرایی' : 
-                       factor === 'agreeableness' ? 'توافق‌پذیری' :
-                       factor === 'conscientiousness' ? 'وظیفه‌شناسی' :
-                       factor === 'neuroticism' ? 'ثبات عاطفی' : 'گشودگی' }}
+                    {{ factor === 'extraversion' ? 'برون‌گرایی' :
+                      factor === 'agreeableness' ? 'توافق‌پذیری' :
+                      factor === 'conscientiousness' ? 'وظیفه‌شناسی' :
+                      factor === 'neuroticism' ? 'ثبات عاطفی' : 'گشودگی' }}
                   </span>
                   <span class="font-medium">{{ score }}%</span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
+                <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
                     class="h-2 rounded-full transition-all duration-500"
-                    :class="getCompletionColor(score) === 'green' ? 'bg-green-500' : 
-                           getCompletionColor(score) === 'blue' ? 'bg-blue-500' :
-                           getCompletionColor(score) === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'"
+                    :class="getCompletionColor(score) === 'green' ? 'bg-green-500' :
+                      getCompletionColor(score) === 'blue' ? 'bg-blue-500' :
+                      getCompletionColor(score) === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'"
                     :style="{ width: `${score}%` }"
-                  ></div>
+                  />
                 </div>
               </div>
             </div>
@@ -548,13 +602,18 @@ function navigateToAssessment(section: string) {
         </div>
 
         <!-- Goals and Motivations -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center me-4">
-              <Icon name="ph:target" class="w-6 h-6 text-white" />
+        <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+          <div class="mb-6 flex items-center">
+            <div class="me-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-400 to-green-600">
+              <Icon name="ph:target" class="size-6 text-white" />
             </div>
             <div>
-              <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-800 dark:text-white mb-1">
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="semibold"
+                class="mb-1 text-gray-800 dark:text-white"
+              >
                 <span>اهداف و انگیزه‌ها</span>
               </BaseHeading>
               <div class="text-sm text-gray-500">
@@ -562,36 +621,44 @@ function navigateToAssessment(section: string) {
               </div>
             </div>
           </div>
-          
+
           <div class="space-y-4">
             <div>
-              <div class="text-sm text-gray-500 mb-2">هدف اصلی</div>
-              <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.analytics.goals.primary }}</div>
+              <div class="mb-2 text-sm text-gray-500">
+                هدف اصلی
+              </div>
+              <div class="font-medium text-gray-800 dark:text-white">
+                {{ userProfile.analytics.goals.primary }}
+              </div>
             </div>
-            
+
             <div>
-              <div class="text-sm text-gray-500 mb-2">اهداف فرعی</div>
+              <div class="mb-2 text-sm text-gray-500">
+                اهداف فرعی
+              </div>
               <div class="flex flex-wrap gap-2">
-                <span 
-                  v-for="goal in userProfile.analytics.goals.secondary" 
+                <span
+                  v-for="goal in userProfile.analytics.goals.secondary"
                   :key="goal"
-                  class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm"
+                  class="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700"
                 >
                   {{ goal }}
                 </span>
               </div>
             </div>
-            
+
             <div>
-              <div class="text-sm text-gray-500 mb-2">انگیزه‌های کلیدی</div>
+              <div class="mb-2 text-sm text-gray-500">
+                انگیزه‌های کلیدی
+              </div>
               <div class="space-y-2">
-                <div 
-                  v-for="motivation in userProfile.analytics.goals.motivations" 
+                <div
+                  v-for="motivation in userProfile.analytics.goals.motivations"
                   :key="motivation"
                   class="flex items-center"
                 >
-                  <Icon name="ph:heart" class="w-4 h-4 text-red-500 me-2" />
-                  <span class="text-gray-700 dark:text-gray-300 text-sm">{{ motivation }}</span>
+                  <Icon name="ph:heart" class="me-2 size-4 text-red-500" />
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ motivation }}</span>
                 </div>
               </div>
             </div>
@@ -599,13 +666,18 @@ function navigateToAssessment(section: string) {
         </div>
 
         <!-- Communication Skills -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center me-4">
-              <Icon name="ph:chat-circle" class="w-6 h-6 text-white" />
+        <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+          <div class="mb-6 flex items-center">
+            <div class="me-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-600">
+              <Icon name="ph:chat-circle" class="size-6 text-white" />
             </div>
             <div>
-              <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-800 dark:text-white mb-1">
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="semibold"
+                class="mb-1 text-gray-800 dark:text-white"
+              >
                 <span>مهارت‌های ارتباطی</span>
               </BaseHeading>
               <div class="text-sm text-gray-500">
@@ -613,34 +685,48 @@ function navigateToAssessment(section: string) {
               </div>
             </div>
           </div>
-          
-          <div class="grid md:grid-cols-2 gap-6">
+
+          <div class="grid gap-6 md:grid-cols-2">
             <div class="space-y-4">
               <div>
-                <div class="text-sm text-gray-500 mb-2">سبک ارتباطی</div>
-                <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.communication.style }}</div>
+                <div class="mb-2 text-sm text-gray-500">
+                  سبک ارتباطی
+                </div>
+                <div class="font-medium text-gray-800 dark:text-white">
+                  {{ userProfile.communication.style }}
+                </div>
               </div>
-              
+
               <div>
-                <div class="text-sm text-gray-500 mb-2">حل تعارض</div>
-                <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.communication.conflictResolution }}</div>
+                <div class="mb-2 text-sm text-gray-500">
+                  حل تعارض
+                </div>
+                <div class="font-medium text-gray-800 dark:text-white">
+                  {{ userProfile.communication.conflictResolution }}
+                </div>
               </div>
             </div>
-            
+
             <div class="space-y-4">
               <div>
-                <div class="text-sm text-gray-500 mb-2">بیان احساسات</div>
-                <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.communication.emotionalExpression }}</div>
+                <div class="mb-2 text-sm text-gray-500">
+                  بیان احساسات
+                </div>
+                <div class="font-medium text-gray-800 dark:text-white">
+                  {{ userProfile.communication.emotionalExpression }}
+                </div>
               </div>
-              
+
               <div>
-                <div class="text-sm text-gray-500 mb-2">مهارت گوش دادن</div>
+                <div class="mb-2 text-sm text-gray-500">
+                  مهارت گوش دادن
+                </div>
                 <div class="flex items-center">
-                  <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 me-3">
-                    <div 
-                      class="bg-orange-500 h-2 rounded-full transition-all duration-500"
+                  <div class="me-3 h-2 w-24 rounded-full bg-gray-200 dark:bg-gray-700">
+                    <div
+                      class="h-2 rounded-full bg-orange-500 transition-all duration-500"
                       :style="{ width: `${userProfile.communication.listeningSkills}%` }"
-                    ></div>
+                    />
                   </div>
                   <span class="font-bold text-orange-600">{{ userProfile.communication.listeningSkills }}%</span>
                 </div>
@@ -651,15 +737,20 @@ function navigateToAssessment(section: string) {
       </div>
 
       <!-- Financial and Lifestyle Profiles -->
-      <div class="grid md:grid-cols-2 gap-6">
+      <div class="grid gap-6 md:grid-cols-2">
         <!-- Financial Profile -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center me-4">
-              <Icon name="ph:coins" class="w-6 h-6 text-white" />
+        <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+          <div class="mb-6 flex items-center">
+            <div class="me-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600">
+              <Icon name="ph:coins" class="size-6 text-white" />
             </div>
             <div>
-              <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-800 dark:text-white mb-1">
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="semibold"
+                class="mb-1 text-gray-800 dark:text-white"
+              >
                 <span>پروفایل مالی</span>
               </BaseHeading>
               <div class="text-sm text-gray-500">
@@ -667,35 +758,47 @@ function navigateToAssessment(section: string) {
               </div>
             </div>
           </div>
-          
+
           <div class="space-y-4">
             <div>
-              <div class="text-sm text-gray-500 mb-2">سبک مدیریت مالی</div>
-              <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.financialProfile.managementStyle }}</div>
+              <div class="mb-2 text-sm text-gray-500">
+                سبک مدیریت مالی
+              </div>
+              <div class="font-medium text-gray-800 dark:text-white">
+                {{ userProfile.financialProfile.managementStyle }}
+              </div>
             </div>
-            
+
             <div>
-              <div class="text-sm text-gray-500 mb-2">تحمل ریسک</div>
-              <div class="font-medium text-gray-800 dark:text-white">{{ userProfile.financialProfile.riskTolerance }}</div>
+              <div class="mb-2 text-sm text-gray-500">
+                تحمل ریسک
+              </div>
+              <div class="font-medium text-gray-800 dark:text-white">
+                {{ userProfile.financialProfile.riskTolerance }}
+              </div>
             </div>
-            
+
             <div>
-              <div class="text-sm text-gray-500 mb-2">اهداف پس‌انداز</div>
+              <div class="mb-2 text-sm text-gray-500">
+                اهداف پس‌انداز
+              </div>
               <div class="flex flex-wrap gap-2">
-                <span 
-                  v-for="goal in userProfile.financialProfile.savingsGoals" 
+                <span
+                  v-for="goal in userProfile.financialProfile.savingsGoals"
                   :key="goal"
-                  class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm"
+                  class="rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-700"
                 >
                   {{ goal }}
                 </span>
               </div>
             </div>
-            
+
             <div>
-              <div class="text-sm text-gray-500 mb-2">وضعیت بودجه</div>
+              <div class="mb-2 text-sm text-gray-500">
+                وضعیت بودجه
+              </div>
               <div class="flex items-center">
-                <Icon name="ph:check-circle" class="w-4 h-4 text-emerald-600 me-2" />
+                <Icon name="ph:check-circle" class="me-2 size-4 text-emerald-600" />
                 <span class="font-medium text-emerald-600">{{ userProfile.financialProfile.monthlyBudget }}</span>
               </div>
             </div>
@@ -703,13 +806,18 @@ function navigateToAssessment(section: string) {
         </div>
 
         <!-- Lifestyle Preferences -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center me-4">
-              <Icon name="ph:house" class="w-6 h-6 text-white" />
+        <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+          <div class="mb-6 flex items-center">
+            <div class="me-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-teal-600">
+              <Icon name="ph:house" class="size-6 text-white" />
             </div>
             <div>
-              <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-800 dark:text-white mb-1">
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="semibold"
+                class="mb-1 text-gray-800 dark:text-white"
+              >
                 <span>ترجیحات سبک زندگی</span>
               </BaseHeading>
               <div class="text-sm text-gray-500">
@@ -717,34 +825,52 @@ function navigateToAssessment(section: string) {
               </div>
             </div>
           </div>
-          
+
           <div class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <div class="text-sm text-gray-500 mb-1">تعادل کار-زندگی</div>
-                <div class="font-medium text-gray-800 dark:text-white text-sm">{{ userProfile.lifestylePreferences.workLifeBalance }}</div>
+                <div class="mb-1 text-sm text-gray-500">
+                  تعادل کار-زندگی
+                </div>
+                <div class="text-sm font-medium text-gray-800 dark:text-white">
+                  {{ userProfile.lifestylePreferences.workLifeBalance }}
+                </div>
               </div>
               <div>
-                <div class="text-sm text-gray-500 mb-1">فعالیت اجتماعی</div>
-                <div class="font-medium text-gray-800 dark:text-white text-sm">{{ userProfile.lifestylePreferences.socialActivity }}</div>
+                <div class="mb-1 text-sm text-gray-500">
+                  فعالیت اجتماعی
+                </div>
+                <div class="text-sm font-medium text-gray-800 dark:text-white">
+                  {{ userProfile.lifestylePreferences.socialActivity }}
+                </div>
               </div>
               <div>
-                <div class="text-sm text-gray-500 mb-1">گرایش خانوادگی</div>
-                <div class="font-medium text-gray-800 dark:text-white text-sm">{{ userProfile.lifestylePreferences.familyOrientation }}</div>
+                <div class="mb-1 text-sm text-gray-500">
+                  گرایش خانوادگی
+                </div>
+                <div class="text-sm font-medium text-gray-800 dark:text-white">
+                  {{ userProfile.lifestylePreferences.familyOrientation }}
+                </div>
               </div>
               <div>
-                <div class="text-sm text-gray-500 mb-1">توجه به سلامت</div>
-                <div class="font-medium text-gray-800 dark:text-white text-sm">{{ userProfile.lifestylePreferences.healthFocus }}</div>
+                <div class="mb-1 text-sm text-gray-500">
+                  توجه به سلامت
+                </div>
+                <div class="text-sm font-medium text-gray-800 dark:text-white">
+                  {{ userProfile.lifestylePreferences.healthFocus }}
+                </div>
               </div>
             </div>
-            
+
             <div>
-              <div class="text-sm text-gray-500 mb-2">علایق و سرگرمی‌ها</div>
+              <div class="mb-2 text-sm text-gray-500">
+                علایق و سرگرمی‌ها
+              </div>
               <div class="flex flex-wrap gap-2">
-                <span 
-                  v-for="hobby in userProfile.lifestylePreferences.hobbies" 
+                <span
+                  v-for="hobby in userProfile.lifestylePreferences.hobbies"
                   :key="hobby"
-                  class="px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm"
+                  class="rounded-full bg-teal-100 px-3 py-1 text-sm text-teal-700"
                 >
                   {{ hobby }}
                 </span>
@@ -755,36 +881,47 @@ function navigateToAssessment(section: string) {
       </div>
 
       <!-- Assessment History -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-        <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-800 dark:text-white mb-6 flex items-center">
-          <Icon name="ph:clock-clockwise" class="w-5 h-5 me-3 text-indigo-600" />
+      <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <BaseHeading
+          as="h2"
+          size="xl"
+          weight="semibold"
+          class="mb-6 flex items-center text-gray-800 dark:text-white"
+        >
+          <Icon name="ph:clock-clockwise" class="me-3 size-5 text-indigo-600" />
           <span>تاریخچه ارزیابی‌ها</span>
         </BaseHeading>
-        
+
         <div class="space-y-4">
-          <div 
-            v-for="assessment in userProfile.assessmentHistory" 
+          <div
+            v-for="assessment in userProfile.assessmentHistory"
             :key="assessment.id"
-            class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-md transition-shadow"
+            class="flex items-center justify-between rounded-xl border border-gray-200 p-4 transition-shadow hover:shadow-md dark:border-gray-700"
           >
             <div class="flex items-center">
-              <div class="w-10 h-10 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg flex items-center justify-center me-4">
-                <Icon :name="getSectionIcon(assessment.type)" class="w-5 h-5 text-white" />
+              <div class="me-4 flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-400 to-indigo-600">
+                <Icon :name="getSectionIcon(assessment.type)" class="size-5 text-white" />
               </div>
-              
+
               <div>
-                <div class="font-medium text-gray-800 dark:text-white">{{ assessment.name }}</div>
-                <div class="text-sm text-gray-500">{{ assessment.completedAt }} • امتیاز: {{ assessment.score }}%</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ assessment.resultSummary }}</div>
+                <div class="font-medium text-gray-800 dark:text-white">
+                  {{ assessment.name }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  {{ assessment.completedAt }} • امتیاز: {{ assessment.score }}%
+                </div>
+                <div class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                  {{ assessment.resultSummary }}
+                </div>
               </div>
             </div>
-            
+
             <BaseButton
               size="sm"
               variant="outline"
               class="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
-              <Icon name="ph:eye" class="w-4 h-4 me-2" />
+              <Icon name="ph:eye" class="me-2 size-4" />
               <span>مشاهده</span>
             </BaseButton>
           </div>
@@ -792,83 +929,103 @@ function navigateToAssessment(section: string) {
       </div>
 
       <!-- Growth Metrics -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-        <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-800 dark:text-white mb-6 flex items-center">
-          <Icon name="ph:trend-up" class="w-5 h-5 me-3 text-blue-600" />
+      <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <BaseHeading
+          as="h2"
+          size="xl"
+          weight="semibold"
+          class="mb-6 flex items-center text-gray-800 dark:text-white"
+        >
+          <Icon name="ph:trend-up" class="me-3 size-5 text-blue-600" />
           <span>شاخص‌های رشد</span>
         </BaseHeading>
-        
-        <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+
+        <div class="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-5">
           <div class="text-center">
-            <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <span class="text-white font-bold text-lg">{{ userProfile.growthMetrics.personalGrowth }}</span>
+            <div class="mx-auto mb-3 flex size-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600">
+              <span class="text-lg font-bold text-white">{{ userProfile.growthMetrics.personalGrowth }}</span>
             </div>
-            <div class="text-sm font-medium text-gray-800 dark:text-white">رشد شخصی</div>
+            <div class="text-sm font-medium text-gray-800 dark:text-white">
+              رشد شخصی
+            </div>
           </div>
-          
+
           <div class="text-center">
-            <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <span class="text-white font-bold text-lg">{{ userProfile.growthMetrics.relationshipSkills }}</span>
+            <div class="mx-auto mb-3 flex size-16 items-center justify-center rounded-xl bg-gradient-to-br from-green-400 to-green-600">
+              <span class="text-lg font-bold text-white">{{ userProfile.growthMetrics.relationshipSkills }}</span>
             </div>
-            <div class="text-sm font-medium text-gray-800 dark:text-white">مهارت‌های رابطه</div>
+            <div class="text-sm font-medium text-gray-800 dark:text-white">
+              مهارت‌های رابطه
+            </div>
           </div>
-          
+
           <div class="text-center">
-            <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <span class="text-white font-bold text-lg">{{ userProfile.growthMetrics.emotionalMaturity }}</span>
+            <div class="mx-auto mb-3 flex size-16 items-center justify-center rounded-xl bg-gradient-to-br from-purple-400 to-purple-600">
+              <span class="text-lg font-bold text-white">{{ userProfile.growthMetrics.emotionalMaturity }}</span>
             </div>
-            <div class="text-sm font-medium text-gray-800 dark:text-white">بلوغ عاطفی</div>
+            <div class="text-sm font-medium text-gray-800 dark:text-white">
+              بلوغ عاطفی
+            </div>
           </div>
-          
+
           <div class="text-center">
-            <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <span class="text-white font-bold text-lg">{{ userProfile.growthMetrics.lifeSkills }}</span>
+            <div class="mx-auto mb-3 flex size-16 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-600">
+              <span class="text-lg font-bold text-white">{{ userProfile.growthMetrics.lifeSkills }}</span>
             </div>
-            <div class="text-sm font-medium text-gray-800 dark:text-white">مهارت‌های زندگی</div>
+            <div class="text-sm font-medium text-gray-800 dark:text-white">
+              مهارت‌های زندگی
+            </div>
           </div>
-          
+
           <div class="text-center">
-            <div class="w-16 h-16 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <span class="text-white font-bold text-lg">{{ userProfile.growthMetrics.overallReadiness }}</span>
+            <div class="mx-auto mb-3 flex size-16 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600">
+              <span class="text-lg font-bold text-white">{{ userProfile.growthMetrics.overallReadiness }}</span>
             </div>
-            <div class="text-sm font-medium text-gray-800 dark:text-white">آمادگی کلی</div>
+            <div class="text-sm font-medium text-gray-800 dark:text-white">
+              آمادگی کلی
+            </div>
           </div>
         </div>
-        
+
         <!-- Improvement Areas -->
         <div>
-          <BaseHeading as="h3" size="md" weight="semibold" class="text-gray-800 dark:text-white mb-4">
+          <BaseHeading
+            as="h3"
+            size="md"
+            weight="semibold"
+            class="mb-4 text-gray-800 dark:text-white"
+          >
             <span>حوزه‌های قابل بهبود</span>
           </BaseHeading>
-          
+
           <div class="space-y-4">
-            <div 
-              v-for="area in userProfile.growthMetrics.improvementAreas" 
+            <div
+              v-for="area in userProfile.growthMetrics.improvementAreas"
               :key="area.area"
-              class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+              class="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
             >
-              <div class="flex items-center justify-between mb-3">
+              <div class="mb-3 flex items-center justify-between">
                 <div class="flex items-center">
                   <span class="font-medium text-gray-800 dark:text-white">{{ area.area }}</span>
-                  <span 
-                    class="ms-2 px-2 py-1 rounded-full text-xs font-medium"
+                  <span
+                    class="ms-2 rounded-full px-2 py-1 text-xs font-medium"
                     :class="area.priority === 'بالا' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'"
                   >
                     اولویت {{ area.priority }}
                   </span>
                 </div>
-                
+
                 <div class="text-sm text-gray-600 dark:text-gray-400">
                   {{ area.current }}% → {{ area.target }}%
                 </div>
               </div>
-              
-              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div 
+
+              <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                <div
                   class="h-2 rounded-full transition-all duration-500"
                   :class="area.priority === 'بالا' ? 'bg-red-500' : 'bg-yellow-500'"
                   :style="{ width: `${area.current}%` }"
-                ></div>
+                />
               </div>
             </div>
           </div>
@@ -876,27 +1033,32 @@ function navigateToAssessment(section: string) {
       </div>
 
       <!-- Completion Status Overview -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-        <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-800 dark:text-white mb-6">
+      <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <BaseHeading
+          as="h2"
+          size="xl"
+          weight="semibold"
+          class="mb-6 text-gray-800 dark:text-white"
+        >
           <span>وضعیت تکمیل بخش‌ها</span>
         </BaseHeading>
-        
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div 
-            v-for="(status, section) in userProfile.completionStatus" 
+
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            v-for="(status, section) in userProfile.completionStatus"
             :key="section"
-            class="p-4 border border-gray-200 dark:border-gray-700 rounded-xl"
+            class="rounded-xl border border-gray-200 p-4 dark:border-gray-700"
             :class="{
-              'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800': status.completed,
-              'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800': status.promoted,
+              'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20': status.completed,
+              'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20': status.promoted,
               'bg-gray-50 dark:bg-gray-700/50': status.locked
             }"
           >
-            <div class="flex items-center justify-between mb-3">
+            <div class="mb-3 flex items-center justify-between">
               <div class="flex items-center">
-                <Icon 
-                  :name="getSectionIcon(section)" 
-                  class="w-5 h-5 me-2"
+                <Icon
+                  :name="getSectionIcon(section)"
+                  class="me-2 size-5"
                   :class="{
                     'text-green-600': status.completed,
                     'text-amber-600': status.promoted,
@@ -904,13 +1066,13 @@ function navigateToAssessment(section: string) {
                     'text-blue-600': !status.completed && !status.promoted && !status.locked
                   }"
                 />
-                <span class="font-medium text-gray-800 dark:text-white text-sm">
+                <span class="text-sm font-medium text-gray-800 dark:text-white">
                   {{ getSectionTitle(section) }}
                 </span>
               </div>
-              
+
               <div class="text-right">
-                <div 
+                <div
                   class="text-lg font-bold"
                   :class="`text-${getCompletionColor(status.score)}-600`"
                 >
@@ -918,9 +1080,9 @@ function navigateToAssessment(section: string) {
                 </div>
               </div>
             </div>
-            
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
-              <div 
+
+            <div class="mb-3 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+              <div
                 class="h-2 rounded-full transition-all duration-500"
                 :class="{
                   'bg-green-500': status.completed,
@@ -929,9 +1091,9 @@ function navigateToAssessment(section: string) {
                   'bg-blue-500': !status.completed && !status.promoted && !status.locked
                 }"
                 :style="{ width: `${status.score}%` }"
-              ></div>
+              />
             </div>
-            
+
             <div class="text-xs text-gray-500">
               <div v-if="status.completed">
                 تکمیل شده • {{ status.lastUpdated }}
@@ -946,14 +1108,14 @@ function navigateToAssessment(section: string) {
                 در دسترس برای تکمیل
               </div>
             </div>
-            
+
             <div v-if="!status.completed" class="mt-3">
               <BaseButton
                 size="sm"
                 class="w-full"
                 :class="{
                   'bg-amber-500 text-white hover:bg-amber-600': status.promoted,
-                  'bg-gray-300 text-gray-500 cursor-not-allowed': status.locked,
+                  'cursor-not-allowed bg-gray-300 text-gray-500': status.locked,
                   'bg-blue-500 text-white hover:bg-blue-600': !status.promoted && !status.locked
                 }"
                 :disabled="status.locked"
@@ -969,14 +1131,19 @@ function navigateToAssessment(section: string) {
       </div>
 
       <!-- Counselor Notes -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-        <div class="flex items-center justify-between mb-6">
+      <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <div class="mb-6 flex items-center justify-between">
           <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center me-4">
-              <Icon name="ph:clipboard-text" class="w-6 h-6 text-white" />
+            <div class="me-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600">
+              <Icon name="ph:clipboard-text" class="size-6 text-white" />
             </div>
             <div>
-              <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-800 dark:text-white mb-1">
+              <BaseHeading
+                as="h2"
+                size="xl"
+                weight="semibold"
+                class="mb-1 text-gray-800 dark:text-white"
+              >
                 <span>یادداشت‌های مشاور</span>
               </BaseHeading>
               <div class="text-sm text-gray-500">
@@ -985,75 +1152,90 @@ function navigateToAssessment(section: string) {
             </div>
           </div>
         </div>
-        
-        <div class="grid md:grid-cols-3 gap-6">
+
+        <div class="grid gap-6 md:grid-cols-3">
           <!-- Strengths -->
           <div>
-            <BaseHeading as="h3" size="md" weight="semibold" class="text-gray-800 dark:text-white mb-3 flex items-center">
-              <Icon name="ph:star" class="w-4 h-4 me-2 text-green-600" />
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              class="mb-3 flex items-center text-gray-800 dark:text-white"
+            >
+              <Icon name="ph:star" class="me-2 size-4 text-green-600" />
               <span>نقاط قوت</span>
             </BaseHeading>
             <div class="space-y-2">
-              <div 
-                v-for="strength in userProfile.counselorNotes.strengths" 
+              <div
+                v-for="strength in userProfile.counselorNotes.strengths"
                 :key="strength"
-                class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+                class="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-900/20"
               >
                 <span class="text-sm text-green-800 dark:text-green-200">{{ strength }}</span>
               </div>
             </div>
           </div>
-          
+
           <!-- Critical Areas -->
           <div>
-            <BaseHeading as="h3" size="md" weight="semibold" class="text-gray-800 dark:text-white mb-3 flex items-center">
-              <Icon name="ph:warning" class="w-4 h-4 me-2 text-amber-600" />
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              class="mb-3 flex items-center text-gray-800 dark:text-white"
+            >
+              <Icon name="ph:warning" class="me-2 size-4 text-amber-600" />
               <span>حوزه‌های حیاتی</span>
             </BaseHeading>
             <div class="space-y-2">
-              <div 
-                v-for="area in userProfile.counselorNotes.criticalAreas" 
+              <div
+                v-for="area in userProfile.counselorNotes.criticalAreas"
                 :key="area"
-                class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg"
+                class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20"
               >
                 <span class="text-sm text-amber-800 dark:text-amber-200">{{ area }}</span>
               </div>
             </div>
           </div>
-          
+
           <!-- Recommendations -->
           <div>
-            <BaseHeading as="h3" size="md" weight="semibold" class="text-gray-800 dark:text-white mb-3 flex items-center">
-              <Icon name="ph:lightbulb" class="w-4 h-4 me-2 text-blue-600" />
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              class="mb-3 flex items-center text-gray-800 dark:text-white"
+            >
+              <Icon name="ph:lightbulb" class="me-2 size-4 text-blue-600" />
               <span>توصیه‌ها</span>
             </BaseHeading>
             <div class="space-y-2">
-              <div 
-                v-for="recommendation in userProfile.counselorNotes.recommendations" 
+              <div
+                v-for="recommendation in userProfile.counselorNotes.recommendations"
                 :key="recommendation"
-                class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+                class="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20"
               >
                 <span class="text-sm text-blue-800 dark:text-blue-200">{{ recommendation }}</span>
               </div>
             </div>
           </div>
         </div>
-        
+
         <!-- Next Session -->
-        <div class="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+        <div class="mt-6 rounded-lg border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
           <div class="flex items-center justify-between">
             <div class="flex items-center">
-              <Icon name="ph:calendar" class="w-5 h-5 text-indigo-600 me-2" />
+              <Icon name="ph:calendar" class="me-2 size-5 text-indigo-600" />
               <span class="font-medium text-indigo-800 dark:text-indigo-200">
                 جلسه مشاوره بعدی: {{ userProfile.counselorNotes.nextSession }}
               </span>
             </div>
-            
+
             <BaseButton
               size="sm"
               class="bg-indigo-500 text-white hover:bg-indigo-600"
             >
-              <Icon name="ph:video-camera" class="w-4 h-4 me-2" />
+              <Icon name="ph:video-camera" class="me-2 size-4" />
               <span>پیوستن</span>
             </BaseButton>
           </div>
@@ -1062,20 +1244,20 @@ function navigateToAssessment(section: string) {
     </div>
 
     <!-- Action Buttons -->
-    <div class="flex gap-4 justify-center mt-8">
+    <div class="mt-8 flex justify-center gap-4">
       <BaseButton
-        @click="navigateTo('/hammasir')"
         variant="outline"
         class="border-gray-300 text-gray-700 hover:bg-gray-50"
+        @click="navigateTo('/hammasir')"
       >
-        <Icon name="ph:arrow-right" class="w-4 h-4 me-2" />
+        <Icon name="ph:arrow-right" class="me-2 size-4" />
         <span>بازگشت به داشبورد</span>
       </BaseButton>
-      
+
       <BaseButton
-        class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
+        class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700"
       >
-        <Icon name="ph:download" class="w-4 h-4 me-2" />
+        <Icon name="ph:download" class="me-2 size-4" />
         <span>دانلود گزارش کامل</span>
       </BaseButton>
     </div>

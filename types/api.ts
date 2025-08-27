@@ -186,6 +186,118 @@ export interface UpdateUserStatusDto {
   status: 'ACTIVE' | 'PENDING_VERIFICATION' | 'SUSPENDED' | 'DEACTIVATED'
 }
 
+// Handbook DTOs
+export interface AnalysisSourceDto {
+  type: 'QUESTIONNAIRE' | 'EDUCATION' | 'COUNSELING'
+  sourceId: string
+  analysisDate: string
+}
+
+export interface AnalysisFactorDto {
+  id: string
+  key: string
+  title: string
+  value: { [key: string]: any }
+  valueType: 'NUMBER' | 'STRING' | 'BOOLEAN' | 'OBJECT' | 'ARRAY'
+  unit?: string
+  category?: string
+  description?: string
+  confidence?: number
+  implications?: string[]
+  factors?: AnalysisFactorDto[]
+  metadata?: { [key: string]: any }
+}
+
+export interface RecommendationDto {
+  id: string
+  key: string
+  title: string
+  description: string
+  category: string
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+  actionable: boolean
+  resources?: ResourceDto[]
+  metadata?: { [key: string]: any }
+}
+
+export interface ResourceDto {
+  id: string
+  type: string
+  title: string
+  description: string
+  url: string
+  tags: string[]
+}
+
+export interface InsightDto {
+  id: string
+  key: string
+  title: string
+  description: string
+  category: string
+  confidence: number
+  data?: { [key: string]: any }
+  metadata?: { [key: string]: any }
+}
+
+export interface AnalysisMetadataDto {
+  version: string
+  modelVersion?: string
+  processingTime?: number
+  tags?: string[]
+  customFields?: { [key: string]: any }
+}
+
+export interface AnalysisErrorDto {
+  code: string
+  message: string
+  details?: { [key: string]: any }
+  retryable: boolean
+}
+
+export interface AnalysisDto {
+  id: string
+  userId: string
+  sourceId: string
+  analysisType: string
+  status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED'
+  factors: AnalysisFactorDto[]
+  recommendations: RecommendationDto[]
+  insights: InsightDto[]
+  createdAt: string
+  completedAt?: string
+  metadata: AnalysisMetadataDto
+  error?: AnalysisErrorDto
+}
+
+export interface HandbookSectionDto {
+  id: string
+  title: string
+  analysisType: string
+  source: AnalysisSourceDto
+  analysis: { [key: string]: any }
+  createdAt: string
+}
+
+export interface HandbookResponseDto {
+  id: string
+  userId: string
+  sections: HandbookSectionDto[]
+  lastUpdated: string
+  version: number
+}
+
+export interface HandbookSectionInputDto {
+  title: string
+  analysisType: string
+  source: AnalysisSourceDto
+  analysis: { [key: string]: any }
+}
+
+export interface UpdateHandbookDto {
+  sections: HandbookSectionInputDto[]
+}
+
 // Notification DTOs
 export interface NotificationDto {
   id: string
@@ -249,6 +361,12 @@ export interface CreateNotificationDto {
 }
 
 // Session DTOs
+export interface NoteAttachmentDto {
+  id: string
+  fileId: string
+  fileName: string
+}
+
 export interface SessionNoteDto {
   id: string
   sessionId: string
@@ -257,7 +375,7 @@ export interface SessionNoteDto {
   isPrivate: boolean
   type: 'OBSERVATION' | 'RECOMMENDATION' | 'PROGRESS' | 'ISSUE' | 'GOAL'
   priority: 'LOW' | 'MEDIUM' | 'HIGH'
-  attachments: string[]
+  attachments: NoteAttachmentDto[]
 }
 
 export interface SessionReportDto {
@@ -571,8 +689,14 @@ export interface CounselorPersonalInfoDto {
   profilePicture?: string
 }
 
+export interface CertificationDto {
+  name: string
+  issuingOrg: string
+  issueDate: string
+}
+
 export interface ProfessionalInfoDto {
-  certifications: string[]
+  certifications: CertificationDto[]
   yearsOfExperience: number
 }
 

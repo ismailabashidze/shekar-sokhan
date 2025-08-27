@@ -20,7 +20,7 @@ const testInfo = {
   duration: '28 دقیقه',
   totalQuestions: 60,
   overallScore: 78,
-  reliability: 96
+  reliability: 96,
 }
 
 const personalityFactors = [
@@ -41,13 +41,13 @@ const personalityFactors = [
       { name: 'جسارت', score: 68, description: 'اعتماد به نفس در موقعیت‌های جدید' },
       { name: 'فعالیت', score: 79, description: 'انرژی و نشاط بالا' },
       { name: 'هیجان‌طلبی', score: 65, description: 'تمایل به تجربیات هیجان‌انگیز' },
-      { name: 'احساسات مثبت', score: 77, description: 'تجربه مکرر احساسات خوشایند' }
+      { name: 'احساسات مثبت', score: 77, description: 'تجربه مکرر احساسات خوشایند' },
     ],
     recommendations: [
       'در موقعیت‌های اجتماعی و تیمی عملکرد بهتری دارید',
       'شغل‌هایی که نیاز به تعامل با مردم دارند مناسب شماست',
-      'در ازدواج، همسری که اجتماعی باشد بهتر با شما جور درمی‌آید'
-    ]
+      'در ازدواج، همسری که اجتماعی باشد بهتر با شما جور درمی‌آید',
+    ],
   },
   {
     id: 'agreeableness',
@@ -66,13 +66,13 @@ const personalityFactors = [
       { name: 'نوع‌دوستی', score: 85, description: 'تمایل به کمک به دیگران' },
       { name: 'تواضع', score: 80, description: 'فروتنی و عدم تکبر' },
       { name: 'نرم‌خویی', score: 82, description: 'مدارا و بردباری در تعاملات' },
-      { name: 'همدلی', score: 87, description: 'درک احساسات دیگران' }
+      { name: 'همدلی', score: 87, description: 'درک احساسات دیگران' },
     ],
     recommendations: [
       'در روابط زناشویی قابلیت سازگاری بالایی دارید',
       'مناسب برای مشاغل خدماتی و انسان‌دوستانه',
-      'ممکن است گاهی نیاز به قاطعیت بیشتر داشته باشید'
-    ]
+      'ممکن است گاهی نیاز به قاطعیت بیشتر داشته باشید',
+    ],
   },
   {
     id: 'conscientiousness',
@@ -91,13 +91,13 @@ const personalityFactors = [
       { name: 'وظیفه‌شناسی', score: 78, description: 'پایبندی به تعهدات' },
       { name: 'تلاش برای موفقیت', score: 71, description: 'انگیزه برای دستیابی به اهداف' },
       { name: 'خودانضباطی', score: 64, description: 'کنترل رفتار و تکانه‌ها' },
-      { name: 'تأمل', score: 63, description: 'تفکر قبل از عمل' }
+      { name: 'تأمل', score: 63, description: 'تفکر قبل از عمل' },
     ],
     recommendations: [
       'در برنامه‌ریزی زندگی مشترک توانایی خوبی دارید',
       'مناسب برای مسئولیت‌های مهم و پیچیده',
-      'گاهی انعطاف بیشتری در برنامه‌ها در نظر بگیرید'
-    ]
+      'گاهی انعطاف بیشتری در برنامه‌ها در نظر بگیرید',
+    ],
   },
   {
     id: 'neuroticism',
@@ -116,13 +116,13 @@ const personalityFactors = [
       { name: 'افسردگی', score: 45, description: 'احساسات غمگینی' },
       { name: 'خودآگاهی', score: 62, description: 'حساسیت به قضاوت دیگران' },
       { name: 'تکانشگری', score: 55, description: 'کنترل تکانه‌ها' },
-      { name: 'آسیب‌پذیری', score: 51, description: 'واکنش به استرس' }
+      { name: 'آسیب‌پذیری', score: 51, description: 'واکنش به استرس' },
     ],
     recommendations: [
       'تکنیک‌های مدیریت استرس را تمرین کنید',
       'در روابط، ارتباط باز و صادقانه برقرار کنید',
-      'برای بهبود ثبات عاطفی، ورزش منظم و مدیتیشن مفید است'
-    ]
+      'برای بهبود ثبات عاطفی، ورزش منظم و مدیتیشن مفید است',
+    ],
   },
   {
     id: 'openness',
@@ -141,14 +141,14 @@ const personalityFactors = [
       { name: 'احساسات', score: 79, description: 'عمق و تنوع احساسی' },
       { name: 'اعمال', score: 68, description: 'تمایل به تجربه فعالیت‌های جدید' },
       { name: 'ایده‌ها', score: 82, description: 'علاقه به مفاهیم انتزاعی' },
-      { name: 'ارزش‌ها', score: 71, description: 'بازنگری در باورها و ارزش‌ها' }
+      { name: 'ارزش‌ها', score: 71, description: 'بازنگری در باورها و ارزش‌ها' },
     ],
     recommendations: [
       'در ازدواج، همسری که از تغییر و تنوع استقبال کند مناسب شماست',
       'مشاغل خلاقانه و نوآورانه برای شما مناسب‌تر است',
-      'از فرصت‌های یادگیری و رشد شخصی استفاده کنید'
-    ]
-  }
+      'از فرصت‌های یادگیری و رشد شخصی استفاده کنید',
+    ],
+  },
 ]
 
 const compatibilityInsights = [
@@ -159,8 +159,8 @@ const compatibilityInsights = [
     factors: [
       'برون‌گرایی بالا: تمایل به ارتباطات اجتماعی',
       'توافق‌پذیری بالا: سازگاری و همکاری در روابط',
-      'گشودگی بالا: انعطاف‌پذیری در مواجهه با تغییرات'
-    ]
+      'گشودگی بالا: انعطاف‌پذیری در مواجهه با تغییرات',
+    ],
   },
   {
     title: 'نقاط قوت در روابط',
@@ -168,17 +168,17 @@ const compatibilityInsights = [
       'توانایی برقراری ارتباط مؤثر',
       'همدلی و درک احساسات همسر',
       'انعطاف‌پذیری در حل مشکلات',
-      'تمایل به فعالیت‌های مشترک'
-    ]
+      'تمایل به فعالیت‌های مشترک',
+    ],
   },
   {
     title: 'نکات قابل توجه',
     items: [
       'ممکن است در موقعیت‌های پراسترس حساسیت بیشتری نشان دهید',
       'نیاز به تعادل بین فعالیت‌های اجتماعی و آرامش خانگی',
-      'اهمیت یافتن همسری با سطح انرژی مشابه'
-    ]
-  }
+      'اهمیت یافتن همسری با سطح انرژی مشابه',
+    ],
+  },
 ]
 
 const developmentAreas = [
@@ -190,8 +190,8 @@ const developmentAreas = [
       'تمرین تکنیک‌های تنفس عمیق',
       'ورزش منظم و فعالیت بدنی',
       'مدیتیشن و ذهن‌آگاهی',
-      'برنامه‌ریزی بهتر برای کاهش استرس'
-    ]
+      'برنامه‌ریزی بهتر برای کاهش استرس',
+    ],
   },
   {
     area: 'تقویت خودانضباطی',
@@ -201,9 +201,9 @@ const developmentAreas = [
       'تنظیم اهداف کوتاه‌مدت و قابل دستیابی',
       'استفاده از ابزارهای برنامه‌ریزی',
       'ایجاد عادات مثبت روزانه',
-      'تمرین تأخیر در ارضای نیازها'
-    ]
-  }
+      'تمرین تأخیر در ارضای نیازها',
+    ],
+  },
 ]
 
 const careerRecommendations = [
@@ -216,8 +216,8 @@ const careerRecommendations = [
       'منابع انسانی',
       'فروش و بازاریابی',
       'روزنامه‌نگار',
-      'طراح گرافیک'
-    ]
+      'طراح گرافیک',
+    ],
   },
   {
     category: 'محیط کار ایده‌آل',
@@ -226,9 +226,9 @@ const careerRecommendations = [
       'امکان خلاقیت و نوآوری',
       'تعامل مستقیم با مردم',
       'برنامه‌های آموزشی و توسعه',
-      'انعطاف در ساعات کاری'
-    ]
-  }
+      'انعطاف در ساعات کاری',
+    ],
+  },
 ]
 
 function getScoreColor(score: number) {
@@ -251,21 +251,26 @@ function getScoreLevel(score: number) {
 <template>
   <div>
     <!-- Header -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 p-1 shadow-2xl shadow-blue-500/25 mb-8">
-      <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
-      <div class="relative rounded-2xl bg-gradient-to-br from-blue-600/90 via-indigo-700/90 to-purple-700/90 backdrop-blur-xl px-8 py-12">
+    <div class="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 p-1 shadow-2xl shadow-blue-500/25">
+      <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+      <div class="relative rounded-2xl bg-gradient-to-br from-blue-600/90 via-indigo-700/90 to-purple-700/90 px-8 py-12 backdrop-blur-xl">
         <!-- Floating decorative elements -->
-        <div class="absolute top-6 right-8 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
-        <div class="absolute bottom-8 left-12 w-32 h-32 bg-purple-400/10 rounded-full blur-3xl"></div>
-        
+        <div class="absolute right-8 top-6 size-24 rounded-full bg-white/5 blur-2xl" />
+        <div class="absolute bottom-8 left-12 size-32 rounded-full bg-purple-400/10 blur-3xl" />
+
         <div class="relative flex items-center justify-between">
           <div>
-            <div class="flex items-center mb-4">
-              <div class="w-16 h-16 bg-gradient-to-br from-white/20 to-white/10 rounded-2xl flex items-center justify-center me-4 shadow-xl">
-                <Icon name="ph:user-circle" class="w-8 h-8 text-white" />
+            <div class="mb-4 flex items-center">
+              <div class="me-4 flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-white/20 to-white/10 shadow-xl">
+                <Icon name="ph:user-circle" class="size-8 text-white" />
               </div>
               <div>
-                <BaseHeading as="h1" size="3xl" weight="bold" class="text-white drop-shadow-lg">
+                <BaseHeading
+                  as="h1"
+                  size="3xl"
+                  weight="bold"
+                  class="text-white drop-shadow-lg"
+                >
                   <span>{{ testInfo.name }}</span>
                 </BaseHeading>
                 <BaseParagraph class="text-white/80">
@@ -273,37 +278,39 @@ function getScoreLevel(score: number) {
                 </BaseParagraph>
               </div>
             </div>
-            
+
             <div class="flex items-center gap-6 text-white/90">
               <div class="flex items-center">
-                <Icon name="ph:calendar" class="w-4 h-4 me-2" />
+                <Icon name="ph:calendar" class="me-2 size-4" />
                 <span>تکمیل شده: {{ testInfo.completedAt }}</span>
               </div>
               <div class="flex items-center">
-                <Icon name="ph:clock" class="w-4 h-4 me-2" />
+                <Icon name="ph:clock" class="me-2 size-4" />
                 <span>مدت زمان: {{ testInfo.duration }}</span>
               </div>
               <div class="flex items-center">
-                <Icon name="ph:list" class="w-4 h-4 me-2" />
+                <Icon name="ph:list" class="me-2 size-4" />
                 <span>{{ testInfo.totalQuestions }} سوال</span>
               </div>
             </div>
           </div>
-          
+
           <!-- Overall Score -->
           <div class="text-center">
-            <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/30">
-              <BaseParagraph class="text-white/80 mb-2">
+            <div class="rounded-2xl border border-white/30 bg-white/20 p-6 backdrop-blur-sm">
+              <BaseParagraph class="mb-2 text-white/80">
                 <span>امتیاز کلی</span>
               </BaseParagraph>
-              <div class="text-4xl font-bold text-white mb-2">{{ testInfo.overallScore }}</div>
-              <div class="w-16 h-2 bg-white/20 rounded-full mx-auto mb-2">
-                <div 
-                  class="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-700"
-                  :style="{ width: `${testInfo.overallScore}%` }"
-                ></div>
+              <div class="mb-2 text-4xl font-bold text-white">
+                {{ testInfo.overallScore }}
               </div>
-              <BaseParagraph class="text-white/70 text-xs">
+              <div class="mx-auto mb-2 h-2 w-16 rounded-full bg-white/20">
+                <div
+                  class="h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-700"
+                  :style="{ width: `${testInfo.overallScore}%` }"
+                />
+              </div>
+              <BaseParagraph class="text-xs text-white/70">
                 <span>قابلیت اطمینان: {{ testInfo.reliability }}%</span>
               </BaseParagraph>
             </div>
@@ -313,43 +320,53 @@ function getScoreLevel(score: number) {
     </div>
 
     <!-- Personality Factors -->
-    <div class="space-y-8 mb-12">
-      <BaseHeading as="h2" size="2xl" weight="bold" class="text-gray-800 dark:text-white mb-8">
+    <div class="mb-12 space-y-8">
+      <BaseHeading
+        as="h2"
+        size="2xl"
+        weight="bold"
+        class="mb-8 text-gray-800 dark:text-white"
+      >
         <span>عوامل شخصیت پنج‌گانه</span>
       </BaseHeading>
-      
-      <div 
-        v-for="factor in personalityFactors" 
+
+      <div
+        v-for="factor in personalityFactors"
         :key="factor.id"
-        class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50"
+        class="rounded-2xl border border-gray-200/50 bg-white p-8 shadow-lg dark:border-gray-700/50 dark:bg-gray-800"
       >
         <!-- Factor Header -->
-        <div class="flex items-start justify-between mb-6">
+        <div class="mb-6 flex items-start justify-between">
           <div class="flex items-center">
-            <div 
-              class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg me-4"
+            <div
+              class="me-4 flex size-16 items-center justify-center rounded-2xl shadow-lg"
               :class="`bg-gradient-to-br from-${factor.color}-400 to-${factor.color}-600 text-white`"
             >
-              <Icon :name="factor.icon" class="w-8 h-8" />
+              <Icon :name="factor.icon" class="size-8" />
             </div>
             <div>
-              <BaseHeading as="h3" size="xl" weight="semibold" class="text-gray-800 dark:text-white mb-1">
+              <BaseHeading
+                as="h3"
+                size="xl"
+                weight="semibold"
+                class="mb-1 text-gray-800 dark:text-white"
+              >
                 <span>{{ factor.name }}</span>
               </BaseHeading>
-              <BaseParagraph class="text-gray-600 dark:text-gray-400 text-sm">
+              <BaseParagraph class="text-sm text-gray-600 dark:text-gray-400">
                 <span>{{ factor.englishName }}</span>
               </BaseParagraph>
             </div>
           </div>
-          
+
           <!-- Score Display -->
           <div class="text-left">
-            <div class="flex items-center gap-4 mb-2">
+            <div class="mb-2 flex items-center gap-4">
               <div class="text-3xl font-bold" :class="`text-${getScoreColor(factor.score)}-600`">
                 {{ factor.score }}
               </div>
-              <div 
-                class="px-3 py-1 rounded-full text-sm font-medium"
+              <div
+                class="rounded-full px-3 py-1 text-sm font-medium"
                 :class="`bg-${getScoreColor(factor.score)}-100 text-${getScoreColor(factor.score)}-700`"
               >
                 {{ factor.level }}
@@ -363,57 +380,71 @@ function getScoreLevel(score: number) {
 
         <!-- Progress Bar -->
         <div class="mb-6">
-          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-            <div 
-              class="h-3 rounded-full transition-all duration-1000 relative overflow-hidden"
+          <div class="h-3 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+            <div
+              class="relative h-3 overflow-hidden rounded-full transition-all duration-1000"
               :class="`bg-gradient-to-r from-${factor.color}-400 to-${factor.color}-600`"
               :style="{ width: `${factor.score}%` }"
             >
-              <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+              <div class="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
             </div>
           </div>
         </div>
 
         <!-- Description -->
-        <div class="grid md:grid-cols-2 gap-8">
+        <div class="grid gap-8 md:grid-cols-2">
           <div>
-            <BaseHeading as="h4" size="md" weight="semibold" class="text-gray-800 dark:text-white mb-3">
+            <BaseHeading
+              as="h4"
+              size="md"
+              weight="semibold"
+              class="mb-3 text-gray-800 dark:text-white"
+            >
               <span>توصیف</span>
             </BaseHeading>
-            <BaseParagraph class="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+            <BaseParagraph class="mb-4 leading-relaxed text-gray-600 dark:text-gray-400">
               <span>{{ factor.description }}</span>
             </BaseParagraph>
-            
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
-              <BaseParagraph class="text-blue-800 dark:text-blue-200 font-medium">
+
+            <div class="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-blue-800 dark:from-blue-900/20 dark:to-indigo-900/20">
+              <BaseParagraph class="font-medium text-blue-800 dark:text-blue-200">
                 <span>{{ factor.interpretation }}</span>
               </BaseParagraph>
             </div>
           </div>
-          
+
           <div>
-            <BaseHeading as="h4" size="md" weight="semibold" class="text-gray-800 dark:text-white mb-3">
+            <BaseHeading
+              as="h4"
+              size="md"
+              weight="semibold"
+              class="mb-3 text-gray-800 dark:text-white"
+            >
               <span>ویژگی‌های فرعی</span>
             </BaseHeading>
             <div class="space-y-3">
-              <div 
-                v-for="trait in factor.traits" 
+              <div
+                v-for="trait in factor.traits"
                 :key="trait.name"
-                class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                class="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50"
               >
                 <div class="flex-1">
-                  <div class="font-medium text-gray-800 dark:text-white text-sm">{{ trait.name }}</div>
-                  <div class="text-xs text-gray-600 dark:text-gray-400">{{ trait.description }}</div>
+                  <div class="text-sm font-medium text-gray-800 dark:text-white">
+                    {{ trait.name }}
+                  </div>
+                  <div class="text-xs text-gray-600 dark:text-gray-400">
+                    {{ trait.description }}
+                  </div>
                 </div>
-                <div class="flex items-center gap-2 ms-4">
-                  <div class="w-16 h-2 bg-gray-200 dark:bg-gray-600 rounded-full">
-                    <div 
+                <div class="ms-4 flex items-center gap-2">
+                  <div class="h-2 w-16 rounded-full bg-gray-200 dark:bg-gray-600">
+                    <div
                       class="h-2 rounded-full transition-all duration-500"
                       :class="`bg-gradient-to-r from-${getScoreColor(trait.score)}-400 to-${getScoreColor(trait.score)}-600`"
                       :style="{ width: `${trait.score}%` }"
-                    ></div>
+                    />
                   </div>
-                  <span class="text-sm font-medium w-8" :class="`text-${getScoreColor(trait.score)}-600`">
+                  <span class="w-8 text-sm font-medium" :class="`text-${getScoreColor(trait.score)}-600`">
                     {{ trait.score }}
                   </span>
                 </div>
@@ -423,18 +454,23 @@ function getScoreLevel(score: number) {
         </div>
 
         <!-- Recommendations -->
-        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <BaseHeading as="h4" size="md" weight="semibold" class="text-gray-800 dark:text-white mb-3">
+        <div class="mt-6 border-t border-gray-200 pt-6 dark:border-gray-700">
+          <BaseHeading
+            as="h4"
+            size="md"
+            weight="semibold"
+            class="mb-3 text-gray-800 dark:text-white"
+          >
             <span>توصیه‌ها</span>
           </BaseHeading>
-          <div class="grid md:grid-cols-3 gap-4">
-            <div 
-              v-for="recommendation in factor.recommendations" 
+          <div class="grid gap-4 md:grid-cols-3">
+            <div
+              v-for="recommendation in factor.recommendations"
               :key="recommendation"
-              class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+              class="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20"
             >
               <div class="flex items-start">
-                <Icon name="ph:lightbulb" class="w-4 h-4 text-green-600 me-2 mt-0.5 flex-shrink-0" />
+                <Icon name="ph:lightbulb" class="me-2 mt-0.5 size-4 shrink-0 text-green-600" />
                 <span class="text-sm text-green-800 dark:text-green-200">{{ recommendation }}</span>
               </div>
             </div>
@@ -444,57 +480,67 @@ function getScoreLevel(score: number) {
     </div>
 
     <!-- Compatibility Insights -->
-    <div class="bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-2xl p-8 border border-pink-200/50 dark:border-pink-800/50 mb-8">
-      <BaseHeading as="h2" size="2xl" weight="bold" class="text-gray-800 dark:text-white mb-6 flex items-center">
-        <Icon name="ph:heart" class="w-6 h-6 me-3 text-pink-600" />
+    <div class="mb-8 rounded-2xl border border-pink-200/50 bg-gradient-to-br from-pink-50 to-rose-100 p-8 dark:border-pink-800/50 dark:from-pink-900/20 dark:to-rose-900/20">
+      <BaseHeading
+        as="h2"
+        size="2xl"
+        weight="bold"
+        class="mb-6 flex items-center text-gray-800 dark:text-white"
+      >
+        <Icon name="ph:heart" class="me-3 size-6 text-pink-600" />
         <span>بینش‌های سازگاری در ازدواج</span>
       </BaseHeading>
-      
-      <div class="grid md:grid-cols-3 gap-6">
-        <div 
-          v-for="insight in compatibilityInsights" 
+
+      <div class="grid gap-6 md:grid-cols-3">
+        <div
+          v-for="insight in compatibilityInsights"
           :key="insight.title"
-          class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 border border-white/50"
+          class="rounded-xl border border-white/50 bg-white/70 p-6 backdrop-blur-sm dark:bg-gray-800/70"
         >
-          <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-800 dark:text-white mb-3">
+          <BaseHeading
+            as="h3"
+            size="lg"
+            weight="semibold"
+            class="mb-3 text-gray-800 dark:text-white"
+          >
             <span>{{ insight.title }}</span>
           </BaseHeading>
-          
+
           <div v-if="insight.score" class="mb-4">
-            <div class="flex items-center justify-between mb-2">
+            <div class="mb-2 flex items-center justify-between">
               <span class="text-sm text-gray-600 dark:text-gray-400">امتیاز سازگاری</span>
-              <span class="font-bold text-pink-600 text-lg">{{ insight.score }}%</span>
+              <span class="text-lg font-bold text-pink-600">{{ insight.score }}%</span>
             </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div 
-                class="bg-gradient-to-r from-pink-500 to-rose-600 h-2 rounded-full transition-all duration-700"
+            <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+              <div
+                class="h-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-600 transition-all duration-700"
                 :style="{ width: `${insight.score}%` }"
-              ></div>
+              />
             </div>
           </div>
-          
-          <BaseParagraph v-if="insight.description" class="text-gray-600 dark:text-gray-400 mb-4">
+
+          <BaseParagraph v-if="insight.description" class="mb-4 text-gray-600 dark:text-gray-400">
             <span>{{ insight.description }}</span>
           </BaseParagraph>
-          
+
           <div v-if="insight.factors" class="space-y-2">
-            <div 
-              v-for="factor in insight.factors" 
+            <div
+              v-for="factor in insight.factors"
               :key="factor"
               class="flex items-center text-sm text-gray-700 dark:text-gray-300"
             >
-              <Icon name="ph:check" class="w-4 h-4 text-green-500 me-2" />
+              <Icon name="ph:check" class="me-2 size-4 text-green-500" />
               <span>{{ factor }}</span>
             </div>
           </div>
-          
+
           <div v-if="insight.items" class="space-y-2">
-            <div 
-              v-for="item in insight.items" 
+            <div
+              v-for="item in insight.items"
               :key="item"
               class="flex items-center text-sm text-gray-700 dark:text-gray-300"
             >
-              <Icon name="ph:star" class="w-4 h-4 text-yellow-500 me-2" />
+              <Icon name="ph:star" class="me-2 size-4 text-yellow-500" />
               <span>{{ item }}</span>
             </div>
           </div>
@@ -503,83 +549,103 @@ function getScoreLevel(score: number) {
     </div>
 
     <!-- Development Areas -->
-    <div class="grid md:grid-cols-2 gap-8 mb-8">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-        <BaseHeading as="h2" size="xl" weight="bold" class="text-gray-800 dark:text-white mb-6 flex items-center">
-          <Icon name="ph:trend-up" class="w-5 h-5 me-3 text-blue-600" />
+    <div class="mb-8 grid gap-8 md:grid-cols-2">
+      <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <BaseHeading
+          as="h2"
+          size="xl"
+          weight="bold"
+          class="mb-6 flex items-center text-gray-800 dark:text-white"
+        >
+          <Icon name="ph:trend-up" class="me-3 size-5 text-blue-600" />
           <span>حوزه‌های قابل توسعه</span>
         </BaseHeading>
-        
+
         <div class="space-y-6">
-          <div 
-            v-for="area in developmentAreas" 
+          <div
+            v-for="area in developmentAreas"
             :key="area.area"
-            class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+            class="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
           >
-            <div class="flex items-center justify-between mb-3">
-              <BaseHeading as="h3" size="md" weight="semibold" class="text-gray-800 dark:text-white">
+            <div class="mb-3 flex items-center justify-between">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="text-gray-800 dark:text-white"
+              >
                 <span>{{ area.area }}</span>
               </BaseHeading>
-              <div 
-                class="px-2 py-1 rounded-full text-xs font-medium"
+              <div
+                class="rounded-full px-2 py-1 text-xs font-medium"
                 :class="area.priority === 'بالا' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'"
               >
                 اولویت {{ area.priority }}
               </div>
             </div>
-            
-            <BaseParagraph class="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+
+            <BaseParagraph class="mb-4 text-sm text-gray-600 dark:text-gray-400">
               <span>{{ area.description }}</span>
             </BaseParagraph>
-            
+
             <div class="space-y-2">
-              <div 
-                v-for="suggestion in area.suggestions" 
+              <div
+                v-for="suggestion in area.suggestions"
                 :key="suggestion"
                 class="flex items-center text-sm text-gray-700 dark:text-gray-300"
               >
-                <Icon name="ph:arrow-left" class="w-3 h-3 text-blue-500 me-2" />
+                <Icon name="ph:arrow-left" class="me-2 size-3 text-blue-500" />
                 <span>{{ suggestion }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <!-- Career Recommendations -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-        <BaseHeading as="h2" size="xl" weight="bold" class="text-gray-800 dark:text-white mb-6 flex items-center">
-          <Icon name="ph:briefcase" class="w-5 h-5 me-3 text-green-600" />
+      <div class="rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <BaseHeading
+          as="h2"
+          size="xl"
+          weight="bold"
+          class="mb-6 flex items-center text-gray-800 dark:text-white"
+        >
+          <Icon name="ph:briefcase" class="me-3 size-5 text-green-600" />
           <span>توصیه‌های شغلی</span>
         </BaseHeading>
-        
+
         <div class="space-y-6">
-          <div 
-            v-for="category in careerRecommendations" 
+          <div
+            v-for="category in careerRecommendations"
             :key="category.category"
-            class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+            class="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
           >
-            <BaseHeading as="h3" size="md" weight="semibold" class="text-gray-800 dark:text-white mb-4">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              class="mb-4 text-gray-800 dark:text-white"
+            >
               <span>{{ category.category }}</span>
             </BaseHeading>
-            
+
             <div v-if="category.jobs" class="grid grid-cols-2 gap-2">
-              <div 
-                v-for="job in category.jobs" 
+              <div
+                v-for="job in category.jobs"
                 :key="job"
-                class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-2 text-center"
+                class="rounded-lg border border-green-200 bg-green-50 p-2 text-center dark:border-green-800 dark:bg-green-900/20"
               >
-                <span class="text-sm text-green-800 dark:text-green-200 font-medium">{{ job }}</span>
+                <span class="text-sm font-medium text-green-800 dark:text-green-200">{{ job }}</span>
               </div>
             </div>
-            
+
             <div v-if="category.features" class="space-y-2">
-              <div 
-                v-for="feature in category.features" 
+              <div
+                v-for="feature in category.features"
                 :key="feature"
                 class="flex items-center text-sm text-gray-700 dark:text-gray-300"
               >
-                <Icon name="ph:check" class="w-4 h-4 text-green-500 me-2" />
+                <Icon name="ph:check" class="me-2 size-4 text-green-500" />
                 <span>{{ feature }}</span>
               </div>
             </div>
@@ -589,23 +655,23 @@ function getScoreLevel(score: number) {
     </div>
 
     <!-- Action Buttons -->
-    <div class="flex gap-4 justify-center">
+    <div class="flex justify-center gap-4">
       <BaseButton
-        @click="navigateTo('/hammasir/questionnaires')"
         variant="outline"
         class="border-gray-300 text-gray-700 hover:bg-gray-50"
+        @click="navigateTo('/hammasir/questionnaires')"
       >
-        <Icon name="ph:arrow-right" class="w-4 h-4 me-2" />
+        <Icon name="ph:arrow-right" class="me-2 size-4" />
         <span>بازگشت به پرسش‌نامه‌ها</span>
       </BaseButton>
-      
-      <BaseButton class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white">
-        <Icon name="ph:download" class="w-4 h-4 me-2" />
+
+      <BaseButton class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700">
+        <Icon name="ph:download" class="me-2 size-4" />
         <span>دانلود گزارش PDF</span>
       </BaseButton>
-      
-      <BaseButton class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white">
-        <Icon name="ph:share" class="w-4 h-4 me-2" />
+
+      <BaseButton class="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700">
+        <Icon name="ph:share" class="me-2 size-4" />
         <span>اشتراک‌گذاری نتایج</span>
       </BaseButton>
     </div>

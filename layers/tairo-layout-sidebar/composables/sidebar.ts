@@ -43,6 +43,10 @@ export function useSidebar() {
   const app = useAppConfig()
   const route = useRoute()
 
+  const isHammasirRoute = computed(() => {
+    return route.path.includes('/hammasir/')
+  })
+
   const sidebars = computed(() => {
     if (
       (app.tairo?.sidebar?.navigation?.enabled as boolean) === false
@@ -167,6 +171,7 @@ export function useSidebar() {
     current,
     currentName,
     isOpen,
+    isHammasirRoute,
     toggle,
     close,
     open,

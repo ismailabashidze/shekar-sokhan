@@ -310,7 +310,6 @@ const closeAlphaModal = () => {
                       >
                         <Icon name="ph:stethoscope" class="ml-2 size-4" />
                         <span>گفت و گوی درمانی</span>
-                       
                       </BaseButton>
                     </div>
                   </div>

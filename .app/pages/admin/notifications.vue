@@ -165,8 +165,6 @@ const selectedUsersCount = computed(() => {
   return bulkOptions.value.selectedRecipients.length
 })
 
-
-
 // Methods
 const loadTemplate = (templateKey: keyof typeof systemTemplates) => {
   const template = systemTemplates[templateKey]
@@ -316,21 +314,21 @@ const notificationTypeOptions: NotificationTypeOption[] = [
   { label: 'موفقیت', value: 'success' },
   { label: 'هشدار', value: 'warning' },
   { label: 'خطا', value: 'error' },
-  { label: 'سیستم', value: 'system' }
+  { label: 'سیستم', value: 'system' },
 ]
 
 const notificationPriorityOptions: NotificationPriorityOption[] = [
   { label: 'کم', value: 'low' },
   { label: 'متوسط', value: 'medium' },
   { label: 'زیاد', value: 'high' },
-  { label: 'فوری', value: 'urgent' }
+  { label: 'فوری', value: 'urgent' },
 ]
 
 const roleOptions: RoleOption[] = [
   { label: 'همه نقش‌ها', value: '' },
   { label: 'کاربر عادی', value: 'user' },
   { label: 'درمانگر', value: 'therapist' },
-  { label: 'ادمین', value: 'admin' }
+  { label: 'ادمین', value: 'admin' },
 ]
 </script>
 
@@ -364,7 +362,7 @@ const roleOptions: RoleOption[] = [
                   class="size-1.5 rounded-full transition-all duration-300"
                   :class="'bg-muted-500'"
                 />
-                <span class="text-xs text-muted-600 dark:text-muted-400">
+                <span class="text-muted-600 dark:text-muted-400 text-xs">
                   محلی
                 </span>
               </div>

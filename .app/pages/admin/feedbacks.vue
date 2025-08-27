@@ -27,7 +27,7 @@ const {
   setSearch,
   setRatingFilter,
   resetFilters,
-  refreshFeedbacks
+  refreshFeedbacks,
 } = useAdminFeedbacks()
 
 const toaster = useToaster()
@@ -51,7 +51,7 @@ const problemCategories = {
   islamic_contradiction: { text: 'تضاد با ارزش‌های اسلامی', icon: 'ph:mosque-duotone' },
   irrelevant: { text: 'نامرتبط', icon: 'ph:x-circle-duotone' },
   generic: { text: 'عمومی', icon: 'ph:circle-duotone' },
-  confusing: { text: 'گیج‌کننده', icon: 'ph:question-duotone' }
+  confusing: { text: 'گیج‌کننده', icon: 'ph:question-duotone' },
 }
 
 // Quality categories mapping with icons
@@ -67,7 +67,7 @@ const qualityCategories = {
   visual_aids: { text: 'کمک‌های بصری', icon: 'ph:image-duotone' },
   more_examples: { text: 'مثال‌های بیشتر', icon: 'ph:list-bullets-duotone' },
   more_detail: { text: 'جزئیات بیشتر', icon: 'ph:magnifying-glass-plus-duotone' },
-  practical: { text: 'عملی', icon: 'ph:wrench-duotone' }
+  practical: { text: 'عملی', icon: 'ph:wrench-duotone' },
 }
 
 // Improvement categories mapping with icons
@@ -82,7 +82,7 @@ const improvementCategories = {
   availability: { text: 'در دسترس بودن', icon: 'ph:calendar-check-duotone' },
   empathy: { text: 'همدلی', icon: 'ph:heart-duotone' },
   content_quality: { text: 'کیفیت محتوا', icon: 'ph:star-duotone' },
-  professional_approach: { text: 'رویکرد حرفه‌ای', icon: 'ph:briefcase-duotone' }
+  professional_approach: { text: 'رویکرد حرفه‌ای', icon: 'ph:briefcase-duotone' },
 }
 
 // Format date to Persian
@@ -105,7 +105,6 @@ const getRatingColor = (rating: number) => {
   return 'danger'
 }
 
-
 // Format categories for display with icons
 const formatCategories = (categories: Record<string, boolean> | undefined, categoryMap: Record<string, { text: string, icon: string }>): Array<{ text: string, icon: string }> => {
   if (!categories) return []
@@ -125,7 +124,8 @@ const handleRefresh = async () => {
       icon: 'ph:check-circle-fill',
       closable: true,
     })
-  } catch (error) {
+  }
+  catch (error) {
     toaster.show({
       title: 'خطا',
       message: 'خطا در بروزرسانی اطلاعات',
@@ -174,14 +174,25 @@ const handleResetFilters = () => {
             class="w-32"
             @update:model-value="setRatingFilter"
           >
-            <option value="all">همه امتیازها</option>
-            <option value="5">5 ستاره</option>
-            <option value="4">4 ستاره</option>
-            <option value="3">3 ستاره</option>
-            <option value="2">2 ستاره</option>
-            <option value="1">1 ستاره</option>
+            <option value="all">
+              همه امتیازها
+            </option>
+            <option value="5">
+              5 ستاره
+            </option>
+            <option value="4">
+              4 ستاره
+            </option>
+            <option value="3">
+              3 ستاره
+            </option>
+            <option value="2">
+              2 ستاره
+            </option>
+            <option value="1">
+              1 ستاره
+            </option>
           </BaseSelect>
-
 
           <!-- Search -->
           <BaseInput
@@ -220,12 +231,12 @@ const handleResetFilters = () => {
           >
             <BaseCard shape="curved" class="overflow-hidden">
               <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
+                <div class="mb-4 flex items-center justify-between">
                   <BasePlaceload class="h-6 w-48 rounded" />
                   <BasePlaceload class="h-6 w-20 rounded" />
                 </div>
-                <BasePlaceload class="h-4 w-full rounded mb-2" />
-                <BasePlaceload class="h-4 w-3/4 rounded mb-4" />
+                <BasePlaceload class="mb-2 h-4 w-full rounded" />
+                <BasePlaceload class="mb-4 h-4 w-3/4 rounded" />
                 <div class="flex items-center gap-2">
                   <BasePlaceload class="h-8 w-24 rounded" />
                   <BasePlaceload class="h-8 w-24 rounded" />
@@ -283,7 +294,7 @@ const handleResetFilters = () => {
             class="overflow-hidden transition-all duration-300 hover:shadow-lg"
           >
             <!-- Header -->
-            <div class="bg-muted-50 dark:bg-muted-800/30 border-b border-muted-200 dark:border-muted-700 p-4">
+            <div class="bg-muted-50 dark:bg-muted-800/30 border-muted-200 dark:border-muted-700 border-b p-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <!-- User Info -->
@@ -298,11 +309,11 @@ const handleResetFilters = () => {
                       weight="medium"
                       class="text-muted-800 dark:text-white"
                     >
-                      <Icon name="ph:user-duotone" class="inline-block ml-1 size-4" />
+                      <Icon name="ph:user-duotone" class="ml-1 inline-block size-4" />
                       {{ feedback.expand?.user_id?.name || 'کاربر ناشناس' }}
                     </BaseHeading>
                     <BaseParagraph size="xs" class="text-muted-400">
-                      <Icon name="ph:envelope-duotone" class="inline-block ml-1 size-3" />
+                      <Icon name="ph:envelope-duotone" class="ml-1 inline-block size-3" />
                       {{ feedback.expand?.user_id?.email || 'ایمیل نامشخص' }}
                     </BaseParagraph>
                   </div>
@@ -332,9 +343,9 @@ const handleResetFilters = () => {
             </div>
 
             <!-- Content -->
-            <div class="p-6 space-y-6">
+            <div class="space-y-6 p-6">
               <!-- Original Message -->
-              <div v-if="feedback.message_content" class="bg-gradient-to-r from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 rounded-xl p-4">
+              <div v-if="feedback.message_content" class="from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 rounded-xl bg-gradient-to-r p-4">
                 <div class="mb-3 flex items-center justify-between">
                   <div class="flex items-center gap-2">
                     <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
@@ -347,17 +358,17 @@ const handleResetFilters = () => {
                       size="xs"
                     />
                     <div class="text-right">
-                      <div class="text-xs text-primary-700 dark:text-primary-300 font-medium">
-                        <Icon name="ph:stethoscope-duotone" class="inline-block ml-1 size-3" />
+                      <div class="text-primary-700 dark:text-primary-300 text-xs font-medium">
+                        <Icon name="ph:stethoscope-duotone" class="ml-1 inline-block size-3" />
                         {{ feedback.expand.therapist_id.name }}
                       </div>
-                      <div v-if="feedback.expand.therapist_id.specialty" class="text-xs text-muted-500">
+                      <div v-if="feedback.expand.therapist_id.specialty" class="text-muted-500 text-xs">
                         {{ feedback.expand.therapist_id.specialty }}
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="bg-white dark:bg-muted-800 rounded-lg p-3 max-h-32 overflow-y-auto">
+                <div class="dark:bg-muted-800 max-h-32 overflow-y-auto rounded-lg bg-white p-3">
                   <BaseParagraph size="sm" class="text-muted-700 dark:text-muted-300 text-right">
                     {{ feedback.message_content }}
                   </BaseParagraph>
@@ -366,14 +377,21 @@ const handleResetFilters = () => {
 
               <!-- General Feedback -->
               <div v-if="feedback.general_text" class="bg-muted-50 dark:bg-muted-900/50 rounded-lg p-4">
-                <BaseHeading tag="h4" size="xs" weight="medium" class="text-muted-700 dark:text-muted-300 mb-3">
+                <BaseHeading
+                  tag="h4"
+                  size="xs"
+                  weight="medium"
+                  class="text-muted-700 dark:text-muted-300 mb-3"
+                >
                   بازخورد کلی
                 </BaseHeading>
                 <BaseParagraph size="sm" class="text-muted-700 dark:text-muted-300">
                   {{ feedback.general_text }}
                 </BaseParagraph>
-                <div v-if="feedback.general_other" class="mt-3 pt-3 border-t border-muted-200 dark:border-muted-700">
-                  <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400 mb-1">توضیحات اضافی:</BaseParagraph>
+                <div v-if="feedback.general_other" class="border-muted-200 dark:border-muted-700 mt-3 border-t pt-3">
+                  <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400 mb-1">
+                    توضیحات اضافی:
+                  </BaseParagraph>
                   <BaseParagraph size="sm" class="text-muted-700 dark:text-muted-300">
                     {{ feedback.general_other }}
                   </BaseParagraph>
@@ -381,10 +399,15 @@ const handleResetFilters = () => {
               </div>
 
               <!-- Feedback Details -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <!-- Problems Categories -->
                 <div v-if="feedback.problems_categories && Object.keys(feedback.problems_categories).length > 0">
-                  <BaseHeading tag="h4" size="xs" weight="medium" class="text-danger-600 dark:text-danger-400 mb-3">
+                  <BaseHeading
+                    tag="h4"
+                    size="xs"
+                    weight="medium"
+                    class="text-danger-600 dark:text-danger-400 mb-3"
+                  >
                     مشکلات گزارش شده
                   </BaseHeading>
                   <div class="space-y-2">
@@ -394,7 +417,7 @@ const handleResetFilters = () => {
                       color="danger"
                       shape="curved"
                       size="sm"
-                      class="ml-2 mb-2"
+                      class="mb-2 ml-2"
                     >
                       <div class="flex items-center gap-1">
                         <Icon :name="category.icon" class="size-3" />
@@ -403,7 +426,9 @@ const handleResetFilters = () => {
                     </BaseTag>
                   </div>
                   <div v-if="feedback.problems_other" class="mt-3">
-                    <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400 mb-1">توضیحات اضافی:</BaseParagraph>
+                    <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400 mb-1">
+                      توضیحات اضافی:
+                    </BaseParagraph>
                     <div class="bg-danger-50 dark:bg-danger-900/20 rounded-lg p-3">
                       <BaseParagraph size="sm" class="text-danger-700 dark:text-danger-300">
                         {{ feedback.problems_other }}
@@ -414,7 +439,12 @@ const handleResetFilters = () => {
 
                 <!-- Quality Categories -->
                 <div v-if="feedback.quality_categories && Object.keys(feedback.quality_categories).length > 0">
-                  <BaseHeading tag="h4" size="xs" weight="medium" class="text-success-600 dark:text-success-400 mb-3">
+                  <BaseHeading
+                    tag="h4"
+                    size="xs"
+                    weight="medium"
+                    class="text-success-600 dark:text-success-400 mb-3"
+                  >
                     نقاط قوت
                   </BaseHeading>
                   <div class="space-y-2">
@@ -424,7 +454,7 @@ const handleResetFilters = () => {
                       color="success"
                       shape="curved"
                       size="sm"
-                      class="ml-2 mb-2"
+                      class="mb-2 ml-2"
                     >
                       <div class="flex items-center gap-1">
                         <Icon :name="category.icon" class="size-3" />
@@ -433,7 +463,9 @@ const handleResetFilters = () => {
                     </BaseTag>
                   </div>
                   <div v-if="feedback.quality_other" class="mt-3">
-                    <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400 mb-1">توضیحات اضافی:</BaseParagraph>
+                    <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400 mb-1">
+                      توضیحات اضافی:
+                    </BaseParagraph>
                     <div class="bg-success-50 dark:bg-success-900/20 rounded-lg p-3">
                       <BaseParagraph size="sm" class="text-success-700 dark:text-success-300">
                         {{ feedback.quality_other }}
@@ -444,7 +476,12 @@ const handleResetFilters = () => {
 
                 <!-- Improvement Suggestions -->
                 <div v-if="feedback.improvements_categories && Object.keys(feedback.improvements_categories).length > 0">
-                  <BaseHeading tag="h4" size="xs" weight="medium" class="text-info-600 dark:text-info-400 mb-3">
+                  <BaseHeading
+                    tag="h4"
+                    size="xs"
+                    weight="medium"
+                    class="text-info-600 dark:text-info-400 mb-3"
+                  >
                     پیشنهادات بهبود
                   </BaseHeading>
                   <div class="space-y-2">
@@ -454,7 +491,7 @@ const handleResetFilters = () => {
                       color="info"
                       shape="curved"
                       size="sm"
-                      class="ml-2 mb-2"
+                      class="mb-2 ml-2"
                     >
                       <div class="flex items-center gap-1">
                         <Icon :name="category.icon" class="size-3" />
@@ -463,7 +500,9 @@ const handleResetFilters = () => {
                     </BaseTag>
                   </div>
                   <div v-if="feedback.improvements_other" class="mt-3">
-                    <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400 mb-1">پیشنهادات اضافی:</BaseParagraph>
+                    <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400 mb-1">
+                      پیشنهادات اضافی:
+                    </BaseParagraph>
                     <div class="bg-info-50 dark:bg-info-900/20 rounded-lg p-3">
                       <BaseParagraph size="sm" class="text-info-700 dark:text-info-300">
                         {{ feedback.improvements_other }}
@@ -475,14 +514,19 @@ const handleResetFilters = () => {
 
               <!-- Session Info -->
               <div class="bg-muted-50 dark:bg-muted-900/50 rounded-lg p-4">
-                <BaseHeading tag="h4" size="xs" weight="medium" class="text-muted-700 dark:text-muted-300 mb-3">
-                  <Icon name="ph:clipboard-text-duotone" class="inline-block ml-1 size-4" />
+                <BaseHeading
+                  tag="h4"
+                  size="xs"
+                  weight="medium"
+                  class="text-muted-700 dark:text-muted-300 mb-3"
+                >
+                  <Icon name="ph:clipboard-text-duotone" class="ml-1 inline-block size-4" />
                   اطلاعات جلسه و درمانگر
                 </BaseHeading>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
                   <!-- Therapist Info -->
                   <div v-if="feedback.expand?.therapist_id">
-                    <span class="text-muted-600 dark:text-muted-400 flex items-center gap-1 mb-1">
+                    <span class="text-muted-600 dark:text-muted-400 mb-1 flex items-center gap-1">
                       <Icon name="ph:stethoscope-duotone" class="size-3" />
                       درمانگر:
                     </span>
@@ -492,49 +536,49 @@ const handleResetFilters = () => {
                         size="xs"
                       />
                       <div>
-                        <div class="font-medium text-muted-800 dark:text-white">
+                        <div class="text-muted-800 font-medium dark:text-white">
                           {{ feedback.expand.therapist_id.name }}
                         </div>
-                        <div v-if="feedback.expand.therapist_id.specialty" class="text-xs text-muted-500">
+                        <div v-if="feedback.expand.therapist_id.specialty" class="text-muted-500 text-xs">
                           {{ feedback.expand.therapist_id.specialty }}
                         </div>
-                        <div class="text-xs text-muted-500">
+                        <div class="text-muted-500 text-xs">
                           {{ feedback.expand.therapist_id.email }}
                         </div>
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Session Info -->
                   <div v-if="feedback.expand?.session_id">
-                    <span class="text-muted-600 dark:text-muted-400 flex items-center gap-1 mb-1">
+                    <span class="text-muted-600 dark:text-muted-400 mb-1 flex items-center gap-1">
                       <Icon name="ph:calendar-duotone" class="size-3" />
                       جلسه:
                     </span>
-                    <div class="font-medium text-muted-800 dark:text-white">
+                    <div class="text-muted-800 font-medium dark:text-white">
                       {{ feedback.expand.session_id.session_type === 'therapy' ? 'جلسه درمانی' : 'جلسه مشاوره' }}
                     </div>
-                    <div class="text-xs text-muted-500">
-                      وضعیت: 
+                    <div class="text-muted-500 text-xs">
+                      وضعیت:
                       <span :class="feedback.expand.session_id.status === 'completed' ? 'text-success-600' : 'text-warning-600'">
                         {{ feedback.expand.session_id.status === 'completed' ? 'تکمیل شده' : 'در حال انجام' }}
                       </span>
                     </div>
-                    <div class="text-xs text-muted-500">
+                    <div class="text-muted-500 text-xs">
                       {{ formatDate(feedback.expand.session_id.created) }}
                     </div>
                   </div>
-                  
+
                   <!-- Feedback ID -->
                   <div>
-                    <span class="text-muted-600 dark:text-muted-400 flex items-center gap-1 mb-1">
+                    <span class="text-muted-600 dark:text-muted-400 mb-1 flex items-center gap-1">
                       <Icon name="ph:hash-duotone" class="size-3" />
                       شناسه بازخورد:
                     </span>
-                    <div class="font-mono text-xs text-muted-800 dark:text-white">
+                    <div class="text-muted-800 font-mono text-xs dark:text-white">
                       {{ feedback.id.slice(-8) }}
                     </div>
-                    <div class="text-xs text-muted-500">
+                    <div class="text-muted-500 text-xs">
                       {{ formatDate(feedback.created) }}
                     </div>
                   </div>

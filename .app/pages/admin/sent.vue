@@ -58,7 +58,7 @@ const toDate = ref('')
 const statusOptions: StatusOption[] = [
   { label: 'همه', value: '' },
   { label: 'خوانده شده', value: 'read' },
-  { label: 'خوانده نشده', value: 'unread' }
+  { label: 'خوانده نشده', value: 'unread' },
 ]
 
 // Initialize user filter from query params
@@ -90,7 +90,7 @@ watch(userFilter, (newUserId) => {
 const userOptions = computed((): UserOption[] => {
   return users.value.map((user: any) => ({
     label: user.meta?.name || user.username || 'کاربر بدون نام',
-    value: user.id
+    value: user.id,
   }))
 })
 
@@ -411,8 +411,8 @@ onBeforeUnmount(() => {
                 {{ selectedUser.meta?.name || selectedUser.username }}
               </span>
               <button
-                @click="clearUserFilter"
                 class="text-muted-400 hover:text-red-600 dark:hover:text-red-400"
+                @click="clearUserFilter"
               >
                 <Icon name="ph:x" class="size-3" />
               </button>
@@ -439,8 +439,8 @@ onBeforeUnmount(() => {
         <div class="flex items-center justify-between pt-4">
           <div class="flex items-center space-x-2 space-x-reverse">
             <button
-              @click="clearFilters"
               class="text-muted-600 hover:text-muted-700 dark:text-muted-400 dark:hover:text-muted-300 flex items-center space-x-1 space-x-reverse text-sm transition-colors"
+              @click="clearFilters"
             >
               <Icon name="ph:x-circle" class="size-4" />
               <span>پاک کردن فیلترها</span>
@@ -689,4 +689,4 @@ onBeforeUnmount(() => {
     opacity: .85;
   }
 }
-</style> 
+</style>

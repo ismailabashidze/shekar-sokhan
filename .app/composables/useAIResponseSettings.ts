@@ -51,16 +51,16 @@ export function useAIResponseSettings() {
     try {
       // Load AI response settings
       const raw = localStorage.getItem(SETTINGS_STORAGE_KEY)
-      let aiSettings = raw ? JSON.parse(raw) : {}
+      const aiSettings = raw ? JSON.parse(raw) : {}
 
       // Load premium status
       const premiumRaw = localStorage.getItem(PREMIUM_STORAGE_KEY)
       const isPremium = premiumRaw ? JSON.parse(premiumRaw) : false
 
-      return { 
-        ...defaults, 
+      return {
+        ...defaults,
         ...aiSettings,
-        isPremium
+        isPremium,
       }
     }
     catch {
@@ -73,7 +73,7 @@ export function useAIResponseSettings() {
       // Save AI response settings (excluding isPremium)
       const { isPremium, ...aiSettings } = settings
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(aiSettings))
-      
+
       // Save premium status separately
       localStorage.setItem(PREMIUM_STORAGE_KEY, JSON.stringify(isPremium))
     }
@@ -109,7 +109,7 @@ export function useAIResponseSettings() {
     (newSettings) => {
       saveSettings(newSettings)
     },
-    { deep: true }
+    { deep: true },
   )
 
   return {

@@ -46,11 +46,12 @@ const hasPreviousData = ref(false)
 
 const playMessageTTS = async (message: any) => {
   if (!message || !message.text) return
-  
+
   ttsLoadingMessageId.value = message.id
   try {
     await play(message.text)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error playing TTS:', error)
     toaster.show({
       title: 'خطا',
@@ -59,18 +60,19 @@ const playMessageTTS = async (message: any) => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     ttsLoadingMessageId.value = null
   }
 }
 
 const { generateAnalysis, createAnalysis, getAnalysisForSession } = useSessionAnalysis()
 const { createAndLinkAnalysis, getMessageAnalysis } = useMessageAnalysis()
-const { 
-  submitFeedback, 
-  getFeedbackForMessage, 
-  validateFeedback, 
-  FEEDBACK_CATEGORIES 
+const {
+  submitFeedback,
+  getFeedbackForMessage,
+  validateFeedback,
+  FEEDBACK_CATEGORIES,
 } = useMessageFeedback()
 
 // AI Response Settings
@@ -79,39 +81,39 @@ const { settings: aiSettings, setPremiumStatus } = useAIResponseSettings()
 // AI Settings Display Computed
 const aiSettingsDisplayText = computed(() => {
   const settings = aiSettings.value
-  
+
   const emojiMap = {
     very_high: '🤩',
     high: '😊😊',
     medium: '🙂',
     low: '😐',
-    none: '🚫'
+    none: '🚫',
   }
-  
+
   const lengthMap = {
     short: 'کوتاه',
-    medium: 'متوسط', 
-    long: 'بلند'
+    medium: 'متوسط',
+    long: 'بلند',
   }
-  
+
   const toneMap = {
     formal: 'رسمی',
     neutral: 'خنثی',
-    casual: 'راحت'
+    casual: 'راحت',
   }
-  
+
   const creativityMap = {
-    '0': 'دقیق',
-    '1': 'متعادل',
-    '2': 'خلاق'
+    0: 'دقیق',
+    1: 'متعادل',
+    2: 'خلاق',
   }
-  
+
   return [
     `${settings.isPremium ? '👑' : '🔓'} ${settings.isPremium ? 'پریمیوم' : 'عادی'}`,
     `طول: ${lengthMap[settings.lengthPref]}`,
     `ایموجی: ${emojiMap[settings.emojiLevel]}`,
     `لحن: ${toneMap[settings.tone]}`,
-    `خلاقیت: ${creativityMap[settings.creativity]}`
+    `خلاقیت: ${creativityMap[settings.creativity]}`,
   ].join(' • ')
 })
 
@@ -343,7 +345,6 @@ watch(activeTherapistId, async (newId) => {
   }
 })
 
-
 async function submitMessage() {
   if (showNoCharge.value) {
     toaster.show({
@@ -466,30 +467,31 @@ async function submitMessage() {
     isAIThinking.value = true
     thinkingResponse.value = ''
     streamingBuffer.value = '' // Reset buffer for new message
-    
+
     // Debug: Log AI settings before sending
     console.log('AI Settings from messaging.vue (line 443):', aiSettings.value)
     console.log('AI Settings isPremium:', aiSettings.value.isPremium)
     console.log('AI Settings lengthPref:', aiSettings.value.lengthPref)
-    
+
     await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value, typingConfig: typingConfig.value }, (chunk) => {
       // Handle multi-message responses
       if (typeof chunk === 'object' && chunk.type === 'multi_message') {
         isMultiMessageMode.value = true
         handleMultiMessageChunk(chunk)
-      } else {
+      }
+      else {
         // Handle regular single message streaming with typing effect
         isMultiMessageMode.value = false
         aiResponse += chunk
         handleStreamingChunk(chunk)
       }
     })
-    
+
     // Mark streaming as complete for typing effect
     if (!isMultiMessageMode.value && streamingBuffer.value) {
       handleStreamingChunk('', true) // Mark as complete
     }
-    
+
     isAIThinking.value = false
 
     // Remove any temporary typing indicators
@@ -911,11 +913,11 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
     streamingBuffer.value = '' // Reset buffer
 
     // Call the OpenRouter API with the system context (CONVERSATION STARTER MODE)
-    await streamChat([systemContext], { 
-      therapistDetails: therapist, 
-      aiResponseSettings: aiSettings.value, 
-      isConversationStarter: true,  // Enable comprehensive summary mode
-      typingConfig: typingConfig.value
+    await streamChat([systemContext], {
+      therapistDetails: therapist,
+      aiResponseSettings: aiSettings.value,
+      isConversationStarter: true, // Enable comprehensive summary mode
+      typingConfig: typingConfig.value,
     }, (chunk) => {
       // Conversation starters are ALWAYS single message - no multi-message handling
       aiResponse += chunk
@@ -947,7 +949,7 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
   }
   catch (e) {
     console.error('Error starting AI conversation with summary:', e)
-    
+
     // Check if it's an authentication error
     if (e.message && e.message.includes('No auth credentials found')) {
       toaster.show({
@@ -957,7 +959,8 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
         icon: 'ph:warning-circle-fill',
         closable: true,
       })
-    } else {
+    }
+    else {
       // Add fallback message if the summary fails
       messages.value.push({
         type: 'received',
@@ -1044,7 +1047,7 @@ const openFeedbackModal = async (message: any) => {
   feedbackStep.value = 1
   feedbackErrors.value = []
   selectedFeedbackType.value = null
-  
+
   // Check if feedback already exists for this message
   try {
     existingFeedback.value = await getFeedbackForMessage(message.id)
@@ -1061,7 +1064,8 @@ const openFeedbackModal = async (message: any) => {
         improvements_categories: existingFeedback.value.improvements_categories || {},
         improvements_other: existingFeedback.value.improvements_other || '',
       }
-    } else {
+    }
+    else {
       // Reset form for new feedback
       feedbackForm.value = {
         rating: 0,
@@ -1075,11 +1079,12 @@ const openFeedbackModal = async (message: any) => {
         improvements_other: '',
       }
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error checking existing feedback:', error)
     existingFeedback.value = null
   }
-  
+
   isFeedbackModalOpen.value = true
 }
 
@@ -1096,7 +1101,7 @@ const closeFeedbackModal = () => {
 
 const nextFeedbackStep = () => {
   feedbackErrors.value = []
-  
+
   if (feedbackStep.value === 1) {
     // Validate basic feedback and category selection
     const errors = validateFeedback(feedbackForm.value)
@@ -1104,14 +1109,14 @@ const nextFeedbackStep = () => {
       feedbackErrors.value = errors
       return
     }
-    
+
     // Check if user selected a feedback type
     if (!selectedFeedbackType.value) {
       feedbackErrors.value = ['لطفاً نوع بازخورد خود را انتخاب کنید (مشکلات یا نقاط قوت)']
       return
     }
   }
-  
+
   if (feedbackStep.value < 3) {
     feedbackStep.value++
     resetModalScroll()
@@ -1158,7 +1163,8 @@ const submitMessageFeedback = async () => {
         icon: 'ph:check-circle-fill',
         closable: true,
       })
-    } else {
+    }
+    else {
       // Create new feedback
       await submitFeedback(feedbackData)
       toaster.show({
@@ -1171,7 +1177,8 @@ const submitMessageFeedback = async () => {
     }
 
     closeFeedbackModal()
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error submitting feedback:', error)
     toaster.show({
       title: 'خطا',
@@ -1180,7 +1187,8 @@ const submitMessageFeedback = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     isSubmittingFeedback.value = false
   }
 }
@@ -1191,9 +1199,9 @@ const confirmRetryMessage = () => {
 
 const retryLastMessage = async () => {
   if (messageLoading.value || isAIResponding.value || !messages.value.length) return
-  
+
   showRetryConfirm.value = false
-  
+
   // Find the last AI message
   const lastAIMessage = [...messages.value].reverse().find(msg => msg.type === 'received')
   if (!lastAIMessage) {
@@ -1229,7 +1237,8 @@ const retryLastMessage = async () => {
     // Delete from database
     try {
       await nuxtApp.$pb.collection('therapists_messages').delete(lastAIMessage.id)
-    } catch (deleteError) {
+    }
+    catch (deleteError) {
       console.error('Error deleting message from database:', deleteError)
       // Continue even if delete fails
     }
@@ -1257,24 +1266,26 @@ const retryLastMessage = async () => {
     let aiResponse = ''
     isAIThinking.value = true
     thinkingResponse.value = ''
-    
+
     await streamChat(contextMessages, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value, typingConfig: typingConfig.value }, (chunk) => {
       // Handle multi-message responses
       if (typeof chunk === 'object' && chunk.type === 'multi_message') {
         handleMultiMessageChunk(chunk)
-      } else {
+      }
+      else {
         // Handle regular single message streaming with typing effect
         aiResponse += chunk
-        
+
         // Apply typing effect for retry messages too
         if (typingConfig.value.enableTypingEffect) {
           startTypingEffect(aiResponse)
-        } else {
+        }
+        else {
           thinkingResponse.value = aiResponse
         }
       }
     })
-    
+
     isAIThinking.value = false
 
     // Save new AI response to PocketBase
@@ -1289,7 +1300,7 @@ const retryLastMessage = async () => {
     })
 
     scrollToBottom()
-    
+
     toaster.show({
       title: 'موفق',
       message: 'پاسخ جدید تولید شد.',
@@ -1297,7 +1308,8 @@ const retryLastMessage = async () => {
       icon: 'ph:check-circle-fill',
       closable: true,
     })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error retrying message:', error)
     toaster.show({
       title: 'خطا',
@@ -1306,7 +1318,8 @@ const retryLastMessage = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-  } finally {
+  }
+  finally {
     messageLoading.value = false
     isAIResponding.value = false
   }
@@ -1549,27 +1562,28 @@ const startTypingEffect = (fullText: string) => {
 
   // Stop any current typing
   isTypingActive.value = false
-  
+
   // Start new typing effect
   typingQueue.value = fullText
   displayedResponse.value = ''
   isTypingActive.value = true
-  
+
   let currentIndex = 0
   const typeNextChar = () => {
     if (currentIndex < typingQueue.value.length && isTypingActive.value) {
       displayedResponse.value += typingQueue.value[currentIndex]
       thinkingResponse.value = displayedResponse.value
       currentIndex++
-      
+
       // Random delay between 20-50ms for natural typing
       const delay = Math.random() * 30 + 20
       setTimeout(typeNextChar, delay)
-    } else {
+    }
+    else {
       isTypingActive.value = false
     }
   }
-  
+
   typeNextChar()
 }
 
@@ -1579,23 +1593,25 @@ let streamingTypingTimeout: NodeJS.Timeout | null = null
 
 const handleStreamingChunk = (chunk: string, isComplete: boolean = false) => {
   streamingBuffer.value += chunk
-  
+
   if (typingConfig.value.enableTypingEffect) {
     // Clear previous timeout
     if (streamingTypingTimeout) {
       clearTimeout(streamingTypingTimeout)
     }
-    
+
     // If this is the final chunk or enough delay, start typing
     if (isComplete) {
       startTypingEffect(streamingBuffer.value)
-    } else {
+    }
+    else {
       // Debounce typing effect - only start if no new chunks for 100ms
       streamingTypingTimeout = setTimeout(() => {
         startTypingEffect(streamingBuffer.value)
       }, 100)
     }
-  } else {
+  }
+  else {
     thinkingResponse.value = streamingBuffer.value
   }
 }
@@ -1607,7 +1623,7 @@ const isMultiMessageMode = ref(false)
 // Handle multi-message chunks
 const handleMultiMessageChunk = async (chunk: any) => {
   console.log(`📨 Received multi-message chunk ${chunk.index + 1}/${chunk.total}:`, chunk.message)
-  
+
   // Validate chunk structure
   if (!chunk || typeof chunk.index !== 'number' || typeof chunk.total !== 'number' || !chunk.message) {
     console.error('❌ Invalid multi-message chunk structure:', chunk)
@@ -1629,7 +1645,7 @@ const handleMultiMessageChunk = async (chunk: any) => {
 
     // Save each message to database
     const savedAIMessage = await sendMessage(currentTherapist.id, activeSession.value.id, chunk.message, 'received')
-    
+
     if (!savedAIMessage?.id) {
       console.error('❌ Failed to save multi-message chunk to database')
       return
@@ -1643,26 +1659,27 @@ const handleMultiMessageChunk = async (chunk: any) => {
       id: savedAIMessage.id,
       isMultiMessage: true,
       multiMessageIndex: chunk.index,
-      multiMessageTotal: chunk.total
+      multiMessageTotal: chunk.total,
     }
 
     if (chunk.index === 0) {
       // First message shows immediately
       messages.value.push(messageData)
       scrollToBottom()
-    } else {
+    }
+    else {
       // Subsequent messages appear with configurable delay
       const delay = typingConfig.value.messageDelay
-      
+
       setTimeout(() => {
         messages.value.push(messageData)
         scrollToBottom()
-        
+
         // Show typing indicator before each message (except the last one)
         if (chunk.index < chunk.total - 1) {
           isAIThinking.value = true
           thinkingResponse.value = 'در حال نوشتن پیام بعدی...'
-          
+
           // Keep typing indicator for a reasonable time before next message
           setTimeout(() => {
             isAIThinking.value = false
@@ -1676,17 +1693,17 @@ const handleMultiMessageChunk = async (chunk: any) => {
     if (chunk.index === chunk.total - 1) {
       // Last message, set final state
       const finalDelay = typingConfig.value.messageDelay * chunk.index + 500
-      
+
       setTimeout(() => {
         isAIResponding.value = false
         isMultiMessageMode.value = false
         console.log('✅ Multi-message sequence completed')
       }, finalDelay)
     }
-
-  } catch (error) {
+  }
+  catch (error) {
     console.error('❌ Error handling multi-message chunk:', error)
-    
+
     // Fallback: show error message
     messages.value.push({
       type: 'received',
@@ -1694,7 +1711,7 @@ const handleMultiMessageChunk = async (chunk: any) => {
       timestamp: new Date().toISOString(),
       id: 'error-multi-' + Date.now(),
     })
-    
+
     isAIResponding.value = false
     isMultiMessageMode.value = false
   }
@@ -1705,7 +1722,7 @@ const testMessageInput = ref('نام من علی است و 25 ساله هستم 
 // Configurable typing settings - easily customizable delays
 const typingConfig = ref({
   messageDelay: 2000, // Delay between multi-messages in milliseconds (change this number to adjust speed)
-  enableTypingEffect: true
+  enableTypingEffect: true,
 })
 
 // To customize delay: Change messageDelay value above
@@ -1776,25 +1793,25 @@ const typingConfig = ref({
                 <Icon name="ph:trash-duotone" class="size-5" />
               </button>
             </div>
-            
+
             <!-- Premium Status Button -->
             <div class="flex h-16 w-full items-center justify-center">
               <button
                 type="button"
-                class="flex size-12 items-center justify-center rounded-2xl transition-all duration-300 transform hover:scale-105"
-                :class="aiSettings.isPremium 
-                  ? 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-500/20 bg-yellow-500/10' 
+                class="flex size-12 items-center justify-center rounded-2xl transition-all duration-300 hover:scale-105"
+                :class="aiSettings.isPremium
+                  ? 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-500/20 bg-yellow-500/10'
                   : 'text-gray-500 hover:text-gray-600 hover:bg-gray-500/20 bg-gray-500/10'"
                 :title="aiSettings.isPremium ? 'وضعیت پریمیوم' : 'وضعیت عادی'"
                 @click="openPremiumModal()"
               >
-                <Icon 
-                  :name="aiSettings.isPremium ? 'ph:crown-fill' : 'ph:crown'" 
-                  class="size-5" 
+                <Icon
+                  :name="aiSettings.isPremium ? 'ph:crown-fill' : 'ph:crown'"
+                  class="size-5"
                 />
               </button>
             </div>
-            
+
             <div class="flex h-16 w-full items-center justify-center">
               <DemoAccountMenu />
             </div>
@@ -1873,15 +1890,15 @@ const typingConfig = ref({
             </button>
             <div class="-mr-1">
               <NuxtLink
-                      to="/settings/ai-response"
-                      class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300 "
-                      title="AI Controls"
-                    >
-                      <Icon
-                        name="ph:sliders-duotone"
-                        class="size-5"
-                      />
-                    </NuxtLink>
+                to="/settings/ai-response"
+                class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300 "
+                title="AI Controls"
+              >
+                <Icon
+                  name="ph:sliders-duotone"
+                  class="size-5"
+                />
+              </NuxtLink>
             </div>
           </div>
         </div>
@@ -1963,8 +1980,6 @@ const typingConfig = ref({
                     />
                   </NuxtLink>
                 </div>
-                
-              
               </div>
             </div>
 
@@ -2079,7 +2094,7 @@ const typingConfig = ref({
                         >
                           <!-- Message bubble and buttons on desktop -->
                           <div
-                            class="hidden sm:flex items-start gap-2"
+                            class="hidden items-start gap-2 sm:flex"
                             :class="[
                               item.type === 'sent'
                                 ? 'flex-row-reverse'
@@ -2147,11 +2162,19 @@ const typingConfig = ref({
                               :loading="ttsLoadingMessageId === item.id"
                               @click="playMessageTTS(item)"
                             >
-                              <Icon v-if="ttsLoadingMessageId === item.id" name="ph:spinner" class="size-4 animate-spin" />
-                              <Icon v-else name="ph:play" class="size-4" />
+                              <Icon
+                                v-if="ttsLoadingMessageId === item.id"
+                                name="ph:spinner"
+                                class="size-4 animate-spin"
+                              />
+                              <Icon
+                                v-else
+                                name="ph:play"
+                                class="size-4"
+                              />
                             </BaseButton>
                           </div>
-                          
+
                           <!-- Message bubble only on mobile -->
                           <div class="block sm:hidden">
                             <div
@@ -2176,20 +2199,20 @@ const typingConfig = ref({
                           </div>
 
                           <!-- Timestamp and mobile buttons -->
-                          <div 
-                            class="flex items-center gap-2 mt-1"
+                          <div
+                            class="mt-1 flex items-center gap-2"
                             :class="[
                               item.type === 'sent' ? 'justify-end' : 'justify-start'
                             ]"
                           >
                             <!-- Desktop timestamp -->
-                            <span class="hidden sm:block text-muted-400 font-sans text-xs">
+                            <span class="text-muted-400 hidden font-sans text-xs sm:block">
                               {{ formatTime(item.timestamp) }}
                             </span>
-                            
+
                             <!-- Mobile: sent messages - button on right of timestamp -->
                             <template v-if="item.type === 'sent'">
-                              <span class="block sm:hidden text-muted-400 font-sans text-xs">
+                              <span class="text-muted-400 block font-sans text-xs sm:hidden">
                                 {{ formatTime(item.timestamp) }}
                               </span>
                               <BaseButton
@@ -2203,7 +2226,7 @@ const typingConfig = ref({
                                 <Icon name="ph:magnifying-glass-duotone" class="size-4" />
                               </BaseButton>
                             </template>
-                            
+
                             <!-- Mobile: received messages - buttons on left of timestamp -->
                             <template v-if="item.type === 'received'">
                               <div class="flex gap-2 sm:hidden">
@@ -2228,7 +2251,7 @@ const typingConfig = ref({
                                   <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
                                 </BaseButton>
                               </div>
-                              <span class="block sm:hidden text-muted-400 font-sans text-xs">
+                              <span class="text-muted-400 block font-sans text-xs sm:hidden">
                                 {{ formatTime(item.timestamp) }}
                               </span>
                             </template>
@@ -2272,7 +2295,6 @@ const typingConfig = ref({
               </div>
             </div>
           </div>
-
 
           <!-- Compose form - Fixed at bottom -->
 
@@ -2621,9 +2643,9 @@ const typingConfig = ref({
                 class="w-full"
                 @click="openPremiumModal()"
               >
-                <Icon 
-                  name="ph:gear-duotone" 
-                  class="mr-2 size-5" 
+                <Icon
+                  name="ph:gear-duotone"
+                  class="mr-2 size-5"
                 />
                 تنظیمات حاضر
               </BaseButton>
@@ -2944,7 +2966,11 @@ const typingConfig = ref({
           <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
             {{ existingFeedback ? 'ویرایش بازخورد' : 'بازخورد پیام' }}
           </h3>
-          <BaseTag v-if="existingFeedback" color="info" size="sm">
+          <BaseTag
+            v-if="existingFeedback"
+            color="info"
+            size="sm"
+          >
             ویرایش
           </BaseTag>
         </div>
@@ -2972,9 +2998,15 @@ const typingConfig = ref({
           color="danger"
         >
           <div class="space-y-1">
-            <div class="font-medium">لطفا موارد زیر را بررسی کنید:</div>
+            <div class="font-medium">
+              لطفا موارد زیر را بررسی کنید:
+            </div>
             <ul class="text-sm">
-              <li v-for="error in feedbackErrors" :key="error" class="flex items-center gap-2">
+              <li
+                v-for="error in feedbackErrors"
+                :key="error"
+                class="flex items-center gap-2"
+              >
                 <Icon name="ph:warning-circle-fill" class="size-4" />
                 {{ error }}
               </li>
@@ -2985,31 +3017,35 @@ const typingConfig = ref({
         <!-- Step 1: Message Display and Category Selection -->
         <div v-if="feedbackStep === 1" class="space-y-8">
           <!-- Message content -->
-          <div class="bg-gradient-to-r from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 rounded-xl p-4 mb-6">
+          <div class="from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 mb-6 rounded-xl bg-gradient-to-r p-4">
             <div class="mb-3 flex items-center gap-2">
               <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
               <span class="text-primary-700 dark:text-primary-300 text-sm font-medium">پیام روانشناس</span>
             </div>
-            <div class="prose prose-sm dark:prose-invert max-w-none text-right bg-white dark:bg-muted-800 rounded-lg p-3 max-h-60 overflow-y-auto">
+            <div class="prose prose-sm dark:prose-invert dark:bg-muted-800 max-h-60 max-w-none overflow-y-auto rounded-lg bg-white p-3 text-right">
               <AddonMarkdownRemark :source="selectedMessageForFeedback.text" />
             </div>
           </div>
 
-          <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary-100 to-info-100 dark:from-primary-900/30 dark:to-info-900/30 mb-4">
-              <Icon name="ph:star-duotone" class="size-8 text-primary-600 dark:text-primary-400" />
+          <div class="mb-8 text-center">
+            <div class="from-primary-100 to-info-100 dark:from-primary-900/30 dark:to-info-900/30 mb-4 inline-flex size-16 items-center justify-center rounded-full bg-gradient-to-br">
+              <Icon name="ph:star-duotone" class="text-primary-600 dark:text-primary-400 size-8" />
             </div>
-            <h4 class="text-xl font-bold text-muted-800 dark:text-white">ارزیابی کلی</h4>
-            <p class="text-muted-500 text-sm mt-2">ابتدا امتیاز کلی و نوع بازخورد خود را انتخاب کنید</p>
+            <h4 class="text-muted-800 text-xl font-bold dark:text-white">
+              ارزیابی کلی
+            </h4>
+            <p class="text-muted-500 mt-2 text-sm">
+              ابتدا امتیاز کلی و نوع بازخورد خود را انتخاب کنید
+            </p>
           </div>
 
           <!-- Rating -->
           <div class="space-y-4 text-right">
-            <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">
+            <label class="text-muted-700 dark:text-muted-300 block text-sm font-medium">
               امتیاز کلی <span class="text-danger-500">*</span>
             </label>
-            <div class="flex items-center justify-center gap-3 p-4 bg-muted-50 dark:bg-muted-800 rounded-xl">
-              <span class="text-sm text-muted-600">ضعیف</span>
+            <div class="bg-muted-50 dark:bg-muted-800 flex items-center justify-center gap-3 rounded-xl p-4">
+              <span class="text-muted-600 text-sm">ضعیف</span>
               <div class="flex gap-2">
                 <button
                   v-for="star in 5"
@@ -3022,10 +3058,10 @@ const typingConfig = ref({
                   <Icon name="ph:star-fill" class="size-8" />
                 </button>
               </div>
-              <span class="text-sm text-muted-600">عالی</span>
+              <span class="text-muted-600 text-sm">عالی</span>
             </div>
             <div v-if="feedbackForm.rating > 0" class="text-center">
-              <span class="text-sm text-primary-600 dark:text-primary-400">
+              <span class="text-primary-600 dark:text-primary-400 text-sm">
                 امتیاز شما: {{ feedbackForm.rating }} از 5
               </span>
             </div>
@@ -3033,45 +3069,54 @@ const typingConfig = ref({
 
           <!-- Feedback Type Selection -->
           <div class="space-y-6 text-right">
-            <div class="text-center mb-6">
-              <h5 class="text-lg font-bold text-muted-800 dark:text-white mb-2">نوع بازخورد</h5>
-              <p class="text-muted-500 text-sm">کدام جنبه را می‌خواهید ارزیابی کنید؟</p>
+            <div class="mb-6 text-center">
+              <h5 class="text-muted-800 mb-2 text-lg font-bold dark:text-white">
+                نوع بازخورد
+              </h5>
+              <p class="text-muted-500 text-sm">
+                کدام جنبه را می‌خواهید ارزیابی کنید؟
+              </p>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <!-- Problems Selection -->
               <button
                 type="button"
-                @click="selectedFeedbackType = 'problems'"
-                class="group relative p-6 border-2 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/20"
-                :class="selectedFeedbackType === 'problems' 
-                  ? 'border-danger-500 bg-gradient-to-br from-danger-50 to-red-50 dark:from-danger-900/20 dark:to-red-900/20 shadow-lg shadow-danger-500/10' 
+                class="focus:ring-primary-500/20 group relative rounded-xl border-2 p-6 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4"
+                :class="selectedFeedbackType === 'problems'
+                  ? 'border-danger-500 bg-gradient-to-br from-danger-50 to-red-50 dark:from-danger-900/20 dark:to-red-900/20 shadow-lg shadow-danger-500/10'
                   : 'border-muted-200 dark:border-muted-700 bg-white dark:bg-muted-800 hover:border-danger-300 hover:shadow-md'"
+                @click="selectedFeedbackType = 'problems'"
               >
-                <div class="flex items-center justify-center mb-3">
-                  <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
-                       :class="selectedFeedbackType === 'problems' 
-                         ? 'bg-danger-100 dark:bg-danger-900/40' 
-                         : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-danger-50'"
+                <div class="mb-3 flex items-center justify-center">
+                  <div
+                    class="flex size-12 items-center justify-center rounded-full transition-all duration-300"
+                    :class="selectedFeedbackType === 'problems'
+                      ? 'bg-danger-100 dark:bg-danger-900/40'
+                      : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-danger-50'"
                   >
-                    <Icon name="ph:warning-duotone" 
-                          :class="selectedFeedbackType === 'problems' 
-                            ? 'text-danger-600 dark:text-danger-400' 
-                            : 'text-muted-500 group-hover:text-danger-500'" 
-                          class="size-6" />
+                    <Icon
+                      name="ph:warning-duotone"
+                      :class="selectedFeedbackType === 'problems'
+                        ? 'text-danger-600 dark:text-danger-400'
+                        : 'text-muted-500 group-hover:text-danger-500'"
+                      class="size-6"
+                    />
                   </div>
                 </div>
-                <h6 class="font-bold mb-2" 
-                   :class="selectedFeedbackType === 'problems' 
-                     ? 'text-danger-700 dark:text-danger-300' 
-                     : 'text-muted-800 dark:text-white group-hover:text-danger-600'"
+                <h6
+                  class="mb-2 font-bold"
+                  :class="selectedFeedbackType === 'problems'
+                    ? 'text-danger-700 dark:text-danger-300'
+                    : 'text-muted-800 dark:text-white group-hover:text-danger-600'"
                 >
                   مشکلات موجود
                 </h6>
-                <p class="text-sm" 
-                   :class="selectedFeedbackType === 'problems' 
-                     ? 'text-danger-600 dark:text-danger-400' 
-                     : 'text-muted-500 group-hover:text-danger-500'"
+                <p
+                  class="text-sm"
+                  :class="selectedFeedbackType === 'problems'
+                    ? 'text-danger-600 dark:text-danger-400'
+                    : 'text-muted-500 group-hover:text-danger-500'"
                 >
                   اگر مشکلی در پاسخ دیدید
                 </p>
@@ -3080,36 +3125,41 @@ const typingConfig = ref({
               <!-- Quality Selection -->
               <button
                 type="button"
-                @click="selectedFeedbackType = 'quality'"
-                class="group relative p-6 border-2 rounded-xl transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/20"
-                :class="selectedFeedbackType === 'quality' 
-                  ? 'border-success-500 bg-gradient-to-br from-success-50 to-emerald-50 dark:from-success-900/20 dark:to-emerald-900/20 shadow-lg shadow-success-500/10' 
+                class="focus:ring-primary-500/20 group relative rounded-xl border-2 p-6 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4"
+                :class="selectedFeedbackType === 'quality'
+                  ? 'border-success-500 bg-gradient-to-br from-success-50 to-emerald-50 dark:from-success-900/20 dark:to-emerald-900/20 shadow-lg shadow-success-500/10'
                   : 'border-muted-200 dark:border-muted-700 bg-white dark:bg-muted-800 hover:border-success-300 hover:shadow-md'"
+                @click="selectedFeedbackType = 'quality'"
               >
-                <div class="flex items-center justify-center mb-3">
-                  <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
-                       :class="selectedFeedbackType === 'quality' 
-                         ? 'bg-success-100 dark:bg-success-900/40' 
-                         : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-success-50'"
+                <div class="mb-3 flex items-center justify-center">
+                  <div
+                    class="flex size-12 items-center justify-center rounded-full transition-all duration-300"
+                    :class="selectedFeedbackType === 'quality'
+                      ? 'bg-success-100 dark:bg-success-900/40'
+                      : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-success-50'"
                   >
-                    <Icon name="ph:heart-duotone" 
-                          :class="selectedFeedbackType === 'quality' 
-                            ? 'text-success-600 dark:text-success-400' 
-                            : 'text-muted-500 group-hover:text-success-500'" 
-                          class="size-6" />
+                    <Icon
+                      name="ph:heart-duotone"
+                      :class="selectedFeedbackType === 'quality'
+                        ? 'text-success-600 dark:text-success-400'
+                        : 'text-muted-500 group-hover:text-success-500'"
+                      class="size-6"
+                    />
                   </div>
                 </div>
-                <h6 class="font-bold mb-2" 
-                   :class="selectedFeedbackType === 'quality' 
-                     ? 'text-success-700 dark:text-success-300' 
-                     : 'text-muted-800 dark:text-white group-hover:text-success-600'"
+                <h6
+                  class="mb-2 font-bold"
+                  :class="selectedFeedbackType === 'quality'
+                    ? 'text-success-700 dark:text-success-300'
+                    : 'text-muted-800 dark:text-white group-hover:text-success-600'"
                 >
                   نقاط قوت پاسخ
                 </h6>
-                <p class="text-sm" 
-                   :class="selectedFeedbackType === 'quality' 
-                     ? 'text-success-600 dark:text-success-400' 
-                     : 'text-muted-500 group-hover:text-success-500'"
+                <p
+                  class="text-sm"
+                  :class="selectedFeedbackType === 'quality'
+                    ? 'text-success-600 dark:text-success-400'
+                    : 'text-muted-500 group-hover:text-success-500'"
                 >
                   نقاط مثبت و قوت‌های پاسخ
                 </p>
@@ -3119,7 +3169,7 @@ const typingConfig = ref({
 
           <!-- General feedback -->
           <div class="space-y-3 text-right">
-            <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">
+            <label class="text-muted-700 dark:text-muted-300 block text-sm font-medium">
               نظر کلی <span class="text-danger-500">*</span>
             </label>
             <BaseTextarea
@@ -3128,14 +3178,14 @@ const typingConfig = ref({
               :rows="4"
               size="lg"
             />
-            <div class="text-right text-xs text-muted-400">
+            <div class="text-muted-400 text-right text-xs">
               {{ feedbackForm.general_text.length }} کاراکتر
             </div>
           </div>
 
           <!-- Additional comments -->
           <div class="space-y-3 text-right">
-            <label class="block text-muted-700 dark:text-muted-300 text-sm font-medium">توضیحات اضافی</label>
+            <label class="text-muted-700 dark:text-muted-300 block text-sm font-medium">توضیحات اضافی</label>
             <BaseTextarea
               v-model="feedbackForm.general_other"
               placeholder="اگر توضیح بیشتری دارید، اینجا بنویسید... (اختیاری)"
@@ -3146,47 +3196,52 @@ const typingConfig = ref({
 
         <!-- Step 2: Selected Category Details -->
         <div v-if="feedbackStep === 2" class="space-y-8">
-          <div class="text-center mb-6">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
-                 :class="selectedFeedbackType === 'problems' 
-                   ? 'bg-danger-100 dark:bg-danger-900/30' 
-                   : 'bg-success-100 dark:bg-success-900/30'"
+          <div class="mb-6 text-center">
+            <div
+              class="mb-4 inline-flex size-16 items-center justify-center rounded-full"
+              :class="selectedFeedbackType === 'problems'
+                ? 'bg-danger-100 dark:bg-danger-900/30'
+                : 'bg-success-100 dark:bg-success-900/30'"
             >
-              <Icon :name="selectedFeedbackType === 'problems' ? 'ph:warning-duotone' : 'ph:heart-duotone'" 
-                    :class="selectedFeedbackType === 'problems' 
-                      ? 'text-danger-600 dark:text-danger-400' 
-                      : 'text-success-600 dark:text-success-400'" 
-                    class="size-8" />
+              <Icon
+                :name="selectedFeedbackType === 'problems' ? 'ph:warning-duotone' : 'ph:heart-duotone'"
+                :class="selectedFeedbackType === 'problems'
+                  ? 'text-danger-600 dark:text-danger-400'
+                  : 'text-success-600 dark:text-success-400'"
+                class="size-8"
+              />
             </div>
-            <h4 class="text-xl font-bold text-muted-800 dark:text-white">
+            <h4 class="text-muted-800 text-xl font-bold dark:text-white">
               {{ selectedFeedbackType === 'problems' ? 'مشکلات موجود' : 'نقاط قوت پاسخ' }}
             </h4>
-            <p class="text-muted-500 text-sm mt-2">
-              {{ selectedFeedbackType === 'problems' 
-                ? 'مشکلات موجود در پاسخ را مشخص کنید' 
+            <p class="text-muted-500 mt-2 text-sm">
+              {{ selectedFeedbackType === 'problems'
+                ? 'مشکلات موجود در پاسخ را مشخص کنید'
                 : 'نقاط قوت و مثبت پاسخ را انتخاب کنید' }}
             </p>
           </div>
 
           <!-- Problems Section -->
-          <div v-if="selectedFeedbackType === 'problems'" class="bg-gradient-to-br from-danger-25 to-orange-25 dark:from-danger-950/20 dark:to-orange-950/20 rounded-2xl p-6 space-y-5">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-danger-100 dark:bg-danger-900/30">
+          <div v-if="selectedFeedbackType === 'problems'" class="from-danger-25 to-orange-25 dark:from-danger-950/20 space-y-5 rounded-2xl bg-gradient-to-br p-6 dark:to-orange-950/20">
+            <div class="mb-4 flex items-center gap-3">
+              <div class="bg-danger-100 dark:bg-danger-900/30 flex size-10 items-center justify-center rounded-xl">
                 <Icon name="ph:warning-duotone" class="text-danger-600 dark:text-danger-400 size-5" />
               </div>
               <div>
-                <label class="block text-danger-800 dark:text-danger-200 font-bold text-base text-right">مشکلات موجود</label>
-                <p class="text-danger-600 dark:text-danger-300 text-sm">در صورت وجود مشکل، انتخاب کنید</p>
+                <label class="text-danger-800 dark:text-danger-200 block text-right text-base font-bold">مشکلات موجود</label>
+                <p class="text-danger-600 dark:text-danger-300 text-sm">
+                  در صورت وجود مشکل، انتخاب کنید
+                </p>
               </div>
               <div class="ml-auto">
-                <div class="text-xs text-danger-600 dark:text-danger-400 bg-danger-100 dark:bg-danger-900/40 px-2 py-1 rounded-full">
+                <div class="text-danger-600 dark:text-danger-400 bg-danger-100 dark:bg-danger-900/40 rounded-full px-2 py-1 text-xs">
                   {{ Object.keys(feedbackForm.problems_categories).filter(k => feedbackForm.problems_categories[k]).length }} انتخاب شده
                 </div>
               </div>
             </div>
 
             <!-- Problem categories with enhanced design -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div
                 v-for="problem in FEEDBACK_CATEGORIES.problems.subcategories"
                 :key="problem.id"
@@ -3194,47 +3249,55 @@ const typingConfig = ref({
               >
                 <button
                   type="button"
-                  class="w-full p-4 rounded-xl border-2 transition-all duration-300 text-right hover:shadow-lg hover:scale-[1.02] relative overflow-hidden"
-                  :class="feedbackForm.problems_categories[problem.id] 
-                    ? 'border-danger-400 bg-gradient-to-br from-danger-50 to-red-50 text-danger-800 dark:from-danger-900/30 dark:to-red-900/30 dark:text-danger-200 shadow-lg shadow-danger-100/50' 
+                  class="relative w-full overflow-hidden rounded-xl border-2 p-4 text-right transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+                  :class="feedbackForm.problems_categories[problem.id]
+                    ? 'border-danger-400 bg-gradient-to-br from-danger-50 to-red-50 text-danger-800 dark:from-danger-900/30 dark:to-red-900/30 dark:text-danger-200 shadow-lg shadow-danger-100/50'
                     : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-danger-300 dark:border-muted-600 hover:bg-danger-25 dark:hover:bg-danger-950/10'"
                   @click="feedbackForm.problems_categories[problem.id] = !feedbackForm.problems_categories[problem.id]"
                 >
                   <!-- Severity indicator -->
-                  <div 
+                  <div
                     v-if="problem.severity"
-                    class="absolute top-2 left-2 w-2 h-2 rounded-full"
+                    class="absolute left-2 top-2 size-2 rounded-full"
                     :class="{
                       'bg-red-500': problem.severity === 'critical',
                       'bg-orange-500': problem.severity === 'high',
                       'bg-yellow-500': problem.severity === 'medium',
                       'bg-blue-500': problem.severity === 'low'
                     }"
-                  ></div>
+                  />
 
-                  <div class="flex items-start justify-between mb-2">
+                  <div class="mb-2 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                       <Icon :name="problem.icon || 'ph:warning-duotone'" class="size-5 opacity-75" />
                       <span class="font-semibold">{{ problem.name }}</span>
                     </div>
-                    <Icon 
-                      v-if="feedbackForm.problems_categories[problem.id]" 
-                      name="ph:check-circle-fill" 
-                      class="size-6 text-danger-500 animate-in zoom-in duration-200" 
+                    <Icon
+                      v-if="feedbackForm.problems_categories[problem.id]"
+                      name="ph:check-circle-fill"
+                      class="text-danger-500 animate-in zoom-in size-6 duration-200"
                     />
-                    <div v-else class="w-6 h-6 border-2 border-muted-300 rounded-full group-hover:border-danger-400 transition-colors"></div>
+                    <div v-else class="border-muted-300 group-hover:border-danger-400 size-6 rounded-full border-2 transition-colors" />
                   </div>
-                  
-                  <p class="text-sm opacity-90 mb-3 leading-relaxed">{{ problem.description }}</p>
-                  
+
+                  <p class="mb-3 text-sm leading-relaxed opacity-90">
+                    {{ problem.description }}
+                  </p>
+
                   <!-- Examples (show on hover or when selected) -->
-                  <div 
+                  <div
                     v-if="problem.examples && (feedbackForm.problems_categories[problem.id] || false)"
-                    class="text-xs bg-white/50 dark:bg-muted-700/50 rounded-lg p-2 space-y-1"
+                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs"
                   >
-                    <div class="font-medium opacity-75">مثال:</div>
+                    <div class="font-medium opacity-75">
+                      مثال:
+                    </div>
                     <ul class="space-y-1">
-                      <li v-for="example in problem.examples" :key="example" class="flex items-start gap-1">
+                      <li
+                        v-for="example in problem.examples"
+                        :key="example"
+                        class="flex items-start gap-1"
+                      >
                         <span class="text-danger-400 mt-0.5">•</span>
                         <span class="opacity-80">{{ example }}</span>
                       </li>
@@ -3246,7 +3309,7 @@ const typingConfig = ref({
 
             <!-- Custom problem input -->
             <div class="mt-6">
-              <label class="block text-danger-700 dark:text-danger-300 text-sm font-medium mb-2 text-right">
+              <label class="text-danger-700 dark:text-danger-300 mb-2 block text-right text-sm font-medium">
                 توضیح بیشتر یا مشکل دیگری؟
               </label>
               <BaseTextarea
@@ -3260,24 +3323,26 @@ const typingConfig = ref({
           </div>
 
           <!-- Quality Section -->
-          <div v-if="selectedFeedbackType === 'quality'" class="bg-gradient-to-br from-success-25 to-emerald-25 dark:from-success-950/20 dark:to-emerald-950/20 rounded-2xl p-6 space-y-5">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-success-100 dark:bg-success-900/30">
+          <div v-if="selectedFeedbackType === 'quality'" class="from-success-25 to-emerald-25 dark:from-success-950/20 space-y-5 rounded-2xl bg-gradient-to-br p-6 dark:to-emerald-950/20">
+            <div class="mb-4 flex items-center gap-3">
+              <div class="bg-success-100 dark:bg-success-900/30 flex size-10 items-center justify-center rounded-xl">
                 <Icon name="ph:heart-duotone" class="text-success-600 dark:text-success-400 size-5" />
               </div>
               <div>
-                <label class="block text-success-800 dark:text-success-200 font-bold text-base text-right">نقاط قوت پاسخ</label>
-                <p class="text-success-600 dark:text-success-300 text-sm">مواردی که در پاسخ خوب بود</p>
+                <label class="text-success-800 dark:text-success-200 block text-right text-base font-bold">نقاط قوت پاسخ</label>
+                <p class="text-success-600 dark:text-success-300 text-sm">
+                  مواردی که در پاسخ خوب بود
+                </p>
               </div>
               <div class="ml-auto">
-                <div class="text-xs text-success-600 dark:text-success-400 bg-success-100 dark:bg-success-900/40 px-2 py-1 rounded-full">
+                <div class="text-success-600 dark:text-success-400 bg-success-100 dark:bg-success-900/40 rounded-full px-2 py-1 text-xs">
                   {{ Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length }} انتخاب شده
                 </div>
               </div>
             </div>
 
             <!-- Quality categories with enhanced design -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div
                 v-for="quality in FEEDBACK_CATEGORIES.quality.subcategories"
                 :key="quality.id"
@@ -3285,46 +3350,54 @@ const typingConfig = ref({
               >
                 <button
                   type="button"
-                  class="w-full p-4 rounded-xl border-2 transition-all duration-300 text-right hover:shadow-lg hover:scale-[1.02] relative overflow-hidden"
+                  class="relative w-full overflow-hidden rounded-xl border-2 p-4 text-right transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                   :class="feedbackForm.quality_categories[quality.id]
                     ? 'border-success-400 bg-gradient-to-br from-success-50 to-emerald-50 text-success-800 dark:from-success-900/30 dark:to-emerald-900/30 dark:text-success-200 shadow-lg shadow-success-100/50'
                     : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-success-300 dark:border-muted-600 hover:bg-success-25 dark:hover:bg-success-950/10'"
                   @click="feedbackForm.quality_categories[quality.id] = !feedbackForm.quality_categories[quality.id]"
                 >
                   <!-- Impact indicator -->
-                  <div 
+                  <div
                     v-if="quality.impact"
-                    class="absolute top-2 left-2 w-2 h-2 rounded-full"
+                    class="absolute left-2 top-2 size-2 rounded-full"
                     :class="{
                       'bg-emerald-500': quality.impact === 'high',
                       'bg-green-500': quality.impact === 'medium',
                       'bg-lime-500': quality.impact === 'low'
                     }"
-                  ></div>
+                  />
 
-                  <div class="flex items-start justify-between mb-2">
+                  <div class="mb-2 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                       <Icon :name="quality.icon || 'ph:heart-duotone'" class="size-5 opacity-75" />
                       <span class="font-semibold">{{ quality.name }}</span>
                     </div>
-                    <Icon 
-                      v-if="feedbackForm.quality_categories[quality.id]" 
-                      name="ph:check-circle-fill" 
-                      class="size-6 text-success-500 animate-in zoom-in duration-200" 
+                    <Icon
+                      v-if="feedbackForm.quality_categories[quality.id]"
+                      name="ph:check-circle-fill"
+                      class="text-success-500 animate-in zoom-in size-6 duration-200"
                     />
-                    <div v-else class="w-6 h-6 border-2 border-muted-300 rounded-full group-hover:border-success-400 transition-colors"></div>
+                    <div v-else class="border-muted-300 group-hover:border-success-400 size-6 rounded-full border-2 transition-colors" />
                   </div>
-                  
-                  <p class="text-sm opacity-90 mb-3 leading-relaxed">{{ quality.description }}</p>
-                  
+
+                  <p class="mb-3 text-sm leading-relaxed opacity-90">
+                    {{ quality.description }}
+                  </p>
+
                   <!-- Examples -->
-                  <div 
+                  <div
                     v-if="quality.examples && (feedbackForm.quality_categories[quality.id] || false)"
-                    class="text-xs bg-white/50 dark:bg-muted-700/50 rounded-lg p-2 space-y-1"
+                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs"
                   >
-                    <div class="font-medium opacity-75">مثال:</div>
+                    <div class="font-medium opacity-75">
+                      مثال:
+                    </div>
                     <ul class="space-y-1">
-                      <li v-for="example in quality.examples" :key="example" class="flex items-start gap-1">
+                      <li
+                        v-for="example in quality.examples"
+                        :key="example"
+                        class="flex items-start gap-1"
+                      >
                         <span class="text-success-400 mt-0.5">•</span>
                         <span class="opacity-80">{{ example }}</span>
                       </li>
@@ -3336,7 +3409,7 @@ const typingConfig = ref({
 
             <!-- Custom quality input -->
             <div class="mt-6">
-              <label class="block text-success-700 dark:text-success-300 text-sm font-medium mb-2 text-right">
+              <label class="text-success-700 dark:text-success-300 mb-2 block text-right text-sm font-medium">
                 نقاط قوت دیگر؟
               </label>
               <BaseTextarea
@@ -3350,8 +3423,8 @@ const typingConfig = ref({
           </div>
 
           <!-- Progress indicator -->
-          <div class="flex items-center justify-center gap-2 mt-8">
-            <div class="flex items-center gap-1 text-xs text-muted-600">
+          <div class="mt-8 flex items-center justify-center gap-2">
+            <div class="text-muted-600 flex items-center gap-1 text-xs">
               <Icon name="ph:info-duotone" class="size-4" />
               <span>انتخاب هیچ‌کدام از گزینه‌ها اختیاری است</span>
             </div>
@@ -3360,37 +3433,43 @@ const typingConfig = ref({
 
         <!-- Step 3: Improvements -->
         <div v-if="feedbackStep === 3" class="space-y-8">
-          <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-warning-100 to-amber-100 dark:from-warning-900/30 dark:to-amber-900/30 mb-4">
-              <Icon name="ph:lightbulb-duotone" class="size-8 text-warning-600 dark:text-warning-400" />
+          <div class="mb-8 text-center">
+            <div class="from-warning-100 dark:from-warning-900/30 mb-4 inline-flex size-16 items-center justify-center rounded-full bg-gradient-to-br to-amber-100 dark:to-amber-900/30">
+              <Icon name="ph:lightbulb-duotone" class="text-warning-600 dark:text-warning-400 size-8" />
             </div>
-            <h4 class="text-xl font-bold text-muted-800 dark:text-white">پیشنهادات بهبود</h4>
-            <p class="text-muted-500 text-sm mt-2">چگونه می‌توان پاسخ‌ها را بهتر کرد؟</p>
-            <div class="inline-flex items-center gap-2 mt-4 px-3 py-1 bg-warning-100 dark:bg-warning-900/30 rounded-full text-xs text-warning-700 dark:text-warning-300">
+            <h4 class="text-muted-800 text-xl font-bold dark:text-white">
+              پیشنهادات بهبود
+            </h4>
+            <p class="text-muted-500 mt-2 text-sm">
+              چگونه می‌توان پاسخ‌ها را بهتر کرد؟
+            </p>
+            <div class="bg-warning-100 dark:bg-warning-900/30 text-warning-700 dark:text-warning-300 mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs">
               <Icon name="ph:rocket-duotone" class="size-4" />
               <span>ایده‌های شما برای بهبود</span>
             </div>
           </div>
 
           <!-- Improvements Section -->
-          <div class="bg-gradient-to-br from-warning-25 to-amber-25 dark:from-warning-950/20 dark:to-amber-950/20 rounded-2xl p-6 space-y-6">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-warning-100 dark:bg-warning-900/30">
+          <div class="from-warning-25 to-amber-25 dark:from-warning-950/20 space-y-6 rounded-2xl bg-gradient-to-br p-6 dark:to-amber-950/20">
+            <div class="mb-6 flex items-center gap-3">
+              <div class="bg-warning-100 dark:bg-warning-900/30 flex size-10 items-center justify-center rounded-xl">
                 <Icon name="ph:lightbulb-duotone" class="text-warning-600 dark:text-warning-400 size-5" />
               </div>
               <div>
-                <label class="block text-warning-800 dark:text-warning-200 font-bold text-base">پیشنهادات شما</label>
-                <p class="text-warning-600 dark:text-warning-300 text-sm">چه چیزی می‌تواند بهتر باشد؟</p>
+                <label class="text-warning-800 dark:text-warning-200 block text-base font-bold">پیشنهادات شما</label>
+                <p class="text-warning-600 dark:text-warning-300 text-sm">
+                  چه چیزی می‌تواند بهتر باشد؟
+                </p>
               </div>
               <div class="ml-auto">
-                <div class="text-xs text-warning-600 dark:text-warning-400 bg-warning-100 dark:bg-warning-900/40 px-2 py-1 rounded-full">
+                <div class="text-warning-600 dark:text-warning-400 bg-warning-100 dark:bg-warning-900/40 rounded-full px-2 py-1 text-xs">
                   {{ Object.keys(feedbackForm.improvements_categories).filter(k => feedbackForm.improvements_categories[k]).length }} انتخاب شده
                 </div>
               </div>
             </div>
 
             <!-- Improvements grid with enhanced design -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div
                 v-for="improvement in FEEDBACK_CATEGORIES.improvements.subcategories"
                 :key="improvement.id"
@@ -3398,46 +3477,54 @@ const typingConfig = ref({
               >
                 <button
                   type="button"
-                  class="w-full p-4 rounded-xl border-2 transition-all duration-300 text-right hover:shadow-lg hover:scale-[1.02] relative overflow-hidden"
+                  class="relative w-full overflow-hidden rounded-xl border-2 p-4 text-right transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                   :class="feedbackForm.improvements_categories[improvement.id]
                     ? 'border-warning-400 bg-gradient-to-br from-warning-50 to-amber-50 text-warning-800 dark:from-warning-900/30 dark:to-amber-900/30 dark:text-warning-200 shadow-lg shadow-warning-100/50'
                     : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-warning-300 dark:border-muted-600 hover:bg-warning-25 dark:hover:bg-warning-950/10'"
                   @click="feedbackForm.improvements_categories[improvement.id] = !feedbackForm.improvements_categories[improvement.id]"
                 >
                   <!-- Priority indicator -->
-                  <div 
+                  <div
                     v-if="improvement.priority"
-                    class="absolute top-2 left-2 w-2 h-2 rounded-full"
+                    class="absolute left-2 top-2 size-2 rounded-full"
                     :class="{
                       'bg-red-400': improvement.priority === 'high',
                       'bg-yellow-400': improvement.priority === 'medium',
                       'bg-blue-400': improvement.priority === 'low'
                     }"
-                  ></div>
+                  />
 
-                  <div class="flex items-start justify-between mb-2">
+                  <div class="mb-2 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                       <Icon :name="improvement.icon || 'ph:lightbulb-duotone'" class="size-5 opacity-75" />
                       <span class="font-semibold">{{ improvement.name }}</span>
                     </div>
-                    <Icon 
-                      v-if="feedbackForm.improvements_categories[improvement.id]" 
-                      name="ph:check-circle-fill" 
-                      class="size-6 text-warning-500 animate-in zoom-in duration-200" 
+                    <Icon
+                      v-if="feedbackForm.improvements_categories[improvement.id]"
+                      name="ph:check-circle-fill"
+                      class="text-warning-500 animate-in zoom-in size-6 duration-200"
                     />
-                    <div v-else class="w-6 h-6 border-2 border-muted-300 rounded-full group-hover:border-warning-400 transition-colors"></div>
+                    <div v-else class="border-muted-300 group-hover:border-warning-400 size-6 rounded-full border-2 transition-colors" />
                   </div>
-                  
-                  <p class="text-sm opacity-90 mb-3 leading-relaxed">{{ improvement.description }}</p>
-                  
+
+                  <p class="mb-3 text-sm leading-relaxed opacity-90">
+                    {{ improvement.description }}
+                  </p>
+
                   <!-- Examples -->
-                  <div 
+                  <div
                     v-if="improvement.examples && (feedbackForm.improvements_categories[improvement.id] || false)"
-                    class="text-xs bg-white/50 dark:bg-muted-700/50 rounded-lg p-2 space-y-1"
+                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs"
                   >
-                    <div class="font-medium opacity-75">مثال:</div>
+                    <div class="font-medium opacity-75">
+                      مثال:
+                    </div>
                     <ul class="space-y-1">
-                      <li v-for="example in improvement.examples" :key="example" class="flex items-start gap-1">
+                      <li
+                        v-for="example in improvement.examples"
+                        :key="example"
+                        class="flex items-start gap-1"
+                      >
                         <span class="text-warning-400 mt-0.5">•</span>
                         <span class="opacity-80">{{ example }}</span>
                       </li>
@@ -3448,8 +3535,8 @@ const typingConfig = ref({
             </div>
 
             <!-- Custom improvement input with enhanced design -->
-            <div class="mt-8 bg-white/50 dark:bg-muted-800/50 rounded-xl p-5">
-              <label class="block text-warning-700 dark:text-warning-300 text-sm font-semibold mb-3 flex items-center gap-2">
+            <div class="dark:bg-muted-800/50 mt-8 rounded-xl bg-white/50 p-5">
+              <label class="text-warning-700 dark:text-warning-300 mb-3 block flex items-center gap-2 text-sm font-semibold">
                 <Icon name="ph:chat-circle-text-duotone" class="size-4" />
                 پیشنهاد خاص شما
               </label>
@@ -3460,40 +3547,44 @@ const typingConfig = ref({
                 size="lg"
                 class="!border-warning-200 focus:!border-warning-400 dark:!border-warning-800"
               />
-              <div class="mt-2 text-xs text-warning-600 dark:text-warning-400 opacity-75">
+              <div class="text-warning-600 dark:text-warning-400 mt-2 text-xs opacity-75">
                 هر ایده‌ای که دارید، هر کوچک که باشد، برای ما ارزشمند است! ✨
               </div>
             </div>
           </div>
 
           <!-- Enhanced Summary Section -->
-          <div class="bg-gradient-to-br from-info-50 via-blue-25 to-indigo-50 dark:from-info-950/20 dark:via-blue-950/10 dark:to-indigo-950/20 rounded-2xl p-6 border border-info-200/50 dark:border-info-800/30">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-info-100 to-blue-100 dark:from-info-900/50 dark:to-blue-900/50">
-                <Icon name="ph:clipboard-text-duotone" class="size-6 text-info-600 dark:text-info-400" />
+          <div class="from-info-50 via-blue-25 dark:from-info-950/20 border-info-200/50 dark:border-info-800/30 rounded-2xl border bg-gradient-to-br to-indigo-50 p-6 dark:via-blue-950/10 dark:to-indigo-950/20">
+            <div class="mb-6 flex items-center gap-3">
+              <div class="from-info-100 dark:from-info-900/50 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br to-blue-100 dark:to-blue-900/50">
+                <Icon name="ph:clipboard-text-duotone" class="text-info-600 dark:text-info-400 size-6" />
               </div>
               <div>
-                <h5 class="font-bold text-info-800 dark:text-info-200 text-lg">خلاصه بازخورد شما</h5>
-                <p class="text-info-600 dark:text-info-300 text-sm">مرور نهایی قبل از ارسال</p>
+                <h5 class="text-info-800 dark:text-info-200 text-lg font-bold">
+                  خلاصه بازخورد شما
+                </h5>
+                <p class="text-info-600 dark:text-info-300 text-sm">
+                  مرور نهایی قبل از ارسال
+                </p>
               </div>
             </div>
-            
+
             <div class="grid gap-4">
               <!-- Rating Summary -->
-              <div class="bg-white/70 dark:bg-muted-800/70 rounded-xl p-4">
+              <div class="dark:bg-muted-800/70 rounded-xl bg-white/70 p-4">
                 <div class="flex items-center justify-between">
-                  <span class="font-medium text-muted-700 dark:text-muted-300">امتیاز کلی:</span>
+                  <span class="text-muted-700 dark:text-muted-300 font-medium">امتیاز کلی:</span>
                   <div class="flex items-center gap-2">
                     <div class="flex">
-                      <Icon 
-                        v-for="star in 5" 
-                        :key="star" 
-                        name="ph:star-fill" 
+                      <Icon
+                        v-for="star in 5"
+                        :key="star"
+                        name="ph:star-fill"
                         class="size-5"
-                        :class="star <= feedbackForm.rating ? 'text-yellow-400' : 'text-muted-300'" 
+                        :class="star <= feedbackForm.rating ? 'text-yellow-400' : 'text-muted-300'"
                       />
                     </div>
-                    <span class="font-bold text-lg text-primary-600 dark:text-primary-400">
+                    <span class="text-primary-600 dark:text-primary-400 text-lg font-bold">
                       {{ feedbackForm.rating }}/5
                     </span>
                   </div>
@@ -3501,24 +3592,24 @@ const typingConfig = ref({
               </div>
 
               <!-- Categories Summary -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <!-- Problems -->
-                <div class="bg-white/70 dark:bg-muted-800/70 rounded-lg p-3">
-                  <div class="flex items-center justify-between mb-2">
+                <div class="dark:bg-muted-800/70 rounded-lg bg-white/70 p-3">
+                  <div class="mb-2 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                      <Icon name="ph:warning-duotone" class="size-4 text-danger-500" />
-                      <span class="text-sm font-medium text-danger-700 dark:text-danger-300">مشکلات</span>
+                      <Icon name="ph:warning-duotone" class="text-danger-500 size-4" />
+                      <span class="text-danger-700 dark:text-danger-300 text-sm font-medium">مشکلات</span>
                     </div>
-                    <span class="text-xs bg-danger-100 dark:bg-danger-900/40 text-danger-600 dark:text-danger-400 px-2 py-0.5 rounded-full">
+                    <span class="bg-danger-100 dark:bg-danger-900/40 text-danger-600 dark:text-danger-400 rounded-full px-2 py-0.5 text-xs">
                       {{ Object.keys(feedbackForm.problems_categories).filter(k => feedbackForm.problems_categories[k]).length }}
                     </span>
                   </div>
-                  <div class="text-xs space-y-1">
-                    <div 
-                      v-for="(selected, key) in feedbackForm.problems_categories" 
-                      :key="key"
+                  <div class="space-y-1 text-xs">
+                    <div
+                      v-for="(selected, key) in feedbackForm.problems_categories"
                       v-if="selected"
-                      class="flex items-center gap-1 text-danger-600 dark:text-danger-400"
+                      :key="key"
+                      class="text-danger-600 dark:text-danger-400 flex items-center gap-1"
                     >
                       <span>•</span>
                       <span>{{ FEEDBACK_CATEGORIES.problems.subcategories.find(p => p.id === key)?.name }}</span>
@@ -3527,22 +3618,22 @@ const typingConfig = ref({
                 </div>
 
                 <!-- Quality -->
-                <div class="bg-white/70 dark:bg-muted-800/70 rounded-lg p-3">
-                  <div class="flex items-center justify-between mb-2">
+                <div class="dark:bg-muted-800/70 rounded-lg bg-white/70 p-3">
+                  <div class="mb-2 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                      <Icon name="ph:heart-duotone" class="size-4 text-success-500" />
-                      <span class="text-sm font-medium text-success-700 dark:text-success-300">نقاط قوت</span>
+                      <Icon name="ph:heart-duotone" class="text-success-500 size-4" />
+                      <span class="text-success-700 dark:text-success-300 text-sm font-medium">نقاط قوت</span>
                     </div>
-                    <span class="text-xs bg-success-100 dark:bg-success-900/40 text-success-600 dark:text-success-400 px-2 py-0.5 rounded-full">
+                    <span class="bg-success-100 dark:bg-success-900/40 text-success-600 dark:text-success-400 rounded-full px-2 py-0.5 text-xs">
                       {{ Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length }}
                     </span>
                   </div>
-                  <div class="text-xs space-y-1">
-                    <div 
-                      v-for="(selected, key) in feedbackForm.quality_categories" 
-                      :key="key"
+                  <div class="space-y-1 text-xs">
+                    <div
+                      v-for="(selected, key) in feedbackForm.quality_categories"
                       v-if="selected"
-                      class="flex items-center gap-1 text-success-600 dark:text-success-400"
+                      :key="key"
+                      class="text-success-600 dark:text-success-400 flex items-center gap-1"
                     >
                       <span>•</span>
                       <span>{{ FEEDBACK_CATEGORIES.quality.subcategories.find(q => q.id === key)?.name }}</span>
@@ -3551,22 +3642,22 @@ const typingConfig = ref({
                 </div>
 
                 <!-- Improvements -->
-                <div class="bg-white/70 dark:bg-muted-800/70 rounded-lg p-3">
-                  <div class="flex items-center justify-between mb-2">
+                <div class="dark:bg-muted-800/70 rounded-lg bg-white/70 p-3">
+                  <div class="mb-2 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                      <Icon name="ph:lightbulb-duotone" class="size-4 text-warning-500" />
-                      <span class="text-sm font-medium text-warning-700 dark:text-warning-300">پیشنهادات</span>
+                      <Icon name="ph:lightbulb-duotone" class="text-warning-500 size-4" />
+                      <span class="text-warning-700 dark:text-warning-300 text-sm font-medium">پیشنهادات</span>
                     </div>
-                    <span class="text-xs bg-warning-100 dark:bg-warning-900/40 text-warning-600 dark:text-warning-400 px-2 py-0.5 rounded-full">
+                    <span class="bg-warning-100 dark:bg-warning-900/40 text-warning-600 dark:text-warning-400 rounded-full px-2 py-0.5 text-xs">
                       {{ Object.keys(feedbackForm.improvements_categories).filter(k => feedbackForm.improvements_categories[k]).length }}
                     </span>
                   </div>
-                  <div class="text-xs space-y-1">
-                    <div 
-                      v-for="(selected, key) in feedbackForm.improvements_categories" 
-                      :key="key"
+                  <div class="space-y-1 text-xs">
+                    <div
+                      v-for="(selected, key) in feedbackForm.improvements_categories"
                       v-if="selected"
-                      class="flex items-center gap-1 text-warning-600 dark:text-warning-400"
+                      :key="key"
+                      class="text-warning-600 dark:text-warning-400 flex items-center gap-1"
                     >
                       <span>•</span>
                       <span>{{ FEEDBACK_CATEGORIES.improvements.subcategories.find(i => i.id === key)?.name }}</span>
@@ -3576,19 +3667,23 @@ const typingConfig = ref({
               </div>
 
               <!-- Custom Comments Summary -->
-              <div v-if="feedbackForm.general_text?.trim() || feedbackForm.problems_other?.trim() || feedbackForm.quality_other?.trim() || feedbackForm.improvements_other?.trim()" class="bg-white/70 dark:bg-muted-800/70 rounded-xl p-4">
-                <h6 class="font-medium text-muted-700 dark:text-muted-300 mb-3 flex items-center gap-2">
+              <div v-if="feedbackForm.general_text?.trim() || feedbackForm.problems_other?.trim() || feedbackForm.quality_other?.trim() || feedbackForm.improvements_other?.trim()" class="dark:bg-muted-800/70 rounded-xl bg-white/70 p-4">
+                <h6 class="text-muted-700 dark:text-muted-300 mb-3 flex items-center gap-2 font-medium">
                   <Icon name="ph:chat-circle-text-duotone" class="size-4" />
                   نظرات تفصیلی
                 </h6>
                 <div class="space-y-2 text-sm">
                   <div v-if="feedbackForm.general_text?.trim()">
-                    <span class="font-medium text-primary-600 text-right">نظر کلی:</span>
-                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">{{ feedbackForm.general_text }}</p>
+                    <span class="text-primary-600 text-right font-medium">نظر کلی:</span>
+                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">
+                      {{ feedbackForm.general_text }}
+                    </p>
                   </div>
                   <div v-if="feedbackForm.improvements_other?.trim()">
-                    <span class="font-medium text-warning-600">پیشنهادات:</span>
-                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">{{ feedbackForm.improvements_other }}</p>
+                    <span class="text-warning-600 font-medium">پیشنهادات:</span>
+                    <p class="text-muted-600 dark:text-muted-400 mt-1 text-xs italic">
+                      {{ feedbackForm.improvements_other }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -3596,7 +3691,7 @@ const typingConfig = ref({
 
             <!-- Final message -->
             <div class="mt-6 text-center">
-              <div class="inline-flex items-center gap-2 text-sm text-info-700 dark:text-info-300 bg-info-100/50 dark:bg-info-900/30 px-4 py-2 rounded-lg">
+              <div class="text-info-700 dark:text-info-300 bg-info-100/50 dark:bg-info-900/30 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm">
                 <Icon name="ph:heart-duotone" class="size-4" />
                 <span>ممنون از وقتی که برای بازخورد گذاشتید! 🙏</span>
               </div>
@@ -3605,8 +3700,8 @@ const typingConfig = ref({
 
           <!-- Progress hint -->
           <div class="flex items-center justify-center gap-2">
-            <div class="flex items-center gap-1 text-xs text-muted-600">
-              <Icon name="ph:check-circle-duotone" class="size-4 text-success-500" />
+            <div class="text-muted-600 flex items-center gap-1 text-xs">
+              <Icon name="ph:check-circle-duotone" class="text-success-500 size-4" />
               <span>آماده برای ارسال بازخورد</span>
             </div>
           </div>
@@ -3623,7 +3718,7 @@ const typingConfig = ref({
               variant="outline"
               @click="prevFeedbackStep"
             >
-              <Icon name="ph:arrow-right" class="size-4 ml-1" />
+              <Icon name="ph:arrow-right" class="ml-1 size-4" />
               قبلی
             </BaseButton>
           </div>
@@ -3640,7 +3735,7 @@ const typingConfig = ref({
               @click="nextFeedbackStep"
             >
               بعدی
-              <Icon name="ph:arrow-left" class="size-4 mr-1" />
+              <Icon name="ph:arrow-left" class="mr-1 size-4" />
             </BaseButton>
             <BaseButton
               v-else
@@ -3649,7 +3744,7 @@ const typingConfig = ref({
               :disabled="isSubmittingFeedback || feedbackForm.rating === 0"
               @click="submitMessageFeedback"
             >
-              <Icon name="ph:check" class="size-4 ml-1" />
+              <Icon name="ph:check" class="ml-1 size-4" />
               {{ existingFeedback ? 'به‌روزرسانی' : 'ثبت بازخورد' }}
             </BaseButton>
           </div>
@@ -3686,7 +3781,7 @@ const typingConfig = ref({
           تولید پاسخ جدید؟
         </h3>
 
-        <p class="font-alt text-muted-500 dark:text-muted-400 text-sm leading-5 mt-2">
+        <p class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-sm leading-5">
           پاسخ فعلی روانشناس حذف شده و پاسخ جدیدی تولید می‌شود. این عمل قابل بازگشت نیست.
         </p>
 
@@ -3711,7 +3806,7 @@ const typingConfig = ref({
             variant="solid"
             @click="retryLastMessage"
           >
-            <Icon name="ph:arrow-clockwise" class="size-4 ml-1" />
+            <Icon name="ph:arrow-clockwise" class="ml-1 size-4" />
             تولید پاسخ جدید
           </BaseButton>
         </div>
@@ -3737,18 +3832,23 @@ const typingConfig = ref({
     <div class="max-h-[70vh] overflow-y-auto p-4 md:p-6">
       <div class="space-y-6">
         <!-- Premium Status Card -->
-        <div class="rounded-xl p-6" :class="aiSettings.isPremium 
-          ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 dark:from-yellow-950/30 dark:to-orange-950/30 dark:border-yellow-800/30' 
-          : 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 dark:from-gray-900/30 dark:to-gray-800/30 dark:border-gray-700/30'">
-          
-          <div class="flex items-center gap-4 mb-4">
-            <div class="flex items-center justify-center size-12 rounded-xl" :class="aiSettings.isPremium 
-              ? 'bg-yellow-500/20 text-yellow-600' 
-              : 'bg-gray-500/20 text-gray-600'">
+        <div
+          class="rounded-xl p-6"
+          :class="aiSettings.isPremium
+            ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 dark:from-yellow-950/30 dark:to-orange-950/30 dark:border-yellow-800/30'
+            : 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 dark:from-gray-900/30 dark:to-gray-800/30 dark:border-gray-700/30'"
+        >
+          <div class="mb-4 flex items-center gap-4">
+            <div
+              class="flex size-12 items-center justify-center rounded-xl"
+              :class="aiSettings.isPremium
+                ? 'bg-yellow-500/20 text-yellow-600'
+                : 'bg-gray-500/20 text-gray-600'"
+            >
               <Icon :name="aiSettings.isPremium ? 'ph:crown-fill' : 'ph:crown'" class="size-6" />
             </div>
             <div>
-              <h4 class="font-semibold text-lg" :class="aiSettings.isPremium ? 'text-yellow-800 dark:text-yellow-200' : 'text-gray-800 dark:text-gray-200'">
+              <h4 class="text-lg font-semibold" :class="aiSettings.isPremium ? 'text-yellow-800 dark:text-yellow-200' : 'text-gray-800 dark:text-gray-200'">
                 {{ aiSettings.isPremium ? 'کاربر پریمیوم' : 'کاربر عادی' }}
               </h4>
               <p class="text-sm" :class="aiSettings.isPremium ? 'text-yellow-600 dark:text-yellow-300' : 'text-gray-600 dark:text-gray-300'">
@@ -3760,11 +3860,11 @@ const typingConfig = ref({
           <!-- Toggle Premium Button -->
           <div class="mb-4">
             <button
-              @click="togglePremiumStatus"
-              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
-              :class="aiSettings.isPremium 
-                ? 'bg-gray-500/20 text-gray-700 dark:text-gray-300 hover:bg-gray-500/30' 
+              class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
+              :class="aiSettings.isPremium
+                ? 'bg-gray-500/20 text-gray-700 dark:text-gray-300 hover:bg-gray-500/30'
                 : 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-500/30'"
+              @click="togglePremiumStatus"
             >
               <Icon :name="aiSettings.isPremium ? 'ph:crown' : 'ph:crown-fill'" class="size-4" />
               {{ aiSettings.isPremium ? 'تبدیل به عادی' : 'فعال‌سازی پریمیوم' }}
@@ -3772,16 +3872,16 @@ const typingConfig = ref({
           </div>
         </div>
         <!-- AI Settings Summary -->
-        <div class="rounded-xl p-6 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 dark:from-purple-950/30 dark:to-pink-950/30 dark:border-purple-800/30">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="flex items-center justify-center size-10 rounded-lg bg-purple-500/20 text-purple-600">
+        <div class="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-6 dark:border-purple-800/30 dark:from-purple-950/30 dark:to-pink-950/30">
+          <div class="mb-4 flex items-center gap-3">
+            <div class="flex size-10 items-center justify-center rounded-lg bg-purple-500/20 text-purple-600">
               <Icon name="ph:robot" class="size-5" />
             </div>
-            <h4 class="font-semibold text-lg text-purple-800 dark:text-purple-200">
+            <h4 class="text-lg font-semibold text-purple-800 dark:text-purple-200">
               تنظیمات AI فعلی
             </h4>
           </div>
-          
+
           <div class="grid grid-cols-2 gap-3 text-sm">
             <div class="flex items-center gap-2">
               <Icon name="ph:chat-circle" class="size-4 text-purple-500" />
@@ -3809,10 +3909,10 @@ const typingConfig = ref({
             </div>
           </div>
 
-          <div class="mt-4 pt-4 border-t border-purple-200 dark:border-purple-700">
+          <div class="mt-4 border-t border-purple-200 pt-4 dark:border-purple-700">
             <NuxtLink
               to="/settings/ai-response"
-              class="inline-flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200 transition-colors"
+              class="inline-flex items-center gap-2 text-sm text-purple-600 transition-colors hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200"
             >
               <Icon name="ph:gear" class="size-4" />
               تغییر تنظیمات AI

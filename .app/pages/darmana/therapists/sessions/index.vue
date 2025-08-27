@@ -655,8 +655,8 @@ onMounted(() => {
             </div>
 
             <!-- Action Buttons -->
-            <div 
-              class="border-muted-200 dark:border-muted-700 border-t p-4" 
+            <div
+              class="border-muted-200 dark:border-muted-700 border-t p-4"
               :data-tour="index === 0 ? 'sessions-actions' : undefined"
             >
               <div class="flex flex-wrap items-center justify-end gap-2">
@@ -679,7 +679,7 @@ onMounted(() => {
                   <Icon name="ph:clock-counter-clockwise-duotone" class="ml-1 size-4" />
                   تاریخچه
                 </BaseButton>
-                
+
                 <BaseButton
                   v-if="!['done', 'inprogress', 'closed', 'deleted'].includes(session.status)"
                   color="muted"

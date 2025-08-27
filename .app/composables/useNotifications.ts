@@ -149,40 +149,36 @@ export function useNotifications() {
   // اعلانات زمان‌بندی شده که هنوز زمان‌شان نرسیده
   const scheduledNotifications = computed(() => {
     const now = new Date()
-    const scheduled = notifications.value.filter((n) => {
+    return notifications.value.filter((n) => {
       // بررسی وجود و اعتبار announce_time
-      const hasValidAnnounceTime = n.announceTime && 
-        n.announceTime.trim() !== '' && 
-        n.announceTime !== 'null' && 
-        n.announceTime !== 'undefined'
-      
+      const hasValidAnnounceTime = n.announceTime
+        && n.announceTime.trim() !== ''
+        && n.announceTime !== 'null'
+        && n.announceTime !== 'undefined'
+
       if (!hasValidAnnounceTime) return false
-      
+
       const announceTime = new Date(n.announceTime)
-      
+
       // بررسی معتبر بودن تاریخ parsed شده
       if (isNaN(announceTime.getTime())) {
         return false
       }
-      
-      const isScheduled = announceTime > now
-      
-      return isScheduled
-    })
 
-    return scheduled
+      return announceTime > now
+    })
   })
 
   // اعلانات قابل نمایش (فقط اعلاناتی که زمان‌شان رسیده)
   const visibleNotifications = computed(() => {
     const now = new Date()
-    const filtered = notifications.value.filter((n) => {
+    return notifications.value.filter((n) => {
       // بررسی وجود و اعتبار announce_time
-      const hasValidAnnounceTime = n.announceTime && 
-        n.announceTime.trim() !== '' && 
-        n.announceTime !== 'null' && 
-        n.announceTime !== 'undefined'
-      
+      const hasValidAnnounceTime = n.announceTime
+        && n.announceTime.trim() !== ''
+        && n.announceTime !== 'null'
+        && n.announceTime !== 'undefined'
+
       // اگر زمان اعلان تنظیم نشده یا نامعتبر است، همیشه نمایش داده شود
       if (!hasValidAnnounceTime) {
         return true
@@ -190,19 +186,15 @@ export function useNotifications() {
 
       // Parse announce time
       const announceTime = new Date(n.announceTime)
-      
+
       // بررسی معتبر بودن تاریخ parsed شده
       if (isNaN(announceTime.getTime())) {
         return true
       }
-      
-      const shouldShow = announceTime <= now
 
       // اگر زمان اعلان رسیده، نمایش داده شود
-      return shouldShow
+      return announceTime <= now
     })
-
-    return filtered
   })
 
   // بروزرسانی filteredNotifications برای استفاده از visibleNotifications
@@ -239,7 +231,8 @@ export function useNotifications() {
             console.warn('PWA notification permission denied, cannot show notification')
             return
           }
-        } catch (err) {
+        }
+        catch (err) {
           console.warn('Failed to request PWA permission for notification:', err)
           return
         }
@@ -264,7 +257,7 @@ export function useNotifications() {
           // This is a future notification - schedule it instead of showing immediately
           console.log(`Scheduling PWA notification "${notification.title}" for ${announceDate.toLocaleString('fa-IR')}`)
           const scheduledId = await pwa.scheduleLocalNotification(notificationOptions, announceDate)
-          
+
           if (scheduledId) {
             console.log(`PWA notification scheduled successfully with ID: ${scheduledId}`)
           }
@@ -434,7 +427,7 @@ export function useNotifications() {
       // Check for new notifications to trigger PWA notifications
       if (page === 1 && notifications.value.length > 0) {
         const newNotifications = transformedNotifications.filter(newNotif =>
-          !notifications.value.some(existing => existing.id === newNotif.id)
+          !notifications.value.some(existing => existing.id === newNotif.id),
         )
 
         console.log('Found', newNotifications.length, 'new notifications to trigger PWA notifications')
@@ -817,7 +810,8 @@ export function useNotifications() {
                 const granted = await pwa.autoRequestPermission()
                 if (granted) {
                   console.log('PWA notifications enabled automatically')
-                } else {
+                }
+                else {
                   console.log('PWA notifications not enabled - user may need to manually enable')
                 }
               }

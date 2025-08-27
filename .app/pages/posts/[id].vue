@@ -44,7 +44,7 @@ const loadPost = async () => {
     console.log('PocketBase instance:', useNuxtApp().$pb)
     console.log('Auth store valid:', useNuxtApp().$pb.authStore.isValid)
     console.log('Current user:', useNuxtApp().$pb.authStore.model)
-    
+
     await getPost(postId)
     console.log('Post loaded:', currentPost.value)
 

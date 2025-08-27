@@ -85,7 +85,7 @@ function useGaugePersonal() {
     <div class="gridlines absolute inset-x-0 z-10 -mt-8 py-20" />
     <div class="absolute inset-x-0 z-20 -mt-24 py-20">
       <div
-        class="mt-12 grid grid-cols-2 -space-x-52 opacity-60 2xl:mx-auto 2xl:max-w-6xl dark:opacity-50"
+        class="mt-12 grid grid-cols-2 -space-x-52 opacity-60 dark:opacity-50 2xl:mx-auto 2xl:max-w-6xl"
       >
         <div
           class="from-primary-200 to-primary-400 h-40 bg-gradient-to-br blur-3xl dark:from-blue-700"

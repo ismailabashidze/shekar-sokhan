@@ -31,10 +31,10 @@ const getCurrentUserId = () => {
 const createTestNotification = async (type: string, announceTime?: string) => {
   isCreating.value = true
   testResults.value = []
-  
+
   try {
     const currentUserId = getCurrentUserId()
-    
+
     const testNotifications = [
       {
         title: `تست اعلان ${type} - بدون زمان اعلان`,
@@ -90,36 +90,38 @@ const createTestNotification = async (type: string, announceTime?: string) => {
         user_name: 'تست کننده',
         user_role: 'admin',
         announce_time: announceTime || new Date(Date.now() + 60000).toISOString(), // 1 دقیقه بعد یا زمان سفارشی
-      }
+      },
     ]
 
     const results = []
-    
+
     // Create notifications sequentially to avoid auto-cancellation
     for (let i = 0; i < testNotifications.length; i++) {
       const notification = testNotifications[i]
       try {
         const result = await createNotification(notification)
-        const status = notification.announce_time 
+        const status = notification.announce_time
           ? (new Date(notification.announce_time) <= new Date() ? 'نمایش داده شده' : 'زمان‌بندی شده')
           : 'نمایش داده شده'
-        
+
         results.push(`✅ اعلان ${i + 1}: ${notification.title} - ${status}`)
-        
+
         // Add small delay between requests to prevent auto-cancellation
         if (i < testNotifications.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 500))
         }
-      } catch (error) {
+      }
+      catch (error) {
         results.push(`❌ اعلان ${i + 1}: خطا - ${error.message}`)
       }
     }
 
     testResults.value = results
-    
-  } catch (error) {
+  }
+  catch (error) {
     testResults.value = [`❌ خطای کلی: ${error.message}`]
-  } finally {
+  }
+  finally {
     isCreating.value = false
   }
 }
@@ -128,50 +130,53 @@ const createTestNotification = async (type: string, announceTime?: string) => {
 const testPwaNotifications = async () => {
   isPwaTestRunning.value = true
   pwaTestResults.value = []
-  
+
   try {
     const results = []
-    
+
     // Test 1: Check PWA support
     const isSupported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
     results.push(
-      isSupported 
+      isSupported
         ? '✅ PWA notifications are supported'
-        : '❌ PWA notifications are not supported'
+        : '❌ PWA notifications are not supported',
     )
-    
+
     // Test 2: Check permission status (both reactive and native)
     const nativePermission = Notification.permission
     const reactivePermission = pwaNotifications.permission
     results.push(`🔒 Native Permission: ${nativePermission}`)
     results.push(`🔒 Reactive Permission: ${reactivePermission}`)
-    
+
     // Test 3: Request permission if needed
     if (nativePermission !== 'granted') {
       results.push('⏳ Requesting notification permission...')
       const granted = await pwaNotifications.requestPermission()
       results.push(
-        granted 
+        granted
           ? '✅ Permission granted successfully'
-          : '❌ Permission denied or failed'
+          : '❌ Permission denied or failed',
       )
-    } else {
+    }
+    else {
       results.push('✅ Permission already granted')
     }
-    
+
     // Test 4: Check service worker
     if (navigator.serviceWorker.controller) {
       results.push('✅ Service worker is active')
-    } else {
+    }
+    else {
       results.push('⚠️ Service worker not active - registering...')
       try {
         const registration = await navigator.serviceWorker.register('/sw.js')
         results.push('✅ Service worker registered successfully')
-      } catch (error) {
+      }
+      catch (error) {
         results.push(`❌ Service worker registration failed: ${error.message}`)
       }
     }
-    
+
     // Test 5: Test local notification
     if (Notification.permission === 'granted') {
       results.push('⏳ Testing local notification...')
@@ -181,35 +186,36 @@ const testPwaNotifications = async () => {
         type: 'info',
         priority: 'medium',
         url: '/notifications',
-        actionText: 'مشاهده'
+        actionText: 'مشاهده',
       })
       results.push(
-        success 
+        success
           ? '✅ Local notification shown successfully'
-          : '❌ Failed to show local notification'
+          : '❌ Failed to show local notification',
       )
     }
-    
+
     // Test 6: Test push subscription
     if (Notification.permission === 'granted') {
       results.push('⏳ Testing push subscription...')
       const subscribed = await pwaNotifications.subscribeToPush()
       results.push(
-        subscribed 
+        subscribed
           ? '✅ Push subscription successful'
-          : '❌ Push subscription failed'
+          : '❌ Push subscription failed',
       )
-      
+
       if (subscribed) {
         results.push(`📱 Subscription status: ${pwaNotifications.isSubscribed ? 'Active' : 'Inactive'}`)
       }
     }
-    
+
     pwaTestResults.value = results
-    
-  } catch (error) {
+  }
+  catch (error) {
     pwaTestResults.value = [`❌ PWA test error: ${error.message}`]
-  } finally {
+  }
+  finally {
     isPwaTestRunning.value = false
   }
 }
@@ -218,11 +224,11 @@ const testPwaNotifications = async () => {
 const testBackgroundNotifications = async () => {
   isPwaTestRunning.value = true
   pwaTestResults.value = []
-  
+
   try {
     // Check permission from native API directly
     const currentPermission = Notification.permission
-    
+
     if (currentPermission !== 'granted') {
       pwaTestResults.value = [`❌ PWA permission required for background notifications. Current: ${currentPermission}`]
       return
@@ -232,7 +238,7 @@ const testBackgroundNotifications = async () => {
 
     // Ensure service worker is ready
     const registration = await ensureServiceWorkerReady()
-    
+
     pwaTestResults.value = ['⏳ Testing background notifications...']
 
     // Create a test notification that simulates push event
@@ -243,7 +249,7 @@ const testBackgroundNotifications = async () => {
       priority: 'high',
       url: '/notifications',
       action_text: 'مشاهده',
-      id: `test-bg-${Date.now()}`
+      id: `test-bg-${Date.now()}`,
     }
 
     // Test showing notification directly through service worker
@@ -256,18 +262,18 @@ const testBackgroundNotifications = async () => {
         url: testData.url,
         notificationId: testData.id,
         type: testData.type,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       },
       actions: [{
         action: 'open',
         title: testData.action_text,
-        icon: '/pwa-192x192.png'
+        icon: '/pwa-192x192.png',
       }],
       requireInteraction: true,
       vibrate: [200, 100, 200, 100, 200],
       dir: 'rtl',
       lang: 'fa',
-      renotify: true
+      renotify: true,
     })
 
     pwaTestResults.value = [
@@ -277,12 +283,13 @@ const testBackgroundNotifications = async () => {
       '💡 Close the app and create a new notification to test real background mode',
       `🔒 Permission Status: ${currentPermission}`,
       `📡 Service Worker: ${registration.active ? 'Active' : 'Inactive'}`,
-      `🆔 Registration Scope: ${registration.scope}`
+      `🆔 Registration Scope: ${registration.scope}`,
     ]
-    
-  } catch (error) {
+  }
+  catch (error) {
     pwaTestResults.value = [`❌ Background notification test failed: ${error.message}`]
-  } finally {
+  }
+  finally {
     isPwaTestRunning.value = false
   }
 }
@@ -291,10 +298,10 @@ const testBackgroundNotifications = async () => {
 const testFullNotificationFlow = async () => {
   isCreating.value = true
   testResults.value = []
-  
+
   try {
     const currentUserId = getCurrentUserId()
-    
+
     // Create a test notification that should trigger PWA notification
     const testNotification = {
       title: 'تست کامل نوتیفیکیشن',
@@ -306,27 +313,28 @@ const testFullNotificationFlow = async () => {
       user_name: 'تست کننده',
       user_role: 'admin',
       action_url: '/notifications',
-      action_text: 'مشاهده در سیستم'
+      action_text: 'مشاهده در سیستم',
     }
-    
+
     testResults.value = ['⏳ Creating test notification...']
-    
+
     const result = await createNotification(testNotification)
-    
+
     // Wait a moment for PWA notification to trigger
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+
     testResults.value = [
       '✅ Notification created successfully',
       '✅ PWA notification should be triggered automatically',
       '✅ Check your browser for the notification popup',
       '📋 You should see a native notification if permission is granted',
-      '🔄 The notification should also appear in the notifications list'
+      '🔄 The notification should also appear in the notifications list',
     ]
-    
-  } catch (error) {
+  }
+  catch (error) {
     testResults.value = [`❌ خطا در تست کامل: ${error.message}`]
-  } finally {
+  }
+  finally {
     isCreating.value = false
   }
 }
@@ -368,7 +376,7 @@ const ensureServiceWorkerReady = async () => {
     const registration = await navigator.serviceWorker.register('/sw.js', {
       scope: '/',
     })
-    
+
     // Wait for it to be active
     if (registration.active) {
       return registration
@@ -400,22 +408,24 @@ const ensureServiceWorkerReady = async () => {
             resolve(registration)
           }
         })
-      } else if (registration.waiting) {
+      }
+      else if (registration.waiting) {
         clearTimeout(timeout)
         resolve(registration)
       }
     })
-  } catch (error) {
+  }
+  catch (error) {
     throw new Error(`Service worker registration failed: ${error.message}`)
   }
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-muted-50 dark:bg-muted-900">
+  <div class="bg-muted-50 dark:bg-muted-900 min-h-screen">
     <div class="container mx-auto max-w-4xl px-4 py-8">
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-muted-900 dark:text-white">
+        <h1 class="text-muted-900 text-3xl font-bold dark:text-white">
           تست عملکرد اعلانات
         </h1>
         <p class="text-muted-500 dark:text-muted-400 mt-2">
@@ -426,11 +436,11 @@ const ensureServiceWorkerReady = async () => {
       <div class="space-y-6">
         <!-- Test Buttons -->
         <BaseCard class="p-6">
-          <h2 class="text-xl font-semibold text-muted-900 dark:text-white mb-4">
+          <h2 class="text-muted-900 mb-4 text-xl font-semibold dark:text-white">
             آزمایش سناریوهای مختلف
           </h2>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
             <BaseButton
               :loading="isCreating"
               :disabled="isCreating"
@@ -468,17 +478,17 @@ const ensureServiceWorkerReady = async () => {
 
         <!-- PWA Notifications Test -->
         <BaseCard class="p-6">
-          <h2 class="text-xl font-semibold text-muted-900 dark:text-white mb-4">
+          <h2 class="text-muted-900 mb-4 text-xl font-semibold dark:text-white">
             تست PWA نوتیفیکیشن
           </h2>
-          
+
           <div class="space-y-4">
             <!-- Instructions -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <h3 class="font-medium text-blue-900 dark:text-blue-100 mb-2">
+            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+              <h3 class="mb-2 font-medium text-blue-900 dark:text-blue-100">
                 📋 راهنمای استفاده
               </h3>
-              <div class="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+              <div class="space-y-1 text-sm text-blue-700 dark:text-blue-300">
                 <p>• ابتدا دکمه "تست PWA نوتیفیکیشن" را بزنید تا مجوز دریافت کنید</p>
                 <p>• برای تست background، دکمه "تست Background" را بزنید</p>
                 <p>• برای تست کامل، دکمه "تست کامل نوتیفیکیشن" را بزنید</p>
@@ -487,11 +497,11 @@ const ensureServiceWorkerReady = async () => {
             </div>
 
             <!-- Auto-cancellation Warning -->
-            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-              <h3 class="font-medium text-amber-900 dark:text-amber-100 mb-2">
+            <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+              <h3 class="mb-2 font-medium text-amber-900 dark:text-amber-100">
                 ⚠️ نکته مهم در مورد خطای Auto-cancellation
               </h3>
-              <div class="text-sm text-amber-700 dark:text-amber-300 space-y-1">
+              <div class="space-y-1 text-sm text-amber-700 dark:text-amber-300">
                 <p>• اگر خطای "autocancelled" دیدید، نگران نباشید! این رفتار عادی PocketBase است</p>
                 <p>• وقتی چندین درخواست همزمان ارسال می‌شود، درخواست‌های قبلی cancel می‌شوند</p>
                 <p>• حالا تست‌ها sequential اجرا می‌شوند تا این مشکل نداشته باشیم</p>
@@ -499,7 +509,7 @@ const ensureServiceWorkerReady = async () => {
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
               <BaseButton
                 :loading="isPwaTestRunning"
                 :disabled="isPwaTestRunning"
@@ -535,8 +545,8 @@ const ensureServiceWorkerReady = async () => {
             </div>
 
             <!-- PWA Status Info -->
-            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
-              <div class="text-sm space-y-2">
+            <div class="rounded-lg bg-slate-50 p-4 dark:bg-slate-900/50">
+              <div class="space-y-2 text-sm">
                 <div class="flex justify-between">
                   <span class="text-muted-600 dark:text-muted-400">PWA Support:</span>
                   <span :class="pwaNotifications.isSupported ? 'text-success-600' : 'text-danger-600'">
@@ -545,11 +555,13 @@ const ensureServiceWorkerReady = async () => {
                 </div>
                 <div class="flex justify-between">
                   <span class="text-muted-600 dark:text-muted-400">Permission:</span>
-                  <span :class="{
-                    'text-success-600': pwaNotifications.permission === 'granted',
-                    'text-warning-600': pwaNotifications.permission === 'default',
-                    'text-danger-600': pwaNotifications.permission === 'denied'
-                  }">
+                  <span
+                    :class="{
+                      'text-success-600': pwaNotifications.permission === 'granted',
+                      'text-warning-600': pwaNotifications.permission === 'default',
+                      'text-danger-600': pwaNotifications.permission === 'denied'
+                    }"
+                  >
                     {{ pwaNotifications.permission || 'Unknown' }}
                   </span>
                 </div>
@@ -563,11 +575,11 @@ const ensureServiceWorkerReady = async () => {
             </div>
 
             <!-- Permission Help -->
-            <div v-if="pwaNotifications.permission === 'denied'" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <h3 class="font-medium text-red-900 dark:text-red-100 mb-2">
+            <div v-if="pwaNotifications.permission === 'denied'" class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+              <h3 class="mb-2 font-medium text-red-900 dark:text-red-100">
                 🚫 نوتیفیکیشن‌ها غیرفعال شده
               </h3>
-              <div class="text-sm text-red-700 dark:text-red-300 space-y-1">
+              <div class="space-y-1 text-sm text-red-700 dark:text-red-300">
                 <p>• در Chrome: Settings → Privacy and Security → Site Settings → Notifications</p>
                 <p>• در Edge: Settings → Cookies and Site Permissions → Notifications</p>
                 <p>• در Firefox: Settings → Privacy & Security → Permissions → Notifications</p>
@@ -577,11 +589,13 @@ const ensureServiceWorkerReady = async () => {
 
             <!-- PWA Test Results -->
             <div v-if="pwaTestResults.length > 0" class="space-y-2">
-              <h3 class="font-medium text-muted-900 dark:text-white">نتایج تست PWA:</h3>
+              <h3 class="text-muted-900 font-medium dark:text-white">
+                نتایج تست PWA:
+              </h3>
               <div
                 v-for="(result, index) in pwaTestResults"
                 :key="index"
-                class="p-3 rounded-lg text-sm"
+                class="rounded-lg p-3 text-sm"
                 :class="{
                   'bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300': result.startsWith('✅'),
                   'bg-danger-50 dark:bg-danger-900/20 text-danger-700 dark:text-danger-300': result.startsWith('❌'),
@@ -597,12 +611,12 @@ const ensureServiceWorkerReady = async () => {
 
         <!-- Custom Time Test -->
         <BaseCard class="p-6">
-          <h2 class="text-xl font-semibold text-muted-900 dark:text-white mb-4">
+          <h2 class="text-muted-900 mb-4 text-xl font-semibold dark:text-white">
             تست با زمان سفارشی
           </h2>
-          
+
           <div class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
               <!-- Persian Calendar -->
               <PersianCalendar
                 v-model="customPersianDate"
@@ -610,7 +624,7 @@ const ensureServiceWorkerReady = async () => {
                 placeholder="انتخاب تاریخ"
                 clearable
               />
-              
+
               <!-- Time Picker -->
               <BaseInput
                 v-model="customTime"
@@ -619,7 +633,7 @@ const ensureServiceWorkerReady = async () => {
                 placeholder="00:00"
                 :disabled="!customPersianDate"
               />
-              
+
               <!-- Test Button -->
               <div class="flex items-end">
                 <BaseButton
@@ -635,10 +649,10 @@ const ensureServiceWorkerReady = async () => {
                 </BaseButton>
               </div>
             </div>
-            
+
             <!-- Schedule Info -->
             <div v-if="customPersianDate && customTime" class="bg-info-50 dark:bg-info-900/20 border-info-200 dark:border-info-800 rounded-lg border p-4">
-              <div class="text-sm space-y-2">
+              <div class="space-y-2 text-sm">
                 <div class="text-info-700 dark:text-info-300 font-medium">
                   📅 تاریخ: {{ formatPersianDate(customPersianDate) }}
                 </div>
@@ -661,15 +675,15 @@ const ensureServiceWorkerReady = async () => {
 
         <!-- Test Results -->
         <BaseCard v-if="testResults.length > 0" class="p-6">
-          <h2 class="text-xl font-semibold text-muted-900 dark:text-white mb-4">
+          <h2 class="text-muted-900 mb-4 text-xl font-semibold dark:text-white">
             نتایج تست
           </h2>
-          
+
           <div class="space-y-2">
             <div
               v-for="(result, index) in testResults"
               :key="index"
-              class="p-3 rounded-lg"
+              class="rounded-lg p-3"
               :class="result.startsWith('✅') ? 'bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300' : 'bg-danger-50 dark:bg-danger-900/20 text-danger-700 dark:text-danger-300'"
             >
               {{ result }}
@@ -679,10 +693,10 @@ const ensureServiceWorkerReady = async () => {
 
         <!-- Current Status -->
         <BaseCard class="p-6">
-          <h2 class="text-xl font-semibold text-muted-900 dark:text-white mb-4">
+          <h2 class="text-muted-900 mb-4 text-xl font-semibold dark:text-white">
             وضعیت فعلی سیستم
           </h2>
-          
+
           <div class="space-y-2 text-sm">
             <p class="text-muted-600 dark:text-muted-300">
               <strong>زمان فعلی:</strong> {{ new Date().toLocaleString('fa-IR') }}
@@ -698,15 +712,15 @@ const ensureServiceWorkerReady = async () => {
 
         <!-- Instructions -->
         <BaseCard class="p-6">
-          <h2 class="text-xl font-semibold text-muted-900 dark:text-white mb-4">
+          <h2 class="text-muted-900 mb-4 text-xl font-semibold dark:text-white">
             راهنمای تست
           </h2>
-          
-          <div class="space-y-3 text-sm text-muted-600 dark:text-muted-300">
+
+          <div class="text-muted-600 dark:text-muted-300 space-y-3 text-sm">
             <p>
               <strong>تست‌های استندارد:</strong> شامل 5 اعلان با سناریوهای مختلف:
             </p>
-            <ul class="list-disc list-inside space-y-1 mr-4">
+            <ul class="mr-4 list-inside list-disc space-y-1">
               <li>اعلان بدون زمان اعلان (باید فوراً نمایش داده شود)</li>
               <li>اعلان با زمان گذشته (باید فوراً نمایش داده شود)</li>
               <li>اعلان با زمان آینده نزدیک - 5 دقیقه (نباید نمایش داده شود)</li>
@@ -724,4 +738,4 @@ const ensureServiceWorkerReady = async () => {
       </div>
     </div>
   </div>
-</template> 
+</template>

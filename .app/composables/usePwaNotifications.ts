@@ -37,10 +37,10 @@ export function usePwaNotifications() {
       && 'PushManager' in window
       && 'Notification' in window
       permission.value = Notification.permission
-      
+
       // Listen for permission changes
       if ('permissions' in navigator) {
-        navigator.permissions.query({ name: 'notifications' }).then(permissionStatus => {
+        navigator.permissions.query({ name: 'notifications' }).then((permissionStatus) => {
           permission.value = permissionStatus.state as NotificationPermission
           permissionStatus.onchange = () => {
             permission.value = permissionStatus.state as NotificationPermission
@@ -171,18 +171,20 @@ export function usePwaNotifications() {
           timestamp: Date.now(),
           notificationId: options.tag || `local-${Date.now()}`,
         },
-        actions: options.actionText ? [{
-          action: 'open',
-          title: options.actionText,
-          icon: '/pwa-192x192.png'
-        }] : [],
+        actions: options.actionText
+          ? [{
+              action: 'open',
+              title: options.actionText,
+              icon: '/pwa-192x192.png',
+            }]
+          : [],
         requireInteraction: options.priority === 'urgent' || options.priority === 'high',
         silent: options.silent || false,
         vibrate: getVibrationPattern(options.priority),
         dir: 'rtl',
         lang: 'fa',
         renotify: true, // Always show notification even if tag exists
-        timestamp: Date.now()
+        timestamp: Date.now(),
       })
 
       console.log('PWA notification shown successfully')
@@ -212,7 +214,7 @@ export function usePwaNotifications() {
 
     const delay = scheduleDate.getTime() - now.getTime()
     const notificationId = options.tag || `scheduled-${Date.now()}`
-    
+
     console.log(`Scheduling PWA notification "${options.title}" to show in ${Math.round(delay / 1000 / 60)} minutes`)
 
     // Use setTimeout to schedule the notification
@@ -220,14 +222,15 @@ export function usePwaNotifications() {
       try {
         console.log(`Showing scheduled PWA notification: ${options.title}`)
         await showLocalNotification(options)
-        
+
         // Remove from scheduled notifications store
         if (process.client && window.localStorage) {
           const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
           delete scheduled[notificationId]
           localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
         }
-      } catch (err) {
+      }
+      catch (err) {
         console.error('Error showing scheduled PWA notification:', err)
       }
     }, delay)
@@ -239,7 +242,7 @@ export function usePwaNotifications() {
         options,
         scheduleDate: scheduleDate.toISOString(),
         timeoutId,
-        created: now.toISOString()
+        created: now.toISOString(),
       }
       localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
     }
@@ -253,23 +256,24 @@ export function usePwaNotifications() {
 
     try {
       const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
-      
+
       if (scheduled[notificationId]) {
         // Clear the timeout
         if (scheduled[notificationId].timeoutId) {
           clearTimeout(scheduled[notificationId].timeoutId)
         }
-        
+
         // Remove from storage
         delete scheduled[notificationId]
         localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
-        
+
         console.log(`Cancelled scheduled PWA notification: ${notificationId}`)
         return true
       }
 
       return false
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Error cancelling scheduled notification:', err)
       return false
     }
@@ -284,10 +288,10 @@ export function usePwaNotifications() {
       const now = new Date()
       let hasChanges = false
 
-      Object.keys(scheduled).forEach(notificationId => {
+      Object.keys(scheduled).forEach((notificationId) => {
         const notification = scheduled[notificationId]
         const scheduleDate = new Date(notification.scheduleDate)
-        
+
         // Clean up notifications that are more than 1 hour past their scheduled time
         if (now.getTime() - scheduleDate.getTime() > 3600000) {
           if (notification.timeoutId) {
@@ -302,7 +306,8 @@ export function usePwaNotifications() {
         localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
         console.log('Cleaned up expired scheduled PWA notifications')
       }
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Error cleaning up scheduled notifications:', err)
     }
   }
@@ -387,7 +392,7 @@ export function usePwaNotifications() {
     catch (err: any) {
       console.error('Error saving subscription to backend:', err)
       console.error('Error details:', err.response || err.message)
-      
+
       // For now, don't throw the error to prevent blocking the subscription process
       // But log it clearly so we can debug
       if (err.status === 404) {
@@ -508,7 +513,7 @@ export function usePwaNotifications() {
 
     // Check local storage for previous decision
     const userDecision = localStorage.getItem('pwa-notification-decision')
-    
+
     // If user previously denied, don't ask again unless they reset
     if (userDecision === 'denied' && permission.value === 'default') {
       console.log('User previously denied PWA notifications')
@@ -529,11 +534,13 @@ export function usePwaNotifications() {
         console.log('PWA notifications granted - subscribing to push...')
         await subscribeToPush()
         return true
-      } else {
+      }
+      else {
         console.log('PWA notifications denied or dismissed')
         return false
       }
-    } catch (err: any) {
+    }
+    catch (err: any) {
       console.error('Error requesting PWA notification permission:', err)
       error.value = err.message || 'خطا در درخواست مجوز اعلان‌ها'
       return false

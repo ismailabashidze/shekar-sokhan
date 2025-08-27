@@ -5,7 +5,7 @@ import type { ResetPasswordDto } from '~/types/api'
 definePageMeta({
   title: 'بازیابی رمز عبور',
   layout: 'auth',
-  middleware: ['guest']
+  middleware: ['guest'],
 })
 
 useHead({ htmlAttrs: { dir: 'rtl' } })
@@ -16,7 +16,7 @@ const router = useRouter()
 
 const formData = ref<ResetPasswordDto>({
   token: '',
-  newPassword: ''
+  newPassword: '',
 })
 
 const errors = ref<Record<string, string>>({})
@@ -32,32 +32,35 @@ onMounted(() => {
 
 const validateForm = () => {
   const newErrors: Record<string, string> = {}
-  
+
   if (!formData.value.token) {
     newErrors.token = 'توکن بازیابی الزامی است'
   }
-  
+
   if (!formData.value.newPassword) {
     newErrors.newPassword = 'رمز عبور جدید الزامی است'
-  } else if (formData.value.newPassword.length < 8) {
+  }
+  else if (formData.value.newPassword.length < 8) {
     newErrors.newPassword = 'رمز عبور باید حداقل ۸ کاراکتر باشد'
-  } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.value.newPassword)) {
+  }
+  else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.value.newPassword)) {
     newErrors.newPassword = 'رمز عبور باید شامل حروف کوچک، بزرگ و عدد باشد'
   }
-  
+
   if (!confirmPassword.value) {
     newErrors.confirmPassword = 'تکرار رمز عبور الزامی است'
-  } else if (formData.value.newPassword !== confirmPassword.value) {
+  }
+  else if (formData.value.newPassword !== confirmPassword.value) {
     newErrors.confirmPassword = 'رمز عبور و تکرار آن یکسان نیست'
   }
-  
+
   errors.value = newErrors
   return Object.keys(newErrors).length === 0
 }
 
 const handleResetPassword = async () => {
   if (!validateForm()) return
-  
+
   const result = await resetPassword(formData.value)
   if (result) {
     isResetSuccessful.value = true
@@ -70,8 +73,8 @@ const handleResetPassword = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
+  <div class="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md space-y-8">
       <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
           بازیابی رمز عبور
@@ -80,8 +83,8 @@ const handleResetPassword = async () => {
           رمز عبور جدید خود را وارد کنید
         </p>
       </div>
-      
-      <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+
+      <div class="bg-white px-4 py-8 shadow dark:bg-gray-800 sm:rounded-lg sm:px-10">
         <div v-if="!isResetSuccessful">
           <form class="space-y-6" @submit.prevent="handleResetPassword">
             <div>
@@ -96,14 +99,16 @@ const handleResetPassword = async () => {
                   type="text"
                   required
                   :class="[
-                    'appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                    errors.token 
-                      ? 'border-red-300 dark:border-red-600' 
+                    'block w-full appearance-none rounded-md border px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm',
+                    errors.token
+                      ? 'border-red-300 dark:border-red-600'
                       : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
                   ]"
                   :placeholder="'کد دریافتی از ایمیل'"
-                />
-                <p v-if="errors.token" class="mt-2 text-sm text-red-600">{{ errors.token }}</p>
+                >
+                <p v-if="errors.token" class="mt-2 text-sm text-red-600">
+                  {{ errors.token }}
+                </p>
               </div>
             </div>
 
@@ -120,14 +125,16 @@ const handleResetPassword = async () => {
                   autocomplete="new-password"
                   required
                   :class="[
-                    'appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                    errors.newPassword 
-                      ? 'border-red-300 dark:border-red-600' 
+                    'block w-full appearance-none rounded-md border px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm',
+                    errors.newPassword
+                      ? 'border-red-300 dark:border-red-600'
                       : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
                   ]"
                   :placeholder="'حداقل ۸ کاراکتر'"
-                />
-                <p v-if="errors.newPassword" class="mt-2 text-sm text-red-600">{{ errors.newPassword }}</p>
+                >
+                <p v-if="errors.newPassword" class="mt-2 text-sm text-red-600">
+                  {{ errors.newPassword }}
+                </p>
               </div>
               <p class="mt-2 text-xs text-gray-500">
                 رمز عبور باید شامل حروف کوچک، بزرگ و عدد باشد
@@ -147,14 +154,16 @@ const handleResetPassword = async () => {
                   autocomplete="new-password"
                   required
                   :class="[
-                    'appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                    errors.confirmPassword 
-                      ? 'border-red-300 dark:border-red-600' 
+                    'block w-full appearance-none rounded-md border px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm',
+                    errors.confirmPassword
+                      ? 'border-red-300 dark:border-red-600'
                       : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
                   ]"
                   :placeholder="'تکرار رمز عبور جدید'"
-                />
-                <p v-if="errors.confirmPassword" class="mt-2 text-sm text-red-600">{{ errors.confirmPassword }}</p>
+                >
+                <p v-if="errors.confirmPassword" class="mt-2 text-sm text-red-600">
+                  {{ errors.confirmPassword }}
+                </p>
               </div>
             </div>
 
@@ -162,35 +171,48 @@ const handleResetPassword = async () => {
               <button
                 type="submit"
                 :disabled="isAuthLoading"
-                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                class="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
               >
                 <span v-if="isAuthLoading">در حال بازیابی...</span>
                 <span v-else>بازیابی رمز عبور</span>
               </button>
-              
-              <p v-if="authError" class="mt-2 text-sm text-red-600 text-center">
+
+              <p v-if="authError" class="mt-2 text-center text-sm text-red-600">
                 {{ authError }}
               </p>
             </div>
           </form>
         </div>
-        
+
         <div v-else>
           <div class="text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-              <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <div class="mx-auto flex size-12 items-center justify-center rounded-full bg-green-100">
+              <svg
+                class="size-6 text-green-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
             <div class="mt-4">
-              <h3 class="text-lg font-medium text-gray-900 dark:text-white">رمز عبور با موفقیت تغییر کرد!</h3>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                رمز عبور با موفقیت تغییر کرد!
+              </h3>
               <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                 <p>رمز عبور شما با موفقیت به‌روزرسانی شد. در حال انتقال به صفحه ورود...</p>
               </div>
             </div>
           </div>
         </div>
-        
+
         <div class="mt-6 text-center">
           <p class="text-sm text-gray-600 dark:text-gray-400">
             <NuxtLink to="/hammasir/auth/login" class="font-medium text-indigo-600 hover:text-indigo-500">

@@ -19,7 +19,7 @@ const props = withDefaults(
         <div class="flex flex-1 items-center">
           <NuxtLink to="/dashboards" class="flex items-center gap-2">
             <TairoLogoText
-              class="text-primary-500 hidden h-7 lg:block dark:text-white"
+              class="text-primary-500 hidden h-7 dark:text-white lg:block"
             />
           </NuxtLink>
         </div>

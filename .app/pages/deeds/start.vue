@@ -22,7 +22,7 @@ useHead({
           size="xs"
           sm="sm"
           weight="medium"
-          class="text-muted-800 mb-0 sm:mb-2 dark:text-white"
+          class="text-muted-800 mb-0 dark:text-white sm:mb-2"
         >
           <span>خانواده و دوستان</span>
         </BaseHeading>
@@ -39,7 +39,7 @@ useHead({
           size="xs"
           sm="sm"
           weight="medium"
-          class="text-muted-800 mb-0 sm:mb-2 dark:text-white"
+          class="text-muted-800 mb-0 dark:text-white sm:mb-2"
         >
           <span>جامعه</span>
         </BaseHeading>
@@ -56,7 +56,7 @@ useHead({
           size="xs"
           sm="sm"
           weight="medium"
-          class="text-muted-800 mb-0 sm:mb-2 dark:text-white"
+          class="text-muted-800 mb-0 dark:text-white sm:mb-2"
         >
           <span>معنویت</span>
         </BaseHeading>
@@ -115,7 +115,7 @@ useHead({
           size="xs"
           sm="sm"
           weight="medium"
-          class="text-muted-800 mb-0 sm:mb-2 dark:text-white"
+          class="text-muted-800 mb-0 dark:text-white sm:mb-2"
         >
           <span>آموزش</span>
         </BaseHeading>
@@ -132,7 +132,7 @@ useHead({
           size="xs"
           sm="sm"
           weight="medium"
-          class="text-muted-800 mb-0 sm:mb-2 dark:text-white"
+          class="text-muted-800 mb-0 dark:text-white sm:mb-2"
         >
           <span>سلامت</span>
         </BaseHeading>
@@ -149,7 +149,7 @@ useHead({
           size="xs"
           sm="sm"
           weight="medium"
-          class="text-muted-800 mb-0 sm:mb-2 dark:text-white"
+          class="text-muted-800 mb-0 dark:text-white sm:mb-2"
         >
           <span>محیط زیست</span>
         </BaseHeading>

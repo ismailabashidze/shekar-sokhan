@@ -74,7 +74,7 @@
     <div v-else class="grid grid-cols-12 gap-6">
       <!-- Header -->
       <div class="col-span-12">
-        <div class="bg-gradient-to-r from-primary-800 to-primary-600 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
+        <div class="from-primary-800 to-primary-600 flex flex-col items-center rounded-2xl bg-gradient-to-r p-4 sm:flex-row">
           <div class="relative h-[168px] w-[280px] shrink-0">
             <img
               class="pointer-events-none absolute -start-6 -top-20 sm:-start-10"
@@ -146,24 +146,24 @@
             <div
               v-for="goal in sessionGoals"
               :key="goal.id"
-              class="border border-muted-200 dark:border-muted-700 rounded-lg p-4"
+              class="border-muted-200 dark:border-muted-700 rounded-lg border p-4"
             >
               <div class="flex items-start gap-3">
-                <div class="text-primary-500 mt-1 flex-shrink-0">
+                <div class="text-primary-500 mt-1 shrink-0">
                   <Icon :name="goal.icon" class="size-5" />
                 </div>
                 <div class="flex-1">
-                  <h4 class="text-muted-800 dark:text-white font-medium">
+                  <h4 class="text-muted-800 font-medium dark:text-white">
                     {{ goal.title }}
                   </h4>
-                  <p class="text-muted-500 text-sm mt-1">
+                  <p class="text-muted-500 mt-1 text-sm">
                     {{ goal.description }}
                   </p>
                   <div class="mt-2 flex items-center gap-2">
-                    <span class="text-xs px-2 py-1 rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900 dark:text-primary-400">
+                    <span class="bg-primary-100 text-primary-600 dark:bg-primary-900 dark:text-primary-400 rounded-full px-2 py-1 text-xs">
                       {{ goal.priority }}
                     </span>
-                    <span class="text-xs text-muted-400">
+                    <span class="text-muted-400 text-xs">
                       {{ goal.estimatedSessions }} جلسه
                     </span>
                   </div>
@@ -190,23 +190,23 @@
             <div
               v-for="technique in therapeuticTechniques"
               :key="technique.id"
-              class="border border-muted-200 dark:border-muted-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+              class="border-muted-200 dark:border-muted-700 rounded-lg border p-4 transition-shadow hover:shadow-md"
             >
               <div class="text-center">
                 <div class="text-primary-500 mb-3 flex justify-center">
                   <Icon :name="technique.icon" class="size-8" />
                 </div>
-                <h4 class="text-muted-800 dark:text-white font-medium mb-2">
+                <h4 class="text-muted-800 mb-2 font-medium dark:text-white">
                   {{ technique.name }}
                 </h4>
-                <p class="text-muted-500 text-sm mb-3">
+                <p class="text-muted-500 mb-3 text-sm">
                   {{ technique.description }}
                 </p>
-                <div class="flex flex-wrap gap-1 justify-center">
+                <div class="flex flex-wrap justify-center gap-1">
                   <span
                     v-for="tag in technique.tags"
                     :key="tag"
-                    class="text-xs px-2 py-1 rounded-full bg-muted-100 text-muted-600 dark:bg-muted-800 dark:text-muted-400"
+                    class="bg-muted-100 text-muted-600 dark:bg-muted-800 dark:text-muted-400 rounded-full px-2 py-1 text-xs"
                   >
                     {{ tag }}
                   </span>
@@ -233,29 +233,29 @@
             <div
               v-for="approach in therapeuticApproaches"
               :key="approach.id"
-              class="border border-muted-200 dark:border-muted-700 rounded-lg p-4"
+              class="border-muted-200 dark:border-muted-700 rounded-lg border p-4"
             >
               <div class="flex items-start gap-4">
-                <div class="text-primary-500 mt-1 flex-shrink-0">
+                <div class="text-primary-500 mt-1 shrink-0">
                   <Icon :name="approach.icon" class="size-6" />
                 </div>
                 <div class="flex-1">
-                  <div class="flex items-center justify-between mb-2">
-                    <h4 class="text-muted-800 dark:text-white font-medium">
+                  <div class="mb-2 flex items-center justify-between">
+                    <h4 class="text-muted-800 font-medium dark:text-white">
                       {{ approach.name }}
                     </h4>
-                    <span class="text-xs px-2 py-1 rounded-full bg-success-100 text-success-600 dark:bg-success-900 dark:text-success-400">
+                    <span class="bg-success-100 text-success-600 dark:bg-success-900 dark:text-success-400 rounded-full px-2 py-1 text-xs">
                       {{ approach.effectiveness }}% موثر
                     </span>
                   </div>
-                  <p class="text-muted-500 text-sm mb-3">
+                  <p class="text-muted-500 mb-3 text-sm">
                     {{ approach.description }}
                   </p>
                   <div class="flex flex-wrap gap-2">
                     <span
                       v-for="condition in approach.suitableFor"
                       :key="condition"
-                      class="text-xs px-2 py-1 rounded-full bg-info-100 text-info-600 dark:bg-info-900 dark:text-info-400"
+                      class="bg-info-100 text-info-600 dark:bg-info-900 dark:text-info-400 rounded-full px-2 py-1 text-xs"
                     >
                       {{ condition }}
                     </span>
@@ -283,24 +283,24 @@
             <div
               v-for="assessment in assessmentMethods"
               :key="assessment.id"
-              class="border border-muted-200 dark:border-muted-700 rounded-lg p-4"
+              class="border-muted-200 dark:border-muted-700 rounded-lg border p-4"
             >
               <div class="flex items-start gap-3">
-                <div class="text-primary-500 mt-1 flex-shrink-0">
+                <div class="text-primary-500 mt-1 shrink-0">
                   <Icon :name="assessment.icon" class="size-5" />
                 </div>
                 <div class="flex-1">
-                  <h4 class="text-muted-800 dark:text-white font-medium mb-1">
+                  <h4 class="text-muted-800 mb-1 font-medium dark:text-white">
                     {{ assessment.name }}
                   </h4>
-                  <p class="text-muted-500 text-sm mb-2">
+                  <p class="text-muted-500 mb-2 text-sm">
                     {{ assessment.description }}
                   </p>
                   <div class="flex items-center justify-between">
-                    <span class="text-xs px-2 py-1 rounded-full bg-warning-100 text-warning-600 dark:bg-warning-900 dark:text-warning-400">
+                    <span class="bg-warning-100 text-warning-600 dark:bg-warning-900 dark:text-warning-400 rounded-full px-2 py-1 text-xs">
                       {{ assessment.duration }}
                     </span>
-                    <span class="text-xs text-muted-400">
+                    <span class="text-muted-400 text-xs">
                       دقت: {{ assessment.accuracy }}%
                     </span>
                   </div>
@@ -330,15 +330,19 @@
             <div
               v-for="stat in quickStats"
               :key="stat.label"
-              class="flex items-center justify-between p-3 bg-muted-50 dark:bg-muted-900 rounded-lg"
+              class="bg-muted-50 dark:bg-muted-900 flex items-center justify-between rounded-lg p-3"
             >
               <div class="flex items-center gap-3">
-                <Icon :name="stat.icon" :class="stat.color" class="size-5" />
+                <Icon
+                  :name="stat.icon"
+                  :class="stat.color"
+                  class="size-5"
+                />
                 <span class="text-muted-600 dark:text-muted-300 text-sm">
                   {{ stat.label }}
                 </span>
               </div>
-              <span class="text-muted-800 dark:text-white font-medium">
+              <span class="text-muted-800 font-medium dark:text-white">
                 {{ stat.value }}
               </span>
             </div>
@@ -362,11 +366,11 @@
             <div
               v-for="activity in recentActivities"
               :key="activity.id"
-              class="flex items-start gap-3 p-3 bg-muted-50 dark:bg-muted-900 rounded-lg"
+              class="bg-muted-50 dark:bg-muted-900 flex items-start gap-3 rounded-lg p-3"
             >
-              <Icon :name="activity.icon" class="text-primary-500 size-4 mt-0.5" />
+              <Icon :name="activity.icon" class="text-primary-500 mt-0.5 size-4" />
               <div class="flex-1">
-                <p class="text-muted-800 dark:text-white text-sm">
+                <p class="text-muted-800 text-sm dark:text-white">
                   {{ activity.description }}
                 </p>
                 <span class="text-muted-400 text-xs">
@@ -414,7 +418,7 @@
 <script setup lang="ts">
 definePageMeta({
   title: 'پروفایل هوش مصنوعی روان‌شناس',
-  layout: 'sidebar'
+  layout: 'sidebar',
 })
 
 // Reactive state
@@ -427,7 +431,7 @@ const aiPsychologist = ref({
   specialization: 'روان‌شناس متخصص در درمان شناختی رفتاری و مشاوره خانواده',
   experience: '5 سال',
   totalSessions: 1247,
-  successRate: 94
+  successRate: 94,
 })
 
 // Session Goals Mock Data
@@ -438,7 +442,7 @@ const sessionGoals = ref([
     description: 'کمک به کاربران برای شناسایی علائم اضطراب و ارائه راهکارهای مقابله',
     priority: 'بالا',
     estimatedSessions: '6-8',
-    icon: 'ph:heart-duotone'
+    icon: 'ph:heart-duotone',
   },
   {
     id: 2,
@@ -446,7 +450,7 @@ const sessionGoals = ref([
     description: 'تقویت مهارت‌های ارتباطی و حل تعارض در روابط',
     priority: 'متوسط',
     estimatedSessions: '4-6',
-    icon: 'ph:users-duotone'
+    icon: 'ph:users-duotone',
   },
   {
     id: 3,
@@ -454,7 +458,7 @@ const sessionGoals = ref([
     description: 'یادگیری تکنیک‌های مؤثر برای کاهش و مدیریت استرس روزانه',
     priority: 'بالا',
     estimatedSessions: '3-5',
-    icon: 'ph:leaf-duotone'
+    icon: 'ph:leaf-duotone',
   },
   {
     id: 4,
@@ -462,7 +466,7 @@ const sessionGoals = ref([
     description: 'افزایش احترام به خود و بهبود تصویر ذهنی مثبت',
     priority: 'متوسط',
     estimatedSessions: '5-7',
-    icon: 'ph:star-duotone'
+    icon: 'ph:star-duotone',
   },
   {
     id: 5,
@@ -470,7 +474,7 @@ const sessionGoals = ref([
     description: 'شناسایی و درمان علائم افسردگی با روش‌های علمی',
     priority: 'بالا',
     estimatedSessions: '8-12',
-    icon: 'ph:sun-duotone'
+    icon: 'ph:sun-duotone',
   },
   {
     id: 6,
@@ -478,8 +482,8 @@ const sessionGoals = ref([
     description: 'راهنمایی در مسائل تحصیلی و انتخاب مسیر شغلی',
     priority: 'پایین',
     estimatedSessions: '2-4',
-    icon: 'ph:graduation-cap-duotone'
-  }
+    icon: 'ph:graduation-cap-duotone',
+  },
 ])
 
 // Therapeutic Techniques Mock Data
@@ -489,43 +493,43 @@ const therapeuticTechniques = ref([
     name: 'درمان شناختی رفتاری',
     description: 'تغییر الگوهای فکری منفی و رفتارهای ناسازگار',
     icon: 'ph:brain-duotone',
-    tags: ['CBT', 'اضطراب', 'افسردگی']
+    tags: ['CBT', 'اضطراب', 'افسردگی'],
   },
   {
     id: 2,
     name: 'ذهن‌آگاهی',
     description: 'تمرکز بر لحظه حال و کاهش استرس',
     icon: 'ph:lotus-duotone',
-    tags: ['مدیتیشن', 'استرس', 'آرامش']
+    tags: ['مدیتیشن', 'استرس', 'آرامش'],
   },
   {
     id: 3,
     name: 'درمان قبولی و تعهد',
     description: 'پذیرش احساسات و تعهد به اهداف مهم',
     icon: 'ph:heart-straight-duotone',
-    tags: ['ACT', 'انعطاف‌پذیری', 'ارزش‌ها']
+    tags: ['ACT', 'انعطاف‌پذیری', 'ارزش‌ها'],
   },
   {
     id: 4,
     name: 'گفتگوی انگیزشی',
     description: 'تقویت انگیزه برای تغییر و بهبود',
     icon: 'ph:chat-circle-duotone',
-    tags: ['انگیزه', 'تغییر', 'هدف‌گذاری']
+    tags: ['انگیزه', 'تغییر', 'هدف‌گذاری'],
   },
   {
     id: 5,
     name: 'درمان خانواده',
     description: 'بهبود روابط و ارتباطات خانوادگی',
     icon: 'ph:house-duotone',
-    tags: ['خانواده', 'ارتباط', 'حل تعارض']
+    tags: ['خانواده', 'ارتباط', 'حل تعارض'],
   },
   {
     id: 6,
     name: 'درمان شناختی مبتنی بر ذهن‌آگاهی',
     description: 'ترکیب تکنیک‌های شناختی و ذهن‌آگاهی',
     icon: 'ph:circles-three-duotone',
-    tags: ['MBCT', 'شناختی', 'ذهن‌آگاهی']
-  }
+    tags: ['MBCT', 'شناختی', 'ذهن‌آگاهی'],
+  },
 ])
 
 // Therapeutic Approaches Mock Data
@@ -536,7 +540,7 @@ const therapeuticApproaches = ref([
     description: 'تمرکز بر درک و همدلی با تجربه کاربر و ایجاد محیط امن و حمایتی',
     effectiveness: 88,
     icon: 'ph:person-duotone',
-    suitableFor: ['اضطراب عمومی', 'مسائل هویت', 'کم اعتمادی']
+    suitableFor: ['اضطراب عمومی', 'مسائل هویت', 'کم اعتمادی'],
   },
   {
     id: 2,
@@ -544,7 +548,7 @@ const therapeuticApproaches = ref([
     description: 'تمرکز بر راه‌حل‌ها و نقاط قوت به جای مشکلات',
     effectiveness: 85,
     icon: 'ph:lightbulb-duotone',
-    suitableFor: ['مشکلات کوتاه‌مدت', 'هدف‌گذاری', 'بحران‌های زندگی']
+    suitableFor: ['مشکلات کوتاه‌مدت', 'هدف‌گذاری', 'بحران‌های زندگی'],
   },
   {
     id: 3,
@@ -552,7 +556,7 @@ const therapeuticApproaches = ref([
     description: 'ترکیب چندین روش درمانی بر اساس نیاز فردی کاربر',
     effectiveness: 92,
     icon: 'ph:puzzle-piece-duotone',
-    suitableFor: ['مسائل پیچیده', 'درمان طولانی‌مدت', 'کوموربیدیتی']
+    suitableFor: ['مسائل پیچیده', 'درمان طولانی‌مدت', 'کوموربیدیتی'],
   },
   {
     id: 4,
@@ -560,8 +564,8 @@ const therapeuticApproaches = ref([
     description: 'تمرکز بر پیشگیری از مشکلات روانی و تقویت سلامت روان',
     effectiveness: 78,
     icon: 'ph:shield-duotone',
-    suitableFor: ['سلامت روان', 'پیشگیری', 'تقویت تاب‌آوری']
-  }
+    suitableFor: ['سلامت روان', 'پیشگیری', 'تقویت تاب‌آوری'],
+  },
 ])
 
 // Assessment Methods Mock Data
@@ -572,7 +576,7 @@ const assessmentMethods = ref([
     description: 'ارزیابی سطح اضطراب با استفاده از مقیاس‌های علمی',
     duration: '10-15 دقیقه',
     accuracy: 94,
-    icon: 'ph:clipboard-duotone'
+    icon: 'ph:clipboard-duotone',
   },
   {
     id: 2,
@@ -580,7 +584,7 @@ const assessmentMethods = ref([
     description: 'بررسی الگوهای گفتاری برای شناسایی حالات روحی',
     duration: '5-10 دقیقه',
     accuracy: 87,
-    icon: 'ph:waveform-duotone'
+    icon: 'ph:waveform-duotone',
   },
   {
     id: 3,
@@ -588,7 +592,7 @@ const assessmentMethods = ref([
     description: 'مشاهده و تحلیل الگوهای رفتاری کاربر',
     duration: '20-30 دقیقه',
     accuracy: 91,
-    icon: 'ph:eye-duotone'
+    icon: 'ph:eye-duotone',
   },
   {
     id: 4,
@@ -596,8 +600,8 @@ const assessmentMethods = ref([
     description: 'شناسایی ویژگی‌های شخصیتی برای درمان هدفمند',
     duration: '15-25 دقیقه',
     accuracy: 89,
-    icon: 'ph:user-circle-duotone'
-  }
+    icon: 'ph:user-circle-duotone',
+  },
 ])
 
 // Quick Stats Mock Data
@@ -606,26 +610,26 @@ const quickStats = ref([
     label: 'نرخ رضایت',
     value: '96%',
     icon: 'ph:thumbs-up-duotone',
-    color: 'text-success-500'
+    color: 'text-success-500',
   },
   {
     label: 'زمان پاسخ',
     value: '< 2 ثانیه',
     icon: 'ph:lightning-duotone',
-    color: 'text-warning-500'
+    color: 'text-warning-500',
   },
   {
     label: 'جلسات امروز',
     value: '23',
     icon: 'ph:calendar-duotone',
-    color: 'text-info-500'
+    color: 'text-info-500',
   },
   {
     label: 'کاربران فعال',
     value: '145',
     icon: 'ph:users-duotone',
-    color: 'text-primary-500'
-  }
+    color: 'text-primary-500',
+  },
 ])
 
 // Recent Activities Mock Data
@@ -634,26 +638,26 @@ const recentActivities = ref([
     id: 1,
     description: 'جلسه مشاوره با کاربر جدید تکمیل شد',
     time: '10 دقیقه پیش',
-    icon: 'ph:check-circle-duotone'
+    icon: 'ph:check-circle-duotone',
   },
   {
     id: 2,
     description: 'پروفایل درمانی بروزرسانی شد',
     time: '1 ساعت پیش',
-    icon: 'ph:pencil-duotone'
+    icon: 'ph:pencil-duotone',
   },
   {
     id: 3,
     description: 'گزارش هفتگی تولید شد',
     time: '2 ساعت پیش',
-    icon: 'ph:file-text-duotone'
+    icon: 'ph:file-text-duotone',
   },
   {
     id: 4,
     description: 'تکنیک درمانی جدید اضافه شد',
     time: '1 روز پیش',
-    icon: 'ph:plus-circle-duotone'
-  }
+    icon: 'ph:plus-circle-duotone',
+  },
 ])
 
 // Methods

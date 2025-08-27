@@ -49,7 +49,7 @@ watch(selectedStyle, (value) => {
         <div class="relative w-full sm:w-1/2">
           <div class="absolute inset-x-0 z-0 -mt-2 py-24">
             <div
-              class="mt-12 grid grid-cols-2 -space-x-52 opacity-60 2xl:mx-auto 2xl:max-w-3xl dark:opacity-50"
+              class="mt-12 grid grid-cols-2 -space-x-52 opacity-60 dark:opacity-50 2xl:mx-auto 2xl:max-w-3xl"
             >
               <div
                 class="from-primary-200 to-primary-400 h-40 bg-gradient-to-br blur-3xl dark:from-blue-700"

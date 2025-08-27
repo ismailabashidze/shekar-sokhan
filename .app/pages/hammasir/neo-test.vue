@@ -90,7 +90,7 @@ const questions = [
   { id: 57, text: 'دوست دارم تجربیات جدید داشته باشم.', factor: 'openness', reverse: false },
   { id: 58, text: 'معمولاً تخیل قوی دارم.', factor: 'openness', reverse: false },
   { id: 59, text: 'ترجیح می‌دهم در چارچوب‌های مشخص کار کنم.', factor: 'openness', reverse: true },
-  { id: 60, text: 'دوست دارم فلسفه و مفاهیم عمیق را بررسی کنم.', factor: 'openness', reverse: false }
+  { id: 60, text: 'دوست دارم فلسفه و مفاهیم عمیق را بررسی کنم.', factor: 'openness', reverse: false },
 ]
 
 const currentQuestion = computed(() => questions[currentQuestionIndex.value])
@@ -106,12 +106,13 @@ function startTest() {
 function selectAnswer(value: number) {
   if (currentQuestion.value) {
     answers.value[currentQuestion.value.id] = value
-    
+
     // Auto-advance to next question after a short delay
     setTimeout(() => {
       if (isLastQuestion.value) {
         completeTest()
-      } else {
+      }
+      else {
         currentQuestionIndex.value++
       }
     }, 300) // 300ms delay for visual feedback
@@ -120,10 +121,11 @@ function selectAnswer(value: number) {
 
 function nextQuestion() {
   if (!canProceed.value) return
-  
+
   if (isLastQuestion.value) {
     completeTest()
-  } else {
+  }
+  else {
     currentQuestionIndex.value++
   }
 }
@@ -138,7 +140,7 @@ function completeTest() {
   isTestCompleted.value = true
   const testDuration = testStartTime.value ? new Date().getTime() - testStartTime.value.getTime() : 0
   const scores = calculateScores()
-  
+
   // Navigate to results page (in real app, would save results to backend)
   navigateTo('/hammasir/neo-results')
 }
@@ -149,22 +151,22 @@ function calculateScores() {
     agreeableness: 0,
     conscientiousness: 0,
     neuroticism: 0,
-    openness: 0
+    openness: 0,
   }
-  
-  questions.forEach(question => {
+
+  questions.forEach((question) => {
     const answer = answers.value[question.id]
     if (answer !== undefined) {
       let score = question.reverse ? (6 - answer) : answer
       factors[question.factor as keyof typeof factors] += score
     }
   })
-  
+
   // Convert to percentages (each factor has 12 questions, max score = 60)
-  Object.keys(factors).forEach(factor => {
+  Object.keys(factors).forEach((factor) => {
     factors[factor as keyof typeof factors] = Math.round((factors[factor as keyof typeof factors] / 60) * 100)
   })
-  
+
   return factors
 }
 
@@ -174,7 +176,7 @@ function goBack() {
 
 function getOptionClasses(value: number, color: string) {
   const isSelected = answers.value[currentQuestion.value?.id] === value
-  
+
   if (isSelected) {
     switch (color) {
       case 'red': return 'border-red-400 bg-red-50 dark:bg-red-900/20'
@@ -185,13 +187,13 @@ function getOptionClasses(value: number, color: string) {
       default: return 'border-gray-400 bg-gray-50 dark:bg-gray-900/20'
     }
   }
-  
+
   return 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
 }
 
 function getRadioClasses(value: number, color: string) {
   const isSelected = answers.value[currentQuestion.value?.id] === value
-  
+
   if (isSelected) {
     switch (color) {
       case 'red': return 'border-red-400 bg-red-400'
@@ -202,13 +204,13 @@ function getRadioClasses(value: number, color: string) {
       default: return 'border-gray-400 bg-gray-400'
     }
   }
-  
+
   return 'border-gray-300 dark:border-gray-600'
 }
 
 function getTextClasses(value: number, color: string) {
   const isSelected = answers.value[currentQuestion.value?.id] === value
-  
+
   if (isSelected) {
     switch (color) {
       case 'red': return 'text-red-700 dark:text-red-300'
@@ -219,13 +221,13 @@ function getTextClasses(value: number, color: string) {
       default: return 'text-gray-700 dark:text-gray-300'
     }
   }
-  
+
   return 'text-gray-700 dark:text-gray-300'
 }
 
 function getNumberClasses(value: number, color: string) {
   const isSelected = answers.value[currentQuestion.value?.id] === value
-  
+
   if (isSelected) {
     switch (color) {
       case 'red': return 'text-red-600'
@@ -236,7 +238,7 @@ function getNumberClasses(value: number, color: string) {
       default: return 'text-gray-600'
     }
   }
-  
+
   return 'text-gray-500'
 }
 
@@ -245,27 +247,32 @@ const answerOptions = [
   { value: 2, text: 'مخالفم', color: 'orange' },
   { value: 3, text: 'تا حدودی مخالفم', color: 'amber' },
   { value: 4, text: 'تا حدودی موافقم', color: 'lime' },
-  { value: 5, text: 'موافقم', color: 'green' }
+  { value: 5, text: 'موافقم', color: 'green' },
 ]
 </script>
 
 <template>
   <div>
     <!-- Test Introduction -->
-    <div v-if="!isTestStarted" class="max-w-4xl mx-auto">
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 p-1 shadow-2xl shadow-blue-500/25 mb-8">
-        <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
-        <div class="relative rounded-2xl bg-gradient-to-br from-blue-600/90 via-indigo-700/90 to-purple-700/90 backdrop-blur-xl px-8 py-12">
+    <div v-if="!isTestStarted" class="mx-auto max-w-4xl">
+      <div class="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 p-1 shadow-2xl shadow-blue-500/25">
+        <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+        <div class="relative rounded-2xl bg-gradient-to-br from-blue-600/90 via-indigo-700/90 to-purple-700/90 px-8 py-12 backdrop-blur-xl">
           <div class="text-center">
-            <div class="w-20 h-20 bg-gradient-to-br from-white/20 to-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-              <Icon name="ph:user-circle" class="w-10 h-10 text-white" />
+            <div class="mx-auto mb-6 flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-white/20 to-white/10 shadow-xl">
+              <Icon name="ph:user-circle" class="size-10 text-white" />
             </div>
-            
-            <BaseHeading as="h1" size="3xl" weight="bold" class="text-white drop-shadow-lg mb-4">
+
+            <BaseHeading
+              as="h1"
+              size="3xl"
+              weight="bold"
+              class="mb-4 text-white drop-shadow-lg"
+            >
               <span>آزمون شخصیت NEO</span>
             </BaseHeading>
-            
-            <BaseParagraph class="text-white/90 text-lg leading-relaxed max-w-2xl mx-auto mb-8">
+
+            <BaseParagraph class="mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-white/90">
               <span>این آزمون پنج عامل اصلی شخصیت شما را بررسی می‌کند: برون‌گرایی، توافق‌پذیری، وظیفه‌شناسی، ثبات عاطفی و گشودگی به تجربه. پاسخ‌دهی به 60 سوال حدود 25-30 دقیقه زمان می‌برد.</span>
             </BaseParagraph>
           </div>
@@ -273,41 +280,46 @@ const answerOptions = [
       </div>
 
       <!-- Test Instructions -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 mb-8">
-        <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-800 dark:text-white mb-6">
+      <div class="mb-8 rounded-2xl border border-gray-200/50 bg-white p-8 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <BaseHeading
+          as="h2"
+          size="xl"
+          weight="semibold"
+          class="mb-6 text-gray-800 dark:text-white"
+        >
           <span>دستورالعمل آزمون</span>
         </BaseHeading>
-        
-        <div class="space-y-4 mb-8">
+
+        <div class="mb-8 space-y-4">
           <div class="flex items-start">
-            <Icon name="ph:number-circle-one" class="w-6 h-6 text-blue-500 me-3 mt-0.5" />
+            <Icon name="ph:number-circle-one" class="me-3 mt-0.5 size-6 text-blue-500" />
             <div>
               <BaseParagraph class="text-gray-700 dark:text-gray-300">
                 <span>به هر سوال بر اساس احساس واقعی خود پاسخ دهید، نه آنچه فکر می‌کنید درست است.</span>
               </BaseParagraph>
             </div>
           </div>
-          
+
           <div class="flex items-start">
-            <Icon name="ph:number-circle-two" class="w-6 h-6 text-blue-500 me-3 mt-0.5" />
+            <Icon name="ph:number-circle-two" class="me-3 mt-0.5 size-6 text-blue-500" />
             <div>
               <BaseParagraph class="text-gray-700 dark:text-gray-300">
                 <span>هیچ پاسخ درست یا غلطی وجود ندارد. فقط صادقانه پاسخ دهید.</span>
               </BaseParagraph>
             </div>
           </div>
-          
+
           <div class="flex items-start">
-            <Icon name="ph:number-circle-three" class="w-6 h-6 text-blue-500 me-3 mt-0.5" />
+            <Icon name="ph:number-circle-three" class="me-3 mt-0.5 size-6 text-blue-500" />
             <div>
               <BaseParagraph class="text-gray-700 dark:text-gray-300">
                 <span>سعی کنید زیاد فکر نکنید و بر اساس اولین احساستان پاسخ دهید.</span>
               </BaseParagraph>
             </div>
           </div>
-          
+
           <div class="flex items-start">
-            <Icon name="ph:number-circle-four" class="w-6 h-6 text-blue-500 me-3 mt-0.5" />
+            <Icon name="ph:number-circle-four" class="me-3 mt-0.5 size-6 text-blue-500" />
             <div>
               <BaseParagraph class="text-gray-700 dark:text-gray-300">
                 <span>می‌توانید در هر مرحله به سوال قبلی برگردید و پاسخ خود را تغییر دهید.</span>
@@ -316,45 +328,50 @@ const answerOptions = [
           </div>
         </div>
 
-        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800 mb-8">
-          <div class="flex items-center mb-4">
-            <Icon name="ph:info" class="w-5 h-5 text-blue-600 me-2" />
-            <BaseHeading as="h3" size="md" weight="semibold" class="text-blue-800 dark:text-blue-200">
+        <div class="mb-8 rounded-xl border border-blue-200 bg-blue-50 p-6 dark:border-blue-800 dark:bg-blue-900/20">
+          <div class="mb-4 flex items-center">
+            <Icon name="ph:info" class="me-2 size-5 text-blue-600" />
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              class="text-blue-800 dark:text-blue-200"
+            >
               <span>اطلاعات آزمون</span>
             </BaseHeading>
           </div>
-          
-          <div class="grid md:grid-cols-3 gap-4 text-sm">
+
+          <div class="grid gap-4 text-sm md:grid-cols-3">
             <div class="flex items-center text-blue-700 dark:text-blue-300">
-              <Icon name="ph:list" class="w-4 h-4 me-2" />
+              <Icon name="ph:list" class="me-2 size-4" />
               <span>60 سوال</span>
             </div>
             <div class="flex items-center text-blue-700 dark:text-blue-300">
-              <Icon name="ph:clock" class="w-4 h-4 me-2" />
+              <Icon name="ph:clock" class="me-2 size-4" />
               <span>25-30 دقیقه</span>
             </div>
             <div class="flex items-center text-blue-700 dark:text-blue-300">
-              <Icon name="ph:chart-bar" class="w-4 h-4 me-2" />
+              <Icon name="ph:chart-bar" class="me-2 size-4" />
               <span>5 عامل شخصیت</span>
             </div>
           </div>
         </div>
 
-        <div class="flex gap-4 justify-center">
+        <div class="flex justify-center gap-4">
           <BaseButton
-            @click="goBack"
             variant="outline"
             class="border-gray-300 text-gray-700 hover:bg-gray-50"
+            @click="goBack"
           >
-            <Icon name="ph:arrow-right" class="w-4 h-4 me-2" />
+            <Icon name="ph:arrow-right" class="me-2 size-4" />
             <span>بازگشت</span>
           </BaseButton>
-          
+
           <BaseButton
+            class="bg-gradient-to-r from-blue-500 to-indigo-600 px-8 text-white hover:from-blue-600 hover:to-indigo-700"
             @click="startTest"
-            class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-8"
           >
-            <Icon name="ph:play" class="w-4 h-4 me-2" />
+            <Icon name="ph:play" class="me-2 size-4" />
             <span>شروع آزمون</span>
           </BaseButton>
         </div>
@@ -362,72 +379,87 @@ const answerOptions = [
     </div>
 
     <!-- Test Questions -->
-    <div v-else-if="!isTestCompleted" class="max-w-4xl mx-auto">
+    <div v-else-if="!isTestCompleted" class="mx-auto max-w-4xl">
       <!-- Progress Header -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 mb-8">
-        <div class="flex items-center justify-between mb-4">
+      <div class="mb-8 rounded-2xl border border-gray-200/50 bg-white p-6 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <div class="mb-4 flex items-center justify-between">
           <div>
-            <BaseHeading as="h2" size="lg" weight="semibold" class="text-gray-800 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="lg"
+              weight="semibold"
+              class="text-gray-800 dark:text-white"
+            >
               <span>سوال {{ currentQuestionIndex + 1 }} از {{ questions.length }}</span>
             </BaseHeading>
-            <BaseParagraph class="text-gray-600 dark:text-gray-400 text-sm">
+            <BaseParagraph class="text-sm text-gray-600 dark:text-gray-400">
               <span>آزمون شخصیت NEO</span>
             </BaseParagraph>
           </div>
-          
+
           <div class="text-left">
-            <div class="text-2xl font-bold text-blue-600">{{ Math.round(progress) }}%</div>
-            <div class="text-xs text-gray-500">تکمیل شده</div>
+            <div class="text-2xl font-bold text-blue-600">
+              {{ Math.round(progress) }}%
+            </div>
+            <div class="text-xs text-gray-500">
+              تکمیل شده
+            </div>
           </div>
         </div>
-        
+
         <!-- Progress Bar -->
-        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-          <div 
-            class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-500 relative overflow-hidden"
+        <div class="h-3 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+          <div
+            class="relative h-3 overflow-hidden rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500"
             :style="{ width: `${progress}%` }"
           >
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+            <div class="animate-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           </div>
         </div>
       </div>
 
       <!-- Question Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 mb-8">
-        <BaseHeading as="h3" size="xl" weight="semibold" class="text-gray-800 dark:text-white mb-8 leading-relaxed">
+      <div class="mb-8 rounded-2xl border border-gray-200/50 bg-white p-8 shadow-lg dark:border-gray-700/50 dark:bg-gray-800">
+        <BaseHeading
+          as="h3"
+          size="xl"
+          weight="semibold"
+          class="mb-8 leading-relaxed text-gray-800 dark:text-white"
+        >
           <span>{{ currentQuestion?.text }}</span>
         </BaseHeading>
-        
+
         <!-- Answer Options -->
-        <div class="space-y-4 mb-8">
+        <div class="mb-8 space-y-4">
           <div
             v-for="option in answerOptions"
             :key="option.value"
-            @click="selectAnswer(option.value)"
-            class="group relative overflow-hidden rounded-xl border-2 transition-all duration-200 cursor-pointer"
+            class="group relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200"
             :class="getOptionClasses(option.value, option.color)"
+            @click="selectAnswer(option.value)"
           >
             <div class="flex items-center p-4">
-              <div 
-                class="w-6 h-6 rounded-full border-2 flex items-center justify-center me-4 transition-all duration-200"
+              <div
+                class="me-4 flex size-6 items-center justify-center rounded-full border-2 transition-all duration-200"
                 :class="getRadioClasses(option.value, option.color)"
               >
-                <div 
+                <div
                   v-if="answers[currentQuestion?.id] === option.value"
-                  class="w-2 h-2 rounded-full bg-white"
-                ></div>
+                  class="size-2 rounded-full bg-white"
+                />
               </div>
-              
+
               <div class="flex-1">
-                <BaseParagraph 
+                <BaseParagraph
                   class="font-medium transition-colors"
                   :class="getTextClasses(option.value, option.color)"
                 >
                   <span>{{ option.text }}</span>
                 </BaseParagraph>
               </div>
-              
-              <div class="text-sm font-medium w-8 text-center"
+
+              <div
+                class="w-8 text-center text-sm font-medium"
                 :class="getNumberClasses(option.value, option.color)"
               >
                 {{ option.value }}
@@ -439,22 +471,22 @@ const answerOptions = [
         <!-- Navigation Buttons -->
         <div class="flex justify-between">
           <BaseButton
-            @click="previousQuestion"
             :disabled="currentQuestionIndex === 0"
             variant="outline"
-            class="border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="border-gray-300 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            @click="previousQuestion"
           >
-            <Icon name="ph:arrow-right" class="w-4 h-4 me-2" />
+            <Icon name="ph:arrow-right" class="me-2 size-4" />
             <span>قبلی</span>
           </BaseButton>
-          
+
           <BaseButton
-            @click="nextQuestion"
             :disabled="!canProceed"
-            class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            @click="nextQuestion"
           >
             <span>{{ isLastQuestion ? 'تکمیل آزمون' : 'بعدی' }}</span>
-            <Icon :name="isLastQuestion ? 'ph:check' : 'ph:arrow-left'" class="w-4 h-4 ms-2" />
+            <Icon :name="isLastQuestion ? 'ph:check' : 'ph:arrow-left'" class="ms-2 size-4" />
           </BaseButton>
         </div>
       </div>

@@ -86,7 +86,7 @@ function goBack() {
               <Icon name="ph:star-fill" class="me-2 size-4 text-yellow-500 dark:text-yellow-400" />مقاله ویژه
             </span>
           </div>
-          <h1 class="mb-3 text-3xl font-bold leading-tight text-gray-900 lg:text-4xl dark:text-white">
+          <h1 class="mb-3 text-3xl font-bold leading-tight text-gray-900 dark:text-white lg:text-4xl">
             {{ title }}
           </h1>
           <p v-if="excerpt" class="mb-4 text-lg leading-relaxed text-gray-600 dark:text-gray-400">
@@ -99,7 +99,7 @@ function goBack() {
 
         <!-- Meta Info: Date, Read Time, Tags -->
         <div class="my-8 border-y border-gray-200 py-4 dark:border-gray-700">
-          <div class="flex flex-col flex-wrap items-start gap-x-6 gap-y-3 text-sm text-gray-500 sm:flex-row sm:items-center dark:text-gray-400">
+          <div class="flex flex-col flex-wrap items-start gap-x-6 gap-y-3 text-sm text-gray-500 dark:text-gray-400 sm:flex-row sm:items-center">
             <span class="flex items-center"><Icon name="ph:calendar-blank-duotone" class="me-1.5 size-5" />تاریخ انتشار: {{ publishDate }}</span>
             <span class="flex items-center"><Icon name="ph:clock-duotone" class="me-1.5 size-5" />زمان مطالعه: {{ readTime }} دقیقه</span>
             <div v-if="tags && tags.length" class="flex flex-wrap items-center gap-2 pt-1 sm:pt-0">
