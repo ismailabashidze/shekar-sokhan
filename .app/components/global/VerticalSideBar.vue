@@ -8,10 +8,10 @@
         <div
           class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
         >
-          <NuxtLink to="#" class="flex items-center justify-center">
+          <NuxtLink :to="isHammasirPage ? '/hammasir' : '/dashboard'" class="flex items-center justify-center">
             <div class="rounded-full bg-white p-[5px]">
               <img
-                src="/img/logo-no-bg.png"
+                :src="isHammasirPage ? '/img/logo-hammasir.png' : '/img/logo-no-bg.png'"
                 width="40"
                 height="40"
                 alt=""
@@ -39,31 +39,81 @@
         </div> -->
         <div class="flex h-16 w-full items-center justify-center">
           <NuxtLink
-            to="/dashboard"
+            :to="isHammasirPage ? '/hammasir' : '/dashboard'"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="بازگشت به صفحه اصلی"
+            :title="isHammasirPage ? 'همسیر' : 'بازگشت به صفحه اصلی'"
           >
-            <Icon name="ph:house-line" class="size-5" />
+            <Icon :name="isHammasirPage ? 'ph:map-trifold' : 'ph:house-line'" class="size-5" />
           </NuxtLink>
         </div>
         <div class="hidden h-16 w-full items-center justify-center md:flex">
           <button
+            type="button"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="نمایش اطلاعات"
-            @click.prevent="changeExpanded"
+            title="اعلان‌ها"
+            @click="toggle"
           >
-            <Icon name="ph:robot" class="size-5" />
+            <Icon name="ph:bell" class="size-5" />
+            <span
+              v-if="unreadCount > 0"
+              class="absolute -right-1 -top-1 flex size-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
+            >
+              {{ unreadCount > 99 ? '99+' : unreadCount }}
+            </span>
           </button>
         </div>
         <div class="flex h-16 w-full items-center justify-center">
-          <NuxtLink
-            to="/login"
-            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="خروج"
-            @click.prevent="signout"
+          <BaseDropdown
+            variant="context"
+            :button-class="'inline-flex size-10 items-center justify-center rounded-full'"
           >
-            <Icon name="ph:sign-out" class="size-5" />
-          </NuxtLink>
+            <template #button>
+              <div class="relative mt-2.5 inline-flex size-10 cursor-pointer items-center justify-center rounded-full">
+                <img
+                  :src="avatarUrl"
+                  class="max-w-full rounded-full object-cover shadow-sm dark:border-transparent"
+                  alt=""
+                  @error="$event.target.src = '/img/avatars/1.png'"
+                >
+              </div>
+            </template>
+            <BaseDropdownItem
+              :to="isHammasirPage ? '/hammasir/my-profile' : '/report'"
+              :title="isHammasirPage ? 'پروفایل همسیر' : 'مشاهده پروفایل'"
+              :text="user.meta?.name || 'کاربر جدید'"
+              rounded="sm"
+            />
+
+            <BaseDropdownItem
+              :to="isHammasirPage ? '/hammasir/sessions' : '/darmana/therapists/sessions'"
+              title="جلسات"
+              text="همه جلسات من"
+              rounded="sm"
+            />
+
+            <BaseDropdownItem
+              to="/payments"
+              title="پرداختی ها"
+              text="مدیریت پرداختی ها"
+              rounded="sm"
+            />
+
+            <BaseDropdownItem
+              :to="isHammasirPage ? '/hammasir/admin' : '/settings'"
+              :title="isHammasirPage ? 'تنظیمات همسیر' : 'تنظیمات'"
+              text="تنظیمات حساب"
+              rounded="sm"
+            />
+
+            <BaseDropdownDivider />
+
+            <BaseDropdownItem
+              to="/auth/logout"
+              title="خروج"
+              text="خروج از حساب کاربری"
+              rounded="sm"
+            />
+          </BaseDropdown>
         </div>
       </div>
     </div>
@@ -76,10 +126,14 @@ import { computed } from 'vue'
 
 const route = useRoute()
 const isAuthPage = computed(() => route.path.startsWith('/auth'))
+const isHammasirPage = computed(() => route.path.includes('/hammasir/'))
 
-const signout = () => {}
-const changeExpanded = () => {}
-const canDelete = () => {}
+const { user } = useUser()
+const { getUserAvatarUrl } = useAvatarManager()
+const { unreadCount } = useNotifications()
+
+// Computed avatar and name from user
+const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png')
 </script>
 
 <style scoped>
