@@ -27,6 +27,38 @@
               >
                 مدیریت پروفایل‌ها
               </NuxtLink>
+              <NuxtLink
+                to="/hammasir/admin/counselors"
+                class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
+                exact-active-class="border-blue-500 text-gray-900"
+                active-class="border-blue-500 text-gray-900"
+              >
+                مشاوران
+              </NuxtLink>
+              <NuxtLink
+                to="/hammasir/admin/verification"
+                class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
+                exact-active-class="border-blue-500 text-gray-900"
+                active-class="border-blue-500 text-gray-900"
+              >
+                تأیید مشاوران
+              </NuxtLink>
+              <NuxtLink
+                to="/hammasir/admin/files"
+                class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
+                exact-active-class="border-blue-500 text-gray-900"
+                active-class="border-blue-500 text-gray-900"
+              >
+                فایل‌ها
+              </NuxtLink>
+              <NuxtLink
+                to="/hammasir/admin/notifications"
+                class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
+                exact-active-class="border-blue-500 text-gray-900"
+                active-class="border-blue-500 text-gray-900"
+              >
+                اعلان‌ها
+              </NuxtLink>
             </nav>
           </div>
           <div class="flex items-center">

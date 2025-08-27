@@ -9,6 +9,26 @@ const hammasirItems = [
     to: '/hammasir/dashboard',
   },
   {
+    title: 'پروفایل من',
+    icon: 'ph:user',
+    to: '/hammasir/my-profile',
+  },
+  {
+    title: 'نقشه راه',
+    icon: 'ph:map-trifold',
+    to: '/hammasir/roadmap',
+  },
+  {
+    title: 'پرسش‌نامه‌ها',
+    icon: 'ph:clipboard-text',
+    to: '/hammasir/questionnaires',
+  },
+  {
+    title: 'تحلیل‌ها',
+    icon: 'ph:chart-bar',
+    to: '/hammasir/analysis',
+  },
+  {
     title: 'مشاوران',
     icon: 'ph:chalkboard-teacher',
     to: '/hammasir/counselors',
@@ -19,14 +39,9 @@ const hammasirItems = [
     to: '/hammasir/sessions',
   },
   {
-    title: 'مشاوره',
-    icon: 'ph:chat',
-    to: '/hammasir/counseling',
-  },
-  {
-    title: 'نقشه راه',
-    icon: 'ph:map-trifold',
-    to: '/hammasir/roadmap',
+    title: 'تأیید صلاحیت',
+    icon: 'ph:identification-card',
+    to: '/hammasir/verifications',
   },
 ]
 </script>
@@ -43,47 +58,50 @@ const hammasirItems = [
           : '-translate-x-full rtl:translate-x-full xl:translate-x-0 rtl:xl:-translate-x-0'
       "
     >
-    <div class="flex mt-5 h-12 w-full items-center justify-center">
-      <slot name="logo">
-        <img 
-          src="/img/logo-hammasir.png" 
-          alt="Hammasir Logo" 
-          class="h-10"
-        />
-      </slot>
-    </div>
-    
-    <!-- Top Menu -->
-    <div class="flex flex-col items-center justify-center gap-2 p-2">
-      <BaseThemeToggle />
-      <NuxtLink
-        v-for="item in hammasirItems"
-        :key="item.title"
-        :to="item.to"
-        class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-        :title="item.title"
-      >
-        <Icon :name="item.icon" class="w-5 h-5" />
-      </NuxtLink>
-    </div>
+      <div class="flex mt-5 h-12 w-full items-center justify-center">
+        <slot name="logo">
+          <img 
+            src="/img/logo-hammasir.png" 
+            alt="Hammasir Logo" 
+            class="h-10"
+          />
+        </slot>
+      </div>
+      
+      <!-- Top Menu -->
+      <div class="flex flex-col items-center justify-center gap-2 p-2">
+        <BaseThemeToggle />
+        <NuxtLink
+          v-for="item in hammasirItems"
+          :key="item.title"
+          :to="item.to"
+          class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+          :title="item.title"
+          :aria-label="item.title"
+        >
+          <Icon :name="item.icon" class="w-5 h-5" />
+        </NuxtLink>
+      </div>
 
-    <!-- Bottom Menu -->
-    <div class="mt-auto flex flex-col items-center justify-center gap-2 p-2">
-      <NuxtLink
-        to="/hammasir/admin"
-        class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-        title="تنظیمات"
-      >
-        <Icon name="ph:gear" class="w-5 h-5" />
-      </NuxtLink>
-      <NuxtLink
-        to="/hammasir/my-profile"
-        class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-        title="پروفایل"
-      >
-        <Icon name="ph:user" class="w-5 h-5" />
-      </NuxtLink>
+      <!-- Bottom Menu -->
+      <div class="mt-auto flex flex-col items-center justify-center gap-2 p-2">
+        <NuxtLink
+          to="/hammasir/admin"
+          class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+          title="مدیریت"
+          aria-label="مدیریت"
+        >
+          <Icon name="ph:gear" class="w-5 h-5" />
+        </NuxtLink>
+        <NuxtLink
+          to="/hammasir/my-profile"
+          class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+          title="پروفایل"
+          aria-label="پروفایل"
+        >
+          <Icon name="ph:user" class="w-5 h-5" />
+        </NuxtLink>
+      </div>
     </div>
-  </div>
   </div>
 </template>

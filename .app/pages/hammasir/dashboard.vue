@@ -201,6 +201,7 @@ const quickActions = [
   { title: 'تکمیل پرسش‌نامه‌ها', icon: 'ph:clipboard-text', action: 'questionnaires' },
   { title: 'درخواست مشاوره', icon: 'ph:user-circle-gear', action: 'counseling' },
   { title: 'ادامه دوره فعلی', icon: 'ph:play-circle', action: 'continue_course' },
+  { title: 'مشاهده دوره‌های من', icon: 'ph:book-open', action: 'my_courses' },
   { title: 'مشاهده قیمت‌گذاری', icon: 'ph:credit-card', action: 'pricing' },
   { title: 'ویرایش پروفایل', icon: 'ph:user-gear', action: 'profile' },
 ]
@@ -266,6 +267,9 @@ function handleQuickAction(action: string) {
     case 'continue_course':
       // TODO: Navigate to current course
       console.log('Continue current course')
+      break
+    case 'my_courses':
+      navigateTo('/hammasir/courses/my')
       break
     case 'pricing':
       navigateTo('/hammasir/pricing')

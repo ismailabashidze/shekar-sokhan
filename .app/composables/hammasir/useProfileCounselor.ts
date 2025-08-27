@@ -7,6 +7,7 @@ import type {
   SpecializationDto,
   AvailabilityDto,
   RateInfoDto,
+  TimeSlotDto,
 } from '~/types/api'
 
 // Counselor profile state
@@ -302,6 +303,31 @@ const updateRates = async (data: RateInfoDto[]): Promise<RateInfoDto[] | null> =
   }
 }
 
+// Get counselor availability for scheduling
+const getCounselorAvailability = async (
+  counselorId: string,
+  startDate: string,
+  endDate: string
+): Promise<TimeSlotDto[] | null> => {
+  isProfileLoading.value = true
+  profileError.value = null
+
+  try {
+    const timeSlots = await apiRequest<TimeSlotDto[]>(
+      `/api/v1/counseling/scheduling/counselors/${counselorId}/availability?startDate=${startDate}&endDate=${endDate}`
+    )
+
+    return timeSlots
+  }
+  catch (error: any) {
+    profileError.value = error.message || 'دریافت زمان‌های آزاد مشاور ناموفق بود'
+    return null
+  }
+  finally {
+    isProfileLoading.value = false
+  }
+}
+
 // Export everything
 export const useProfileCounselor = () => {
   return {
@@ -322,5 +348,6 @@ export const useProfileCounselor = () => {
     updateSpecializations,
     updateAvailability,
     updateRates,
+    getCounselorAvailability,
   }
 }

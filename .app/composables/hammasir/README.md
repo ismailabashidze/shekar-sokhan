@@ -34,13 +34,19 @@ composables/hammasir/
 ├── usePublicCounselors.ts        # Main composable for public counselor functionality
 ├── useProfileCounselor.ts        # Composable for counselor profile management
 ├── useMyClients.ts              # Composable for counselor client management
+├── useVerifications.ts          # Composable for counselor verification management
+├── useNotes.ts                  # Composable for managing client notes
 ├── index.ts                      # Export file
 ├── usePublicCounselors.example.ts # Usage examples for public counselors
 ├── useProfileCounselor.example.ts # Usage examples for counselor profile
 ├── useMyClients.example.ts      # Usage examples for counselor clients
+├── useVerifications.example.ts  # Usage examples for counselor verifications
+├── useNotes.example.ts          # Usage examples for notes
 ├── usePublicCounselors.test.ts    # Test file for public counselors
 ├── useProfileCounselor.test.ts    # Test file for counselor profile
-└── useMyClients.test.ts         # Test file for counselor clients
+├── useMyClients.test.ts         # Test file for counselor clients
+├── useVerifications.test.ts     # Test file for counselor verifications
+└── useNotes.test.ts             # Test file for notes
 ```
 
 ## Usage
@@ -128,6 +134,60 @@ const {
 } = useMyClients()
 ```
 
+### Verifications Composable
+
+```typescript
+import { useVerifications } from '~/composables/hammasir/useVerifications'
+
+const {
+  // State
+  verificationState,
+  verificationError,
+  isVerificationLoading,
+  isVerificationSubmitting,
+  isVerificationSyncing,
+  
+  // Computed
+  userVerificationDocuments,
+  userVerificationStatus,
+  verificationRequests,
+  currentSyncStatus,
+  keycloakValidation,
+  
+  // Methods
+  getMyVerificationDocuments,
+  registerVerificationDocument,
+  submitVerificationRequest,
+  getMyVerificationStatus,
+  getAllVerificationRequests,
+  updateVerificationStatus,
+  validateKeycloakConsistency,
+  getSyncStatus,
+  syncWithKeycloak
+} = useVerifications()
+```
+
+### Notes Composable
+
+```typescript
+import { useNotes } from '~/composables/hammasir/useNotes'
+
+const {
+  // State
+  notesState,
+  notesError,
+  isNotesLoading,
+  isNotesCreating,
+  
+  // Computed
+  clientNotes,
+  
+  // Methods
+  getClientNotes,
+  addClientNote
+} = useNotes()
+```
+
 ## API Integration
 
 The module integrates with the following API endpoints:
@@ -159,6 +219,21 @@ The module integrates with the following API endpoints:
 - `GET /api/v1/counselor/me/clients/{id}/goals` - Get client goals
 - `POST /api/v1/counselor/me/clients/{id}/goals` - Add client goal
 - `PATCH /api/v1/counselor/me/clients/{id}/goals/{goalId}` - Update client goal
+
+### Verifications
+- `GET /api/v1/counselor/me/documents` - Get my verification documents
+- `POST /api/v1/counselor/me/documents` - Register verification document
+- `PUT /api/v1/counselor/verification/me` - Submit verification request
+- `GET /api/v1/counselor/verification/me` - Get my verification status
+- `GET /api/v1/counselor/admin/verifications` - List all verification requests (admin)
+- `PUT /api/v1/counselor/admin/verifications/{id}/status` - Update verification status (admin)
+- `GET /api/v1/counselor/internal/counselors/{id}/validate/keycloak-consistency` - Validate Keycloak consistency (internal)
+- `GET /api/v1/counselor/internal/counselors/{id}/sync/status` - Get sync status (internal)
+- `POST /api/v1/counselor/internal/counselors/{id}/sync/keycloak` - Sync with Keycloak (internal)
+
+### Notes
+- `GET /api/v1/counselor/me/clients/{id}/notes` - Get client notes
+- `POST /api/v1/counselor/me/clients/{id}/notes` - Add client note
 
 ## Permissions
 

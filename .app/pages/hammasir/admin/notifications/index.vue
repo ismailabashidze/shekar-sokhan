@@ -384,6 +384,7 @@ definePageMeta({
 
 import { ref, computed, onMounted } from 'vue'
 import { useAdminNotifications } from '~/composables/hammasir/useAdminNotifications'
+import { useAdmin } from '~/composables/hammasir/useAdmin'
 import type { SystemNotificationDto } from '~/types/api'
 
 // State
@@ -413,6 +414,14 @@ const {
   sendSystemNotificationAdmin,
   deleteSystemNotificationAdmin,
 } = useAdminNotifications()
+
+// Also use the new admin composable
+const {
+  getSystemNotificationsAdmin: getSystemNotificationsNew,
+  sendSystemNotificationAdmin: sendSystemNotificationNew,
+  adminState,
+  isAdminLoading,
+} = useAdmin()
 
 // Computed properties
 const notifications = computed(() => adminNotificationsState.value.notifications)

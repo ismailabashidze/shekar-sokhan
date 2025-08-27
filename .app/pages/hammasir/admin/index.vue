@@ -122,6 +122,125 @@
       </div>
     </div>
 
+    <!-- New Admin Sections Overview -->
+    <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-lg bg-white p-6 shadow">
+        <div class="flex items-center">
+          <div class="rounded-full bg-purple-100 p-3 text-purple-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          </div>
+          <div class="mr-4">
+            <p class="text-sm font-medium text-gray-600">
+              مجموع مشاوران
+            </p>
+            <p class="text-2xl font-semibold">
+              {{ adminStats.totalCounselors }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg bg-white p-6 shadow">
+        <div class="flex items-center">
+          <div class="rounded-full bg-indigo-100 p-3 text-indigo-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <div class="mr-4">
+            <p class="text-sm font-medium text-gray-600">
+              درخواست‌های تأیید
+            </p>
+            <p class="text-2xl font-semibold">
+              {{ adminStats.pendingVerifications }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg bg-white p-6 shadow">
+        <div class="flex items-center">
+          <div class="rounded-full bg-teal-100 p-3 text-teal-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <div class="mr-4">
+            <p class="text-sm font-medium text-gray-600">
+              فایل‌های سیستمی
+            </p>
+            <p class="text-2xl font-semibold">
+              {{ adminStats.totalFiles }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg bg-white p-6 shadow">
+        <div class="flex items-center">
+          <div class="rounded-full bg-pink-100 p-3 text-pink-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+          </div>
+          <div class="mr-4">
+            <p class="text-sm font-medium text-gray-600">
+              اعلان‌های سیستمی
+            </p>
+            <p class="text-2xl font-semibold">
+              {{ adminStats.totalNotifications }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <div class="rounded-lg bg-white shadow">
         <div class="border-b border-gray-200 px-6 py-4">
@@ -281,8 +400,9 @@ definePageMeta({
   middleware: 'admin',
 })
 
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAdminProfile } from '~/composables/hammasir/useAdminProfile'
+import { useAdmin } from '~/composables/hammasir/useAdmin'
 import type { UserProfileDto } from '~/types/api'
 
 // State
@@ -293,10 +413,30 @@ const stats = ref({
   suspendedUsers: 0,
 })
 
+const adminStats = ref({
+  totalCounselors: 0,
+  pendingVerifications: 0,
+  totalFiles: 0,
+  totalNotifications: 0,
+})
+
 const recentUsers = ref<UserProfileDto[]>([])
 
 // Composables
 const { getAllProfiles } = useAdminProfile()
+const { 
+  getAllCounselorsAdmin,
+  getSystemNotificationsAdmin,
+  getAllVerificationRequestsAdmin,
+  getAllModulesAdmin,
+  getAllFilesAdmin,
+  adminState,
+} = useAdmin()
+
+// Computed properties for admin data
+const adminData = computed(() => ({
+  // You can access various admin states here if needed
+}))
 
 // Initialize
 onMounted(() => {
@@ -312,15 +452,49 @@ const loadDashboardData = async () => {
     if (result) {
       recentUsers.value = result.profiles
 
-      // Calculate statistics (in a real app, you might have a separate API endpoint for this)
+      // Calculate user statistics
       stats.value.totalUsers = result.total
       stats.value.activeUsers = result.profiles.filter(u => u.status === 'ACTIVE').length
       stats.value.pendingUsers = result.profiles.filter(u => u.status === 'PENDING_VERIFICATION').length
       stats.value.suspendedUsers = result.profiles.filter(u => u.status === 'SUSPENDED').length
     }
+
+    // Load admin statistics
+    await loadAdminStats()
   }
   catch (err) {
     console.error('Error loading dashboard data:', err)
+  }
+}
+
+const loadAdminStats = async () => {
+  try {
+    // Load counselors data
+    const counselorsResult = await getAllCounselorsAdmin(1, 10)
+    if (counselorsResult) {
+      adminStats.value.totalCounselors = counselorsResult.total
+    }
+
+    // Load verification requests
+    const verificationsResult = await getAllVerificationRequestsAdmin('PENDING')
+    if (verificationsResult) {
+      adminStats.value.pendingVerifications = verificationsResult.total
+    }
+
+    // Load files data
+    const filesResult = await getAllFilesAdmin()
+    if (filesResult) {
+      adminStats.value.totalFiles = filesResult.total
+    }
+
+    // Load notifications data
+    const notificationsResult = await getSystemNotificationsAdmin(1, 10)
+    if (notificationsResult) {
+      adminStats.value.totalNotifications = notificationsResult.total
+    }
+  }
+  catch (err) {
+    console.error('Error loading admin statistics:', err)
   }
 }
 

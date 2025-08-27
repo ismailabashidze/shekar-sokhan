@@ -1,23 +1,55 @@
 <template>
-  <div class="admin-profiles">
+  <div class="admin-files">
     <h1 class="mb-6 text-2xl font-bold">
-      لیست پروفایل‌های کاربران
+      مدیریت فایل‌های سیستمی
     </h1>
 
     <!-- Search and Filter Section -->
     <div class="mb-6 rounded-lg bg-white p-4 shadow">
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
         <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700">جستجو بر اساس نام</label>
+          <label class="mb-1 block text-sm font-medium text-gray-700">شناسه کاربر</label>
           <input
-            v-model="searchTerm"
+            v-model="userIdFilter"
             type="text"
-            placeholder="نام یا نام خانوادگی..."
+            placeholder="شناسه کاربر..."
             class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700">وضعیت کاربر</label>
+          <label class="mb-1 block text-sm font-medium text-gray-700">نوع فایل</label>
+          <select
+            v-model="fileTypeFilter"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">
+              همه انواع
+            </option>
+            <option value="PROFILE_IMAGE">
+              تصویر پروفایل
+            </option>
+            <option value="DOCUMENT">
+              سند
+            </option>
+            <option value="SESSION_RECORDING">
+              ضبط جلسه
+            </option>
+            <option value="COURSE_MATERIAL">
+              محتوای دوره
+            </option>
+            <option value="ASSESSMENT_FILE">
+              فایل ارزیابی
+            </option>
+            <option value="MESSAGE_ATTACHMENT">
+              پیوست پیام
+            </option>
+            <option value="NOTIFICATION_ATTACHMENT">
+              پیوست اعلان
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">وضعیت</label>
           <select
             v-model="statusFilter"
             class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -25,24 +57,30 @@
             <option value="">
               همه وضعیت‌ها
             </option>
-            <option value="Active">
-              فعال
+            <option value="PENDING">
+              در انتظار
             </option>
-            <option value="Inactive">
-              غیرفعال
+            <option value="UPLOADED">
+              آپلود شده
             </option>
-            <option value="Suspended">
-              تعلیق شده
+            <option value="PROCESSING">
+              در حال پردازش
             </option>
-            <option value="Pending">
-              در انتظار تأیید
+            <option value="READY">
+              آماده
+            </option>
+            <option value="ERROR">
+              خطا
+            </option>
+            <option value="DELETED">
+              حذف شده
             </option>
           </select>
         </div>
         <div class="flex items-end">
           <button
             class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            @click="searchProfiles"
+            @click="searchFiles"
           >
             جستجو
           </button>
@@ -50,12 +88,12 @@
       </div>
     </div>
 
-    <!-- Profiles Table -->
+    <!-- Files Table -->
     <div class="overflow-hidden rounded-lg bg-white shadow">
       <div v-if="isLoading" class="p-6 text-center">
         <div class="inline-block size-8 animate-spin rounded-full border-y-2 border-blue-500" />
         <p class="mt-2">
-          در حال بارگذاری پروفایل‌ها...
+          در حال بارگذاری فایل‌ها...
         </p>
       </div>
 
@@ -63,7 +101,7 @@
         <p>{{ error }}</p>
         <button
           class="mt-2 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          @click="loadProfiles"
+          @click="loadFiles"
         >
           تلاش مجدد
         </button>
@@ -74,19 +112,22 @@
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                نام کاربری
+                نام فایل
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                نام کامل
+                نوع فایل
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                ایمیل
+                اندازه
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 وضعیت
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                تاریخ عضویت
+                کاربر
+              </th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                تاریخ ایجاد
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 عملیات
@@ -95,42 +136,46 @@
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white">
             <tr
-              v-for="profile in filteredProfiles"
-              :key="profile.userId"
+              v-for="file in files"
+              :key="file.id"
               class="hover:bg-gray-50"
             >
               <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {{ profile.username }}
+                {{ file.fileName }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {{ profile.personalInfo?.firstName }} {{ profile.personalInfo?.lastName }}
+                {{ getFileTypeText(file.fileType) }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {{ profile.email }}
+                {{ formatFileSize(file.fileSize) }}
               </td>
               <td class="whitespace-nowrap px-6 py-4">
                 <span
                   class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
-                  :class="getStatusClass(profile.status)"
+                  :class="getStatusClass(file.status)"
                 >
-                  {{ getStatusText(profile.status) }}
+                  {{ getStatusText(file.status) }}
                 </span>
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {{ formatDate(profile.createdAt) }}
+                {{ file.userId }}
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                {{ formatDate(file.createdAt) }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                <NuxtLink
-                  :to="`/hammasir/admin/profiles/${profile.userId}`"
-                  class="ml-3 text-blue-600 hover:text-blue-900"
-                >
-                  جزئیات
-                </NuxtLink>
                 <button
-                  class="text-indigo-600 hover:text-indigo-900"
-                  @click="openStatusModal(profile)"
+                  v-if="file.status === 'READY'"
+                  class="ml-3 text-blue-600 hover:text-blue-900"
+                  @click="downloadFile(file.id)"
                 >
-                  تغییر وضعیت
+                  دانلود
+                </button>
+                <button
+                  class="text-red-600 hover:text-red-900"
+                  @click="deleteFile(file.id)"
+                >
+                  حذف
                 </button>
               </td>
             </tr>
@@ -164,7 +209,7 @@
                 <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, totalItems) }}</span>
                 از
                 <span class="font-medium">{{ totalItems }}</span>
-                پروفایل
+                فایل
               </p>
             </div>
             <div>
@@ -205,61 +250,32 @@
       </div>
     </div>
 
-    <!-- Status Update Modal -->
-    <div v-if="showStatusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div class="w-full max-w-md rounded-lg bg-white shadow-xl">
         <div class="border-b border-gray-200 px-6 py-4">
           <h3 class="text-lg font-medium text-gray-900">
-            تغییر وضعیت کاربر
+            حذف فایل
           </h3>
         </div>
         <div class="px-6 py-4">
           <p class="mb-4">
-            تغییر وضعیت برای کاربر: <strong>{{ selectedProfile?.username }}</strong>
+            آیا از حذف این فایل اطمینان دارید؟ این عمل قابل بازگشت نیست.
           </p>
-          <div class="mb-4">
-            <label class="mb-1 block text-sm font-medium text-gray-700">وضعیت جدید</label>
-            <select
-              v-model="newStatus"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Active">
-                فعال
-              </option>
-              <option value="Inactive">
-                غیرفعال
-              </option>
-              <option value="Suspended">
-                تعلیق شده
-              </option>
-              <option value="Pending">
-                در انتظار تأیید
-              </option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label class="mb-1 block text-sm font-medium text-gray-700">توضیحات (اختیاری)</label>
-            <textarea
-              v-model="statusReason"
-              rows="3"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="دلیل تغییر وضعیت..."
-            />
-          </div>
         </div>
         <div class="flex justify-end space-x-3 space-x-reverse border-t border-gray-200 px-6 py-4">
           <button
             class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            @click="closeStatusModal"
+            @click="closeDeleteModal"
           >
             انصراف
           </button>
           <button
-            :disabled="isUpdatingStatus"
-            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            @click="updateStatus"
+            :disabled="isDeleting"
+            class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+            @click="confirmDelete"
           >
-            {{ isUpdatingStatus ? 'در حال به‌روزرسانی...' : 'تغییر وضعیت' }}
+            {{ isDeleting ? 'در حال حذف...' : 'حذف فایل' }}
           </button>
         </div>
       </div>
@@ -274,37 +290,33 @@ definePageMeta({
 })
 
 import { ref, computed, onMounted } from 'vue'
-import { useAdminProfile } from '~/composables/hammasir/useAdminProfile'
 import { useAdmin } from '~/composables/hammasir/useAdmin'
-import type { UserProfileDto } from '~/types/api'
+import type { FileMetadataDto } from '~/types/api'
 
 // State
-const searchTerm = ref('')
+const userIdFilter = ref('')
+const fileTypeFilter = ref('')
 const statusFilter = ref('')
-const showStatusModal = ref(false)
-const selectedProfile = ref<UserProfileDto | null>(null)
-const newStatus = ref('ACTIVE')
-const statusReason = ref('')
-const isUpdatingStatus = ref(false)
+const showDeleteModal = ref(false)
+const selectedFileId = ref('')
+const isDeleting = ref(false)
 
 // Composables
-const { adminProfileState, getAllProfiles, updateUserStatusAdmin } = useAdminProfile()
-
-// Use the new admin composable for additional functionality
 const {
-  getAllCounselorsAdmin,
-  getAllFilesAdmin,
   adminState,
   isAdminLoading,
+  adminError,
+  getAllFilesAdmin,
+  deleteFileAdmin,
 } = useAdmin()
 
 // Computed properties
-const profiles = computed(() => adminProfileState.value.profiles)
-const isLoading = computed(() => adminProfileState.value.isLoading || isAdminLoading.value)
-const error = computed(() => adminProfileState.value.error)
-const currentPage = computed(() => adminProfileState.value.currentPage)
-const itemsPerPage = computed(() => adminProfileState.value.itemsPerPage)
-const totalItems = computed(() => adminProfileState.value.totalProfiles)
+const files = computed(() => adminState.value.files)
+const isLoading = computed(() => isAdminLoading.value)
+const error = computed(() => adminError.value)
+const currentPage = computed(() => adminState.value.currentPage)
+const itemsPerPage = computed(() => adminState.value.itemsPerPage)
+const totalItems = computed(() => adminState.value.totalFiles)
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
 
 // Displayed pages for pagination
@@ -334,106 +346,140 @@ const displayedPages = computed(() => {
 
 // Initialize
 onMounted(() => {
-  loadProfiles()
+  loadFiles()
 })
 
 // Methods
-const loadProfiles = async () => {
-  await getAllProfiles(currentPage.value, itemsPerPage.value, searchTerm.value, statusFilter.value)
+const loadFiles = async () => {
+  await getAllFilesAdmin(
+    userIdFilter.value,
+    fileTypeFilter.value,
+    statusFilter.value
+  )
 }
 
-const searchProfiles = () => {
-  getAllProfiles(1, itemsPerPage.value, searchTerm.value, statusFilter.value)
+const searchFiles = () => {
+  getAllFilesAdmin(
+    userIdFilter.value,
+    fileTypeFilter.value,
+    statusFilter.value
+  )
+}
+
+const getFileTypeText = (type: string) => {
+  const typeMap: Record<string, string> = {
+    PROFILE_IMAGE: 'تصویر پروفایل',
+    DOCUMENT: 'سند',
+    SESSION_RECORDING: 'ضبط جلسه',
+    COURSE_MATERIAL: 'محتوای دوره',
+    ASSESSMENT_FILE: 'فایل ارزیابی',
+    MESSAGE_ATTACHMENT: 'پیوست پیام',
+    NOTIFICATION_ATTACHMENT: 'پیوست اعلان',
+  }
+  return typeMap[type] || type
 }
 
 const getStatusText = (status: string) => {
   const statusMap: Record<string, string> = {
-    ACTIVE: 'فعال',
-    INACTIVE: 'غیرفعال',
-    SUSPENDED: 'تعلیق شده',
-    PENDING_VERIFICATION: 'در انتظار تأیید',
-    DEACTIVATED: 'غیرفعال شده',
+    PENDING: 'در انتظار',
+    UPLOADED: 'آپلود شده',
+    PROCESSING: 'در حال پردازش',
+    READY: 'آماده',
+    ERROR: 'خطا',
+    DELETED: 'حذف شده',
   }
   return statusMap[status] || status
 }
 
 const getStatusClass = (status: string) => {
   const classMap: Record<string, string> = {
-    ACTIVE: 'bg-green-100 text-green-800',
-    INACTIVE: 'bg-gray-100 text-gray-800',
-    SUSPENDED: 'bg-red-100 text-red-800',
-    PENDING_VERIFICATION: 'bg-yellow-100 text-yellow-800',
-    DEACTIVATED: 'bg-gray-100 text-gray-800',
+    PENDING: 'bg-yellow-100 text-yellow-800',
+    UPLOADED: 'bg-blue-100 text-blue-800',
+    PROCESSING: 'bg-purple-100 text-purple-800',
+    READY: 'bg-green-100 text-green-800',
+    ERROR: 'bg-red-100 text-red-800',
+    DELETED: 'bg-gray-100 text-gray-800',
   }
   return classMap[status] || 'bg-gray-100 text-gray-800'
+}
+
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('fa-IR')
 }
 
-const openStatusModal = (profile: UserProfileDto) => {
-  selectedProfile.value = profile
-  newStatus.value = profile.status || 'ACTIVE'
-  statusReason.value = ''
-  showStatusModal.value = true
+const downloadFile = (fileId: string) => {
+  // In a real implementation, you would generate a download URL and trigger the download
+  console.log(`Downloading file with ID: ${fileId}`)
+  // Example:
+  // const downloadUrl = `/api/v1/files/${fileId}/download`
+  // window.open(downloadUrl, '_blank')
 }
 
-const closeStatusModal = () => {
-  showStatusModal.value = false
-  selectedProfile.value = null
-  newStatus.value = 'ACTIVE'
-  statusReason.value = ''
+const deleteFile = (fileId: string) => {
+  selectedFileId.value = fileId
+  showDeleteModal.value = true
 }
 
-const updateStatus = async () => {
-  if (!selectedProfile.value) return
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+  selectedFileId.value = ''
+}
 
-  isUpdatingStatus.value = true
+const confirmDelete = async () => {
+  if (!selectedFileId.value) return
+
+  isDeleting.value = true
 
   try {
-    const result = await updateUserStatusAdmin(selectedProfile.value.userId, {
-      status: newStatus.value,
-    })
+    const result = await deleteFileAdmin(selectedFileId.value)
 
     if (result) {
-      closeStatusModal()
-      // Reload the profiles to show updated status
-      await loadProfiles()
+      closeDeleteModal()
+      // Reload files to show updated list
+      await loadFiles()
     }
   }
   catch (err: any) {
-    console.error('Error updating status:', err)
+    console.error('Error deleting file:', err)
   }
   finally {
-    isUpdatingStatus.value = false
+    isDeleting.value = false
   }
 }
 
 const goToPage = (page: number) => {
-  getAllProfiles(page, itemsPerPage.value, searchTerm.value, statusFilter.value)
+  // In a real implementation, you would pass pagination parameters to the API
+  console.log(`Navigating to page ${page}`)
 }
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    getAllProfiles(currentPage.value - 1, itemsPerPage.value, searchTerm.value, statusFilter.value)
+    goToPage(currentPage.value - 1)
   }
 }
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    getAllProfiles(currentPage.value + 1, itemsPerPage.value, searchTerm.value, statusFilter.value)
+    goToPage(currentPage.value + 1)
   }
 }
 </script>
 
 <style scoped>
-.admin-profiles {
+.admin-files {
   padding: 1.5rem;
 }
 
 @media (max-width: 640px) {
-  .admin-profiles {
+  .admin-files {
     padding: 1rem;
   }
 }

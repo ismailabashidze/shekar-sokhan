@@ -1,12 +1,12 @@
 <template>
-  <div class="admin-profiles">
+  <div class="admin-counselors">
     <h1 class="mb-6 text-2xl font-bold">
-      لیست پروفایل‌های کاربران
+      لیست مشاوران
     </h1>
 
     <!-- Search and Filter Section -->
     <div class="mb-6 rounded-lg bg-white p-4 shadow">
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700">جستجو بر اساس نام</label>
           <input
@@ -17,32 +17,52 @@
           >
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700">وضعیت کاربر</label>
+          <label class="mb-1 block text-sm font-medium text-gray-700">وضعیت تأیید</label>
           <select
-            v-model="statusFilter"
+            v-model="verificationStatusFilter"
             class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">
               همه وضعیت‌ها
             </option>
-            <option value="Active">
-              فعال
-            </option>
-            <option value="Inactive">
-              غیرفعال
-            </option>
-            <option value="Suspended">
-              تعلیق شده
-            </option>
-            <option value="Pending">
+            <option value="PENDING">
               در انتظار تأیید
+            </option>
+            <option value="APPROVED">
+              تأیید شده
+            </option>
+            <option value="REJECTED">
+              رد شده
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">تخصص</label>
+          <select
+            v-model="specializationFilter"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">
+              همه تخصص‌ها
+            </option>
+            <option value="PSYCHOLOGY">
+              روانشناسی
+            </option>
+            <option value="PSYCHIATRY">
+              روانپزشکی
+            </option>
+            <option value="SOCIAL_WORK">
+              کار соیال
+            </option>
+            <option value="MARITAL_THERAPY">
+              مشاوره زناشویی
             </option>
           </select>
         </div>
         <div class="flex items-end">
           <button
             class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            @click="searchProfiles"
+            @click="searchCounselors"
           >
             جستجو
           </button>
@@ -50,12 +70,12 @@
       </div>
     </div>
 
-    <!-- Profiles Table -->
+    <!-- Counselors Table -->
     <div class="overflow-hidden rounded-lg bg-white shadow">
       <div v-if="isLoading" class="p-6 text-center">
         <div class="inline-block size-8 animate-spin rounded-full border-y-2 border-blue-500" />
         <p class="mt-2">
-          در حال بارگذاری پروفایل‌ها...
+          در حال بارگذاری مشاوران...
         </p>
       </div>
 
@@ -63,7 +83,7 @@
         <p>{{ error }}</p>
         <button
           class="mt-2 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          @click="loadProfiles"
+          @click="loadCounselors"
         >
           تلاش مجدد
         </button>
@@ -74,19 +94,19 @@
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                نام کاربری
+                نام مشاور
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                نام کامل
+                تخصص‌ها
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                ایمیل
+                سال‌های تجربه
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                وضعیت
+                وضعیت تأیید
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                تاریخ عضویت
+                تاریخ ثبت‌نام
               </th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 عملیات
@@ -95,42 +115,58 @@
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white">
             <tr
-              v-for="profile in filteredProfiles"
-              :key="profile.userId"
+              v-for="counselor in counselors"
+              :key="counselor.id"
               class="hover:bg-gray-50"
             >
               <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {{ profile.username }}
+                {{ counselor.personalInfo?.firstName }} {{ counselor.personalInfo?.lastName }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900">
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="spec in counselor.specializations"
+                    :key="spec.name"
+                    class="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800"
+                  >
+                    {{ spec.name }}
+                  </span>
+                </div>
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {{ profile.personalInfo?.firstName }} {{ profile.personalInfo?.lastName }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {{ profile.email }}
+                {{ counselor.professionalInfo?.yearsOfExperience }}
               </td>
               <td class="whitespace-nowrap px-6 py-4">
                 <span
                   class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
-                  :class="getStatusClass(profile.status)"
+                  :class="getVerificationStatusClass(counselor.verificationStatus)"
                 >
-                  {{ getStatusText(profile.status) }}
+                  {{ getVerificationStatusText(counselor.verificationStatus) }}
                 </span>
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {{ formatDate(profile.createdAt) }}
+                {{ formatDate(counselor.createdAt) }}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
                 <NuxtLink
-                  :to="`/hammasir/admin/profiles/${profile.userId}`"
+                  :to="`/hammasir/admin/counselors/${counselor.id}`"
                   class="ml-3 text-blue-600 hover:text-blue-900"
                 >
                   جزئیات
                 </NuxtLink>
                 <button
-                  class="text-indigo-600 hover:text-indigo-900"
-                  @click="openStatusModal(profile)"
+                  v-if="counselor.verificationStatus === 'PENDING'"
+                  class="text-green-600 hover:text-green-900"
+                  @click="approveCounselor(counselor.id)"
                 >
-                  تغییر وضعیت
+                  تأیید
+                </button>
+                <button
+                  v-if="counselor.verificationStatus === 'PENDING'"
+                  class="text-red-600 hover:text-red-900"
+                  @click="rejectCounselor(counselor.id)"
+                >
+                  رد
                 </button>
               </td>
             </tr>
@@ -164,7 +200,7 @@
                 <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, totalItems) }}</span>
                 از
                 <span class="font-medium">{{ totalItems }}</span>
-                پروفایل
+                مشاور
               </p>
             </div>
             <div>
@@ -205,61 +241,82 @@
       </div>
     </div>
 
-    <!-- Status Update Modal -->
-    <div v-if="showStatusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <!-- Approval Confirmation Modal -->
+    <div v-if="showApprovalModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div class="w-full max-w-md rounded-lg bg-white shadow-xl">
         <div class="border-b border-gray-200 px-6 py-4">
           <h3 class="text-lg font-medium text-gray-900">
-            تغییر وضعیت کاربر
+            تأیید مشاور
           </h3>
         </div>
         <div class="px-6 py-4">
           <p class="mb-4">
-            تغییر وضعیت برای کاربر: <strong>{{ selectedProfile?.username }}</strong>
+            آیا از تأیید این مشاور اطمینان دارید؟
           </p>
-          <div class="mb-4">
-            <label class="mb-1 block text-sm font-medium text-gray-700">وضعیت جدید</label>
-            <select
-              v-model="newStatus"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Active">
-                فعال
-              </option>
-              <option value="Inactive">
-                غیرفعال
-              </option>
-              <option value="Suspended">
-                تعلیق شده
-              </option>
-              <option value="Pending">
-                در انتظار تأیید
-              </option>
-            </select>
-          </div>
           <div class="mb-4">
             <label class="mb-1 block text-sm font-medium text-gray-700">توضیحات (اختیاری)</label>
             <textarea
-              v-model="statusReason"
+              v-model="approvalNotes"
               rows="3"
               class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="دلیل تغییر وضعیت..."
+              placeholder="دلیل تأیید..."
             />
           </div>
         </div>
         <div class="flex justify-end space-x-3 space-x-reverse border-t border-gray-200 px-6 py-4">
           <button
             class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            @click="closeStatusModal"
+            @click="closeApprovalModal"
           >
             انصراف
           </button>
           <button
-            :disabled="isUpdatingStatus"
-            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            @click="updateStatus"
+            :disabled="isApproving"
+            class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+            @click="confirmApproval"
           >
-            {{ isUpdatingStatus ? 'در حال به‌روزرسانی...' : 'تغییر وضعیت' }}
+            {{ isApproving ? 'در حال تأیید...' : 'تأیید مشاور' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rejection Confirmation Modal -->
+    <div v-if="showRejectionModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div class="w-full max-w-md rounded-lg bg-white shadow-xl">
+        <div class="border-b border-gray-200 px-6 py-4">
+          <h3 class="text-lg font-medium text-gray-900">
+            رد مشاور
+          </h3>
+        </div>
+        <div class="px-6 py-4">
+          <p class="mb-4">
+            آیا از رد این مشاور اطمینان دارید؟
+          </p>
+          <div class="mb-4">
+            <label class="mb-1 block text-sm font-medium text-gray-700">دلیل رد</label>
+            <textarea
+              v-model="rejectionReason"
+              rows="3"
+              required
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="دلیل رد کردن مشاور..."
+            />
+          </div>
+        </div>
+        <div class="flex justify-end space-x-3 space-x-reverse border-t border-gray-200 px-6 py-4">
+          <button
+            class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            @click="closeRejectionModal"
+          >
+            انصراف
+          </button>
+          <button
+            :disabled="isRejecting"
+            class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+            @click="confirmRejection"
+          >
+            {{ isRejecting ? 'در حال رد...' : 'رد مشاور' }}
           </button>
         </div>
       </div>
@@ -274,37 +331,37 @@ definePageMeta({
 })
 
 import { ref, computed, onMounted } from 'vue'
-import { useAdminProfile } from '~/composables/hammasir/useAdminProfile'
 import { useAdmin } from '~/composables/hammasir/useAdmin'
-import type { UserProfileDto } from '~/types/api'
+import type { CounselorProfileDto } from '~/types/api'
 
 // State
 const searchTerm = ref('')
-const statusFilter = ref('')
-const showStatusModal = ref(false)
-const selectedProfile = ref<UserProfileDto | null>(null)
-const newStatus = ref('ACTIVE')
-const statusReason = ref('')
-const isUpdatingStatus = ref(false)
+const verificationStatusFilter = ref('')
+const specializationFilter = ref('')
+const showApprovalModal = ref(false)
+const showRejectionModal = ref(false)
+const selectedCounselorId = ref('')
+const approvalNotes = ref('')
+const rejectionReason = ref('')
+const isApproving = ref(false)
+const isRejecting = ref(false)
 
 // Composables
-const { adminProfileState, getAllProfiles, updateUserStatusAdmin } = useAdminProfile()
-
-// Use the new admin composable for additional functionality
 const {
-  getAllCounselorsAdmin,
-  getAllFilesAdmin,
   adminState,
   isAdminLoading,
+  adminError,
+  getAllCounselorsAdmin,
+  updateVerificationStatusAdmin,
 } = useAdmin()
 
 // Computed properties
-const profiles = computed(() => adminProfileState.value.profiles)
-const isLoading = computed(() => adminProfileState.value.isLoading || isAdminLoading.value)
-const error = computed(() => adminProfileState.value.error)
-const currentPage = computed(() => adminProfileState.value.currentPage)
-const itemsPerPage = computed(() => adminProfileState.value.itemsPerPage)
-const totalItems = computed(() => adminProfileState.value.totalProfiles)
+const counselors = computed(() => adminState.value.counselors)
+const isLoading = computed(() => isAdminLoading.value)
+const error = computed(() => adminError.value)
+const currentPage = computed(() => adminState.value.currentPage)
+const itemsPerPage = computed(() => adminState.value.itemsPerPage)
+const totalItems = computed(() => adminState.value.totalCounselors)
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
 
 // Displayed pages for pagination
@@ -334,36 +391,37 @@ const displayedPages = computed(() => {
 
 // Initialize
 onMounted(() => {
-  loadProfiles()
+  loadCounselors()
 })
 
 // Methods
-const loadProfiles = async () => {
-  await getAllProfiles(currentPage.value, itemsPerPage.value, searchTerm.value, statusFilter.value)
+const loadCounselors = async () => {
+  await getAllCounselorsAdmin(
+    currentPage.value,
+    itemsPerPage.value,
+    verificationStatusFilter.value,
+    specializationFilter.value
+  )
 }
 
-const searchProfiles = () => {
-  getAllProfiles(1, itemsPerPage.value, searchTerm.value, statusFilter.value)
+const searchCounselors = () => {
+  getAllCounselorsAdmin(1, itemsPerPage.value, verificationStatusFilter.value, specializationFilter.value)
 }
 
-const getStatusText = (status: string) => {
+const getVerificationStatusText = (status: string) => {
   const statusMap: Record<string, string> = {
-    ACTIVE: 'فعال',
-    INACTIVE: 'غیرفعال',
-    SUSPENDED: 'تعلیق شده',
-    PENDING_VERIFICATION: 'در انتظار تأیید',
-    DEACTIVATED: 'غیرفعال شده',
+    PENDING: 'در انتظار تأیید',
+    APPROVED: 'تأیید شده',
+    REJECTED: 'رد شده',
   }
   return statusMap[status] || status
 }
 
-const getStatusClass = (status: string) => {
+const getVerificationStatusClass = (status: string) => {
   const classMap: Record<string, string> = {
-    ACTIVE: 'bg-green-100 text-green-800',
-    INACTIVE: 'bg-gray-100 text-gray-800',
-    SUSPENDED: 'bg-red-100 text-red-800',
-    PENDING_VERIFICATION: 'bg-yellow-100 text-yellow-800',
-    DEACTIVATED: 'bg-gray-100 text-gray-800',
+    PENDING: 'bg-yellow-100 text-yellow-800',
+    APPROVED: 'bg-green-100 text-green-800',
+    REJECTED: 'bg-red-100 text-red-800',
   }
   return classMap[status] || 'bg-gray-100 text-gray-800'
 }
@@ -372,68 +430,98 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('fa-IR')
 }
 
-const openStatusModal = (profile: UserProfileDto) => {
-  selectedProfile.value = profile
-  newStatus.value = profile.status || 'ACTIVE'
-  statusReason.value = ''
-  showStatusModal.value = true
+const approveCounselor = (counselorId: string) => {
+  selectedCounselorId.value = counselorId
+  approvalNotes.value = ''
+  showApprovalModal.value = true
 }
 
-const closeStatusModal = () => {
-  showStatusModal.value = false
-  selectedProfile.value = null
-  newStatus.value = 'ACTIVE'
-  statusReason.value = ''
+const rejectCounselor = (counselorId: string) => {
+  selectedCounselorId.value = counselorId
+  rejectionReason.value = ''
+  showRejectionModal.value = true
 }
 
-const updateStatus = async () => {
-  if (!selectedProfile.value) return
+const closeApprovalModal = () => {
+  showApprovalModal.value = false
+  selectedCounselorId.value = ''
+  approvalNotes.value = ''
+}
 
-  isUpdatingStatus.value = true
+const closeRejectionModal = () => {
+  showRejectionModal.value = false
+  selectedCounselorId.value = ''
+  rejectionReason.value = ''
+}
+
+const confirmApproval = async () => {
+  if (!selectedCounselorId.value) return
+
+  isApproving.value = true
 
   try {
-    const result = await updateUserStatusAdmin(selectedProfile.value.userId, {
-      status: newStatus.value,
-    })
+    const result = await updateVerificationStatusAdmin(selectedCounselorId.value, 'APPROVED')
 
     if (result) {
-      closeStatusModal()
-      // Reload the profiles to show updated status
-      await loadProfiles()
+      closeApprovalModal()
+      // Reload counselors to show updated status
+      await loadCounselors()
     }
   }
   catch (err: any) {
-    console.error('Error updating status:', err)
+    console.error('Error approving counselor:', err)
   }
   finally {
-    isUpdatingStatus.value = false
+    isApproving.value = false
+  }
+}
+
+const confirmRejection = async () => {
+  if (!selectedCounselorId.value || !rejectionReason.value) return
+
+  isRejecting.value = true
+
+  try {
+    const result = await updateVerificationStatusAdmin(selectedCounselorId.value, 'REJECTED')
+
+    if (result) {
+      closeRejectionModal()
+      // Reload counselors to show updated status
+      await loadCounselors()
+    }
+  }
+  catch (err: any) {
+    console.error('Error rejecting counselor:', err)
+  }
+  finally {
+    isRejecting.value = false
   }
 }
 
 const goToPage = (page: number) => {
-  getAllProfiles(page, itemsPerPage.value, searchTerm.value, statusFilter.value)
+  getAllCounselorsAdmin(page, itemsPerPage.value, verificationStatusFilter.value, specializationFilter.value)
 }
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    getAllProfiles(currentPage.value - 1, itemsPerPage.value, searchTerm.value, statusFilter.value)
+    getAllCounselorsAdmin(currentPage.value - 1, itemsPerPage.value, verificationStatusFilter.value, specializationFilter.value)
   }
 }
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    getAllProfiles(currentPage.value + 1, itemsPerPage.value, searchTerm.value, statusFilter.value)
+    getAllCounselorsAdmin(currentPage.value + 1, itemsPerPage.value, verificationStatusFilter.value, specializationFilter.value)
   }
 }
 </script>
 
 <style scoped>
-.admin-profiles {
+.admin-counselors {
   padding: 1.5rem;
 }
 
 @media (max-width: 640px) {
-  .admin-profiles {
+  .admin-counselors {
     padding: 1rem;
   }
 }

@@ -343,6 +343,7 @@ definePageMeta({
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAdminProfile } from '~/composables/hammasir/useAdminProfile'
+import { useAdmin } from '~/composables/hammasir/useAdmin'
 import type { UserProfileDto } from '~/types/api'
 
 // Route
@@ -357,9 +358,17 @@ const isUpdatingStatus = ref(false)
 // Composables
 const { adminProfileState, getProfileById, updateUserStatusAdmin, suspendUser, unsuspendUser } = useAdminProfile()
 
+// Use the new admin composable for additional functionality
+const {
+  getCounselorByIdAdmin,
+  getAllFilesAdmin,
+  adminState,
+  isAdminLoading,
+} = useAdmin()
+
 // Computed properties
 const profile = computed(() => adminProfileState.value.profiles.find(p => p.userId === route.params.id) || null)
-const isLoading = computed(() => adminProfileState.value.isLoading)
+const isLoading = computed(() => adminProfileState.value.isLoading || isAdminLoading.value)
 const error = computed(() => adminProfileState.value.error)
 
 // Initialize
@@ -406,6 +415,18 @@ const getGenderText = (gender: string) => {
     FEMALE: 'زن',
   }
   return genderMap[gender] || gender || 'نامشخص'
+}
+
+const getEducationLevelText = (educationLevel: string) => {
+  const educationMap: Record<string, string> = {
+    HIGH_SCHOOL: 'دیپلم',
+    BACHELOR: 'لیسانس',
+    MASTER: 'فوق لیسانس',
+    PHD: 'دکتری',
+    VOCATIONAL: 'حرفه‌ای',
+    OTHER: 'سایر',
+  }
+  return educationMap[educationLevel] || educationLevel || 'نامشخص'
 }
 
 const formatDate = (dateString: string) => {
