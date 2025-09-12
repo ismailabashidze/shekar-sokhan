@@ -502,7 +502,7 @@ export function useOpenRouter() {
 
   // Models state
   const allModels = ref<OpenRouterModel[]>([])
-  const selectedModel = ref<string>('mistralai/mistral-saba')
+  const selectedModel = ref<string>('google/gemma-3-27b-it')
   const loading = ref(false)
   const searchQuery = ref('')
 
@@ -641,7 +641,7 @@ export function useOpenRouter() {
         body: JSON.stringify({
           model: options.model || selectedModel.value,
           messages: messagesWithSystem,
-          stream: true,
+          stream: false, // Changed from true to false
           temperature: aiConfig?.temperature || options.temperature || 0.7,
           max_tokens: aiConfig?.max_tokens || options.max_tokens || 400,
           ...(aiConfig?.response_format && { response_format: aiConfig.response_format }),
@@ -669,75 +669,8 @@ export function useOpenRouter() {
         throw new Error(`Chat error: ${errorMessage}`)
       }
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        let errorMessage: string
-        try {
-          const errorData = JSON.parse(errorText)
-          errorMessage = errorData?.error?.message || errorData?.message || errorText
-        }
-        catch {
-          errorMessage = errorText
-        }
-        throw new Error(`Chat error: ${errorMessage}`)
-      }
-
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-
-      if (!reader) {
-        throw new Error('Failed to create stream reader')
-      }
-
-      let buffer = ''
-      let fullResponse = ''
-
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { done, value } = await reader.read()
-
-        if (done) {
-          break
-        }
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          const trimmedLine = line.trim()
-          if (!trimmedLine || trimmedLine.startsWith(':')) {
-            continue
-          }
-
-          const data = trimmedLine.startsWith('data: ') ? trimmedLine.slice(6) : trimmedLine
-
-          if (data === '[DONE]') {
-            break
-          }
-
-          try {
-            const parsed = JSON.parse(data)
-            const textChunk = parsed?.choices?.[0]?.delta?.content
-            if (textChunk) {
-              fullResponse += textChunk
-
-              // For multi-message mode, collect full response before processing
-              if (aiConfig?.response_format?.type === 'json_object') {
-                // Don't stream individual chunks for JSON responses, wait for complete
-                continue
-              }
-              else {
-                // Stream normally for single message mode
-                onChunk(textChunk)
-              }
-            }
-          }
-          catch (e: any) {
-            throw new Error(`Invalid response format: ${e.message}`)
-          }
-        }
-      }
+      const data = await response.json()
+      const fullResponse = data.choices[0].message.content
 
       // Post-process the complete response with validation
       if (aiConfig && fullResponse) {
@@ -764,14 +697,9 @@ export function useOpenRouter() {
             }
 
             const processedResponse = postProcessResponse(fullResponse, aiConfig)
-
-            // Send additional processed content if it was added
-            if (processedResponse !== fullResponse) {
-              const additionalContent = processedResponse.replace(fullResponse, '')
-              if (additionalContent.trim()) {
-                onChunk(additionalContent)
-              }
-            }
+            
+            // Send the complete response at once
+            onChunk(processedResponse)
           }
         }
         catch (processingError) {
@@ -1205,11 +1133,12 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
       { role: 'system', content: 'شما یک دستیار متخصص تولید محتوای روانشناسی هستید.' },
       { role: 'user', content: prompt },
     ]
-    let result = ''
-    await streamChat(messages as ChatMessage[], {}, (chunk) => {
-      result += chunk.choices?.[0]?.delta?.content || ''
+    return new Promise((resolve, reject) => {
+      streamChat(messages as ChatMessage[], {}, (chunk) => {
+        // With non-streaming, we get the complete response in one chunk
+        resolve(chunk)
+      }).catch(reject)
     })
-    return result
   }
 
   // Initialize models on composable creation

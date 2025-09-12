@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0] - 2025-09-12
+### Fixed
+- Version bump to 3.1.0
+- Enhanced version management system across the platform
+
 ## [2.10.2] - 2025-07-24
 ### Fixed
 - Minor bug fixes and improvements

@@ -7,6 +7,24 @@
         </h1>
 
         <div class="space-y-8">
+          <!-- Version 3.1.0 -->
+          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
+            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
+              نسخه 3.1.0
+            </h2>
+            <p class="text-muted-400 mb-4 text-sm">
+              12 سپتامبر 2025
+            </p>
+
+            <h3 class="text-success-500 mb-2 text-lg font-medium">
+              بهبود‌ها
+            </h3>
+            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
+              <li>به‌روزرسانی نسخه به 3.1.0</li>
+              <li>بهبود سیستم مدیریت نسخه در کل پلتفرم</li>
+            </ul>
+          </div>
+
           <!-- Version 3.0.1 -->
           <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
             <h2 class="text-primary-500 mb-2 text-xl font-semibold">

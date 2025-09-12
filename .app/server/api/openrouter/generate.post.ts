@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
         'X-Title': 'Patient Details Generator',
       },
       body: {
-        model: 'mistralai/mistral-saba',
+        model: 'google/gemma-3-27b-it',
         messages: [
           {
             role: 'system',

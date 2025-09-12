@@ -140,7 +140,7 @@ export const useSessionAnalysis = () => {
           'X-Title': 'Session Analysis Generator',
         },
         body: JSON.stringify({
-          model: 'mistralai/mistral-saba',
+          model: 'google/gemma-3-27b-it',
           messages: [
             {
               role: 'system',

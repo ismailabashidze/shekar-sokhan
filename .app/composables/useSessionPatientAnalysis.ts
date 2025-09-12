@@ -194,7 +194,7 @@ export const useSessionPatientAnalysis = () => {
           'X-Title': 'Session Analysis Generator For Patient',
         },
         body: JSON.stringify({
-          model: 'mistralai/mistral-saba',
+          model: 'google/gemma-3-27b-it',
           messages: [
             {
               role: 'system',

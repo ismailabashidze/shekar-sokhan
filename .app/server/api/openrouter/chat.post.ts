@@ -31,7 +31,7 @@ export default defineEventHandler(async (event: H3Event) => {
       },
       body: JSON.stringify({
         include_reasoning: true,
-        model: body.model || 'mistralai/mistral-saba',
+        model: body.model || 'google/gemma-3-27b-it',
         messages: body.messages,
         stream: true,
         transforms: ['middle-out'],
