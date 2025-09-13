@@ -187,7 +187,6 @@ export function usePwaNotifications() {
         timestamp: Date.now(),
       })
 
-      console.log('PWA notification shown successfully')
       return true
     }
     catch (err: any) {
@@ -215,12 +214,9 @@ export function usePwaNotifications() {
     const delay = scheduleDate.getTime() - now.getTime()
     const notificationId = options.tag || `scheduled-${Date.now()}`
 
-    console.log(`Scheduling PWA notification "${options.title}" to show in ${Math.round(delay / 1000 / 60)} minutes`)
-
     // Use setTimeout to schedule the notification
     const timeoutId = setTimeout(async () => {
       try {
-        console.log(`Showing scheduled PWA notification: ${options.title}`)
         await showLocalNotification(options)
 
         // Remove from scheduled notifications store
@@ -267,7 +263,6 @@ export function usePwaNotifications() {
         delete scheduled[notificationId]
         localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
 
-        console.log(`Cancelled scheduled PWA notification: ${notificationId}`)
         return true
       }
 
@@ -304,7 +299,6 @@ export function usePwaNotifications() {
 
       if (hasChanges) {
         localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
-        console.log('Cleaned up expired scheduled PWA notifications')
       }
     }
     catch (err) {
@@ -506,7 +500,6 @@ export function usePwaNotifications() {
 
     // Skip if already granted
     if (permission.value === 'granted') {
-      console.log('PWA notifications already granted')
       await subscribeToPush()
       return true
     }
@@ -516,13 +509,11 @@ export function usePwaNotifications() {
 
     // If user previously denied, don't ask again unless they reset
     if (userDecision === 'denied' && permission.value === 'default') {
-      console.log('User previously denied PWA notifications')
       return false
     }
 
     // Request permission immediately without delay
     try {
-      console.log('Requesting PWA notification permission immediately...')
       const result = await Notification.requestPermission()
       permission.value = result
 
@@ -531,12 +522,10 @@ export function usePwaNotifications() {
       localStorage.setItem('pwa-permission-timestamp', Date.now().toString())
 
       if (result === 'granted') {
-        console.log('PWA notifications granted - subscribing to push...')
         await subscribeToPush()
         return true
       }
       else {
-        console.log('PWA notifications denied or dismissed')
         return false
       }
     }

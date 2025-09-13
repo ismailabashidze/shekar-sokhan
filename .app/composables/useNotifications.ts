@@ -224,7 +224,6 @@ export function useNotifications() {
     try {
       // Check if permission is granted, if not request it immediately
       if (Notification.permission !== 'granted') {
-        console.log('PWA permission not granted, requesting now...')
         try {
           const granted = await pwa.autoRequestPermission()
           if (!granted) {
@@ -255,11 +254,9 @@ export function useNotifications() {
 
         if (announceDate > now) {
           // This is a future notification - schedule it instead of showing immediately
-          console.log(`Scheduling PWA notification "${notification.title}" for ${announceDate.toLocaleString('fa-IR')}`)
           const scheduledId = await pwa.scheduleLocalNotification(notificationOptions, announceDate)
 
           if (scheduledId) {
-            console.log(`PWA notification scheduled successfully with ID: ${scheduledId}`)
           }
           return
         }
@@ -267,7 +264,6 @@ export function useNotifications() {
 
       // Show immediate notification for current/past announcements
       await pwa.showLocalNotification(notificationOptions)
-      console.log('PWA notification shown immediately:', notification.title)
     }
     catch (err) {
       console.warn('Failed to show PWA notification:', err)
@@ -308,7 +304,6 @@ export function useNotifications() {
 
             // Always trigger PWA notification for new notifications (even if read)
             // This ensures the user sees the notification immediately
-            console.log('Triggering PWA notification for new realtime notification:', transformedNotification.title)
             await triggerPwaNotification(transformedNotification)
             break
 
@@ -430,11 +425,8 @@ export function useNotifications() {
           !notifications.value.some(existing => existing.id === newNotif.id),
         )
 
-        console.log('Found', newNotifications.length, 'new notifications to trigger PWA notifications')
-
         // Trigger PWA notifications for all new notifications
         for (const newNotif of newNotifications) {
-          console.log('Triggering PWA notification for fetched notification:', newNotif.title)
           await triggerPwaNotification(newNotif)
         }
       }
@@ -622,7 +614,6 @@ export function useNotifications() {
         notifications.value.unshift(transformedNotification)
 
         // Always trigger PWA notification for new notification
-        console.log('Triggering PWA notification for created notification:', transformedNotification.title)
         await triggerPwaNotification(transformedNotification)
       }
 
@@ -809,10 +800,8 @@ export function useNotifications() {
               try {
                 const granted = await pwa.autoRequestPermission()
                 if (granted) {
-                  console.log('PWA notifications enabled automatically')
                 }
                 else {
-                  console.log('PWA notifications not enabled - user may need to manually enable')
                 }
               }
               catch (err) {

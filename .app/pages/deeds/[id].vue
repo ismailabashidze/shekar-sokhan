@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { definePageMeta } from '#imports'
 import { useClipboard } from '@vueuse/core'
@@ -46,27 +46,6 @@ const showDiscountModal = ref(false)
 const discountCode = ref<string | null>(null)
 const discountError = ref<string | null>(null)
 const showSuccessModal = ref(false)
-
-// Convert HTML content to markdown
-const convertHtmlToMarkdown = (html: string) => {
-  if (!html) return ''
-
-  return html
-    // Convert divs with # to headings
-    .replace(/<div>#+ ([^<]+)<\/div>/g, (_, title) => `# ${title}\n`)
-    .replace(/<div>##+ ([^<]+)<\/div>/g, (_, title) => `## ${title}\n`)
-    // Convert lists
-    .replace(/<div>&nbsp; &nbsp;\* ([^<]+)<\/div>/g, (_, item) => `* ${item}\n`)
-    .replace(/<div>\d+\. ([^<]+)<\/div>/g, (_, item) => `1. ${item}\n`)
-    // Convert regular divs to paragraphs
-    .replace(/<div>([^<]+)<\/div>/g, (_, text) => `${text}\n`)
-    // Clean up
-    .replace(/<br>/g, '\n')
-    .replace(/&zwnj;/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\n\s*\n/g, '\n\n')
-    .trim()
-}
 
 interface Deed {
   emoji: string
@@ -118,6 +97,23 @@ const durationMap = {
   more_60: 120,
 }
 
+const formattedDate = computed(() => {
+  return new Date(deed.value.approvedAt).toLocaleDateString('fa-IR')
+})
+
+const statusColor = computed(() => {
+  switch (deed.value.status) {
+    case 'approved':
+      return 'success'
+    case 'pending':
+      return 'warning'
+    case 'reject':
+      return 'danger'
+    default:
+      return 'info'
+  }
+})
+
 onMounted(async () => {
   try {
     const data = await getDeed(id)
@@ -142,23 +138,6 @@ onMounted(async () => {
   }
   finally {
     loading.value = false
-  }
-})
-
-const formattedDate = computed(() => {
-  return new Date(deed.value.approvedAt).toLocaleDateString('fa-IR')
-})
-
-const statusColor = computed(() => {
-  switch (deed.value.status) {
-    case 'approved':
-      return 'success'
-    case 'pending':
-      return 'warning'
-    case 'reject':
-      return 'danger'
-    default:
-      return 'info'
   }
 })
 
@@ -202,6 +181,35 @@ const copyCode = async () => {
       classes: 'z-[60]', // Higher than modal overlay which is usually z-50
     })
   }
+}
+
+// Convert HTML content to markdown
+const convertHtmlToMarkdown = (html: string) => {
+  if (!html) return ''
+
+  return html
+    // Convert divs with # to headings
+    .replace(/<div>#+ ([^<]+)<\/div>/g, (_, title) => `# ${title}
+`)
+    .replace(/<div>##+ ([^<]+)<\/div>/g, (_, title) => `## ${title}
+`)
+    // Convert lists
+    .replace(/<div>&nbsp; &nbsp;\* ([^<]+)<\/div>/g, (_, item) => `* ${item}
+`)
+    .replace(/<div>\d+\. ([^<]+)<\/div>/g, (_, item) => `1. ${item}
+`)
+    // Convert regular divs to paragraphs
+    .replace(/<div>([^<]+)<\/div>/g, (_, text) => `${text}
+`)
+    // Clean up
+    .replace(/<br>/g, `
+`)
+    .replace(/&zwnj;/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\n\s*\n/g, `
+
+`)
+    .trim()
 }
 
 const formatLongDescription = (html: string) => {
@@ -512,20 +520,11 @@ const formatLongDescription = (html: string) => {
               color="success"
               class="w-full"
               rounded="lg"
-              @click="handleDiscountRequest"
-            >
-              <Icon name="ph:ticket" class="me-2" />
-              درخواست کد تخفیف
-            </BaseButton>
-            <!-- <BaseButton
-              color="success"
-              class="w-full"
-              rounded="lg"
               @click="showDiscountModal = true"
             >
               <Icon name="ph:ticket" class="me-2" />
               درخواست کد تخفیف
-            </BaseButton> -->
+            </BaseButton>
           </div>
         </BaseCard>
 

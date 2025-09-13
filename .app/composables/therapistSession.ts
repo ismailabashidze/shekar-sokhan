@@ -6,9 +6,6 @@ export function useTherapistSession() {
   const { user } = useUser()
 
   const getCurrentSession = async (therapistId: string) => {
-    if (!nuxtApp.$pb.authStore.isValid || !nuxtApp.$pb.authStore.model?.id) {
-      throw new Error('User not authenticated')
-    }
 
     try {
       const records = await nuxtApp.$pb.collection('sessions').getFullList({
@@ -48,20 +45,12 @@ export function useTherapistSession() {
     }
   }
 
-  const endSession = async (sessionId: string) => {
-    if (!nuxtApp.$pb.authStore.isValid || !nuxtApp.$pb.authStore.model?.id) {
-      throw new Error('User not authenticated')
-    }
-
+  const endSession = async (sessionId: string, analysisId: string) => {
     try {
-      // Get current session to access its data
       const session = await nuxtApp.$pb.collection('sessions').getOne(sessionId)
-
-      // Get messages for this session to count them
-      const messagesResult = await nuxtApp.$pb.collection('messages').getList(1, 1000, {
-        filter: `session_id = "${sessionId}"`,
+      const messagesResult = await nuxtApp.$pb.collection('therapists_messages').getList(1, 1000, {
+        filter: `session = "${sessionId}"`,
       })
-
       const messageCount = messagesResult.items.length
 
       // Calculate session duration
@@ -69,40 +58,12 @@ export function useTherapistSession() {
       const endTime = new Date()
       const totalTimePassedMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60))
 
-      // Check if there's an existing analysis
-      let analysisId = session.session_analysis_for_system
-
-      // If no analysis exists and we need one, create a placeholder
-      if (!analysisId) {
-        console.log('Creating placeholder analysis for session')
-        try {
-          const placeholderAnalysis = await nuxtApp.$pb.collection('session_analysis').create({
-            session: sessionId,
-            title: 'جلسه پایان یافته',
-            summaryOfSession: 'این جلسه بدون تحلیل پایان یافته است.',
-            headlines: [],
-            finalTrustAndOppennessOfUser: 'low',
-            finalTrustAndOppennessOfUserEvaluationDescription: '',
-            psychotherapistEvaluation: '',
-            negativeScoresList: [],
-            psychotherapistEvaluationScorePositiveBehavior: [],
-            psychotherapistEvaluationScoreSuggestionsToImprove: [],
-          })
-          analysisId = placeholderAnalysis.id
-        }
-        catch (analysisError) {
-          console.error('Error creating placeholder analysis:', analysisError)
-          // Continue even if analysis creation fails
-        }
-      }
-
-      // Update the session with all required fields
       return await nuxtApp.$pb.collection('sessions').update(sessionId, {
         status: 'done',
         end_time: endTime.toISOString(),
         count_of_total_messages: messageCount,
         total_time_passed: totalTimePassedMinutes,
-        session_analysis_for_system: analysisId,
+        session_analysis_for_system: analysisId
       })
     }
     catch (error: any) {

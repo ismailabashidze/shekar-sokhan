@@ -521,12 +521,57 @@ export function useOpenRouter() {
     error.value = null
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/models', {
-        headers: {
-          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-        },
-      })
+      // Implement timeout mechanism with retry
+      let response: Response | null = null;
+      let attempts = 0;
+      const maxAttempts = 2; // Initial attempt + 1 retry
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to fetch models`);
+        
+        try {
+          response = await Promise.race([
+            fetch('https://openrouter.ai/api/v1/models', {
+              headers: {
+                'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+              },
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => {
+                console.log('⏰ Request timeout after 30 seconds');
+                reject(new Error('Request timeout after 30 seconds'));
+              }, 30000)
+            )
+          ]) as Response;
+          
+          console.log(`✅ Request successful on attempt ${attempts}`);
+          // If we get here, the request was successful
+          // Check if response is valid before breaking
+          if (response && response.ok) {
+            break;
+          } else if (response) {
+            // If response exists but is not ok, throw error to trigger retry
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+          }
+        } catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e);
+          if (attempts >= maxAttempts) {
+            // Last attempt failed, re-throw the error
+            throw e;
+          }
+          // Retry after 1 second
+          console.log('🔄 Retrying in 1 second...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // Additional check to ensure we have a valid response
+      if (!response) {
+        throw new Error('No response received from OpenRouter API after all attempts');
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -630,25 +675,70 @@ export function useOpenRouter() {
         ? messages
         : [{ role: 'system', content: systemPrompt }, ...messages]
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-          'X-Title': 'Therapist Chat',
-        },
-        body: JSON.stringify({
-          model: options.model || selectedModel.value,
-          messages: messagesWithSystem,
-          stream: false, // Changed from true to false
-          temperature: aiConfig?.temperature || options.temperature || 0.7,
-          max_tokens: aiConfig?.max_tokens || options.max_tokens || 400,
-          ...(aiConfig?.response_format && { response_format: aiConfig.response_format }),
-          plugins: [],
-          transforms: ['middle-out'],
-        }),
-      })
+      // Implement timeout mechanism with retry
+      let response: Response | null = null;
+      let attempts = 0;
+      const maxAttempts = 2; // Initial attempt + 1 retry
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate chat response`);
+        
+        try {
+          response = await Promise.race([
+            fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+                'X-Title': 'Therapist Chat',
+              },
+              body: JSON.stringify({
+                model: options.model || selectedModel.value,
+                messages: messagesWithSystem,
+                stream: false, // Changed from true to false
+                temperature: aiConfig?.temperature || options.temperature || 0.7,
+                max_tokens: aiConfig?.max_tokens || options.max_tokens || 400,
+                ...(aiConfig?.response_format && { response_format: aiConfig.response_format }),
+                plugins: [],
+                transforms: ['middle-out'],
+              }),
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => {
+                console.log('⏰ Request timeout after 30 seconds');
+                reject(new Error('Request timeout after 30 seconds'));
+              }, 30000)
+            )
+          ]) as Response;
+          
+          console.log(`✅ Request successful on attempt ${attempts}`);
+          // If we get here, the request was successful
+          // Check if response is valid before breaking
+          if (response && response.ok) {
+            break;
+          } else if (response) {
+            // If response exists but is not ok, throw error to trigger retry
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+          }
+        } catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e);
+          if (attempts >= maxAttempts) {
+            // Last attempt failed, re-throw the error
+            throw e;
+          }
+          // Retry after 1 second
+          console.log('🔄 Retrying in 1 second...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // Additional check to ensure we have a valid response
+      if (!response) {
+        throw new Error('No response received from OpenRouter API after all attempts');
+      }
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -733,70 +823,115 @@ export function useOpenRouter() {
       // Use only the system prompt and the last message for analysis
       const messagesWithSystem = [systemPrompt, lastMessage]
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-          'X-Title': 'An Inline Analysis Generator to help therapists be more align with the needs of patients',
-        },
-        body: JSON.stringify({
-          model: selectedModel.value,
-          messages: messagesWithSystem as ChatMessage[],
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'inline_analysis',
-              strict: true,
-              schema: {
-                type: 'object',
-                properties: {
-                  lastMessage_emotions: {
-                    type: 'array',
-                    items: {
+      // Implement timeout mechanism with retry
+      let response: Response | null = null;
+      let attempts = 0;
+      const maxAttempts = 2; // Initial attempt + 1 retry
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate inline analysis`);
+        
+        try {
+          response = await Promise.race([
+            fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+                'X-Title': 'An Inline Analysis Generator to help therapists be more align with the needs of patients',
+              },
+              body: JSON.stringify({
+                model: selectedModel.value,
+                messages: messagesWithSystem as ChatMessage[],
+                response_format: {
+                  type: 'json_schema',
+                  json_schema: {
+                    name: 'inline_analysis',
+                    strict: true,
+                    schema: {
                       type: 'object',
                       properties: {
-                        emotionName: {
-                          type: 'string',
-                          enum: ['شادی', 'اعتماد', 'ترس', 'تعجب', 'غم', 'انزجار', 'خشم', 'انتظار', 'نامشخص'],
-                          description: 'نام احساس بر اساس چرخه احساسات پلوچیک',
+                        lastMessage_emotions: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              emotionName: {
+                                type: 'string',
+                                enum: ['شادی', 'اعتماد', 'ترس', 'تعجب', 'غم', 'انزجار', 'خشم', 'انتظار', 'نامشخص'],
+                                description: 'نام احساس بر اساس چرخه احساسات پلوچیک',
+                              },
+                              severity: {
+                                type: 'string',
+                                enum: ['خالی', 'کم', 'متوسط', 'زیاد'],
+                                description: 'شدت احساس شناسایی شده',
+                              },
+                            },
+                            required: ['emotionName', 'severity'],
+                            additionalProperties: false,
+                          },
+                          description: 'آرایه باید دقیقاً شامل 9 عنصر باشد - یکی برای هر احساس اصلی: شادی، اعتماد، ترس، تعجب، غم، انزجار، خشم، انتظار، نامشخص. هیچ احساسی نباید حذف یا تکرار شود.',
                         },
-                        severity: {
+                        correspondingEmojis: {
                           type: 'string',
-                          enum: ['خالی', 'کم', 'متوسط', 'زیاد'],
-                          description: 'شدت احساس شناسایی شده',
+                          description: 'ایموجی‌های متناظر که احساس کلی پیام را به صورت کامل بازتاب می‌دهند. می‌توانند ترکیب چند ایموجی در کنار هم باشند. مثال: "😊💖" یا "😰😔" یا "🤔💭" - باید احساس اصلی و غالب پیام را نشان دهند.',
+                        },
+                        emotionalResponse: {
+                          type: 'string',
+                          description: 'پاسخ پیشنهادی مبتنی بر تحلیل احساسات کاربر جهت بازتاب و درک عمیق‌تر. مثال: اگر کاربر ترسیده، واکنش مناسب آرام سازی و دلگرم کردن اوست. اگر خشمگین است، می‌توان پرسید "آیا احساس خشم می‌کنی؟" یا گفت "به نظر می‌رسد خشم را در خودت احساس می‌کنی." اگر احساس نامشخص است، می‌توان پرسید "می‌توانی بیشتر در مورد احساست توضیح دهی؟ این پاسخ باید به فارسی باشد."',
                         },
                       },
-                      required: ['emotionName', 'severity'],
+                      required: [
+                        'lastMessage_emotions',
+                        'correspondingEmojis',
+                        'emotionalResponse',
+                      ],
                       additionalProperties: false,
                     },
-                    description: 'آرایه باید دقیقاً شامل 9 عنصر باشد - یکی برای هر احساس اصلی: شادی، اعتماد، ترس، تعجب، غم، انزجار، خشم، انتظار، نامشخص. هیچ احساسی نباید حذف یا تکرار شود.',
-                  },
-                  correspondingEmojis: {
-                    type: 'string',
-                    description: 'ایموجی‌های متناظر که احساس کلی پیام را به صورت کامل بازتاب می‌دهند. می‌توانند ترکیب چند ایموجی در کنار هم باشند. مثال: "😊💖" یا "😰😔" یا "🤔💭" - باید احساس اصلی و غالب پیام را نشان دهند.',
-                  },
-                  emotionalResponse: {
-                    type: 'string',
-                    description: 'پاسخ پیشنهادی مبتنی بر تحلیل احساسات کاربر جهت بازتاب و درک عمیق‌تر. مثال: اگر کاربر ترسیده، واکنش مناسب آرام سازی و دلگرم کردن اوست. اگر خشمگین است، می‌توان پرسید "آیا احساس خشم می‌کنی؟" یا گفت "به نظر می‌رسد خشم را در خودت احساس می‌کنی." اگر احساس نامشخص است، می‌توان پرسید "می‌توانی بیشتر در مورد احساست توضیح دهی؟ این پاسخ باید به فارسی باشد."',
                   },
                 },
-                required: [
-                  'lastMessage_emotions',
-                  'correspondingEmojis',
-                  'emotionalResponse',
-                ],
-                additionalProperties: false,
-              },
-            },
-          },
-          temperature: 0.7,
-          max_tokens: 0,
-          plugins: [],
-          transforms: ['middle-out'],
-        }),
-      })
+                temperature: 0.7,
+                max_tokens: 0,
+                plugins: [],
+                transforms: ['middle-out'],
+              }),
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => {
+                console.log('⏰ Request timeout after 30 seconds');
+                reject(new Error('Request timeout after 30 seconds'));
+              }, 30000)
+            )
+          ]) as Response;
+          
+          console.log(`✅ Request successful on attempt ${attempts}`);
+          // If we get here, the request was successful
+          // Check if response is valid before breaking
+          if (response && response.ok) {
+            break;
+          } else if (response) {
+            // If response exists but is not ok, throw error to trigger retry
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+          }
+        } catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e);
+          if (attempts >= maxAttempts) {
+            // Last attempt failed, re-throw the error
+            throw e;
+          }
+          // Retry after 1 second
+          console.log('🔄 Retrying in 1 second...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // Additional check to ensure we have a valid response
+      if (!response) {
+        throw new Error('No response received from OpenRouter API after all attempts');
+      }
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -850,24 +985,35 @@ export function useOpenRouter() {
     error.value = null
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-          'X-Title': 'Patient Details Generator',
-        },
-        body: JSON.stringify({
-          model: selectedModel.value,
-          messages: [
-            {
-              role: 'system',
-              content: 'شما یک دستیار روانشناس هستید که در تولید اطلاعات بیمار کمک می‌کند. لطفا با توجه به اطلاعات اولیه بیمار، سایر جزئیات را به صورت منطقی و به زبان فارسی تولید کنید.',
-            },
-            {
-              role: 'user',
-              content: `اطلاعات اولیه بیمار:
+      // Implement timeout mechanism with retry
+      let response: Response | null = null;
+      let attempts = 0;
+      const maxAttempts = 2; // Initial attempt + 1 retry
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate patient details`);
+        
+        try {
+          response = await Promise.race([
+            fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+                'X-Title': 'Patient Details Generator',
+              },
+              body: JSON.stringify({
+                model: selectedModel.value,
+                messages: [
+                  {
+                    role: 'system',
+                    content: 'شما یک دستیار روانشناس هستید که در تولید اطلاعات بیمار کمک می‌کند. لطفا با توجه به اطلاعات اولیه بیمار، سایر جزئیات را به صورت منطقی و به زبان فارسی تولید کنید.',
+                  },
+                  {
+                    role: 'user',
+                    content: `اطلاعات اولیه بیمار:
 نام: ${input.name}
 سن: ${input.age}
 توضیح کوتاه: ${input.shortDescription}
@@ -884,64 +1030,98 @@ export function useOpenRouter() {
 خروجی باید به صورت یک آبجکت JSON با کلیدهای زیر باشد:
 longDescription, definingTraits, backStory, personality, appearance, motivation, moodAndCurrentEmotions
 `,
-            },
-          ] as ChatMessage[], // Add type assertion here
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'patient_details',
-              strict: true,
-              schema: {
-                type: 'object',
-                properties: {
-                  longDescription: {
-                    type: 'string',
-                    description: 'توضیح بلند و کامل در مورد بیمار و وضعیت او',
                   },
-                  definingTraits: {
-                    type: 'string',
-                    description: 'صفات و ویژگی‌های تعریف‌کننده شخصیت و رفتار بیمار',
-                  },
-                  backStory: {
-                    type: 'string',
-                    description: 'داستان زندگی، پیشینه و تجربیات مهم بیمار',
-                  },
-                  personality: {
-                    type: 'string',
-                    description: 'شخصیت، رفتارها و خصوصیات روانشناختی بیمار',
-                  },
-                  appearance: {
-                    type: 'string',
-                    description: 'توصیف ظاهری و ویژگی‌های فیزیکی بیمار',
-                  },
-                  motivation: {
-                    type: 'string',
-                    description: 'انگیزه‌ها، اهداف و خواسته‌های اصلی بیمار',
-                  },
-                  moodAndCurrentEmotions: {
-                    type: 'string',
-                    description: 'حالت روحی، احساسات و وضعیت عاطفی فعلی بیمار',
+                ] as ChatMessage[], // Add type assertion here
+                response_format: {
+                  type: 'json_schema',
+                  json_schema: {
+                    name: 'patient_details',
+                    strict: true,
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        longDescription: {
+                          type: 'string',
+                          description: 'توضیح بلند و کامل در مورد بیمار و وضعیت او',
+                        },
+                        definingTraits: {
+                          type: 'string',
+                          description: 'صفات و ویژگی‌های تعریف‌کننده شخصیت و رفتار بیمار',
+                        },
+                        backStory: {
+                          type: 'string',
+                          description: 'داستان زندگی، پیشینه و تجربیات مهم بیمار',
+                        },
+                        personality: {
+                          type: 'string',
+                          description: 'شخصیت، رفتارها و خصوصیات روانشناختی بیمار',
+                        },
+                        appearance: {
+                          type: 'string',
+                          description: 'توصیف ظاهری و ویژگی‌های فیزیکی بیمار',
+                        },
+                        motivation: {
+                          type: 'string',
+                          description: 'انگیزه‌ها، اهداف و خواسته‌های اصلی بیمار',
+                        },
+                        moodAndCurrentEmotions: {
+                          type: 'string',
+                          description: 'حالت روحی، احساسات و وضعیت عاطفی فعلی بیمار',
+                        },
+                      },
+                      required: [
+                        'longDescription',
+                        'definingTraits',
+                        'backStory',
+                        'personality',
+                        'appearance',
+                        'motivation',
+                        'moodAndCurrentEmotions',
+                      ],
+                      additionalProperties: false,
+                    },
                   },
                 },
-                required: [
-                  'longDescription',
-                  'definingTraits',
-                  'backStory',
-                  'personality',
-                  'appearance',
-                  'motivation',
-                  'moodAndCurrentEmotions',
-                ],
-                additionalProperties: false,
-              },
-            },
-          },
-          temperature: 0.7,
-          max_tokens: 0,
-          plugins: [],
-          transforms: ['middle-out'],
-        }),
-      })
+                temperature: 0.7,
+                max_tokens: 0,
+                plugins: [],
+                transforms: ['middle-out'],
+              }),
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => {
+                console.log('⏰ Request timeout after 30 seconds');
+                reject(new Error('Request timeout after 30 seconds'));
+              }, 30000)
+            )
+          ]) as Response;
+          
+          console.log(`✅ Request successful on attempt ${attempts}`);
+          // If we get here, the request was successful
+          // Check if response is valid before breaking
+          if (response && response.ok) {
+            break;
+          } else if (response) {
+            // If response exists but is not ok, throw error to trigger retry
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+          }
+        } catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e);
+          if (attempts >= maxAttempts) {
+            // Last attempt failed, re-throw the error
+            throw e;
+          }
+          // Retry after 1 second
+          console.log('🔄 Retrying in 1 second...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // Additional check to ensure we have a valid response
+      if (!response) {
+        throw new Error('No response received from OpenRouter API after all attempts');
+      }
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -995,85 +1175,130 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
     error.value = null
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-          'X-Title': 'Therapist Details Generator',
-        },
-        body: JSON.stringify({
-          model: selectedModel.value,
-          messages: [
-            {
-              role: 'system',
-              content: 'شما یک دستیار روانشناس هستید که در تولید اطلاعات روانشناس کمک می‌کند. لطفا با توجه به اطلاعات اولیه روانشناس، سایر جزئیات را به صورت منطقی و به زبان فارسی تولید کنید.',
-            },
-            {
-              role: 'user',
-              content: `لطفا با توجه به اطلاعات زیر، جزئیات روانشناس را تولید کنید:
+      // Implement timeout mechanism with retry
+      let response: Response | null = null;
+      let attempts = 0;
+      const maxAttempts = 2; // Initial attempt + 1 retry
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate therapist details`);
+        
+        try {
+          response = await Promise.race([
+            fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+                'X-Title': 'Therapist Details Generator',
+              },
+              body: JSON.stringify({
+                model: selectedModel.value,
+                messages: [
+                  {
+                    role: 'system',
+                    content: 'شما یک دستیار روانشناس هستید که در تولید اطلاعات روانشناس کمک می‌کند. لطفا با توجه به اطلاعات اولیه روانشناس، سایر جزئیات را به صورت منطقی و به زبان فارسی تولید کنید.',
+                  },
+                  {
+                    role: 'user',
+                    content: `لطفا با توجه به اطلاعات زیر، جزئیات روانشناس را تولید کنید:
 نام: ${input.name}
 تخصص: ${input.specialty}
 توضیح کوتاه: ${input.shortDescription}`,
-            },
-          ] as ChatMessage[], // Added type assertion to fix TS error 2345
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'therapist_details',
-              strict: true,
-              schema: {
-                type: 'object',
-                properties: {
-                  longDescription: {
-                    type: 'string',
-                    description: 'توضیح بلند و کامل در مورد روانشناس و تخصص او',
                   },
-                  definingTraits: {
-                    type: 'string',
-                    description: 'صفات و ویژگی‌های تعریف‌کننده شخصیت و رفتار روانشناس',
-                  },
-                  backStory: {
-                    type: 'string',
-                    description: 'داستان زندگی، پیشینه و تجربیات مهم روانشناس',
-                  },
-                  personality: {
-                    type: 'string',
-                    description: 'شخصیت، رفتارها و خصوصیات روانشناختی روانشناس',
-                  },
-                  appearance: {
-                    type: 'string',
-                    description: 'توصیف ظاهری و ویژگی‌های فیزیکی روانشناس',
-                  },
-                  approach: {
-                    type: 'string',
-                    description: 'روش و رویکرد درمانی روانشناس',
-                  },
-                  expertise: {
-                    type: 'string',
-                    description: 'تخصص و مهارت‌های روانشناس',
+                ] as ChatMessage[], // Added type assertion to fix TS error 2345
+                response_format: {
+                  type: 'json_schema',
+                  json_schema: {
+                    name: 'therapist_details',
+                    strict: true,
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        longDescription: {
+                          type: 'string',
+                          description: 'توضیح بلند و کامل در مورد روانشناس و تخصص او',
+                        },
+                        definingTraits: {
+                          type: 'string',
+                          description: 'صفات و ویژگی‌های تعریف‌کننده شخصیت و رفتار روانشناس',
+                        },
+                        backStory: {
+                          type: 'string',
+                          description: 'داستان زندگی، پیشینه و تجربیات مهم روانشناس',
+                        },
+                        personality: {
+                          type: 'string',
+                          description: 'شخصیت، رفتارها و خصوصیات روانشناختی روانشناس',
+                        },
+                        appearance: {
+                          type: 'string',
+                          description: 'توصیف ظاهری و ویژگی‌های فیزیکی روانشناس',
+                        },
+                        approach: {
+                          type: 'string',
+                          description: 'روش و رویکرد درمانی روانشناس',
+                        },
+                        expertise: {
+                          type: 'string',
+                          description: 'تخصص و مهارت‌های روانشناس',
+                        },
+                      },
+                      required: [
+                        'longDescription',
+                        'definingTraits',
+                        'backStory',
+                        'personality',
+                        'appearance',
+                        'approach',
+                        'expertise',
+                      ],
+                      additionalProperties: false,
+                    },
                   },
                 },
-                required: [
-                  'longDescription',
-                  'definingTraits',
-                  'backStory',
-                  'personality',
-                  'appearance',
-                  'approach',
-                  'expertise',
-                ],
-                additionalProperties: false,
-              },
-            },
-          },
-          temperature: 0.7,
-          max_tokens: 0,
-          plugins: [],
-          transforms: ['middle-out'],
-        }),
-      })
+                temperature: 0.7,
+                max_tokens: 0,
+                plugins: [],
+                transforms: ['middle-out'],
+              }),
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => {
+                console.log('⏰ Request timeout after 30 seconds');
+                reject(new Error('Request timeout after 30 seconds'));
+              }, 30000)
+            )
+          ]) as Response;
+          
+          console.log(`✅ Request successful on attempt ${attempts}`);
+          // If we get here, the request was successful
+          // Check if response is valid before breaking
+          if (response && response.ok) {
+            break;
+          } else if (response) {
+            // If response exists but is not ok, throw error to trigger retry
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+          }
+        } catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e);
+          if (attempts >= maxAttempts) {
+            // Last attempt failed, re-throw the error
+            throw e;
+          }
+          // Retry after 1 second
+          console.log('🔄 Retrying in 1 second...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // Additional check to ensure we have a valid response
+      if (!response) {
+        throw new Error('No response received from OpenRouter API after all attempts');
+      }
 
       if (!response.ok) {
         const errorText = await response.text()

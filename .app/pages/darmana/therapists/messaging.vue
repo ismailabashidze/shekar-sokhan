@@ -12,6 +12,7 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 const { getTherapists } = useTherapist()
 const { getCurrentSession, endSession, createSession } = useTherapistSession()
 const { getMessages, sendMessage } = useTherapistsMessages()
+const { unreadCount } = useNotifications()
 const route = useRoute()
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
@@ -577,7 +578,28 @@ function formatInlineAnalysis(analysisResult) {
   return output + '</div>' + '</div>'
 }
 
-watch(messages, () => {
+watch(messages, (newMessages) => {
+  // Show toast after 10 messages
+  if (newMessages.length === 10) {
+    // Use nextTick to ensure DOM is updated
+    nextTick(() => {
+      // Check if toast has already been shown by looking for a flag in localStorage or a ref
+      const toastShown = localStorage.getItem('tenMessagesToastShown')
+      if (!toastShown) {
+        toaster.show({
+          title: 'جلسه شما پیش می‌رود!',
+          message: 'می‌توانید جلسه را با کلیک بر روی دکمه تیک سبز رنگ در بالای صفحه پایان دهید.',
+          color: 'success',
+          icon: 'ph:check-circle',
+          closable: true,
+          duration: 10000
+        })
+        // Set flag so toast doesn't show again
+        localStorage.setItem('tenMessagesToastShown', 'true')
+      }
+    })
+  }
+  
   if (!isAIResponding.value) {
     scrollToBottom()
   }
@@ -1374,10 +1396,7 @@ const isGeneratingAnalysis = ref(false)
 
 const handleConfirmEndSession = async () => {
   if (!activeSession.value) return
-
   isGeneratingAnalysis.value = true
-  let savedAnalysisId = null
-
   try {
     // 1. Check if analysis already exists for this session
     let existingAnalysis = null
@@ -1401,111 +1420,26 @@ const handleConfirmEndSession = async () => {
       // If 404, just continue (analysis does not exist)
     }
     if (existingAnalysis) {
-      savedAnalysisId = existingAnalysis.id
+      const savedAnalysisId = existingAnalysis.id
       isReportModalOpen.value = false
+      isGeneratingAnalysis.value = false
       await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
       return
     }
 
-    // 2. If not, generate and save analysis
-    // Remove first AI message if it was the starting message (for users with previous sessions)
-    let messagesToAnalyze = messages.value
-    if (messages.value.length > 0 && messages.value[0].type === 'received') {
-      // If first message is from AI (received), exclude it from analysis
-      messagesToAnalyze = messages.value.slice(1)
-    }
 
-    const allMessages = messagesToAnalyze.map(msg => ({
-      role: msg.type === 'sent' ? 'patient' : 'therapist',
+    // Redirect to waitForReport page
+    const contextMessages = messages.value.map(msg => ({
+      role: msg.type === 'sent' ? 'user' : 'assistant',
       content: msg.text,
     }))
+    const genAnalysis = await generateAnalysis({ sessionId: activeSession.value.id, messages: contextMessages })
+    const analysis = await createAnalysis(genAnalysis)  
+    await endSession(activeSession.value.id, analysis.id)
+    isReportModalOpen.value = false
+    isGeneratingAnalysis.value = false
 
-    const startTime = new Date(activeSession.value.created)
-    const endTime = new Date()
-    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
-
-    // Generate and save analysis
-    const generatedAnalysis = await generateAnalysis({
-      sessionId: activeSession.value.id,
-      messages: allMessages,
-    })
-
-    const savedAnalysis = await createAnalysis({
-      session: activeSession.value.id,
-      ...generatedAnalysis,
-    })
-
-    savedAnalysisId = savedAnalysis.id
-    // Try to update session with the analysis ID
-    try {
-      await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
-        status: 'done',
-        end_time: endTime.toISOString(),
-        count_of_total_messages: messagesToAnalyze.length,
-        total_time_passed: totalTimePassedMinutes,
-        updated: endTime.toISOString(),
-        session_analysis_for_system: savedAnalysisId,
-      })
-
-      activeSession.value.status = 'done'
-      activeSession.value.session_analysis_for_system = savedAnalysisId
-      let report: Report | null = null
-
-      // Check if user already has a report
-      const existingReport = await getReportByUserId(nuxtApp.$pb.authStore.model?.id)
-
-      if (!existingReport) {
-        // Create new report
-        report = await createReport({
-          user: nuxtApp.$pb.authStore.model.id,
-          totalSessions: 1,
-          summaries: [{
-            session: activeSession.value.id,
-            summary: savedAnalysis.summaryOfSession,
-            title: savedAnalysis.title,
-            date: activeSession.value.created,
-            duration: totalTimePassedMinutes,
-          }],
-          finalDemographicProfile: savedAnalysis.demographicData,
-          possibleRiskFactors: savedAnalysis.possibleRiskFactorsExtracted ? [savedAnalysis.possibleRiskFactorsExtracted] : [],
-          possibleDeeperGoals: savedAnalysis.possibleDeeperGoalsOfPatient ? [savedAnalysis.possibleDeeperGoalsOfPatient] : [],
-        })
-      }
-      else {
-        // Update existing report
-        const updatedData = {
-          totalSessions: (existingReport.totalSessions || 0) + 1,
-          summaries: [...(existingReport.summaries || []), {
-            session: activeSession.value.id,
-            summary: savedAnalysis.summaryOfSession,
-            title: savedAnalysis.title,
-            date: activeSession.value.created,
-            duration: totalTimePassedMinutes,
-          }],
-          finalDemographicProfile: {
-            ...(existingReport.finalDemographicProfile || {}),
-            // Only merge non-null values from new demographic data
-            ...Object.fromEntries(
-              Object.entries(savedAnalysis.demographicData || {})
-                .filter(([key, value]) => value !== null && value !== undefined),
-            ),
-          },
-          possibleRiskFactors: [
-            ...(existingReport.possibleRiskFactors || []),
-            ...(savedAnalysis.possibleRiskFactorsExtracted ? [savedAnalysis.possibleRiskFactorsExtracted] : []),
-          ],
-          possibleDeeperGoals: [
-            ...(existingReport.possibleDeeperGoals || []),
-            ...(savedAnalysis.possibleDeeperGoalsOfPatient ? [savedAnalysis.possibleDeeperGoalsOfPatient] : []),
-          ],
-        }
-        report = await updateReport(existingReport.id, updatedData)
-      }
-    }
-    catch (updateError) {
-      console.error('Error updating session:', updateError)
-      // Continue even if session update fails - we'll still navigate to analysis
-    }
+    await navigateTo(`/darmana/therapists/analysis?analysis_id=${analysis.id}`)
   }
   catch (error) {
     console.error('Error ending session:', error)
@@ -1516,12 +1450,8 @@ const handleConfirmEndSession = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-  }
-  finally {
     isGeneratingAnalysis.value = false
     isReportModalOpen.value = false
-
-    await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
   }
 }
 
@@ -1812,6 +1742,9 @@ const typingConfig = ref({
               </button>
             </div>
 
+            <div class="flex h-16 w-full items-center justify-center">
+              <NotificationIcon />
+            </div>
             <div class="flex h-16 w-full items-center justify-center">
               <DemoAccountMenu />
             </div>
@@ -2643,11 +2576,11 @@ const typingConfig = ref({
                 class="w-full"
                 @click="openPremiumModal()"
               >
+                تنظیمات حاضر
                 <Icon
                   name="ph:gear-duotone"
                   class="mr-2 size-5"
                 />
-                تنظیمات حاضر
               </BaseButton>
             </div>
             <BaseButton

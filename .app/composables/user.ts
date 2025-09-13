@@ -15,6 +15,7 @@ export type User = {
   role: string
   avatar?: string // فیلد آواتار محلی
   meta: MetaObj
+  phoneNumber: string
 }
 
 export function useUser() {
@@ -33,11 +34,15 @@ export function useUser() {
     role.value = r
     return user
   }
-
+  const updateUser = async (u: User) => {
+    return await nuxtApp.$pb.collection('users').update(u.id as string, u)
+    user.value = u
+  }
   return {
     user,
     role,
     getAllUsers,
     setUser,
+    updateUser,
   }
 }

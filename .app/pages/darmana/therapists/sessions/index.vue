@@ -17,7 +17,7 @@ interface SessionWithExpanded {
   start_time: string
   end_time: string
   user: string
-  status: 'inprogress' | 'done' | 'closed' | 'deleted'
+  status: 'inprogress' | 'done' | 'closed' | 'deleted' | 'generatingReport'
   count_of_total_messages: number
   total_time_passed: number
   session_analysis_for_system: string
@@ -92,6 +92,8 @@ const getStatusInfo = (status: SessionWithExpanded['status']) => {
       return { text: 'بسته شده', color: 'info' as const }
     case 'deleted':
       return { text: 'حذف شده', color: 'danger' as const }
+    case 'generatingReport':
+      return { text: 'در انتظار گزارش', color: 'primary' as const }
     default:
       return { text: 'نامشخص', color: 'muted' as const }
   }
@@ -179,8 +181,12 @@ const fetchSessions = async () => {
   try {
     let filterObj: any = {}
 
+    // Check if we're manually filtering by status
     if (statusFilter.value !== 'all') {
       filterObj.status = statusFilter.value
+    } else {
+      // Auto-filter logic: first check for ongoing sessions
+      filterObj.status = 'inprogress'
     }
 
     // If admin is viewing another user's sessions, use patientId filter
@@ -190,6 +196,14 @@ const fetchSessions = async () => {
 
     const result = await getSessions(filterObj)
     sessions.value = result as unknown as SessionWithExpanded[]
+    
+    // If no ongoing sessions and we're using auto-filter, show completed sessions
+    if (sessions.value.length === 0 && statusFilter.value === 'all') {
+      filterObj.status = 'done'
+      const completedResult = await getSessions(filterObj)
+      sessions.value = completedResult as unknown as SessionWithExpanded[]
+    }
+    
     console.log('Sessions loaded:', sessions.value)
   }
   catch (error) {
@@ -209,7 +223,14 @@ const fetchSessions = async () => {
 
 // Refresh sessions data
 const refreshSessions = () => {
-  fetchSessions()
+  // Reset to auto-filter mode when refreshing
+  if (statusFilter.value === 'all') {
+    fetchSessions()
+  } else {
+    // If manually filtered, keep the filter
+    fetchSessions()
+  }
+  
   toaster.show({
     title: 'بروزرسانی',
     message: 'اطلاعات جلسات بروزرسانی شد',
@@ -290,13 +311,16 @@ onMounted(() => {
             @update:model-value="fetchSessions"
           >
             <option value="all">
-              همه جلسات
+              جلسات فعال/تکمیل شده
             </option>
             <option value="inprogress">
               در حال انجام
             </option>
             <option value="done">
               تکمیل شده
+            </option>
+            <option value="generatingReport">
+              در انتظار گزارش
             </option>
             <option value="closed">
               بسته شده
@@ -378,8 +402,8 @@ onMounted(() => {
       <!-- No results -->
       <div v-else-if="!loading && filteredSessions.length === 0">
         <BasePlaceholderPage
-          title="جلسه‌ای یافت نشد"
-          subtitle="هیچ جلسه‌ای با این مشخصات پیدا نشد. لطفا معیارهای جستجوی خود را تغییر دهید یا یک جلسه جدید شروع کنید."
+          :title="statusFilter === 'all' ? 'جلسه‌ای در حال انجام یا تکمیل شده یافت نشد' : 'جلسه‌ای یافت نشد'"
+          :subtitle="statusFilter === 'all' ? 'هیچ جلسه‌ای در حال انجام یا تکمیل شده یافت نشد. لطفا یک جلسه جدید شروع کنید.' : 'هیچ جلسه‌ای با این مشخصات پیدا نشد. لطفا معیارهای جستجوی خود را تغییر دهید یا یک جلسه جدید شروع کنید.'"
         >
           <template #image>
             <img
@@ -396,11 +420,12 @@ onMounted(() => {
           <template #action>
             <div class="flex gap-2">
               <BaseButton
+                v-if="statusFilter !== 'all'"
                 color="muted"
                 shape="curved"
                 @click="statusFilter = 'all'; fetchSessions()"
               >
-                نمایش همه جلسات
+                نمایش جلسات فعال/تکمیل شده
               </BaseButton>
               <BaseButton
                 color="primary"
@@ -661,9 +686,10 @@ onMounted(() => {
             >
               <div class="flex flex-wrap items-center justify-end gap-2">
                 <BaseButton
-                  v-if="session.status === 'done'"
+                  v-if="session.status === 'done' || session.status === 'generatingReport'"
                   color="info"
                   shape="curved"
+                  :disabled="session.status === 'generatingReport'"
                   @click="viewSessionAnalysis(session.session_analysis_for_system)"
                 >
                   <Icon name="ph:chart-line-duotone" class="ml-1 size-4" />
@@ -681,7 +707,17 @@ onMounted(() => {
                 </BaseButton>
 
                 <BaseButton
-                  v-if="!['done', 'inprogress', 'closed', 'deleted'].includes(session.status)"
+                  v-if="session.status === 'inprogress'"
+                  color="success"
+                  shape="curved"
+                  @click="continueSession(session.expand?.therapist?.id)"
+                >
+                  <Icon name="ph:play-duotone" class="ml-1 size-4" />
+                  ادامه جلسه
+                </BaseButton>
+                
+                <BaseButton
+                  v-else-if="!['done', 'inprogress', 'closed', 'deleted', 'generatingReport'].includes(session.status)"
                   color="muted"
                   shape="curved"
                   disabled

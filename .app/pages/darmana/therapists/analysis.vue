@@ -586,7 +586,7 @@ const getStatusInfo = (step: any) => {
         bgClass: 'bg-gradient-to-r from-gray-500/15 to-slate-500/20 dark:from-gray-400/20 dark:to-slate-400/25 border border-gray-200/40 dark:border-gray-400/30',
         textClass: 'text-gray-700 dark:text-gray-300',
         iconClass: 'text-gray-600 dark:text-gray-400',
-        pulseClass: 'animate-spin',
+        pulseClass: '',
         conflicts: conflictInfo.conflicts,
       }
     case 'not_created':

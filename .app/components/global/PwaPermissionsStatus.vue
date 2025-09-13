@@ -173,7 +173,6 @@ const showInstallGuidance = computed(() => {
 // Actions
 const installPwa = async () => {
   if (!deferredPrompt.value) {
-    console.log('No deferred prompt available')
     return
   }
 
@@ -184,18 +183,13 @@ const installPwa = async () => {
     const { outcome } = await deferredPrompt.value.userChoice
 
     if (outcome === 'accepted') {
-      console.log('User accepted PWA installation')
       // بررسی که آیا واقعاً نصب شده یا نه
       setTimeout(() => {
         if (isPwaInstalled()) {
-          console.log('PWA installed successfully')
           pwaInstalled.value = true
           localStorage.removeItem('pwa-install-dismissed')
         }
       }, 1000)
-    }
-    else {
-      console.log('User dismissed PWA installation')
     }
 
     deferredPrompt.value = null
@@ -288,24 +282,15 @@ onMounted(async () => {
   notificationStatus.value = getNotificationStatus()
   await checkMicrophonePermission()
 
-  console.log('🔍 PWA Debug Info:')
-  console.log('- PWA installed:', pwaInstalled.value)
-  console.log('- Deferred prompt available:', deferredPrompt.value !== null)
-  console.log('- Can install PWA:', !pwaInstalled.value && deferredPrompt.value !== null)
-  console.log('- Show install guidance:', !pwaInstalled.value && deferredPrompt.value === null)
-
   // Listen for the beforeinstallprompt event
   if (typeof window !== 'undefined') {
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault()
       deferredPrompt.value = e as BeforeInstallPromptEvent
-      console.log('✅ PWA install prompt is now available!')
-      console.log('- Can install PWA:', !pwaInstalled.value && deferredPrompt.value !== null)
     })
 
     // Listen for app installation
     window.addEventListener('appinstalled', () => {
-      console.log('✅ PWA has been installed')
       pwaInstalled.value = true
       deferredPrompt.value = null
       localStorage.removeItem('pwa-install-dismissed')
@@ -317,7 +302,6 @@ onMounted(async () => {
     const newStatus = isPwaInstalled()
     if (newStatus !== pwaInstalled.value) {
       pwaInstalled.value = newStatus
-      console.log('🔄 PWA status changed:', newStatus)
     }
   }
 

@@ -36,7 +36,6 @@ export function usePwaCache() {
         })
 
         if (success) {
-          console.log('[PWA] All caches cleared successfully')
         }
         else {
           console.warn('[PWA] Service worker cache clear may have failed')
@@ -66,7 +65,6 @@ export function usePwaCache() {
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations()
         await Promise.all(registrations.map(reg => reg.unregister()))
-        console.log('[PWA] Service workers unregistered')
       }
 
       // Force reload the page without cache

@@ -379,14 +379,15 @@ const filteredMessages = computed(() => {
               <!-- Status tag -->
               <div v-if="activeSession" class="hidden sm:block">
                 <BaseTag
-                  :color="activeSession.status === 'done' ? 'success' : activeSession.status === 'inprogress' ? 'info' : 'warning'"
+                  :color="activeSession.status === 'done' ? 'success' : activeSession.status === 'inprogress' ? 'info' : activeSession.status === 'generatingReport' ? 'warning' : 'warning'"
                   shape="curved"
                   size="sm"
                 >
                   <div class="flex items-center px-2 py-1.5">
                     {{ activeSession.status === 'done' ? 'تکمیل شده' :
                       activeSession.status === 'inprogress' ? 'در حال انجام' :
-                      activeSession.status === 'closed' ? 'بسته شده' : 'نامشخص' }}
+                      activeSession.status === 'closed' ? 'بسته شده' :
+                      activeSession.status === 'generatingReport' ? 'در حال تولید گزارش' : 'نامشخص' }}
                   </div>
                 </BaseTag>
               </div>
@@ -685,7 +686,8 @@ const filteredMessages = computed(() => {
                 <span class="text-muted-800 dark:text-white">
                   {{ activeSession.status === 'done' ? 'تکمیل شده' :
                     activeSession.status === 'inprogress' ? 'در حال انجام' :
-                    activeSession.status === 'closed' ? 'بسته شده' : 'نامشخص' }}
+                    activeSession.status === 'closed' ? 'بسته شده' :
+                    activeSession.status === 'generatingReport' ? 'در حال تولید گزارش' : 'نامشخص' }}
                 </span>
               </div>
 
