@@ -24,3 +24,6 @@ export { useNotes } from './useNotes'
 
 // Export enrollments composable
 export { useEnrollments } from './useEnrollments'
+
+// Export counselor profile composable for hammasir
+export { useCounselorProfile } from './useCounselorProfile'
