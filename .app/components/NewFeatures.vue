@@ -20,7 +20,7 @@
         <slot name="actions" />
       </div>
     </div>
-    <div class="ltablet:grid-cols-2 grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div class="ltablet:grid-cols-1 grid grid-cols-1 gap-6 lg:grid-cols-1">
       <div class="relative">
         <BaseCard
           rounded="md"

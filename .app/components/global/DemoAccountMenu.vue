@@ -17,7 +17,7 @@ const displayName = computed(() => user.value.meta?.name || 'کاربر جدید
     <Menu
       v-slot="{ close }"
       as="div"
-      class="relative z-20 size-10 text-start"
+      class="relative z-50 size-10 text-start"
     >
       <MenuButton as="template">
         <button

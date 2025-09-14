@@ -316,35 +316,11 @@ const closeAlphaModal = () => {
                 </div>
               </div>
             </div>
+            
             <!-- Content -->
             <div class="col-span-12">
               <!-- Sub grid -->
               <div class="grid grid-cols-12 gap-6">
-                <div class="col-span-12">
-                  <Transition
-                    leave-active-class="transition origin-top duration-75 ease-in"
-                    leave-from-class="transform scale-y-100 opacity-100"
-                    leave-to-class="transform scale-y-0 opacity-0"
-                  >
-                    <div
-                      v-if="showFeatures"
-                      class="w-full"
-                      data-tour="new-features"
-                    >
-                      <!--Features widget-->
-                      <NewFeatures>
-                        <template #actions>
-                          <BaseButtonClose
-                            size="sm"
-                            color="muted"
-                            data-nui-tooltip="بستن"
-                            @click="showFeatures = false"
-                          />
-                        </template>
-                      </NewFeatures>
-                    </div>
-                  </Transition>
-                </div>
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
                     <InfoImage
@@ -400,316 +376,38 @@ const closeAlphaModal = () => {
             </div>
           </div>
         </div>
-
-        <!-- Column -->
         <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
-          <div class="bg-muted-200 dark:bg-muted-800/70  rounded-2xl p-6" data-tour="articles-section">
-            <!-- Title -->
-            <div class="mb-8 flex items-center justify-between">
-              <BaseHeading
-                as="h3"
-                size="md"
-                weight="semibold"
-                lead="tight"
-                class="text-muted-800 dark:text-white"
+          <!-- New Features Section -->
+            <div class="col-span-12">
+              <Transition
+                leave-active-class="transition origin-top duration-75 ease-in"
+                leave-from-class="transform scale-y-100 opacity-100"
+                leave-to-class="transform scale-y-0 opacity-0"
               >
-                <span>آخرین مطالب</span>
-              </BaseHeading>
-              <div class="flex scale-90 gap-2 sm:justify-end">
-                <BaseButtonAction
-                  small
-                  :color="activePosts === 'recent' ? 'primary' : 'default'"
-                  @click="activePosts = 'recent'"
+                <div
+                  v-if="showFeatures"
+                  class="w-full"
+                  data-tour="new-features"
                 >
-                  مقالات اخیر
-                </BaseButtonAction>
-                <BaseButtonAction
-                  small
-                  :color="activePosts === 'popular' ? 'primary' : 'default'"
-                  @click="activePosts = 'popular'"
-                >
-                  مقالات محبوب
-                </BaseButtonAction>
-              </div>
+                  <!--Features widget-->
+                  <NewFeatures>
+                    <template #actions>
+                      <BaseButtonClose
+                        size="sm"
+                        color="muted"
+                        data-nui-tooltip="بستن"
+                        @click="showFeatures = false"
+                      />
+                    </template>
+                  </NewFeatures>
+                </div>
+              </Transition>
             </div>
-            <!-- Posts-->
-            <div class="ptablet:grid ptablet:grid-cols-2 flex flex-col gap-6">
-              <!-- Post -->
-              <NuxtLink :to="`/posts/1`" class="flex flex-col">
-                <img
-                  src="/img/illustrations/dashboards/writer/post-1.svg"
-                  alt="Post image"
-                  class="bg-muted-200 rounded-xl"
-                >
-                <BaseCard class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl">
-                  <div class="mb-3">
-                    <BaseHeading
-                      as="h4"
-                      size="md"
-                      weight="light"
-                      lead="tight"
-                      class="text-muted-800 mb-1 dark:text-white"
-                    >
-                      <span>چگونه خودآگاهی می‌تواند زندگی‌تان را تغییر دهد</span>
-                    </BaseHeading>
-                    <BaseParagraph size="xs">
-                      <span class="text-muted-400">
-                        کشف قدرت خودآگاهی برای بهبود زندگی و راهکارهای کاربردی برای تقویت آن.
-                      </span>
-                    </BaseParagraph>
-                  </div>
-                  <div class="flex gap-3">
-                    <BaseAvatar
-                      src="/img/avatars/6.svg"
-                      text="BT"
-                      size="xs"
-                      class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
-                    />
-                    <div>
-                      <BaseHeading
-                        as="h4"
-                        size="xs"
-                        weight="light"
-                        lead="tight"
-                        class="text-muted-800 dark:text-white"
-                      >
-                        <span>دکتر علی مرادی</span>
-                      </BaseHeading>
-                      <BaseParagraph size="xs">
-                        <span class="text-muted-400">روانشناس بالینی</span>
-                      </BaseParagraph>
-                    </div>
-                  </div>
-                </BaseCard>
-              </NuxtLink>
-              <!-- Post -->
-              <NuxtLink :to="`/posts/2`" class="flex flex-col">
-                <img
-                  src="/img/illustrations/dashboards/writer/post-2.svg"
-                  alt="Post image"
-                  class="bg-muted-200 rounded-xl"
-                >
-                <BaseCard class="shadow-muted-300/30 dark:shadow-muted-900/20 -mt-8 !rounded-2xl p-6 shadow-xl">
-                  <div class="mb-3">
-                    <BaseHeading
-                      as="h4"
-                      size="md"
-                      weight="light"
-                      lead="tight"
-                      class="text-muted-800 mb-1 dark:text-white"
-                    >
-                      <span>استرس را بکش، قبل از اینکه تو را بکشد</span>
-                    </BaseHeading>
-                    <BaseParagraph size="xs">
-                      <span class="text-muted-400">
-                        چرا باید استرس داشته باشیم، وقتی می توانیم شاد باشیم؟
-                      </span>
-                    </BaseParagraph>
-                  </div>
-                  <div class="flex gap-3">
-                    <BaseAvatar
-                      src="/img/avatars/5.svg"
-                      text="BT"
-                      size="xs"
-                      class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
-                    />
-                    <div>
-                      <BaseHeading
-                        as="h4"
-                        size="xs"
-                        weight="light"
-                        lead="tight"
-                        class="text-muted-800 dark:text-white"
-                      >
-                        <span>دکتر مرضیه یوسفی</span>
-                      </BaseHeading>
-                      <BaseParagraph size="xs">
-                        <span class="text-muted-400">روان درمانگر و عضو هیئت علمی دانشگاه</span>
-                      </BaseParagraph>
-                    </div>
-                  </div>
-                </BaseCard>
-              </NuxtLink>
-            </div>
-          </div>
         </div>
+        
       </div>
     </div>
-    <BaseCard class="my-5" data-tour="video-section">
-      <div class="m-5">
-        <BaseHeading
-          as="h3"
-          weight="medium"
-          size="xl"
-          class="text-muted-800 dark:text-muted-100"
-        >
-          ویدئوهایی برای شما
-        </BaseHeading>
-        <BaseParagraph class="text-muted-500 dark:text-muted-400">
-          اگر با محتوای بصری راحت تر هستید، این ویدئو ها را از دست ندهید
-        </BaseParagraph>
-      </div>
-      <div class="m-5 grid min-h-[440px] grid-cols-12 gap-6">
-        <!-- Column -->
-        <div
-          v-for="video in featuredVideos.slice(0, 1)"
-          :key="video.id"
-          class="ltablet:col-span-6 col-span-12 lg:col-span-6"
-        >
-          <NuxtLink :to="`/videos/${video.id}`" class="flex h-full cursor-pointer flex-col">
-            <div
-              class="bg-muted-200 dark:bg-muted-800 group relative size-full overflow-hidden rounded-2xl"
-            >
-              <img
-                :src="video.cover"
-                :alt="video.title"
-                class="w-full object-cover object-center"
-              >
-              <div
-                class="absolute inset-x-0 bottom-0 z-10 h-3/5 w-full bg-gradient-to-t from-black transition-all duration-500 ease-in-out group-hover:h-full"
-              />
-              <div
-                class="absolute inset-0 z-20 flex size-full flex-col justify-between"
-              >
-                <div class="ptablet:p-10 p-6">
-                  <div
-                    class="group-hover:border-primary-500 text-muted-300 group-hover:text-primary-500 shadow-muted-300/30 dark:shadow-muted-900/20 flex size-14 items-center justify-center rounded-full border-2 border-transparent bg-white shadow-2xl transition-colors duration-300"
-                  >
-                    <Icon name="ic:round-play-arrow" class="size-7" />
-                  </div>
-                </div>
-                <div class="ptablet:p-10 p-6">
-                  <BaseHeading
-                    as="h3"
-                    size="3xl"
-                    weight="bold"
-                    lead="tight"
-                    class="xs:text-xl hover:text-primary-300 mb-4 line-clamp-2 text-white transition-colors duration-300"
-                  >
-                    <span>{{ video.title }}</span>
-                  </BaseHeading>
-                  <div class="flex gap-3">
-                    <BaseAvatar
-                      :src="video.author.avatar"
-                      :text="video.author.name.slice(0, 1)"
-                      size="xs"
-                      class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
-                    />
-                    <div>
-                      <BaseHeading
-                        as="h4"
-                        size="xs"
-                        weight="light"
-                        lead="tight"
-                        class="hover:text-primary-500 text-white transition-colors duration-300"
-                      >
-                        <span>{{ video.author.name }}</span>
-                      </BaseHeading>
-                      <BaseParagraph size="xs">
-                        <span class="text-muted-400">{{ video.uploaded }}</span>
-                      </BaseParagraph>
-                    </div>
-                    <div class="ms-auto">
-                      <BaseTag
-                        color="primary"
-                        rounded="full"
-                        size="sm"
-                      >
-                        <span>{{ video.category }}</span>
-                      </BaseTag>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </NuxtLink>
-        </div>
-
-        <!-- Column -->
-        <div class="ltablet:col-span-6 col-span-12 lg:col-span-6">
-          <div class="flex h-full flex-col">
-            <div class="grid h-full grid-cols-12 gap-6">
-              <!-- Subcolumn -->
-              <div
-                v-for="video in featuredVideos.slice(1)"
-                :key="video.id"
-                class="col-span-12 sm:col-span-6"
-              >
-                <NuxtLink :to="`/videos/${video.id}`" class="group flex h-full flex-col">
-                  <div
-                    class="bg-muted-200 dark:bg-muted-800 relative size-full overflow-hidden rounded-2xl"
-                  >
-                    <img
-                      :src="video.cover"
-                      :alt="video.title"
-                      class="w-full object-cover object-center"
-                    >
-                    <div
-                      class="absolute inset-x-0 bottom-0 z-10 h-3/5 w-full bg-gradient-to-t from-black transition-all duration-500 ease-in-out group-hover:h-full"
-                    />
-                    <div
-                      class="absolute inset-0 z-20 flex size-full flex-col justify-between"
-                    >
-                      <div class="p-4">
-                        <div
-                          class="group-hover:border-primary-500 text-muted-300 group-hover:text-primary-500 shadow-muted-300/30 dark:shadow-muted-900/20 flex size-10 items-center justify-center rounded-full border-2 border-transparent bg-white shadow-2xl transition-colors duration-300"
-                        >
-                          <Icon name="ic:round-play-arrow" class="size-5" />
-                        </div>
-                      </div>
-                      <div class="p-4">
-                        <BaseHeading
-                          as="h3"
-                          size="md"
-                          weight="medium"
-                          lead="tight"
-                          class="xs:text-xl ptablet:text-xl ptablet:font-bold xs:font-bold hover:text-primary-300 mb-4 line-clamp-2 text-white transition-colors duration-300"
-                        >
-                          <span>{{ video.title }}</span>
-                        </BaseHeading>
-                        <div class="flex gap-3">
-                          <BaseAvatar
-                            :src="video.author.avatar"
-                            :text="video.author.name.slice(0, 1)"
-                            size="xs"
-                            class="bg-primary-100 dark:bg-primary-500/20 text-primary-500 shrink-0"
-                          />
-                          <div>
-                            <BaseHeading
-                              as="h4"
-                              size="xs"
-                              weight="light"
-                              lead="tight"
-                              class="hover:text-primary-500 text-white transition-colors duration-300"
-                            >
-                              <span>{{ video.author.name }}</span>
-                            </BaseHeading>
-                            <BaseParagraph size="xs">
-                              <span class="text-muted-400">
-                                {{ video.uploaded }}
-                              </span>
-                            </BaseParagraph>
-                          </div>
-                          <div class="ms-auto">
-                            <BaseTag
-                              color="primary"
-                              rounded="full"
-                              size="sm"
-                            >
-                              <span>{{ video.category }}</span>
-                            </BaseTag>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </NuxtLink>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </BaseCard>
+    
 
     <!-- Tour Component -->
     <TourButton />

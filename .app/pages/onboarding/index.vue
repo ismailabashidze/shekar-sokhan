@@ -11,7 +11,12 @@ definePageMeta({
   },
 })
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ 
+  htmlAttrs: { dir: 'rtl' },
+  meta: [
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' }
+  ]
+})
 
 const isModalOpen = ref(false)
 const isSubmitting = ref(false)
@@ -216,8 +221,10 @@ const pasteCouponCode = () => {
 </script>
 
 <template>
-  <div class="animated-gradient-bg flex min-h-screen items-center justify-center py-8" data-tour="welcome">
-    <div class="mx-auto w-full max-w-4xl">
+  <div class="onboarding-page">
+    <div class="animated-gradient-bg"></div>
+    <div class="flex min-h-screen items-center justify-center py-8" data-tour="welcome">
+      <div class="content-container mx-auto w-full max-w-4xl">
       <BaseCard>
         <div
           class="divide-muted-200 dark:divide-muted-700 grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0"
@@ -430,6 +437,7 @@ const pasteCouponCode = () => {
         </div>
       </BaseCard>
     </div>
+    </div>
   </div>
   <!-- Modal component -->
   <TairoModal
@@ -524,6 +532,20 @@ const pasteCouponCode = () => {
   background-size: 400% 400%;
   animation: gradientShift 30s ease infinite;
   overflow: hidden;
+  z-index: -1; /* Send background behind content */
+}
+
+/* Ensure the page content can scroll vertically on mobile */
+@media (max-width: 640px) {
+  .onboarding-page {
+    overflow-y: auto;
+    height: 100vh;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+  
+  .content-container {
+    padding-bottom: env(safe-area-inset-bottom); /* Handle safe areas on mobile */
+  }
 }
 
 .dark .animated-gradient-bg {

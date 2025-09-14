@@ -156,7 +156,7 @@
             <template v-if="report.summaries && report.summaries.length > 0">
               <div
                 v-for="(summary, idx) in visibleSummaries"
-                :key="summary.session"
+                :key="summary.sessionId"
                 class="mb-6"
               >
                 <BaseCard
@@ -176,8 +176,8 @@
                     <span v-if="summary.date" class="text-muted-500 dark:text-muted-400 text-xs">
                       تاریخ برگزاری: {{ formatDate(summary.date) }}
                     </span>
-                    <span v-if="summary.duration" class="text-muted-500 dark:text-muted-400 text-xs">
-                      مدت جلسه: {{ summary.duration }} دقیقه
+                    <span v-if="summary.sessionId" class="text-muted-500 dark:text-muted-400 text-xs">
+                      شناسه جلسه: {{ summary.sessionId }}
                     </span>
                   </div>
 
@@ -326,57 +326,7 @@
           </template>
         </TairoModal>
 
-        <!-- Delete All Risk Factors Confirmation Modal -->
-        <TairoModal
-          :open="isDeleteAllRiskFactorsModalOpen"
-          size="sm"
-          @close="isDeleteAllRiskFactorsModalOpen = false"
-        >
-          <template #header>
-            <div class="flex w-full items-center justify-between p-4 md:p-6">
-              <BaseHeading
-                tag="h3"
-                size="md"
-                weight="medium"
-                class="text-muted-800 dark:text-white"
-              >
-                تایید حذف همه عوامل خطر
-              </BaseHeading>
-              <div class="flex items-center gap-2">
-                <ButtonClose @click="isDeleteAllRiskFactorsModalOpen = false" />
-              </div>
-            </div>
-          </template>
-          <div class="p-4 text-center md:p-6">
-            <div class="relative mx-auto mb-4 flex size-24 justify-center">
-              <Icon
-                name="ph:trash-duotone"
-                class="text-danger-500 size-24"
-              />
-            </div>
-            <BaseParagraph class="text-muted-700 dark:text-muted-300 mb-4">
-              آیا از حذف تمامی عوامل خطر احتمالی ({{ report.possibleRiskFactors.length }} مورد) اطمینان دارید؟
-            </BaseParagraph>
-            <BaseParagraph class="text-muted-500 mb-4 text-sm">
-              پس از حذف، امکان بازیابی وجود ندارد.
-              تمام عوامل خطر از دسترس هوش مصنوعی خارج خواهد شد.
-            </BaseParagraph>
-          </div>
-          <template #footer>
-            <div class="flex items-center justify-end gap-2 p-4 sm:p-6">
-              <BaseButton @click="isDeleteAllRiskFactorsModalOpen = false">
-                انصراف
-              </BaseButton>
-              <BaseButton
-                color="danger"
-                :loading="isDeletingAllRiskFactors"
-                @click="confirmDeleteAllRiskFactors"
-              >
-                حذف همه
-              </BaseButton>
-            </div>
-          </template>
-        </TairoModal>
+        
 
         <!-- Demographic Profile Card -->
         <BaseCard shape="curved" class="mt-4 p-6">
@@ -516,11 +466,11 @@
               <div class="col-span-12 sm:col-span-6">
                 <div class="mb-1 flex items-center justify-between">
                   <label class="text-muted-400 text-xs font-medium">تحصیلات</label>
-                  <span v-if="report.finalDemographicProfile?.education" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
+                  <span v-if="report.finalDemographicProfile?.educationLevel" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
                   <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
                 </div>
                 <BaseSelect
-                  v-model="editDemographicProfile.education"
+                  v-model="editDemographicProfile.educationLevel"
                   :disabled="!isEditingDemographic"
                   placeholder="تحصیلات"
                   :class="{'opacity-50': !isEditingDemographic}"
@@ -543,45 +493,8 @@
                   <option value="phd">
                     دکتری
                   </option>
-                  <option value="other">
-                    سایر
-                  </option>
-                </BaseSelect>
-              </div>
-
-              <!-- Occupation -->
-              <div class="col-span-12 sm:col-span-6">
-                <div class="mb-1 flex items-center justify-between">
-                  <label class="text-muted-400 text-xs font-medium">شغل</label>
-                  <span v-if="report.finalDemographicProfile?.occupation" class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
-                  <span v-else class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
-                </div>
-                <BaseSelect
-                  v-model="editDemographicProfile.occupation"
-                  :disabled="!isEditingDemographic"
-                  placeholder="شغل"
-                  :class="{'opacity-50': !isEditingDemographic}"
-                >
-                  <option value="">
-                    شغل
-                  </option>
-                  <option value="student">
-                    دانشجو
-                  </option>
-                  <option value="employed">
-                    کارمند
-                  </option>
-                  <option value="self-employed">
-                    آزاد
-                  </option>
-                  <option value="unemployed">
-                    بیکار
-                  </option>
-                  <option value="retired">
-                    بازننشسته
-                  </option>
-                  <option value="householder">
-                    خانه‌دار
+                  <option value="unknown">
+                    نامشخص
                   </option>
                   <option value="other">
                     سایر
@@ -639,12 +552,13 @@
             </div>
           </div>
         </BaseCard>
-      </div>
+
+        </div>
 
       <!-- Sidebar Content -->
       <div class="col-span-12 mb-5 lg:col-span-4">
         <!-- Possible Deeper Goals Card -->
-        <div class="col-span-12 lg:col-span-6">
+        <div class="col-span-12">
           <BaseCard class="h-full p-6" shape="curved">
             <div class="mb-2 flex items-center justify-between">
               <BaseHeading
@@ -688,7 +602,7 @@
                         <Icon name="ph:target-duotone" class="text-success-500 size-5" />
                       </div>
                       <div class="flex-1">
-                        <BaseText size="xs" class="text-muted-600">
+                        <BaseText size="xs" class="text-muted-600 whitespace-pre-line">
                           {{ goal }}
                         </BaseText>
                       </div>
@@ -716,96 +630,179 @@
             </div>
           </BaseCard>
         </div>
-
-        <!-- Possible Risk Factors Card -->
-        <div class="col-span-12 mt-4 lg:col-span-6">
-          <BaseCard class="h-full p-6" shape="curved">
-            <div class="mb-2 flex items-center justify-between">
-              <BaseHeading
-                as="h3"
-                size="md"
-                weight="semibold"
-                lead="tight"
-                class="text-muted-800 dark:text-white"
-              >
-                <span>عوامل خطر احتمالی</span>
-              </BaseHeading>
-              <BaseButton
-                v-if="report.possibleRiskFactors.length > 0"
-                color="danger"
-                size="sm"
-                class="ms-2"
-                @click="openDeleteAllRiskFactorsModal"
-              >
-                <Icon name="ph:trash-duotone" class="ms-1 size-4" /> حذف همه
-              </BaseButton>
-            </div>
-            <div class="flex justify-between">
-              <BaseParagraph size="xs" class="text-muted-400 max-w-full">
-                <Icon name="ph:warning-circle-duotone" class="size-4" />
-                <span>عوامل خطر شناسایی شده در جلسات</span>
-              </BaseParagraph>
-            </div>
-            <div class="mt-6">
-              <div v-if="report.possibleRiskFactors.length > 0" class="space-y-4">
-                <div
-                  v-for="(group, idx) in visibleRiskFactors"
-                  :key="idx"
-                  class="space-y-4"
-                >
-                  <div
-                    v-for="(risk, j) in group"
-                    :key="j"
-                    class="group relative"
-                  >
-                    <BaseCard
-                      shape="rounded"
-                      class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
-                    >
-                      <div class="flex w-full items-start gap-3">
-                        <div class="bg-danger-500/10 dark:bg-danger-500/20 rounded-lg p-2">
-                          <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-5" />
-                        </div>
-                        <div class="flex-1">
-                          <BaseHeading
-                            as="h4"
-                            size="sm"
-                            weight="medium"
-                            lead="none"
-                            class="text-danger-500 mb-3"
-                          >
-                            {{ risk.title }}
-                          </BaseHeading>
-                          <BaseText size="xs" class="text-muted-600">
-                            {{ risk.description }}
-                          </BaseText>
-                        </div>
-                      </div>
-                    </BaseCard>
-                  </div>
-                </div>
-                <!-- Show More Button for Risk Factors -->
-                <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
-                  <BaseButton
-                    color="primary"
-                    size="sm"
-                    class="mx-auto"
-                    @click="showMoreRiskFactors"
-                  >
-                    نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
-                  </BaseButton>
-                </div>
-              </div>
-              <div v-else class="text-center">
-                <Icon name="ph:warning-circle-duotone" class="text-muted-400 mb-2 size-12" />
-                <BaseText size="sm" class="text-muted-400">
-                  در حال حاضر عامل خطری شناسایی نشده است.
-                </BaseText>
-              </div>
-            </div>
-          </BaseCard>
-        </div>
       </div>
+      
+      <!-- Possible Risk Factors Card (Full Width) -->
+      <div class="col-span-12">
+        <BaseCard class="mt-4 p-6" shape="curved">
+          <div class="mb-2 flex items-center justify-between">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              lead="tight"
+              class="text-muted-800 dark:text-white"
+            >
+              <span>عوامل خطر احتمالی</span>
+            </BaseHeading>
+            <BaseButton
+              v-if="report.possibleRiskFactors.length > 0"
+              color="danger"
+              size="sm"
+              class="ms-2"
+              @click="openDeleteAllRiskFactorsModal"
+            >
+              <Icon name="ph:trash-duotone" class="ms-1 size-4" /> حذف همه
+            </BaseButton>
+          </div>
+          <div class="flex justify-between">
+            <BaseParagraph size="xs" class="text-muted-400 max-w-full">
+              <Icon name="ph:warning-circle-duotone" class="size-4" />
+              <span>عوامل خطر شناسایی شده در جلسات</span>
+            </BaseParagraph>
+          </div>
+          <div class="mt-6">
+            <div v-if="report.possibleRiskFactors.length > 0" class="grid grid-cols-12 gap-4">
+              <div
+                v-for="(risk, idx) in visibleRiskFactorsFlat"
+                :key="idx"
+                class="col-span-12 md:col-span-6"
+              >
+                <BaseCard
+                  shape="rounded"
+                  class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg h-full"
+                >
+                  <div class="flex w-full items-start gap-3">
+                    <div class="bg-danger-500/10 dark:bg-danger-500/20 rounded-lg p-2">
+                      <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-5" />
+                    </div>
+                    <div class="flex-1">
+                      <BaseHeading
+                        as="h4"
+                        size="sm"
+                        weight="medium"
+                        lead="none"
+                        class="text-danger-500 mb-3"
+                      >
+                        {{ risk.title }}
+                      </BaseHeading>
+                      <BaseText size="xs" class="text-muted-600 mb-2">
+                        {{ risk.description }}
+                      </BaseText>
+                      <div v-if="risk.associatedThemes && risk.associatedThemes.length > 0" class="mt-2">
+                        <span class="text-muted-500 text-xs">موضوعات مرتبط: </span>
+                        <span 
+                          v-for="(theme, themeIdx) in risk.associatedThemes" 
+                          :key="themeIdx"
+                          class="bg-primary-500/10 text-primary-500 mx-1 rounded-full px-2 py-0.5 text-xs"
+                        >
+                          {{ theme }}
+                        </span>
+                      </div>
+                      <div v-if="risk.severity" class="mt-2">
+                        <span class="text-muted-500 text-xs">شدت: </span>
+                        <span 
+                          :class="{
+                            'bg-danger-500/10 text-danger-500': risk.severity === 'High',
+                            'bg-warning-500/10 text-warning-500': risk.severity === 'Medium',
+                            'bg-success-500/10 text-success-500': risk.severity === 'Low'
+                          }"
+                          class="rounded-full px-2 py-0.5 text-xs"
+                        >
+                          {{ risk.severity === 'High' ? 'بالا' : risk.severity === 'Medium' ? 'متوسط' : 'پایین' }}
+                        </span>
+                      </div>
+                      <div v-if="risk.evidence && risk.evidence.length > 0" class="mt-3">
+                        <span class="text-muted-500 text-xs">شواهد: </span>
+                        <ul class="text-muted-600 mt-1 list-disc pr-5 text-xs">
+                          <li v-for="(evidence, evidenceIdx) in risk.evidence" :key="evidenceIdx" class="mb-1">
+                            {{ evidence }}
+                          </li>
+                        </ul>
+                      </div>
+                      <div v-if="risk.potentialIntervention" class="mt-2">
+                        <span class="text-muted-500 text-xs">مداخله‌های بالقوه: </span>
+                        <p class="text-muted-600 mt-1 text-xs">
+                          {{ risk.potentialIntervention }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </BaseCard>
+              </div>
+              <!-- Show More Button for Risk Factors -->
+              <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="col-span-12 mt-4 text-center">
+                <BaseButton
+                  color="primary"
+                  size="sm"
+                  class="mx-auto"
+                  @click="showMoreRiskFactors"
+                >
+                  نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
+                </BaseButton>
+              </div>
+            </div>
+            <div v-else class="text-center">
+              <Icon name="ph:warning-circle-duotone" class="text-muted-400 mb-2 size-12" />
+              <BaseText size="sm" class="text-muted-400">
+                در حال حاضر عامل خطری شناسایی نشده است.
+              </BaseText>
+            </div>
+          </div>
+        </BaseCard>
+      </div>
+      
+      <!-- Delete All Risk Factors Confirmation Modal -->
+      <TairoModal
+        :open="isDeleteAllRiskFactorsModalOpen"
+        size="sm"
+        @close="isDeleteAllRiskFactorsModalOpen = false"
+      >
+        <template #header>
+          <div class="flex w-full items-center justify-between p-4 md:p-6">
+            <BaseHeading
+              tag="h3"
+              size="md"
+              weight="medium"
+              class="text-muted-800 dark:text-white"
+            >
+              تایید حذف همه عوامل خطر
+            </BaseHeading>
+            <div class="flex items-center gap-2">
+              <ButtonClose @click="isDeleteAllRiskFactorsModalOpen = false" />
+            </div>
+          </div>
+        </template>
+        <div class="p-4 text-center md:p-6">
+          <div class="relative mx-auto mb-4 flex size-24 justify-center">
+            <Icon
+              name="ph:trash-duotone"
+              class="text-danger-500 size-24"
+            />
+          </div>
+          <BaseParagraph class="text-muted-700 dark:text-muted-300 mb-4">
+            آیا از حذف تمامی عوامل خطر احتمالی ({{ report.possibleRiskFactors.length }} مورد) اطمینان دارید؟
+          </BaseParagraph>
+          <BaseParagraph class="text-muted-500 mb-4 text-sm">
+            پس از حذف، امکان بازیابی وجود ندارد.
+            تمام عوامل خطر از دسترس هوش مصنوعی خارج خواهد شد.
+          </BaseParagraph>
+        </div>
+        <template #footer>
+          <div class="flex items-center justify-end gap-2 p-4 sm:p-6">
+            <BaseButton @click="isDeleteAllRiskFactorsModalOpen = false">
+              انصراف
+            </BaseButton>
+            <BaseButton
+              color="danger"
+              :loading="isDeletingAllRiskFactors"
+              @click="confirmDeleteAllRiskFactors"
+            >
+              حذف همه
+            </BaseButton>
+          </div>
+        </template>
+      </TairoModal>
     </div>
   </div>
 </template>
@@ -824,14 +821,51 @@ const report = ref({
   collectionId: '',
   collectionName: '',
   created: '',
+  expand: {
+    user: {
+      avatar: '',
+      collectionId: '',
+      collectionName: '',
+      created: '',
+      email: '',
+      emailVisibility: false,
+      expireChargeTime: '',
+      finalReport: '',
+      hasCharge: false,
+      id: '',
+      meta: {
+        accessToken: '',
+        avatarUrl: '',
+        email: '',
+        expiry: '',
+        id: '',
+        isNew: false,
+        name: '',
+        rawUser: {
+          email: '',
+          family_name: '',
+          given_name: '',
+          id: '',
+          name: '',
+          picture: '',
+          verified_email: false
+        },
+        refreshToken: '',
+        username: ''
+      },
+      phoneNumber: '',
+      role: '',
+      startChargeTime: '',
+      updated: '',
+      username: '',
+      verified: false
+    }
+  },
   finalDemographicProfile: {
     age: null,
-    education: null,
-    firstName: null,
+    educationLevel: null,
     gender: null,
-    lastName: null,
     maritalStatus: null,
-    occupation: null,
   },
   id: '',
   possibleDeeperGoals: [],
@@ -860,6 +894,17 @@ const visibleDeeperGoals = computed(() => {
 
 // Computed property for visible risk factors
 const visibleRiskFactors = computed(() => {
+  const factors = [...(report.value.possibleRiskFactors || [])].slice(0, visibleRiskFactorsCount.value)
+  // Group factors in pairs for better display
+  const grouped = []
+  for (let i = 0; i < factors.length; i += 2) {
+    grouped.push(factors.slice(i, i + 2))
+  }
+  return grouped
+})
+
+// Computed property for visible risk factors (flat array for 12-column grid)
+const visibleRiskFactorsFlat = computed(() => {
   return [...(report.value.possibleRiskFactors || [])].slice(0, visibleRiskFactorsCount.value)
 })
 
@@ -905,12 +950,9 @@ const toaster = useToaster()
 const isEditingDemographic = ref(false)
 const isSavingDemographic = ref(false)
 const editDemographicProfile = reactive({
-  firstName: '',
-  lastName: '',
   age: '',
   gender: '',
-  education: '',
-  occupation: '',
+  educationLevel: '',
   maritalStatus: '',
 })
 
@@ -918,7 +960,10 @@ watch(
   () => report.value.finalDemographicProfile,
   (profile) => {
     if (!isEditingDemographic.value && profile) {
-      Object.assign(editDemographicProfile, profile)
+      editDemographicProfile.age = profile.age || ''
+      editDemographicProfile.gender = profile.gender || ''
+      editDemographicProfile.educationLevel = profile.educationLevel || ''
+      editDemographicProfile.maritalStatus = profile.maritalStatus || ''
     }
   },
   { immediate: true },
@@ -928,18 +973,19 @@ function enableEditDemographic() {
   isEditingDemographic.value = true
   // Initialize with existing data or empty strings
   const profile = report.value.finalDemographicProfile || {}
-  editDemographicProfile.firstName = profile.firstName || ''
-  editDemographicProfile.lastName = profile.lastName || ''
   editDemographicProfile.age = profile.age || ''
   editDemographicProfile.gender = profile.gender || ''
-  editDemographicProfile.education = profile.education || ''
-  editDemographicProfile.occupation = profile.occupation || ''
+  editDemographicProfile.educationLevel = profile.educationLevel || ''
   editDemographicProfile.maritalStatus = profile.maritalStatus || ''
 }
 
 function cancelEditDemographic() {
   isEditingDemographic.value = false
-  Object.assign(editDemographicProfile, report.value.finalDemographicProfile || {})
+  const profile = report.value.finalDemographicProfile || {}
+  editDemographicProfile.age = profile.age || ''
+  editDemographicProfile.gender = profile.gender || ''
+  editDemographicProfile.educationLevel = profile.educationLevel || ''
+  editDemographicProfile.maritalStatus = profile.maritalStatus || ''
 }
 
 async function saveDemographicProfile() {

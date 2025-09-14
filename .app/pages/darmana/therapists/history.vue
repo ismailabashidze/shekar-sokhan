@@ -435,7 +435,7 @@ const filteredMessages = computed(() => {
             <!-- Session info card -->
             <div v-if="activeSession && !loading" class="mb-6">
               <BaseCard class="p-4">
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-4">
                   <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
                     <div class="bg-primary-100 dark:bg-primary-500/20 ml-3 rounded-full p-2">
                       <Icon name="ph:clock-duotone" class="text-primary-500 size-5" />

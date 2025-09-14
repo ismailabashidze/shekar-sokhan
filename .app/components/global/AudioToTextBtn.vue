@@ -6,6 +6,25 @@
       <span id="final_span" class="final">{{ finalText }}</span>
       <span id="interim_span" class="interim">{{ interimText }}</span>
     </div>
+    
+    <!-- Microphone selection -->
+    <div v-if="microphones.length > 1" class="microphone-selector">
+      <label for="microphone-select">Microphone:</label>
+      <select 
+        id="microphone-select" 
+        v-model="selectedMicrophone"
+        :disabled="recognizing"
+      >
+        <option 
+          v-for="mic in microphones" 
+          :key="mic.deviceId" 
+          :value="mic.deviceId"
+        >
+          {{ mic.label }}
+        </option>
+      </select>
+    </div>
+    
     <div id="visualization">
       <div id="viz1" class="visual" />
       <div id="viz2" class="visual" />
@@ -44,14 +63,46 @@ const finalText = ref('')
 const interimText = ref('')
 const recognizing = ref(false)
 const showTip = ref(false)
+const microphones = ref([])
+const selectedMicrophone = ref('')
 let recognition
 let tipTimeout
+
+const getMicrophones = async () => {
+  try {
+    // Request microphone permission
+    await navigator.mediaDevices.getUserMedia({ audio: true })
+    
+    // Get all audio input devices
+    const devices = await navigator.mediaDevices.enumerateDevices()
+    microphones.value = devices
+      .filter(device => device.kind === 'audioinput')
+      .map(device => ({
+        deviceId: device.deviceId,
+        label: device.label || `Microphone ${microphones.value.length + 1}`
+      }))
+    
+    // Set default microphone if available
+    if (microphones.value.length > 0 && !selectedMicrophone.value) {
+      selectedMicrophone.value = microphones.value[0].deviceId
+    }
+  } catch (error) {
+    console.error('Error getting microphones:', error)
+  }
+}
 
 const initSpeechRecognition = () => {
   if ('webkitSpeechRecognition' in window) {
     recognition = new webkitSpeechRecognition()
     recognition.interimResults = true
     recognition.continuous = true
+
+    // Set the microphone if selected
+    if (selectedMicrophone.value) {
+      recognition.lang = 'en-US' // Set appropriate language
+      // Note: webkitSpeechRecognition doesn't directly support deviceId,
+      // but we can constrain the media stream later
+    }
 
     recognition.onresult = (event) => {
       let finalTranscript = ''
@@ -109,6 +160,7 @@ const showTipMessage = () => {
 
 onMounted(() => {
   initSpeechRecognition()
+  getMicrophones()
 })
 
 onBeforeUnmount(() => {
@@ -133,6 +185,25 @@ onBeforeUnmount(() => {
 
   #interim_span {
     opacity: 0.4;
+  }
+
+  .microphone-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .microphone-selector label {
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  .microphone-selector select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: white;
   }
 
   #tip {

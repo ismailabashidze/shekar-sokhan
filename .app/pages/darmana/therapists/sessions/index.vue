@@ -522,7 +522,7 @@ onMounted(() => {
               <!-- Main Content Grid -->
               <div class="grid h-full grid-cols-1 gap-4">
                 <!-- Session Stats Row -->
-                <div class="grid grid-cols-1 md:grid-cols-3">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-4">
                   <div class="bg-muted-100 dark:bg-muted-800 flex items-center rounded-lg p-3">
                     <div class="bg-primary-100 dark:bg-primary-500/20 ml-3 rounded-full p-2">
                       <Icon name="ph:clock-duotone" class="text-primary-500 size-4" />

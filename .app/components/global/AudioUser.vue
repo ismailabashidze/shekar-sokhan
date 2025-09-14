@@ -51,31 +51,31 @@ const getDeviceInfo = async () => {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices()
     const audioDevices = devices.filter(device => device.kind === 'audioinput')
-    deviceInfo.value = `Available audio devices: ${audioDevices.map(d => d.label || 'Unnamed device').join(', ')}`
-    console.log('[AudioUser] Device info:', deviceInfo.value)
+    deviceInfo.value = `دستگاه‌های صوتی موجود: ${audioDevices.map(d => d.label || 'دستگاه بدون نام').join(', ')}`
+    console.log('[AudioUser] اطلاعات دستگاه:', deviceInfo.value)
   }
   catch (err) {
-    console.error('[AudioUser] Error getting device info:', err)
-    deviceInfo.value = `Error getting device info: ${err.message}`
+    console.error('[AudioUser] خطا در دریافت اطلاعات دستگاه:', err)
+    deviceInfo.value = `خطا در دریافت اطلاعات دستگاه: ${err.message}`
   }
 }
 
 const startSilenceTimer = () => {
   if (silenceTimer.value) clearTimeout(silenceTimer.value)
   showCountdown.value = true
-  countDown.value = 3
+  countDown.value = 1.5
 
   const countdown = () => {
     if (countDown.value > 0) {
-      countDown.value--
-      silenceTimer.value = setTimeout(countdown, 1000)
+      countDown.value -= 0.5
+      silenceTimer.value = setTimeout(countdown, 500)
     }
     else {
       handleAutoClose()
     }
   }
 
-  silenceTimer.value = setTimeout(countdown, 1000)
+  silenceTimer.value = setTimeout(countdown, 500)
 }
 
 const resetSilenceTimer = () => {
@@ -84,7 +84,7 @@ const resetSilenceTimer = () => {
     silenceTimer.value = null
   }
   showCountdown.value = false
-  countDown.value = 3
+  countDown.value = 1.5
 }
 
 // Set the visualization options
@@ -212,7 +212,7 @@ const visualize = () => {
 
 // Initialize speech recognition
 const initSpeechRecognition = () => {
-  logStatus('Speech recognition available')
+  logStatus('تشخیص گفتار در دسترس است')
   if ('webkitSpeechRecognition' in window) {
     recognition.value = new (window as any).webkitSpeechRecognition()
     recognition.value.continuous = true
@@ -220,7 +220,7 @@ const initSpeechRecognition = () => {
     recognition.value.lang = 'fa-IR'
 
     recognition.value.onstart = () => {
-      logStatus('Recognition started')
+      logStatus('تشخیص گفتار آغاز شد')
     }
 
     recognition.value.onresult = (event: any) => {
@@ -254,12 +254,12 @@ const initSpeechRecognition = () => {
     }
 
     recognition.value.onerror = (event: any) => {
-      logStatus(`Recognition error: ${event.error}`, true)
+      logStatus(`خطای تشخیص گفتار: ${event.error}`, true)
       console.error('[AudioUser] Recognition error:', event)
     }
 
     recognition.value.onend = () => {
-      logStatus('Recognition ended')
+      logStatus('تشخیص گفتار پایان یافت')
       if (isStarted.value) {
         // Add a small delay before restarting recognition
         recognitionTimeout.value = setTimeout(() => {
@@ -267,7 +267,7 @@ const initSpeechRecognition = () => {
             recognition.value.start()
           }
           catch (e) {
-            console.error('Error restarting recognition:', e)
+            console.error('خطا در راه‌اندازی مجدد تشخیص گفتار:', e)
           }
         }, 100)
       }
@@ -313,7 +313,7 @@ const startRecognition = () => {
           .catch(onStreamError)
       }
       catch (e) {
-        console.error('Error starting recognition:', e)
+        console.error('خطا در شروع تشخیص گفتار:', e)
       }
     }, 100)
   }
@@ -330,7 +330,7 @@ const endRecognition = () => {
       recognition.value.stop()
     }
     catch (e) {
-      console.error('Error stopping recognition:', e)
+      console.error('خطا در توقف تشخیص گفتار:', e)
     }
 
     isStarted.value = false
@@ -344,7 +344,7 @@ const endRecognition = () => {
 }
 
 const onStream = (stream) => {
-  logStatus('Audio stream initialized')
+  logStatus('جریان صوتی راه‌اندازی شد')
   context = new AudioContext()
   const source = context.createMediaStreamSource(stream)
   analyser = context.createAnalyser()
@@ -354,7 +354,7 @@ const onStream = (stream) => {
 }
 
 const onStreamError = (e) => {
-  logStatus(`Microphone error: ${e.message}`, true)
+  logStatus(`خطای میکروفون: ${e.message}`, true)
   console.error('[AudioUser] Stream error:', e)
   isStarted.value = false
 }
@@ -402,13 +402,13 @@ const resetState = () => {
   finalText.value = ''
   isStarted.value = false
   showCountdown.value = false
-  countDown.value = 3
+  countDown.value = 1.5
   if (recognition.value) {
     try {
       recognition.value.stop()
     }
     catch (e) {
-      console.error('Error stopping recognition:', e)
+      console.error('خطا در توقف تشخیص گفتار:', e)
     }
   }
 }
@@ -416,19 +416,19 @@ const resetState = () => {
 // Update the autoCloseTimer to use handleAutoClose
 const startAutoCloseTimer = () => {
   showCountdown.value = true
-  countDown.value = 3
+  countDown.value = 1.5
 
   const timer = setInterval(() => {
-    countDown.value--
+    countDown.value -= 0.5
     if (countDown.value <= 0) {
       clearInterval(timer)
       handleAutoClose()
     }
-  }, 1000)
+  }, 500)
 }
 
 onMounted(() => {
-  logStatus('Component mounted')
+  logStatus('کامپوننت بارگذاری شد')
   getDeviceInfo()
   initSpeechRecognition()
   visualize()
@@ -441,7 +441,7 @@ onBeforeUnmount(() => {
       recognition.value.stop()
     }
     catch (e) {
-      console.error('Error stopping recognition:', e)
+      console.error('خطا در توقف تشخیص گفتار:', e)
     }
   }
 
@@ -454,7 +454,7 @@ onBeforeUnmount(() => {
       context.close()
     }
     catch (e) {
-      console.error('Error closing audio context:', e)
+      console.error('خطا در بستن زمینه صوتی:', e)
     }
   }
 
@@ -471,10 +471,10 @@ onBeforeUnmount(() => {
         <!-- Add debug info section -->
         <div v-if="audioStatus || errorMessage || deviceInfo" class="mb-2 rounded bg-gray-100 p-2 text-sm">
           <p v-if="audioStatus" class="text-blue-600">
-            Status: {{ audioStatus }}
+            وضعیت: {{ audioStatus }}
           </p>
           <p v-if="errorMessage" class="text-red-600">
-            Error: {{ errorMessage }}
+            خطا: {{ errorMessage }}
           </p>
           <p v-if="deviceInfo" class="text-xs text-gray-600">
             {{ deviceInfo }}
@@ -489,7 +489,7 @@ onBeforeUnmount(() => {
             <!-- Base message -->
             <div class="mb-4 text-center">
               <div class="text-muted-500 dark:text-muted-400 text-sm">
-                پس از ۳ ثانیه سکوت، پیام به صورت خودکار ارسال می‌شود
+                پس از ۱.۵ ثانیه سکوت، پیام به صورت خودکار ارسال می‌شود
               </div>
             </div>
 
@@ -579,8 +579,8 @@ onBeforeUnmount(() => {
               </div>
               <div class="bg-muted-100 dark:bg-muted-700 h-1 w-full max-w-xs rounded-full">
                 <div
-                  class="bg-primary-500 h-1 rounded-full transition-all duration-1000"
-                  :style="{ width: `${(countDown / 3) * 100}%` }"
+                  class="bg-primary-500 h-1 rounded-full transition-all duration-500"
+                  :style="{ width: `${(countDown / 1.5) * 100}%` }"
                 />
               </div>
             </div>

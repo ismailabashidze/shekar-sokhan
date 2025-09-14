@@ -53,12 +53,12 @@ function generateAIConfig(aiSettings: any, isConversationStarter: boolean = fals
   // Special configuration for conversation starters (AI-initiated messages with session summaries)
   if (isConversationStarter) {
     return {
-      max_tokens: 1200, // Always use high token count for comprehensive summaries
+      max_tokens: 0, // Always use high token count for comprehensive summaries
       temperature: 0.7, // Balanced creativity for welcoming but informative tone
       system_prompt_additions: generateConversationStarterPrompt(aiSettings),
       post_processing: {
         enable_emoji_injection: true, // Always use emojis for warmth
-        emoji_density: 0.08, // Medium emoji density
+        emoji_density: 0.28, // Medium emoji density
         enable_formatting: true, // Enable formatting for better readability
         format_type: 'bullets', // Use bullet points for organized summary
       },
@@ -193,13 +193,6 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 `
 
   prompt += `
-CONVERSATION STARTER MODE - COMPREHENSIVE SINGLE MESSAGE:
-CRITICAL: This is a conversation starter - ALWAYS respond as a SINGLE comprehensive message, NEVER in multi-message format.
-Ignore any multi-message settings from the user for this conversation starter.
-
-IMPORTANT: The previous session summaries are already provided in the system context above. DO NOT repeat or duplicate them.
-Instead, reference them naturally in your greeting and use them to create a welcoming conversation starter.
-
 - استفاده از اطلاعات جلسات قبلی که در سیستم ارائه شده (بدون تکرار کامل آنها)
 - استفاده از لحن گرم، مهربان و حرفه‌ای
 - سازماندهی اطلاعات با استفاده از نقاط و فهرست‌ها
@@ -211,14 +204,10 @@ Instead, reference them naturally in your greeting and use them to create a welc
 استفاده از ایموجی‌های مناسب برای ایجاد فضای دوستانه
 قالب‌بندی مناسب برای خوانایی بهتر
 
-CRITICAL: DO NOT duplicate or repeat the full session summaries that are already provided in the system context.
-Reference them naturally and focus on creating a warm, welcoming atmosphere for the new session.
-NEVER break this into multiple messages - it must be ONE complete message.
 `
 
   // Always include premium features for conversation starters regardless of user's premium status
   prompt += `
-PREMIUM FEATURES ENABLED FOR CONVERSATION STARTERS:
 - ارائه تحلیل‌های عمیق از الگوهای رفتاری مراجع
 - استفاده از تکنیک‌های پیشرفته روان‌درمانی در خلاصه‌سازی
 - ارائه بینش‌های تخصصی درباره پیشرفت مراجع
@@ -314,15 +303,22 @@ function applyFormatting(text: string, formatType: string): string {
 interface TypingConfig {
   messageDelay: number // delay between multi-messages (default 2000ms)
   enableTypingEffect: boolean // enable typing effect for multi-messages
+  signal?: AbortSignal // abort signal for cancellation
 }
 
 const defaultTypingConfig: TypingConfig = {
   messageDelay: 2000, // 2 seconds between multi-messages
   enableTypingEffect: true,
+  signal: undefined,
 }
 
 // Handle typing effect for multi-message by sending to UI with typing indicator
 async function handleMessageWithTyping(message: string, messageIndex: number, totalMessages: number, onChunk: (chunk: any) => void, typingConfig: TypingConfig = defaultTypingConfig) {
+  // Check if the operation has been aborted
+  if (typingConfig.signal && typingConfig.signal.aborted) {
+    throw new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.')
+  }
+
   if (!typingConfig.enableTypingEffect) {
     onChunk({ type: 'multi_message', message, index: messageIndex, total: totalMessages })
     return
@@ -472,6 +468,7 @@ interface OpenRouterOptions {
   aiResponseSettings?: AiResponseSettings
   isConversationStarter?: boolean
   typingConfig?: TypingConfig
+  signal?: AbortSignal // Add abort signal support
 }
 
 export interface PatientGenerateInput {
@@ -668,12 +665,31 @@ export function useOpenRouter() {
       if (aiSettings && therapistDetails) {
         aiConfig = generateAIConfig(aiSettings, isConversationStarter)
         systemPrompt += aiConfig.system_prompt_additions
-        console.log(`🤖 AI Config Generated (${isConversationStarter ? 'CONVERSATION STARTER' : 'REGULAR'}):`, aiConfig)
       }
 
-      const messagesWithSystem = systemMessage
-        ? messages
-        : [{ role: 'system', content: systemPrompt }, ...messages]
+      // For AI-initiated conversations, we need both system prompt and initial user message
+      // because some LLMs don't support starting with just a system prompt
+      let messagesWithSystem = [...messages]; // Start with original messages
+      
+      // If there's no system message, add our system prompt at the beginning
+      if (!systemMessage) {
+        messagesWithSystem.unshift({ role: 'system', content: systemPrompt });
+      }
+      
+      // If this is an AI-initiated conversation (conversation starter), 
+      // add an initial user message that aligns completely with the system prompt
+      // but will never be shown in the conversation
+      if (isConversationStarter) {
+        // Create an initial user message that aligns with the system prompt
+        // This message will be sent to the LLM but not displayed in the UI
+        const initialUserMessage: ChatMessage = {
+          role: 'user',
+          content: 'سلام، به عنوان روانشناس من، لطفاً خلاصه‌ای از جلسات قبلی و وضعیت فعلی را برایم بفرست.' // "Hello, as my psychologist, please send me a summary of previous sessions and current status."
+        };
+        
+        // Insert the user message after the system message (which is always first now)
+        messagesWithSystem.splice(1, 0, initialUserMessage);
+      }
 
       // Implement timeout mechanism with retry
       let response: Response | null = null;
@@ -685,26 +701,33 @@ export function useOpenRouter() {
         console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate chat response`);
         
         try {
-          response = await Promise.race([
-            fetch('https://openrouter.ai/api/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-                'X-Title': 'Therapist Chat',
-              },
-              body: JSON.stringify({
-                model: options.model || selectedModel.value,
-                messages: messagesWithSystem,
-                stream: false, // Changed from true to false
-                temperature: aiConfig?.temperature || options.temperature || 0.7,
-                max_tokens: aiConfig?.max_tokens || options.max_tokens || 400,
-                ...(aiConfig?.response_format && { response_format: aiConfig.response_format }),
-                plugins: [],
-                transforms: ['middle-out'],
-              }),
+          const fetchOptions: RequestInit = {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+              'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+              'X-Title': 'Therapist Chat',
+            },
+            body: JSON.stringify({
+              model: options.model || selectedModel.value,
+              messages: messagesWithSystem,
+              stream: false, // Changed from true to false
+              temperature: aiConfig?.temperature || options.temperature || 0.7,
+              max_tokens: aiConfig?.max_tokens || options.max_tokens || 400,
+              ...(aiConfig?.response_format && { response_format: aiConfig.response_format }),
+              plugins: [],
+              transforms: ['middle-out'],
             }),
+          };
+
+          // Add abort signal if provided
+          if (options.signal) {
+            fetchOptions.signal = options.signal;
+          }
+
+          response = await Promise.race([
+            fetch('https://openrouter.ai/api/v1/chat/completions', fetchOptions),
             new Promise((_, reject) => 
               setTimeout(() => {
                 console.log('⏰ Request timeout after 30 seconds');
@@ -754,6 +777,11 @@ export function useOpenRouter() {
         // Handle authentication errors specifically
         if (errorMessage.includes('No auth credentials found')) {
           throw new Error(`Chat error: No auth credentials found`)
+        }
+
+        // Handle abort errors
+        if (errorMessage.includes('AbortError') || (options.signal && options.signal.aborted)) {
+          throw new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.')
         }
 
         throw new Error(`Chat error: ${errorMessage}`)
@@ -810,6 +838,7 @@ export function useOpenRouter() {
   // Accepts only the last message for inline analysis
   const generateInlineAnalysis = async (
     lastMessage: ChatMessage,
+    options: { signal?: AbortSignal } = {}
   ): Promise<any> => {
     processing.value = true
     error.value = null
@@ -823,6 +852,77 @@ export function useOpenRouter() {
       // Use only the system prompt and the last message for analysis
       const messagesWithSystem = [systemPrompt, lastMessage]
 
+      // Create fetch options with potential abort signal
+      const fetchOptions: RequestInit = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+          'X-Title': 'An Inline Analysis Generator to help therapists be more align with the needs of patients',
+        },
+        body: JSON.stringify({
+          model: selectedModel.value,
+          messages: messagesWithSystem as ChatMessage[],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'inline_analysis',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  lastMessage_emotions: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        emotionName: {
+                          type: 'string',
+                          enum: ['شادی', 'اعتماد', 'ترس', 'تعجب', 'غم', 'انزجار', 'خشم', 'انتظار', 'نامشخص'],
+                          description: 'نام احساس بر اساس چرخه احساسات پلوچیک',
+                        },
+                        severity: {
+                          type: 'string',
+                          enum: ['خالی', 'کم', 'متوسط', 'زیاد'],
+                          description: 'شدت احساس شناسایی شده',
+                        },
+                      },
+                      required: ['emotionName', 'severity'],
+                      additionalProperties: false,
+                    },
+                    description: 'آرایه باید دقیقاً شامل 9 عنصر باشد - یکی برای هر احساس اصلی: شادی، اعتماد، ترس، تعجب، غم، انزجار، خشم، انتظار، نامشخص. هیچ احساسی نباید حذف یا تکرار شود.',
+                  },
+                  correspondingEmojis: {
+                    type: 'string',
+                    description: 'ایموجی‌های متناظر که احساس کلی پیام را به صورت کامل بازتاب می‌دهند. می‌توانند ترکیب چند ایموجی در کنار هم باشند. مثال: "😊💖" یا "😰😔" یا "🤔💭" - باید احساس اصلی و غالب پیام را نشان دهند.',
+                  },
+                  emotionalResponse: {
+                    type: 'string',
+                    description: 'پاسخ پیشنهادی مبتنی بر تحلیل احساسات کاربر جهت بازتاب و درک عمیق‌تر. مثال: اگر کاربر ترسیده، واکنش مناسب آرام سازی و دلگرم کردن اوست. اگر خشمگین است، می‌توان پرسید "آیا احساس خشم می‌کنی؟" یا گفت "به نظر می‌رسد خشم را در خودت احساس می‌کنی." اگر احساس نامشخص است، می‌توان پرسید "می‌توانی بیشتر در مورد احساست توضیح دهی؟ این پاسخ باید به فارسی باشد."',
+                  },
+                },
+                required: [
+                  'lastMessage_emotions',
+                  'correspondingEmojis',
+                  'emotionalResponse',
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+          temperature: 0.7,
+          max_tokens: 0,
+          plugins: [],
+          transforms: ['middle-out'],
+        }),
+      };
+
+      // Add abort signal if provided
+      if (options.signal) {
+        fetchOptions.signal = options.signal;
+      }
+
       // Implement timeout mechanism with retry
       let response: Response | null = null;
       let attempts = 0;
@@ -834,70 +934,7 @@ export function useOpenRouter() {
         
         try {
           response = await Promise.race([
-            fetch('https://openrouter.ai/api/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
-                'X-Title': 'An Inline Analysis Generator to help therapists be more align with the needs of patients',
-              },
-              body: JSON.stringify({
-                model: selectedModel.value,
-                messages: messagesWithSystem as ChatMessage[],
-                response_format: {
-                  type: 'json_schema',
-                  json_schema: {
-                    name: 'inline_analysis',
-                    strict: true,
-                    schema: {
-                      type: 'object',
-                      properties: {
-                        lastMessage_emotions: {
-                          type: 'array',
-                          items: {
-                            type: 'object',
-                            properties: {
-                              emotionName: {
-                                type: 'string',
-                                enum: ['شادی', 'اعتماد', 'ترس', 'تعجب', 'غم', 'انزجار', 'خشم', 'انتظار', 'نامشخص'],
-                                description: 'نام احساس بر اساس چرخه احساسات پلوچیک',
-                              },
-                              severity: {
-                                type: 'string',
-                                enum: ['خالی', 'کم', 'متوسط', 'زیاد'],
-                                description: 'شدت احساس شناسایی شده',
-                              },
-                            },
-                            required: ['emotionName', 'severity'],
-                            additionalProperties: false,
-                          },
-                          description: 'آرایه باید دقیقاً شامل 9 عنصر باشد - یکی برای هر احساس اصلی: شادی، اعتماد، ترس، تعجب، غم، انزجار، خشم، انتظار، نامشخص. هیچ احساسی نباید حذف یا تکرار شود.',
-                        },
-                        correspondingEmojis: {
-                          type: 'string',
-                          description: 'ایموجی‌های متناظر که احساس کلی پیام را به صورت کامل بازتاب می‌دهند. می‌توانند ترکیب چند ایموجی در کنار هم باشند. مثال: "😊💖" یا "😰😔" یا "🤔💭" - باید احساس اصلی و غالب پیام را نشان دهند.',
-                        },
-                        emotionalResponse: {
-                          type: 'string',
-                          description: 'پاسخ پیشنهادی مبتنی بر تحلیل احساسات کاربر جهت بازتاب و درک عمیق‌تر. مثال: اگر کاربر ترسیده، واکنش مناسب آرام سازی و دلگرم کردن اوست. اگر خشمگین است، می‌توان پرسید "آیا احساس خشم می‌کنی؟" یا گفت "به نظر می‌رسد خشم را در خودت احساس می‌کنی." اگر احساس نامشخص است، می‌توان پرسید "می‌توانی بیشتر در مورد احساست توضیح دهی؟ این پاسخ باید به فارسی باشد."',
-                        },
-                      },
-                      required: [
-                        'lastMessage_emotions',
-                        'correspondingEmojis',
-                        'emotionalResponse',
-                      ],
-                      additionalProperties: false,
-                    },
-                  },
-                },
-                temperature: 0.7,
-                max_tokens: 0,
-                plugins: [],
-                transforms: ['middle-out'],
-              }),
-            }),
+            fetch('https://openrouter.ai/api/v1/chat/completions', fetchOptions),
             new Promise((_, reject) => 
               setTimeout(() => {
                 console.log('⏰ Request timeout after 30 seconds');
@@ -973,6 +1010,12 @@ export function useOpenRouter() {
     }
     catch (e: any) {
       error.value = e.message
+      
+      // Check if this is an abort error
+      if (e.name === 'AbortError' || (options.signal && options.signal.aborted)) {
+        throw new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.')
+      }
+      
       throw e
     }
     finally {

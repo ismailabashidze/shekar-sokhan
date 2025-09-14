@@ -504,7 +504,9 @@ const headlines = ref([
 ])
 
 onMounted(async () => {
+  console.log('Analysis page mounted with query params:', route.query)
   if (!analysisId.value) {
+    console.error('No analysis ID found in query parameters')
     toaster.clearAll()
     toaster.show({
       title: 'مشکل در بارگزاری داده',
@@ -516,11 +518,25 @@ onMounted(async () => {
     navigateTo('/dashboard')
     return
   }
-  analysisData.value = await getAnalysisById(analysisId.value)
-  console.log(analysisData.value)
-
-  // Process enhanced next steps after data is loaded
-  await processEnhancedNextSteps()
+  try {
+    console.log('Fetching analysis with ID:', analysisId.value)
+    analysisData.value = await getAnalysisById(analysisId.value)
+    console.log('Analysis data fetched successfully:', analysisData.value)
+    
+    // Process enhanced next steps after data is loaded
+    await processEnhancedNextSteps()
+  } catch (error) {
+    console.error('Error fetching analysis data:', error)
+    toaster.clearAll()
+    toaster.show({
+      title: 'مشکل در بارگزاری داده',
+      message: 'خطا در دریافت تحلیل جلسه',
+      color: 'danger',
+      icon: 'ph:warning-circle-fill',
+      closable: true,
+    })
+    navigateTo('/dashboard')
+  }
 })
 
 const isLoading = ref(false)
@@ -1015,7 +1031,7 @@ const getStatusInfo = (step: any) => {
                         </h4>
                       </div>
                       <p class="text-muted-500 dark:text-muted-400 leading-relaxed">
-                        {{ analysisData.psychotherapistEvaluation }}
+                        {{ analysisData.finalTrustAndOppennessOfUserEvaluationDescription }}
                       </p>
                     </div>
                   </div>

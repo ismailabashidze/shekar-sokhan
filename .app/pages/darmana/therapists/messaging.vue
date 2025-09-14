@@ -39,6 +39,8 @@ const currentLoadingTherapistId = ref<string | null>(null)
 const showScrollButton = ref(false)
 const isAIResponding = ref(false)
 const ttsLoadingMessageId = ref<string | null>(null)
+const hasShownPremiumMessage = ref(false)
+const showPremiumAlert = ref(false)
 
 const { play, isLoading: isTTSLoading, error: ttsError } = useOpenAITTS()
 
@@ -234,6 +236,9 @@ const loadMessages = async (therapistId: string) => {
       )
 
       messages.value = messagesWithAnalysis
+      // Reset premium message flag when loading new messages
+      hasShownPremiumMessage.value = false
+      showPremiumAlert.value = false
       scrollToBottom()
       startSessionTimer() // Start session timer when messages are loaded
     }
@@ -243,6 +248,9 @@ const loadMessages = async (therapistId: string) => {
         activeSession.value = newSession
         sessionId.value = newSession.id
         messages.value = []
+        // Reset premium message flag when creating a new session
+        hasShownPremiumMessage.value = false
+        showPremiumAlert.value = false
         startSessionTimer() // Start session timer for new session
       }
     }
@@ -250,6 +258,9 @@ const loadMessages = async (therapistId: string) => {
   catch (error) {
     console.error('Error loading messages:', error)
     messages.value = []
+    // Reset premium message flag when clearing messages due to error
+    hasShownPremiumMessage.value = false
+    showPremiumAlert.value = false
   }
   finally {
     loading.value = false
@@ -394,7 +405,7 @@ async function submitMessage() {
 
     // Inline Analysis Integration (in background)
     isAIThinking.value = true
-    thinkingResponse.value = ''
+    thinkingResponse.value = 'در حال تحلیل پیام شما...'
     let analysisResult = null
     let formattedAnalysis = ''
     try {
@@ -403,7 +414,19 @@ async function submitMessage() {
         role: 'user',
         content: userMessage.text,
       }
-      analysisResult = await generateInlineAnalysis(lastMessage)
+      
+      // Create AbortController for inline analysis
+      const analysisAbortController = new AbortController()
+      
+      // Set a timeout for the analysis request
+      const analysisTimeout = setTimeout(() => {
+        analysisAbortController.abort()
+      }, 30000) // 30 seconds timeout for analysis
+      
+      analysisResult = await generateInlineAnalysis(lastMessage, { signal: analysisAbortController.signal })
+      
+      // Clear the timeout if the request completes successfully
+      clearTimeout(analysisTimeout)
 
       console.log('analysisResult', analysisResult)
 
@@ -425,10 +448,34 @@ async function submitMessage() {
       if (messageToUpdate) {
         messageToUpdate.analysisResult = analysisResult
       }
+      
+      // Keep the analysis visible for a moment before proceeding
+      await new Promise(resolve => setTimeout(resolve, 1000))
     }
     catch (err) {
-      thinkingResponse.value = 'خطا در دریافت تحلیل. لطفا دوباره تلاش کنید.'
+      // Check if this is a timeout error
+      if (err.message && err.message.includes('زمان پاسخ‌دهی به پایان رسید')) {
+        thinkingResponse.value = 'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.'
+        toaster.show({
+          title: 'زمان پاسخ‌دهی به پایان رسید',
+          message: 'درخواست تحلیل پیام شما به دلیل طولانی شدن زمان پاسخ‌دهی لغو شد. لطفا دوباره تلاش کنید.',
+          color: 'warning',
+          icon: 'ph:warning-circle-fill',
+          closable: true,
+        })
+      } else {
+        thinkingResponse.value = 'خطا در دریافت تحلیل. لطفا دوباره تلاش کنید.'
+        toaster.show({
+          title: 'خطا در تحلیل پیام',
+          message: 'در دریافت تحلیل پیام خطایی رخ داد. لطفا دوباره تلاش کنید.',
+          color: 'danger',
+          icon: 'ph:warning-circle-fill',
+          closable: true,
+        })
+      }
       console.error('Inline analysis error:', err)
+      // Wait a moment to show the error before proceeding
+      await new Promise(resolve => setTimeout(resolve, 1500))
     }
     finally {
       isAIThinking.value = false
@@ -466,33 +513,72 @@ async function submitMessage() {
     let aiResponse = ''
     // Show streaming response in real time
     isAIThinking.value = true
-    thinkingResponse.value = ''
-    streamingBuffer.value = '' // Reset buffer for new message
+    thinkingResponse.value = 'در حال فکر کردن...'
+    
+    // Reset streaming state for new message
+    streamingBuffer.value = ''
+    streamingMessageId.value = '' // Reset message ID tracking
+    if (streamingTypingTimeout) {
+      clearTimeout(streamingTypingTimeout)
+      streamingTypingTimeout = null
+    }
 
     // Debug: Log AI settings before sending
     console.log('AI Settings from messaging.vue (line 443):', aiSettings.value)
     console.log('AI Settings isPremium:', aiSettings.value.isPremium)
     console.log('AI Settings lengthPref:', aiSettings.value.lengthPref)
 
-    await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value, typingConfig: typingConfig.value }, (chunk) => {
-      // Handle multi-message responses
-      if (typeof chunk === 'object' && chunk.type === 'multi_message') {
-        isMultiMessageMode.value = true
-        handleMultiMessageChunk(chunk)
-      }
-      else {
-        // Handle regular single message streaming with typing effect
-        isMultiMessageMode.value = false
-        aiResponse += chunk
-        handleStreamingChunk(chunk)
-      }
+        // Create AbortController for request cancellation
+    const abortController = new AbortController()
+    const { signal } = abortController
+
+    // Add a timeout to prevent indefinite thinking state
+    const streamTimeout = new Promise((_, reject) => {
+      setTimeout(() => {
+        // Abort the request when timeout occurs
+        abortController.abort()
+        reject(new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.'))
+      }, 60000) // 60 seconds timeout
     })
+
+    // Race between streamChat and timeout
+    try {
+      await Promise.race([
+        streamChat(chatMessagesForAI, { 
+          therapistDetails: selectedConversationComputed.value?.user, 
+          aiResponseSettings: aiSettings.value, 
+          typingConfig: typingConfig.value,
+          signal // Pass abort signal to streamChat
+        }, (chunk) => {
+          // Handle multi-message responses
+          if (typeof chunk === 'object' && chunk.type === 'multi_message') {
+            isMultiMessageMode.value = true
+            handleMultiMessageChunk(chunk)
+          }
+          else {
+            // Handle regular single message streaming with typing effect
+            isMultiMessageMode.value = false
+            aiResponse += chunk
+            handleStreamingChunk(chunk)
+          }
+        }),
+        streamTimeout
+      ])
+    } catch (error) {
+      // Check if the error is due to abort
+      if (error.name === 'AbortError' || signal.aborted) {
+        console.log('Request was aborted due to timeout')
+        throw new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.')
+      }
+      throw error
+    }
 
     // Mark streaming as complete for typing effect
     if (!isMultiMessageMode.value && streamingBuffer.value) {
       handleStreamingChunk('', true) // Mark as complete
     }
 
+    // Ensure we're not stuck in thinking mode
     isAIThinking.value = false
 
     // Remove any temporary typing indicators
@@ -509,6 +595,13 @@ async function submitMessage() {
         timestamp: savedAIMessage.time, // Use timestamp from saved message
         id: savedAIMessage.id, // Use ID from saved message
       })
+
+      // Check if we should show the premium alert
+      // Show after the first AI message if user is not premium and has charge
+      if (!aiSettings.value.isPremium && !hasShownPremiumMessage.value && !showNoCharge.value) {
+        showPremiumAlert.value = true
+        hasShownPremiumMessage.value = true
+      }
     }
     // Multi-message responses are already saved individually in handleMultiMessageChunk
     checkIfScrolledToBottom()
@@ -516,12 +609,27 @@ async function submitMessage() {
   }
   catch (e) {
     console.error('Error in chat:', e)
-    messages.value.push({
-      type: 'received',
-      text: 'متاسفانه خطایی رخ داد. لطفا دوباره تلاش کنید.',
-      timestamp: new Date().toISOString(),
-      id: 'error-' + Date.now(),
-    })
+    // Ensure we're not stuck in thinking mode
+    isAIThinking.value = false
+    isAIResponding.value = false
+    
+    // Check if this is a timeout error
+    if (e.message && e.message.includes('زمان پاسخ‌دهی به پایان رسید')) {
+      toaster.show({
+        title: 'زمان پاسخ‌دهی به پایان رسید',
+        message: 'درخواست شما به دلیل طولانی شدن زمان پاسخ‌دهی لغو شد. لطفا دوباره تلاش کنید.',
+        color: 'warning',
+        icon: 'ph:warning-circle-fill',
+        closable: true,
+      })
+    } else {
+      messages.value.push({
+        type: 'received',
+        text: 'متاسفانه خطایی رخ داد. لطفا دوباره تلاش کنید.',
+        timestamp: new Date().toISOString(),
+        id: 'error-' + Date.now(),
+      })
+    }
     scrollToBottom()
   }
   finally {
@@ -541,41 +649,22 @@ const toggleAnalysis = () => {
 
 function formatInlineAnalysis(analysisResult) {
   if (!analysisResult) return 'نتیجه‌ای یافت نشد.'
-  let output = ''
+  
+  // Session Details
+  let output = '**جزئیات جلسه:**\n'
+  output += `- هدف جلسه: ${analysisResult.session_mainGoal || 'نامشخص'}\n`
+  output += `- نیاز به مداخله انسانی: ${analysisResult.session_humanInterventionNeeded ? 'بله' : 'خیر'}\n`
+  output += `- نیازهای ناهشیار: ${analysisResult.session_unconsciousNeeds || 'نامشخص'}\n\n`
 
-  if (showAnalysis.value) {
-    output += '<div class="analysis-message bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">'
-
-    if (showAnalysis.value) {
-      output += '<div class="analysis-message bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">'
-
-      if (showAnalysis.value) {
-      // Session Details
-        output += `\n**جزئیات جلسه:**\n`
-        output += `- هدف جلسه: ${analysisResult.session_mainGoal || 'نامشخص'}\n`
-        output += `- نیاز به مداخله انسانی: ${analysisResult.session_humanInterventionNeeded ? 'بله' : 'خیر'}\n`
-        output += `- نیازهای ناهشیار: ${analysisResult.session_unconsciousNeeds || 'نامشخص'}\n`
-
-        // Last Message Analysis
-        output += `\n**تحلیل پیام آخر:**\n`
-        output += `- احساسات اولیه: ${(analysisResult.lastMessage_primaryEmotions || []).join(', ') || 'نامشخص'}\n`
-        output += `- احساسات دقیق‌تر: ${(analysisResult.lastMessage_nuancedEmotions || []).join(', ') || 'نامشخص'}\n`
-        output += `- شدت احساسات: ${analysisResult.lastMessage_emotionIntensity || 'نامشخص'}\n`
-        output += `- تناسب با هدف جلسه: ${analysisResult.lastMessage_alignmentWithGoal || 'نامشخص'}\n`
-        output += `- پاسخ پیشنهادی: ${analysisResult.emotionalResponse || 'نامشخص'}\n`
-      }
-      else {
-        output = '<div class="analysis-icon cursor-pointer" @click="showAnalysis = !showAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>'
-      }
-    }
-    else {
-      output = '<div class="analysis-icon cursor-pointer flex items-center justify-center p-3" @click="toggleAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>'
-    }
-  }
-  else {
-    output = '<div class="analysis-icon cursor-pointer flex items-center justify-center p-3" @click="toggleAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>'
-  }
-  return output + '</div>' + '</div>'
+  // Last Message Analysis
+  output += '**تحلیل پیام آخر:**\n'
+  output += `- احساسات اولیه: ${(analysisResult.lastMessage_primaryEmotions || []).join(', ') || 'نامشخص'}\n`
+  output += `- احساسات دقیق‌تر: ${(analysisResult.lastMessage_nuancedEmotions || []).join(', ') || 'نامشخص'}\n`
+  output += `- شدت احساسات: ${analysisResult.lastMessage_emotionIntensity || 'نامشخص'}\n`
+  output += `- تناسب با هدف جلسه: ${analysisResult.lastMessage_alignmentWithGoal || 'نامشخص'}\n`
+  output += `- پاسخ پیشنهادی: ${analysisResult.emotionalResponse || 'نامشخص'}\n`
+  
+  return output
 }
 
 watch(messages, (newMessages) => {
@@ -587,8 +676,8 @@ watch(messages, (newMessages) => {
       const toastShown = localStorage.getItem('tenMessagesToastShown')
       if (!toastShown) {
         toaster.show({
-          title: 'جلسه شما پیش می‌رود!',
-          message: 'می‌توانید جلسه را با کلیک بر روی دکمه تیک سبز رنگ در بالای صفحه پایان دهید.',
+          title: 'شما به پیش می‌روید!',
+          message: 'می‌توانید جلسه را با کلیک بر روی دکمه تیک سبز رنگ در منوی ناوبری پایان دهید.',
           color: 'success',
           icon: 'ph:check-circle',
           closable: true,
@@ -615,16 +704,25 @@ const checkForHalfTime = () => {
   return (temp / timeToShow.value > 1)
 }
 
-watch(timeToShow, async (newValue) => {
-  if (newValue <= 0 && activeSession.value?.id) {
-    const startTime = new Date(activeSession.value.created)
-    const endTime = new Date()
-    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
-    isReportModalOpen.value = true
-    isGeneratingAnalysis.value = true
-    await handleConfirmEndSession()
-    showNoCharge.value = true
+watch(timeToShow, (newValue) => {
+  if (newValue !== undefined && newValue <= 0 && activeSession.value?.id) {
+    // Pause the interval to prevent further decrements
     pause()
+    
+    // Clear the timer interval
+    if (timeUpdateInterval.value) {
+      clearInterval(timeUpdateInterval.value)
+      timeUpdateInterval.value = null
+    }
+    
+    // Only end session if we haven't already done so
+    if (!showNoCharge.value) {
+      isReportModalOpen.value = true
+      // isGeneratingAnalysis.value = true
+      // Call handleConfirmEndSession without await to avoid blocking
+      handleConfirmEndSession()
+      showNoCharge.value = true
+    }
   }
 })
 
@@ -680,6 +778,10 @@ const startSessionTimer = () => {
 }
 
 onMounted(async () => {
+  // Reset premium message flag when component is mounted
+  hasShownPremiumMessage.value = false
+  showPremiumAlert.value = false
+  
   loading.value = true
   try {
     const therapists = await getTherapists()
@@ -702,16 +804,15 @@ onMounted(async () => {
       }
     }
 
-    if (timeToShow.value <= 0) {
-      showNoCharge.value = true
-      pause()
-    }
-
+    // Initialize the timer to update every second for a more accurate countdown
     timeUpdateInterval.value = setInterval(() => {
-      if (timeToShow.value !== undefined) {
-        timeToShow.value = timeToShow.value - 1
+      if (remainingTime.value && startChargeTime.value) {
+        const now = new Date()
+        const remainingMilliseconds = remainingTime.value.getTime() - now.getTime()
+        timeToShow.value = Math.floor(remainingMilliseconds / (1000 * 60))
+        // The watch function will handle the session end when timeToShow <= 0
       }
-    }, 60000)
+    }, 1000)
 
     if (nuxtApp.$pb.authStore.isValid) {
       userSubscription.value = await nuxtApp.$pb.collection('users').subscribe(
@@ -730,19 +831,111 @@ onMounted(async () => {
               }
             }, 600)
             pause()
+            
+            // Clear the timer interval
+            if (timeUpdateInterval.value) {
+              clearInterval(timeUpdateInterval.value)
+              timeUpdateInterval.value = null
+            }
           }
         },
       )
 
       // fetching userReport for having memory of previous sessions
-      const userReportData = await getReportByUserId(nuxtApp.$pb.authStore.model?.id)
-      if (userReportData) {
-        userReport.value = userReportData
-        hasPreviousData.value = true
+      try {
+        const userReportData = await getReportByUserId(nuxtApp.$pb.authStore.model?.id)
+        
+        if (userReportData) {
+          userReport.value = userReportData
+          hasPreviousData.value = true
 
-        // If there are previous sessions (totalSessions > 0), we'll have AI start the conversation
-        if (userReportData.totalSessions && userReportData.totalSessions > 0 && userReportData.summaries.length > 0) {
-          console.log('This user has previous sessions, AI will start with a summary')
+          // If there are previous sessions (totalSessions > 0), we'll have AI start the conversation
+          if (userReportData.totalSessions && userReportData.totalSessions > 0 && userReportData.summaries.length > 0) {
+            console.log('This user has previous sessions, AI will start with a summary')
+            // Wait a moment for UI to initialize properly
+            setTimeout(() => {
+              const session = activeSession.value
+              if (!session) {
+                console.error('No active session found')
+                return
+              }
+
+              // Check if there are already messages in the conversation
+              // If there are messages, don't trigger the AI introduction
+              if (messages.value.length === 0) {
+                startAIConversationWithSummary(selectedConversationComputed.value?.user, session.id, userReportData)
+              }
+              else {
+                console.log('Messages already exist in conversation, skipping AI introduction')
+              }
+            }, 1000)
+          }
+        } else {
+          // User has no report, create a new empty report for them
+          console.log('User has no previous report, creating a new one')
+          try {
+            const newReport = await createReport({
+              user: nuxtApp.$pb.authStore.model?.id,
+              totalSessions: 0,
+              summaries: [],
+              possibleDeeperGoals: [],
+              possibleRiskFactors: [],
+              finalDemographicProfile: {}
+            })
+            userReport.value = newReport
+            hasPreviousData.value = false
+            console.log('New report created for user:', newReport)
+            
+            // Even for new users, we want to start the conversation
+            // Wait a moment for UI to initialize properly
+            setTimeout(() => {
+              const session = activeSession.value
+              if (!session) {
+                console.error('No active session found')
+                return
+              }
+
+              // Check if there are already messages in the conversation
+              // If there are messages, don't trigger the AI introduction
+              if (messages.value.length === 0) {
+                // Create a minimal report data object for first-time users
+                const firstTimeReport = {
+                  totalSessions: 0,
+                  summaries: [],
+                  possibleDeeperGoals: [],
+                  possibleRiskFactors: [],
+                  finalDemographicProfile: {}
+                }
+                // startAIConversationWithSummary(selectedConversationComputed.value?.user, session.id, firstTimeReport)
+              }
+              else {
+                console.log('Messages already exist in conversation, skipping AI introduction')
+              }
+            }, 1000)
+          }
+          catch (createError) {
+            console.error('Error creating new report for user:', createError)
+            // Continue without report if creation fails
+          }
+        }
+      }
+      catch (fetchError) {
+        console.error('Error fetching user report:', fetchError)
+        // Try to create a new report even if fetching failed
+        try {
+          const newReport = await createReport({
+            user: nuxtApp.$pb.authStore.model?.id,
+            totalSessions: 0,
+            summaries: [],
+            possibleDeeperGoals: [],
+            possibleRiskFactors: [],
+            finalDemographicProfile: {}
+          })
+          userReport.value = newReport
+          hasPreviousData.value = false
+          console.log('New report created for user after fetch error:', newReport)
+          
+          // Even for new users, we want to start the conversation
           // Wait a moment for UI to initialize properly
           setTimeout(() => {
             const session = activeSession.value
@@ -754,12 +947,24 @@ onMounted(async () => {
             // Check if there are already messages in the conversation
             // If there are messages, don't trigger the AI introduction
             if (messages.value.length === 0) {
-              startAIConversationWithSummary(selectedConversationComputed.value?.user, session.id, userReportData)
+              // Create a minimal report data object for first-time users
+              const firstTimeReport = {
+                totalSessions: 0,
+                summaries: [],
+                possibleDeeperGoals: [],
+                possibleRiskFactors: [],
+                finalDemographicProfile: {}
+              }
+              // startAIConversationWithSummary(selectedConversationComputed.value?.user, session.id, firstTimeReport)
             }
             else {
               console.log('Messages already exist in conversation, skipping AI introduction')
             }
           }, 1000)
+        }
+        catch (createError) {
+          console.error('Error creating new report after fetch error:', createError)
+          // Continue without report if creation fails
         }
       }
     }
@@ -800,6 +1005,11 @@ onUnmounted(() => {
   if (chatEl.value) {
     chatEl.value.removeEventListener('scroll', checkIfScrolledToBottom)
   }
+  
+  // Clear countdown interval if it exists
+  if (countdownInterval.value) {
+    clearInterval(countdownInterval.value)
+  }
 })
 
 const clearMessages = async (sessionId: string) => {
@@ -820,6 +1030,9 @@ const clearMessages = async (sessionId: string) => {
       closable: true,
     })
     messages.value = []
+    // Reset premium message flag when messages are cleared
+    hasShownPremiumMessage.value = false
+    showPremiumAlert.value = false
   }
   catch (error) {
     console.error('Error clearing messages:', error)
@@ -926,6 +1139,8 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 با توجه به اطلاعات بالا، جلسه جدید را با یک خلاصه از جلسات قبلی و وضعیت مراجع شروع کن و از مراجع بپرس که امروز حالش چطور است و میخواهد درباره چه مسائلی صحبت کند. لحن باید گرم و حرفه‌ای باشد.
 همین طور از اهداف عمیق تر احتمالی نیز استفاده کن. کاربر را ترغیب به دادن پاسخ در مورد موضوعات احتمالی کن.
 از ایموجی های خوب و جذاب استفاده کن.
+مطمئن شو که پاسخت به زبان فارسی باشد.
+حتما پاسخ را تنها به زبان فارسی بده.
  `,
     }
     console.log('report', report)
@@ -933,18 +1148,48 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
     // Generate initial AI message
     let aiResponse = ''
     streamingBuffer.value = '' // Reset buffer
+    streamingMessageId.value = '' // Reset message ID tracking
+    if (streamingTypingTimeout) {
+      clearTimeout(streamingTypingTimeout)
+      streamingTypingTimeout = null
+    }
+
+    // Create AbortController for conversation starter
+    const conversationAbortController = new AbortController()
+    
+    // Add a timeout to prevent indefinite thinking state
+    const conversationTimeout = new Promise((_, reject) => {
+      setTimeout(() => {
+        // Abort the request when timeout occurs
+        conversationAbortController.abort()
+        reject(new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.'))
+      }, 60000) // 60 seconds timeout
+    })
 
     // Call the OpenRouter API with the system context (CONVERSATION STARTER MODE)
-    await streamChat([systemContext], {
-      therapistDetails: therapist,
-      aiResponseSettings: aiSettings.value,
-      isConversationStarter: true, // Enable comprehensive summary mode
-      typingConfig: typingConfig.value,
-    }, (chunk) => {
-      // Conversation starters are ALWAYS single message - no multi-message handling
-      aiResponse += chunk
-      handleStreamingChunk(chunk)
-    })
+    try {
+      await Promise.race([
+        streamChat([systemContext], {
+          therapistDetails: therapist,
+          aiResponseSettings: aiSettings.value,
+          isConversationStarter: true, // Enable comprehensive summary mode
+          typingConfig: typingConfig.value,
+          signal: conversationAbortController.signal // Pass abort signal
+        }, (chunk) => {
+          // Conversation starters are ALWAYS single message - no multi-message handling
+          aiResponse += chunk
+          handleStreamingChunk(chunk)
+        }),
+        conversationTimeout
+      ])
+    } catch (error) {
+      // Check if the error is due to abort
+      if (error.name === 'AbortError' || conversationAbortController.signal.aborted) {
+        console.log('Conversation starter request was aborted due to timeout')
+        throw new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.')
+      }
+      throw error
+    }
 
     // Mark streaming as complete for typing effect
     if (streamingBuffer.value) {
@@ -972,8 +1217,18 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
   catch (e) {
     console.error('Error starting AI conversation with summary:', e)
 
+    // Check if it's a timeout error
+    if (e.message && e.message.includes('زمان پاسخ‌دهی به پایان رسید')) {
+      toaster.show({
+        title: 'زمان پاسخ‌دهی به پایان رسید',
+        message: 'درخواست شروع گفتگوی جدید به دلیل طولانی شدن زمان پاسخ‌دهی لغو شد. لطفا دوباره تلاش کنید.',
+        color: 'warning',
+        icon: 'ph:warning-circle-fill',
+        closable: true,
+      })
+    }
     // Check if it's an authentication error
-    if (e.message && e.message.includes('No auth credentials found')) {
+    else if (e.message && e.message.includes('No auth credentials found')) {
       toaster.show({
         title: 'خطا در احراز هویت',
         message: 'مشکلی در احراز هویت رخ داد. لطفاً مجدداً وارد شوید.',
@@ -1015,8 +1270,13 @@ const closePremiumModal = () => {
 }
 
 const closeReportModal = () => {
-  if (!isGeneratingAnalysis.value) {
-    isReportModalOpen.value = false
+  // Allow closing the modal even when generating analysis
+  isReportModalOpen.value = false
+  
+  // Clear countdown interval if it exists
+  if (countdownInterval.value) {
+    clearInterval(countdownInterval.value)
+    countdownInterval.value = null
   }
 }
 
@@ -1288,25 +1548,52 @@ const retryLastMessage = async () => {
     let aiResponse = ''
     isAIThinking.value = true
     thinkingResponse.value = ''
+    
+    // Reset streaming state for new message
+    streamingBuffer.value = ''
+    streamingMessageId.value = '' // Reset message ID tracking
+    if (streamingTypingTimeout) {
+      clearTimeout(streamingTypingTimeout)
+      streamingTypingTimeout = null
+    }
 
-    await streamChat(contextMessages, { therapistDetails: selectedConversationComputed.value?.user, aiResponseSettings: aiSettings.value, typingConfig: typingConfig.value }, (chunk) => {
-      // Handle multi-message responses
-      if (typeof chunk === 'object' && chunk.type === 'multi_message') {
-        handleMultiMessageChunk(chunk)
-      }
-      else {
-        // Handle regular single message streaming with typing effect
-        aiResponse += chunk
+    // Create AbortController for retry
+    const retryAbortController = new AbortController()
+    
+    // Add a timeout to prevent indefinite thinking state
+    const retryTimeout = new Promise((_, reject) => {
+      setTimeout(() => {
+        // Abort the request when timeout occurs
+        retryAbortController.abort()
+        reject(new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.'))
+      }, 60000) // 60 seconds timeout
+    })
 
-        // Apply typing effect for retry messages too
-        if (typingConfig.value.enableTypingEffect) {
-          startTypingEffect(aiResponse)
+    await Promise.race([
+      streamChat(contextMessages, { 
+        therapistDetails: selectedConversationComputed.value?.user, 
+        aiResponseSettings: aiSettings.value, 
+        typingConfig: typingConfig.value,
+        signal: retryAbortController.signal // Pass abort signal
+      }, (chunk) => {
+        // Handle multi-message responses
+        if (typeof chunk === 'object' && chunk.type === 'multi_message') {
+          handleMultiMessageChunk(chunk)
         }
         else {
-          thinkingResponse.value = aiResponse
+          // Handle regular single message streaming with typing effect
+          isMultiMessageMode.value = false
+          aiResponse += chunk
+          handleStreamingChunk(chunk)
         }
-      }
-    })
+      }),
+      retryTimeout
+    ])
+
+    // Mark streaming as complete for typing effect
+    if (!isMultiMessageMode.value && streamingBuffer.value) {
+      handleStreamingChunk('', true) // Mark as complete
+    }
 
     isAIThinking.value = false
 
@@ -1333,13 +1620,25 @@ const retryLastMessage = async () => {
   }
   catch (error) {
     console.error('Error retrying message:', error)
-    toaster.show({
-      title: 'خطا',
-      message: 'خطا در تولید پاسخ جدید. لطفا دوباره تلاش کنید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    })
+    
+    // Check if this is a timeout error
+    if (error.message && error.message.includes('زمان پاسخ‌دهی به پایان رسید')) {
+      toaster.show({
+        title: 'زمان پاسخ‌دهی به پایان رسید',
+        message: 'درخواست تولید پاسخ جدید به دلیل طولانی شدن زمان پاسخ‌دهی لغو شد. لطفا دوباره تلاش کنید.',
+        color: 'warning',
+        icon: 'ph:warning-circle-fill',
+        closable: true,
+      })
+    } else {
+      toaster.show({
+        title: 'خطا',
+        message: 'خطا در تولید پاسخ جدید. لطفا دوباره تلاش کنید.',
+        color: 'danger',
+        icon: 'ph:warning-circle-fill',
+        closable: true,
+      })
+    }
   }
   finally {
     messageLoading.value = false
@@ -1393,10 +1692,33 @@ const handleEndSession = async () => {
 }
 
 const isGeneratingAnalysis = ref(false)
+const countdownSeconds = ref(120) // 2 minutes in seconds
+const countdownInterval = ref<NodeJS.Timeout | null>(null)
+
+const formatCountdownTime = computed(() => {
+  const minutes = Math.floor(countdownSeconds.value / 60)
+  const seconds = countdownSeconds.value % 60
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+})
 
 const handleConfirmEndSession = async () => {
   if (!activeSession.value) return
+  // Prevent multiple clicks
+  if (isGeneratingAnalysis.value) return
   isGeneratingAnalysis.value = true
+  countdownSeconds.value = 120 // Reset to 2 minutes
+  
+  // Start countdown timer
+  if (countdownInterval.value) {
+    clearInterval(countdownInterval.value)
+  }
+  countdownInterval.value = setInterval(() => {
+    countdownSeconds.value--
+    if (countdownSeconds.value <= 0 && countdownInterval.value) {
+      clearInterval(countdownInterval.value)
+    }
+  }, 1000)
+  
   try {
     // 1. Check if analysis already exists for this session
     let existingAnalysis = null
@@ -1421,37 +1743,128 @@ const handleConfirmEndSession = async () => {
     }
     if (existingAnalysis) {
       const savedAnalysisId = existingAnalysis.id
+      console.log('Found existing analysis, navigating to:', `/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
       isReportModalOpen.value = false
       isGeneratingAnalysis.value = false
-      await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
+      if (countdownInterval.value) {
+        clearInterval(countdownInterval.value)
+        countdownInterval.value = null
+      }
+      // Use nextTick to ensure state updates before navigation
+      nextTick(() => {
+        console.log('Performing navigation to analysis page with existing analysis')
+        navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`)
+      })
       return
     }
 
-
-    // Redirect to waitForReport page
+    // Generate new analysis
+    console.log('Generating new analysis for session:', activeSession.value.id)
     const contextMessages = messages.value.map(msg => ({
       role: msg.type === 'sent' ? 'user' : 'assistant',
       content: msg.text,
     }))
-    const genAnalysis = await generateAnalysis({ sessionId: activeSession.value.id, messages: contextMessages })
-    const analysis = await createAnalysis(genAnalysis)  
+    
+    // Add timeout to analysis generation
+    const analysisPromise = generateAnalysis({ sessionId: activeSession.value.id, messages: contextMessages })
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('زمان تحلیل جلسه به پایان رسید')), 180000) // 3 minutes timeout
+    )
+    
+    const genAnalysis = await Promise.race([analysisPromise, timeoutPromise])
+    console.log('Analysis generated successfully:', genAnalysis)
+    const analysis = await createAnalysis({ ...genAnalysis, session: activeSession.value.id })
+    console.log('Analysis created successfully with ID:', analysis.id)
     await endSession(activeSession.value.id, analysis.id)
+    console.log('Session ended successfully')
+    
+    // Update user's final report with session data
+    try {
+      if (userReport.value) {
+        // Update existing report
+        const updatedReport = {
+          totalSessions: (userReport.value.totalSessions || 0) + 1,
+          summaries: [
+            ...(userReport.value.summaries || []),
+            {
+              sessionId: activeSession.value.id,
+              title: analysis.title || 'جلسه مشاوره',
+              summary: analysis.summaryOfSession || '',
+              date: new Date().toISOString()
+            }
+          ],
+          finalDemographicProfile: {
+            ...(userReport.value.finalDemographicProfile || {}),
+            ...(analysis.demographicData || {})
+          },
+          possibleRiskFactors: [
+            ...(userReport.value.possibleRiskFactors || []),
+            ...(analysis.possibleRiskFactorsExtracted || [])
+          ],
+          possibleDeeperGoals: [
+            ...(userReport.value.possibleDeeperGoals || []),
+            analysis.possibleDeeperGoalsOfPatient || ''
+          ]
+        }
+        
+        await updateReport(userReport.value.id, updatedReport)
+        console.log('User report updated successfully')
+      } else {
+        // Create new report if it doesn't exist
+        const newReport = {
+          user: nuxtApp.$pb.authStore.model.id,
+          totalSessions: 1,
+          summaries: [
+            {
+              sessionId: activeSession.value.id,
+              title: analysis.title || 'جلسه مشاوره',
+              summary: analysis.summaryOfSession || '',
+              date: new Date().toISOString()
+            }
+          ],
+          finalDemographicProfile: analysis.demographicData || {},
+          possibleRiskFactors: analysis.possibleRiskFactorsExtracted || [],
+          possibleDeeperGoals: [analysis.possibleDeeperGoalsOfPatient || '']
+        }
+        
+        const createdReport = await createReport(newReport)
+        userReport.value = createdReport
+        console.log('New user report created successfully')
+      }
+    } catch (reportError) {
+      console.error('Error updating user report:', reportError)
+      // Continue with navigation even if report update fails
+    }
+    
+    // Close modal and reset state before navigation
     isReportModalOpen.value = false
     isGeneratingAnalysis.value = false
-
-    await navigateTo(`/darmana/therapists/analysis?analysis_id=${analysis.id}`)
+    if (countdownInterval.value) {
+      clearInterval(countdownInterval.value)
+      countdownInterval.value = null
+    }
+    
+    // Use nextTick to ensure state updates before navigation
+    nextTick(() => {
+      console.log('Performing navigation to analysis page with new analysis')
+      navigateTo(`/darmana/therapists/analysis?analysis_id=${analysis.id}`)
+    })
   }
   catch (error) {
     console.error('Error ending session:', error)
     toaster.show({
       title: 'خطا',
-      message: 'خطا در پایان جلسه. لطفا دوباره تلاش کنید.',
+      message: error.message || 'خطا در پایان جلسه. لطفا دوباره تلاش کنید.',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
     isGeneratingAnalysis.value = false
     isReportModalOpen.value = false
+    if (countdownInterval.value) {
+      clearInterval(countdownInterval.value)
+      countdownInterval.value = null
+    }
   }
 }
 
@@ -1477,28 +1890,38 @@ const handleTextareaClick = () => {
 }
 const thinkingResponse = ref('')
 const isAIThinking = ref(false)
+const showPremiumModal = ref(false)
 
 // Typing effect for single messages
 const typingQueue = ref('')
 const displayedResponse = ref('')
 const isTypingActive = ref(false)
+const currentMessageId = ref('') // Track current message ID
 
 // Function to start typing effect for single messages
-const startTypingEffect = (fullText: string) => {
+const startTypingEffect = (fullText: string, messageId: string = '') => {
+  // If message ID changed, reset the typing effect
+  if (messageId && currentMessageId.value !== messageId) {
+    currentMessageId.value = messageId
+    isTypingActive.value = false
+    displayedResponse.value = ''
+  }
+  
   if (!typingConfig.value.enableTypingEffect) {
     thinkingResponse.value = fullText
     return
   }
 
-  // Stop any current typing
-  isTypingActive.value = false
+  // Stop any current typing for different message
+  if (messageId && currentMessageId.value !== messageId) {
+    isTypingActive.value = false
+  }
 
   // Start new typing effect
   typingQueue.value = fullText
-  displayedResponse.value = ''
   isTypingActive.value = true
 
-  let currentIndex = 0
+  let currentIndex = displayedResponse.value.length // Continue from where we left off
   const typeNextChar = () => {
     if (currentIndex < typingQueue.value.length && isTypingActive.value) {
       displayedResponse.value += typingQueue.value[currentIndex]
@@ -1514,14 +1937,24 @@ const startTypingEffect = (fullText: string) => {
     }
   }
 
-  typeNextChar()
+  // Only start if we're at the beginning or continuing the same message
+  if (displayedResponse.value === '' || currentMessageId.value === messageId) {
+    typeNextChar()
+  }
 }
 
 // For streaming, we need to handle typing differently
 let streamingBuffer = ref('')
 let streamingTypingTimeout: NodeJS.Timeout | null = null
+let streamingMessageId = ref('') // Track streaming message ID
 
 const handleStreamingChunk = (chunk: string, isComplete: boolean = false) => {
+  // Reset buffer when starting a new message
+  if (!streamingMessageId.value) {
+    streamingMessageId.value = 'msg-' + Date.now()
+    streamingBuffer.value = ''
+  }
+  
   streamingBuffer.value += chunk
 
   if (typingConfig.value.enableTypingEffect) {
@@ -1532,12 +1965,14 @@ const handleStreamingChunk = (chunk: string, isComplete: boolean = false) => {
 
     // If this is the final chunk or enough delay, start typing
     if (isComplete) {
-      startTypingEffect(streamingBuffer.value)
+      startTypingEffect(streamingBuffer.value, streamingMessageId.value)
+      // Reset message ID for next message
+      streamingMessageId.value = ''
     }
     else {
       // Debounce typing effect - only start if no new chunks for 100ms
       streamingTypingTimeout = setTimeout(() => {
-        startTypingEffect(streamingBuffer.value)
+        startTypingEffect(streamingBuffer.value, streamingMessageId.value)
       }, 100)
     }
   }
@@ -1628,6 +2063,13 @@ const handleMultiMessageChunk = async (chunk: any) => {
         isAIResponding.value = false
         isMultiMessageMode.value = false
         console.log('✅ Multi-message sequence completed')
+        
+        // Check if we should show the premium alert
+        // Show after the first AI message if user is not premium and has charge
+        if (!aiSettings.value.isPremium && !hasShownPremiumMessage.value && !showNoCharge.value) {
+          showPremiumAlert.value = true
+          hasShownPremiumMessage.value = true
+        }
       }, finalDelay)
     }
   }
@@ -1673,7 +2115,7 @@ const typingConfig = ref({
     <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen overflow-hidden">
       <!-- Sidebar -->
       <div
-        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-10 hidden h-screen w-20 border-r bg-white sm:block"
+        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-30 hidden h-screen w-20 border-r bg-white sm:block"
       >
         <div class="flex h-full flex-col justify-between">
           <div class="flex flex-col">
@@ -1753,7 +2195,7 @@ const typingConfig = ref({
       </div>
       <!-- Conversations -->
       <div
-        class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-[9] h-screen w-16 bg-white sm:w-20 lg:border-r"
+        class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-70 h-screen w-16 bg-white sm:w-20 lg:border-r"
       >
         <div class="mt-3 flex h-full flex-col justify-between gap-2">
           <!-- List -->
@@ -1851,11 +2293,11 @@ const typingConfig = ref({
           <div
             class="mb-2 flex h-16 w-full items-center justify-between px-4 sm:px-8"
           >
-            <div class="mt-[140px] flex items-center gap-2 md:mt-4">
+            <div class="flex items-center gap-2 mt-5">
               <div class="flex">
                 <BaseMessage
                   v-if="!showNoCharge"
-                  class="w-[180px]"
+                  class="w-[180px] absolute-timer sm:relative sm:top-auto sm:left-auto sm:z-auto"
                   :color="timeToShow > 10 ? 'success' : 'warning'"
                 >
                   <span v-if="timeToShow > 0">
@@ -1865,7 +2307,7 @@ const typingConfig = ref({
                 </BaseMessage>
                 <BaseMessage
                   v-else
-                  class="w-[280px] justify-center !pl-2"
+                  class="w-[280px] justify-center !pl-2 absolute-timer sm:relative sm:top-auto sm:left-auto sm:z-auto"
                   color="warning"
                 >
                   لطفا اشتراک تهیه فرمایید.
@@ -1923,7 +2365,7 @@ const typingConfig = ref({
           <!-- Body -->
           <div
             ref="chatEl"
-            class="relative flex h-[calc(100vh-4rem)] flex-col p-4 !pb-60 sm:p-8"
+            class="relative flex h-[calc(100vh-4rem)] flex-col p-4 !pb-60 sm:p-8 sm:!pb-60"
             :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
           >
             <!-- Loader-->
@@ -2035,11 +2477,11 @@ const typingConfig = ref({
                             ]"
                           >
                             <div
-                              class="rounded-xl px-4 py-2"
+                              class="rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md"
                               :class="[
                                 item.type === 'sent'
-                                  ? 'bg-primary-500 prose-p:text-white text-white'
-                                  : 'bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                                  ? 'bg-primary-500 prose-p:text-white text-white rounded-br-md'
+                                  : 'bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-bl-md border border-muted-200 dark:border-muted-700',
                               ]"
                             >
                               <span
@@ -2111,11 +2553,11 @@ const typingConfig = ref({
                           <!-- Message bubble only on mobile -->
                           <div class="block sm:hidden">
                             <div
-                              class="rounded-xl px-4 py-2"
+                              class="rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md"
                               :class="[
                                 item.type === 'sent'
-                                  ? 'bg-primary-500 prose-p:text-white text-white'
-                                  : 'bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                                  ? 'bg-primary-500 prose-p:text-white text-white rounded-br-md'
+                                  : 'bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-bl-md border border-muted-200 dark:border-muted-700',
                               ]"
                             >
                               <span
@@ -2133,19 +2575,19 @@ const typingConfig = ref({
 
                           <!-- Timestamp and mobile buttons -->
                           <div
-                            class="mt-1 flex items-center gap-2"
+                            class="mt-2 flex items-center gap-2"
                             :class="[
                               item.type === 'sent' ? 'justify-end' : 'justify-start'
                             ]"
                           >
                             <!-- Desktop timestamp -->
-                            <span class="text-muted-400 hidden font-sans text-xs sm:block">
+                            <span class="text-muted-500 hidden font-sans text-xs sm:block bg-muted-100 dark:bg-muted-800 px-2 py-1 rounded-full">
                               {{ formatTime(item.timestamp) }}
                             </span>
 
                             <!-- Mobile: sent messages - button on right of timestamp -->
                             <template v-if="item.type === 'sent'">
-                              <span class="text-muted-400 block font-sans text-xs sm:hidden">
+                              <span class="text-muted-500 block font-sans text-xs sm:hidden bg-muted-100 dark:bg-muted-800 px-2 py-1 rounded-full">
                                 {{ formatTime(item.timestamp) }}
                               </span>
                               <BaseButton
@@ -2184,7 +2626,7 @@ const typingConfig = ref({
                                   <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
                                 </BaseButton>
                               </div>
-                              <span class="text-muted-400 block font-sans text-xs sm:hidden">
+                              <span class="text-muted-500 block font-sans text-xs sm:hidden bg-muted-100 dark:bg-muted-800 px-2 py-1 rounded-full">
                                 {{ formatTime(item.timestamp) }}
                               </span>
                             </template>
@@ -2197,7 +2639,7 @@ const typingConfig = ref({
                 <!-- Assistant thinking bubble -->
                 <div v-if="isAIThinking" class="mb-4 flex justify-start">
                   <div class="flex max-w-[85%] flex-col items-start">
-                    <div class="bg-muted-200 dark:bg-muted-700 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-xl px-4 py-2">
+                    <div class="bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-2xl rounded-bl-md px-4 py-3 border border-muted-200 dark:border-muted-700 shadow-sm">
                       <span class="block flex items-center font-sans">
                         <AddonMarkdownRemark :source="thinkingResponse || 'در حال فکر کردن'" />
                         <span class="typing-ellipsis ml-2" />
@@ -2225,6 +2667,58 @@ const typingConfig = ref({
                     </div>
                   </div>
                 </BaseMessage>
+                <!-- Premium Upgrade Alert -->
+                <div 
+                  v-else-if="showPremiumAlert"
+                  id="premium-upgrade-alert"
+                  class="bg-gradient-to-l from-yellow-400/20 to-orange-500/20 dark:from-yellow-600/20 dark:to-orange-700/20 border border-yellow-300 dark:border-yellow-700/50 rounded-2xl p-4 sm:p-5 w-full animate-pulse-slow"
+                >
+                  <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                    <div class="order-1 flex items-start gap-3">
+                      <div class="bg-gradient-to-br from-yellow-400 to-orange-500 dark:from-yellow-500 dark:to-orange-600 flex size-10 items-center justify-center rounded-xl shadow-lg">
+                        <Icon name="ph:crown-fill" class="text-white size-5" />
+                      </div>
+                      <div class="text-right">
+                        <h4 class="font-heading text-yellow-800 dark:text-yellow-200 text-lg font-bold">
+                          ویژگی‌های پیشرفته در انتظار شماست!
+                        </h4>
+                        <p class="text-yellow-700 dark:text-yellow-300 mt-1 text-sm">
+                          با ارتقاء به نسخه پرمیوم، از تمام امکانات پیشرفته هوش مصنوعی بهره‌مند شوید.
+                        </p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs px-2 py-1 rounded-full">
+                            سبک‌های ارتباطی پیشرفته
+                          </span>
+                          <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs px-2 py-1 rounded-full">
+                            خلاقیت حداکثری
+                          </span>
+                          <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs px-2 py-1 rounded-full">
+                            قالب‌بندی پیشرفته
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="order-3 flex gap-2">
+                      <BaseButton
+                        color="primary"
+                        class="w-full sm:w-auto bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-none shadow-lg hover:shadow-xl transition-all duration-300"
+                        @click="showPremiumModal = true"
+                      >
+                        <Icon name="ph:crown-fill" class="mr-2 size-4" />
+                        ارتقاء به پرمیوم
+                      </BaseButton>
+                      <div class="order-2">
+                        <BaseButtonIcon
+                          size="sm"
+                          class="bg-white/50 dark:bg-muted-800/50 hover:bg-white dark:hover:bg-muted-700 backdrop-blur-sm"
+                          @click="showPremiumAlert = false"
+                        >
+                          <Icon name="ph:x" class="text-yellow-700 dark:text-yellow-300 size-4" />
+                        </BaseButtonIcon>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2684,7 +3178,6 @@ const typingConfig = ref({
           ساخت گزارش
         </h3>
         <BaseButtonClose
-          v-if="!isGeneratingAnalysis"
           @click="closeReportModal"
         />
       </div>
@@ -2697,11 +3190,28 @@ const typingConfig = ref({
     </div>
     <div class="p-4 text-center md:p-6">
       <p> {{ isGeneratingAnalysis ? 'در حال ساخت گزارش هستیم. لطفا منتظر  بمانید. . . ' : 'آیا مایل به پایان دادن این جلسه و ساخت گزارش از این گفتگو هستید؟' }} </p>
+      
+      <!-- Additional information when not generating -->
+      <div v-if="!isGeneratingAnalysis" class="mt-4 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+        <div class="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300">
+          <Icon name="ph:timer-duotone" class="size-5" />
+          <span class="text-sm font-medium">زمان تقریبی تولید گزارش: ۲ دقیقه</span>
+        </div>
+      </div>
+      
+      <!-- Countdown timer when generating -->
+      <div v-if="isGeneratingAnalysis" class="mt-4">
+        <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
+          زمان باقی‌مانده تقریبی:
+        </div>
+        <div class="text-primary-600 dark:text-primary-400 text-2xl font-bold">
+          {{ formatCountdownTime }}
+        </div>
+      </div>
     </div>
     <template #footer>
       <div class="flex w-full items-center justify-end gap-2 p-4 md:p-6">
         <BaseButton
-          :disabled="isGeneratingAnalysis"
           @click="closeReportModal"
         >
           انصراف
@@ -2710,7 +3220,6 @@ const typingConfig = ref({
           color="success"
           variant="solid"
           :loading="isGeneratingAnalysis"
-          :disabled="isGeneratingAnalysis"
           @click="handleConfirmEndSession"
         >
           تایید
@@ -3855,6 +4364,87 @@ const typingConfig = ref({
       </div>
     </div>
   </TairoModal>
+
+  <!-- Premium Upgrade Modal -->
+  <TairoModal :open="showPremiumModal" @close="showPremiumModal = false">
+    <template #header>
+      <div class="flex items-center gap-3 px-8 py-6">
+        <Icon name="ph:crown-duotone" class="size-6 text-yellow-500" />
+        <h3 class="text-lg font-semibold leading-tight">
+          بروزرسانی به نسخه پرمیوم
+        </h3>
+      </div>
+    </template>
+    <div class="space-y-6 px-8 py-2">
+      <div class="mx-2 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 p-8 dark:from-yellow-950/20 dark:to-amber-950/20">
+        <div class="mb-6 flex flex-row-reverse items-start gap-4">
+          <div class="rounded-xl bg-yellow-500 p-3 shadow-lg">
+            <Icon name="ph:sparkle-duotone" class="size-7 text-white" />
+          </div>
+          <div class="flex-1 text-right">
+            <h4 class="mb-2 text-xl font-bold leading-tight text-yellow-800 dark:text-yellow-200">
+              ویژگی‌های پیشرفته
+            </h4>
+            <p class="text-sm leading-snug text-yellow-600 dark:text-yellow-300">
+              مخصوص کاربران پرمیوم
+            </p>
+          </div>
+        </div>
+        <div class="dark:bg-muted-800/60 rounded-lg bg-white/60 p-5 text-justify backdrop-blur-sm">
+          <div class="text-muted-700 dark:text-muted-200 space-y-2 text-base leading-snug">
+            <p class="leading-snug">
+              با ارتقاء به نسخه پرمیوم، از تمام امکانات پیشرفته هوش مصنوعی بهره‌مند شوید.
+            </p>
+            <p class="leading-snug">
+              این قابلیت فقط برای کاربران پرمیوم قابل دسترسی است.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-3 px-2">
+        <div class="text-muted-600 dark:text-muted-300 flex items-center gap-4 py-1.5">
+          <Icon name="ph:check-circle-duotone" class="size-5 shrink-0 text-green-500" />
+          <span class="leading-snug">دسترسی به تمام سبک‌های ارتباطی</span>
+        </div>
+        <div class="text-muted-600 dark:text-muted-300 flex items-center gap-4 py-1.5">
+          <Icon name="ph:check-circle-duotone" class="size-5 shrink-0 text-green-500" />
+          <span class="leading-snug">امکانات پیشرفته قالب‌بندی</span>
+        </div>
+        <div class="text-muted-600 dark:text-muted-300 flex items-center gap-4 py-1.5">
+          <Icon name="ph:check-circle-duotone" class="size-5 shrink-0 text-green-500" />
+          <span class="leading-snug">حداکثر سطح خلاقیت و شخصی‌سازی</span>
+        </div>
+        <div class="text-muted-600 dark:text-muted-300 flex items-center gap-4 py-1.5">
+          <Icon name="ph:check-circle-duotone" class="size-5 shrink-0 text-green-500" />
+          <span class="leading-snug">پاسخ‌های بلند و تفصیلی</span>
+        </div>
+        <div class="text-muted-600 dark:text-muted-300 flex items-center gap-4 py-1.5">
+          <Icon name="ph:check-circle-duotone" class="size-5 shrink-0 text-green-500" />
+          <span class="leading-snug">سبک‌های ارتباطی رسمی و دوستانه</span>
+        </div>
+      </div>
+    </div>
+    <template #footer>
+      <div class="flex items-center justify-between gap-6 px-8 py-6">
+        <BaseButton
+          color="muted"
+          size="lg"
+          class="px-6 py-3 leading-tight"
+          @click="showPremiumModal = false"
+        >
+          بعداً
+        </BaseButton>
+        <BaseButton
+          size="lg"
+          class="bg-gradient-to-r from-yellow-500 to-amber-500 px-8 py-3 font-semibold leading-tight text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
+          @click="$router.push('/onboarding')"
+        >
+          <Icon name="ph:crown-duotone" class="ml-2 size-5" />
+          بروزرسانی به پرمیوم
+        </BaseButton>
+      </div>
+    </template>
+  </TairoModal>
 </template>
 
 <style scoped>
@@ -3879,6 +4469,15 @@ const typingConfig = ref({
   100% { content: ''; }
 }
 
+/* Pulse animation for premium alert */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.9; }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 </style>
 <style scoped>
 #no-money-message {
@@ -3886,4 +4485,19 @@ const typingConfig = ref({
 }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Mobile timer positioning */
+@media (max-width: 640px) {
+  .absolute-timer {
+    position: absolute;
+    top: 85px;
+    right: 1rem;
+    z-index: 10; /* Lower z-index to ensure sidebar is above */
+  }
+}
+
+/* Ensure sidebar is above timer */
+.border-r {
+  z-index: 20; /* Higher z-index for sidebar */
+}
 </style>
