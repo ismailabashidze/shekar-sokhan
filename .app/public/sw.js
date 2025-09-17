@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v3.3.0' // این ورژن باید با package.json همخوانی داشته باشد
+const CACHE_VERSION = 'v3.2.1' // این ورژن باید با package.json همخوانی داشته باشد
 const STATIC_CACHE = `zehna-static-${CACHE_VERSION}`
 const IMAGES_CACHE = `zehna-images-${CACHE_VERSION}`
 const ICONS_CACHE = `zehna-icons-${CACHE_VERSION}`
