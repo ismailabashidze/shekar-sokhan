@@ -56,8 +56,8 @@ export default defineAppConfig({
           },
           {
             // Title displayed in the sidebar
-            title: 'مشاوران',
-            icon: { name: 'ph:robot', class: 'w-7 h-7' },
+            title: 'گفتگوها',
+            icon: { name: 'ph:chats', class: 'w-7 h-7' },
             activePath: '/darmana/therapists/sessions',
             to: '/darmana/therapists/sessions',
             class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',

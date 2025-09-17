@@ -2674,7 +2674,7 @@ const typingConfig = ref({
                   class="bg-gradient-to-l from-yellow-400/20 to-orange-500/20 dark:from-yellow-600/20 dark:to-orange-700/20 border border-yellow-300 dark:border-yellow-700/50 rounded-2xl p-4 sm:p-5 w-full animate-pulse-slow"
                 >
                   <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
-                    <div class="order-1 flex items-start gap-3">
+                    <div class="order-1 flex items-start gap-1">
                       <div class="bg-gradient-to-br from-yellow-400 to-orange-500 dark:from-yellow-500 dark:to-orange-600 flex size-10 items-center justify-center rounded-xl shadow-lg">
                         <Icon name="ph:crown-fill" class="text-white size-5" />
                       </div>
@@ -4375,7 +4375,7 @@ const typingConfig = ref({
         </h3>
       </div>
     </template>
-    <div class="space-y-6 px-8 py-2">
+    <div class="max-h-[70vh] overflow-y-auto space-y-6 px-8 py-2">
       <div class="mx-2 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 p-8 dark:from-yellow-950/20 dark:to-amber-950/20">
         <div class="mb-6 flex flex-row-reverse items-start gap-4">
           <div class="rounded-xl bg-yellow-500 p-3 shadow-lg">

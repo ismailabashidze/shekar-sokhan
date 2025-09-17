@@ -23,10 +23,10 @@
         <div
           class="ltablet:w-full flex size-16 items-center justify-center lg:w-full"
         >
-          <div class="mr-14 flex items-center">
+          <div class="mr-28 flex items-center">
             <BaseThemeToggle />
-            <BaseTag color="primary" class="mr-4">
-              آزمایشی
+            <BaseTag color="primary" class="mr-4 w-[120px]">
+              آزمایشی - پژوهشی
             </BaseTag>
           </div>
         </div>
@@ -60,7 +60,7 @@
           <NuxtLink
             :to="isHammasirPage ? '/hammasir' : '/dashboard'"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            :title="isHammasirPage ? 'همسیر' : 'خانه'"
+            :title="isHammasirPage ? 'هم‌مسیر' : 'خانه'"
           >
             <Icon :name="isHammasirPage ? 'ph:map-trifold' : 'ph:house-line'" class="size-5" />
           </NuxtLink>
@@ -83,7 +83,7 @@
               </template>
               <BaseDropdownItem
                 :to="isHammasirPage ? '/hammasir/my-profile' : '/report'"
-                :title="isHammasirPage ? 'پروفایل همسیر' : 'مشاهده پروفایل'"
+                :title="isHammasirPage ? 'پروفایل هم‌مسیر' : 'مشاهده پروفایل'"
                 :text="displayName"
                 rounded="sm"
               />
@@ -104,7 +104,7 @@
 
               <BaseDropdownItem
                 :to="isHammasirPage ? '/hammasir/admin' : '/settings'"
-                :title="isHammasirPage ? 'تنظیمات همسیر' : 'تنظیمات'"
+                :title="isHammasirPage ? 'تنظیمات هم‌مسیر' : 'تنظیمات'"
                 text="تنظیمات حساب"
                 rounded="sm"
               />

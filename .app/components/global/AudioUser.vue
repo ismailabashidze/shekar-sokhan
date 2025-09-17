@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useHead } from '@vueuse/head'
 
 // Define emits
@@ -176,7 +176,7 @@ const visualize = () => {
   if (!canvas.value) return
 
   const ctx = canvas.value.getContext('2d')
-  const containerWidth = canvas.value.parentElement.clientWidth || 500
+  const containerWidth = canvas.value.parentElement?.clientWidth || 500
   const WIDTH = canvas.value.width = containerWidth
   const HEIGHT = canvas.value.height = 150
 
@@ -212,12 +212,14 @@ const visualize = () => {
 
 // Initialize speech recognition
 const initSpeechRecognition = () => {
-  logStatus('تشخیص گفتار در دسترس است')
-  if ('webkitSpeechRecognition' in window) {
-    recognition.value = new (window as any).webkitSpeechRecognition()
+  logStatus('بررسی تشخیص گفتار...')
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+    recognition.value = new SpeechRecognition()
     recognition.value.continuous = true
     recognition.value.interimResults = true
     recognition.value.lang = 'fa-IR'
+    recognition.value.maxAlternatives = 1
 
     recognition.value.onstart = () => {
       logStatus('تشخیص گفتار آغاز شد')
@@ -227,14 +229,16 @@ const initSpeechRecognition = () => {
       let finalTranscript = ''
       let interimTranscript = ''
 
-      // Only process new results
-      for (let i = Math.max(lastProcessedIndex.value + 1, 0); i < event.results.length; i++) {
+      // Process all results to ensure nothing is missed on mobile
+      for (let i = 0; i < event.results.length; i++) {
         const result = event.results[i]
         if (result.isFinal) {
           finalTranscript += result[0].transcript + ' '
+          // Update lastProcessedIndex to prevent reprocessing
           lastProcessedIndex.value = i
         }
         else {
+          // Always process interim results
           interimTranscript += result[0].transcript + ' '
         }
       }
@@ -244,18 +248,32 @@ const initSpeechRecognition = () => {
         finalText.value = finalTranscript.trim()
         // Add a space only if allText is not empty
         allText.value = allText.value ? `${allText.value} ${finalTranscript}`.trim() : finalTranscript.trim()
-        interimText.value = interimTranscript.trim()
+        interimText.value = '' // Clear interim when we have final text
         startSilenceTimer()
       }
       else if (interimTranscript) {
         interimText.value = interimTranscript.trim()
         resetSilenceTimer()
       }
+      
+      // Force update the UI by triggering a reactivity refresh
+      nextTick(() => {
+        // This ensures the UI updates even on mobile devices
+      })
     }
 
     recognition.value.onerror = (event: any) => {
       logStatus(`خطای تشخیص گفتار: ${event.error}`, true)
       console.error('[AudioUser] Recognition error:', event)
+      
+      // Handle specific mobile errors
+      if (event.error === 'no-speech') {
+        logStatus('هیچ گفتاری شناسایی نشد. لطفاً دوباره تلاش کنید.', true)
+      } else if (event.error === 'audio-capture') {
+        logStatus('دستگاه صوتی یافت نشد. لطفاً اتصال میکروفون را بررسی کنید.', true)
+      } else if (event.error === 'not-allowed') {
+        logStatus('دسترسی به میکروفون رد شد. لطفاً مجوزها را بررسی کنید.', true)
+      }
     }
 
     recognition.value.onend = () => {
@@ -268,12 +286,16 @@ const initSpeechRecognition = () => {
           }
           catch (e) {
             console.error('خطا در راه‌اندازی مجدد تشخیص گفتار:', e)
+            logStatus(`خطا در راه‌اندازی مجدد: ${e.message}`, true)
           }
         }, 100)
       }
     }
+    
+    logStatus('تشخیص گفتار مقداردهی اولیه شد')
   }
   else {
+    logStatus('تشخیص گفتار در این مرورگر پشتیبانی نمی‌شود', true)
     console.warn('Speech recognition not supported in this browser.')
   }
 }
@@ -302,7 +324,7 @@ const startRecognition = () => {
         isStarted.value = true
 
         // Create audio context for visualization
-        context = new AudioContext()
+        context = new (window.AudioContext || (window as any).webkitAudioContext)()
         analyser = context.createAnalyser()
         freqs = new Uint8Array(analyser.frequencyBinCount)
 
@@ -314,6 +336,7 @@ const startRecognition = () => {
       }
       catch (e) {
         console.error('خطا در شروع تشخیص گفتار:', e)
+        logStatus(`خطا در شروع تشخیص گفتار: ${e.message}`, true)
       }
     }, 100)
   }
@@ -345,12 +368,20 @@ const endRecognition = () => {
 
 const onStream = (stream) => {
   logStatus('جریان صوتی راه‌اندازی شد')
-  context = new AudioContext()
-  const source = context.createMediaStreamSource(stream)
-  analyser = context.createAnalyser()
-  freqs = new Uint8Array(analyser.frequencyBinCount)
-  source.connect(analyser)
-  visualize()
+  try {
+    // Handle different browser prefixes for AudioContext
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+    context = new AudioContext()
+    const source = context.createMediaStreamSource(stream)
+    analyser = context.createAnalyser()
+    freqs = new Uint8Array(analyser.frequencyBinCount)
+    source.connect(analyser)
+    visualize()
+  }
+  catch (e) {
+    console.error('[AudioUser] Error setting up audio context:', e)
+    logStatus(`خطا در راه‌اندازی زمینه صوتی: ${e.message}`, true)
+  }
 }
 
 const onStreamError = (e) => {
@@ -486,6 +517,12 @@ onBeforeUnmount(() => {
             shadow="md"
             class="dark:bg-muted-800 bg-white p-6"
           >
+            <!-- User activation notice for mobile -->
+            <div v-if="!isStarted && !finalText && !allText" class="mb-4 rounded-lg bg-blue-50 p-3 text-center text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+              <Icon name="ph:info-duotone" class="mr-1 inline size-4" />
+              برای شروع ضبط، روی دکمه میکروفون کلیک کنید. در موبایل ممکن است نیاز به تعامل مستقیم با صفحه داشته باشید.
+            </div>
+            
             <!-- Base message -->
             <div class="mb-4 text-center">
               <div class="text-muted-500 dark:text-muted-400 text-sm">
@@ -499,16 +536,25 @@ onBeforeUnmount(() => {
                 <div>متن وارد شده:</div>
               </div>
               <!-- Show interim text during recognition, final text after release -->
-              <div class="text-muted-800 text-lg dark:text-white">
+              <div class="text-muted-800 text-lg dark:text-white break-words">
                 <span
-                  v-if="isStarted"
+                  v-if="isStarted && interimText"
                   id="interim_span"
                   class="bg-primary-500/20 text-primary-600 rounded px-1 dark:text-white"
                 >{{ interimText }}</span>
                 <span
-                  v-else
+                  v-else-if="finalText"
                   id="final_span"
-                >{{ finalText || 'برای شروع ضبط، روی دکمه میکروفون کلیک کنید' }}</span>
+                >{{ finalText }}</span>
+                <span
+                  v-else-if="allText"
+                  id="all_text_span"
+                >{{ allText }}</span>
+                <span
+                  v-else
+                  id="placeholder_span"
+                  class="text-muted-400"
+                >برای شروع ضبط، روی دکمه میکروفون کلیک کنید</span>
               </div>
             </div>
 
