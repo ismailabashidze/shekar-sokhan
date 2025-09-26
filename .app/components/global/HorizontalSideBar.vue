@@ -6,7 +6,7 @@
     <div class="flex w-full flex-row justify-between">
       <div class="flex flex-row">
         <div
-          class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
+          class=" flex size-16 shrink-0 items-center justify-center"
         >
           <NuxtLink :to="isHammasirPage ? '/hammasir' : '/dashboard'" class="flex items-center justify-center">
             <div class="rounded-full bg-white p-[5px]">
@@ -21,7 +21,7 @@
           </NuxtLink>
         </div>
         <div
-          class="ltablet:w-full flex size-16 items-center justify-center lg:w-full"
+          class="flex size-16 items-center justify-center"
         >
           <div class="mr-28 flex items-center">
             <BaseThemeToggle />

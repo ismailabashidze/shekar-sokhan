@@ -699,14 +699,14 @@ const confirmDeletion = async () => {
       </div>
 
       <template #footer>
-        <div class="border-muted-200 dark:border-muted-700 bg-muted-50/50 dark:bg-muted-900/50 shrink-0 border-t p-3" dir="rtl">
+        <div class="border-muted-200 dark:border-muted-700 bg-muted-50/50 dark:bg-muted-900/50 shrink-0 border-t p-3 w-full" dir="rtl">
           <!-- Step 1 buttons -->
           <template v-if="confirmationStep === 1 && !isDeleting">
             <div class="flex gap-2">
               <BaseButton
                 variant="ghost"
                 color="muted"
-                class="border-muted-200 dark:border-muted-700 hover:border-muted-300 dark:hover:border-muted-600 !h-9 flex-1 rounded-md border-2 text-xs font-semibold transition-all duration-200"
+                class="border-muted-200 dark:border-muted-700 hover:border-muted-300 dark:hover:border-muted-600 !h-9 flex-1 rounded-md border-2 text-xs font-medium transition-all duration-200"
                 @click="closeModal"
               >
                 <Icon name="ph:x-circle-duotone" class="ml-1 size-3.5" />
@@ -715,7 +715,7 @@ const confirmDeletion = async () => {
               <BaseButton
                 variant="solid"
                 color="warning"
-                class="!h-9 flex-[2] rounded-md text-xs font-bold shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md"
+                class="!h-9 flex-[2] rounded-md text-xs font-medium shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md"
                 @click="nextStep"
               >
                 ادامه می دهم
@@ -730,7 +730,7 @@ const confirmDeletion = async () => {
               <BaseButton
                 variant="ghost"
                 color="muted"
-                class="border-muted-200 dark:border-muted-700 hover:border-muted-300 dark:hover:border-muted-600 !h-9 flex-1 rounded-md border-2 text-xs font-semibold transition-all duration-200"
+                class="border-muted-200 dark:border-muted-700 hover:border-muted-300 dark:hover:border-muted-600 !h-9 flex-1 rounded-md border-2 text-xs font-medium transition-all duration-200"
                 @click="previousStep"
               >
                 <Icon name="ph:arrow-right-duotone" class="ml-1 size-3.5" />
@@ -739,7 +739,7 @@ const confirmDeletion = async () => {
               <BaseButton
                 variant="solid"
                 color="danger"
-                class="!h-9 flex-[2] rounded-md text-xs font-bold shadow-sm transition-all duration-200"
+                class="!h-9 flex-[2] rounded-md text-xs font-medium shadow-sm transition-all duration-200"
                 :class="{
                   'cursor-not-allowed opacity-50': confirmationText !== 'DELETE MY DATA',
                   'bg-gradient-to-l from-red-600 to-red-500 hover:scale-[1.01] hover:shadow-md': confirmationText === 'DELETE MY DATA'
@@ -765,7 +765,7 @@ const confirmDeletion = async () => {
               <BaseButton
                 variant="solid"
                 color="primary"
-                class="!h-9 w-full cursor-not-allowed rounded-md text-xs font-bold"
+                class="!h-9 w-full cursor-not-allowed rounded-md text-xs font-medium"
                 disabled
               >
                 <Icon name="ph:spinner-duotone" class="ml-1 size-3.5 animate-spin" />

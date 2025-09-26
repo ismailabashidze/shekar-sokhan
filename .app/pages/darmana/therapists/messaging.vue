@@ -105,18 +105,49 @@ const aiSettingsDisplayText = computed(() => {
     casual: 'راحت',
   }
 
+  const kindnessMap = {
+    very_kind: 'بسیار مهربان',
+    kind: 'مهربان',
+    neutral: 'خنثی',
+    direct: 'مستقیم',
+  }
+
   const creativityMap = {
     0: 'دقیق',
     1: 'متعادل',
     2: 'خلاق',
   }
 
+  const formattingMap = {
+    none: 'ساده',
+    bullets: 'گلوله‌ای',
+    numbers: 'عددی',
+    markdown: 'پیشرفته',
+    rich: 'غناور',
+  }
+
+  const multiMsgModeMap = {
+    single: 'تک پیام',
+    multi_short: 'چند پیام کوتاه',
+    multi_medium: 'چند پیام متوسط',
+  }
+
+  const languageStyleMap = {
+    professional: 'حرفه‌ای',
+    casual: 'آزاد',
+    friendly: 'دوستانه',
+  }
+
   return [
     `${settings.isPremium ? '👑' : '🔓'} ${settings.isPremium ? 'پریمیوم' : 'عادی'}`,
+    `حالت: ${multiMsgModeMap[settings.multiMsgMode]}`,
     `طول: ${lengthMap[settings.lengthPref]}`,
     `ایموجی: ${emojiMap[settings.emojiLevel]}`,
     `لحن: ${toneMap[settings.tone]}`,
+    `مهربانی: ${kindnessMap[settings.kindness]}`,
+    `سبک: ${languageStyleMap[settings.languageStyle]}`,
     `خلاقیت: ${creativityMap[settings.creativity]}`,
+    `قالب: ${formattingMap[settings.formatting]}`,
   ].join(' • ')
 })
 
@@ -2103,6 +2134,38 @@ const typingConfig = ref({
 // - 2000 = 2 second delay (default)
 // - 3000 = 3 second delay (slower)
 
+// Driver.js modal for statistics information
+const showStatisticsInfo = () => {
+  const { $tour } = useNuxtApp()
+  
+  // Define the statistics information modal
+  $tour.setSteps([{
+    element: '#stats-info-trigger', // We'll create a hidden element to trigger from
+    popover: {
+      title: 'آمار و ارقام 📊',
+      description: 'در این بخش آمار کلی فعالیت‌های سیستم نمایش داده می‌شود.',
+      side: 'bottom',
+      align: 'center',
+    },
+  }])
+
+  // Create a temporary hidden element if it doesn't exist
+  let tempElement = document.getElementById('stats-info-trigger')
+  if (!tempElement) {
+    tempElement = document.createElement('div')
+    tempElement.id = 'stats-info-trigger'
+    tempElement.style.position = 'fixed'
+    tempElement.style.top = '0'
+    tempElement.style.left = '0'
+    tempElement.style.width = '1px'
+    tempElement.style.height = '1px'
+    tempElement.style.zIndex = '-1'
+    document.body.appendChild(tempElement)
+  }
+  
+  $tour.drive()
+}
+
 // --- Ensure no 'thinking' message is pushed to messages ---
 // In submitMessage or any streaming logic, do not push a 'thinking' or empty message to messages array.
 // Only use isAIThinking and thinkingResponse for the typing indicator.
@@ -2893,7 +2956,7 @@ const typingConfig = ref({
           />
         </BaseButtonIcon>
       </div>
-      <div class="relative flex w-full flex-col px-8">
+      <div class="relative flex h-[calc(100%-4rem)] w-full flex-col overflow-y-auto px-8">
         <!-- Loader -->
         <div v-if="loading" class="mt-8">
           <div class="mb-3 flex items-center justify-center">
@@ -3068,7 +3131,8 @@ const typingConfig = ref({
                 type="button"
                 :color="aiSettings.isPremium ? 'warning' : 'muted'"
                 class="w-full"
-                @click="openPremiumModal()"
+                :title="aiSettingsDisplayText"
+                @click="openPremiumModal()" 
               >
                 تنظیمات حاضر
                 <Icon
@@ -3077,6 +3141,18 @@ const typingConfig = ref({
                 />
               </BaseButton>
             </div>
+            
+            <!-- Statistics Info Button -->
+            <BaseButton
+              type="button"
+              color="info"
+              class="mt-3 w-full"
+              @click="showStatisticsInfo()"
+            >
+              آمار و ارقام
+              <Icon name="ph:chart-line-up" class="mr-2 size-5" />
+            </BaseButton>
+            
             <BaseButton
               type="button"
               class="mt-3"

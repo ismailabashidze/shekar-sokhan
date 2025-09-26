@@ -238,7 +238,7 @@ const closeAlphaModal = () => {
 
     <div>
       <!-- Statistics Cards Section -->
-      <div class="mb-6" data-tour="statistics">
+      <div class="mb-6 mt-0" data-tour="statistics">
         <DashboardStatisticsCards />
       </div>
 

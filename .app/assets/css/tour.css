@@ -1,8 +1,10 @@
 /* Tour/Driver.js Custom Styles for RTL */
-
+.driver-popover * {
+  font-family: IRANSans !important;
+}
 .driver-popover {
   direction: rtl;
-  font-family: var(--font-sans, system-ui, sans-serif);
+  font-family: IRANSans !important;
   border-radius: 20px;
   box-shadow: 
     0 32px 64px -12px rgba(0, 0, 0, 0.25),

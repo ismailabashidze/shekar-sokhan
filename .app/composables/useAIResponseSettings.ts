@@ -32,19 +32,19 @@ export function useAIResponseSettings() {
   const PREMIUM_STORAGE_KEY = 'aiResponsePremium'
 
   const defaults: AiResponseSettings = {
-    multiMsgMode: 'single',
-    lengthPref: 'medium',
-    emojiLevel: 'medium',
-    tone: 'neutral',
-    kindness: 'kind',
+    multiMsgMode: 'multi_short',
+    lengthPref: 'short',
+    emojiLevel: 'high',
+    tone: 'casual',
+    kindness: 'very_kind',
     replySpeedMs: '350',
     creativity: '1',
     domainStrictness: 'balanced',
-    languageStyle: 'professional',
+    languageStyle: 'friendly',
     disclaimers: 'when_needed',
     profanity: 'soften',
-    formatting: 'bullets',
-    isPremium: false,
+    formatting: 'none',
+    isPremium: true,
   }
 
   function loadSettings(): AiResponseSettings {

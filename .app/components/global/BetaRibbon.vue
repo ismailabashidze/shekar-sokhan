@@ -10,7 +10,7 @@
   top: 35px;
   left: -65px;
   transform: rotate(-45deg);
-  padding: 8px 70px;
+  padding: 8px 50px;
   z-index: 9999;
   font-family: var(--font-sans);
   transition: all 0.3s ease;
