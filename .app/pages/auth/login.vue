@@ -118,6 +118,12 @@ const loginWithGoogle = async () => {
 
     await setUser(appUser, 'user')
 
+    // Update premium status based on user's charge status
+    const { setPremiumStatus } = useAIResponseSettings()
+    if (appUser.hasCharge) {
+      setPremiumStatus(true)
+    }
+
     toaster.clearAll()
     toaster.show({
       title: 'ورود موفق',

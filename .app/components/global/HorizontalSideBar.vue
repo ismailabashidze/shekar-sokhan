@@ -33,14 +33,7 @@
       </div>
       <div class="ml-5 flex flex-row gap-x-2">
         <div class="flex h-16 w-full items-center justify-center">
-          <!-- <NuxtLink
-            to=""
-            title="Settings"
-            class="text-warning-400 hover:text-primary-500 bg-warning-500/20 hover:bg-primary-500/20 flex size-12 cursor-pointer items-center justify-center rounded-2xl transition-colors duration-300"
-            @click.prevent="canDelete"
-          >
-            <Icon name="ph:arrow-clockwise" class="size-5" />
-          </NuxtLink> -->
+          <BugReportIcon :visible="true" />
         </div>
         <div class="flex h-16 w-full items-center justify-center">
           <!-- Notifications Button -->
@@ -128,6 +121,7 @@
 <script setup>
 import { useRoute } from '#app'
 import { computed } from 'vue'
+import BugReportIcon from './BugReportIcon.vue'
 
 const route = useRoute()
 const isAuthPage = computed(() => route.path.startsWith('/auth'))

@@ -38,11 +38,22 @@ export function useUser() {
     return await nuxtApp.$pb.collection('users').update(u.id as string, u)
     user.value = u
   }
+  
+  const logout = async () => {
+    // Clear user data from localStorage
+    user.value = {} as User
+    role.value = ''
+    
+    // Also clear PocketBase auth store
+    nuxtApp.$pb.authStore.clear()
+  }
+  
   return {
     user,
     role,
     getAllUsers,
     setUser,
     updateUser,
+    logout,
   }
 }

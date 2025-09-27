@@ -6,10 +6,15 @@ definePageMeta({
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
 const router = useRouter()
+const { logout: logoutUser } = useUser()
+const { setPremiumStatus } = useAIResponseSettings()
 
-onMounted(() => {
-  // Clear the auth store
-  nuxtApp.$pb.authStore.clear()
+onMounted(async () => {
+  // Clear the auth store and reset user data
+  await logoutUser()
+  
+  // Reset premium status to false on logout
+  setPremiumStatus(false)
 
   // Show success toast
   toaster.show({

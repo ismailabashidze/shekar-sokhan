@@ -24,7 +24,7 @@ function onSidebarItemClick() {
     <component
       :is="resolveComponentOrNative(props.sidebar.component)"
       v-if="props.sidebar.component"
-      v-bind="props.sidebar.props"
+      v-bind="props.sidebar.props || {}"
     />
     <NuxtLink
       v-else-if="props.sidebar.to && props.sidebar.icon"

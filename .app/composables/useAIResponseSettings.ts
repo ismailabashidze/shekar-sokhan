@@ -44,7 +44,7 @@ export function useAIResponseSettings() {
     disclaimers: 'when_needed',
     profanity: 'soften',
     formatting: 'none',
-    isPremium: true,
+    isPremium: true, // Default to true for experimental feature
   }
 
   function loadSettings(): AiResponseSettings {
@@ -55,7 +55,7 @@ export function useAIResponseSettings() {
 
       // Load premium status
       const premiumRaw = localStorage.getItem(PREMIUM_STORAGE_KEY)
-      const isPremium = premiumRaw ? JSON.parse(premiumRaw) : false
+      const isPremium = premiumRaw ? JSON.parse(premiumRaw) : defaults.isPremium
 
       return {
         ...defaults,
@@ -110,6 +110,21 @@ export function useAIResponseSettings() {
       saveSettings(newSettings)
     },
     { deep: true },
+  )
+
+  // Watch for user changes to sync premium status
+  const { user } = useUser()
+  watch(
+    () => user.value?.hasCharge,
+    (hasCharge) => {
+      // Only update premium status if user is actually logged in (user.id exists) and hasCharge is defined
+      if (user.value?.id && typeof hasCharge !== 'undefined') {
+        const newIsPremium = !!hasCharge
+        settings.value = { ...settings.value, isPremium: newIsPremium }
+        setPremiumStatus(newIsPremium)
+      }
+    },
+    { immediate: true }
   )
 
   return {

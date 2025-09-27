@@ -212,9 +212,9 @@ const closeAlphaModal = () => {
             >
               <Icon name="ph:bug" class="size-5" />
             </div>
-            <div class="flex flex-col">
+            <div class="flex flex-col items-start">
               <BaseText size="sm" class="text-muted-400">
-                این دکمه را در نوار کناری پیدا کنید
+                این دکمه را  پیدا کنید
               </BaseText>
               <BaseText>
                 و برای گزارش روی آن کلیک کنید

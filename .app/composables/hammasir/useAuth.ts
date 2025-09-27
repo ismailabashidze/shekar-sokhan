@@ -207,6 +207,10 @@ const login = async (data: LoginDto): Promise<AuthTokensDto | null> => {
 
     // Get user info
     await fetchCurrentUser()
+    
+    // Update premium status based on user's charge status
+    // Since we don't have direct access to hasCharge in this auth system,
+    // we'll need to update this when the user data is available
 
     return tokens
   }
@@ -240,6 +244,10 @@ const logout = async (): Promise<boolean> => {
     authState.value.accessToken = ''
     authState.value.refreshToken = ''
     authState.value.isAuthenticated = false
+    
+    // Reset premium status to false on logout
+    const { setPremiumStatus } = useAIResponseSettings()
+    setPremiumStatus(false)
 
     return true
   }

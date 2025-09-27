@@ -41,6 +41,7 @@ const isAIResponding = ref(false)
 const ttsLoadingMessageId = ref<string | null>(null)
 const hasShownPremiumMessage = ref(false)
 const showPremiumAlert = ref(false)
+const showPremiumEnjoyMessage = ref(true)
 
 const { play, isLoading: isTTSLoading, error: ttsError } = useOpenAITTS()
 
@@ -270,6 +271,7 @@ const loadMessages = async (therapistId: string) => {
       // Reset premium message flag when loading new messages
       hasShownPremiumMessage.value = false
       showPremiumAlert.value = false
+      showPremiumEnjoyMessage.value = true
       scrollToBottom()
       startSessionTimer() // Start session timer when messages are loaded
     }
@@ -282,6 +284,7 @@ const loadMessages = async (therapistId: string) => {
         // Reset premium message flag when creating a new session
         hasShownPremiumMessage.value = false
         showPremiumAlert.value = false
+        showPremiumEnjoyMessage.value = true
         startSessionTimer() // Start session timer for new session
       }
     }
@@ -292,6 +295,7 @@ const loadMessages = async (therapistId: string) => {
     // Reset premium message flag when clearing messages due to error
     hasShownPremiumMessage.value = false
     showPremiumAlert.value = false
+    showPremiumEnjoyMessage.value = true
   }
   finally {
     loading.value = false
@@ -372,7 +376,6 @@ const {
 
 const { role, user } = useUser()
 const { createReport, updateReport, getReportByUserId } = useReport()
-const streamingResponse = ref('')
 const showModelError = ref(false)
 const modelSearchInput = ref('')
 const showModelDropdown = ref(false)
@@ -382,7 +385,6 @@ watch(modelSearchInput, (newValue) => {
 })
 
 watch(activeTherapistId, async (newId) => {
-  streamingResponse.value = ''
   if (newId) {
     await loadMessages(newId)
   }
@@ -405,7 +407,6 @@ async function submitMessage() {
   try {
     messageLoading.value = true
     const now = new Date().toISOString()
-    streamingResponse.value = ''
 
     const userMessage = {
       type: 'sent',
@@ -542,17 +543,9 @@ async function submitMessage() {
     ]
     // Call streamChat with therapistDetails option (so system prompt is automatically added)
     let aiResponse = ''
-    // Show streaming response in real time
+    // Show thinking indicator
     isAIThinking.value = true
     thinkingResponse.value = 'در حال فکر کردن...'
-    
-    // Reset streaming state for new message
-    streamingBuffer.value = ''
-    streamingMessageId.value = '' // Reset message ID tracking
-    if (streamingTypingTimeout) {
-      clearTimeout(streamingTypingTimeout)
-      streamingTypingTimeout = null
-    }
 
     // Debug: Log AI settings before sending
     console.log('AI Settings from messaging.vue (line 443):', aiSettings.value)
@@ -572,7 +565,7 @@ async function submitMessage() {
       }, 60000) // 60 seconds timeout
     })
 
-    // Race between streamChat and timeout
+    // Call streamChat and handle response via onChunk
     try {
       await Promise.race([
         streamChat(chatMessagesForAI, { 
@@ -590,7 +583,6 @@ async function submitMessage() {
             // Handle regular single message streaming with typing effect
             isMultiMessageMode.value = false
             aiResponse += chunk
-            handleStreamingChunk(chunk)
           }
         }),
         streamTimeout
@@ -602,11 +594,6 @@ async function submitMessage() {
         throw new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.')
       }
       throw error
-    }
-
-    // Mark streaming as complete for typing effect
-    if (!isMultiMessageMode.value && streamingBuffer.value) {
-      handleStreamingChunk('', true) // Mark as complete
     }
 
     // Ensure we're not stuck in thinking mode
@@ -812,6 +799,7 @@ onMounted(async () => {
   // Reset premium message flag when component is mounted
   hasShownPremiumMessage.value = false
   showPremiumAlert.value = false
+  showPremiumEnjoyMessage.value = true
   
   loading.value = true
   try {
@@ -1064,6 +1052,7 @@ const clearMessages = async (sessionId: string) => {
     // Reset premium message flag when messages are cleared
     hasShownPremiumMessage.value = false
     showPremiumAlert.value = false
+    showPremiumEnjoyMessage.value = true
   }
   catch (error) {
     console.error('Error clearing messages:', error)
@@ -1124,7 +1113,6 @@ async function startAIConversationWithSummary(therapist: any, sessionId: string,
   try {
     isAIResponding.value = true
     messageLoading.value = true
-    streamingResponse.value = ''
     isAIThinking.value = true
     thinkingResponse.value = '...'
 
@@ -1178,12 +1166,6 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 
     // Generate initial AI message
     let aiResponse = ''
-    streamingBuffer.value = '' // Reset buffer
-    streamingMessageId.value = '' // Reset message ID tracking
-    if (streamingTypingTimeout) {
-      clearTimeout(streamingTypingTimeout)
-      streamingTypingTimeout = null
-    }
 
     // Create AbortController for conversation starter
     const conversationAbortController = new AbortController()
@@ -1207,9 +1189,8 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
           typingConfig: typingConfig.value,
           signal: conversationAbortController.signal // Pass abort signal
         }, (chunk) => {
-          // Conversation starters are ALWAYS single message - no multi-message handling
+          // Handle regular single message streaming with typing effect
           aiResponse += chunk
-          handleStreamingChunk(chunk)
         }),
         conversationTimeout
       ])
@@ -1220,11 +1201,6 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
         throw new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.')
       }
       throw error
-    }
-
-    // Mark streaming as complete for typing effect
-    if (streamingBuffer.value) {
-      handleStreamingChunk('', true)
     }
 
     isAIThinking.value = false
@@ -1579,14 +1555,6 @@ const retryLastMessage = async () => {
     let aiResponse = ''
     isAIThinking.value = true
     thinkingResponse.value = ''
-    
-    // Reset streaming state for new message
-    streamingBuffer.value = ''
-    streamingMessageId.value = '' // Reset message ID tracking
-    if (streamingTypingTimeout) {
-      clearTimeout(streamingTypingTimeout)
-      streamingTypingTimeout = null
-    }
 
     // Create AbortController for retry
     const retryAbortController = new AbortController()
@@ -1615,16 +1583,10 @@ const retryLastMessage = async () => {
           // Handle regular single message streaming with typing effect
           isMultiMessageMode.value = false
           aiResponse += chunk
-          handleStreamingChunk(chunk)
         }
       }),
       retryTimeout
     ])
-
-    // Mark streaming as complete for typing effect
-    if (!isMultiMessageMode.value && streamingBuffer.value) {
-      handleStreamingChunk('', true) // Mark as complete
-    }
 
     isAIThinking.value = false
 
@@ -1971,44 +1933,6 @@ const startTypingEffect = (fullText: string, messageId: string = '') => {
   // Only start if we're at the beginning or continuing the same message
   if (displayedResponse.value === '' || currentMessageId.value === messageId) {
     typeNextChar()
-  }
-}
-
-// For streaming, we need to handle typing differently
-let streamingBuffer = ref('')
-let streamingTypingTimeout: NodeJS.Timeout | null = null
-let streamingMessageId = ref('') // Track streaming message ID
-
-const handleStreamingChunk = (chunk: string, isComplete: boolean = false) => {
-  // Reset buffer when starting a new message
-  if (!streamingMessageId.value) {
-    streamingMessageId.value = 'msg-' + Date.now()
-    streamingBuffer.value = ''
-  }
-  
-  streamingBuffer.value += chunk
-
-  if (typingConfig.value.enableTypingEffect) {
-    // Clear previous timeout
-    if (streamingTypingTimeout) {
-      clearTimeout(streamingTypingTimeout)
-    }
-
-    // If this is the final chunk or enough delay, start typing
-    if (isComplete) {
-      startTypingEffect(streamingBuffer.value, streamingMessageId.value)
-      // Reset message ID for next message
-      streamingMessageId.value = ''
-    }
-    else {
-      // Debounce typing effect - only start if no new chunks for 100ms
-      streamingTypingTimeout = setTimeout(() => {
-        startTypingEffect(streamingBuffer.value, streamingMessageId.value)
-      }, 100)
-    }
-  }
-  else {
-    thinkingResponse.value = streamingBuffer.value
   }
 }
 
@@ -2544,7 +2468,7 @@ const showStatisticsInfo = () => {
                               :class="[
                                 item.type === 'sent'
                                   ? 'bg-primary-500 prose-p:text-white text-white rounded-br-md'
-                                  : 'bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-bl-md border border-muted-200 dark:border-muted-700',
+                                  : 'bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-bl-md border border-muted-200 dark:border-muted-700 shadow-sm transition-all duration-200 hover:shadow-md',
                               ]"
                             >
                               <span
@@ -2591,7 +2515,7 @@ const showStatisticsInfo = () => {
                             >
                               <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
                             </BaseButton>
-                            <BaseButton
+                           <!-- <BaseButton
                               v-if="item.type === 'received'"
                               rounded="full"
                               title="پخش صوتی"
@@ -2610,7 +2534,7 @@ const showStatisticsInfo = () => {
                                 name="ph:play"
                                 class="size-4"
                               />
-                            </BaseButton>
+                            </BaseButton> -->
                           </div>
 
                           <!-- Message bubble only on mobile -->
@@ -2620,7 +2544,7 @@ const showStatisticsInfo = () => {
                               :class="[
                                 item.type === 'sent'
                                   ? 'bg-primary-500 prose-p:text-white text-white rounded-br-md'
-                                  : 'bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-bl-md border border-muted-200 dark:border-muted-700',
+                                  : 'bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-bl-md border border-muted-200 dark:border-muted-700 shadow-sm transition-all duration-200 hover:shadow-md',
                               ]"
                             >
                               <span
@@ -2702,9 +2626,9 @@ const showStatisticsInfo = () => {
                 <!-- Assistant thinking bubble -->
                 <div v-if="isAIThinking" class="mb-4 flex justify-start">
                   <div class="flex max-w-[85%] flex-col items-start">
-                    <div class="bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-2xl rounded-bl-md px-4 py-3 border border-muted-200 dark:border-muted-700 shadow-sm">
+                    <div class="bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-2xl rounded-bl-md px-4 py-3 border border-muted-200 dark:border-muted-700 shadow-sm transition-all duration-200 hover:shadow-md">
                       <span class="block flex items-center font-sans">
-                        <AddonMarkdownRemark :source="thinkingResponse || 'در حال فکر کردن'" />
+                        <AddonMarkdownRemark :source="thinkingResponse || 'در حال فکر کن'" />
                         <span class="typing-ellipsis ml-2" />
                       </span>
                     </div>
@@ -2730,9 +2654,9 @@ const showStatisticsInfo = () => {
                     </div>
                   </div>
                 </BaseMessage>
-                <!-- Premium Upgrade Alert -->
+                <!-- Premium Upgrade Alert for Non-Premium Users -->
                 <div 
-                  v-else-if="showPremiumAlert"
+                  v-else-if="showPremiumAlert && !aiSettings.isPremium"
                   id="premium-upgrade-alert"
                   class="bg-gradient-to-l from-yellow-400/20 to-orange-500/20 dark:from-yellow-600/20 dark:to-orange-700/20 border border-yellow-300 dark:border-yellow-700/50 rounded-2xl p-4 sm:p-5 w-full animate-pulse-slow"
                 >
@@ -2741,7 +2665,7 @@ const showStatisticsInfo = () => {
                       <div class="bg-gradient-to-br from-yellow-400 to-orange-500 dark:from-yellow-500 dark:to-orange-600 flex size-10 items-center justify-center rounded-xl shadow-lg">
                         <Icon name="ph:crown-fill" class="text-white size-5" />
                       </div>
-                      <div class="text-right">
+                      <div class="text-right mr-2">
                         <h4 class="font-heading text-yellow-800 dark:text-yellow-200 text-lg font-bold">
                           ویژگی‌های پیشرفته در انتظار شماست!
                         </h4>
@@ -2761,13 +2685,13 @@ const showStatisticsInfo = () => {
                         </div>
                       </div>
                     </div>
-                    <div class="order-3 flex gap-2">
+                    <div class="order-3 flex gap-2 items-center">
                       <BaseButton
                         color="primary"
                         class="w-full sm:w-auto bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-none shadow-lg hover:shadow-xl transition-all duration-300"
                         @click="showPremiumModal = true"
                       >
-                        <Icon name="ph:crown-fill" class="mr-2 size-4" />
+                        <Icon name="ph:crown-fill" class="ml-2 size-4" />
                         ارتقاء به پرمیوم
                       </BaseButton>
                       <div class="order-2">
@@ -2777,6 +2701,58 @@ const showStatisticsInfo = () => {
                           @click="showPremiumAlert = false"
                         >
                           <Icon name="ph:x" class="text-yellow-700 dark:text-yellow-300 size-4" />
+                        </BaseButtonIcon>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Premium Enjoy Message for Premium Users -->
+                <div 
+                  v-else-if="!showNoCharge && aiSettings.isPremium && showPremiumEnjoyMessage"
+                  id="premium-enjoy-message"
+                  class="bg-gradient-to-l from-emerald-400/20 to-teal-500/20 dark:from-emerald-600/20 dark:to-teal-700/20 border border-emerald-300 dark:border-emerald-700/50 rounded-2xl p-4 sm:p-5 w-full"
+                >
+                  <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                    <div class="order-1 flex items-start gap-1">
+                      <div class="bg-gradient-to-br from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 flex size-10 items-center justify-center rounded-xl shadow-lg">
+                        <Icon name="ph:crown-simple" class="text-white size-5" />
+                      </div>
+                      <div class="text-right">
+                        <h4 class="font-heading text-emerald-800 dark:text-emerald-200 text-lg font-bold">
+                          پریمیوم فعال است، لذت ببرید!
+                        </h4>
+                        <p class="text-emerald-700 dark:text-emerald-300 mt-1 text-sm">
+                          از تمام امکانات پیشرفته هوش مصنوعی در این جلسه بهره‌مند شوید.
+                        </p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs px-2 py-1 rounded-full">
+                            سبک‌های ارتباطی پیشرفته
+                          </span>
+                          <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs px-2 py-1 rounded-full">
+                            خلاقیت حداکثری
+                          </span>
+                          <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs px-2 py-1 rounded-full">
+                            قالب‌بندی پیشرفته
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="order-3 flex gap-2 items-center">
+                      <BaseButton
+                        color="success"
+                        class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 border-none shadow-lg"
+                      >
+                        <Icon name="ph:check" class="ml-2 size-4" />
+                        وضعیت پریمیوم
+                      </BaseButton>
+                      <div class="order-2">
+                        <BaseButtonIcon
+                          size="sm"
+                          class="bg-white/50 dark:bg-muted-800/50 hover:bg-white dark:hover:bg-muted-700 backdrop-blur-sm"
+                          @click="showPremiumEnjoyMessage = false"
+                        >
+                          <Icon name="ph:x" class="text-emerald-700 dark:text-emerald-300 size-4" />
                         </BaseButtonIcon>
                       </div>
                     </div>
@@ -2988,7 +2964,7 @@ const showStatisticsInfo = () => {
           </div>
         </div>
         <!-- User details -->
-        <div v-else class="mt-8">
+        <div v-else class="mt-8 mb-3">
           <div class="flex items-center justify-center">
             <BaseAvatar
               size="2xl"
@@ -3143,7 +3119,7 @@ const showStatisticsInfo = () => {
             </div>
             
             <!-- Statistics Info Button -->
-            <BaseButton
+            <!-- <BaseButton
               type="button"
               color="info"
               class="mt-3 w-full"
@@ -3151,7 +3127,7 @@ const showStatisticsInfo = () => {
             >
               آمار و ارقام
               <Icon name="ph:chart-line-up" class="mr-2 size-5" />
-            </BaseButton>
+            </BaseButton> -->
             
             <BaseButton
               type="button"

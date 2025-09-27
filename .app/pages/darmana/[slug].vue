@@ -1799,7 +1799,7 @@ const closeEdit = () => {
         </div>
         <div class="grid grid-cols-2 gap-1">
           <div class="mt-2 text-justify">
-            <Legend>متن انگلیسی</Legend>
+            <legend>متن انگلیسی</legend>
             <BaseMessage dir="ltr" class="flex-col text-left">
               <div>
                 <div
@@ -1814,7 +1814,7 @@ const closeEdit = () => {
             </BaseMessage>
           </div>
           <div class="mt-2 text-justify">
-            <Legend>متن فارسی</Legend>
+            <legend>متن فارسی</legend>
             <BaseMessage>
               <div v-if="selectionType === 'words'" class="flex flex-wrap">
                 <span
@@ -1841,7 +1841,7 @@ const closeEdit = () => {
           </div>
         </div>
         <div class="mt-2 text-justify">
-          <Legend>تغییرات</Legend>
+          <legend>تغییرات</legend>
           <BaseTextarea
             v-model="editedText"
             rounded="md"

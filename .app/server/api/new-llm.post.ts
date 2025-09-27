@@ -1,7 +1,7 @@
 const RUNPOD_TOKEN = process.env.RUNPOD_TOKEN
 const LLM_ADDRESS = process.env.LLM_ADDRESS!
 const LLM_MODEL = process.env.LLM_MODEL
-const LLM_TEMPERATURE = Number(process.env.LLM_TEMPERATURE || 1)
+const LLM_TEMPERATURE = Number(process.env.LLM_TEMPERATURE || 0.7)
 const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS || 8192)
 const LLM_REPEAT_PENALTY = Number(process.env.LLM_REPEAT_PENALTY || 2)
 

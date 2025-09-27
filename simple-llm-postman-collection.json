@@ -1,0 +1,84 @@
+{
+  "info": {
+    "name": "Zehna Simple LLM API",
+    "description": "Postman collection for testing the simple-llm API endpoint",
+    "_postman_id": "c8e5a0b1-4d2e-4e5f-9a8a-8f4d5e6f7a8b",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Simple LLM API Call",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"systemMessage\": \"You are a helpful assistant that provides concise answers.\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What is the meaning of life?\"\n    },\n    {\n      \"role\": \"assistant\",\n      \"content\": \"The meaning of life is subjective and can vary based on personal beliefs and values.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Can you explain quantum computing in simple terms?\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/simple-llm",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "simple-llm"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Simple LLM - Medical Assistant Example",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"systemMessage\": \"You are a medical assistant providing health information. Only provide general information, not medical advice.\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What are common symptoms of the flu?\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"How can I prevent getting the flu?\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/simple-llm",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "simple-llm"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Simple LLM - Therapist Assistant Example",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"systemMessage\": \"You are a supportive therapist providing emotional guidance and coping strategies.\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"I've been feeling anxious lately. What can I do to manage my anxiety?\"\n    },\n    {\n      \"role\": \"assistant\",\n      \"content\": \"I'm sorry to hear you're experiencing anxiety. Some helpful strategies include deep breathing exercises, regular physical activity, maintaining a consistent sleep schedule, and talking to someone you trust.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Can you suggest some breathing exercises?\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/simple-llm",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "simple-llm"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "id": "baseUrl",
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}

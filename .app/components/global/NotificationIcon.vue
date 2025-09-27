@@ -1,10 +1,12 @@
 <script setup lang="ts">
-const { unreadCount } = useNotifications()
+// Get the notifications and panels composables
+const notifications = useNotifications()
 const { open } = usePanels()
 
-// Notifications are initialized globally via plugin
-// No need to initialize here
+// Extract the unread count as a computed property to avoid direct component instance enumeration
+const unreadCount = computed(() => notifications.unreadCount)
 
+// Function to open notifications panel
 const openNotifications = () => {
   open('notifications')
 }

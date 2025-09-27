@@ -207,6 +207,12 @@ const verifyCodes = async () => {
       return structuredClone(record)
     })
 
+    // Update premium status based on user's charge status
+    const { setPremiumStatus } = useAIResponseSettings()
+    if (user.value.hasCharge) {
+      setPremiumStatus(true)
+    }
+    
     // setToken(recor)
     toaster.show({
       title: 'ثبت موفق',

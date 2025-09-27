@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.4.0] - 2025-09-27
+### Fixed
+- Version bump to 3.4.0
+- Updated version across all configuration files
+- Updated PWA manifest version
+
 ## [3.3.0] - 2025-09-14
 ### Fixed
 - Version bump to 3.3.0
