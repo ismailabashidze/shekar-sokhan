@@ -66,7 +66,7 @@ const fetchPatients = async () => {
   try {
     const data = await getPatients()
     patients.value = data
-    patients.value.map(p => p.badge = '/img/logo.png')
+    patients.value.map(p => p.badge = '/img/logo.svg')
     totalPatients.value = data.length
 
     // Filter patients if search filter is applied

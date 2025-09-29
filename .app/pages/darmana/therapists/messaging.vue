@@ -1555,7 +1555,6 @@ const retryLastMessage = async () => {
     let aiResponse = ''
     isAIThinking.value = true
     thinkingResponse.value = ''
-
     // Create AbortController for retry
     const retryAbortController = new AbortController()
     
@@ -1567,7 +1566,6 @@ const retryLastMessage = async () => {
         reject(new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.'))
       }, 60000) // 60 seconds timeout
     })
-
     await Promise.race([
       streamChat(contextMessages, { 
         therapistDetails: selectedConversationComputed.value?.user, 
@@ -1587,7 +1585,6 @@ const retryLastMessage = async () => {
       }),
       retryTimeout
     ])
-
     isAIThinking.value = false
 
     // Save new AI response to PocketBase
@@ -1613,7 +1610,6 @@ const retryLastMessage = async () => {
   }
   catch (error) {
     console.error('Error retrying message:', error)
-    
     // Check if this is a timeout error
     if (error.message && error.message.includes('زمان پاسخ‌دهی به پایان رسید')) {
       toaster.show({

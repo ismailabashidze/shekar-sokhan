@@ -305,8 +305,8 @@ const closeAlphaModal = () => {
                         color="light"
                         variant="outline"
                         class="w-full sm:w-auto"
-                        to="/darmana/coming-soon"
-                        data-tour="therapeutic-chat-button"
+                        to="/therapy-journey/welcome"
+                        data-tour="therapists-button"
                       >
                         <Icon name="ph:stethoscope" class="ml-2 size-4" />
                         <span>گفت و گوی درمانی</span>

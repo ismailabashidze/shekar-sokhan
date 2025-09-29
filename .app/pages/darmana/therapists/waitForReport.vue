@@ -53,6 +53,8 @@ onMounted(async () => {
       return
     }
 
+  // Set up interval to check every 2 seconds for better UX
+  checkInterval.value = setInterval(checkForAnalysis, 2000)
   } catch (error) {
     console.error('Error checking for existing analysis:', error)
   }

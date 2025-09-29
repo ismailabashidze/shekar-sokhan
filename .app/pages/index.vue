@@ -6,8 +6,8 @@ definePageMeta({
     title: 'انتخاب سرویس',
     description: 'استفاده از سرویس ها',
     categories: ['layouts'],
-    src: '/img/logo.png',
-    srcDark: '/img/logo.png',
+    src: '/img/logo.svg',
+    srcDark: '/img/logo.svg',
     order: 84,
   },
 })

@@ -7,6 +7,7 @@ export default defineNuxtPlugin(async () => {
 
       // Check if service worker is already active
       if (registration.active) {
+        // Service worker is active
       }
 
       // Update service worker if needed
@@ -16,10 +17,12 @@ export default defineNuxtPlugin(async () => {
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed') {
-
+              // Content has been cached for offline use
               if (navigator.serviceWorker.controller) {
+                // New content is available; please refresh
               }
               else {
+                // Content is cached for offline use
               }
             }
           })
@@ -28,11 +31,12 @@ export default defineNuxtPlugin(async () => {
 
       // Listen for service worker errors
       registration.addEventListener('error', (error) => {
-        console.error('[PWA] Service worker error:', error)
+        // Service worker error
       })
 
       // Check for waiting service worker
       if (registration.waiting) {
+        // Service worker is waiting for activation
       }
     }
     catch (error) {
@@ -45,7 +49,7 @@ export default defineNuxtPlugin(async () => {
     }
   }
   else {
-    console.warn('[PWA] Service worker not supported in this browser')
+    // Service worker not supported in this browser
   }
 
   // Global PWA install prompt management

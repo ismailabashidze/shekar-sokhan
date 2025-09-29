@@ -237,6 +237,8 @@ const installPwa = async () => {
         }
       }, 1000)
     }
+    else {
+    }
 
     showInstallPrompt.value = false
     deferredPrompt.value = null

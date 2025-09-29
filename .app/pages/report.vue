@@ -672,32 +672,33 @@
                   shape="rounded"
                   class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg h-full"
                 >
-                  <div class="flex w-full items-start gap-3">
-                    <div class="bg-danger-500/10 dark:bg-danger-500/20 rounded-lg p-2">
-                      <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-5" />
-                    </div>
-                    <div class="flex-1">
-                      <BaseHeading
-                        as="h4"
-                        size="sm"
-                        weight="medium"
-                        lead="none"
-                        class="text-danger-500 mb-3"
-                      >
-                        {{ risk.title }}
-                      </BaseHeading>
-                      <BaseText size="xs" class="text-muted-600 mb-2">
-                        {{ risk.description }}
-                      </BaseText>
-                      <div v-if="risk.associatedThemes && risk.associatedThemes.length > 0" class="mt-2">
-                        <span class="text-muted-500 text-xs">موضوعات مرتبط: </span>
-                        <span 
-                          v-for="(theme, themeIdx) in risk.associatedThemes" 
-                          :key="themeIdx"
-                          class="bg-primary-500/10 text-primary-500 mx-1 rounded-full px-2 py-0.5 text-xs"
-                        >
-                          {{ theme }}
-                        </span>
+                  <div
+                    v-for="(risk, j) in group"
+                    :key="j"
+                    class="group relative"
+                  >
+                    <BaseCard
+                      shape="rounded"
+                      class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
+                    >
+                      <div class="flex w-full items-start gap-3">
+                        <div class="bg-danger-500/10 dark:bg-danger-500/20 rounded-lg p-2">
+                          <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-5" />
+                        </div>
+                        <div class="flex-1">
+                          <BaseHeading
+                            as="h4"
+                            size="sm"
+                            weight="medium"
+                            lead="none"
+                            class="text-danger-500 mb-3"
+                          >
+                            {{ risk.title }}
+                          </BaseHeading>
+                          <BaseText size="xs" class="text-muted-600">
+                            {{ risk.description }}
+                          </BaseText>
+                        </div>
                       </div>
                       <div v-if="risk.severity" class="mt-2">
                         <span class="text-muted-500 text-xs">شدت: </span>
@@ -728,7 +729,18 @@
                       </div>
                     </div>
                   </div>
-                </BaseCard>
+                </div>
+                <!-- Show More Button for Risk Factors -->
+                <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
+                  <BaseButton
+                    color="primary"
+                    size="sm"
+                    class="mx-auto"
+                    @click="showMoreRiskFactors"
+                  >
+                    نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
+                  </BaseButton>
+                </div>
               </div>
               <!-- Show More Button for Risk Factors -->
               <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="col-span-12 mt-4 text-center">

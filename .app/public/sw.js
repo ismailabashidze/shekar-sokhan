@@ -9,7 +9,7 @@ const CRITICAL_ASSETS = [
   '/manifest.json',
   '/pwa-192x192.png',
   '/pwa-512x512.png',
-  '/img/logo.png',
+  '/img/logo.svg',
   '/img/logo-no-bg.png',
   '/img/favicon.png',
   '/img/avatars/1.png'

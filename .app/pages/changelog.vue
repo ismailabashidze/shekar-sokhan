@@ -1027,8 +1027,8 @@ definePageMeta({
     title: 'تاریخچه تغییرات',
     description: 'تاریخچه تغییرات و بروزرسانیهای نرم‌افزار',
     categories: ['layouts'],
-    src: '/img/logo.png',
-    srcDark: '/img/logo.png',
+    src: '/img/logo.svg',
+    srcDark: '/img/logo.svg',
     order: 84,
   },
 })

@@ -124,7 +124,7 @@ export function useNotifications() {
       return usePwaNotifications()
     }
     catch (err) {
-      console.warn('PWA notifications not available:', err)
+      
       return null
     }
   })
@@ -266,7 +266,7 @@ export function useNotifications() {
       await pwa.showLocalNotification(notificationOptions)
     }
     catch (err) {
-      console.warn('Failed to show PWA notification:', err)
+      
     }
   }
 

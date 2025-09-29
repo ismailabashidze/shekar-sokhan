@@ -191,11 +191,14 @@ const installPwa = async () => {
         }
       }, 1000)
     }
+    else {
+      // User dismissed PWA installation
+    }
 
     deferredPrompt.value = null
   }
   catch (error) {
-    console.error('Error installing PWA:', error)
+    // Error installing PWA
   }
   finally {
     isInstallingPwa.value = false
@@ -282,15 +285,18 @@ onMounted(async () => {
   notificationStatus.value = getNotificationStatus()
   await checkMicrophonePermission()
 
+  // PWA Debug Info - checking installation and permission status
   // Listen for the beforeinstallprompt event
   if (typeof window !== 'undefined') {
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault()
       deferredPrompt.value = e as BeforeInstallPromptEvent
+      // PWA install prompt is now available
     })
 
     // Listen for app installation
     window.addEventListener('appinstalled', () => {
+      // PWA has been installed
       pwaInstalled.value = true
       deferredPrompt.value = null
       localStorage.removeItem('pwa-install-dismissed')
@@ -302,6 +308,7 @@ onMounted(async () => {
     const newStatus = isPwaInstalled()
     if (newStatus !== pwaInstalled.value) {
       pwaInstalled.value = newStatus
+      // PWA status changed
     }
   }
 

@@ -21,7 +21,7 @@ export function useTherapistSession() {
     }
   }
 
-  const createSession = async (therapistId: string) => {
+  const createSession = async (therapistId: string, sessionType: string) => {
     if (!nuxtApp.$pb.authStore.isValid || !nuxtApp.$pb.authStore.model?.id) {
       throw new Error('User not authenticated')
     }
@@ -33,7 +33,7 @@ export function useTherapistSession() {
       start_time: new Date().toISOString(),
       count_of_total_messages: 0,
       total_time_passed: 0,
-      session_type: 'therapic',
+      session_type: sessionType || 'therapic',
     }
 
     try {
