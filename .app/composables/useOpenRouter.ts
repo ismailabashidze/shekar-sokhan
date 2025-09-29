@@ -20,9 +20,9 @@ interface AIResponseConfig {
 // Calculate dynamic max_tokens based on length preference
 function calculateMaxTokens(lengthPref: string, isPremium: boolean): number {
   const baseTokens = {
-    short: isPremium ? 200 : 150,
-    medium: isPremium ? 400 : 300,
-    long: isPremium ? 800 : 600,
+    short: 0,
+    medium: 0,
+    long: 0,
   }
   return baseTokens[lengthPref] || baseTokens.medium
 }
@@ -41,11 +41,11 @@ function mapCreativityToTemperature(creativity: string): number {
 function generateRandomMessageCount(): number {
   const random = Math.random()
 
-  // Weighted randomization favoring 2-3 messages
-  if (random < 0.15) return 1 // 15% chance for 1 message
-  if (random < 0.50) return 2 // 35% chance for 2 messages
-  if (random < 0.85) return 3 // 35% chance for 3 messages
-  return 4 // 15% chance for 4 messages
+  // Weighted randomization favoring 2-3 messages with decreased chance of 1 message
+  if (random < 0.05) return 1 // 5% chance for 1 message (decreased from 15%)
+  if (random < 0.45) return 2 // 40% chance for 2 messages (increased from 35%)
+  if (random < 0.85) return 3 // 40% chance for 3 messages (increased from 35%)
+  return 4 // 15% chance for 4 messages (unchanged)
 }
 
 // Generate AI configuration from settings
@@ -69,7 +69,7 @@ function generateAIConfig(aiSettings: any, isConversationStarter: boolean = fals
 
   // Regular user-response configuration
   const config: AIResponseConfig = {
-    max_tokens: calculateMaxTokens(aiSettings.lengthPref, aiSettings.isPremium),
+    max_tokens: 0,
     temperature: mapCreativityToTemperature(aiSettings.creativity),
     system_prompt_additions: generateAdvancedSystemPrompt(aiSettings),
     post_processing: {
@@ -96,7 +96,7 @@ function generateAdvancedSystemPrompt(aiSettings: any): string {
   // UX instruction: Use natural language instead of template placeholders
   prompt += `
 === دستورالعمل مهم برای تجربه کاربری ===
-CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ندارید (مانند نام مراجع، سن، یا جزئیات شخصی)، از کلمات طبیعی و دوستانه استفاده کنید به جای قالب‌های خالی یا placeholder ها.
+CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ندارید (ماندل نام مراجع، سن، یا جزئیات شخصی)، از کلمات طبیعی و دوستانه استفاده کنید به جای قالب‌های خالی یا placeholder ها.
 
 مثال‌های درست:
 - به جای [نام مراجع] از "دوست من" یا "عزیز من" استفاده کنید
@@ -106,6 +106,17 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 این کار باعث احساس طبیعی‌تر و دوستانه‌تر شدن گفتگو می‌شود و تجربه کاربری بهتری ایجاد می‌کند.
 `
 
+  // Add information about answer size/length preference
+  const lengthPreferences = {
+    short: 'پاسخ کوتاه و مختصر (2-3 جمله)',
+    medium: 'پاسخ متعادل و جامع (4-6 جمله)',
+    long: 'پاسخ کامل و تفصیلی (7 جمله یا بیشتر)',
+  }
+  
+  if (aiSettings.lengthPref && lengthPreferences[aiSettings.lengthPref]) {
+    prompt += `\nتوضیح درباره اندازه پاسخ: ${lengthPreferences[aiSettings.lengthPref]}\n`
+  }
+
   // Multi-message handling with randomization
   if (aiSettings.multiMsgMode !== 'single') {
     // Generate random number of messages (2-4, with preference for 2-3)
@@ -114,7 +125,7 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
     prompt += `
 CRITICAL INSTRUCTION - MULTI-MESSAGE MODE:
 You must break your response into ${randomMessageCount} separate message${randomMessageCount > 1 ? 's' : ''}.
-Each message should be ${aiSettings.multiMsgMode === 'multi_short' ? 'short (20-50 words)' : 'medium length (50-100 words)'}.
+Each message should be ${aiSettings.multiMsgMode === 'multi_short' ? 'very short (10-25 words)' : 'short (25-50 words)'}.
 
 IMPORTANT: Respond with a simple JSON object in this format:
 {
@@ -191,6 +202,17 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 
 این کار باعث احساس طبیعی‌تر و دوستانه‌تر شدن گفتگو می‌شود و تجربه کاربری بهتری ایجاد می‌کند.
 `
+
+  // Add information about answer size/length preference
+  const lengthPreferences = {
+    short: 'پاسخ کوتاه و مختصر (2-3 جمله)',
+    medium: 'پاسخ متعادل و جامع (4-6 جمله)',
+    long: 'پاسخ کامل و تفصیلی (7 جمله یا بیشتر)',
+  }
+  
+  if (aiSettings.lengthPref && lengthPreferences[aiSettings.lengthPref]) {
+    prompt += `\nتوضیح درباره اندازه پاسخ: ${lengthPreferences[aiSettings.lengthPref]}\n`
+  }
 
   prompt += `
 - استفاده از اطلاعات جلسات قبلی که در سیستم ارائه شده (بدون تکرار کامل آنها)
@@ -328,10 +350,19 @@ async function handleMessageWithTyping(message: string, messageIndex: number, to
   onChunk({ type: 'multi_message', message, index: messageIndex, total: totalMessages })
 }
 
-// Handle multi-message JSON responses with delays
-async function handleMultiMessageResponse(response: string, config: AIResponseConfig, onChunk: (chunk: any) => void, typingConfig: TypingConfig = defaultTypingConfig) {
+// Handle multi-message JSON responses with delays and retries
+async function handleMultiMessageResponse(
+  response: string, 
+  config: AIResponseConfig, 
+  onChunk: (chunk: any) => void, 
+  typingConfig: TypingConfig = defaultTypingConfig,
+  retryCount: number = 0,
+  maxRetries: number = 3,
+  originalMessages?: ChatMessage[],
+  retryCallback?: (retryMessages: ChatMessage[]) => Promise<string>
+) {
   try {
-    console.log('🔄 Processing multi-message response:', response)
+    console.log(`🔄 Processing multi-message response (attempt: ${retryCount + 1}):`, response)
     console.log('📏 Raw response length:', response.length)
     console.log('🧾 First 200 chars:', response.substring(0, 200))
 
@@ -345,46 +376,47 @@ async function handleMultiMessageResponse(response: string, config: AIResponseCo
     console.log('📏 Cleaned response length:', cleanResponse.length)
 
     let parsedResponse: any
+    let parseErrorOccurred = false
+    let parseErrorMessage = ''
+    
     try {
       parsedResponse = JSON.parse(cleanResponse)
       console.log('✅ Successfully parsed JSON:', parsedResponse)
       console.log('🔑 Parsed response keys:', Object.keys(parsedResponse))
     }
     catch (parseError) {
+      parseErrorOccurred = true
+      parseErrorMessage = (parseError as Error).message
       console.error('❌ JSON Parse Error:', parseError)
       console.log('💥 Failed to parse this response:', cleanResponse)
-
-      // Fallback: treat as single message
-      onChunk(postProcessResponse(cleanResponse, config))
-      return
     }
 
-    if (parsedResponse.messages && Array.isArray(parsedResponse.messages)) {
+    // Check if we have a valid messages array and valid content
+    let hasValidStructure = false
+    let validMessages: string[] = []
+
+    if (!parseErrorOccurred && parsedResponse.messages && Array.isArray(parsedResponse.messages)) {
       console.log('🔍 Found messages array:', parsedResponse.messages)
       console.log('📊 Messages array length:', parsedResponse.messages.length)
       console.log('📝 Messages content:', parsedResponse.messages.map((msg, idx) => `${idx + 1}: "${msg}"`))
 
       // Validate messages array
-      if (parsedResponse.messages.length === 0) {
-        console.warn('⚠️ Empty messages array, falling back to single message')
-        onChunk(postProcessResponse(response, config))
-        return
+      if (parsedResponse.messages.length > 0) {
+        // Validate each message is a string
+        validMessages = parsedResponse.messages.filter(msg =>
+          typeof msg === 'string' && msg.trim().length > 0,
+        )
+
+        console.log('✅ Valid messages after filtering:', validMessages)
+        console.log('📊 Valid messages count:', validMessages.length)
+
+        if (validMessages.length > 0) {
+          hasValidStructure = true
+        }
       }
+    }
 
-      // Validate each message is a string
-      const validMessages = parsedResponse.messages.filter(msg =>
-        typeof msg === 'string' && msg.trim().length > 0,
-      )
-
-      console.log('✅ Valid messages after filtering:', validMessages)
-      console.log('📊 Valid messages count:', validMessages.length)
-
-      if (validMessages.length === 0) {
-        console.warn('⚠️ No valid messages found, falling back to single message')
-        onChunk(postProcessResponse(response, config))
-        return
-      }
-
+    if (hasValidStructure) {
       console.log(`📨 Processing ${validMessages.length} valid messages`)
 
       // Send messages with delays and typing effect
@@ -415,14 +447,65 @@ async function handleMultiMessageResponse(response: string, config: AIResponseCo
       }
     }
     else {
-      console.warn('⚠️ Invalid multi-message format, falling back to single message')
-      onChunk(postProcessResponse(response, config))
+      // If we've reached the max retry count, fall back to single message
+      if (retryCount >= maxRetries || !retryCallback || !originalMessages) {
+        console.warn('⚠️ Invalid multi-message format after retries, falling back to single message')
+        onChunk(postProcessResponse(response, config))
+        return
+      }
+
+      console.log(`🔄 Attempting retry (${retryCount + 1}/${maxRetries}) for valid JSON response...`)
+      
+      // Create a new message to request proper JSON format
+      const retryMessages: ChatMessage[] = [
+        ...originalMessages,  // Include original conversation
+        {
+          role: 'user',
+          content: `لطفاً پاسخ قبلی را به فرمت صحیح JSON ارسال کن. پاسخ باید یک آبجکت با یک فیلد "messages" شامل آرایه‌ای از رشته‌ها باشد، مانند:
+{
+  "messages": [
+    "پیام اول",
+    "پیام دوم",
+    "پیام سوم"
+  ]
+}`
+        }
+      ]
+
+      try {
+        // Get new response via retry callback
+        const newResponse = await retryCallback(retryMessages)
+        
+        // Recursively call this function with the new response and incremented retry count
+        await handleMultiMessageResponse(
+          newResponse,
+          config,
+          onChunk,
+          typingConfig,
+          retryCount + 1,
+          maxRetries,
+          originalMessages,
+          retryCallback
+        )
+      }
+      catch (retryError) {
+        console.error('❌ Error during retry:', retryError)
+        // If retry fails, fall back to single message
+        onChunk(postProcessResponse(response, config))
+      }
     }
   }
   catch (error) {
     console.error('❌ Error processing multi-message response:', error)
-    // Fallback to single message
-    onChunk(postProcessResponse(response, config))
+
+    // If we're in a retry attempt, don't infinitely loop on errors
+    if (retryCount >= maxRetries) {
+      // Fallback to single message
+      onChunk(postProcessResponse(response, config))
+    } else {
+      // Rethrow to be handled by calling function
+      throw error
+    }
   }
 }
 
@@ -732,7 +815,7 @@ export function useOpenRouter() {
               messages: messagesWithSystem,
               stream: aiConfig?.response_format?.type === 'json_object' ? false : true,  // JSON format requires non-streaming
               temperature: aiConfig?.temperature || options.temperature || 0.7,
-              max_tokens: aiConfig?.max_tokens || options.max_tokens || 400,
+              max_tokens: 0,
               ...(aiConfig?.response_format?.type !== 'json_object' && aiConfig?.response_format), // Only include response_format if not JSON
               plugins: [],
               transforms: ['middle-out'],
@@ -835,8 +918,47 @@ export function useOpenRouter() {
           return ''
         }
 
-        // Handle multi-message JSON response
-        await handleMultiMessageResponse(fullResponse, aiConfig, onChunk, typingConfig)
+        // Handle multi-message JSON response with retry capability
+        await handleMultiMessageResponse(
+          fullResponse, 
+          aiConfig, 
+          onChunk, 
+          typingConfig,
+          0, // initial retry count
+          3, // max retries
+          messagesWithSystem, // original messages for retry context
+          async (retryMessages: ChatMessage[]) => {
+            // Create a new request with the same configuration but different messages
+            const retryResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.public.openRouterApiKey}`,
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+                'X-Title': 'Therapist Chat',
+              },
+              body: JSON.stringify({
+                model: options.model || selectedModel.value,
+                messages: retryMessages,
+                stream: false,  // JSON format requires non-streaming
+                temperature: aiConfig?.temperature || options.temperature || 0.7,
+                max_tokens: 0,
+                response_format: { type: 'json_object' }, // Ensure JSON format for retry
+                plugins: [],
+                transforms: ['middle-out'],
+              }),
+              signal: options.signal
+            });
+
+            if (!retryResponse.ok) {
+              const errorText = await retryResponse.text();
+              throw new Error(`Retry request failed: ${errorText}`);
+            }
+
+            const retryData = await retryResponse.json();
+            return retryData.choices[0].message.content;
+          }
+        )
         
         return fullResponse
       }

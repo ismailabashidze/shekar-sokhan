@@ -672,15 +672,6 @@
                   shape="rounded"
                   class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg h-full"
                 >
-                  <div
-                    v-for="(risk, j) in group"
-                    :key="j"
-                    class="group relative"
-                  >
-                    <BaseCard
-                      shape="rounded"
-                      class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
-                    >
                       <div class="flex w-full items-start gap-3">
                         <div class="bg-danger-500/10 dark:bg-danger-500/20 rounded-lg p-2">
                           <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-5" />
@@ -728,8 +719,6 @@
                         </p>
                       </div>
                     </div>
-                  </div>
-                </div>
                 <!-- Show More Button for Risk Factors -->
                 <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
                   <BaseButton
@@ -821,6 +810,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, computed } from 'vue'
+import ButtonClose from '~/components/base/button/ButtonClose.client.vue'
 definePageMeta({
   title: 'گزارش نهایی',
   layout: 'sidebar',
