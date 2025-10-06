@@ -43,6 +43,17 @@ const hasShownPremiumMessage = ref(false)
 const showPremiumAlert = ref(false)
 const showPremiumEnjoyMessage = ref(true)
 
+// Check if premium message has been permanently dismissed
+const isPremiumMessageDismissed = ref(false)
+
+onMounted(() => {
+  // Check localStorage for premium message dismissal status
+  const dismissedStatus = localStorage.getItem('premiumMessageDismissed')
+  if (dismissedStatus === 'true') {
+    isPremiumMessageDismissed.value = true
+  }
+})
+
 const { play, isLoading: isTTSLoading, error: ttsError } = useOpenAITTS()
 
 const userReport = ref<Report | null>(null)
@@ -651,6 +662,11 @@ async function submitMessage() {
     scrollToBottom()
   }
   finally {
+    // Mark premium message as dismissed if user sends a message without clicking premium buttons
+    if (!aiSettings.value.isPremium && !isPremiumMessageDismissed.value) {
+      isPremiumMessageDismissed.value = true
+      localStorage.setItem('premiumMessageDismissed', 'true')
+    }
     messageLoading.value = false
   }
 }
@@ -2016,8 +2032,8 @@ const handleMultiMessageChunk = async (chunk: any) => {
         console.log('✅ Multi-message sequence completed')
         
         // Check if we should show the premium alert
-        // Show after the first AI message if user is not premium and has charge
-        if (!aiSettings.value.isPremium && !hasShownPremiumMessage.value && !showNoCharge.value) {
+        // Show after the first AI message if user is not premium, has charge, and hasn't dismissed it permanently
+        if (!aiSettings.value.isPremium && !hasShownPremiumMessage.value && !showNoCharge.value && !isPremiumMessageDismissed.value) {
           showPremiumAlert.value = true
           hasShownPremiumMessage.value = true
         }
@@ -2624,7 +2640,7 @@ const showStatisticsInfo = () => {
                   <div class="flex max-w-[85%] flex-col items-start">
                     <div class="bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-2xl rounded-bl-md px-4 py-3 border border-muted-200 dark:border-muted-700 shadow-sm transition-all duration-200 hover:shadow-md">
                       <span class="block flex items-center font-sans">
-                        <AddonMarkdownRemark :source="thinkingResponse || 'در حال فکر کن'" />
+                        <AddonMarkdownRemark :source="thinkingResponse || 'در حال فکر کردن'" />
                         <span class="typing-ellipsis ml-2" />
                       </span>
                     </div>
@@ -2694,7 +2710,7 @@ const showStatisticsInfo = () => {
                         <BaseButtonIcon
                           size="sm"
                           class="bg-white/50 dark:bg-muted-800/50 hover:bg-white dark:hover:bg-muted-700 backdrop-blur-sm"
-                          @click="showPremiumAlert = false"
+                          @click="showPremiumAlert = false; isPremiumMessageDismissed.value = true; localStorage.setItem('premiumMessageDismissed', 'true')"
                         >
                           <Icon name="ph:x" class="text-yellow-700 dark:text-yellow-300 size-4" />
                         </BaseButtonIcon>

@@ -3,7 +3,7 @@
     <!-- Floating Help Button -->
     <button
       v-if="showFloatingButton"
-      class="bg-primary-500 hover:bg-primary-600 fixed bottom-6 left-6 z-50 rounded-full p-3 text-white shadow-lg transition-all duration-300 hover:scale-110"
+      class="bg-primary-500 hover:bg-primary-600 flex size-12 items-center justify-center rounded-full text-white shadow-lg transition-all duration-300 hover:scale-110"
       title="راهنما"
       @click="openTourModal"
     >

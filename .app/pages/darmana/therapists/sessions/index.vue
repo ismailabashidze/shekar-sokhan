@@ -741,9 +741,6 @@ onMounted(() => {
         </div>
       </div>
     </TairoContentWrapper>
-
-    <!-- Tour Component -->
-    <TourButton />
   </div>
 </template>
 

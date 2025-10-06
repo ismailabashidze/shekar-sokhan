@@ -47,11 +47,11 @@
           </NuxtLink>
         </div>
         <div class="hidden h-16 w-full items-center justify-center md:flex">
-          <button
-            type="button"
-            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+          <!-- Notifications Button -->
+          <NuxtLink
+            to="/notifications"
+            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 relative flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
             title="اعلان‌ها"
-            @click="toggle"
           >
             <Icon name="ph:bell" class="size-5" />
             <span
@@ -60,7 +60,7 @@
             >
               {{ unreadCount > 99 ? '99+' : unreadCount }}
             </span>
-          </button>
+          </NuxtLink>
         </div>
         <div class="flex h-16 w-full items-center justify-center">
           <BaseDropdown
@@ -132,8 +132,16 @@ const { user } = useUser()
 const { getUserAvatarUrl } = useAvatarManager()
 const { unreadCount } = useNotifications()
 
+// Import and use panels composable for notification panel
+const { open } = usePanels()
+
 // Computed avatar and name from user
 const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png')
+
+// Function to open notifications panel
+const openNotifications = () => {
+  open('notifications')
+}
 </script>
 
 <style scoped>

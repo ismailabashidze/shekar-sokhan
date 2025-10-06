@@ -251,6 +251,47 @@ export const useTour = () => {
         },
       ],
     },
+    {
+      id: 'deeds-start',
+      name: 'راهنمای کارهای نیک',
+      steps: [
+        {
+          element: '[data-tour="deeds-intro"]',
+          popover: {
+            title: 'به کارهای نیک خوش آمدید! 🎉',
+            description: 'در این بخش می‌توانید کارهای نیک مختلف را مشاهده کنید و با انجام آن‌ها کد تخفیف دریافت کنید.',
+            side: 'bottom',
+            align: 'center',
+          },
+        },
+        {
+          element: '[data-tour="deeds-categories-top"]',
+          popover: {
+            title: 'دسته‌بندی‌های کارهای نیک 📚',
+            description: 'کارهای نیک در این دسته‌بندی‌ها قرار دارند: خانواده و دوستان، جامعه، معنویت.',
+            side: 'bottom',
+            align: 'center',
+          },
+        },
+        {
+          element: '[data-tour="deeds-categories-bottom"]',
+          popover: {
+            title: 'دیگر دسته‌بندی‌ها 🌱',
+            description: 'همچنین دسته‌بندی‌های دیگری مانند آموزش، سلامت و محیط زیست نیز وجود دارند.',
+            side: 'top',
+            align: 'center',
+          },
+        },
+        {
+          element: '[data-tour="deeds-actions"]',
+          popover: {
+            title: 'شروع کار با کارهای نیک ⚡',
+            description: 'می‌توانید کارهای نیک موجود را مشاهده کنید یا در آینده کارهای نیک خود را پیشنهاد دهید.',
+            side: 'top',
+          },
+        },
+      ],
+    },
   ]
 
   // Start a specific tour

@@ -516,9 +516,6 @@ const pasteCouponCode = () => {
       </div>
     </template>
   </TairoModal>
-
-  <!-- Tour Component -->
-  <TourButton />
 </template>
 
 <style scoped>

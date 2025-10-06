@@ -207,9 +207,6 @@
         </BaseButton>
       </div>
     </TairoContentWrapper>
-
-    <!-- Tour Button Component -->
-    <TourButton />
   </div>
 </template>
 

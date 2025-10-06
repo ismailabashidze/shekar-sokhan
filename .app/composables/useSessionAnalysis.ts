@@ -142,7 +142,8 @@ export const useSessionAnalysis = () => {
     maxTokens = 1000,
   ) => {
     // Try a more reliable model first
-    const models = ['google/gemma-3-27b-it', 'mistralai/mistral-saba']
+    // const models = ['google/gemma-3-27b-it', 'mistralai/mistral-saba']
+    const models = ['mistralai/mistral-saba']
     let currentModelIndex = 0
     
     // Add emphasis on Farsi language to the system message if it exists

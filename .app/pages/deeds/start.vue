@@ -8,11 +8,17 @@ useHead({
   htmlAttrs: { dir: 'rtl' },
 })
 
+const { autoStartTour } = useTour()
+
+onMounted(() => {
+  // Auto-start the deeds tour with a slight delay
+  autoStartTour('deeds-start', 1500)
+})
 </script>
 
 <template>
   <div class="mx-auto w-full px-4">
-    <div class="mb-16 flex flex-row gap-2 sm:grid sm:grid-cols-3 sm:gap-6">
+    <div data-tour="deeds-categories-top" class="mb-16 flex flex-row gap-2 sm:grid sm:grid-cols-3 sm:gap-6">
       <div class="w-1/3 text-center sm:w-auto">
         <div class="bg-primary-500/20 mx-auto mb-2 flex size-10 items-center justify-center rounded-full sm:mb-4 sm:size-12">
           <Icon name="lucide:heart" class="text-primary-500 size-5 sm:size-6" />
@@ -65,7 +71,7 @@ useHead({
         </BaseParagraph>
       </div>
     </div>
-    <div class="text-center">
+    <div data-tour="deeds-intro" class="text-center">
       <BaseHeading
         tag="h1"
         size="4xl"
@@ -83,7 +89,7 @@ useHead({
         <span>در مسیر انجام کارهای نیک، هر قدم کوچک می‌تواند تأثیری بزرگ داشته باشد. با انجام این کارها، کد تخفیف دریافت کنید و از مشاوره روانشناختی با هوش مصنوعی به صورت رایگان بهره‌مند شوید.</span>
       </BaseParagraph>
 
-      <div class="flex justify-center gap-2">
+      <div data-tour="deeds-actions" class="flex justify-center gap-2">
         <BaseButton
           to="/deeds/list"
           color="primary"
@@ -104,6 +110,7 @@ useHead({
       </div>
     </div>
     <div
+      data-tour="deeds-categories-bottom" 
       class="mt-16 flex flex-row gap-2 sm:grid sm:grid-cols-3 sm:gap-6"
     >
       <div class="w-1/3 text-center sm:w-auto">
@@ -159,4 +166,6 @@ useHead({
       </div>
     </div>
   </div>
+  <!-- Floating Buttons -->
+  <FloatingButtons />
 </template>

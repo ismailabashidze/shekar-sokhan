@@ -710,8 +710,5 @@ const closeAlphaModal = () => {
         </div>
       </div>
     </BaseCard>
-
-    <!-- Tour Component -->
-    <TourButton />
   </div>
 </template>

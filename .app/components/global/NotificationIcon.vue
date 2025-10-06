@@ -1,10 +1,9 @@
 <script setup lang="ts">
 // Get the notifications and panels composables
-const notifications = useNotifications()
 const { open } = usePanels()
 
 // Extract the unread count as a computed property to avoid direct component instance enumeration
-const unreadCount = computed(() => notifications.unreadCount)
+const { unreadCount } = useNotifications()
 
 // Function to open notifications panel
 const openNotifications = () => {
@@ -45,7 +44,7 @@ const openNotifications = () => {
     <div
       v-if="unreadCount > 0"
       class="bg-danger-500 absolute -right-1 -top-1 size-5 animate-ping rounded-full opacity-30"
-    />
+    ></div>
   </button>
 </template>
 

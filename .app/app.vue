@@ -9,5 +9,7 @@
 
     <!-- Version Display -->
     <CommonVersionDisplay />
+    <!-- Floating Buttons -->
+    <FloatingButtons />
   </NuxtLayout>
 </template>
