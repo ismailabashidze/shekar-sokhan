@@ -9,7 +9,7 @@ const props = withDefaults(
     expanded: false,
   },
 )
-const { isOpen, sidebars, isHammasirRoute } = useSidebar()
+const { isOpen, sidebars } = useSidebar()
 
 const startSidebars = computed(
   () =>

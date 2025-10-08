@@ -10,9 +10,6 @@ const props = withDefaults(
     closeTo: '/',
   },
 )
-
-const route = useRoute()
-const isHammasirPage = computed(() => route.path.includes('/hammasir/'))
 </script>
 
 <template>
@@ -20,10 +17,10 @@ const isHammasirPage = computed(() => route.path.includes('/hammasir/'))
     <div class="mx-auto w-full max-w-6xl px-4">
       <div class="flex w-full items-center justify-between py-5">
         <div class="flex flex-1 items-center">
-          <NuxtLink :to="isHammasirPage ? '/hammasir' : '/'" class="flex items-center justify-center">
+          <NuxtLink to="/" class="flex items-center justify-center">
             <div class="rounded-full bg-white p-[5px]">
               <img
-                :src="isHammasirPage ? '/img/logo-hammasir.png' : '/img/logo-no-bg.png'"
+                src="/img/logo-no-bg.png"
                 width="40"
                 height="40"
                 alt=""

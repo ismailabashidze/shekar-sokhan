@@ -12,7 +12,7 @@
             </div>
             <nav class="ml-6 flex space-x-8 space-x-reverse">
               <NuxtLink
-                to="/hammasir/admin"
+                to="/admin"
                 class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
                 exact-active-class="border-blue-500 text-gray-900"
                 active-class="border-blue-500 text-gray-900"
@@ -20,7 +20,7 @@
                 پیشخوان
               </NuxtLink>
               <NuxtLink
-                to="/hammasir/admin/profiles"
+                to="/admin/profiles"
                 class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
                 exact-active-class="border-blue-500 text-gray-900"
                 active-class="border-blue-500 text-gray-900"
@@ -28,7 +28,7 @@
                 مدیریت پروفایل‌ها
               </NuxtLink>
               <NuxtLink
-                to="/hammasir/admin/counselors"
+                to="/admin/counselors"
                 class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
                 exact-active-class="border-blue-500 text-gray-900"
                 active-class="border-blue-500 text-gray-900"
@@ -36,7 +36,7 @@
                 مشاوران
               </NuxtLink>
               <NuxtLink
-                to="/hammasir/admin/verification"
+                to="/admin/verification"
                 class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
                 exact-active-class="border-blue-500 text-gray-900"
                 active-class="border-blue-500 text-gray-900"
@@ -44,7 +44,7 @@
                 تأیید مشاوران
               </NuxtLink>
               <NuxtLink
-                to="/hammasir/admin/files"
+                to="/admin/files"
                 class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
                 exact-active-class="border-blue-500 text-gray-900"
                 active-class="border-blue-500 text-gray-900"
@@ -52,7 +52,7 @@
                 فایل‌ها
               </NuxtLink>
               <NuxtLink
-                to="/hammasir/admin/notifications"
+                to="/admin/notifications"
                 class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
                 exact-active-class="border-blue-500 text-gray-900"
                 active-class="border-blue-500 text-gray-900"
@@ -92,9 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '~/composables/hammasir/useAuth'
-
-const { logout } = useAuth()
+const { logout } = useUser()
 </script>
 
 <style scoped>

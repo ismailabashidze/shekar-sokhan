@@ -18,7 +18,7 @@ const props = withDefaults(
 )
 
 const app = useAppConfig()
-const { setup, currentName, isOpen, toggle, isHammasirRoute } = useSidebar()
+const { setup, currentName, isOpen, toggle } = useSidebar()
 setup()
 
 const sidebarEnabled = computed(() => {
@@ -47,17 +47,11 @@ const wrapperClass = computed(() => {
     'bg-muted-100 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 pt-16 xl:pt-0 transition-all duration-300 xl:px-10',
   ]
 
-  // For hammasir routes, we use a fixed sidebar width
-  if (isHammasirRoute.value) {
-    list.push('xl:max-w-[calc(100%_-_80px)] xl:ms-[80px]')
+  if (isOpen.value) {
+    list.push('xl:max-w-[calc(100%_-_300px)] xl:ms-[300px]')
   }
   else {
-    if (isOpen.value) {
-      list.push('xl:max-w-[calc(100%_-_300px)] xl:ms-[300px]')
-    }
-    else {
-      list.push('xl:max-w-[calc(100%_-_80px)] xl:ms-[80px]')
-    }
+    list.push('xl:max-w-[calc(100%_-_80px)] xl:ms-[80px]')
   }
 
   if (props.horizontalScroll) {
@@ -81,7 +75,7 @@ const wrapperClass = computed(() => {
     <div class="bg-muted-100 dark:bg-muted-900">
       <slot name="sidebar">
         <TairoSidebarNavigation
-          v-if="sidebarEnabled && !isHammasirRoute"
+          v-if="sidebarEnabled"
           :subsidebar="props.subsidebar"
         >
           <div
@@ -104,23 +98,6 @@ const wrapperClass = computed(() => {
             </slot>
           </div>
         </TairoSidebarNavigation>
-
-        <!-- Hammasir sidebar -->
-        <TairoHammasirSidebar
-          v-else-if="sidebarEnabled && isHammasirRoute"
-        >
-          <template #logo>
-            <div>
-              <NuxtLink to="/hammasir" class="flex items-center justify-center">
-                <img 
-                  src="/img/logo-hammasir.png" 
-                  alt="Hammasir Logo" 
-                  class="h-10"
-                />
-              </NuxtLink>
-            </div>
-          </template>
-        </TairoHammasirSidebar>
 
         <div
           role="button"

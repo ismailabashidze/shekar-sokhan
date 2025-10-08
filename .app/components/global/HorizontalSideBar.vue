@@ -8,10 +8,10 @@
         <div
           class=" flex size-16 shrink-0 items-center justify-center"
         >
-          <NuxtLink :to="isHammasirPage ? '/hammasir' : '/dashboard'" class="flex items-center justify-center">
+          <NuxtLink to="/dashboard" class="flex items-center justify-center">
             <div class="rounded-full bg-white p-[5px]">
               <img
-                :src="isHammasirPage ? '/img/logo-hammasir.png' : '/img/logo-no-bg.png'"
+                src="/img/logo-no-bg.png"
                 width="40"
                 height="40"
                 alt=""
@@ -51,11 +51,11 @@
             </span>
           </NuxtLink>
           <NuxtLink
-            :to="isHammasirPage ? '/hammasir' : '/dashboard'"
+            to="/dashboard"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            :title="isHammasirPage ? 'هم‌مسیر' : 'خانه'"
+            title="خانه"
           >
-            <Icon :name="isHammasirPage ? 'ph:map-trifold' : 'ph:house-line'" class="size-5" />
+            <Icon name="ph:house-line" class="size-5" />
           </NuxtLink>
         </div>
         <div class="flex h-16 w-full items-center justify-center">
@@ -75,14 +75,14 @@
                 </div>
               </template>
               <BaseDropdownItem
-                :to="isHammasirPage ? '/hammasir/my-profile' : '/report'"
-                :title="isHammasirPage ? 'پروفایل هم‌مسیر' : 'مشاهده پروفایل'"
+                to="/report"
+                title="مشاهده پروفایل"
                 :text="displayName"
                 rounded="sm"
               />
 
               <BaseDropdownItem
-                :to="isHammasirPage ? '/hammasir/sessions' : '/darmana/therapists/sessions'"
+                to="/darmana/therapists/sessions"
                 title="جلسات"
                 text="همه جلسات من"
                 rounded="sm"
@@ -96,8 +96,8 @@
               />
 
               <BaseDropdownItem
-                :to="isHammasirPage ? '/hammasir/admin' : '/settings'"
-                :title="isHammasirPage ? 'تنظیمات هم‌مسیر' : 'تنظیمات'"
+                to="/settings"
+                title="تنظیمات"
                 text="تنظیمات حساب"
                 rounded="sm"
               />
@@ -125,7 +125,6 @@ import BugReportIcon from './BugReportIcon.vue'
 
 const route = useRoute()
 const isAuthPage = computed(() => route.path.startsWith('/auth'))
-const isHammasirPage = computed(() => route.path.includes('/hammasir/'))
 
 const { user } = useUser()
 const { getUserAvatarUrl } = useAvatarManager()
