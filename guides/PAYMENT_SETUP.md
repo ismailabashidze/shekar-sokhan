@@ -72,7 +72,7 @@
 یک فایل `.env` در دایرکتوری `.app` ایجاد کنید:
 ```env
 # Application URL
-PUBLIC_APP_URL=http://localhost:3000
+PUBLIC_APP_URL=http://localhost:4000
 
 # OpenRouter API Key (for AI features)
 OPENROUTER_API_KEY=your_openrouter_api_key_here
@@ -149,14 +149,14 @@ const userPayments = await getPayments()
 
 #### 1. **بررسی Environment Variables:**
    ```bash
-   # مسیر: http://localhost:3000/debug-env
+   # مسیر: http://localhost:4000/debug-env
    ```
    - همه متغیرها باید مقدار داشته باشند
    - `dargahUsername` و `dargahPassword` نباید خالی باشند
 
 #### 2. **تست Login مستقل:**
    ```bash
-   # مسیر: http://localhost:3000/test-dargah
+   # مسیر: http://localhost:4000/test-dargah
    ```
    - تست مستقل login به درگاه‌نو
    - مشاهده console برای debugging 
@@ -164,7 +164,7 @@ const userPayments = await getPayments()
 
 #### 3. **تست فرآیند کامل پرداخت:**
    ```bash
-   # مسیر: http://localhost:3000/onboarding
+   # مسیر: http://localhost:4000/onboarding
    ```
    - تست integration کامل
    - پیگیری console browser

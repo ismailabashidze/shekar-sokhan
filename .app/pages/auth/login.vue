@@ -176,6 +176,18 @@ const loginWithGoogle = async () => {
   }
 }
 
+// Check if we're in a client-side environment
+if (process.client) {
+  // Check if a passkey is set but not authenticated, redirect to lock screen
+  const passkey = localStorage.getItem('passkey')
+  if (passkey) {
+    const isAuthenticated = localStorage.getItem('passkeyAuthenticated')
+    if (!isAuthenticated || isAuthenticated !== 'true') {
+      navigateTo('/lock-screen')
+    }
+  }
+}
+
 if (nuxtApp.$pb.authStore.isValid) {
   navigateTo('/dashboard')
 }

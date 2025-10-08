@@ -48,7 +48,7 @@ pnpm install
 pnpm dev
 ```
 
-> Access the application in your browser at [http://localhost:3000/](http://localhost:3000/)
+> Access the application in your browser at [http://localhost:4000/](http://localhost:4000/)
 
 ### Demo Application
 

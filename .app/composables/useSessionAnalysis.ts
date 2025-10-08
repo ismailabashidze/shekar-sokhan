@@ -422,12 +422,14 @@ export const useSessionAnalysis = () => {
               description: { type: 'string' },
             },
             required: ['title', 'description'],
+            additionalProperties: false,
           },
           minItems: 4,
           maxItems: 4,
         },
       },
       required: ['title', 'summaryOfSession', 'headlines'],
+      additionalProperties: false,
     }
 
     // Reduce max tokens to prevent truncation
@@ -469,6 +471,7 @@ export const useSessionAnalysis = () => {
         'finalTrustAndOppennessOfUser',
         'finalTrustAndOppennessOfUserEvaluationDescription',
       ],
+      additionalProperties: false,
     }
 
     // Reduce token limit to prevent truncation and allow buffer
@@ -517,6 +520,7 @@ export const useSessionAnalysis = () => {
               },
             },
             required: ['points', 'cause'],
+            additionalProperties: false,
           },
           description:
             'فهرستی از مسائل عملکردی که امتیاز کلی درمانگر را کاهش می دهد. امتیاز نهایی (psychotherapistEvaluationScore) باید به صورت ۱۰۰ منهای مجموع تمام امتیازات کسر شده محاسبه شود - باید کاملاً به زبان فارسی باشد.',
@@ -552,6 +556,7 @@ export const useSessionAnalysis = () => {
         'psychotherapistEvaluationScorePositiveBehavior',
         'psychotherapistEvaluationScoreSuggestionsToImprove',
       ],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(
@@ -583,6 +588,7 @@ export const useSessionAnalysis = () => {
         },
       },
       required: ['behavioralAnalysisSummary'],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(
@@ -614,6 +620,7 @@ export const useSessionAnalysis = () => {
         },
       },
       required: ['emotionalAnalysisSummary'],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(
@@ -645,6 +652,7 @@ export const useSessionAnalysis = () => {
         },
       },
       required: ['thoughtsAndConcernsSummary'],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(
@@ -681,6 +689,7 @@ export const useSessionAnalysis = () => {
         },
       },
       required: ['psychoAnalysis', 'possibleDeeperGoalsOfPatient'],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(
@@ -730,7 +739,7 @@ export const useSessionAnalysis = () => {
                   'منفعل پرخاشگر', // passive aggressive
                   'عمل گرایی', // acting out
                   'خیال پردازی', // fantasy
-                  'شوخی', // humor
+                  ' Shoخی', // humor
                   'گسستگی', // dissociation
                   'اجتناب', // avoidance
                   'قربانی کردن', // scapegoating
@@ -744,16 +753,18 @@ export const useSessionAnalysis = () => {
               evidence: {
                 type: 'string',
                 description:
-                  'بخشی از پیام دقیق کاربر که حاوی شواهد این مکانیسم دفاعی است. باید پیام دقیق کاربر باشد، نه چیز دیگری. به عنوان شواهدی برای این مکانیسم دفاعی - باید کاملاً به زبان فارسی باشد',
+                  'بخشی از پیام دقیق کاربر که حاوی شواهد این مکانیسم دفاعی است. باید پیام دقیق کاربر باشد، نه چیز دیگری. به عنوان شواhedی برای این مکانیسم دفاعی - باید کاملاً به زبان فارسی باشد',
               },
             },
             required: ['name', 'confidence', 'evidence'],
+            additionalProperties: false,
           },
           description:
             'فهرستی از مکانیسم های دفاعی شناسایی شده در طول جلسه با سطوح اطمینان و شواهد پشتیبان. اگر چیزی شناسایی نشد یا مطمئن نیستید از name: no_data استفاده کنید - باید کاملاً به زبان فارسی باشد.',
         },
       },
       required: ['detectedDefenceMechanisms'],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(
@@ -818,12 +829,14 @@ export const useSessionAnalysis = () => {
               },
             },
             required: ['name', 'confidence', 'evidence'],
+            additionalProperties: false,
           },
           description:
             'فهرستی از الگوهای شناسایی شده در طول جلسه بر اساس نظریه الگوهای یانگ با سطوح اطمینان و شواهد پشتیبان. اگر چیزی شناسایی نشد یا مطمئن نیستید از name: no_data استفاده کنید - باید کاملاً به زبان فارسی باشد.',
         },
       },
       required: ['detectedSchemas'],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(
@@ -913,9 +926,11 @@ export const useSessionAnalysis = () => {
           },
           description:
             'اطلاعات دموگرافیک درباره بیمار که از جلسه استخراج شده است - باید کاملاً به زبان فارسی باشد',
+          additionalProperties: false,
         },
       },
       required: ['demographicData'],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(
@@ -955,6 +970,7 @@ export const useSessionAnalysis = () => {
               },
             },
             required: ['title', 'description'],
+            additionalProperties: false,
           },
           description:
             'فهرستی از مراحل پیشنهادی بعدی برای درمانگر که باید در جلسه بعدی مدنظر قرار گیرد. باید منحصر به فرد و بدون تکرار باشد - باید کاملاً به زبان فارسی باشد',
@@ -963,6 +979,7 @@ export const useSessionAnalysis = () => {
         },
       },
       required: ['suggestedNextStepsForTherapistForNextSession'],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(
@@ -1004,6 +1021,7 @@ export const useSessionAnalysis = () => {
               },
             },
             required: ['title', 'description'],
+            additionalProperties: false,
           },
           description:
             'فهرستی از عوامل ریسک شناسایی شده در طول جلسه مرتبط با افکار، رفتارها یا باورهای بیمار که ممکن است نیاز به توجه یا مداخله حرفه ای بیشتر داشته باشد. باید منحصر به فرد و بدون تکرار باشد - باید کاملاً به زبان فارسی باشد',
@@ -1012,6 +1030,7 @@ export const useSessionAnalysis = () => {
         },
       },
       required: ['possibleRiskFactorsExtracted'],
+      additionalProperties: false,
     }
 
     return await makeOpenRouterRequest(

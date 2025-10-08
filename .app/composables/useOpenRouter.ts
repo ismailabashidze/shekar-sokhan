@@ -615,7 +615,7 @@ export function useOpenRouter() {
             fetch('https://openrouter.ai/api/v1/models', {
               headers: {
                 'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
               },
             }),
             new Promise((_, reject) => 
@@ -807,7 +807,7 @@ export function useOpenRouter() {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-              'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+              'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
               'X-Title': 'Therapist Chat',
             },
             body: JSON.stringify({
@@ -934,7 +934,7 @@ export function useOpenRouter() {
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
                 'X-Title': 'Therapist Chat',
               },
               body: JSON.stringify({
@@ -1077,7 +1077,7 @@ export function useOpenRouter() {
       // System prompt for analysis
       const systemPrompt: ChatMessage = {
         role: 'system',
-        content: 'شما یک تحلیل گر پیام ها در یک سیستم مشاوره آنلاین برخط و به صورت متنی هستید. شما به پیام های مشاور و مراجع دسترسی دارید و بر اساس این پیام ها موارد خواسته شده را ارزیابی می کنید. برخی از این موارد مربوط به پیام آخر، برخی مربوط به سه پیام آخر و برخی نیز مربوط به کل جلسه هستند. خروجی تحلیل شما در اختیار روانشناس و سیستم قرار خواهد گرفت تا بهترین کمک به مراجع انجام شود.',
+        content: 'شما یک تحلیل گر پیام ها در یک سیستم مشاوره آنلاین برخط و به صورت متنی هستید. شما به پیام های مشاور و مراجع دسترسی دارید و بر اساس این پیام ها موارد خواسته شده را ارزیابی می کنید. برخی از این موارد مربوط به پیام آخر، برخی مربوط به سه پیام آخر و برخی نیز مربوط به کل جلسه هستند. خروجی تحلیل شما در اختیار روانشناس و سیستم قرار خواهد گرفت تا بهترین کمک به مراجع انجام شود. از اهمیت ویژه ای برخوردار است که ریسک خودکشی مراجع با دقت ارزیابی شود. اگر مراجع هر نوع اشاره یا تمایل به خودکشی، آسیب رساندن به خود، یا ابراز ناراحتی عمیق داشت، باید آن را به دقت ارزیابی کنید و در میزان medium و بالاتر، باید نشانه‌ها و واقعیت‌های متن اصلی را در توضیح ذکر کنید.',
       }
       // Use only the system prompt and the last message for analysis
       const messagesWithSystem = [systemPrompt, lastMessage]
@@ -1088,7 +1088,7 @@ export function useOpenRouter() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+          'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
           'X-Title': 'An Inline Analysis Generator to help therapists be more align with the needs of patients',
         },
         body: JSON.stringify({
@@ -1131,11 +1131,22 @@ export function useOpenRouter() {
                     type: 'string',
                     description: 'پاسخ پیشنهادی مبتنی بر تحلیل احساسات کاربر جهت بازتاب و درک عمیق‌تر. مثال: اگر کاربر ترسیده، واکنش مناسب آرام سازی و دلگرم کردن اوست. اگر خشمگین است، می‌توان پرسید "آیا احساس خشم می‌کنی؟" یا گفت "به نظر می‌رسد خشم را در خودت احساس می‌کنی." اگر احساس نامشخص است، می‌توان پرسید "می‌توانی بیشتر در مورد احساست توضیح دهی؟ این پاسخ باید به فارسی باشد."',
                   },
+                  suicideRiskEvaluation: {
+                    type: 'string',
+                    enum: ['N/A', 'veryLow', 'low', 'medium', 'high', 'veryHigh'],
+                    description: 'ارزیابی ریسک خودکشی بر اساس پیام کاربر. مقادیر: N/A: پیام کاملاً مرتبط با خودکشی، آسیب رساندن به خود یا ابراز ناراحتی عمیق نیست. veryLow: کاربر ناراحتی یا استرس کمی را بیان می‌کند اما هیچ گونه فکر یا قصدی در مورد خودکشی یا آسیب رساندن به خود ندارد. low: ابراز ناامیدی، تمایلات منفی عمومی یا افکار خودکشی بدون برنامه یا روش خاص. medium: کاربر فکر خودکشی فعال دارد و یک روش خاص را در نظر دارد یا یک طرح کلی دارد. high: کاربر یک طرح خاص و ملموس خودکشی با نیت قوی برای اقدام دارد. veryHigh: کاربر در حال تلاش برای خودکشی است یا عمل را فوری انجام خواهد داد (در چند دقیقه/ساعت).',
+                  },
+                  suicideRiskDescription: {
+                    type: 'string',
+                    description: 'شرح دلیل انتخاب این برچسب، بر اساس نشانه‌ها و واقعیت‌های موجود در متن اصلی که در تحلیل استفاده شده است. برای سطوح medium, high, veryHigh باید نشانه‌ها و واقعیت‌های خاصی که در متن اصلی وجود داشتند ذکر شود.',
+                  },
                 },
                 required: [
                   'lastMessage_emotions',
                   'correspondingEmojis',
                   'emotionalResponse',
+                  'suicideRiskEvaluation',
+                  'suicideRiskDescription',
                 ],
                 additionalProperties: false,
               },
@@ -1292,7 +1303,7 @@ export function useOpenRouter() {
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
                 'X-Title': 'Patient Details Generator',
               },
               body: JSON.stringify({
@@ -1500,7 +1511,7 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-                'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+                'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
                 'X-Title': 'Therapist Details Generator',
               },
               body: JSON.stringify({

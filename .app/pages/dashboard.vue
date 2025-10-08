@@ -238,14 +238,36 @@ const closeAlphaModal = () => {
 
     <div>
       <!-- Statistics Cards Section -->
-      <div class="mb-6 mt-0" data-tour="statistics">
+      <div class="mb-3 mt-0" data-tour="statistics">
         <DashboardStatisticsCards />
       </div>
 
+      <!-- Passkey Notice Section -->
+      <div class="mb-3">
+        <BaseCard rounded="lg" class="p-4 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <Icon name="ph:lock-duotone" class="text-blue-500 size-5 ml-2" />
+              <BaseText class="text-blue-800 dark:text-blue-200">
+                می‌توانید یک گذرواژه ۴ رقمی برای حفاظت از حساب کاربری خود تنظیم کنید
+              </BaseText>
+            </div>
+            <BaseButton
+              size="sm"
+              color="primary"
+              variant="solid"
+              @click="$router.push('/settings/security')"
+            >
+              تنظیم گذرواژه
+            </BaseButton>
+          </div>
+        </BaseCard>
+      </div>
       <!-- Grid -->
       <div class="grid grid-cols-12 gap-6">
+        
         <!-- Column -->
-        <div class="ltablet:col-span-8 col-span-12 lg:col-span-8">
+        <div class="ltablet:col-span-8 col-span-12 lg:col-span-8 mb-3">
           <!-- Inner grid -->
           <div class="grid grid-cols-12 gap-6">
             <!-- Header -->
@@ -406,6 +428,7 @@ const closeAlphaModal = () => {
         </div>
         
       </div>
+
     </div>
   </div>
 </template>

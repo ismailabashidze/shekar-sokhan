@@ -15,7 +15,7 @@ export function useGoals() {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-        'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+        'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
         'X-Title': 'Therapy Goals Generation',
       },
       body: JSON.stringify({
@@ -616,7 +616,7 @@ export function useGoals() {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-        'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+        'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
         'X-Title': 'DSM-5 Disorder Investigation Generator',
       },
       body: JSON.stringify({
@@ -857,7 +857,7 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-        'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+        'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
         'X-Title': 'DSM-5 Phase 1 - Basic Disorders',
       },
       body: JSON.stringify({
@@ -1270,7 +1270,7 @@ ${disordersList.map(cat => `**${cat.categoryTitle}:**\n${cat.disorders.map(d => 
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${config.public.openRouterApiKey}`,
-        'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+        'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
         'X-Title': 'DSM-5 Phase 2 - Detailed Features',
       },
       body: JSON.stringify({

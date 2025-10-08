@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${config.openRouterApiKey}`,
-        'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+        'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
         'X-Title': 'Patient Details Generator',
       },
       body: {

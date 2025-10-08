@@ -20,7 +20,6 @@ function onSidebarItemClick() {
 
 <template>
   <div class="flex h-16 w-full items-center justify-center">
-    <span>{{ props.sidebar.order }}</span>
     <component
       :is="resolveComponentOrNative(props.sidebar.component)"
       v-if="props.sidebar.component"

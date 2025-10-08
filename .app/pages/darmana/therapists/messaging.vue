@@ -260,6 +260,9 @@ const loadMessages = async (therapistId: string) => {
               analysisResult = {
                 lastMessage_emotions: analysisData.emotions || [],
                 correspondingEmojis: analysisData.emojis || '',
+                emotionalResponse: analysisData.emotionalResponse || '',
+                suicideRiskEvaluation: analysisData.suicideRiskEvaluation || 'N/A',
+                suicideRiskDescription: analysisData.suicideRiskDescription || '',
                 // Note: emotionalResponse is not stored in message_analysis collection
                 // It's part of the full analysis result generated dynamically
               }
@@ -489,7 +492,13 @@ async function submitMessage() {
       // Update the message with analysis result using message ID
       const messageToUpdate = messages.value.find(msg => msg.id === messageId)
       if (messageToUpdate) {
-        messageToUpdate.analysisResult = analysisResult
+        messageToUpdate.analysisResult = {
+          lastMessage_emotions: analysisResult.lastMessage_emotions || [],
+          correspondingEmojis: analysisResult.correspondingEmojis || '',
+          emotionalResponse: analysisResult.emotionalResponse || '',
+          suicideRiskEvaluation: analysisResult.suicideRiskEvaluation || 'N/A',
+          suicideRiskDescription: analysisResult.suicideRiskDescription || ''
+        }
       }
       
       // Keep the analysis visible for a moment before proceeding
@@ -696,7 +705,12 @@ function formatInlineAnalysis(analysisResult) {
   output += `- احساسات دقیق‌تر: ${(analysisResult.lastMessage_nuancedEmotions || []).join(', ') || 'نامشخص'}\n`
   output += `- شدت احساسات: ${analysisResult.lastMessage_emotionIntensity || 'نامشخص'}\n`
   output += `- تناسب با هدف جلسه: ${analysisResult.lastMessage_alignmentWithGoal || 'نامشخص'}\n`
-  output += `- پاسخ پیشنهادی: ${analysisResult.emotionalResponse || 'نامشخص'}\n`
+  output += `- پاسخ پیشنهادی: ${analysisResult.emotionalResponse || 'نامشخص'}\n\n`
+  
+  // Suicide Risk Evaluation
+  output += '**ارزیابی ریسک خودکشی:**\n'
+  output += `- سطح ریسک: ${analysisResult.suicideRiskEvaluation || 'نامشخص'}\n`
+  output += `- توضیحات: ${analysisResult.suicideRiskDescription || 'نامشخص'}\n`
   
   return output
 }
@@ -1669,6 +1683,18 @@ const selectedMessageEmotions = computed(() => {
     return []
   }
 })
+
+const getSuicideRiskLabel = (riskLevel) => {
+  const labels = {
+    'N/A': 'نامربوط',
+    'veryLow': 'خیلی کم',
+    'low': 'کم',
+    'medium': 'متوسط',
+    'high': 'زیاد',
+    'veryHigh': 'خیلی زیاد'
+  }
+  return labels[riskLevel] || riskLevel
+}
 
 const handleEndSession = async () => {
   if (!activeSession.value) return
@@ -3434,6 +3460,40 @@ const showStatisticsInfo = () => {
             <p class="text-right text-sm text-blue-600 dark:text-blue-400">
               {{ selectedMessage.analysisResult.emotionalResponse }}
             </p>
+          </div>
+
+          <!-- Suicide Risk Evaluation -->
+          <div v-if="selectedMessage.analysisResult.suicideRiskEvaluation" class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 mt-4">
+            <div class="mb-4 flex items-center gap-2">
+              <Icon name="ph:warning-circle-duotone" class="size-5 text-red-500" />
+              <span class="text-sm font-medium text-red-700 dark:text-red-300">ارزیابی ریسک خودکشی</span>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-xs font-medium text-red-600 dark:text-red-400 mb-1">سطح ریسک:</div>
+              <div class="inline-flex items-center gap-2">
+                <span 
+                  class="rounded-full px-3 py-1 text-xs font-semibold"
+                  :class="{
+                    'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'N/A',
+                    'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'veryLow',
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'low',
+                    'bg-orange-100 text-orange-800 dark:bg-orange-700 dark:text-orange-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'medium',
+                    'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'high',
+                    'bg-red-500 text-white dark:bg-red-800 dark:text-white': selectedMessage.analysisResult.suicideRiskEvaluation === 'veryHigh',
+                  }"
+                >
+                  {{ getSuicideRiskLabel(selectedMessage.analysisResult.suicideRiskEvaluation) }}
+                </span>
+              </div>
+            </div>
+
+            <div v-if="selectedMessage.analysisResult.suicideRiskDescription" class="mt-3">
+              <div class="text-xs font-medium text-red-600 dark:text-red-400 mb-1">توضیحات:</div>
+              <div class="text-sm text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-800/30 p-2 rounded">
+                {{ selectedMessage.analysisResult.suicideRiskDescription }}
+              </div>
+            </div>
           </div>
         </div>
 

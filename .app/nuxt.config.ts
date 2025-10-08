@@ -55,7 +55,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       appVersion,
-      appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:3000',
+      appUrl: process.env.PUBLIC_APP_URL || 'http://localhost:4000',
       openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
       openaiApiKey: process.env.OPENAI_API_KEY || '',
       dargahMerchantId: process.env.DARGAH_MERCHANT_ID || '',

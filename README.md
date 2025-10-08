@@ -54,7 +54,7 @@ pnpm dev
 
 This will run the `dev` script from the `package.json` file.
 
-> Access the Tairo frontend in your browser at [http://localhost:3000/](http://localhost:3000/)
+> Access the Tairo frontend in your browser at [http://localhost:4000/](http://localhost:4000/)
 
 ## 💡 What to do next ?
 

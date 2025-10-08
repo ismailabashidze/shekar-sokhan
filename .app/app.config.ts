@@ -100,15 +100,11 @@ export default defineAppConfig({
             to: '/dashboard',
             position: 'end',
           },
-          {
-            title: 'اعلان‌ها',
-            component: 'NotificationIcon',
-            position: 'end',
-            click: () => {
-              const { open } = usePanels()
-              open('notifications')
-            },
-          },
+          // {
+          //   title: 'اعلان‌ها',
+          //   component: 'NotificationIcon',
+          //   position: 'end',
+          // },
           {
             title: 'گزارش باگ',
             component: 'BugReportIcon',

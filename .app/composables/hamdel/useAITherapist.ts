@@ -69,7 +69,7 @@ export function useAITherapist() {
         headers: {
           'Authorization': `Bearer ${config.public.openRouterApiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+          'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
           'X-Title': 'AI Therapist Chat',
         },
         body: JSON.stringify(payload),

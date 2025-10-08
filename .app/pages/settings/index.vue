@@ -332,7 +332,7 @@ const confirmDeletion = async () => {
           elevated-hover
           class="hover:!border-danger-500 group border-2 transition-all duration-300 hover:shadow-lg"
         >
-          <NuxtLink to="#" class="block p-6">
+          <NuxtLink to="/settings/security" class="block p-6">
             <div class="text-center">
               <div class="bg-danger-100 dark:bg-danger-900/30 mx-auto flex size-12 items-center justify-center rounded-full">
                 <Icon

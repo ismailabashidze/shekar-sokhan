@@ -17,7 +17,7 @@
   },
   "scripts": {
     "prepare": "nuxt prepare",
-    "dev": "nuxt dev --open",
+    "dev": "cross-env NODE_OPTIONS=\"--no-deprecation\" nuxt dev --open --port 4000",
     "build": "cross-env NODE_ENV=production NODE_OPTIONS=\"--max-old-space-size=6144 --no-deprecation\" NUXT_DEVTOOLS_ENABLED=false NUXT_TYPESCRIPT_TYPECHECK=false nuxt build",
     "build:fast": "cross-env NODE_ENV=production NODE_OPTIONS=\"--max-old-space-size=8192 --no-deprecation\" NUXT_DEVTOOLS_ENABLED=false NUXT_TYPESCRIPT_TYPECHECK=false VITE_BUILD_SOURCEMAP=false UV_THREADPOOL_SIZE=128 nuxt build",
     "generate": "cross-env NODE_ENV=production NODE_OPTIONS=\"--max-old-space-size=6144 --no-deprecation\" NUXT_DEVTOOLS_ENABLED=false nuxt generate",

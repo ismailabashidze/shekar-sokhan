@@ -26,7 +26,7 @@ export default defineEventHandler(async (event: H3Event) => {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${config.openRouterApiKey}`,
-        'HTTP-Referer': config.public.appUrl || 'http://localhost:3000',
+        'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
         'X-Title': 'Therapist Chat',
       },
       body: JSON.stringify({

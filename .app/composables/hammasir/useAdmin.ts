@@ -111,7 +111,7 @@ const translateError = (error: any): string => {
 
 // Helper function to get API base URL
 const getApiBaseUrl = () => {
-  return process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'
+  return process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 }
 
 // Helper function for API requests
