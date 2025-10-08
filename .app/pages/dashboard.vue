@@ -175,6 +175,8 @@ const closeAlphaModal = () => {
 
 <template>
   <div class="relative">
+
+
     <!-- Alpha State Modal -->
     <TairoModal
       :open="showAlphaModal"
@@ -242,32 +244,12 @@ const closeAlphaModal = () => {
         <DashboardStatisticsCards />
       </div>
 
-      <!-- Passkey Notice Section -->
-      <div class="mb-3">
-        <BaseCard rounded="lg" class="p-4 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <Icon name="ph:lock-duotone" class="text-blue-500 size-5 ml-2" />
-              <BaseText class="text-blue-800 dark:text-blue-200">
-                می‌توانید یک گذرواژه ۴ رقمی برای حفاظت از حساب کاربری خود تنظیم کنید
-              </BaseText>
-            </div>
-            <BaseButton
-              size="sm"
-              color="primary"
-              variant="solid"
-              @click="$router.push('/settings/security')"
-            >
-              تنظیم گذرواژه
-            </BaseButton>
-          </div>
-        </BaseCard>
-      </div>
+
       <!-- Grid -->
       <div class="grid grid-cols-12 gap-6">
         
-        <!-- Column -->
-        <div class="ltablet:col-span-8 col-span-12 lg:col-span-8 mb-3">
+        <!-- Main Content Column -->
+        <div :class="showFeatures ? 'ltablet:col-span-8 lg:col-span-8' : 'ltablet:col-span-12 lg:col-span-12'" class="col-span-12 mb-3">
           <!-- Inner grid -->
           <div class="grid grid-cols-12 gap-6">
             <!-- Header -->
@@ -398,10 +380,12 @@ const closeAlphaModal = () => {
             </div>
           </div>
         </div>
+        <!-- Right Column (only shown when features are visible) -->
         <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
           <!-- New Features Section -->
             <div class="col-span-12">
               <Transition
+                name="features"
                 leave-active-class="transition origin-top duration-75 ease-in"
                 leave-from-class="transform scale-y-100 opacity-100"
                 leave-to-class="transform scale-y-0 opacity-0"

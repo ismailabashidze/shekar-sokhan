@@ -3,7 +3,7 @@
     <!-- Floating Help Button -->
     <button
       v-if="showFloatingButton"
-      class="bg-primary-500 hover:bg-primary-600 flex size-12 items-center justify-center rounded-full text-white shadow-lg transition-all duration-300 hover:scale-110"
+      class="bg-primary-500 flex size-12 items-center justify-center rounded-full text-white shadow-lg"
       title="راهنما"
       @click="openTourModal"
     >
@@ -199,18 +199,8 @@ const resetAllToursAndClose = () => {
   position: relative;
 }
 
-/* Floating button animations */
+/* No floating animation - static button */
 .tour-button-container button {
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
 }
 
 /* Hover effect for tour cards */
@@ -264,7 +254,7 @@ const resetAllToursAndClose = () => {
 }
 
 /* Smooth transitions for all interactive elements */
-* {
+.tour-modal-content * {
   transition-property: color, background-color, border-color, transform, opacity, box-shadow;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
