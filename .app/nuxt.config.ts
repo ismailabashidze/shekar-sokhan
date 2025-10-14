@@ -66,6 +66,10 @@ export default defineNuxtConfig({
   },
 
   app: {
+    pageTransition: {
+      name: 'page-fade',
+      mode: 'default',
+    },
     head: {
       meta: [
         { name: 'mobile-web-app-capable', content: 'yes' },
@@ -93,6 +97,7 @@ export default defineNuxtConfig({
     '@fontsource-variable/inter/index.css',
     '@fontsource-variable/karla/index.css',
     '~/assets/css/tour.css',
+    '~/assets/css/fonts-compat.css',
   ],
 
   nitro: {

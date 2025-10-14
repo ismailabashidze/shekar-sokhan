@@ -1,0 +1,48 @@
+/* Fallback fonts for older Windows browsers */
+/* Define fonts with proper format fallbacks */
+
+/* Note: For full compatibility, WOFF and WOFF2 versions of IRANSans fonts should be generated */
+/* The current implementation uses TTF which has good compatibility but larger file sizes */
+
+/* Enhanced font stack with better fallbacks for older browsers */
+body, html {
+  font-family: 'IRANSans', 'Vazir', 'Inter', 'Karla', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif !important;
+}
+
+/* Define CSS variables for consistent font usage */
+:root {
+  --font-primary: 'IRANSans', 'Vazir', 'Inter', 'Karla', sans-serif;
+  --font-secondary: 'IRANSans', 'Vazir', 'Inter', 'Karla', Georgia, 'Times New Roman', serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
+}
+
+/* Ensure consistent font loading across all elements */
+*, *:before, *:after {
+  font-family: inherit !important;
+}
+
+/* Font loading strategy for better performance and compatibility */
+html {
+  font-family: var(--font-primary);
+  -webkit-text-size-adjust: 100%; /* Prevent font scaling in iOS */
+  -ms-text-size-adjust: 100%; /* Prevent font scaling in IE */
+  -webkit-font-smoothing: antialiased; /* Optimize for legibility */
+  -moz-osx-font-smoothing: grayscale; /* Optimize for legibility */
+  text-rendering: optimizeLegibility; /* Optimize for legibility */
+}
+
+/* Provide fallback font loading for older browsers */
+@supports not (font-display: swap) {
+  body {
+    font-family: 'IRANSans', 'Vazir', 'Inter', sans-serif !important;
+  }
+}
+
+/* Additional fallbacks for critical elements */
+h1, h2, h3, h4, h5, h6, .title, .heading {
+  font-family: var(--font-primary) !important;
+}
+
+p, span, div, li, a, button, input, textarea {
+  font-family: var(--font-primary) !important;
+}

@@ -38,6 +38,65 @@ const formatEmoji = (trustLevel: number): string => {
   return '😠' // Angry face for 0 to 49
 }
 
+const genderLabel = (value?: string | null) => {
+  if (!value) return ''
+  const map: Record<string, string> = {
+    male: 'مرد',
+    female: 'زن',
+    other: 'دیگر',
+  }
+  return map[value] || value
+}
+
+const educationLabel = (value?: string | null) => {
+  if (!value) return ''
+  const map: Record<string, string> = {
+    'under diploma': 'زیر دیپلم',
+    diploma: 'دیپلم',
+    bachelor: 'کارشناسی',
+    master: 'کارشناسی ارشد',
+    phd: 'دکتری',
+    other: 'سایر',
+  }
+  return map[value] || value
+}
+
+const occupationLabel = (value?: string | null) => {
+  if (!value) return ''
+  const map: Record<string, string> = {
+    student: 'دانشجو',
+    employed: 'کارمند',
+    'self-employed': 'آزاد',
+    unemployed: 'بیکار',
+    retired: 'بازنشسته',
+    householder: 'خانه‌دار',
+    other: 'سایر',
+  }
+  return map[value] || value
+}
+
+const maritalStatusLabel = (value?: string | null) => {
+  if (!value) return ''
+  const map: Record<string, string> = {
+    single: 'مجرد',
+    married: 'متأهل',
+    divorced: 'مطلقه',
+    widowed: 'بیوه',
+  }
+  return map[value] || value
+}
+
+const summarizeDemographicDetails = (data: any) => {
+  if (!data) return ''
+  return [
+    data.age && `سن: ${data.age}`,
+    data.gender && `جنسیت: ${genderLabel(data.gender)}`,
+    data.education && `تحصیلات: ${educationLabel(data.education)}`,
+    data.occupation && `شغل: ${occupationLabel(data.occupation)}`,
+    data.maritalStatus && `وضعیت تأهل: ${maritalStatusLabel(data.maritalStatus)}`,
+  ].filter(Boolean).join('، ')
+}
+
 const trustLevelComputed = computed(() => {
   if (!analysisData.value) return 0
   const trust = analysisData.value.finalTrustAndOppennessOfUser
@@ -74,15 +133,7 @@ const generateCaringMessage = async (
   const { streamChat } = useOpenRouter()
 
   // Prepare demographic info
-  const demographicInfo = demographicData
-    ? [
-        demographicData.age && `سن: ${demographicData.age}`,
-        demographicData.gender && `جنسیت: ${demographicData.gender === 'male' ? 'مرد' : demographicData.gender === 'female' ? 'زن' : 'دیگر'}`,
-        demographicData.education && `تحصیلات: ${demographicData.education}`,
-        demographicData.occupation && `شغل: ${demographicData.occupation}`,
-        demographicData.maritalStatus && `وضعیت تأهل: ${demographicData.maritalStatus}`,
-      ].filter(Boolean).join('، ')
-    : ''
+  const demographicInfo = summarizeDemographicDetails(demographicData)
 
   // Prepare psychological insights
   const psychoInsights = [

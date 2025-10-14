@@ -372,14 +372,14 @@ onMounted(() => {
 
       <!-- Loading state -->
       <div v-if="loading" class="py-10">
-        <div class="flex flex-col items-center justify-center">
-          <div class="mt-8 w-full">
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-              <div
-                v-for="i in 5"
-                :key="i"
-              >
-                <BaseCard shape="curved" class="overflow-hidden">
+      <div class="flex flex-col items-center justify-center">
+        <div class="mt-8 w-full">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div
+              v-for="i in 4"
+              :key="i"
+            >
+              <BaseCard shape="curved" class="flex h-48 flex-col overflow-hidden">
                   <div class="p-4">
                     <div class="flex items-center justify-between">
                       <BasePlaceload class="h-5 w-40 rounded" />

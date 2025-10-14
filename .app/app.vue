@@ -5,6 +5,12 @@ const { user } = useUser()
 const route = useRoute()
 const router = useRouter()
 
+useHead({
+  htmlAttrs: {
+    dir: 'rtl',
+  },
+})
+
 // Strong lock enforcement at app level - runs continuously
 watch([isAppLocked, user, () => route.path], ([locked, currentUser, currentPath]) => {
   // Only redirect if user is authenticated and app is locked
@@ -44,3 +50,15 @@ router.beforeEach((to, from) => {
     <FloatingButtons />
   </NuxtLayout>
 </template>
+
+<style>
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+}
+</style>

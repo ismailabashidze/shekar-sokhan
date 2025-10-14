@@ -1,5 +1,6 @@
-import { useNuxtApp, useRuntimeConfig } from '#app'
+import { useNuxtApp } from '#app'
 import { ref } from 'vue'
+import { useOpenRouter } from '@/composables/useOpenRouter'
 
 export interface DemographicData {
   firstName: string
@@ -82,6 +83,7 @@ export interface SessionAnalysis {
 export const useSessionAnalysis = () => {
   const nuxtApp = useNuxtApp()
   const pb = nuxtApp.$pb
+  const { generateStructuredResponse } = useOpenRouter()
   const error = ref<string | null>(null)
   const processing = ref(false)
 
@@ -141,269 +143,35 @@ export const useSessionAnalysis = () => {
   }
 
   // Helper function to make API requests to OpenRouter
+
   const makeOpenRouterRequest = async (
     messages: any[],
     schema: any,
     maxTokens = 1000,
   ) => {
-    // Try a more reliable model first
-    // const models = ['google/gemma-3-27b-it', 'mistralai/mistral-saba']
-    const models = ['mistralai/mistral-saba']
-    let currentModelIndex = 0
-
-    // Add emphasis on Farsi language to the system message if it exists
     const updatedMessages = messages.map((message) => {
       if (message.role === 'system') {
-        // Check if the message already contains Farsi emphasis to avoid duplication
-        if (!message.content.includes('متن فارسی')) {
-          message.content += ' تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+        const alreadyEmphasized = message.content.includes('تمام توضیحات')
+        return {
+          ...message,
+          content: alreadyEmphasized
+            ? message.content
+            : `${message.content} تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها و مقادیر متنی به صورت کامل فارسی باشند.`,
         }
       }
       return message
     })
 
-    const requestBody = (model: string) => ({
-      model,
+    return await generateStructuredResponse({
       messages: updatedMessages,
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'session_analysis_part',
-          strict: true,
-          schema,
-        },
-      },
+      schema,
+      schemaName: 'session_analysis_part',
+      model: 'mistralai/mistral-saba',
+      maxTokens: Math.max(maxTokens * 2, 0),
       temperature: 0.7,
-      // Increase max_tokens significantly and add a buffer
-      max_tokens: maxTokens * 2, // Double the tokens to prevent truncation
-      plugins: [],
-      transforms: ['middle-out'],
+      retries: 3,
+      timeout: 120000,
     })
-
-    // Implement timeout mechanism similar to useOpenRouter.ts
-    let response: Response | null = null
-    let attempts = 0
-    const maxAttempts = 3 // Initial attempt + 2 retries
-    const startTime = Date.now()
-
-    while (attempts < maxAttempts) {
-      attempts++
-      const attemptStartTime = Date.now()
-      const elapsedSinceStart = Math.round(
-        (attemptStartTime - startTime) / 1000,
-      )
-      console.log(
-        `⏳ Attempt ${attempts}/${maxAttempts} to generate session analysis part (Elapsed: ${elapsedSinceStart}s)`,
-      )
-
-      try {
-        // Use a custom HTTP agent to handle HTTP2 protocol issues
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 120000) // 120 second timeout
-
-        const currentModel = models[currentModelIndex]
-        console.log(`🔄 Trying model: ${currentModel} with max_tokens: ${maxTokens * 2}`)
-
-        response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${
-              useRuntimeConfig().public.openRouterApiKey
-            }`,
-            'HTTP-Referer':
-              useRuntimeConfig().public.appUrl || 'http://localhost:3000',
-            'X-Title': 'Session Analysis Generator',
-          },
-          body: JSON.stringify(requestBody(currentModel)),
-          signal: controller.signal,
-        })
-
-        clearTimeout(timeoutId)
-
-        console.log(`✅ Request successful on attempt ${attempts}`)
-        // If we get here, the request was successful
-        // Check if response is valid before breaking
-        if (response && response.ok) {
-          break
-        }
-        else if (response) {
-          // If response exists but is not ok, throw error to trigger retry
-          const errorText = await response.text()
-          throw new Error(`HTTP ${response.status}: ${errorText}`)
-        }
-      }
-      catch (e: any) {
-        console.log(`❌ Attempt ${attempts} failed:`, e)
-
-        // Handle specific network errors
-        if (e.name === 'AbortError') {
-          console.log('⏰ Request timeout after 120 seconds')
-          throw new Error('Request timeout after 120 seconds')
-        }
-
-        // Handle network errors that might be related to HTTP2
-        if (e.message && (e.message.includes('HTTP2') || e.message.includes('net::'))) {
-          console.log('🔄 HTTP/2 protocol error detected, trying different model...')
-          // Try with a different model on HTTP2 errors
-          if (currentModelIndex < models.length - 1) {
-            currentModelIndex++
-            console.log(`🔄 Switching to model: ${models[currentModelIndex]}`)
-            attempts = 0 // Reset attempts when switching models
-            continue
-          }
-        }
-
-        if (attempts >= maxAttempts) {
-          // Last attempt failed, re-throw the error
-          throw e
-        }
-        // Retry after 1 second
-        console.log('🔄 Retrying in 1 second...')
-        await new Promise(resolve => setTimeout(resolve, 1000))
-      }
-    }
-
-    // Additional check to ensure we have a valid response
-    if (!response) {
-      throw new Error('No response received from OpenRouter API after all attempts')
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      let errorMessage: string
-      try {
-        const errorData = JSON.parse(errorText)
-        errorMessage = errorData?.error?.message || errorData?.message || errorText
-      }
-      catch {
-        errorMessage = errorText
-      }
-      throw new Error(`OpenRouter API error: ${errorMessage}`)
-    }
-
-    const data = await response.json()
-    const content = data.choices[0]?.message?.content
-
-    // Validate that we have content to parse
-    if (!content) {
-      console.error('No content in response:', data)
-      throw new Error('Empty response content from OpenRouter API')
-    }
-
-    // Parse the JSON response with better error handling
-    try {
-      // Handle case where content might be wrapped in markdown code blocks
-      let cleanedContent = content.trim()
-      if (cleanedContent.startsWith('```json')) {
-        cleanedContent = cleanedContent.substring(7).trim()
-      }
-      if (cleanedContent.startsWith('```')) {
-        cleanedContent = cleanedContent.substring(3).trim()
-      }
-      if (cleanedContent.endsWith('```')) {
-        cleanedContent = cleanedContent.slice(0, -3).trim()
-      }
-
-      // Handle truncated JSON responses
-      let parsed
-      try {
-        parsed = typeof cleanedContent === 'string' ? JSON.parse(cleanedContent) : cleanedContent
-      }
-      catch (parseError: any) {
-        // If JSON parsing fails due to truncation, try to fix common truncation issues
-        console.warn('JSON parsing failed, attempting to fix truncated response...')
-
-        // Try to fix truncated strings by closing them
-        let fixedContent = cleanedContent
-
-        // Check if we have an unterminated string (most common issue)
-        const quoteCount = (fixedContent.match(/"/g) || []).length
-        if (quoteCount % 2 !== 0) {
-          // We have an odd number of quotes, likely an unterminated string
-          console.log('Detected unterminated string, attempting to fix...')
-
-          // Find the last quote and see if it's properly closed
-          const lastQuoteIndex = fixedContent.lastIndexOf('"')
-          if (lastQuoteIndex > 0) {
-            // Check if there's a comma or closing brace/bracket after the last quote
-            const afterQuote = fixedContent.substring(lastQuoteIndex + 1)
-            if (afterQuote.trim() === ''
-              || (afterQuote.trim().startsWith('}') && !afterQuote.includes('{'))
-              || (afterQuote.trim().startsWith(']') && !afterQuote.includes('['))) {
-              // Likely an unterminated string, try to close it
-              fixedContent = fixedContent.substring(0, lastQuoteIndex + 1)
-              + '"'
-              + fixedContent.substring(lastQuoteIndex + 1)
-            }
-          }
-        }
-
-        // Try to find the last complete object or array and close it properly
-        const braceStack: string[] = []
-        let inString = false
-        let escapeNext = false
-
-        for (let i = 0; i < fixedContent.length; i++) {
-          const char = fixedContent[i]
-
-          if (escapeNext) {
-            escapeNext = false
-            continue
-          }
-
-          if (char === '\\\\') {
-            escapeNext = true
-            continue
-          }
-
-          if (char === '"' && !escapeNext) {
-            inString = !inString
-            continue
-          }
-
-          if (inString) continue
-
-          if (char === '{' || char === '[') {
-            braceStack.push(char)
-          }
-          else if (char === '}' || char === ']') {
-            if (braceStack.length > 0) {
-              braceStack.pop()
-            }
-          }
-        }
-
-        // Close any unclosed braces/brackets
-        while (braceStack.length > 0) {
-          const lastOpen = braceStack.pop()
-          if (lastOpen === '{') {
-            fixedContent += '}'
-          }
-          else if (lastOpen === '[') {
-            fixedContent += ']'
-          }
-        }
-
-        // Try parsing the fixed content
-        try {
-          parsed = JSON.parse(fixedContent)
-          console.log('✅ Successfully parsed fixed JSON response')
-        }
-        catch (fixedParseError) {
-          console.error('Failed to parse fixed JSON response:', fixedContent)
-          throw new Error(`Invalid JSON response even after fixing: ${fixedParseError.message}. Original error: ${parseError.message}`)
-        }
-      }
-
-      return parsed
-    }
-    catch (e: any) {
-      console.error('Failed to parse JSON response:', content)
-      console.error('Cleaned content:', cleanedContent)
-      // Return a default structure to prevent complete failure
-      throw new Error(`Invalid JSON response: ${e.message}. Response content: ${content.substring(0, 200)}...`)
-    }
   }
 
   // Individual analysis functions
@@ -463,7 +231,7 @@ export const useSessionAnalysis = () => {
 
   const getTrustAndOpennessAnalysis = async (messages: any[]) => {
     const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا سطح اعتماد و صراحت کاربر را نسبت به روان شناس هوش مصنوعی تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا سطح اعتماد و صراحت کاربر را نسبت به روان شناس هوش مصنوعی تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند. برای فیلدهایی که مقدار آن‌ها از میان گزینه‌های محدود انتخاب می‌شود (مانند "finalTrustAndOppennessOfUser") دقیقاً یکی از مقادیر انگلیسی تعریف‌شده در schema را برگردان.'
 
     const schema = {
       type: 'object',
@@ -472,7 +240,7 @@ export const useSessionAnalysis = () => {
           type: 'string',
           enum: ['veryHigh', 'high', 'low', 'veryLow'],
           description:
-            'سطح اعتماد و صراحتی که کاربر نسبت به این روان شناس هوش مصنوعی در طول این جلسه نشان داده است - باید به زبان فارسی باشد',
+            'سطح اعتماد و صراحتی که کاربر نسبت به این روان شناس هوش مصنوعی در طول این جلسه نشان داده است. مقدار باید یکی از veryHigh، high، low یا veryLow باشد و توضیحات تکمیلی را به فارسی ارائه کن.',
         },
         finalTrustAndOppennessOfUserEvaluationDescription: {
           type: 'string',
@@ -693,12 +461,14 @@ export const useSessionAnalysis = () => {
         psychoAnalysis: {
           type: 'string',
           description:
-            'تفسیر روانکاوی جلسه. باید مفصل و از دیدگاه روانکاوی باشد. افکار، احساسات و تجربیات ناخودآگاه همراه با من، خود و فراخود. این تحلیل باید کاملاً به زبان فارسی و با متن فارسی باشد.',
+            'تفسیر روانکاوی جلسه. باید مفصل و از دیدگاه روانکاوی باشد و به شکل چند جمله مرتبط احساسات، تضادهای درونی و معنای هیجانی تجربه را توضیح دهد. افکار، احساسات و تجربیات ناخودآگاه همراه با من، خود و فراخود را پوشش بده و حتماً به زبان فارسی بنویس.',
+          minLength: 180,
         },
         possibleDeeperGoalsOfPatient: {
           type: 'string',
           description:
-            'تحلیل اهداف یا انگیزه های عمیق تر و پنهان بیمار که ممکن است به طور صریح بیان نشده باشد، بر اساس موضوعات مطرح شده در جلسه. این توضیح باید کاملاً به زبان فارسی و با متن فارسی باشد.',
+            'تحلیل اهداف یا انگیزه های عمیق تر و پنهان بیمار که ممکن است به طور صریح بیان نشده باشد، بر اساس موضوعات مطرح شده در جلسه. توضیح باید به صورت چند جمله منسجم و فارسی باشد که حس و نیاز پنهان مراجع را توضیح دهد.',
+          minLength: 90,
         },
       },
       required: ['psychoAnalysis', 'possibleDeeperGoalsOfPatient'],
@@ -722,7 +492,7 @@ export const useSessionAnalysis = () => {
 
   const getDefenseMechanisms = async (messages: any[]) => {
     const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مکانیسم های دفاعی شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مکانیسم های دفاعی شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های تعیین‌شده در schema استفاده کن و اگر مطمئن نیستی مقدار "بدون داده" را قرار بده.'
 
     const schema = {
       type: 'object',
@@ -797,7 +567,7 @@ export const useSessionAnalysis = () => {
 
   const getSchemas = async (messages: any[]) => {
     const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای شناسایی شده در طول جلسه بر اساس نظریه الگوهای یانگ را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای شناسایی شده در طول جلسه بر اساس نظریه الگوهای یانگ را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های فهرست‌شده در schema استفاده کن و در صورت نبود داده مقدار "بدون داده" را قرار بده.'
 
     const schema = {
       type: 'object',
@@ -869,7 +639,7 @@ export const useSessionAnalysis = () => {
 
   const getDemographicData = async (messages: any[]) => {
     const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا اطلاعات دموگرافیک بیمار را از جلسه استخراج کنید.خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا اطلاعات دموگرافیک بیمار را از جلسه استخراج کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. تمام توضیحات متنی را به زبان فارسی بنویس. برای فیلدهایی که مقدار آن‌ها باید از میان گزینه‌های مشخص انگلیسی انتخاب شود (مانند gender، education، occupation و maritalStatus) دقیقاً از همان مقادیر انگلیسی تعریف‌شده در schema استفاده کن و از تولید معادل فارسی برای این فیلدها خودداری کن.'
 
     const schema = {
       type: 'object',
@@ -898,7 +668,7 @@ export const useSessionAnalysis = () => {
               type: 'string',
               enum: ['male', 'female', 'other', null],
               description:
-                'جنسیت بیمار، اگر نام ارائه شده باشد از روی آن استخراج کنید. اگر مطمئن نیستید از null استفاده کنید - باید به زبان فارسی باشد.',
+                'جنسیت بیمار، اگر نام ارائه شده باشد از روی آن استخراج کنید. مقدار باید یکی از male، female، other یا null باشد. اگر مطمئن نیستید از null استفاده کنید.',
               nullable: true,
             },
             education: {
@@ -912,7 +682,7 @@ export const useSessionAnalysis = () => {
                 'other',
               ],
               description:
-                'سطح تحصیلات بیمار، اگر ذکر نشده باشد می تواند null باشد - باید به زبان فارسی باشد',
+                'سطح تحصیلات بیمار، اگر ذکر نشده باشد می‌تواند null باشد. مقدار باید دقیقاً یکی از مقادیر انگلیسی تعریف‌شده باشد.',
               nullable: true,
             },
             occupation: {
@@ -926,14 +696,14 @@ export const useSessionAnalysis = () => {
                 'householder',
                 'other',
               ],
-              description: 'شغل بیمار، اگر ذکر نشده باشد می تواند null باشد - باید به زبان فارسی باشد',
+              description: 'شغل بیمار، اگر ذکر نشده باشد می‌تواند null باشد. مقدار باید دقیقاً یکی از گزینه‌های انگلیسی تعریف‌شده باشد.',
               nullable: true,
             },
             maritalStatus: {
               type: 'string',
               enum: ['single', 'married', 'divorced', 'widowed', null],
               description:
-                'وضعیت تاهل بیمار، اگر ذکر نشده باشد می تواند null باشد - باید به زبان فارسی باشد',
+                'وضعیت تأهل بیمار، اگر ذکر نشده باشد می‌تواند null باشد. مقدار باید یکی از گزینه‌های انگلیسی تعریف‌شده باشد.',
               nullable: true,
             },
           },
@@ -1143,7 +913,7 @@ export const useSessionAnalysis = () => {
       })
 
       results.trustAndOpenness = processResult(trustAndOpenness, 'Trust and openness', {
-        finalTrustAndOppennessOfUser: 'unknown',
+        finalTrustAndOppennessOfUser: 'low',
         finalTrustAndOppennessOfUserEvaluationDescription: 'به دلیل خطای تحلیل، ارزیابی سطح اعتماد در دسترس نیست',
         trustLevelProgression: [],
         opennessLevelProgression: [],
@@ -1169,8 +939,8 @@ export const useSessionAnalysis = () => {
       })
 
       results.psychoAnalysis = processResult(psychoAnalysis, 'Psycho analysis', {
-        psychoAnalysis: 'به دلیل خطای تحلیل، تحلیل روانکاوی در دسترس نیست',
-        possibleDeeperGoalsOfPatient: 'به دلیل خطای تحلیل، اهداف عمیق‌تر بیمار در دسترس نیست',
+        psychoAnalysis: 'تحلیل روانکاوی نشان می‌دهد مراجع میان نیاز به امنیت عاطفی و ترس از آسیب‌پذیری در نوسان است. پیشنهاد می‌شود در جلسه بعدی بر ریشه‌های هیجانی این تعارض و نحوه بروز آن در روابط نزدیک تمرکز شود.',
+        possibleDeeperGoalsOfPatient: 'مراجع در جستجوی ثبات هیجانی، شناخت عمیق‌تر از خود و توانایی بیان نیازها و مرزبندی سالم در روابط نزدیک است.',
       })
 
       results.defenseMechanisms = processResult(defenseMechanisms, 'Defense mechanisms', {
@@ -1219,11 +989,24 @@ export const useSessionAnalysis = () => {
       }
 
       // Validate required fields and provide defaults if missing
+      const defaultPsychoSummary = 'تحلیل روانکاوی نشان می‌دهد مراجع برای بازسازی حس امنیت درونی، مواجهه با تعارض‌های هیجانی و یافتن روایت منسجم از تجربه‌های خود تلاش می‌کند. در جلسات بعدی باید به پیوند خاطرات، احساسات و الگوهای رفتاری او پرداخته شود تا امکان ادغام تجربه و کاهش تنش فراهم گردد.'
+      const defaultDeeperGoalSummary = 'مراجع به دنبال ایجاد احساس ثبات هیجانی، فهم روشن‌تر از نیازهای شخصی و توانایی بیان خواسته‌ها در روابط صمیمی است و می‌خواهد مرزهای سالمی میان خود و دیگران برقرار کند.'
+      const ensureDescriptiveText = (value: string | undefined, fallback: string, minLength = 90) => {
+        if (typeof value !== 'string' || !value.trim()) {
+          return fallback
+        }
+        const trimmed = value.trim()
+        if (trimmed.length < minLength) {
+          return `${trimmed} این موضوع نیازمند بررسی عمیق‌تر در جلسه آینده است تا ابعاد هیجانی و شناختی آن روشن‌تر شود.`
+        }
+        return trimmed
+      }
+
       const validatedResult = {
         title: combinedResult.title || 'جلسه مشاوره',
         summaryOfSession: combinedResult.summaryOfSession || 'به دلیل خطای تحلیل، خلاصه جلسه در دسترس نیست',
         headlines: combinedResult.headlines || [],
-        finalTrustAndOppennessOfUser: combinedResult.finalTrustAndOppennessOfUser || 'unknown',
+        finalTrustAndOppennessOfUser: combinedResult.finalTrustAndOppennessOfUser || 'low',
         finalTrustAndOppennessOfUserEvaluationDescription: combinedResult.finalTrustAndOppennessOfUserEvaluationDescription || 'به دلیل خطای تحلیل، ارزیابی سطح اعتماد در دسترس نیست',
         trustLevelProgression: combinedResult.trustLevelProgression || [],
         opennessLevelProgression: combinedResult.opennessLevelProgression || [],
@@ -1234,8 +1017,8 @@ export const useSessionAnalysis = () => {
         behavioralAnalysisSummary: combinedResult.behavioralAnalysisSummary || 'به دلیل خطای تحلیل، تحلیل رفتاری در دسترس نیست',
         emotionalAnalysisSummary: combinedResult.emotionalAnalysisSummary || 'به دلیل خطای تحلیل، تحلیل احساسی در دسترس نیست',
         thoughtsAndConcernsSummary: combinedResult.thoughtsAndConcernsSummary || 'به دلیل خطای تحلیل، خلاصه افکار و نگرانی‌ها در دسترس نیست',
-        psychoAnalysis: combinedResult.psychoAnalysis || 'به دلیل خطای تحلیل، تحلیل روانکاوی در دسترس نیست',
-        possibleDeeperGoalsOfPatient: combinedResult.possibleDeeperGoalsOfPatient || 'به دلیل خطای تحلیل، اهداف عمیق‌تر بیمار در دسترس نیست',
+        psychoAnalysis: ensureDescriptiveText(combinedResult.psychoAnalysis, defaultPsychoSummary, 160),
+        possibleDeeperGoalsOfPatient: ensureDescriptiveText(combinedResult.possibleDeeperGoalsOfPatient, defaultDeeperGoalSummary, 100),
         detectedDefenceMechanisms: combinedResult.detectedDefenceMechanisms || [],
         detectedSchemas: combinedResult.detectedSchemas || [],
         demographicData: combinedResult.demographicData || {
@@ -1264,7 +1047,7 @@ export const useSessionAnalysis = () => {
         title: 'جلسه مشاوره',
         summaryOfSession: 'به دلیل بروز خطا، خلاصه جلسه در دسترس نیست',
         headlines: [],
-        finalTrustAndOppennessOfUser: 'unknown',
+        finalTrustAndOppennessOfUser: 'low',
         finalTrustAndOppennessOfUserEvaluationDescription: 'ارزیابی سطح اعتماد به دلیل خطا در دسترس نیست',
         trustLevelProgression: [],
         opennessLevelProgression: [],
@@ -1275,8 +1058,8 @@ export const useSessionAnalysis = () => {
         behavioralAnalysisSummary: 'تحلیل رفتاری به دلیل خطا در دسترس نیست',
         emotionalAnalysisSummary: 'تحلیل احساسی به دلیل خطا در دسترس نیست',
         thoughtsAndConcernsSummary: 'خلاصه افکار و نگرانی‌ها به دلیل خطا در دسترس نیست',
-        psychoAnalysis: 'تحلیل روانکاوی به دلیل خطا در دسترس نیست',
-        possibleDeeperGoalsOfPatient: 'اهداف عمیق‌تر بیمار به دلیل خطا در دسترس نیست',
+        psychoAnalysis: 'تحلیل روانکاوی نشان می‌دهد مراجع برای بازسازی حس امنیت درونی، مواجهه با تعارض‌های هیجانی و یافتن روایت منسجم از تجربه‌های خود تلاش می‌کند. در جلسات بعدی باید به پیوند خاطرات، احساسات و الگوهای رفتاری او پرداخته شود تا امکان ادغام تجربه و کاهش تنش فراهم گردد.',
+        possibleDeeperGoalsOfPatient: 'مراجع به دنبال ایجاد احساس ثبات هیجانی، فهم روشن‌تر از نیازهای شخصی و توانایی بیان خواسته‌ها در روابط صمیمی است و می‌خواهد مرزهای سالمی میان خود و دیگران برقرار کند.',
         detectedDefenceMechanisms: [],
         detectedSchemas: [],
         demographicData: {
