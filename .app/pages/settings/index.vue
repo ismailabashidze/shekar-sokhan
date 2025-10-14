@@ -16,6 +16,7 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 const { user } = useUser()
 const { getUserAvatarUrl } = useAvatarManager()
 const { executeDataRemoval } = useDataRemoval()
+const { hasPin } = useLockSystem()
 const avatarUrl = computed(() => getUserAvatarUrl(user.value))
 
 // Modal state
@@ -327,6 +328,38 @@ const confirmDeletion = async () => {
             </div>
           </NuxtLink>
         </BaseCard>
+        <!-- Lock Settings Card -->
+        <BaseCard
+          rounded="lg"
+          elevated-hover
+          class="group border-2 transition-all duration-300 hover:!border-indigo-500 hover:shadow-lg"
+        >
+          <NuxtLink
+            :to="hasPin ? '/settings/remove-lock' : '/settings/lock-setup'"
+            class="block p-6"
+          >
+            <div class="text-center">
+              <div class="mx-auto flex size-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+                <Icon
+                  name="ph:lock-simple-duotone"
+                  class="size-6 text-indigo-500 transition-all duration-300 group-hover:scale-110 group-hover:text-indigo-500"
+                />
+              </div>
+              <BaseHeading
+                tag="h3"
+                size="sm"
+                weight="semibold"
+                class="mt-3 !text-[0.65rem] uppercase"
+              >
+                پین امنیتی
+              </BaseHeading>
+              <BaseText size="xs" class="text-muted-400 mt-1">
+                {{ hasPin ? 'حذف پین' : 'تنظیم پین' }}
+              </BaseText>
+            </div>
+          </NuxtLink>
+        </BaseCard>
+
         <BaseCard
           rounded="lg"
           elevated-hover
@@ -699,7 +732,7 @@ const confirmDeletion = async () => {
       </div>
 
       <template #footer>
-        <div class="border-muted-200 dark:border-muted-700 bg-muted-50/50 dark:bg-muted-900/50 shrink-0 border-t p-3 w-full" dir="rtl">
+        <div class="border-muted-200 dark:border-muted-700 bg-muted-50/50 dark:bg-muted-900/50 w-full shrink-0 border-t p-3" dir="rtl">
           <!-- Step 1 buttons -->
           <template v-if="confirmationStep === 1 && !isDeleting">
             <div class="flex gap-2">

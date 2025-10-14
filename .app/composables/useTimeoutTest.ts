@@ -10,16 +10,16 @@ export function useTimeoutTest() {
 
     try {
       console.log('🔍 Starting timeout test with retry mechanism')
-      
+
       // Implement timeout mechanism with retry
       let response: Response | null = null
       let attempts = 0
       const maxAttempts = 2 // Initial attempt + 1 retry
-      
+
       while (attempts < maxAttempts) {
         attempts++
         console.log(`⏳ Attempt ${attempts}/${maxAttempts} to test timeout mechanism`)
-        
+
         try {
           response = await Promise.race([
             // This is a test endpoint that will always timeout to simulate the issue
@@ -29,25 +29,27 @@ export function useTimeoutTest() {
                 'Content-Type': 'application/json',
               },
             }),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
               setTimeout(() => {
                 console.log('⏰ Request timeout after 30 seconds')
                 reject(new Error('Request timeout after 30 seconds'))
-              }, 30000)
-            )
+              }, 30000),
+            ),
           ]) as Response
-          
+
           console.log(`✅ Request successful on attempt ${attempts}`)
           // If we get here, the request was successful
           // Check if response is valid before breaking
           if (response && response.ok) {
             break
-          } else if (response) {
+          }
+          else if (response) {
             // If response exists but is not ok, throw error to trigger retry
             const errorText = await response.text()
             throw new Error(`HTTP ${response.status}: ${errorText}`)
           }
-        } catch (e) {
+        }
+        catch (e) {
           console.log(`❌ Attempt ${attempts} failed:`, e)
           if (attempts >= maxAttempts) {
             // Last attempt failed, re-throw the error
@@ -63,7 +65,7 @@ export function useTimeoutTest() {
       if (!response) {
         throw new Error('No response received after all attempts')
       }
-      
+
       if (!response.ok) {
         const errorText = await response.text()
         console.error('❌ API error response:', errorText)

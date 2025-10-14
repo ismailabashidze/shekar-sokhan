@@ -578,11 +578,11 @@ async function submitMessage() {
 <template>
   <div class="relative">
     <!-- Horizontal bar for small screens (600px and below) -->
-    <div class="bg-muted-100 dark:bg-muted-900 flex h-16 w-full items-center justify-between border-b px-4 hidden [@media(max-width:600px)]:flex">
+    <div class="bg-muted-100 dark:bg-muted-900 flex hidden h-16 w-full items-center justify-between border-b px-4 [@media(max-width:600px)]:flex">
       <div class="flex items-center gap-2">
         <button
           type="button"
-          class="text-muted-400 hover:text-primary-500 flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300"
+          class="text-muted-400 hover:text-primary-500 flex size-10 items-center justify-center rounded-full transition-colors duration-300"
           @click="open('search')"
         >
           <Icon name="ph:magnifying-glass-duotone" class="size-5" />
@@ -596,7 +596,7 @@ async function submitMessage() {
       <div class="flex items-center gap-2">
         <NuxtLink
           to="#"
-          class="text-muted-400 hover:text-primary-500 flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300"
+          class="text-muted-400 hover:text-primary-500 flex size-10 items-center justify-center rounded-full transition-colors duration-300"
         >
           <Icon name="ph:gear-six-duotone" class="size-5" />
         </NuxtLink>

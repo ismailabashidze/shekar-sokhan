@@ -104,7 +104,7 @@ export function useGoal() {
         user_id: record.user_id,
         session_id: record.session_id,
         goals: {
-          suggestedDisordersToInvestigate: record.suggestedDisordersToInvestigate
+          suggestedDisordersToInvestigate: record.suggestedDisordersToInvestigate,
         },
         created: record.created,
         updated: record.updated,

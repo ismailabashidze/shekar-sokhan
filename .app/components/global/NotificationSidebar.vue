@@ -23,7 +23,7 @@ onMounted(() => {
 const handleNotificationClick = async (notification: any) => {
   await markAsRead(notification.id)
   close('notifications')
-  
+
   // Navigate to notification details page
   await navigateTo(`/notifications/${notification.id}`)
 }

@@ -1,20 +1,26 @@
 <template>
-  <div class="from-primary-50 via-white to-blue-50 dark:from-muted-900 dark:via-muted-800 dark:to-muted-900 min-h-screen bg-gradient-to-br">
+  <div class="from-primary-50 dark:from-muted-900 dark:via-muted-800 dark:to-muted-900 min-h-screen bg-gradient-to-br via-white to-blue-50">
     <!-- Loading State -->
-    <div v-if="loading" class="flex items-center justify-center min-h-screen">
+    <div v-if="loading" class="flex min-h-screen items-center justify-center">
       <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-2 border-primary-500 border-t-transparent mx-auto mb-4"></div>
-        <p class="text-muted-600 dark:text-muted-400">در حال بارگذاری مصاحبه...</p>
+        <div class="border-primary-500 mx-auto mb-4 size-12 animate-spin rounded-full border-2 border-t-transparent" />
+        <p class="text-muted-600 dark:text-muted-400">
+          در حال بارگذاری مصاحبه...
+        </p>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="flex items-center justify-center min-h-screen">
-      <div class="text-center p-8 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800">
-        <Icon name="ph:warning" class="size-12 text-red-500 mx-auto mb-4" />
-        <h2 class="text-xl font-bold text-red-800 dark:text-red-200 mb-2">خطا در بارگذاری مصاحبه</h2>
-        <p class="text-red-600 dark:text-red-400">{{ error }}</p>
-        <button @click="$router.push('/diagnosis/categories')" class="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+    <div v-else-if="error" class="flex min-h-screen items-center justify-center">
+      <div class="rounded-2xl border border-red-200 bg-red-50 p-8 text-center dark:border-red-800 dark:bg-red-900/20">
+        <Icon name="ph:warning" class="mx-auto mb-4 size-12 text-red-500" />
+        <h2 class="mb-2 text-xl font-bold text-red-800 dark:text-red-200">
+          خطا در بارگذاری مصاحبه
+        </h2>
+        <p class="text-red-600 dark:text-red-400">
+          {{ error }}
+        </p>
+        <button class="mt-4 rounded-lg bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600" @click="$router.push('/diagnosis/categories')">
           بازگشت به دسته‌بندی‌ها
         </button>
       </div>
@@ -23,15 +29,19 @@
     <!-- Main Interview Content -->
     <div v-else-if="disorderInfo && currentStep">
       <!-- Header Section -->
-      <div class="bg-white/80 dark:bg-muted-800/80 backdrop-blur-sm border-b border-white/20 dark:border-muted-700/50">
+      <div class="dark:bg-muted-800/80 dark:border-muted-700/50 border-b border-white/20 bg-white/80 backdrop-blur-sm">
         <div class="container mx-auto max-w-7xl px-4 py-6">
           <!-- Navigation Breadcrumb -->
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2 text-sm text-muted-600 dark:text-muted-400">
+          <div class="mb-4 flex items-center justify-between">
+            <div class="text-muted-600 dark:text-muted-400 flex items-center gap-2 text-sm">
               <Icon name="ph:house" class="size-4" />
-              <NuxtLink to="/" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">خانه</NuxtLink>
+              <NuxtLink to="/" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                خانه
+              </NuxtLink>
               <Icon name="ph:caret-left" class="size-3" />
-              <NuxtLink to="/diagnosis" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">راهنمای تشخیصی</NuxtLink>
+              <NuxtLink to="/diagnosis" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                راهنمای تشخیصی
+              </NuxtLink>
               <Icon name="ph:caret-left" class="size-3" />
               <span class="text-primary-600 dark:text-primary-400 font-medium">مصاحبه تشخیصی</span>
             </div>
@@ -39,69 +49,72 @@
           </div>
 
           <!-- Interview Header -->
-          <div class="flex items-center gap-4 mb-4">
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-full">
+          <div class="mb-4 flex items-center gap-4">
+            <div class="rounded-full bg-gradient-to-r from-blue-500 to-blue-600 p-3">
               <Icon name="ph:user-focus" class="size-8 text-white" />
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-muted-800 dark:text-white">
+              <h1 class="text-muted-800 text-2xl font-bold dark:text-white">
                 مصاحبه تشخیصی {{ disorderInfo.title }}
               </h1>
-              <p class="text-muted-600 dark:text-muted-400">{{ disorderInfo.titleEn }} ({{ disorderInfo.code || 'DSM-5' }})</p>
+              <p class="text-muted-600 dark:text-muted-400">
+                {{ disorderInfo.titleEn }} ({{ disorderInfo.code || 'DSM-5' }})
+              </p>
             </div>
           </div>
 
           <!-- Progress Bar -->
           <div class="mb-6">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-muted-700 dark:text-muted-300">پیشرفت مصاحبه</span>
-              <span class="text-sm font-medium text-primary-600 dark:text-primary-400">
+            <div class="mb-2 flex items-center justify-between">
+              <span class="text-muted-700 dark:text-muted-300 text-sm font-medium">پیشرفت مصاحبه</span>
+              <span class="text-primary-600 dark:text-primary-400 text-sm font-medium">
                 مرحله {{ currentStepIndex + 1 }} از {{ interviewSteps.length }}
               </span>
             </div>
-            <div class="w-full bg-muted-200 dark:bg-muted-700 rounded-full h-2">
-              <div 
-                class="bg-primary-500 h-2 rounded-full transition-all duration-500" 
+            <div class="bg-muted-200 dark:bg-muted-700 h-2 w-full rounded-full">
+              <div
+                class="bg-primary-500 h-2 rounded-full transition-all duration-500"
                 :style="{ width: `${((currentStepIndex + 1) / interviewSteps.length) * 100}%` }"
-              ></div>
+              />
             </div>
           </div>
 
           <!-- Visual Step Graph -->
           <div class="mb-6">
-            <h3 class="text-sm font-medium text-muted-700 dark:text-muted-300 mb-4">نقشه مراحل مصاحبه</h3>
-            <div class="bg-white/80 dark:bg-muted-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20 dark:border-muted-700/50 step-graph-container">
-              
+            <h3 class="text-muted-700 dark:text-muted-300 mb-4 text-sm font-medium">
+              نقشه مراحل مصاحبه
+            </h3>
+            <div class="dark:bg-muted-800/80 dark:border-muted-700/50 step-graph-container rounded-2xl border border-white/20 bg-white/80 p-8 shadow-xl backdrop-blur-sm">
               <!-- Compact Step Flow -->
-              <div class="relative pt-8 pb-16">
+              <div class="relative pb-16 pt-8">
                 <!-- Step Indicators -->
-                <div class="relative flex justify-between items-center">
+                <div class="relative flex items-center justify-between">
                   <!-- Background Progress Line -->
-                  <div class="absolute top-6 left-0 right-0 h-2 bg-muted-200 dark:bg-muted-700 rounded-full">
-                    <div 
-                      class="h-2 bg-gradient-to-r from-primary-500 to-green-500 rounded-full transition-all duration-1000 ease-out"
+                  <div class="bg-muted-200 dark:bg-muted-700 absolute inset-x-0 top-6 h-2 rounded-full">
+                    <div
+                      class="from-primary-500 h-2 rounded-full bg-gradient-to-r to-green-500 transition-all duration-1000 ease-out"
                       :style="{ width: `${Math.max(8, (completedSteps.length / Math.max(1, interviewSteps.length)) * 100)}%` }"
-                    ></div>
+                    />
                   </div>
                   <div
                     v-for="(step, index) in interviewSteps"
                     :key="step.id"
-                    class="relative group"
+                    class="group relative"
                     :class="{ 'cursor-pointer': canNavigateToStep(step.id) }"
                   >
                     <!-- Step Circle -->
                     <div
-                      @click="canNavigateToStep(step.id) && navigateToStep(step.id)"
-                      class="w-12 h-12 rounded-full border-4 bg-white dark:bg-muted-800 flex items-center justify-center transition-all duration-300 relative z-10"
+                      class="dark:bg-muted-800 relative z-10 flex size-12 items-center justify-center rounded-full border-4 bg-white transition-all duration-300"
                       :class="[
                         step.id === currentStep?.id
-                          ? 'border-primary-500 shadow-lg shadow-primary-500/30 scale-110'
+                          ? 'border-primary-500 shadow-primary-500/30 scale-110 shadow-lg'
                           : completedSteps.includes(step.id)
                             ? 'border-green-500 shadow-lg shadow-green-500/20'
                             : canNavigateToStep(step.id)
-                              ? 'border-muted-300 dark:border-muted-600 hover:border-primary-400 hover:scale-105 cursor-pointer'
-                              : 'border-muted-200 dark:border-muted-700 opacity-60 cursor-not-allowed'
+                              ? 'border-muted-300 dark:border-muted-600 hover:border-primary-400 cursor-pointer hover:scale-105'
+                              : 'border-muted-200 dark:border-muted-700 cursor-not-allowed opacity-60'
                       ]"
+                      @click="canNavigateToStep(step.id) && navigateToStep(step.id)"
                     >
                       <!-- Step Content -->
                       <div v-if="completedSteps.includes(step.id)" class="text-green-600">
@@ -110,61 +123,73 @@
                       <div v-else-if="step.id === currentStep?.id" class="text-primary-600">
                         <Icon name="ph:play-fill" class="size-6" />
                       </div>
-                      <div v-else class="text-muted-500 dark:text-muted-400 font-bold text-sm">
+                      <div v-else class="text-muted-500 dark:text-muted-400 text-sm font-bold">
                         {{ index + 1 }}
                       </div>
                     </div>
-                    
+
                     <!-- Step Label -->
-                    <div class="absolute top-16 left-1/2 transform -translate-x-1/2 text-center min-w-max">
-                      <div 
-                        class="text-xs font-medium px-2 py-1 rounded-md max-w-20 break-words"
+                    <div class="absolute left-1/2 top-16 min-w-max -translate-x-1/2 text-center">
+                      <div
+                        class="max-w-20 break-words rounded-md px-2 py-1 text-xs font-medium"
                         :class="[
                           step.id === currentStep?.id
                             ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20'
                             : completedSteps.includes(step.id)
-                              ? 'text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20'
+                              ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
                               : 'text-muted-600 dark:text-muted-400'
                         ]"
                       >
                         {{ step.title }}
                       </div>
                     </div>
-                    
+
                     <!-- Hover Tooltip -->
-                    <div class="absolute -top-20 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 delay-500 pointer-events-none z-30">
-                      <div class="bg-muted-900 dark:bg-muted-100 text-white dark:text-muted-900 text-xs rounded-lg py-2 px-3 shadow-2xl border border-muted-700 dark:border-muted-300 w-32">
-                        <div class="font-semibold text-center mb-1 leading-tight">{{ step.title }}</div>
+                    <div class="pointer-events-none absolute -top-20 left-1/2 z-30 -translate-x-1/2 opacity-0 transition-all delay-500 duration-300 group-hover:opacity-100">
+                      <div class="bg-muted-900 dark:bg-muted-100 dark:text-muted-900 border-muted-700 dark:border-muted-300 w-32 rounded-lg border px-3 py-2 text-xs text-white shadow-2xl">
+                        <div class="mb-1 text-center font-semibold leading-tight">
+                          {{ step.title }}
+                        </div>
                         <div class="text-muted-300 dark:text-muted-600 text-center text-xs leading-tight">
                           {{ step.description ? (step.description.length > 60 ? step.description.substring(0, 60) + '...' : step.description) : 'مرحله ' + (index + 1) + ' از مصاحبه' }}
                         </div>
                         <!-- Arrow pointing down -->
-                        <div class="absolute top-full left-1/2 transform -translate-x-1/2">
-                          <div class="border-l-4 border-r-4 border-t-4 border-transparent border-t-muted-900 dark:border-t-muted-100"></div>
+                        <div class="absolute left-1/2 top-full -translate-x-1/2">
+                          <div class="border-t-muted-900 dark:border-t-muted-100 border-x-4 border-t-4 border-transparent" />
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                
               </div>
-              
+
               <!-- Progress Stats -->
               <div class="mt-12 grid grid-cols-3 gap-4">
                 <div class="text-center">
-                  <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ completedSteps.length }}</div>
-                  <div class="text-xs text-muted-600 dark:text-muted-400">تکمیل شده</div>
+                  <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {{ completedSteps.length }}
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    تکمیل شده
+                  </div>
                 </div>
                 <div class="text-center">
-                  <div class="text-2xl font-bold text-primary-600 dark:text-primary-400">{{ currentStep ? 1 : 0 }}</div>
-                  <div class="text-xs text-muted-600 dark:text-muted-400">جاری</div>
+                  <div class="text-primary-600 dark:text-primary-400 text-2xl font-bold">
+                    {{ currentStep ? 1 : 0 }}
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    جاری
+                  </div>
                 </div>
                 <div class="text-center">
-                  <div class="text-2xl font-bold text-muted-500 dark:text-muted-400">{{ Math.max(0, interviewSteps.length - completedSteps.length - (currentStep ? 1 : 0)) }}</div>
-                  <div class="text-xs text-muted-600 dark:text-muted-400">باقی‌مانده</div>
+                  <div class="text-muted-500 dark:text-muted-400 text-2xl font-bold">
+                    {{ Math.max(0, interviewSteps.length - completedSteps.length - (currentStep ? 1 : 0)) }}
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    باقی‌مانده
+                  </div>
                 </div>
               </div>
-              
             </div>
           </div>
 
@@ -173,18 +198,18 @@
             <button
               v-for="(step, index) in interviewSteps"
               :key="step.id"
-              @click="navigateToStep(step.id)"
               :disabled="!canNavigateToStep(step.id)"
-              class="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+              class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200"
               :class="[
-                step.id === currentStep.id 
-                  ? 'bg-primary-500 text-white' 
+                step.id === currentStep.id
+                  ? 'bg-primary-500 text-white'
                   : completedSteps.includes(step.id)
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                     : canNavigateToStep(step.id)
                       ? 'bg-muted-100 dark:bg-muted-700 text-muted-700 dark:text-muted-300 hover:bg-primary-100 dark:hover:bg-primary-900/30'
                       : 'bg-muted-50 dark:bg-muted-800/50 text-muted-400 dark:text-muted-500 cursor-not-allowed'
               ]"
+              @click="navigateToStep(step.id)"
             >
               {{ index + 1 }}. {{ step.title }}
             </button>
@@ -194,47 +219,58 @@
 
       <!-- Main Content Area -->
       <div class="container mx-auto max-w-7xl px-4 py-8">
-        <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
-          
+        <div class="grid grid-cols-1 gap-8 xl:grid-cols-4">
           <!-- Main Interview Area -->
           <div class="xl:col-span-3">
             <!-- Current Step -->
-            <div class="bg-white/80 dark:bg-muted-800/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-muted-700/50 mb-8">
+            <div class="dark:bg-muted-800/80 dark:border-muted-700/50 mb-8 rounded-3xl border border-white/20 bg-white/80 p-8 shadow-2xl backdrop-blur-sm">
               <!-- Step Header -->
               <div class="mb-8">
-                <div class="flex items-center gap-3 mb-4">
-                  <div class="bg-primary-500 p-3 rounded-full">
+                <div class="mb-4 flex items-center gap-3">
+                  <div class="bg-primary-500 rounded-full p-3">
                     <Icon :name="getStepIcon(currentStep.id)" class="size-6 text-white" />
                   </div>
                   <div>
-                    <h2 class="text-2xl font-bold text-muted-800 dark:text-white">{{ currentStep.title }}</h2>
-                    <p class="text-muted-600 dark:text-muted-400">{{ currentStep.description }}</p>
+                    <h2 class="text-muted-800 text-2xl font-bold dark:text-white">
+                      {{ currentStep.title }}
+                    </h2>
+                    <p class="text-muted-600 dark:text-muted-400">
+                      {{ currentStep.description }}
+                    </p>
                   </div>
                 </div>
 
                 <!-- Goals -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl mb-4">
-                  <h3 class="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
+                <div class="mb-4 rounded-xl bg-blue-50 p-4 dark:bg-blue-900/20">
+                  <h3 class="mb-2 flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
                     <Icon name="ph:target" class="size-5" />
                     اهداف این مرحله
                   </h3>
                   <ul class="space-y-1">
-                    <li v-for="goal in currentStep.goals" :key="goal" class="flex items-start gap-2 text-sm text-blue-700 dark:text-blue-300">
-                      <Icon name="ph:check-circle" class="size-4 shrink-0 mt-0.5" />
+                    <li
+                      v-for="goal in currentStep.goals"
+                      :key="goal"
+                      class="flex items-start gap-2 text-sm text-blue-700 dark:text-blue-300"
+                    >
+                      <Icon name="ph:check-circle" class="mt-0.5 size-4 shrink-0" />
                       <span>{{ goal }}</span>
                     </li>
                   </ul>
                 </div>
 
                 <!-- Precautions -->
-                <div v-if="currentStep.precautions?.length" class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl">
-                  <h3 class="font-semibold text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-2">
+                <div v-if="currentStep.precautions?.length" class="rounded-xl bg-amber-50 p-4 dark:bg-amber-900/20">
+                  <h3 class="mb-2 flex items-center gap-2 font-semibold text-amber-800 dark:text-amber-300">
                     <Icon name="ph:warning-circle" class="size-5" />
                     نکات مهم و احتیاط‌ها
                   </h3>
                   <ul class="space-y-1">
-                    <li v-for="precaution in currentStep.precautions" :key="precaution" class="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300">
-                      <Icon name="ph:warning" class="size-4 shrink-0 mt-0.5" />
+                    <li
+                      v-for="precaution in currentStep.precautions"
+                      :key="precaution"
+                      class="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300"
+                    >
+                      <Icon name="ph:warning" class="mt-0.5 size-4 shrink-0" />
                       <span>{{ precaution }}</span>
                     </li>
                   </ul>
@@ -243,18 +279,24 @@
 
               <!-- Tasks -->
               <div class="space-y-6">
-                <div v-for="task in currentStep.tasks" :key="task.id" class="border border-muted-200 dark:border-muted-700 rounded-xl p-6">
-                  <div class="flex items-start justify-between gap-4 mb-4">
+                <div
+                  v-for="task in currentStep.tasks"
+                  :key="task.id"
+                  class="border-muted-200 dark:border-muted-700 rounded-xl border p-6"
+                >
+                  <div class="mb-4 flex items-start justify-between gap-4">
                     <div class="flex items-start gap-3">
-                      <Icon :name="getTaskIcon(task.type)" class="size-5 text-primary-500 shrink-0 mt-1" />
+                      <Icon :name="getTaskIcon(task.type)" class="text-primary-500 mt-1 size-5 shrink-0" />
                       <div>
-                        <h4 class="font-semibold text-muted-800 dark:text-white mb-1">{{ task.content }}</h4>
-                        <span class="text-xs px-2 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
+                        <h4 class="text-muted-800 mb-1 font-semibold dark:text-white">
+                          {{ task.content }}
+                        </h4>
+                        <span class="bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full px-2 py-1 text-xs">
                           {{ getTaskTypeLabel(task.type) }}
                         </span>
                       </div>
                     </div>
-                    <div v-if="task.required" class="text-xs px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                    <div v-if="task.required" class="rounded-full bg-red-100 px-2 py-1 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-300">
                       ضروری
                     </div>
                   </div>
@@ -263,16 +305,20 @@
                   <div class="mt-4">
                     <!-- Multiple Choice Questions -->
                     <div v-if="task.options" class="space-y-2">
-                      <div v-for="option in task.options" :key="option" class="flex items-center gap-3">
-                        <input 
+                      <div
+                        v-for="option in task.options"
+                        :key="option"
+                        class="flex items-center gap-3"
+                      >
+                        <input
                           :id="`${task.id}-${option}`"
-                          v-model="taskResponses[task.id]" 
+                          v-model="taskResponses[task.id]"
                           :value="option"
-                          type="radio" 
+                          type="radio"
                           :name="task.id"
-                          class="w-4 h-4 text-primary-500 border-muted-300 focus:ring-primary-500"
-                        />
-                        <label :for="`${task.id}-${option}`" class="text-sm text-muted-700 dark:text-muted-300">{{ option }}</label>
+                          class="text-primary-500 border-muted-300 focus:ring-primary-500 size-4"
+                        >
+                        <label :for="`${task.id}-${option}`" class="text-muted-700 dark:text-muted-300 text-sm">{{ option }}</label>
                       </div>
                     </div>
 
@@ -281,31 +327,39 @@
                       <textarea
                         v-model="taskResponses[task.id]"
                         rows="4"
-                        class="w-full p-3 border border-muted-300 dark:border-muted-600 rounded-lg bg-white dark:bg-muted-800 text-muted-800 dark:text-white"
+                        class="border-muted-300 dark:border-muted-600 dark:bg-muted-800 text-muted-800 w-full rounded-lg border bg-white p-3 dark:text-white"
                         :placeholder="getTaskPlaceholder(task.type)"
-                      ></textarea>
+                      />
                     </div>
 
                     <!-- Assessment Input -->
                     <div v-else-if="task.type === 'assessment'">
-                      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                          <label class="block text-sm font-medium text-muted-700 dark:text-muted-300 mb-2">نتیجه ارزیابی</label>
-                          <select v-model="taskResponses[task.id]" class="w-full p-2 border border-muted-300 dark:border-muted-600 rounded-lg bg-white dark:bg-muted-800">
-                            <option value="">انتخاب کنید</option>
-                            <option value="positive">مثبت</option>
-                            <option value="negative">منفی</option>
-                            <option value="inconclusive">غیرقطعی</option>
+                          <label class="text-muted-700 dark:text-muted-300 mb-2 block text-sm font-medium">نتیجه ارزیابی</label>
+                          <select v-model="taskResponses[task.id]" class="border-muted-300 dark:border-muted-600 dark:bg-muted-800 w-full rounded-lg border bg-white p-2">
+                            <option value="">
+                              انتخاب کنید
+                            </option>
+                            <option value="positive">
+                              مثبت
+                            </option>
+                            <option value="negative">
+                              منفی
+                            </option>
+                            <option value="inconclusive">
+                              غیرقطعی
+                            </option>
                           </select>
                         </div>
                         <div class="md:col-span-2">
-                          <label class="block text-sm font-medium text-muted-700 dark:text-muted-300 mb-2">یادداشت‌ها</label>
+                          <label class="text-muted-700 dark:text-muted-300 mb-2 block text-sm font-medium">یادداشت‌ها</label>
                           <textarea
                             v-model="taskNotes[task.id]"
                             rows="3"
-                            class="w-full p-3 border border-muted-300 dark:border-muted-600 rounded-lg bg-white dark:bg-muted-800"
+                            class="border-muted-300 dark:border-muted-600 dark:bg-muted-800 w-full rounded-lg border bg-white p-3"
                             placeholder="یادداشت‌های تکمیلی..."
-                          ></textarea>
+                          />
                         </div>
                       </div>
                     </div>
@@ -314,11 +368,23 @@
                     <div v-else class="space-y-2">
                       <div class="flex gap-4">
                         <label class="flex items-center gap-2">
-                          <input v-model="taskResponses[task.id]" value="yes" type="radio" :name="task.id" class="w-4 h-4 text-green-500">
+                          <input
+                            v-model="taskResponses[task.id]"
+                            value="yes"
+                            type="radio"
+                            :name="task.id"
+                            class="size-4 text-green-500"
+                          >
                           <span class="text-sm text-green-700 dark:text-green-300">بله</span>
                         </label>
                         <label class="flex items-center gap-2">
-                          <input v-model="taskResponses[task.id]" value="no" type="radio" :name="task.id" class="w-4 h-4 text-red-500">
+                          <input
+                            v-model="taskResponses[task.id]"
+                            value="no"
+                            type="radio"
+                            :name="task.id"
+                            class="size-4 text-red-500"
+                          >
                           <span class="text-sm text-red-700 dark:text-red-300">خیر</span>
                         </label>
                       </div>
@@ -328,31 +394,31 @@
               </div>
 
               <!-- Navigation Actions -->
-              <div class="flex justify-between items-center mt-8 pt-6 border-t border-muted-200 dark:border-muted-700">
-                <button 
+              <div class="border-muted-200 dark:border-muted-700 mt-8 flex items-center justify-between border-t pt-6">
+                <button
                   v-if="currentStepIndex > 0"
+                  class="text-muted-600 dark:text-muted-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-2 px-4 py-2 transition-colors"
                   @click="goToPreviousStep"
-                  class="flex items-center gap-2 px-4 py-2 text-muted-600 dark:text-muted-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                 >
                   <Icon name="ph:arrow-right" class="size-4" />
                   مرحله قبل
                 </button>
-                <div></div>
-                
+                <div />
+
                 <div class="flex gap-3">
-                  <button 
+                  <button
+                    class="bg-muted-200 dark:bg-muted-700 text-muted-700 dark:text-muted-300 hover:bg-muted-300 dark:hover:bg-muted-600 rounded-lg px-4 py-2 transition-colors"
                     @click="saveStepProgress"
-                    class="px-4 py-2 bg-muted-200 dark:bg-muted-700 text-muted-700 dark:text-muted-300 rounded-lg hover:bg-muted-300 dark:hover:bg-muted-600 transition-colors"
                   >
                     ذخیره پیشرفت
                   </button>
-                  <button 
-                    @click="completeStep"
+                  <button
                     :disabled="!canCompleteStep"
-                    class="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    class="bg-primary-500 hover:bg-primary-600 rounded-lg px-6 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    @click="completeStep"
                   >
                     {{ isLastStep ? 'اتمام مصاحبه' : 'مرحله بعد' }}
-                    <Icon name="ph:arrow-left" class="size-4 inline mr-2" />
+                    <Icon name="ph:arrow-left" class="mr-2 inline size-4" />
                   </button>
                 </div>
               </div>
@@ -362,12 +428,12 @@
           <!-- Sidebar -->
           <div class="xl:col-span-1">
             <!-- Interview Progress -->
-            <div class="bg-white/80 dark:bg-muted-800/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 dark:border-muted-700/50 mb-6">
-              <h3 class="font-semibold text-muted-800 dark:text-white mb-4 flex items-center gap-2">
+            <div class="dark:bg-muted-800/80 dark:border-muted-700/50 mb-6 rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
+              <h3 class="text-muted-800 mb-4 flex items-center gap-2 font-semibold dark:text-white">
                 <Icon name="ph:chart-line" class="size-5" />
                 وضعیت مصاحبه
               </h3>
-              
+
               <div class="space-y-3">
                 <div class="flex justify-between text-sm">
                   <span class="text-muted-600 dark:text-muted-400">مراحل تکمیل شده</span>
@@ -375,50 +441,58 @@
                 </div>
                 <div class="flex justify-between text-sm">
                   <span class="text-muted-600 dark:text-muted-400">زمان شروع</span>
-                  <span class="font-medium text-muted-800 dark:text-white">{{ formatTime(session.startTime) }}</span>
+                  <span class="text-muted-800 font-medium dark:text-white">{{ formatTime(session.startTime) }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
                   <span class="text-muted-600 dark:text-muted-400">مدت زمان</span>
-                  <span class="font-medium text-muted-800 dark:text-white">{{ getElapsedTime() }}</span>
+                  <span class="text-muted-800 font-medium dark:text-white">{{ getElapsedTime() }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Quick Notes -->
-            <div class="bg-white/80 dark:bg-muted-800/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 dark:border-muted-700/50 mb-6">
-              <h3 class="font-semibold text-muted-800 dark:text-white mb-4 flex items-center gap-2">
+            <div class="dark:bg-muted-800/80 dark:border-muted-700/50 mb-6 rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
+              <h3 class="text-muted-800 mb-4 flex items-center gap-2 font-semibold dark:text-white">
                 <Icon name="ph:note-pencil" class="size-5" />
                 یادداشت‌های سریع
               </h3>
-              
+
               <textarea
                 v-model="quickNotes"
                 rows="6"
-                class="w-full p-3 border border-muted-300 dark:border-muted-600 rounded-lg bg-white dark:bg-muted-800 text-sm"
+                class="border-muted-300 dark:border-muted-600 dark:bg-muted-800 w-full rounded-lg border bg-white p-3 text-sm"
                 placeholder="یادداشت‌های کلی مصاحبه..."
-              ></textarea>
-              
-              <button 
+              />
+
+              <button
+                class="bg-primary-500 hover:bg-primary-600 mt-3 w-full rounded-lg px-4 py-2 text-sm text-white transition-colors"
                 @click="saveQuickNotes"
-                class="w-full mt-3 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm"
               >
                 ذخیره یادداشت
               </button>
             </div>
 
             <!-- Activity Log -->
-            <div class="bg-white/80 dark:bg-muted-800/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 dark:border-muted-700/50">
-              <h3 class="font-semibold text-muted-800 dark:text-white mb-4 flex items-center gap-2">
+            <div class="dark:bg-muted-800/80 dark:border-muted-700/50 rounded-3xl border border-white/20 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
+              <h3 class="text-muted-800 mb-4 flex items-center gap-2 font-semibold dark:text-white">
                 <Icon name="ph:list-bullets" class="size-5" />
                 گزارش فعالیت‌ها
               </h3>
-              
-              <div class="space-y-3 max-h-64 overflow-y-auto">
-                <div v-for="log in activityLogs.slice().reverse()" :key="log.id" class="flex items-start gap-3 text-xs">
-                  <Icon :name="getLogIcon(log.action)" class="size-4 text-muted-500 shrink-0 mt-0.5" />
+
+              <div class="max-h-64 space-y-3 overflow-y-auto">
+                <div
+                  v-for="log in activityLogs.slice().reverse()"
+                  :key="log.id"
+                  class="flex items-start gap-3 text-xs"
+                >
+                  <Icon :name="getLogIcon(log.action)" class="text-muted-500 mt-0.5 size-4 shrink-0" />
                   <div>
-                    <p class="text-muted-800 dark:text-white">{{ getLogDescription(log) }}</p>
-                    <p class="text-muted-500 dark:text-muted-400">{{ formatTime(log.timestamp) }}</p>
+                    <p class="text-muted-800 dark:text-white">
+                      {{ getLogDescription(log) }}
+                    </p>
+                    <p class="text-muted-500 dark:text-muted-400">
+                      {{ formatTime(log.timestamp) }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -489,7 +563,7 @@ const activityLogs = ref<InterviewLog[]>([])
 const session = ref({
   disorderId: '',
   startTime: new Date(),
-  endTime: null as Date | null
+  endTime: null as Date | null,
 })
 
 // Generate interview steps based on disorder info
@@ -505,45 +579,45 @@ const generateInterviewSteps = (disorder: any): InterviewStep[] => {
         'برقراری ارتباط مناسب با مراجع',
         'توضیح فرآیند مصاحبه و اهداف آن',
         'کسب رضایت آگاهانه',
-        'ایجاد محیط امن و راحت'
+        'ایجاد محیط امن و راحت',
       ],
       precautions: [
         'حفظ محرمانگی اطلاعات',
         'عدم قضاوت در مورد مراجع',
         'استفاده از زبان ساده و قابل فهم',
-        'توجه به نشانه‌های استرس یا نگرانی'
+        'توجه به نشانه‌های استرس یا نگرانی',
       ],
       tasks: [
         {
           id: 'therapist-intro',
           type: 'documentation',
           content: 'معرفی خود، سوابق تحصیلی و حرفه‌ای',
-          required: true
+          required: true,
         },
         {
           id: 'process-explanation',
           type: 'question',
           content: 'آیا فرآیند مصاحبه و اهداف آن به طور کامل توضیح داده شد؟',
-          required: true
+          required: true,
         },
         {
           id: 'consent-obtained',
           type: 'question',
           content: 'آیا رضایت آگاهانه کسب شد؟',
-          required: true
+          required: true,
         },
         {
           id: 'comfort-check',
           type: 'observation',
           content: 'ارزیابی سطح راحتی و آمادگی مراجع',
-          required: true
-        }
+          required: true,
+        },
       ],
       passCriteria: {
         requiredTasks: ['therapist-intro', 'process-explanation', 'consent-obtained', 'comfort-check'],
-        optionalTasks: []
+        optionalTasks: [],
       },
-      connectedSteps: ['symptom-screening']
+      connectedSteps: ['symptom-screening'],
     },
 
     // Dynamic steps based on disorder
@@ -554,19 +628,19 @@ const generateInterviewSteps = (disorder: any): InterviewStep[] => {
       goals: [
         'شناسایی علائم اصلی و کلیدی اختلال',
         'ارزیابی شدت و مدت علائم',
-        'بررسی الگوی شروع علائم'
+        'بررسی الگوی شروع علائم',
       ],
       precautions: [
         'دقت در ثبت جزئیات علائم',
         'پرسش سوالات باز',
-        'عدم تلقین علائم'
+        'عدم تلقین علائم',
       ],
       tasks: generateSymptomTasks(disorder),
       passCriteria: {
         requiredTasks: ['main-symptoms-check'],
-        optionalTasks: ['severity-assessment']
+        optionalTasks: ['severity-assessment'],
       },
-      connectedSteps: ['diagnostic-criteria']
+      connectedSteps: ['diagnostic-criteria'],
     },
 
     {
@@ -576,19 +650,19 @@ const generateInterviewSteps = (disorder: any): InterviewStep[] => {
       goals: [
         'بررسی هر معیار تشخیصی به طور جداگانه',
         'ثبت شواهد موافق یا مخالف',
-        'ارزیابی مدت زمان علائم'
+        'ارزیابی مدت زمان علائم',
       ],
       precautions: [
         'رعایت ترتیب معیارهای DSM-5',
         'دقت در محاسبه مدت علائم',
-        'جمع‌آوری شواهد کافی'
+        'جمع‌آوری شواهد کافی',
       ],
       tasks: generateDiagnosticCriteriaTasks(disorder),
       passCriteria: {
         requiredTasks: ['criteria-assessment'],
-        optionalTasks: []
+        optionalTasks: [],
       },
-      connectedSteps: ['differential-diagnosis']
+      connectedSteps: ['differential-diagnosis'],
     },
 
     {
@@ -598,19 +672,19 @@ const generateInterviewSteps = (disorder: any): InterviewStep[] => {
       goals: [
         'بررسی اختلالات مشابه',
         'تعیین علت‌های طبی احتمالی',
-        'حذف تشخیص‌های جایگزین'
+        'حذف تشخیص‌های جایگزین',
       ],
       precautions: [
         'دقت در تفکیک اختلالات',
         'در نظر گیری همه احتمالات',
-        'مراجعه برای بررسی‌های طبی در صورت نیاز'
+        'مراجعه برای بررسی‌های طبی در صورت نیاز',
       ],
       tasks: generateDifferentialTasks(disorder),
       passCriteria: {
         requiredTasks: ['differential-review'],
-        optionalTasks: ['medical-causes']
+        optionalTasks: ['medical-causes'],
       },
-      connectedSteps: ['risk-assessment']
+      connectedSteps: ['risk-assessment'],
     },
 
     {
@@ -620,38 +694,38 @@ const generateInterviewSteps = (disorder: any): InterviewStep[] => {
       goals: [
         'ارزیابی خطر خودکشی',
         'بررسی خطر آسیب به دیگران',
-        'شناسایی عوامل محافظت‌کننده'
+        'شناسایی عوامل محافظت‌کننده',
       ],
       precautions: [
         'جدی گرفتن هر نشانه خطر',
         'مستندسازی دقیق ارزیابی خطر',
-        'برنامه‌ریزی ایمنی در صورت نیاز'
+        'برنامه‌ریزی ایمنی در صورت نیاز',
       ],
       tasks: [
         {
           id: 'suicide-risk',
           type: 'assessment',
           content: 'ارزیابی خطر خودکشی',
-          required: true
+          required: true,
         },
         {
           id: 'self-harm-risk',
           type: 'assessment',
           content: 'ارزیابی خطر خودآسیبی',
-          required: true
+          required: true,
         },
         {
           id: 'protective-factors',
           type: 'observation',
           content: 'شناسایی عوامل محافظت‌کننده',
-          required: false
-        }
+          required: false,
+        },
       ],
       passCriteria: {
         requiredTasks: ['suicide-risk', 'self-harm-risk'],
-        optionalTasks: ['protective-factors']
+        optionalTasks: ['protective-factors'],
       },
-      connectedSteps: ['treatment-planning']
+      connectedSteps: ['treatment-planning'],
     },
 
     {
@@ -661,39 +735,39 @@ const generateInterviewSteps = (disorder: any): InterviewStep[] => {
       goals: [
         'تعیین اهداف درمانی',
         'انتخاب روش‌های درمانی مناسب',
-        'برنامه‌ریزی جلسات بعدی'
+        'برنامه‌ریزی جلسات بعدی',
       ],
       precautions: [
         'در نظر گیری ترجیحات مراجع',
         'واقعی بودن اهداف درمانی',
-        'توضیح روند درمان'
+        'توضیح روند درمان',
       ],
       tasks: [
         {
           id: 'treatment-goals',
           type: 'documentation',
           content: 'تعیین اهداف درمانی کوتاه و بلندمدت',
-          required: true
+          required: true,
         },
         {
           id: 'treatment-methods',
           type: 'documentation',
           content: 'انتخاب روش‌های درمانی مناسب',
-          required: true
+          required: true,
         },
         {
           id: 'next-session',
           type: 'documentation',
           content: 'برنامه‌ریزی جلسه بعدی',
-          required: true
-        }
+          required: true,
+        },
       ],
       passCriteria: {
         requiredTasks: ['treatment-goals', 'treatment-methods', 'next-session'],
-        optionalTasks: []
+        optionalTasks: [],
       },
-      connectedSteps: []
-    }
+      connectedSteps: [],
+    },
   ]
 
   return steps
@@ -707,8 +781,8 @@ const generateSymptomTasks = (disorder: any): Task[] => {
       type: 'question',
       content: 'آیا مراجع علائم اصلی اختلال را دارد؟',
       required: true,
-      options: ['بله، همه علائم', 'بله، برخی علائم', 'خیر']
-    }
+      options: ['بله، همه علائم', 'بله، برخی علائم', 'خیر'],
+    },
   ]
 
   if (disorder.diagnosticMarkers) {
@@ -717,7 +791,7 @@ const generateSymptomTasks = (disorder: any): Task[] => {
         id: `symptom-category-${index}`,
         type: 'observation',
         content: `بررسی ${category.category}`,
-        required: false
+        required: false,
       })
     })
   }
@@ -731,8 +805,8 @@ const generateDiagnosticCriteriaTasks = (disorder: any): Task[] => {
       id: 'criteria-assessment',
       type: 'assessment',
       content: 'ارزیابی کلی معیارهای تشخیصی',
-      required: true
-    }
+      required: true,
+    },
   ]
 
   return tasks
@@ -744,8 +818,8 @@ const generateDifferentialTasks = (disorder: any): Task[] => {
       id: 'differential-review',
       type: 'assessment',
       content: 'بررسی اختلالات افتراقی',
-      required: true
-    }
+      required: true,
+    },
   ]
 
   if (disorder.differentialDiagnosis) {
@@ -754,7 +828,7 @@ const generateDifferentialTasks = (disorder: any): Task[] => {
         id: `differential-${index}`,
         type: 'question',
         content: `آیا علائم ${diff.disorder} وجود دارد؟`,
-        required: false
+        required: false,
       })
     })
   }
@@ -782,9 +856,9 @@ const isLastStep = computed(() => {
 
 const canCompleteStep = computed(() => {
   if (!currentStep.value) return false
-  
+
   const requiredTasks = currentStep.value.passCriteria.requiredTasks
-  return requiredTasks.every(taskId => {
+  return requiredTasks.every((taskId) => {
     return taskResponses.value[taskId] !== undefined && taskResponses.value[taskId] !== ''
   })
 })
@@ -795,7 +869,8 @@ const navigateToStep = (stepId: string) => {
     console.log('🚀 Navigating to step:', stepId)
     addActivityLog('step_started', stepId)
     currentStepId.value = stepId
-  } else {
+  }
+  else {
     console.log('❌ Cannot navigate to step:', stepId)
   }
 }
@@ -803,34 +878,35 @@ const navigateToStep = (stepId: string) => {
 const canNavigateToStep = (stepId: string): boolean => {
   const stepIndex = interviewSteps.value.findIndex(step => step.id === stepId)
   const currentIndex = currentStepIndex.value
-  
+
   // Can always go to completed steps or current step
   if (completedSteps.value.includes(stepId) || stepId === currentStepId.value) {
     return true
   }
-  
+
   // Can only go forward one step at a time
   return stepIndex === currentIndex + 1
 }
 
 const completeStep = () => {
   if (!currentStep.value || !canCompleteStep.value) return
-  
+
   // Mark step as completed
   if (!completedSteps.value.includes(currentStep.value.id)) {
     completedSteps.value.push(currentStep.value.id)
   }
-  
+
   addActivityLog('step_completed', currentStep.value.id, {
     responses: { ...taskResponses.value },
-    notes: { ...taskNotes.value }
+    notes: { ...taskNotes.value },
   })
-  
+
   // Move to next step or finish
   if (!isLastStep.value) {
     const nextStepIndex = currentStepIndex.value + 1
     currentStepId.value = interviewSteps.value[nextStepIndex].id
-  } else {
+  }
+  else {
     finishInterview()
   }
 }
@@ -845,13 +921,13 @@ const goToPreviousStep = () => {
 const saveStepProgress = () => {
   addActivityLog('note_added', currentStepId.value, {
     progress_saved: true,
-    responses: { ...taskResponses.value }
+    responses: { ...taskResponses.value },
   })
 }
 
 const saveQuickNotes = () => {
   addActivityLog('note_added', currentStepId.value, {
-    quick_note: quickNotes.value
+    quick_note: quickNotes.value,
   })
 }
 
@@ -859,14 +935,14 @@ const finishInterview = () => {
   session.value.endTime = new Date()
   addActivityLog('step_completed', 'interview', {
     total_duration: getElapsedTime(),
-    completed_steps: completedSteps.value.length
+    completed_steps: completedSteps.value.length,
   })
-  
+
   // Here you would typically save the interview results
   console.log('Interview completed!', {
     session: session.value,
     responses: taskResponses.value,
-    logs: activityLogs.value
+    logs: activityLogs.value,
   })
 }
 
@@ -876,7 +952,7 @@ const addActivityLog = (action: InterviewLog['action'], stepId: string, details:
     timestamp: new Date(),
     action,
     stepId,
-    details
+    details,
   })
 }
 
@@ -888,46 +964,46 @@ const getStepIcon = (stepId: string): string => {
     'diagnostic-criteria': 'ph:check-square',
     'differential-diagnosis': 'ph:scales',
     'risk-assessment': 'ph:warning-circle',
-    'treatment-planning': 'ph:calendar-check'
+    'treatment-planning': 'ph:calendar-check',
   }
   return iconMap[stepId] || 'ph:circle'
 }
 
 const getTaskIcon = (type: string): string => {
   const iconMap: Record<string, string> = {
-    'observation': 'ph:eye',
-    'question': 'ph:question',
-    'assessment': 'ph:clipboard-text',
-    'documentation': 'ph:note-pencil'
+    observation: 'ph:eye',
+    question: 'ph:question',
+    assessment: 'ph:clipboard-text',
+    documentation: 'ph:note-pencil',
   }
   return iconMap[type] || 'ph:circle'
 }
 
 const getTaskTypeLabel = (type: string): string => {
   const labelMap: Record<string, string> = {
-    'observation': 'مشاهده',
-    'question': 'پرسش',
-    'assessment': 'ارزیابی',
-    'documentation': 'مستندسازی'
+    observation: 'مشاهده',
+    question: 'پرسش',
+    assessment: 'ارزیابی',
+    documentation: 'مستندسازی',
   }
   return labelMap[type] || type
 }
 
 const getTaskPlaceholder = (type: string): string => {
   const placeholderMap: Record<string, string> = {
-    'observation': 'مشاهدات خود را ثبت کنید...',
-    'documentation': 'جزئیات را مستند کنید...'
+    observation: 'مشاهدات خود را ثبت کنید...',
+    documentation: 'جزئیات را مستند کنید...',
   }
   return placeholderMap[type] || 'توضیحات...'
 }
 
 const getLogIcon = (action: string): string => {
   const iconMap: Record<string, string> = {
-    'step_started': 'ph:play',
-    'step_completed': 'ph:check-circle',
-    'step_failed': 'ph:x-circle',
-    'task_completed': 'ph:check',
-    'note_added': 'ph:note'
+    step_started: 'ph:play',
+    step_completed: 'ph:check-circle',
+    step_failed: 'ph:x-circle',
+    task_completed: 'ph:check',
+    note_added: 'ph:note',
   }
   return iconMap[action] || 'ph:circle'
 }
@@ -935,7 +1011,7 @@ const getLogIcon = (action: string): string => {
 const getLogDescription = (log: InterviewLog): string => {
   const step = interviewSteps.value.find(s => s.id === log.stepId)
   const stepTitle = step?.title || log.stepId
-  
+
   switch (log.action) {
     case 'step_started': return `شروع مرحله: ${stepTitle}`
     case 'step_completed': return `تکمیل مرحله: ${stepTitle}`
@@ -949,7 +1025,7 @@ const getLogDescription = (log: InterviewLog): string => {
 const formatTime = (date: Date): string => {
   return new Intl.DateTimeFormat('fa-IR', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   }).format(date)
 }
 
@@ -977,7 +1053,7 @@ onMounted(async () => {
 
     // Initialize session
     session.value.disorderId = disorderResult.id
-    
+
     // Start with first step
     if (interviewSteps.value.length > 0) {
       currentStepId.value = interviewSteps.value[0].id
@@ -985,7 +1061,8 @@ onMounted(async () => {
       console.log('📋 All steps:', interviewSteps.value.map(s => s.id))
       console.log('🎯 Current step object:', currentStep.value)
       addActivityLog('step_started', currentStepId.value)
-    } else {
+    }
+    else {
       console.error('❌ No interview steps generated!')
     }
 
@@ -993,24 +1070,25 @@ onMounted(async () => {
       htmlAttrs: { dir: 'rtl' },
       title: `مصاحبه تشخیصی ${disorderResult.title} | ذهنا`,
       meta: [
-        { 
-          name: 'description', 
-          content: `مصاحبه تشخیصی گام به گام برای ${disorderResult.title} بر اساس معیارهای DSM-5`
-        }
-      ]
+        {
+          name: 'description',
+          content: `مصاحبه تشخیصی گام به گام برای ${disorderResult.title} بر اساس معیارهای DSM-5`,
+        },
+      ],
     })
-
-  } catch (err: any) {
+  }
+  catch (err: any) {
     console.error('Error loading disorder data:', err)
     error.value = err.message || 'خطا در بارگذاری اطلاعات'
-  } finally {
+  }
+  finally {
     loading.value = false
   }
 })
 
 definePageMeta({
   layout: 'default',
-  title: 'مصاحبه تشخیصی | ذهنا'
+  title: 'مصاحبه تشخیصی | ذهنا',
 })
 </script>
 
@@ -1096,11 +1174,11 @@ definePageMeta({
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .step-graph-mobile .absolute {
     position: relative;
   }
-  
+
   /* Hide tooltips on mobile to prevent overlap */
   .group:hover .opacity-0 {
     opacity: 0 !important;

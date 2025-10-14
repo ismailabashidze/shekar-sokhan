@@ -124,7 +124,7 @@ export function useAIResponseSettings() {
         setPremiumStatus(newIsPremium)
       }
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   return {

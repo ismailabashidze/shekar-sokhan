@@ -1,199 +1,530 @@
 <script setup lang="ts">
 
 definePageMeta({
-  title: 'قفل صفحه',
   layout: 'blank', // Use a blank layout for lock screen
+  title: 'قفل برنامه',
 })
 
-const { logout } = useUser()
-const passkey = ref('')
-const error = ref('')
-const isLoggingOut = ref(false)
-const isUnlocking = ref(false)
+useHead({ htmlAttrs: { dir: 'rtl' } })
 
-// Function to handle passkey input
-function onPasskeyInput(event: Event) {
-  const target = event.target as HTMLInputElement
-  const value = target.value
-  
-  // Only allow numeric input and limit to 4 digits
-  if (/^\d*$/.test(value) && value.length <= 4) {
-    passkey.value = value
-    error.value = ''
-  } else {
-    // Remove non-numeric characters
-    passkey.value = value.replace(/\D/g, '').substring(0, 4)
+const VALIDATION_TEXT = {
+  PIN_LENGTH: 'پین باید ۴ رقمی باشد',
+  PIN_INVALID: 'پین نامعتبر است',
+}
+
+const router = useRouter()
+const toaster = useToaster()
+const { unlockApp, isAppLocked } = useLockSystem()
+const { user } = useUser()
+
+const isVerifying = ref(false)
+const showSupportModal = ref(false)
+
+// OTP Input variables
+const pinInputRefs = ref<HTMLInputElement[]>([])
+const pinDigits = ref<string[]>(['', '', '', ''])
+const pinError = ref('')
+
+const lastFilledIndex = computed(() => {
+  for (let i = pinDigits.value.length - 1; i >= 0; i--) {
+    if (pinDigits.value[i] !== '') {
+      return i
+    }
   }
-  
-  // Auto submit when 4 digits are entered
-  if (passkey.value.length === 4) {
-    attemptUnlock()
+  return -1
+})
+
+const setPinInputRef = (el: HTMLInputElement | null, index: number) => {
+  if (el) {
+    pinInputRefs.value[index] = el
   }
 }
 
-// Function to attempt to unlock
-async function attemptUnlock() {
-  if (isUnlocking.value) return // Prevent multiple attempts
+// Prevent navigation away from lock page while app is locked
+// This is an additional safety guard
+onBeforeRouteLeave((to, from) => {
+  // Allow navigation to auth pages (for logout)
+  if (to.path.startsWith('/auth')) {
+    return true
+  }
   
-  isUnlocking.value = true
-  error.value = ''
+  // Block navigation if still locked
+  if (isAppLocked.value) {
+    console.log('🔒 [Lock Page] Navigation blocked - App is still locked')
+    toaster.show({
+      title: 'برنامه قفل است',
+      message: 'برای دسترسی به برنامه، پین خود را وارد کنید یا خارج شوید',
+      color: 'warning',
+      icon: 'ph:lock',
+      closable: true,
+    })
+    return false
+  }
   
+  return true
+})
+
+const sanitizeDigit = (value: string | undefined) => {
+  if (!value) return ''
+
+  return value
+    .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0))
+    .replace(/\D/g, '')
+    .slice(-1)
+}
+
+const clearPinInputs = () => {
+  pinDigits.value = ['', '', '', '']
+  nextTick(() => {
+    const firstInput = pinInputRefs.value[0]
+    firstInput?.focus()
+  })
+}
+
+const validatePinDigits = () => {
+  if (pinDigits.value.some(digit => digit === '')) {
+    pinError.value = VALIDATION_TEXT.PIN_LENGTH
+    return null
+  }
+
+  if (!pinDigits.value.every(digit => /^\d$/.test(digit))) {
+    pinError.value = VALIDATION_TEXT.PIN_INVALID
+    return null
+  }
+
+  return pinDigits.value.join('')
+}
+
+const submitPin = async () => {
+  if (isVerifying.value) return
+
+  pinError.value = ''
+  const pin = validatePinDigits()
+  if (!pin) return
+
+  isVerifying.value = true
+
   try {
-    // TODO: Implement actual unlock logic based on your authentication system
-    // For now, we'll just show an error as an example
-    // This is where you might make an API call to verify the passkey
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    // For now, we'll just show an error as an example
-    error.value = 'کلمه عبور اشتباه است. لطفاً دوباره تلاش کنید.'
-  } finally {
-    isUnlocking.value = false
+    const unlocked = unlockApp(pin)
+
+    if (unlocked) {
+      toaster.show({
+        title: 'موفقیت',
+        message: 'برنامه با موفقیت باز شد',
+        color: 'success',
+        icon: 'ph:lock-open',
+        closable: true,
+      })
+
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 300)
+    }
+    else {
+      pinError.value = 'پین صحیح نیست'
+      clearPinInputs()
+      toaster.show({
+        title: 'پین نادرست',
+        message: 'پین وارد شده صحیح نیست',
+        color: 'danger',
+        icon: 'ph:warning',
+        closable: true,
+      })
+    }
+  }
+  catch (error) {
+    console.error('Unlock error:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'مشکلی در باز کردن قفل پیش آمد',
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
+  }
+  finally {
+    isVerifying.value = false
   }
 }
 
-// Function for unlock button click
-function handleUnlock() {
-  if (passkey.value.length !== 4) {
-    error.value = 'لطفاً ۴ رقم را وارد کنید'
+const logout = async () => {
+  try {
+    const { logout: logoutUser } = useUser()
+    await logoutUser()
+
+    toaster.show({
+      title: 'خروج موفق',
+      message: 'با موفقیت خارج شدید',
+      color: 'success',
+      icon: 'ph:sign-out',
+      closable: true,
+    })
+
+    router.push('/auth/login')
+  }
+  catch (error) {
+    console.error('Logout error:', error)
+    toaster.show({
+      title: 'خطا',
+      message: 'مشکلی در خروج پیش آمد',
+      color: 'danger',
+      icon: 'ph:warning',
+      closable: true,
+    })
+  }
+}
+
+// Redirect if not locked - check on mount
+onMounted(() => {
+  if (!isAppLocked.value) {
+    console.log('🔓 [Lock Page] Not locked - Redirecting to dashboard')
+    router.replace('/dashboard')
     return
   }
-  attemptUnlock()
-}
 
-const isSupportLoading = ref(false)
+  nextTick(() => {
+    pinInputRefs.value[0]?.focus()
+  })
+})
 
-// Function for support button
-async function handleSupport() {
-  isSupportLoading.value = true
-  // TODO: Implement support functionality (e.g., open support modal, redirect to support page)
-  // For now, we'll just show an alert after a small delay
-  await new Promise(resolve => setTimeout(resolve, 300))
-  alert('پشتیبانی')
-  isSupportLoading.value = false
-}
+// Methods for OTP input handling
+const handlePinInput = (index: number) => {
+  const sanitized = sanitizeDigit(pinDigits.value[index])
+  pinDigits.value[index] = sanitized
 
-// Function for logout button
-async function handleLogout() {
-  isLoggingOut.value = true
-  const result = await logout()
-  isLoggingOut.value = false
-  
-  if (result) {
-    // Redirect to login page after successful logout
-    await navigateTo('/auth/login')
-  } else {
-    error.value = 'خطا در خروج از سیستم'
+  if (pinError.value) {
+    pinError.value = ''
   }
+
+  if (sanitized && index < 3) {
+    nextTick(() => {
+      const nextInput = pinInputRefs.value[index + 1]
+      nextInput?.focus()
+    })
+  }
+
+  if (pinDigits.value.every(digit => digit !== '')) {
+    submitPin()
+  }
+}
+
+const handleKeyDown = (event: KeyboardEvent, index: number) => {
+  if (event.key === 'Backspace' && !pinDigits.value[index] && index > 0) {
+    // Move to previous input on backspace if current is empty
+    nextTick(() => {
+      const prevInput = pinInputRefs.value[index - 1]
+      prevInput?.focus()
+    })
+  }
+  else if (event.key === 'ArrowLeft' && index > 0) {
+    nextTick(() => {
+      const prevInput = pinInputRefs.value[index - 1]
+      prevInput?.focus()
+    })
+  }
+  else if (event.key === 'ArrowRight' && index < 3) {
+    nextTick(() => {
+      const nextInput = pinInputRefs.value[index + 1]
+      nextInput?.focus()
+    })
+  }
+  else if (event.key.length === 1 && !/[0-9]/.test(event.key)) {
+    event.preventDefault()
+  }
+}
+
+const handleFocus = (index: number) => {
+  // Select all text when focusing on an input for easier replacement
+  nextTick(() => {
+    const target = pinInputRefs.value[index]
+    target?.select()
+  })
+}
+
+const handlePaste = (event: ClipboardEvent) => {
+  event.preventDefault()
+  const paste = event.clipboardData?.getData('text') ?? ''
+  const numericPaste = paste.replace(/[^0-9\u0660-\u0669\u06F0-\u06F9]/g, '')
+
+  if (!numericPaste) return
+
+  const focusedIndex = pinInputRefs.value.findIndex(input => input === document.activeElement)
+  const startIndex = focusedIndex >= 0 ? focusedIndex : 0
+
+  for (let i = 0; i < Math.min(4 - startIndex, numericPaste.length); i++) {
+    pinDigits.value[startIndex + i] = sanitizeDigit(numericPaste[i])
+  }
+
+  const nextFocusIndex = Math.min(startIndex + numericPaste.length, 3)
+  nextTick(() => {
+    const target = pinInputRefs.value[nextFocusIndex]
+    target?.focus()
+  })
+
+  if (pinDigits.value.every(digit => digit !== '')) {
+    submitPin()
+  }
+}
+
+const getInputType = (index: number) => {
+  if (!pinDigits.value[index]) {
+    return 'text'
+  }
+
+  return index === lastFilledIndex.value ? 'text' : 'password'
 }
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col items-center justify-center bg-muted-100 p-4 dark:bg-muted-900">
-    <div class="w-full max-w-md">
-      <!-- Lock icon -->
-      <div class="mb-8 flex justify-center">
-        <div class="bg-primary-500/10 flex size-24 items-center justify-center rounded-full p-6">
-          <Icon name="ph:lock-key-duotone" class="text-primary-500 size-12" />
+  <div class="flex min-h-screen bg-white dark:bg-muted-800">
+    <div
+      class="relative hidden w-0 flex-1 items-center justify-center bg-muted-100 dark:bg-muted-900 lg:flex lg:w-2/5"
+    >
+      <div class="mx-auto flex size-full max-w-2xl items-center justify-center p-12">
+        <!-- Lock Icon -->
+        <div class="text-center">
+          <div class="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
+            <Icon name="ph:lock-fill" class="size-12 text-primary-600 dark:text-primary-400" />
+          </div>
+          <h1 class="mb-4 text-2xl font-bold text-muted-800 dark:text-muted-200">
+            برنامه قفل شده است
+          </h1>
+          <p class="mx-auto max-w-sm text-muted-500 dark:text-muted-400">
+            برای دسترسی به برنامه، پین ۴ رقمی خود را وارد کنید
+          </p>
         </div>
       </div>
+    </div>
 
-      <!-- Card container -->
-      <div class="bg-white dark:bg-muted-800 rounded-2xl p-8 shadow-lg">
-        <!-- Title -->
-        <div class="mb-8 text-center">
-          <BaseHeading
-            as="h2"
-            size="lg"
-            weight="semibold"
-            lead="tight"
-            class="text-muted-800 dark:text-white"
-          >
-            برای ادامه دسترسی، رمز را وارد کنید
-          </BaseHeading>
-        </div>
-
-        <!-- Passkey input -->
-        <div class="mb-6">
-          <label for="passkey" class="mb-2 block text-sm font-medium text-muted-700 dark:text-muted-300 text-right">
-            رمز چهار رقمی
-          </label>
-          
-          <div class="relative">
-            <input
-              id="passkey"
-              v-model="passkey"
-              type="password"
-              inputmode="numeric"
-              maxlength="4"
-              placeholder="••••"
-              class="bg-muted-50 border-muted-300 text-muted-700 dark:text-white dark:bg-muted-700 dark:border-muted-600 dark:placeholder-muted-400 block w-full rounded-xl border px-4 py-3 text-center text-2xl focus:border-primary-500 focus:ring-primary-500"
-              @input="onPasskeyInput"
-            />
+    <div class="relative flex flex-1 flex-col justify-center px-6 py-8 lg:w-3/5 lg:flex-none">
+      <div class="relative mx-auto w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl dark:bg-muted-800">
+        <!-- User Info -->
+        <div class="mb-6 text-center">
+          <div v-if="user?.avatar" class="mx-auto mb-4">
+            <img
+              :src="`https://pocket.zehna.ir/api/files/users/${user.id}/${user.avatar}`"
+              :alt="user.username || 'User'"
+              class="mx-auto size-16 rounded-full object-cover"
+            >
           </div>
-          
-          <!-- Error message -->
-          <div v-if="error" class="mt-2 text-sm text-red-600 dark:text-red-500">
-            {{ error }}
+          <div v-else class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted-200 dark:bg-muted-700">
+            <Icon name="ph:user" class="size-8 text-muted-500" />
+          </div>
+          <h2 class="text-xl font-semibold text-muted-800 dark:text-muted-200">
+            {{ user?.username || 'کاربر گرامی' }}
+          </h2>
+          <p class="mt-1 text-sm text-muted-500">
+            پین خود را برای باز کردن قفل وارد کنید
+          </p>
+        </div>
+
+        <!-- PIN Input Form -->
+        <form
+          method="POST"
+          action=""
+          class="space-y-6"
+          novalidate
+          @submit.prevent="submitPin"
+        >
+          <!-- OTP Input Fields -->
+          <div class="space-y-3">
+            <label class="text-sm font-medium text-muted-700 dark:text-muted-300">
+              پین ۴ رقمی
+            </label>
+            <div class="flex justify-center gap-3" dir="ltr">
+              <input
+                v-for="n in 4"
+                :key="n"
+                :ref="el => setPinInputRef(el, n-1)"
+                v-model="pinDigits[n-1]"
+                :type="getInputType(n-1)"
+                inputmode="numeric"
+                maxlength="1"
+                :autofocus="n === 1"
+                autocomplete="one-time-code"
+                pattern="[0-9]*"
+                dir="ltr"
+                class="h-14 w-14 rounded-lg border border-muted-300 text-center text-2xl font-bold text-muted-800 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-muted-700 dark:bg-muted-900/50 dark:text-muted-200"
+                @input="handlePinInput(n-1)"
+                @keydown="handleKeyDown($event, n-1)"
+                @paste="handlePaste"
+                @focus="handleFocus(n-1)"
+              />
+            </div>
+            <div v-if="pinError" class="text-sm font-medium text-danger-600 dark:text-danger-400">
+              {{ pinError }}
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="space-y-3">
+            <BaseButton
+              :disabled="isVerifying"
+              :loading="isVerifying"
+              type="submit"
+              color="primary"
+              shape="curved"
+              class="!h-12 w-full"
+            >
+              باز کردن قفل
+              <Icon name="ph:lock-open" class="mr-2 size-4" />
+            </BaseButton>
+
+            <div class="grid grid-cols-2 gap-3">
+              <BaseButton
+                type="button"
+                color="info"
+                variant="outline"
+                shape="curved"
+                class="!h-12"
+                @click="showSupportModal = true"
+              >
+                پشتیبانی
+                <Icon name="ph:phone" class="mr-2 size-4" />
+              </BaseButton>
+
+              <BaseButton
+                type="button"
+                color="muted"
+                variant="outline"
+                shape="curved"
+                class="!h-12"
+                @click="logout"
+              >
+                خروج
+                <Icon name="ph:sign-out" class="mr-2 size-4" />
+              </BaseButton>
+            </div>
+          </div>
+        </form>
+
+        <!-- Support Info -->
+        <div class="mt-6 border-t border-muted-200 pt-6 dark:border-muted-700">
+          <div class="text-center">
+            <p class="mb-2 text-sm text-muted-500">
+              در صورت فراموشی پین با پشتیبانی تماس بگیرید
+            </p>
+            <button
+              class="mx-auto flex items-center justify-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-500"
+              @click="showSupportModal = true"
+            >
+              <span dir="ltr">021 4421 4594</span>
+              <Icon name="ph:phone" class="size-4" />
+            </button>
           </div>
         </div>
-
-        <!-- Progress dots for passkey -->
-        <div class="mb-8 flex justify-center space-x-4">
-          <div
-            v-for="n in 4"
-            :key="n"
-            class="bg-muted-200 dark:bg-muted-700 size-4 rounded-full"
-            :class="{
-              'bg-primary-500': passkey.length >= n,
-            }"
-          />
-        </div>
-
-        <!-- Buttons -->
-        <div class="grid grid-cols-3 gap-3">
-          <BaseButton
-            :disabled="passkey.length !== 4 || isUnlocking"
-            color="primary"
-            class="col-span-1"
-            @click="handleUnlock"
-          >
-            <Icon v-if="!isUnlocking" name="ph:lock-open" class="me-2 size-5" />
-            <Icon v-else name="eos-icons:loading" class="me-2 size-5 animate-spin" />
-            <span>{{ isUnlocking ? 'در حال باز کردن...' : 'باز کردن' }}</span>
-          </BaseButton>
-          
-          <BaseButton
-            :disabled="isSupportLoading"
-            color="info"
-            variant="outline"
-            class="col-span-1"
-            @click="handleSupport"
-          >
-            <Icon v-if="!isSupportLoading" name="ph:chat-circle" class="me-2 size-5" />
-            <Icon v-else name="eos-icons:loading" class="me-2 size-5 animate-spin" />
-            <span>{{ isSupportLoading ? 'در حال بارگذاری...' : 'پشتیبانی' }}</span>
-          </BaseButton>
-          
-          <BaseButton
-            :disabled="isLoggingOut"
-            color="muted"
-            variant="outline"
-            class="col-span-1"
-            @click="handleLogout"
-          >
-            <Icon v-if="!isLoggingOut" name="ph:sign-out" class="me-2 size-5" />
-            <Icon v-else name="eos-icons:loading" class="me-2 size-5 animate-spin" />
-            <span>{{ isLoggingOut ? 'در حال خروج...' : 'خروج' }}</span>
-          </BaseButton>
-        </div>
-      </div>
-      
-      <!-- Hint text -->
-      <div class="mt-6 text-center text-sm text-muted-500 dark:text-muted-400">
-        رمز خود را با دقت وارد کنید
       </div>
     </div>
   </div>
+
+  <!-- Support Modal -->
+  <TairoModal
+    :open="showSupportModal"
+    size="sm"
+    @close="showSupportModal = false"
+  >
+    <template #header>
+      <div class="flex items-center gap-4 p-4" dir="rtl">
+        <div class="flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-info-500 to-primary-500">
+          <Icon name="ph:headset" class="size-6 text-white" />
+        </div>
+        <div class="flex-1 text-right">
+          <h3 class="text-lg font-semibold text-muted-800 dark:text-muted-200">
+            تماس با پشتیبانی
+          </h3>
+          <p class="mt-1 text-sm text-muted-500">
+            تیم پشتیبانی ما برای کمک به شما در دسترس است
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <template #body>
+      <div class="space-y-6 px-4 py-2 text-center" dir="rtl">
+        <!-- Main Support Card -->
+        <div class="rounded-2xl bg-gradient-to-br from-info-50 to-primary-50 p-6 dark:from-info-900/20 dark:to-primary-900/20">
+          <div class="mb-4 flex justify-center">
+            <div class="flex size-16 items-center justify-center rounded-full bg-white p-3 shadow-md dark:bg-muted-800">
+              <Icon name="ph:phone-call" class="size-8 text-primary-600 dark:text-primary-400" />
+            </div>
+          </div>
+          <p class="mb-2 text-lg font-medium text-muted-800 dark:text-muted-200">
+            تماس مستقیم با پشتیبانی
+          </p>
+          <p class="mb-6 text-sm text-muted-600 dark:text-muted-400">
+            شماره تماس: <span dir="ltr" class="font-mono">021 4421 4594</span>
+          </p>
+          <a
+            href="tel:02144214594"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-3 font-medium text-white transition-all hover:bg-primary-700 hover:shadow-lg"
+          >
+            <Icon name="ph:phone" class="size-5" />
+            تماس مستقیم
+          </a>
+        </div>
+
+        <!-- Working Hours -->
+        <div class="rounded-2xl bg-muted-100 p-5 dark:bg-muted-800/70">
+          <div class="mb-4 flex justify-center">
+            <div class="flex size-12 items-center justify-center rounded-full bg-white p-2 shadow-md dark:bg-muted-800">
+              <Icon name="ph:clock" class="size-6 text-info-600 dark:text-info-400" />
+            </div>
+          </div>
+          <p class="mb-4 text-base font-semibold text-muted-800 dark:text-muted-200">
+            ساعات کاری
+          </p>
+          <div class="space-y-3 text-sm">
+            <div class="flex items-center justify-between rounded-lg bg-white p-3 text-muted-700 shadow-sm dark:bg-muted-900 dark:text-muted-300">
+              <span>شنبه تا چهارشنبه</span>
+              <div class="flex items-center gap-2">
+                <span>۹ الی ۱۷</span>
+                <Icon name="ph:calendar-blank" class="size-4 text-info-500" />
+              </div>
+            </div>
+            <div class="flex items-center justify-between rounded-lg bg-white p-3 text-muted-700 shadow-sm dark:bg-muted-900 dark:text-muted-300">
+              <span>پنج‌شنبه</span>
+              <div class="flex items-center gap-2">
+                <span>۹ الی ۱۳</span>
+                <Icon name="ph:calendar-blank" class="size-4 text-info-500" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Support Options -->
+        <div class="grid grid-cols-2 gap-4">
+          <a 
+            href="mailto:support@zehna.ir" 
+            class="flex flex-col items-center justify-center rounded-xl border border-muted-300 p-4 text-center transition-all hover:bg-muted-50 dark:border-muted-700 dark:hover:bg-muted-800/50"
+          >
+            <Icon name="ph:envelope" class="mb-2 size-6 text-muted-600 dark:text-muted-400" />
+            <span class="text-sm font-medium text-muted-700 dark:text-muted-300">ایمیل</span>
+            <span class="text-xs text-muted-500">support@zehna.ir</span>
+          </a>
+          <a 
+            href="https://t.me/zehnasupport" 
+            class="flex flex-col items-center justify-center rounded-xl border border-muted-300 p-4 text-center transition-all hover:bg-muted-50 dark:border-muted-700 dark:hover:bg-muted-800/50"
+          >
+            <Icon name="ph:paper-plane-tilt" class="mb-2 size-6 text-muted-600 dark:text-muted-400" />
+            <span class="text-sm font-medium text-muted-700 dark:text-muted-300">تلگرام</span>
+            <span class="text-xs text-muted-500">@zehnasupport</span>
+          </a>
+        </div>
+      </div>
+    </template>
+
+    <template #footer>
+      <div class="flex flex-row-reverse gap-3 p-4" dir="rtl">
+        <BaseButton
+          color="muted"
+          variant="outline"
+          class="flex-1"
+          @click="showSupportModal = false"
+        >
+          بستن
+        </BaseButton>
+      </div>
+    </template>
+  </TairoModal>
 </template>

@@ -43,8 +43,6 @@ export function useSidebar() {
   const app = useAppConfig()
   const route = useRoute()
 
-
-
   const sidebars = computed(() => {
     if (
       (app.tairo?.sidebar?.navigation?.enabled as boolean) === false

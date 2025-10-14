@@ -12,7 +12,7 @@ const { setPremiumStatus } = useAIResponseSettings()
 onMounted(async () => {
   // Clear the auth store and reset user data
   await logoutUser()
-  
+
   // Reset premium status to false on logout
   setPremiumStatus(false)
 

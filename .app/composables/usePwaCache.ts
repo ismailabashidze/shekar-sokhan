@@ -8,7 +8,6 @@ export function usePwaCache() {
       isClearing.value = true
 
       if (!('serviceWorker' in navigator)) {
-        
         return false
       }
 
@@ -36,17 +35,16 @@ export function usePwaCache() {
         })
 
         if (success) {
-          
+
         }
         else {
-          
+
         }
       }
 
       return true
     }
     catch (error) {
-      
       return false
     }
     finally {
@@ -66,14 +64,12 @@ export function usePwaCache() {
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations()
         await Promise.all(registrations.map(reg => reg.unregister()))
-        
       }
 
       // Force reload the page without cache
       window.location.reload()
     }
     catch (error) {
-      
       // Fallback to simple reload
       window.location.reload()
     }
@@ -103,7 +99,6 @@ export function usePwaCache() {
       }
     }
     catch (error) {
-      
       return null
     }
   }

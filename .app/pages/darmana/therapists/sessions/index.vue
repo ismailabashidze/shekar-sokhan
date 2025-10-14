@@ -184,7 +184,8 @@ const fetchSessions = async () => {
     // Check if we're manually filtering by status
     if (statusFilter.value !== 'all') {
       filterObj.status = statusFilter.value
-    } else {
+    }
+    else {
       // Auto-filter logic: first check for ongoing sessions
       filterObj.status = 'inprogress'
     }
@@ -196,14 +197,14 @@ const fetchSessions = async () => {
 
     const result = await getSessions(filterObj)
     sessions.value = result as unknown as SessionWithExpanded[]
-    
+
     // If no ongoing sessions and we're using auto-filter, show completed sessions
     if (sessions.value.length === 0 && statusFilter.value === 'all') {
       filterObj.status = 'done'
       const completedResult = await getSessions(filterObj)
       sessions.value = completedResult as unknown as SessionWithExpanded[]
     }
-    
+
     console.log('Sessions loaded:', sessions.value)
   }
   catch (error) {
@@ -226,11 +227,12 @@ const refreshSessions = () => {
   // Reset to auto-filter mode when refreshing
   if (statusFilter.value === 'all') {
     fetchSessions()
-  } else {
+  }
+  else {
     // If manually filtered, keep the filter
     fetchSessions()
   }
-  
+
   toaster.show({
     title: 'بروزرسانی',
     message: 'اطلاعات جلسات بروزرسانی شد',
@@ -715,7 +717,7 @@ onMounted(() => {
                   <Icon name="ph:play-duotone" class="ml-1 size-4" />
                   ادامه جلسه
                 </BaseButton>
-                
+
                 <BaseButton
                   v-else-if="!['done', 'inprogress', 'closed', 'deleted', 'generatingReport'].includes(session.status)"
                   color="muted"

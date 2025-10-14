@@ -6,7 +6,6 @@ export function useTherapistSession() {
   const { user } = useUser()
 
   const getCurrentSession = async (therapistId: string) => {
-
     try {
       const records = await nuxtApp.$pb.collection('sessions').getFullList({
         sort: '-created',
@@ -63,7 +62,7 @@ export function useTherapistSession() {
         end_time: endTime.toISOString(),
         count_of_total_messages: messageCount,
         total_time_passed: totalTimePassedMinutes,
-        session_analysis_for_system: analysisId
+        session_analysis_for_system: analysisId,
       })
     }
     catch (error: any) {

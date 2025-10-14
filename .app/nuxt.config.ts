@@ -39,13 +39,13 @@ export default defineNuxtConfig({
   // Set default color mode to light
   colorMode: {
     preference: 'light', // default value of $colorMode.preference
-    fallback: 'light',   // fallback value if not in user's preference
+    fallback: 'light', // fallback value if not in user's preference
     hid: 'nuxt-color-mode-script',
     globalName: '__NUXT_COLOR_MODE__',
     componentName: 'ColorScheme',
     classPrefix: '',
     classSuffix: '',
-    storageKey: 'nuxt-color-mode'
+    storageKey: 'nuxt-color-mode',
   },
 
   // Disable devtools in production

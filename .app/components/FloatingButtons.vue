@@ -2,6 +2,7 @@
   <div v-if="!isAuthPage" class="fixed bottom-6 left-6 z-50 flex flex-col gap-3 xl:flex-row xl:gap-4">
     <BackButton />
     <TourButton />
+    <LockButton />
   </div>
 </template>
 

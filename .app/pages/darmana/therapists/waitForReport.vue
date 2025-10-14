@@ -34,8 +34,8 @@ const phoneNumber = ref('')
 const phoneError = ref('')
 
 onMounted(async () => {
-  console.log(user.value);
-  
+  console.log(user.value)
+
   if (!user.value?.phoneNumber) {
     isPhoneModalOpen.value = true
     isLoading.value = false
@@ -53,9 +53,10 @@ onMounted(async () => {
       return
     }
 
-  // Set up interval to check every 2 seconds for better UX
-  checkInterval.value = setInterval(checkForAnalysis, 2000)
-  } catch (error) {
+    // Set up interval to check every 2 seconds for better UX
+    checkInterval.value = setInterval(checkForAnalysis, 2000)
+  }
+  catch (error) {
     console.error('Error checking for existing analysis:', error)
   }
   hasCheckedForExistingAnalysis.value = true
@@ -103,7 +104,7 @@ const checkForAnalysis = async () => {
       clearInterval(checkInterval.value)
       checkInterval.value = null
     }
-    
+
     // Show error to user
     toaster.show({
       title: 'خطا',
@@ -112,7 +113,7 @@ const checkForAnalysis = async () => {
       icon: 'ph:warning-circle-fill',
       closable: true,
     })
-    
+
     // Redirect to dashboard after showing error
     setTimeout(() => {
       navigateTo('/dashboard')
@@ -123,7 +124,8 @@ const checkForAnalysis = async () => {
 const goToAnalysis = () => {
   if (analysisId.value) {
     navigateTo(`/darmana/therapists/analysis?analysis_id=${analysisId.value}`)
-  } else {
+  }
+  else {
     // If for some reason analysisId is not set, redirect to dashboard
     navigateTo('/dashboard')
   }
@@ -141,22 +143,22 @@ const validatePhoneNumber = (value) => {
   }
 
   const sanitizedValue = persianToEnglish(value).replace(/\D/g, '')
-  
+
   // Check length
   if (sanitizedValue.length !== 11) {
     return 'شماره تماس باید یازده رقم باشد'
   }
-  
+
   // Check if it starts with 09
   if (!sanitizedValue.startsWith('09')) {
     return 'شماره باید با ۰۹ شروع شود'
   }
-  
+
   // Check if all characters are digits
   if (!/^\d+$/.test(sanitizedValue)) {
     return 'شماره تماس باید فقط شامل ارقام باشد'
   }
-  
+
   return null // Valid phone number
 }
 
@@ -166,13 +168,13 @@ const savePhoneNumber = async () => {
     phoneError.value = error
     return
   }
-  
+
   phoneError.value = ''
   isSavingPhone.value = true
-  
+
   try {
     await updateUser({ ...user.value, phoneNumber: phoneNumber.value })
-    
+
     // Show success message
     toaster.show({
       title: 'موفقیت',
@@ -181,12 +183,12 @@ const savePhoneNumber = async () => {
       icon: 'ph:check-circle-fill',
       closable: true,
     })
-    
+
     // Close phone modal and continue with analysis
     isPhoneModalOpen.value = false
     isSavingPhone.value = false
     isLoading.value = true
-    
+
     try {
       const existingAnalysis = await getAnalysisForSession(sessionId.value)
       if (existingAnalysis && existingAnalysis.id) {
@@ -197,7 +199,8 @@ const savePhoneNumber = async () => {
         hasCheckedForExistingAnalysis.value = true
         return
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error checking for existing analysis:', error)
     }
     hasCheckedForExistingAnalysis.value = true
@@ -291,7 +294,7 @@ const startAnalysisGeneration = async () => {
       <div v-else class="container mx-auto px-4 py-8">
         <div class="mx-auto max-w-2xl rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
           <div class="text-center">
-            <div class="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
+            <div class="bg-primary-100 dark:bg-primary-900/30 mx-auto mb-6 flex size-20 items-center justify-center rounded-full">
               <Icon name="ph:file-text-fill" class="text-primary-500 dark:text-primary-400 size-10" />
             </div>
             <h2 class="mb-4 text-2xl font-bold text-slate-800 dark:text-white">
@@ -302,13 +305,13 @@ const startAnalysisGeneration = async () => {
             </p>
             <div class="mb-8">
               <div class="mx-auto h-2 w-64 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                <div class="h-full animate-pulse bg-gradient-to-r from-primary-400 to-primary-600" style="width: 70%"></div>
+                <div class="from-primary-400 to-primary-600 h-full animate-pulse bg-gradient-to-r" style="width: 70%" />
               </div>
               <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 در حال پردازش اطلاعات جلسه...
               </p>
             </div>
-            <div class="rounded-lg bg-primary-50 p-4 dark:bg-primary-900/20">
+            <div class="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4">
               <p class="text-primary-700 dark:text-primary-300">
                 <Icon name="ph:info-fill" class="mr-2 inline size-5 align-text-bottom" />
                 گزارش شما به زودی آماده خواهد شد. این فرآیند ممکن است چند دقیقه طول بکشد.
@@ -319,7 +322,11 @@ const startAnalysisGeneration = async () => {
       </div>
 
       <!-- Modal for phone number input -->
-      <TairoModal :open="isPhoneModalOpen" size="sm" @close="isPhoneModalOpen = false">
+      <TairoModal
+        :open="isPhoneModalOpen"
+        size="sm"
+        @close="isPhoneModalOpen = false"
+      >
         <template #header>
           <div class="flex w-full items-center justify-between p-4 md:p-6">
             <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
@@ -338,7 +345,7 @@ const startAnalysisGeneration = async () => {
         </template>
         <div class="p-4 md:p-6">
           <div class="text-center">
-            <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
+            <div class="bg-primary-100 dark:bg-primary-900/30 mx-auto mb-4 flex size-16 items-center justify-center rounded-full">
               <Icon name="ph:phone-fill" class="text-primary-500 dark:text-primary-400 size-8" />
             </div>
             <h3 class="mb-2 text-xl font-bold text-slate-800 dark:text-white">
@@ -347,7 +354,7 @@ const startAnalysisGeneration = async () => {
             <p class="text-muted-500 dark:text-muted-400 mb-6">
               لطفاً شماره تماس خود را وارد کنید تا بتوانیم گزارش جلسه را برای شما ارسال کنیم.
             </p>
-            <div class="mb-6 rounded-lg bg-primary-50 p-4 dark:bg-primary-900/20">
+            <div class="bg-primary-50 dark:bg-primary-900/20 mb-6 rounded-lg p-4">
               <p class="text-primary-700 dark:text-primary-300">
                 <Icon name="ph:info-fill" class="mr-2 inline size-5 align-text-bottom" />
                 هنگامی که گزارش آماده شد، پیامکی حاوی لینک مشاهده گزارش برای شما ارسال خواهد شد.
@@ -358,22 +365,26 @@ const startAnalysisGeneration = async () => {
                 v-model="phoneNumber"
                 placeholder="09123456789"
                 :error="phoneError"
-                @input="phoneError = ''"
                 class="text-center text-lg"
+                @input="phoneError = ''"
               />
-              <p v-if="phoneError" class="mt-2 text-sm text-danger-500">
+              <p v-if="phoneError" class="text-danger-500 mt-2 text-sm">
                 {{ phoneError }}
               </p>
             </div>
             <div class="flex justify-center">
-              <BaseButton color="primary" :loading="isSavingPhone" @click="savePhoneNumber" size="lg">
+              <BaseButton
+                color="primary"
+                :loading="isSavingPhone"
+                size="lg"
+                @click="savePhoneNumber"
+              >
                 ذخیره و ادامه
               </BaseButton>
             </div>
           </div>
         </div>
       </TairoModal>
-
     </div>
   </div>
 </template>

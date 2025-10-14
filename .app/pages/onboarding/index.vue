@@ -11,11 +11,11 @@ definePageMeta({
   },
 })
 
-useHead({ 
+useHead({
   htmlAttrs: { dir: 'rtl' },
   meta: [
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' }
-  ]
+    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },
+  ],
 })
 
 const isModalOpen = ref(false)
@@ -222,221 +222,221 @@ const pasteCouponCode = () => {
 
 <template>
   <div class="onboarding-page">
-    <div class="animated-gradient-bg"></div>
+    <div class="animated-gradient-bg" />
     <div class="flex min-h-screen items-center justify-center py-8" data-tour="welcome">
       <div class="content-container mx-auto w-full max-w-4xl">
-      <BaseCard>
-        <div
-          class="divide-muted-200 dark:divide-muted-700 grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0"
-        >
-          <div class="order-2 sm:order-1">
-            <div class="flex flex-col p-8">
-              <BaseThemeToggle />
-              <BaseAvatar
-                class="mx-auto"
-                size="xl"
-                src="/img/avatars/mana.jpg"
-                badge-src="/img/logo.svg"
-              />
-              <div class="mx-auto mb-4 max-w-xs text-center">
+        <BaseCard>
+          <div
+            class="divide-muted-200 dark:divide-muted-700 grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0"
+          >
+            <div class="order-2 sm:order-1">
+              <div class="flex flex-col p-8">
+                <BaseThemeToggle />
+                <BaseAvatar
+                  class="mx-auto"
+                  size="xl"
+                  src="/img/avatars/mana.jpg"
+                  badge-src="/img/logo.svg"
+                />
+                <div class="mx-auto mb-4 max-w-xs text-center">
+                  <BaseHeading
+                    as="h2"
+                    size="md"
+                    weight="medium"
+                    class="mt-4"
+                  >
+                    ذهنا اولین
+                    <span class="text-primary-500">سکوی هوش مصنوعی</span>
+                    به زبان فارسی را ساخته‌است که به شما حمایت‌های
+                    روانشناختی ارائه می‌دهد.
+                  </BaseHeading>
+                </div>
+                <div class="mx-auto max-w-sm">
+                  <BaseCard elevated class="p-6">
+                    <BaseHeading
+                      as="h3"
+                      size="xs"
+                      weight="medium"
+                      class="text-muted-400 mb-2 !text-[0.65rem] uppercase"
+                    >
+                      پیامی از طرف تیم ذهنا
+                    </BaseHeading>
+                    <BaseParagraph
+                      size="xs"
+                      class="text-muted-500 dark:text-muted-400 text-justify"
+                    >
+                      برای ما، خوشحالی و سرزندگی شما اولویت اول را دارد. از ابتدا
+                      این سامانه برای بهتر کردن حال شما و کمک به شما (و نه انگیزه
+                      های مالی) توسعه داده شده است. باید دانست که این خدمت‌رسانی
+                      برای تیم توسعه هزینه‌هایی دارد که ما را مجبور به دریافت هزینه
+                      از شما کرده‌است. دوست داشتیم که این خدمت را رایگان در اختیار
+                      شما بگذاریم، ولی می‌دانیم که درک می‌کنید که راه‌اندازی،
+                      نگه‌داری و توسعه این نرم‌افزار دانش‌بنیان هزینه‌هایی دارد که
+                      با کمک شما آن‌ها را پوشش می‌دهیم.
+                    </BaseParagraph>
+                  </BaseCard>
+
+                  <div class="mt-6 flex items-center justify-between gap-2" data-tour="payment-options">
+                    <BaseButton
+                      color="primary"
+                      class="w-full"
+                      :loading="isPaymentLoading || isPaymentProcessing"
+                      data-tour="payment-button"
+                      @click="startPayment"
+                    >
+                      پرداخت اشتراک
+                    </BaseButton>
+                    <BaseButton
+                      class="w-full"
+                      :loading="isSubmitting"
+                      data-tour="coupon-button"
+                      @click="openModal"
+                    >
+                      کد تخفیف دارم
+                    </BaseButton>
+                  </div>
+                  <div class="mt-2 flex items-center justify-between gap-2">
+                    <BaseButton
+                      to="/deeds/start"
+                      color="success"
+                      class="w-full"
+                    >
+                      دریافت کد در قبال کار نیک
+                    </BaseButton>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="order-1 sm:order-2">
+              <div class="flex flex-col p-8">
                 <BaseHeading
-                  as="h2"
+                  tag="h2"
                   size="md"
                   weight="medium"
-                  class="mt-4"
+                  class="mt-8"
                 >
-                  ذهنا اولین
-                  <span class="text-primary-500">سکوی هوش مصنوعی</span>
-                  به زبان فارسی را ساخته‌است که به شما حمایت‌های
-                  روانشناختی ارائه می‌دهد.
+                  با کمک هم می توانیم!
                 </BaseHeading>
-              </div>
-              <div class="mx-auto max-w-sm">
-                <BaseCard elevated class="p-6">
-                  <BaseHeading
-                    as="h3"
-                    size="xs"
-                    weight="medium"
-                    class="text-muted-400 mb-2 !text-[0.65rem] uppercase"
-                  >
-                    پیامی از طرف تیم ذهنا
-                  </BaseHeading>
-                  <BaseParagraph
-                    size="xs"
-                    class="text-muted-500 dark:text-muted-400 text-justify"
-                  >
-                    برای ما، خوشحالی و سرزندگی شما اولویت اول را دارد. از ابتدا
-                    این سامانه برای بهتر کردن حال شما و کمک به شما (و نه انگیزه
-                    های مالی) توسعه داده شده است. باید دانست که این خدمت‌رسانی
-                    برای تیم توسعه هزینه‌هایی دارد که ما را مجبور به دریافت هزینه
-                    از شما کرده‌است. دوست داشتیم که این خدمت را رایگان در اختیار
-                    شما بگذاریم، ولی می‌دانیم که درک می‌کنید که راه‌اندازی،
-                    نگه‌داری و توسعه این نرم‌افزار دانش‌بنیان هزینه‌هایی دارد که
-                    با کمک شما آن‌ها را پوشش می‌دهیم.
-                  </BaseParagraph>
-                </BaseCard>
+                <BaseText
+                  size="xs"
+                  class="text-muted-500 dark:text-muted-400 mt-1 max-w-xs"
+                >
+                  کمک‌های مالی شما در فعالیت‌ها و موارد زیر هزینه خواهد شد:
+                </BaseText>
+                <div class="mt-6">
+                  <ul class="space-y-6">
+                    <li class="flex gap-3">
+                      <div
+                        class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
+                      >
+                        <Icon
+                          name="lucide:check"
+                          class="text-success-500 size-4"
+                        />
+                      </div>
+                      <div>
+                        <BaseHeading
+                          as="h3"
+                          size="sm"
+                          weight="medium"
+                        >
+                          توسعه و بهبود نرم افزاری
+                        </BaseHeading>
+                        <BaseText
+                          size="xs"
+                          class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
+                        >
+                          با کمک شما می توانیم امکانات بیشتری را به سامانه اضافه
+                          کنیم.
+                        </BaseText>
+                      </div>
+                    </li>
+                    <li class="flex gap-3">
+                      <div
+                        class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
+                      >
+                        <Icon
+                          name="lucide:check"
+                          class="text-success-500 size-4"
+                        />
+                      </div>
+                      <div>
+                        <BaseHeading
+                          as="h3"
+                          size="sm"
+                          weight="medium"
+                        >
+                          سخت افزار و سرور
+                        </BaseHeading>
+                        <BaseText
+                          size="xs"
+                          class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
+                        >
+                          هزینه‌های پردازنده‌های گرافیکی بسیار پیشرفته را پوشش
+                          می‌دهیم.
+                        </BaseText>
+                      </div>
+                    </li>
 
-                <div class="mt-6 flex items-center justify-between gap-2" data-tour="payment-options">
-                  <BaseButton
-                    color="primary"
-                    class="w-full"
-                    :loading="isPaymentLoading || isPaymentProcessing"
-                    data-tour="payment-button"
-                    @click="startPayment"
-                  >
-                    پرداخت اشتراک
-                  </BaseButton>
-                  <BaseButton
-                    class="w-full"
-                    :loading="isSubmitting"
-                    data-tour="coupon-button"
-                    @click="openModal"
-                  >
-                    کد تخفیف دارم
-                  </BaseButton>
-                </div>
-                <div class="mt-2 flex items-center justify-between gap-2">
-                  <BaseButton
-                    to="/deeds/start"
-                    color="success"
-                    class="w-full"
-                  >
-                    دریافت کد در قبال کار نیک
-                  </BaseButton>
+                    <li class="flex gap-3">
+                      <div
+                        class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
+                      >
+                        <Icon
+                          name="lucide:check"
+                          class="text-success-500 size-4"
+                        />
+                      </div>
+                      <div>
+                        <BaseHeading
+                          as="h3"
+                          size="sm"
+                          weight="medium"
+                        >
+                          نگه داری و دردسترس پذیری
+                        </BaseHeading>
+                        <BaseText
+                          size="xs"
+                          class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
+                        >
+                          شما به تیم ذهنا کمک می کنید که سرویس را پایدار و بدون
+                          مشکل ارائه دهند.
+                        </BaseText>
+                      </div>
+                    </li>
+                    <li class="flex gap-3">
+                      <div
+                        class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
+                      >
+                        <Icon
+                          name="lucide:check"
+                          class="text-success-500 size-4"
+                        />
+                      </div>
+                      <div>
+                        <BaseHeading
+                          as="h3"
+                          size="sm"
+                          weight="medium"
+                        >
+                          حمایت از ذهنا
+                        </BaseHeading>
+                        <BaseText
+                          size="xs"
+                          class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
+                        >
+                          شما به تیم ذهنا و کمک رسانی به افرادی که نیاز به حمایت
+                          روانی دارند کمک می کنید.
+                        </BaseText>
+                      </div>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
           </div>
-          <div class="order-1 sm:order-2">
-            <div class="flex flex-col p-8">
-              <BaseHeading
-                tag="h2"
-                size="md"
-                weight="medium"
-                class="mt-8"
-              >
-                با کمک هم می توانیم!
-              </BaseHeading>
-              <BaseText
-                size="xs"
-                class="text-muted-500 dark:text-muted-400 mt-1 max-w-xs"
-              >
-                کمک‌های مالی شما در فعالیت‌ها و موارد زیر هزینه خواهد شد:
-              </BaseText>
-              <div class="mt-6">
-                <ul class="space-y-6">
-                  <li class="flex gap-3">
-                    <div
-                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
-                    >
-                      <Icon
-                        name="lucide:check"
-                        class="text-success-500 size-4"
-                      />
-                    </div>
-                    <div>
-                      <BaseHeading
-                        as="h3"
-                        size="sm"
-                        weight="medium"
-                      >
-                        توسعه و بهبود نرم افزاری
-                      </BaseHeading>
-                      <BaseText
-                        size="xs"
-                        class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
-                      >
-                        با کمک شما می توانیم امکانات بیشتری را به سامانه اضافه
-                        کنیم.
-                      </BaseText>
-                    </div>
-                  </li>
-                  <li class="flex gap-3">
-                    <div
-                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
-                    >
-                      <Icon
-                        name="lucide:check"
-                        class="text-success-500 size-4"
-                      />
-                    </div>
-                    <div>
-                      <BaseHeading
-                        as="h3"
-                        size="sm"
-                        weight="medium"
-                      >
-                        سخت افزار و سرور
-                      </BaseHeading>
-                      <BaseText
-                        size="xs"
-                        class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
-                      >
-                        هزینه‌های پردازنده‌های گرافیکی بسیار پیشرفته را پوشش
-                        می‌دهیم.
-                      </BaseText>
-                    </div>
-                  </li>
-
-                  <li class="flex gap-3">
-                    <div
-                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
-                    >
-                      <Icon
-                        name="lucide:check"
-                        class="text-success-500 size-4"
-                      />
-                    </div>
-                    <div>
-                      <BaseHeading
-                        as="h3"
-                        size="sm"
-                        weight="medium"
-                      >
-                        نگه داری و دردسترس پذیری
-                      </BaseHeading>
-                      <BaseText
-                        size="xs"
-                        class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
-                      >
-                        شما به تیم ذهنا کمک می کنید که سرویس را پایدار و بدون
-                        مشکل ارائه دهند.
-                      </BaseText>
-                    </div>
-                  </li>
-                  <li class="flex gap-3">
-                    <div
-                      class="border-muted-200 dark:border-muted-600 dark:bg-muted-700 shadow-muted-300/30 dark:shadow-muted-800/20 flex size-9 items-center justify-center rounded-full border bg-white shadow-xl"
-                    >
-                      <Icon
-                        name="lucide:check"
-                        class="text-success-500 size-4"
-                      />
-                    </div>
-                    <div>
-                      <BaseHeading
-                        as="h3"
-                        size="sm"
-                        weight="medium"
-                      >
-                        حمایت از ذهنا
-                      </BaseHeading>
-                      <BaseText
-                        size="xs"
-                        class="text-muted-500 dark:text-muted-400 max-w-full text-justify"
-                      >
-                        شما به تیم ذهنا و کمک رسانی به افرادی که نیاز به حمایت
-                        روانی دارند کمک می کنید.
-                      </BaseText>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </BaseCard>
-    </div>
+        </BaseCard>
+      </div>
     </div>
   </div>
   <!-- Modal component -->
@@ -539,7 +539,7 @@ const pasteCouponCode = () => {
     height: 100vh;
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   }
-  
+
   .content-container {
     padding-bottom: env(safe-area-inset-bottom); /* Handle safe areas on mobile */
   }

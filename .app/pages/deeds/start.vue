@@ -110,7 +110,7 @@ onMounted(() => {
       </div>
     </div>
     <div
-      data-tour="deeds-categories-bottom" 
+      data-tour="deeds-categories-bottom"
       class="mt-16 flex flex-row gap-2 sm:grid sm:grid-cols-3 sm:gap-6"
     >
       <div class="w-1/3 text-center sm:w-auto">

@@ -112,7 +112,7 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
     medium: 'پاسخ متعادل و جامع (4-6 جمله)',
     long: 'پاسخ کامل و تفصیلی (7 جمله یا بیشتر)',
   }
-  
+
   if (aiSettings.lengthPref && lengthPreferences[aiSettings.lengthPref]) {
     prompt += `\nتوضیح درباره اندازه پاسخ: ${lengthPreferences[aiSettings.lengthPref]}\n`
   }
@@ -209,7 +209,7 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
     medium: 'پاسخ متعادل و جامع (4-6 جمله)',
     long: 'پاسخ کامل و تفصیلی (7 جمله یا بیشتر)',
   }
-  
+
   if (aiSettings.lengthPref && lengthPreferences[aiSettings.lengthPref]) {
     prompt += `\nتوضیح درباره اندازه پاسخ: ${lengthPreferences[aiSettings.lengthPref]}\n`
   }
@@ -352,14 +352,14 @@ async function handleMessageWithTyping(message: string, messageIndex: number, to
 
 // Handle multi-message JSON responses with delays and retries
 async function handleMultiMessageResponse(
-  response: string, 
-  config: AIResponseConfig, 
-  onChunk: (chunk: any) => void, 
+  response: string,
+  config: AIResponseConfig,
+  onChunk: (chunk: any) => void,
   typingConfig: TypingConfig = defaultTypingConfig,
   retryCount: number = 0,
   maxRetries: number = 3,
   originalMessages?: ChatMessage[],
-  retryCallback?: (retryMessages: ChatMessage[]) => Promise<string>
+  retryCallback?: (retryMessages: ChatMessage[]) => Promise<string>,
 ) {
   try {
     console.log(`🔄 Processing multi-message response (attempt: ${retryCount + 1}):`, response)
@@ -378,7 +378,7 @@ async function handleMultiMessageResponse(
     let parsedResponse: any
     let parseErrorOccurred = false
     let parseErrorMessage = ''
-    
+
     try {
       parsedResponse = JSON.parse(cleanResponse)
       console.log('✅ Successfully parsed JSON:', parsedResponse)
@@ -455,10 +455,10 @@ async function handleMultiMessageResponse(
       }
 
       console.log(`🔄 Attempting retry (${retryCount + 1}/${maxRetries}) for valid JSON response...`)
-      
+
       // Create a new message to request proper JSON format
       const retryMessages: ChatMessage[] = [
-        ...originalMessages,  // Include original conversation
+        ...originalMessages, // Include original conversation
         {
           role: 'user',
           content: `لطفاً پاسخ قبلی را به فرمت صحیح JSON ارسال کن. پاسخ باید یک آبجکت با یک فیلد "messages" شامل آرایه‌ای از رشته‌ها باشد، مانند:
@@ -468,14 +468,14 @@ async function handleMultiMessageResponse(
     "پیام دوم",
     "پیام سوم"
   ]
-}`
-        }
+}`,
+        },
       ]
 
       try {
         // Get new response via retry callback
         const newResponse = await retryCallback(retryMessages)
-        
+
         // Recursively call this function with the new response and incremented retry count
         await handleMultiMessageResponse(
           newResponse,
@@ -485,7 +485,7 @@ async function handleMultiMessageResponse(
           retryCount + 1,
           maxRetries,
           originalMessages,
-          retryCallback
+          retryCallback,
         )
       }
       catch (retryError) {
@@ -502,7 +502,8 @@ async function handleMultiMessageResponse(
     if (retryCount >= maxRetries) {
       // Fallback to single message
       onChunk(postProcessResponse(response, config))
-    } else {
+    }
+    else {
       // Rethrow to be handled by calling function
       throw error
     }
@@ -602,14 +603,14 @@ export function useOpenRouter() {
 
     try {
       // Implement timeout mechanism with retry
-      let response: Response | null = null;
-      let attempts = 0;
-      const maxAttempts = 4; // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
-      
+      let response: Response | null = null
+      let attempts = 0
+      const maxAttempts = 4 // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
+
       while (attempts < maxAttempts) {
-        attempts++;
-        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to fetch models`);
-        
+        attempts++
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to fetch models`)
+
         try {
           response = await Promise.race([
             fetch('https://openrouter.ai/api/v1/models', {
@@ -618,57 +619,60 @@ export function useOpenRouter() {
                 'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
               },
             }),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
               setTimeout(() => {
-                console.log('⏰ Request timeout after 30 seconds');
-                reject(new Error('Request timeout after 30 seconds'));
-              }, 30000)
-            )
-          ]) as Response;
-          
-          console.log(`✅ Request successful on attempt ${attempts}`);
+                console.log('⏰ Request timeout after 30 seconds')
+                reject(new Error('Request timeout after 30 seconds'))
+              }, 30000),
+            ),
+          ]) as Response
+
+          console.log(`✅ Request successful on attempt ${attempts}`)
           // If we get here, the request was successful
           // Check if response is valid before breaking
           if (response && response.ok) {
-            break;
-          } else if (response) {
-            const errorText = await response.text();
+            break
+          }
+          else if (response) {
+            const errorText = await response.text()
             // Check if it's a 429 error (Too Many Requests)
             if (response.status === 429) {
-              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`);
+              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`)
               if (attempts >= maxAttempts) {
                 // If we've exhausted all attempts, throw the error
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                throw new Error(`HTTP ${response.status}: ${errorText}`)
               }
-              
+
               // Calculate delay based on attempt number: 5s, 10s, 15s
-              let delay = 5000; // First retry after 5 seconds
-              if (attempts === 2) delay = 10000; // Second retry after 10 seconds
-              if (attempts === 3) delay = 15000; // Third retry after 15 seconds
-              
-              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-              continue; // Continue to next attempt
-            } else {
+              let delay = 5000 // First retry after 5 seconds
+              if (attempts === 2) delay = 10000 // Second retry after 10 seconds
+              if (attempts === 3) delay = 15000 // Third retry after 15 seconds
+
+              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`)
+              await new Promise(resolve => setTimeout(resolve, delay))
+              continue // Continue to next attempt
+            }
+            else {
               // For non-429 errors, throw to trigger regular retry logic
-              throw new Error(`HTTP ${response.status}: ${errorText}`);
+              throw new Error(`HTTP ${response.status}: ${errorText}`)
             }
           }
-        } catch (e) {
-          console.log(`❌ Attempt ${attempts} failed:`, e);
+        }
+        catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e)
           if (attempts >= maxAttempts) {
             // Last attempt failed, re-throw the error
-            throw e;
+            throw e
           }
           // Retry after 1 second for other errors (not 429)
-          console.log('🔄 Retrying in 1 second...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('🔄 Retrying in 1 second...')
+          await new Promise(resolve => setTimeout(resolve, 1000))
         }
       }
 
       // Additional check to ensure we have a valid response
       if (!response) {
-        throw new Error('No response received from OpenRouter API after all attempts');
+        throw new Error('No response received from OpenRouter API after all attempts')
       }
 
       if (!response.ok) {
@@ -770,14 +774,14 @@ export function useOpenRouter() {
 
       // For AI-initiated conversations, we need both system prompt and initial user message
       // because some LLMs don't support starting with just a system prompt
-      let messagesWithSystem = [...messages]; // Start with original messages
-      
+      const messagesWithSystem = [...messages] // Start with original messages
+
       // If there's no system message, add our system prompt at the beginning
       if (!systemMessage) {
-        messagesWithSystem.unshift({ role: 'system', content: systemPrompt });
+        messagesWithSystem.unshift({ role: 'system', content: systemPrompt })
       }
-      
-      // If this is an AI-initiated conversation (conversation starter), 
+
+      // If this is an AI-initiated conversation (conversation starter),
       // add an initial user message that aligns completely with the system prompt
       // but will never be shown in the conversation
       if (isConversationStarter) {
@@ -785,22 +789,22 @@ export function useOpenRouter() {
         // This message will be sent to the LLM but not displayed in the UI
         const initialUserMessage: ChatMessage = {
           role: 'user',
-          content: 'سلام، به عنوان روانشناس من، لطفاً خلاصه‌ای از جلسات قبلی و وضعیت فعلی را برایم بفرست.' // "Hello, as my psychologist, please send me a summary of previous sessions and current status."
-        };
-        
+          content: 'سلام، به عنوان روانشناس من، لطفاً خلاصه‌ای از جلسات قبلی و وضعیت فعلی را برایم بفرست.', // "Hello, as my psychologist, please send me a summary of previous sessions and current status."
+        }
+
         // Insert the user message after the system message (which is always first now)
-        messagesWithSystem.splice(1, 0, initialUserMessage);
+        messagesWithSystem.splice(1, 0, initialUserMessage)
       }
 
       // Implement timeout mechanism with retry
-      let response: Response | null = null;
-      let attempts = 0;
-      const maxAttempts = 4; // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
-      
+      let response: Response | null = null
+      let attempts = 0
+      const maxAttempts = 4 // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
+
       while (attempts < maxAttempts) {
-        attempts++;
-        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate chat response`);
-        
+        attempts++
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate chat response`)
+
         try {
           const fetchOptions: RequestInit = {
             method: 'POST',
@@ -813,73 +817,76 @@ export function useOpenRouter() {
             body: JSON.stringify({
               model: options.model || selectedModel.value,
               messages: messagesWithSystem,
-              stream: aiConfig?.response_format?.type === 'json_object' ? false : true,  // JSON format requires non-streaming
+              stream: aiConfig?.response_format?.type === 'json_object' ? false : true, // JSON format requires non-streaming
               temperature: aiConfig?.temperature || options.temperature || 0.7,
               max_tokens: 0,
               ...(aiConfig?.response_format?.type !== 'json_object' && aiConfig?.response_format), // Only include response_format if not JSON
               plugins: [],
               transforms: ['middle-out'],
             }),
-          };
+          }
 
           // Add abort signal if provided
           if (options.signal) {
-            fetchOptions.signal = options.signal;
+            fetchOptions.signal = options.signal
           }
 
           response = await Promise.race([
             fetch('https://openrouter.ai/api/v1/chat/completions', fetchOptions),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
               setTimeout(() => {
-                console.log('⏰ Request timeout after 30 seconds');
-                reject(new Error('Request timeout after 30 seconds'));
-              }, 30000)
-            )
-          ]) as Response;
-          
-          console.log(`✅ Request successful on attempt ${attempts}`);
+                console.log('⏰ Request timeout after 30 seconds')
+                reject(new Error('Request timeout after 30 seconds'))
+              }, 30000),
+            ),
+          ]) as Response
+
+          console.log(`✅ Request successful on attempt ${attempts}`)
           // If we get here, the request was successful
           // Check if response is valid before breaking
           if (response && response.ok) {
-            break;
-          } else if (response) {
-            const errorText = await response.text();
+            break
+          }
+          else if (response) {
+            const errorText = await response.text()
             // Check if it's a 429 error (Too Many Requests)
             if (response.status === 429) {
-              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`);
+              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`)
               if (attempts >= maxAttempts) {
                 // If we've exhausted all attempts, throw the error
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                throw new Error(`HTTP ${response.status}: ${errorText}`)
               }
-              
+
               // Calculate delay based on attempt number: 5s, 10s, 15s
-              let delay = 5000; // First retry after 5 seconds
-              if (attempts === 2) delay = 10000; // Second retry after 10 seconds
-              if (attempts === 3) delay = 15000; // Third retry after 15 seconds
-              
-              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-              continue; // Continue to next attempt
-            } else {
+              let delay = 5000 // First retry after 5 seconds
+              if (attempts === 2) delay = 10000 // Second retry after 10 seconds
+              if (attempts === 3) delay = 15000 // Third retry after 15 seconds
+
+              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`)
+              await new Promise(resolve => setTimeout(resolve, delay))
+              continue // Continue to next attempt
+            }
+            else {
               // For non-429 errors, throw to trigger regular retry logic
-              throw new Error(`HTTP ${response.status}: ${errorText}`);
+              throw new Error(`HTTP ${response.status}: ${errorText}`)
             }
           }
-        } catch (e) {
-          console.log(`❌ Attempt ${attempts} failed:`, e);
+        }
+        catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e)
           if (attempts >= maxAttempts) {
             // Last attempt failed, re-throw the error
-            throw e;
+            throw e
           }
           // Retry after 1 second for other errors (not 429)
-          console.log('🔄 Retrying in 1 second...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('🔄 Retrying in 1 second...')
+          await new Promise(resolve => setTimeout(resolve, 1000))
         }
       }
 
       // Additional check to ensure we have a valid response
       if (!response) {
-        throw new Error('No response received from OpenRouter API after all attempts');
+        throw new Error('No response received from OpenRouter API after all attempts')
       }
 
       if (!response.ok) {
@@ -920,9 +927,9 @@ export function useOpenRouter() {
 
         // Handle multi-message JSON response with retry capability
         await handleMultiMessageResponse(
-          fullResponse, 
-          aiConfig, 
-          onChunk, 
+          fullResponse,
+          aiConfig,
+          onChunk,
           typingConfig,
           0, // initial retry count
           3, // max retries
@@ -940,26 +947,26 @@ export function useOpenRouter() {
               body: JSON.stringify({
                 model: options.model || selectedModel.value,
                 messages: retryMessages,
-                stream: false,  // JSON format requires non-streaming
+                stream: false, // JSON format requires non-streaming
                 temperature: aiConfig?.temperature || options.temperature || 0.7,
                 max_tokens: 0,
                 response_format: { type: 'json_object' }, // Ensure JSON format for retry
                 plugins: [],
                 transforms: ['middle-out'],
               }),
-              signal: options.signal
-            });
+              signal: options.signal,
+            })
 
             if (!retryResponse.ok) {
-              const errorText = await retryResponse.text();
-              throw new Error(`Retry request failed: ${errorText}`);
+              const errorText = await retryResponse.text()
+              throw new Error(`Retry request failed: ${errorText}`)
             }
 
-            const retryData = await retryResponse.json();
-            return retryData.choices[0].message.content;
-          }
+            const retryData = await retryResponse.json()
+            return retryData.choices[0].message.content
+          },
         )
-        
+
         return fullResponse
       }
       else {
@@ -976,7 +983,7 @@ export function useOpenRouter() {
         try {
           while (true) {
             const { done, value } = await reader.read()
-            
+
             if (done) {
               break
             }
@@ -986,7 +993,7 @@ export function useOpenRouter() {
             buffer += chunk
 
             // Process complete lines in the buffer
-            let lines = buffer.split('\n')
+            const lines = buffer.split('\n')
             buffer = lines.pop() || '' // Keep incomplete line in buffer
 
             for (const line of lines) {
@@ -1000,10 +1007,10 @@ export function useOpenRouter() {
 
                 try {
                   const parsed = JSON.parse(data)
-                  
+
                   if (parsed.choices && parsed.choices.length > 0) {
                     const delta = parsed.choices[0].delta
-                    
+
                     if (delta && delta.content) {
                       // Accumulate the response
                       fullResponse += delta.content
@@ -1011,7 +1018,8 @@ export function useOpenRouter() {
                       onChunk(delta.content)
                     }
                   }
-                } catch (e) {
+                }
+                catch (e) {
                   console.error('Error parsing stream data:', e)
                   console.error('Problematic data:', data)
                 }
@@ -1021,7 +1029,7 @@ export function useOpenRouter() {
 
           // Process any remaining data in buffer after stream ends
           if (buffer.trim()) {
-            let lines = buffer.split('\n')
+            const lines = buffer.split('\n')
             for (const line of lines) {
               if (line.trim() === '') continue
               if (line.startsWith('data: ')) {
@@ -1032,10 +1040,10 @@ export function useOpenRouter() {
 
                 try {
                   const parsed = JSON.parse(data)
-                  
+
                   if (parsed.choices && parsed.choices.length > 0) {
                     const delta = parsed.choices[0].delta
-                    
+
                     if (delta && delta.content) {
                       // Accumulate the response
                       fullResponse += delta.content
@@ -1043,15 +1051,17 @@ export function useOpenRouter() {
                       onChunk(delta.content)
                     }
                   }
-                } catch (e) {
+                }
+                catch (e) {
                   console.error('Error parsing buffered stream data:', e)
                 }
               }
             }
           }
-          
+
           return fullResponse
-        } finally {
+        }
+        finally {
           reader.releaseLock()
         }
       }
@@ -1068,7 +1078,7 @@ export function useOpenRouter() {
   // Accepts only the last message for inline analysis
   const generateInlineAnalysis = async (
     lastMessage: ChatMessage,
-    options: { signal?: AbortSignal } = {}
+    options: { signal?: AbortSignal } = {},
   ): Promise<any> => {
     processing.value = true
     error.value = null
@@ -1092,7 +1102,7 @@ export function useOpenRouter() {
           'X-Title': 'An Inline Analysis Generator to help therapists be more align with the needs of patients',
         },
         body: JSON.stringify({
-          model: "mistralai/mistral-saba",
+          model: 'mistralai/mistral-saba',
           messages: messagesWithSystem as ChatMessage[],
           response_format: {
             type: 'json_schema',
@@ -1157,76 +1167,79 @@ export function useOpenRouter() {
           plugins: [],
           transforms: ['middle-out'],
         }),
-      };
+      }
 
       // Add abort signal if provided
       if (options.signal) {
-        fetchOptions.signal = options.signal;
+        fetchOptions.signal = options.signal
       }
 
       // Implement timeout mechanism with retry
-      let response: Response | null = null;
-      let attempts = 0;
-      const maxAttempts = 4; // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
-      
+      let response: Response | null = null
+      let attempts = 0
+      const maxAttempts = 4 // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
+
       while (attempts < maxAttempts) {
-        attempts++;
-        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate inline analysis`);
-        
+        attempts++
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate inline analysis`)
+
         try {
           response = await Promise.race([
             fetch('https://openrouter.ai/api/v1/chat/completions', fetchOptions),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
               setTimeout(() => {
-                console.log('⏰ Request timeout after 30 seconds');
-                reject(new Error('Request timeout after 30 seconds'));
-              }, 30000)
-            )
-          ]) as Response;
-          
-          console.log(`✅ Request successful on attempt ${attempts}`);
+                console.log('⏰ Request timeout after 30 seconds')
+                reject(new Error('Request timeout after 30 seconds'))
+              }, 30000),
+            ),
+          ]) as Response
+
+          console.log(`✅ Request successful on attempt ${attempts}`)
           // If we get here, the request was successful
           // Check if response is valid before breaking
           if (response && response.ok) {
-            break;
-          } else if (response) {
-            const errorText = await response.text();
+            break
+          }
+          else if (response) {
+            const errorText = await response.text()
             // Check if it's a 429 error (Too Many Requests)
             if (response.status === 429) {
-              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`);
+              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`)
               if (attempts >= maxAttempts) {
                 // If we've exhausted all attempts, throw the error
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                throw new Error(`HTTP ${response.status}: ${errorText}`)
               }
-              
+
               // Calculate delay based on attempt number: 5s, 10s, 15s
-              let delay = 5000; // First retry after 5 seconds
-              if (attempts === 2) delay = 10000; // Second retry after 10 seconds
-              if (attempts === 3) delay = 15000; // Third retry after 15 seconds
-              
-              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-              continue; // Continue to next attempt
-            } else {
+              let delay = 5000 // First retry after 5 seconds
+              if (attempts === 2) delay = 10000 // Second retry after 10 seconds
+              if (attempts === 3) delay = 15000 // Third retry after 15 seconds
+
+              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`)
+              await new Promise(resolve => setTimeout(resolve, delay))
+              continue // Continue to next attempt
+            }
+            else {
               // For non-429 errors, throw to trigger regular retry logic
-              throw new Error(`HTTP ${response.status}: ${errorText}`);
+              throw new Error(`HTTP ${response.status}: ${errorText}`)
             }
           }
-        } catch (e) {
-          console.log(`❌ Attempt ${attempts} failed:`, e);
+        }
+        catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e)
           if (attempts >= maxAttempts) {
             // Last attempt failed, re-throw the error
-            throw e;
+            throw e
           }
           // Retry after 1 second for other errors (not 429)
-          console.log('🔄 Retrying in 1 second...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('🔄 Retrying in 1 second...')
+          await new Promise(resolve => setTimeout(resolve, 1000))
         }
       }
 
       // Additional check to ensure we have a valid response
       if (!response) {
-        throw new Error('No response received from OpenRouter API after all attempts');
+        throw new Error('No response received from OpenRouter API after all attempts')
       }
 
       if (!response.ok) {
@@ -1269,12 +1282,12 @@ export function useOpenRouter() {
     }
     catch (e: any) {
       error.value = e.message
-      
+
       // Check if this is an abort error
       if (e.name === 'AbortError' || (options.signal && options.signal.aborted)) {
         throw new Error('زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.')
       }
-      
+
       throw e
     }
     finally {
@@ -1288,14 +1301,14 @@ export function useOpenRouter() {
 
     try {
       // Implement timeout mechanism with retry
-      let response: Response | null = null;
-      let attempts = 0;
-      const maxAttempts = 4; // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
-      
+      let response: Response | null = null
+      let attempts = 0
+      const maxAttempts = 4 // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
+
       while (attempts < maxAttempts) {
-        attempts++;
-        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate patient details`);
-        
+        attempts++
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate patient details`)
+
         try {
           response = await Promise.race([
             fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -1390,57 +1403,60 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
                 transforms: ['middle-out'],
               }),
             }),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
               setTimeout(() => {
-                console.log('⏰ Request timeout after 30 seconds');
-                reject(new Error('Request timeout after 30 seconds'));
-              }, 30000)
-            )
-          ]) as Response;
-          
-          console.log(`✅ Request successful on attempt ${attempts}`);
+                console.log('⏰ Request timeout after 30 seconds')
+                reject(new Error('Request timeout after 30 seconds'))
+              }, 30000),
+            ),
+          ]) as Response
+
+          console.log(`✅ Request successful on attempt ${attempts}`)
           // If we get here, the request was successful
           // Check if response is valid before breaking
           if (response && response.ok) {
-            break;
-          } else if (response) {
-            const errorText = await response.text();
+            break
+          }
+          else if (response) {
+            const errorText = await response.text()
             // Check if it's a 429 error (Too Many Requests)
             if (response.status === 429) {
-              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`);
+              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`)
               if (attempts >= maxAttempts) {
                 // If we've exhausted all attempts, throw the error
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                throw new Error(`HTTP ${response.status}: ${errorText}`)
               }
-              
+
               // Calculate delay based on attempt number: 5s, 10s, 15s
-              let delay = 5000; // First retry after 5 seconds
-              if (attempts === 2) delay = 10000; // Second retry after 10 seconds
-              if (attempts === 3) delay = 15000; // Third retry after 15 seconds
-              
-              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-              continue; // Continue to next attempt
-            } else {
+              let delay = 5000 // First retry after 5 seconds
+              if (attempts === 2) delay = 10000 // Second retry after 10 seconds
+              if (attempts === 3) delay = 15000 // Third retry after 15 seconds
+
+              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`)
+              await new Promise(resolve => setTimeout(resolve, delay))
+              continue // Continue to next attempt
+            }
+            else {
               // For non-429 errors, throw to trigger regular retry logic
-              throw new Error(`HTTP ${response.status}: ${errorText}`);
+              throw new Error(`HTTP ${response.status}: ${errorText}`)
             }
           }
-        } catch (e) {
-          console.log(`❌ Attempt ${attempts} failed:`, e);
+        }
+        catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e)
           if (attempts >= maxAttempts) {
             // Last attempt failed, re-throw the error
-            throw e;
+            throw e
           }
           // Retry after 1 second for other errors (not 429)
-          console.log('🔄 Retrying in 1 second...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('🔄 Retrying in 1 second...')
+          await new Promise(resolve => setTimeout(resolve, 1000))
         }
       }
 
       // Additional check to ensure we have a valid response
       if (!response) {
-        throw new Error('No response received from OpenRouter API after all attempts');
+        throw new Error('No response received from OpenRouter API after all attempts')
       }
 
       if (!response.ok) {
@@ -1496,14 +1512,14 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
 
     try {
       // Implement timeout mechanism with retry
-      let response: Response | null = null;
-      let attempts = 0;
-      const maxAttempts = 4; // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
-      
+      let response: Response | null = null
+      let attempts = 0
+      const maxAttempts = 4 // Initial attempt + 3 retries for 429 errors (5s, 10s, 15s)
+
       while (attempts < maxAttempts) {
-        attempts++;
-        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate therapist details`);
-        
+        attempts++
+        console.log(`⏳ Attempt ${attempts}/${maxAttempts} to generate therapist details`)
+
         try {
           response = await Promise.race([
             fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -1585,57 +1601,60 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
                 transforms: ['middle-out'],
               }),
             }),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
               setTimeout(() => {
-                console.log('⏰ Request timeout after 30 seconds');
-                reject(new Error('Request timeout after 30 seconds'));
-              }, 30000)
-            )
-          ]) as Response;
-          
-          console.log(`✅ Request successful on attempt ${attempts}`);
+                console.log('⏰ Request timeout after 30 seconds')
+                reject(new Error('Request timeout after 30 seconds'))
+              }, 30000),
+            ),
+          ]) as Response
+
+          console.log(`✅ Request successful on attempt ${attempts}`)
           // If we get here, the request was successful
           // Check if response is valid before breaking
           if (response && response.ok) {
-            break;
-          } else if (response) {
-            const errorText = await response.text();
+            break
+          }
+          else if (response) {
+            const errorText = await response.text()
             // Check if it's a 429 error (Too Many Requests)
             if (response.status === 429) {
-              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`);
+              console.log(`⚠️ 429 Too Many Requests error received, attempt ${attempts}/${maxAttempts}`)
               if (attempts >= maxAttempts) {
                 // If we've exhausted all attempts, throw the error
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                throw new Error(`HTTP ${response.status}: ${errorText}`)
               }
-              
+
               // Calculate delay based on attempt number: 5s, 10s, 15s
-              let delay = 5000; // First retry after 5 seconds
-              if (attempts === 2) delay = 10000; // Second retry after 10 seconds
-              if (attempts === 3) delay = 15000; // Third retry after 15 seconds
-              
-              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-              continue; // Continue to next attempt
-            } else {
+              let delay = 5000 // First retry after 5 seconds
+              if (attempts === 2) delay = 10000 // Second retry after 10 seconds
+              if (attempts === 3) delay = 15000 // Third retry after 15 seconds
+
+              console.log(`⏳ Waiting ${delay / 1000}s before retrying...`)
+              await new Promise(resolve => setTimeout(resolve, delay))
+              continue // Continue to next attempt
+            }
+            else {
               // For non-429 errors, throw to trigger regular retry logic
-              throw new Error(`HTTP ${response.status}: ${errorText}`);
+              throw new Error(`HTTP ${response.status}: ${errorText}`)
             }
           }
-        } catch (e) {
-          console.log(`❌ Attempt ${attempts} failed:`, e);
+        }
+        catch (e) {
+          console.log(`❌ Attempt ${attempts} failed:`, e)
           if (attempts >= maxAttempts) {
             // Last attempt failed, re-throw the error
-            throw e;
+            throw e
           }
           // Retry after 1 second for other errors (not 429)
-          console.log('🔄 Retrying in 1 second...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('🔄 Retrying in 1 second...')
+          await new Promise(resolve => setTimeout(resolve, 1000))
         }
       }
 
       // Additional check to ensure we have a valid response
       if (!response) {
-        throw new Error('No response received from OpenRouter API after all attempts');
+        throw new Error('No response received from OpenRouter API after all attempts')
       }
 
       if (!response.ok) {

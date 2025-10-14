@@ -20,16 +20,16 @@ async function fetchLLM(messages: LLMMessage[]): Promise<string> {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${RUNPOD_API_TOKEN}`,
   }
-  
+
   console.log(JSON.stringify({
-      model: LLM_MODEL,
-      input:{messages},
-      temperature: LLM_TEMPERATURE,
-      max_tokens: LLM_MAX_TOKENS,
-      repeat_penalty: LLM_REPEAT_PENALTY,
-      stream: false,
-    }));
-  
+    model: LLM_MODEL,
+    input: { messages },
+    temperature: LLM_TEMPERATURE,
+    max_tokens: LLM_MAX_TOKENS,
+    repeat_penalty: LLM_REPEAT_PENALTY,
+    stream: false,
+  }))
+
   const response = await $fetch<FetchResponse>(LLM_ADDRESS, {
     method: 'POST',
     headers,
@@ -54,17 +54,18 @@ export default defineEventHandler(async (event) => {
 
   const systemMessage = body.systemMessage || ''
   const messages: LLMMessage[] = body.messages || []
-  
+
   // Prepend the system message if provided
   if (systemMessage) {
     messages.unshift({ role: 'system', content: systemMessage })
   }
-  
+
   try {
     const result = await fetchLLM(messages)
     console.log(result)
     return result
-  } catch (error: unknown) {
+  }
+  catch (error: unknown) {
     console.error('Error fetching LLM:', error)
     throw createError({
       statusCode: 500,

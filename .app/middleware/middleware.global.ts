@@ -29,6 +29,35 @@ export default defineNuxtRouteMiddleware((to) => {
     return navigateTo('/auth/login', { redirectCode: 401 })
   }
 
+  // LOCK SYSTEM CHECK - Enforce lock at middleware level (strongest check)
+  // This runs on every navigation attempt
+  if (process.client && nuxtApp.$pb.authStore.isValid) {
+    try {
+      const lockStateStr = localStorage.getItem('zehna_lock_state')
+      if (lockStateStr) {
+        const lockState = JSON.parse(lockStateStr)
+        const { user } = useUser()
+        
+        // Check if app is locked for current user
+        const isLocked = lockState.isLocked && lockState.userId === user.value?.id && !!lockState.pin
+        
+        // If locked, only allow access to /lock page and auth pages
+        if (isLocked && to.path !== '/lock' && !to.path.startsWith('/auth')) {
+          console.log('🔒 Navigation blocked - App is locked. Redirecting to /lock')
+          return navigateTo('/lock', { replace: true })
+        }
+        
+        // If not locked but trying to access lock page, redirect to dashboard
+        if (!isLocked && to.path === '/lock') {
+          return navigateTo('/dashboard', { replace: true })
+        }
+      }
+    }
+    catch (error) {
+      console.warn('Lock check failed in middleware:', error)
+    }
+  }
+
   // Additional check: PocketBase auth is present, but user in localStorage is '{}' and role is empty
   try {
     const localUserStr = localStorage.getItem('user')

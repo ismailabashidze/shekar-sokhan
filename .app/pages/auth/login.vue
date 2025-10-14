@@ -124,6 +124,10 @@ const loginWithGoogle = async () => {
       setPremiumStatus(true)
     }
 
+    // Check if user has lock PIN set
+    const { syncPinFromServer } = useLockSystem()
+    const hasLockPin = await syncPinFromServer(appUser.id as string)
+
     toaster.clearAll()
     toaster.show({
       title: 'ورود موفق',
@@ -134,7 +138,8 @@ const loginWithGoogle = async () => {
     })
 
     setTimeout(() => {
-      router.push('/dashboard')
+      // Redirect to lock page if user has PIN, otherwise go to dashboard
+      router.push(hasLockPin ? '/lock' : '/dashboard')
     }, 1000)
   }
   catch (error) {
@@ -175,8 +180,6 @@ const loginWithGoogle = async () => {
     isGoogleLogin.value = false
   }
 }
-
-
 
 if (nuxtApp.$pb.authStore.isValid) {
   navigateTo('/dashboard')

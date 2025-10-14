@@ -522,10 +522,11 @@ onMounted(async () => {
     console.log('Fetching analysis with ID:', analysisId.value)
     analysisData.value = await getAnalysisById(analysisId.value)
     console.log('Analysis data fetched successfully:', analysisData.value)
-    
+
     // Process enhanced next steps after data is loaded
     await processEnhancedNextSteps()
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error fetching analysis data:', error)
     toaster.clearAll()
     toaster.show({

@@ -41,7 +41,7 @@ const { unreadCount } = useNotifications()
     <div
       v-if="unreadCount > 0"
       class="bg-danger-500 absolute -right-1 -top-1 size-5 animate-ping rounded-full opacity-30"
-    ></div>
+    />
   </button>
 </template>
 

@@ -151,7 +151,6 @@ export function usePwaNotifications() {
   // Show local notification
   const showLocalNotification = async (options: PwaNotificationOptions): Promise<boolean> => {
     if (!isSupported.value || permission.value !== 'granted') {
-      
       return false
     }
 
@@ -187,11 +186,9 @@ export function usePwaNotifications() {
         timestamp: Date.now(),
       })
 
-      
       return true
     }
     catch (err: any) {
-      
       error.value = err.message || 'خطا در نمایش اعلان محلی'
       return false
     }
@@ -490,7 +487,6 @@ export function usePwaNotifications() {
   // Auto-request permission on user interaction
   const autoRequestPermission = async (): Promise<boolean> => {
     if (!isSupported.value) {
-      
       return false
     }
 
@@ -501,7 +497,6 @@ export function usePwaNotifications() {
 
     // Skip if already granted
     if (permission.value === 'granted') {
-      
       await subscribeToPush()
       return true
     }
@@ -511,13 +506,11 @@ export function usePwaNotifications() {
 
     // If user previously denied, don't ask again unless they reset
     if (userDecision === 'denied' && permission.value === 'default') {
-      
       return false
     }
 
     // Request permission immediately without delay
     try {
-      
       const result = await Notification.requestPermission()
       permission.value = result
 
@@ -526,7 +519,6 @@ export function usePwaNotifications() {
       localStorage.setItem('pwa-permission-timestamp', Date.now().toString())
 
       if (result === 'granted') {
-        
         await subscribeToPush()
         return true
       }

@@ -97,14 +97,14 @@ export function useGoals() {
         filter: `user_id = "${userId}"`,
         sort: '-created',
       })
-      
+
       // Transform to maintain compatibility with existing code
       return records.map(record => ({
         id: record.id,
         user_id: record.user_id,
         session_id: record.session_id,
         goals: {
-          suggestedDisordersToInvestigate: record.suggestedDisordersToInvestigate
+          suggestedDisordersToInvestigate: record.suggestedDisordersToInvestigate,
         },
         created: record.created,
         updated: record.updated,
@@ -290,7 +290,7 @@ export function useGoals() {
             type: 'object',
             additionalProperties: false,
             properties: {
-              categoryTitle: { 
+              categoryTitle: {
                 type: 'string',
                 enum: [
                   'Neurodevelopmental Disorders',
@@ -314,8 +314,8 @@ export function useGoals() {
                   'Paraphilic Disorders',
                   'Other Mental Disorders',
                   'Medication-Induced Movement Disorders and Other Adverse Effects of Medication',
-                  'Other Conditions That May Be a Focus of Clinical Attention'
-                ]
+                  'Other Conditions That May Be a Focus of Clinical Attention',
+                ],
               },
               categoryTitleFa: { type: 'string', description: 'عنوان فارسی دسته‌بندی' },
               categoryDescription: { type: 'string' },
@@ -351,14 +351,14 @@ export function useGoals() {
                               additionalProperties: false,
                               properties: {
                                 number: { type: 'string' },
-                                description: { type: 'string' }
+                                description: { type: 'string' },
                               },
-                              required: ['number', 'description']
-                            }
-                          }
+                              required: ['number', 'description'],
+                            },
+                          },
                         },
-                        required: ['alphabet', 'description']
-                      }
+                        required: ['alphabet', 'description'],
+                      },
                     },
                     specifiers: {
                       type: 'array',
@@ -369,11 +369,11 @@ export function useGoals() {
                           title: { type: 'string' },
                           conditions: {
                             type: 'array',
-                            items: { type: 'string' }
-                          }
+                            items: { type: 'string' },
+                          },
                         },
-                        required: ['title', 'conditions']
-                      }
+                        required: ['title', 'conditions'],
+                      },
                     },
                     diagnosticFeatures: {
                       type: 'object',
@@ -391,10 +391,10 @@ export function useGoals() {
                                 properties: {
                                   symptom: { type: 'string' },
                                   description: { type: 'string' },
-                                  quantification: { type: 'string' }
+                                  quantification: { type: 'string' },
                                 },
-                                required: ['symptom', 'description', 'quantification']
-                              }
+                                required: ['symptom', 'description', 'quantification'],
+                              },
                             },
                             associated: {
                               type: 'array',
@@ -404,16 +404,16 @@ export function useGoals() {
                                 properties: {
                                   symptom: { type: 'string' },
                                   description: { type: 'string' },
-                                  category: { 
+                                  category: {
                                     type: 'string',
-                                    enum: ['mood', 'anxiety', 'behavioral', 'somatic']
-                                  }
+                                    enum: ['mood', 'anxiety', 'behavioral', 'somatic'],
+                                  },
                                 },
-                                required: ['symptom', 'description', 'category']
-                              }
+                                required: ['symptom', 'description', 'category'],
+                              },
                             },
-                            exclusion_criteria: { type: 'string' }
-                          }
+                            exclusion_criteria: { type: 'string' },
+                          },
                         },
                         temporal_pattern: {
                           type: 'object',
@@ -428,10 +428,10 @@ export function useGoals() {
                               additionalProperties: false,
                               properties: {
                                 required: { type: 'boolean' },
-                                description: { type: 'string' }
-                              }
-                            }
-                          }
+                                description: { type: 'string' },
+                              },
+                            },
+                          },
                         },
                         functional_impairment: {
                           type: 'object',
@@ -442,17 +442,17 @@ export function useGoals() {
                               type: 'array',
                               items: {
                                 type: 'string',
-                                enum: ['occupational', 'social', 'academic', 'interpersonal']
-                              }
+                                enum: ['occupational', 'social', 'academic', 'interpersonal'],
+                              },
                             },
                             severity_levels: {
                               type: 'array',
                               items: {
                                 type: 'string',
-                                enum: ['mild', 'moderate', 'severe']
-                              }
-                            }
-                          }
+                                enum: ['mild', 'moderate', 'severe'],
+                              },
+                            },
+                          },
                         },
                         contextual_factors: {
                           type: 'array',
@@ -462,7 +462,7 @@ export function useGoals() {
                             properties: {
                               factor: { type: 'string' },
                               impact_description: { type: 'string' },
-                              type: { 
+                              type: {
                                 type: 'string',
                                 enum: [
                                   'cultural_background', 'gender_roles', 'religious_beliefs', 'social_tolerance',
@@ -471,12 +471,12 @@ export function useGoals() {
                                   'disability_status', 'trauma_history', 'occupational_demands', 'educational_background',
                                   'language_barriers', 'acculturation_level', 'community_support', 'political_climate',
                                   'generational_differences', 'healthcare_access', 'nutritional_status', 'substance_use_patterns',
-                                  'media_influences'
-                                ]
-                              }
+                                  'media_influences',
+                                ],
+                              },
                             },
-                            required: ['factor', 'impact_description', 'type']
-                          }
+                            required: ['factor', 'impact_description', 'type'],
+                          },
                         },
                         differential_diagnostics: {
                           type: 'array',
@@ -492,16 +492,16 @@ export function useGoals() {
                                   additionalProperties: false,
                                   properties: {
                                     feature: { type: 'string' },
-                                    comparison: { type: 'string' }
+                                    comparison: { type: 'string' },
                                   },
-                                  required: ['feature', 'comparison']
-                                }
-                              }
+                                  required: ['feature', 'comparison'],
+                                },
+                              },
                             },
-                            required: ['disorder', 'distinguishing_features']
-                          }
-                        }
-                      }
+                            required: ['disorder', 'distinguishing_features'],
+                          },
+                        },
+                      },
                     },
                     diagnosticMarkers: {
                       type: 'array',
@@ -511,15 +511,15 @@ export function useGoals() {
                         properties: {
                           name: {
                             type: 'string',
-                            enum: ['biological', 'neurophysiological', 'cognitive_behavioral', 'digital', 'other']
+                            enum: ['biological', 'neurophysiological', 'cognitive_behavioral', 'digital', 'other'],
                           },
                           subtype: {
                             type: 'array',
-                            items: { type: 'string' }
-                          }
+                            items: { type: 'string' },
+                          },
                         },
-                        required: ['name', 'subtype']
-                      }
+                        required: ['name', 'subtype'],
+                      },
                     },
                     associated_features: {
                       type: 'object',
@@ -527,7 +527,7 @@ export function useGoals() {
                       properties: {
                         supporting_symptoms: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         demographic_patterns: {
                           type: 'object',
@@ -535,16 +535,16 @@ export function useGoals() {
                           properties: {
                             age_onset: { type: 'string' },
                             gender_distribution: { type: 'string' },
-                            cultural_variations: { type: 'string' }
-                          }
+                            cultural_variations: { type: 'string' },
+                          },
                         },
                         common_comorbidities: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         functional_impacts: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         developmental_course: {
                           type: 'object',
@@ -553,61 +553,61 @@ export function useGoals() {
                             typical_progression: { type: 'string' },
                             risk_factors: {
                               type: 'array',
-                              items: { type: 'string' }
-                            }
-                          }
+                              items: { type: 'string' },
+                            },
+                          },
                         },
                         biological_findings: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         cognitive_emotional_patterns: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         cultural_manifestations: {
                           type: 'array',
-                          items: { type: 'string' }
-                        }
-                      }
+                          items: { type: 'string' },
+                        },
+                      },
                     },
                     riskAndPrognosticFactors: {
                       type: 'object',
                       additionalProperties: false,
                       properties: {
                         Environmental: { type: 'string' },
-                        geneticAndPhysiological: { type: 'string' }
-                      }
+                        geneticAndPhysiological: { type: 'string' },
+                      },
                     },
                     cultureRelatedDiagnosticIssues: {
                       type: 'object',
-                      additionalProperties: false
+                      additionalProperties: false,
                     },
                     genderRelatedDiagnosticIssues: {
                       type: 'object',
-                      additionalProperties: false
+                      additionalProperties: false,
                     },
                     differentialDiagnosis: {
                       type: 'object',
-                      additionalProperties: false
+                      additionalProperties: false,
                     },
                     comorbidity: {
                       type: 'object',
-                      additionalProperties: false
-                    }
+                      additionalProperties: false,
+                    },
                   },
                   required: ['code', 'title', 'description', 'minimumCriteria', 'Prevalence', 'developmentAndCourse', 'suicideRisk'],
-                  additionalProperties: false
-                }
-              }
+                  additionalProperties: false,
+                },
+              },
             },
             required: ['categoryTitle', 'categoryTitleFa', 'categoryDescription', 'disorders'],
-            additionalProperties: false
-          }
-        }
+            additionalProperties: false,
+          },
+        },
       },
       required: ['suggestedDisordersToInvestigate'],
-      additionalProperties: false
+      additionalProperties: false,
     }
 
     console.log('Making API request to OpenRouter...')
@@ -643,28 +643,29 @@ export function useGoals() {
 
     const data = await response.json()
     console.log('Full API response:', data)
-    
+
     const content = data.choices?.[0]?.message?.content
     if (!content) {
       console.error('No content in API response:', data)
       throw new Error('No content received from API')
     }
-    
+
     console.log('Raw content from API:', content)
-    
+
     let result
     try {
       result = typeof content === 'string' ? JSON.parse(content) : content
-    } catch (parseError) {
+    }
+    catch (parseError) {
       console.error('JSON parse error. Content was:', content)
       throw new Error(`Invalid JSON response - ${parseError.message}`)
     }
-    
+
     console.log('Parsed result:', result)
 
     const disorders = result.suggestedDisordersToInvestigate || []
     console.log('Extracted disorders:', disorders.length, 'categories')
-    
+
     return disorders
   }
 
@@ -674,35 +675,37 @@ export function useGoals() {
       const relevantCategories = analyzeDSM5Categories(assessment)
 
       console.log('Starting two-phase DSM-5 generation process...')
-      
+
       // PHASE 1: Generate basic disorder information
       let phase1Results = []
       try {
         phase1Results = await generatePhase1BasicDisorders(assessment, relevantCategories, sessionNumber)
-        
+
         if (!phase1Results || phase1Results.length === 0) {
           throw new Error('Phase 1 returned empty results')
         }
 
         console.log('Phase 1 completed - basic disorders generated:', phase1Results.length, 'categories')
-      } catch (phase1Error) {
+      }
+      catch (phase1Error) {
         console.error('Phase 1 failed:', phase1Error)
-        
+
         // Fall back to legacy single-phase generation
         console.log('Falling back to legacy generation method...')
         try {
           return await generateStructuredGoalsOld(assessment, sessionNumber)
-        } catch (legacyError) {
+        }
+        catch (legacyError) {
           console.error('Legacy generation also failed:', legacyError)
           throw new Error('All generation methods failed')
         }
       }
-      
+
       // PHASE 2: Enhance with detailed diagnostic information
       let phase2Results = []
       try {
         phase2Results = await generatePhase2DetailedFeatures(phase1Results, assessment, sessionNumber)
-        
+
         if (!phase2Results || phase2Results.length === 0) {
           console.warn('Phase 2 failed - falling back to Phase 1 results')
           return phase1Results
@@ -710,13 +713,14 @@ export function useGoals() {
 
         console.log('Phase 2 completed - detailed features added')
         return phase2Results
-      } catch (phase2Error) {
+      }
+      catch (phase2Error) {
         console.error('Phase 2 failed:', phase2Error)
         console.warn('Returning Phase 1 results without enhancement')
         return phase1Results
       }
-
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error in two-phase diagnosis goals generation:', error)
       throw error
     }
@@ -736,7 +740,7 @@ export function useGoals() {
             type: 'object',
             additionalProperties: false,
             properties: {
-              categoryTitle: { 
+              categoryTitle: {
                 type: 'string',
                 enum: [
                   'Neurodevelopmental Disorders',
@@ -760,8 +764,8 @@ export function useGoals() {
                   'Paraphilic Disorders',
                   'Other Mental Disorders',
                   'Medication-Induced Movement Disorders and Other Adverse Effects of Medication',
-                  'Other Conditions That May Be a Focus of Clinical Attention'
-                ]
+                  'Other Conditions That May Be a Focus of Clinical Attention',
+                ],
               },
               categoryTitleFa: { type: 'string', description: 'عنوان فارسی دسته‌بندی' },
               categoryDescription: { type: 'string' },
@@ -781,20 +785,20 @@ export function useGoals() {
                     specialNote: { type: 'string', description: 'نکته ویژه' },
                     Prevalence: { type: 'string', description: 'شیوع' },
                     developmentAndCourse: { type: 'string', description: 'توسعه و سیر' },
-                    suicideRisk: { type: 'string', description: 'خطر خودکشی' }
+                    suicideRisk: { type: 'string', description: 'خطر خودکشی' },
                   },
                   required: ['code', 'title', 'description', 'minimumCriteria', 'Prevalence', 'developmentAndCourse', 'suicideRisk'],
-                  additionalProperties: false
-                }
-              }
+                  additionalProperties: false,
+                },
+              },
             },
             required: ['categoryTitle', 'categoryTitleFa', 'categoryDescription', 'disorders'],
-            additionalProperties: false
-          }
-        }
+            additionalProperties: false,
+          },
+        },
       },
       required: ['suggestedDisordersToInvestigate'],
-      additionalProperties: false
+      additionalProperties: false,
     }
 
     const systemPrompt = `شما یک روانشناس متخصص در تشخیص اختلالات روانی بر اساس DSM-5 هستید.
@@ -851,7 +855,7 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
     ]
 
     console.log('Phase 1: Generating basic disorder information...')
-    
+
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -881,15 +885,15 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
 
     const data = await response.json()
     console.log('Phase 1 API response:', data)
-    
+
     const content = data.choices?.[0]?.message?.content
     if (!content) {
       throw new Error('Phase 1: No content received from API')
     }
-    
+
     console.log('Phase 1 raw content:', content)
     console.log('Phase 1 content type:', typeof content)
-    
+
     // Check if content looks like valid JSON before parsing
     if (typeof content === 'string') {
       // Basic validation: should start with { and end with }
@@ -898,28 +902,29 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
         console.error('Phase 1: Content does not look like valid JSON:', content)
         throw new Error('Phase 1: Response does not appear to be valid JSON')
       }
-      
+
       // Check for obvious truncation issues
       if (trimmedContent.includes('agnostic features...') || trimmedContent.length < 100) {
         console.error('Phase 1: Content appears to be truncated:', content)
         throw new Error('Phase 1: API response appears to be truncated or incomplete')
       }
     }
-    
+
     let result
     try {
       result = typeof content === 'string' ? JSON.parse(content) : content
-    } catch (parseError) {
+    }
+    catch (parseError) {
       console.error('Phase 1 JSON parse error. Content was:', content)
       throw new Error(`Phase 1: Invalid JSON response - ${parseError.message}`)
     }
-    
+
     console.log('Phase 1 parsed result:', result)
-    
+
     if (!result.suggestedDisordersToInvestigate) {
       throw new Error('Phase 1: Missing suggestedDisordersToInvestigate in response')
     }
-    
+
     return result.suggestedDisordersToInvestigate
   }
 
@@ -958,14 +963,14 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                               additionalProperties: false,
                               properties: {
                                 number: { type: 'string' },
-                                description: { type: 'string' }
+                                description: { type: 'string' },
                               },
-                              required: ['number', 'description']
-                            }
-                          }
+                              required: ['number', 'description'],
+                            },
+                          },
                         },
-                        required: ['alphabet', 'description']
-                      }
+                        required: ['alphabet', 'description'],
+                      },
                     },
                     specifiers: {
                       type: 'array',
@@ -976,11 +981,11 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                           title: { type: 'string' },
                           conditions: {
                             type: 'array',
-                            items: { type: 'string' }
-                          }
+                            items: { type: 'string' },
+                          },
                         },
-                        required: ['title', 'conditions']
-                      }
+                        required: ['title', 'conditions'],
+                      },
                     },
                     diagnosticFeatures: {
                       type: 'object',
@@ -998,10 +1003,10 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                                 properties: {
                                   symptom: { type: 'string' },
                                   description: { type: 'string' },
-                                  quantification: { type: 'string' }
+                                  quantification: { type: 'string' },
                                 },
-                                required: ['symptom', 'description', 'quantification']
-                              }
+                                required: ['symptom', 'description', 'quantification'],
+                              },
                             },
                             associated: {
                               type: 'array',
@@ -1011,16 +1016,16 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                                 properties: {
                                   symptom: { type: 'string' },
                                   description: { type: 'string' },
-                                  category: { 
+                                  category: {
                                     type: 'string',
-                                    enum: ['mood', 'anxiety', 'behavioral', 'somatic']
-                                  }
+                                    enum: ['mood', 'anxiety', 'behavioral', 'somatic'],
+                                  },
                                 },
-                                required: ['symptom', 'description', 'category']
-                              }
+                                required: ['symptom', 'description', 'category'],
+                              },
                             },
-                            exclusion_criteria: { type: 'string' }
-                          }
+                            exclusion_criteria: { type: 'string' },
+                          },
                         },
                         temporal_pattern: {
                           type: 'object',
@@ -1035,10 +1040,10 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                               additionalProperties: false,
                               properties: {
                                 required: { type: 'boolean' },
-                                description: { type: 'string' }
-                              }
-                            }
-                          }
+                                description: { type: 'string' },
+                              },
+                            },
+                          },
                         },
                         functional_impairment: {
                           type: 'object',
@@ -1049,17 +1054,17 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                               type: 'array',
                               items: {
                                 type: 'string',
-                                enum: ['occupational', 'social', 'academic', 'interpersonal']
-                              }
+                                enum: ['occupational', 'social', 'academic', 'interpersonal'],
+                              },
                             },
                             severity_levels: {
                               type: 'array',
                               items: {
                                 type: 'string',
-                                enum: ['mild', 'moderate', 'severe']
-                              }
-                            }
-                          }
+                                enum: ['mild', 'moderate', 'severe'],
+                              },
+                            },
+                          },
                         },
                         contextual_factors: {
                           type: 'array',
@@ -1069,7 +1074,7 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                             properties: {
                               factor: { type: 'string' },
                               impact_description: { type: 'string' },
-                              type: { 
+                              type: {
                                 type: 'string',
                                 enum: [
                                   'cultural_background', 'gender_roles', 'religious_beliefs', 'social_tolerance',
@@ -1078,12 +1083,12 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                                   'disability_status', 'trauma_history', 'occupational_demands', 'educational_background',
                                   'language_barriers', 'acculturation_level', 'community_support', 'political_climate',
                                   'generational_differences', 'healthcare_access', 'nutritional_status', 'substance_use_patterns',
-                                  'media_influences'
-                                ]
-                              }
+                                  'media_influences',
+                                ],
+                              },
                             },
-                            required: ['factor', 'impact_description', 'type']
-                          }
+                            required: ['factor', 'impact_description', 'type'],
+                          },
                         },
                         differential_diagnostics: {
                           type: 'array',
@@ -1099,16 +1104,16 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                                   additionalProperties: false,
                                   properties: {
                                     feature: { type: 'string' },
-                                    comparison: { type: 'string' }
+                                    comparison: { type: 'string' },
                                   },
-                                  required: ['feature', 'comparison']
-                                }
-                              }
+                                  required: ['feature', 'comparison'],
+                                },
+                              },
                             },
-                            required: ['disorder', 'distinguishing_features']
-                          }
-                        }
-                      }
+                            required: ['disorder', 'distinguishing_features'],
+                          },
+                        },
+                      },
                     },
                     diagnosticMarkers: {
                       type: 'array',
@@ -1118,15 +1123,15 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                         properties: {
                           name: {
                             type: 'string',
-                            enum: ['biological', 'neurophysiological', 'cognitive_behavioral', 'digital', 'other']
+                            enum: ['biological', 'neurophysiological', 'cognitive_behavioral', 'digital', 'other'],
                           },
                           subtype: {
                             type: 'array',
-                            items: { type: 'string' }
-                          }
+                            items: { type: 'string' },
+                          },
                         },
-                        required: ['name', 'subtype']
-                      }
+                        required: ['name', 'subtype'],
+                      },
                     },
                     associated_features: {
                       type: 'object',
@@ -1134,7 +1139,7 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                       properties: {
                         supporting_symptoms: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         demographic_patterns: {
                           type: 'object',
@@ -1142,16 +1147,16 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                           properties: {
                             age_onset: { type: 'string' },
                             gender_distribution: { type: 'string' },
-                            cultural_variations: { type: 'string' }
-                          }
+                            cultural_variations: { type: 'string' },
+                          },
                         },
                         common_comorbidities: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         functional_impacts: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         developmental_course: {
                           type: 'object',
@@ -1160,58 +1165,58 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
                             typical_progression: { type: 'string' },
                             risk_factors: {
                               type: 'array',
-                              items: { type: 'string' }
-                            }
-                          }
+                              items: { type: 'string' },
+                            },
+                          },
                         },
                         biological_findings: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         cognitive_emotional_patterns: {
                           type: 'array',
-                          items: { type: 'string' }
+                          items: { type: 'string' },
                         },
                         cultural_manifestations: {
                           type: 'array',
-                          items: { type: 'string' }
-                        }
-                      }
+                          items: { type: 'string' },
+                        },
+                      },
                     },
                     riskAndPrognosticFactors: {
                       type: 'object',
                       additionalProperties: false,
                       properties: {
                         Environmental: { type: 'string' },
-                        geneticAndPhysiological: { type: 'string' }
-                      }
+                        geneticAndPhysiological: { type: 'string' },
+                      },
                     },
                     cultureRelatedDiagnosticIssues: {
                       type: 'object',
-                      additionalProperties: false
+                      additionalProperties: false,
                     },
                     genderRelatedDiagnosticIssues: {
                       type: 'object',
-                      additionalProperties: false
+                      additionalProperties: false,
                     },
                     differentialDiagnosis: {
                       type: 'object',
-                      additionalProperties: false
+                      additionalProperties: false,
                     },
                     comorbidity: {
                       type: 'object',
-                      additionalProperties: false
-                    }
+                      additionalProperties: false,
+                    },
                   },
-                  required: ['code']
-                }
-              }
+                  required: ['code'],
+                },
+              },
             },
-            required: ['categoryTitle', 'disorders']
-          }
-        }
+            required: ['categoryTitle', 'disorders'],
+          },
+        },
       },
-      required: ['enhancedDisorders']
+      required: ['enhancedDisorders'],
     }
 
     const systemPrompt = `شما یک روانشناس متخصص در تشخیص اختلالات روانی بر اساس DSM-5 هستید.
@@ -1245,8 +1250,8 @@ ${relevantCategories.map(cat => `• ${cat.category}: احتمال ${(cat.likeli
       categoryTitle: category.categoryTitle,
       disorders: category.disorders.map(disorder => ({
         code: disorder.code,
-        title: disorder.title
-      }))
+        title: disorder.title,
+      })),
     }))
 
     const userPrompt = `برای اختلالات زیر، جزئیات پیشرفته تشخیصی را اضافه کنید:
@@ -1294,43 +1299,42 @@ ${disordersList.map(cat => `**${cat.categoryTitle}:**\n${cat.disorders.map(d => 
 
     const data = await response.json()
     console.log('Phase 2 API response:', data)
-    
+
     const content = data.choices?.[0]?.message?.content
     if (!content) {
       throw new Error('Phase 2: No content received from API')
     }
-    
+
     console.log('Phase 2 raw content:', content)
     console.log('Phase 2 content type:', typeof content)
-    
+
     let result
     try {
       result = typeof content === 'string' ? JSON.parse(content) : content
-    } catch (parseError) {
+    }
+    catch (parseError) {
       console.error('Phase 2 JSON parse error. Content was:', content)
       throw new Error(`Phase 2: Invalid JSON response - ${parseError.message}`)
     }
-    
+
     console.log('Phase 2 parsed result:', result)
-    
+
     // Merge Phase 1 and Phase 2 results
-    const enhancedResults = phase1Results.map(category => {
+    return phase1Results.map((category) => {
       const enhancedCategory = result.enhancedDisorders?.find(ecat => ecat.categoryTitle === category.categoryTitle)
-      
+
       if (enhancedCategory) {
         return {
           ...category,
-          disorders: category.disorders.map(disorder => {
+          disorders: category.disorders.map((disorder) => {
             const enhancedDisorder = enhancedCategory.disorders?.find(ed => ed.code === disorder.code)
             return enhancedDisorder ? { ...disorder, ...enhancedDisorder } : disorder
-          })
+          }),
         }
       }
-      
+
       return category
     })
-
-    return enhancedResults
   }
 
   // DSM-5 Categories for systematic evaluation

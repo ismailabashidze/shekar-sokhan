@@ -135,7 +135,7 @@ export function useSessionReports() {
               properties: {
                 diagnostic_summary: {
                   type: 'string',
-                  description: 'Comprehensive clinical diagnostic assessment'
+                  description: 'Comprehensive clinical diagnostic assessment',
                 },
                 dsm5_assessments: {
                   type: 'array',
@@ -145,10 +145,10 @@ export function useSessionReports() {
                       category: { type: 'string' },
                       confidence: { type: 'number', minimum: 0, maximum: 100 },
                       evidence: { type: 'string' },
-                      assessment: { type: 'string' }
+                      assessment: { type: 'string' },
                     },
-                    required: ['category', 'confidence', 'evidence', 'assessment']
-                  }
+                    required: ['category', 'confidence', 'evidence', 'assessment'],
+                  },
                 },
                 risk_assessment: {
                   type: 'object',
@@ -156,9 +156,9 @@ export function useSessionReports() {
                     level: { type: 'string', enum: ['low', 'moderate', 'high'] },
                     factors: { type: 'array', items: { type: 'string' } },
                     suicide_risk: { type: 'string', enum: ['low', 'moderate', 'high'] },
-                    intervention_needed: { type: 'boolean' }
+                    intervention_needed: { type: 'boolean' },
                   },
-                  required: ['level', 'factors', 'suicide_risk', 'intervention_needed']
+                  required: ['level', 'factors', 'suicide_risk', 'intervention_needed'],
                 },
                 goal_progress: {
                   type: 'array',
@@ -171,10 +171,10 @@ export function useSessionReports() {
                       confidence_before: { type: 'number' },
                       confidence_after: { type: 'number' },
                       evidence_collected: { type: 'string' },
-                      progress_notes: { type: 'string' }
+                      progress_notes: { type: 'string' },
                     },
-                    required: ['goal_id', 'title', 'category', 'confidence_before', 'confidence_after', 'evidence_collected', 'progress_notes']
-                  }
+                    required: ['goal_id', 'title', 'category', 'confidence_before', 'confidence_after', 'evidence_collected', 'progress_notes'],
+                  },
                 },
                 emotional_patterns: {
                   type: 'array',
@@ -184,25 +184,25 @@ export function useSessionReports() {
                       timestamp: { type: 'string' },
                       primary_emotions: { type: 'array', items: { type: 'string' } },
                       intensity: { type: 'string' },
-                      context: { type: 'string' }
+                      context: { type: 'string' },
                     },
-                    required: ['timestamp', 'primary_emotions', 'intensity', 'context']
-                  }
+                    required: ['timestamp', 'primary_emotions', 'intensity', 'context'],
+                  },
                 },
                 communication_style: { type: 'string' },
                 therapeutic_alliance: { type: 'string' },
                 cultural_considerations: { type: 'string' },
                 next_session_focus: { type: 'array', items: { type: 'string' } },
                 intervention_recommendations: { type: 'array', items: { type: 'string' } },
-                referral_needed: { type: 'boolean' }
+                referral_needed: { type: 'boolean' },
               },
-              required: ['diagnostic_summary', 'dsm5_assessments', 'risk_assessment', 'goal_progress', 'emotional_patterns', 'communication_style', 'therapeutic_alliance', 'cultural_considerations', 'next_session_focus', 'intervention_recommendations', 'referral_needed']
-            }
-          }
+              required: ['diagnostic_summary', 'dsm5_assessments', 'risk_assessment', 'goal_progress', 'emotional_patterns', 'communication_style', 'therapeutic_alliance', 'cultural_considerations', 'next_session_focus', 'intervention_recommendations', 'referral_needed'],
+            },
+          },
         },
         temperature: 0.7,
-        max_tokens: 2000
-      })
+        max_tokens: 2000,
+      }),
     })
 
     if (!response.ok) {
@@ -246,24 +246,24 @@ export function useSessionReports() {
                       area: { type: 'string' },
                       description: { type: 'string' },
                       progress: { type: 'number' },
-                      next_steps: { type: 'string' }
+                      next_steps: { type: 'string' },
                     },
-                    required: ['area', 'description', 'progress', 'next_steps']
-                  }
+                    required: ['area', 'description', 'progress', 'next_steps'],
+                  },
                 },
                 strengths_identified: { type: 'array', items: { type: 'string' } },
                 homework_suggestions: { type: 'array', items: { type: 'string' } },
                 next_session_preview: { type: 'string' },
                 self_care_tips: { type: 'array', items: { type: 'string' } },
-                coping_strategies: { type: 'array', items: { type: 'string' } }
+                coping_strategies: { type: 'array', items: { type: 'string' } },
               },
-              required: ['session_summary', 'key_insights', 'emotional_journey', 'progress_made', 'areas_explored', 'strengths_identified', 'homework_suggestions', 'next_session_preview', 'self_care_tips', 'coping_strategies']
-            }
-          }
+              required: ['session_summary', 'key_insights', 'emotional_journey', 'progress_made', 'areas_explored', 'strengths_identified', 'homework_suggestions', 'next_session_preview', 'self_care_tips', 'coping_strategies'],
+            },
+          },
         },
         temperature: 0.7,
-        max_tokens: 1500
-      })
+        max_tokens: 1500,
+      }),
     })
 
     if (!response.ok) {

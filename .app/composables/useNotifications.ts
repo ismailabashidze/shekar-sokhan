@@ -124,7 +124,6 @@ export function useNotifications() {
       return usePwaNotifications()
     }
     catch (err) {
-      
       return null
     }
   })
@@ -266,7 +265,7 @@ export function useNotifications() {
       await pwa.showLocalNotification(notificationOptions)
     }
     catch (err) {
-      
+
     }
   }
 

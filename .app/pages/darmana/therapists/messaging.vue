@@ -460,17 +460,17 @@ async function submitMessage() {
         role: 'user',
         content: userMessage.text,
       }
-      
+
       // Create AbortController for inline analysis
       const analysisAbortController = new AbortController()
-      
+
       // Set a timeout for the analysis request
       const analysisTimeout = setTimeout(() => {
         analysisAbortController.abort()
       }, 30000) // 30 seconds timeout for analysis
-      
+
       analysisResult = await generateInlineAnalysis(lastMessage, { signal: analysisAbortController.signal })
-      
+
       // Clear the timeout if the request completes successfully
       clearTimeout(analysisTimeout)
 
@@ -497,10 +497,10 @@ async function submitMessage() {
           correspondingEmojis: analysisResult.correspondingEmojis || '',
           emotionalResponse: analysisResult.emotionalResponse || '',
           suicideRiskEvaluation: analysisResult.suicideRiskEvaluation || 'N/A',
-          suicideRiskDescription: analysisResult.suicideRiskDescription || ''
+          suicideRiskDescription: analysisResult.suicideRiskDescription || '',
         }
       }
-      
+
       // Keep the analysis visible for a moment before proceeding
       await new Promise(resolve => setTimeout(resolve, 1000))
     }
@@ -515,7 +515,8 @@ async function submitMessage() {
           icon: 'ph:warning-circle-fill',
           closable: true,
         })
-      } else {
+      }
+      else {
         thinkingResponse.value = 'خطا در دریافت تحلیل. لطفا دوباره تلاش کنید.'
         toaster.show({
           title: 'خطا در تحلیل پیام',
@@ -572,7 +573,7 @@ async function submitMessage() {
     console.log('AI Settings isPremium:', aiSettings.value.isPremium)
     console.log('AI Settings lengthPref:', aiSettings.value.lengthPref)
 
-        // Create AbortController for request cancellation
+    // Create AbortController for request cancellation
     const abortController = new AbortController()
     const { signal } = abortController
 
@@ -588,11 +589,11 @@ async function submitMessage() {
     // Call streamChat and handle response via onChunk
     try {
       await Promise.race([
-        streamChat(chatMessagesForAI, { 
-          therapistDetails: selectedConversationComputed.value?.user, 
-          aiResponseSettings: aiSettings.value, 
+        streamChat(chatMessagesForAI, {
+          therapistDetails: selectedConversationComputed.value?.user,
+          aiResponseSettings: aiSettings.value,
           typingConfig: typingConfig.value,
-          signal // Pass abort signal to streamChat
+          signal, // Pass abort signal to streamChat
         }, (chunk) => {
           // Handle multi-message responses
           if (typeof chunk === 'object' && chunk.type === 'multi_message') {
@@ -605,9 +606,10 @@ async function submitMessage() {
             aiResponse += chunk
           }
         }),
-        streamTimeout
+        streamTimeout,
       ])
-    } catch (error) {
+    }
+    catch (error) {
       // Check if the error is due to abort
       if (error.name === 'AbortError' || signal.aborted) {
         console.log('Request was aborted due to timeout')
@@ -650,7 +652,7 @@ async function submitMessage() {
     // Ensure we're not stuck in thinking mode
     isAIThinking.value = false
     isAIResponding.value = false
-    
+
     // Check if this is a timeout error
     if (e.message && e.message.includes('زمان پاسخ‌دهی به پایان رسید')) {
       toaster.show({
@@ -660,7 +662,8 @@ async function submitMessage() {
         icon: 'ph:warning-circle-fill',
         closable: true,
       })
-    } else {
+    }
+    else {
       messages.value.push({
         type: 'received',
         text: 'متاسفانه خطایی رخ داد. لطفا دوباره تلاش کنید.',
@@ -692,7 +695,7 @@ const toggleAnalysis = () => {
 
 function formatInlineAnalysis(analysisResult) {
   if (!analysisResult) return 'نتیجه‌ای یافت نشد.'
-  
+
   // Session Details
   let output = '**جزئیات جلسه:**\n'
   output += `- هدف جلسه: ${analysisResult.session_mainGoal || 'نامشخص'}\n`
@@ -706,12 +709,12 @@ function formatInlineAnalysis(analysisResult) {
   output += `- شدت احساسات: ${analysisResult.lastMessage_emotionIntensity || 'نامشخص'}\n`
   output += `- تناسب با هدف جلسه: ${analysisResult.lastMessage_alignmentWithGoal || 'نامشخص'}\n`
   output += `- پاسخ پیشنهادی: ${analysisResult.emotionalResponse || 'نامشخص'}\n\n`
-  
+
   // Suicide Risk Evaluation
   output += '**ارزیابی ریسک خودکشی:**\n'
   output += `- سطح ریسک: ${analysisResult.suicideRiskEvaluation || 'نامشخص'}\n`
   output += `- توضیحات: ${analysisResult.suicideRiskDescription || 'نامشخص'}\n`
-  
+
   return output
 }
 
@@ -729,14 +732,14 @@ watch(messages, (newMessages) => {
           color: 'success',
           icon: 'ph:check-circle',
           closable: true,
-          duration: 10000
+          duration: 10000,
         })
         // Set flag so toast doesn't show again
         localStorage.setItem('tenMessagesToastShown', 'true')
       }
     })
   }
-  
+
   if (!isAIResponding.value) {
     scrollToBottom()
   }
@@ -756,13 +759,13 @@ watch(timeToShow, (newValue) => {
   if (newValue !== undefined && newValue <= 0 && activeSession.value?.id) {
     // Pause the interval to prevent further decrements
     pause()
-    
+
     // Clear the timer interval
     if (timeUpdateInterval.value) {
       clearInterval(timeUpdateInterval.value)
       timeUpdateInterval.value = null
     }
-    
+
     // Only end session if we haven't already done so
     if (!showNoCharge.value) {
       isReportModalOpen.value = true
@@ -830,7 +833,7 @@ onMounted(async () => {
   hasShownPremiumMessage.value = false
   showPremiumAlert.value = false
   showPremiumEnjoyMessage.value = true
-  
+
   loading.value = true
   try {
     const therapists = await getTherapists()
@@ -880,7 +883,7 @@ onMounted(async () => {
               }
             }, 600)
             pause()
-            
+
             // Clear the timer interval
             if (timeUpdateInterval.value) {
               clearInterval(timeUpdateInterval.value)
@@ -893,7 +896,7 @@ onMounted(async () => {
       // fetching userReport for having memory of previous sessions
       try {
         const userReportData = await getReportByUserId(nuxtApp.$pb.authStore.model?.id)
-        
+
         if (userReportData) {
           userReport.value = userReportData
           hasPreviousData.value = true
@@ -919,7 +922,8 @@ onMounted(async () => {
               }
             }, 1000)
           }
-        } else {
+        }
+        else {
           // User has no report, create a new empty report for them
           console.log('User has no previous report, creating a new one')
           try {
@@ -929,12 +933,12 @@ onMounted(async () => {
               summaries: [],
               possibleDeeperGoals: [],
               possibleRiskFactors: [],
-              finalDemographicProfile: {}
+              finalDemographicProfile: {},
             })
             userReport.value = newReport
             hasPreviousData.value = false
             console.log('New report created for user:', newReport)
-            
+
             // Even for new users, we want to start the conversation
             // Wait a moment for UI to initialize properly
             setTimeout(() => {
@@ -953,7 +957,7 @@ onMounted(async () => {
                   summaries: [],
                   possibleDeeperGoals: [],
                   possibleRiskFactors: [],
-                  finalDemographicProfile: {}
+                  finalDemographicProfile: {},
                 }
                 // startAIConversationWithSummary(selectedConversationComputed.value?.user, session.id, firstTimeReport)
               }
@@ -978,12 +982,12 @@ onMounted(async () => {
             summaries: [],
             possibleDeeperGoals: [],
             possibleRiskFactors: [],
-            finalDemographicProfile: {}
+            finalDemographicProfile: {},
           })
           userReport.value = newReport
           hasPreviousData.value = false
           console.log('New report created for user after fetch error:', newReport)
-          
+
           // Even for new users, we want to start the conversation
           // Wait a moment for UI to initialize properly
           setTimeout(() => {
@@ -1002,7 +1006,7 @@ onMounted(async () => {
                 summaries: [],
                 possibleDeeperGoals: [],
                 possibleRiskFactors: [],
-                finalDemographicProfile: {}
+                finalDemographicProfile: {},
               }
               // startAIConversationWithSummary(selectedConversationComputed.value?.user, session.id, firstTimeReport)
             }
@@ -1054,7 +1058,7 @@ onUnmounted(() => {
   if (chatEl.value) {
     chatEl.value.removeEventListener('scroll', checkIfScrolledToBottom)
   }
-  
+
   // Clear countdown interval if it exists
   if (countdownInterval.value) {
     clearInterval(countdownInterval.value)
@@ -1199,7 +1203,7 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 
     // Create AbortController for conversation starter
     const conversationAbortController = new AbortController()
-    
+
     // Add a timeout to prevent indefinite thinking state
     const conversationTimeout = new Promise((_, reject) => {
       setTimeout(() => {
@@ -1217,14 +1221,15 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
           aiResponseSettings: aiSettings.value,
           isConversationStarter: true, // Enable comprehensive summary mode
           typingConfig: typingConfig.value,
-          signal: conversationAbortController.signal // Pass abort signal
+          signal: conversationAbortController.signal, // Pass abort signal
         }, (chunk) => {
           // Handle regular single message streaming with typing effect
           aiResponse += chunk
         }),
-        conversationTimeout
+        conversationTimeout,
       ])
-    } catch (error) {
+    }
+    catch (error) {
       // Check if the error is due to abort
       if (error.name === 'AbortError' || conversationAbortController.signal.aborted) {
         console.log('Conversation starter request was aborted due to timeout')
@@ -1309,7 +1314,7 @@ const closePremiumModal = () => {
 const closeReportModal = () => {
   // Allow closing the modal even when generating analysis
   isReportModalOpen.value = false
-  
+
   // Clear countdown interval if it exists
   if (countdownInterval.value) {
     clearInterval(countdownInterval.value)
@@ -1587,7 +1592,7 @@ const retryLastMessage = async () => {
     thinkingResponse.value = ''
     // Create AbortController for retry
     const retryAbortController = new AbortController()
-    
+
     // Add a timeout to prevent indefinite thinking state
     const retryTimeout = new Promise((_, reject) => {
       setTimeout(() => {
@@ -1597,11 +1602,11 @@ const retryLastMessage = async () => {
       }, 60000) // 60 seconds timeout
     })
     await Promise.race([
-      streamChat(contextMessages, { 
-        therapistDetails: selectedConversationComputed.value?.user, 
-        aiResponseSettings: aiSettings.value, 
+      streamChat(contextMessages, {
+        therapistDetails: selectedConversationComputed.value?.user,
+        aiResponseSettings: aiSettings.value,
         typingConfig: typingConfig.value,
-        signal: retryAbortController.signal // Pass abort signal
+        signal: retryAbortController.signal, // Pass abort signal
       }, (chunk) => {
         // Handle multi-message responses
         if (typeof chunk === 'object' && chunk.type === 'multi_message') {
@@ -1613,7 +1618,7 @@ const retryLastMessage = async () => {
           aiResponse += chunk
         }
       }),
-      retryTimeout
+      retryTimeout,
     ])
     isAIThinking.value = false
 
@@ -1649,7 +1654,8 @@ const retryLastMessage = async () => {
         icon: 'ph:warning-circle-fill',
         closable: true,
       })
-    } else {
+    }
+    else {
       toaster.show({
         title: 'خطا',
         message: 'خطا در تولید پاسخ جدید. لطفا دوباره تلاش کنید.',
@@ -1691,7 +1697,7 @@ const getSuicideRiskLabel = (riskLevel) => {
     'low': 'کم',
     'medium': 'متوسط',
     'high': 'زیاد',
-    'veryHigh': 'خیلی زیاد'
+    'veryHigh': 'خیلی زیاد',
   }
   return labels[riskLevel] || riskLevel
 }
@@ -1738,7 +1744,7 @@ const handleConfirmEndSession = async () => {
   if (isGeneratingAnalysis.value) return
   isGeneratingAnalysis.value = true
   countdownSeconds.value = 120 // Reset to 2 minutes
-  
+
   // Start countdown timer
   if (countdownInterval.value) {
     clearInterval(countdownInterval.value)
@@ -1749,7 +1755,7 @@ const handleConfirmEndSession = async () => {
       clearInterval(countdownInterval.value)
     }
   }, 1000)
-  
+
   try {
     // 1. Check if analysis already exists for this session
     let existingAnalysis = null
@@ -1795,20 +1801,20 @@ const handleConfirmEndSession = async () => {
       role: msg.type === 'sent' ? 'user' : 'assistant',
       content: msg.text,
     }))
-    
+
     // Add timeout to analysis generation
     const analysisPromise = generateAnalysis({ sessionId: activeSession.value.id, messages: contextMessages })
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('زمان تحلیل جلسه به پایان رسید')), 180000) // 3 minutes timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('زمان تحلیل جلسه به پایان رسید')), 180000), // 3 minutes timeout
     )
-    
+
     const genAnalysis = await Promise.race([analysisPromise, timeoutPromise])
     console.log('Analysis generated successfully:', genAnalysis)
     const analysis = await createAnalysis({ ...genAnalysis, session: activeSession.value.id })
     console.log('Analysis created successfully with ID:', analysis.id)
     await endSession(activeSession.value.id, analysis.id)
     console.log('Session ended successfully')
-    
+
     // Update user's final report with session data
     try {
       if (userReport.value) {
@@ -1821,26 +1827,27 @@ const handleConfirmEndSession = async () => {
               sessionId: activeSession.value.id,
               title: analysis.title || 'جلسه مشاوره',
               summary: analysis.summaryOfSession || '',
-              date: new Date().toISOString()
-            }
+              date: new Date().toISOString(),
+            },
           ],
           finalDemographicProfile: {
             ...(userReport.value.finalDemographicProfile || {}),
-            ...(analysis.demographicData || {})
+            ...(analysis.demographicData || {}),
           },
           possibleRiskFactors: [
             ...(userReport.value.possibleRiskFactors || []),
-            ...(analysis.possibleRiskFactorsExtracted || [])
+            ...(analysis.possibleRiskFactorsExtracted || []),
           ],
           possibleDeeperGoals: [
             ...(userReport.value.possibleDeeperGoals || []),
-            analysis.possibleDeeperGoalsOfPatient || ''
-          ]
+            analysis.possibleDeeperGoalsOfPatient || '',
+          ],
         }
-        
+
         await updateReport(userReport.value.id, updatedReport)
         console.log('User report updated successfully')
-      } else {
+      }
+      else {
         // Create new report if it doesn't exist
         const newReport = {
           user: nuxtApp.$pb.authStore.model.id,
@@ -1850,23 +1857,24 @@ const handleConfirmEndSession = async () => {
               sessionId: activeSession.value.id,
               title: analysis.title || 'جلسه مشاوره',
               summary: analysis.summaryOfSession || '',
-              date: new Date().toISOString()
-            }
+              date: new Date().toISOString(),
+            },
           ],
           finalDemographicProfile: analysis.demographicData || {},
           possibleRiskFactors: analysis.possibleRiskFactorsExtracted || [],
-          possibleDeeperGoals: [analysis.possibleDeeperGoalsOfPatient || '']
+          possibleDeeperGoals: [analysis.possibleDeeperGoalsOfPatient || ''],
         }
-        
+
         const createdReport = await createReport(newReport)
         userReport.value = createdReport
         console.log('New user report created successfully')
       }
-    } catch (reportError) {
+    }
+    catch (reportError) {
       console.error('Error updating user report:', reportError)
       // Continue with navigation even if report update fails
     }
-    
+
     // Close modal and reset state before navigation
     isReportModalOpen.value = false
     isGeneratingAnalysis.value = false
@@ -1874,7 +1882,7 @@ const handleConfirmEndSession = async () => {
       clearInterval(countdownInterval.value)
       countdownInterval.value = null
     }
-    
+
     // Use nextTick to ensure state updates before navigation
     nextTick(() => {
       console.log('Performing navigation to analysis page with new analysis')
@@ -1937,7 +1945,7 @@ const startTypingEffect = (fullText: string, messageId: string = '') => {
     isTypingActive.value = false
     displayedResponse.value = ''
   }
-  
+
   if (!typingConfig.value.enableTypingEffect) {
     thinkingResponse.value = fullText
     return
@@ -2056,7 +2064,7 @@ const handleMultiMessageChunk = async (chunk: any) => {
         isAIResponding.value = false
         isMultiMessageMode.value = false
         console.log('✅ Multi-message sequence completed')
-        
+
         // Check if we should show the premium alert
         // Show after the first AI message if user is not premium, has charge, and hasn't dismissed it permanently
         if (!aiSettings.value.isPremium && !hasShownPremiumMessage.value && !showNoCharge.value && !isPremiumMessageDismissed.value) {
@@ -2099,7 +2107,7 @@ const typingConfig = ref({
 // Driver.js modal for statistics information
 const showStatisticsInfo = () => {
   const { $tour } = useNuxtApp()
-  
+
   // Define the statistics information modal
   $tour.setSteps([{
     element: '#stats-info-trigger', // We'll create a hidden element to trigger from
@@ -2124,7 +2132,7 @@ const showStatisticsInfo = () => {
     tempElement.style.zIndex = '-1'
     document.body.appendChild(tempElement)
   }
-  
+
   $tour.drive()
 }
 
@@ -2220,7 +2228,7 @@ const showStatisticsInfo = () => {
       </div>
       <!-- Conversations -->
       <div
-        class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-70 h-screen w-16 bg-white sm:w-20 lg:border-r"
+        class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 z-70 relative h-screen w-16 bg-white sm:w-20 lg:border-r"
       >
         <div class="mt-3 flex h-full flex-col justify-between gap-2">
           <!-- List -->
@@ -2318,11 +2326,11 @@ const showStatisticsInfo = () => {
           <div
             class="mb-2 flex h-16 w-full items-center justify-between px-4 sm:px-8"
           >
-            <div class="flex items-center gap-2 mt-5">
+            <div class="mt-5 flex items-center gap-2">
               <div class="flex">
                 <BaseMessage
                   v-if="!showNoCharge"
-                  class="w-[180px] absolute-timer sm:relative sm:top-auto sm:left-auto sm:z-auto"
+                  class="absolute-timer w-[180px] sm:relative sm:left-auto sm:top-auto sm:z-auto"
                   :color="timeToShow > 10 ? 'success' : 'warning'"
                 >
                   <span v-if="timeToShow > 0">
@@ -2332,7 +2340,7 @@ const showStatisticsInfo = () => {
                 </BaseMessage>
                 <BaseMessage
                   v-else
-                  class="w-[280px] justify-center !pl-2 absolute-timer sm:relative sm:top-auto sm:left-auto sm:z-auto"
+                  class="absolute-timer w-[280px] justify-center !pl-2 sm:relative sm:left-auto sm:top-auto sm:z-auto"
                   color="warning"
                 >
                   لطفا اشتراک تهیه فرمایید.
@@ -2505,8 +2513,8 @@ const showStatisticsInfo = () => {
                               class="rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md"
                               :class="[
                                 item.type === 'sent'
-                                  ? 'bg-primary-500 prose-p:text-white text-white rounded-br-md'
-                                  : 'bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-bl-md border border-muted-200 dark:border-muted-700 shadow-sm transition-all duration-200 hover:shadow-md',
+                                  ? 'bg-primary-500 prose-p:text-white rounded-br-md text-white'
+                                  : 'dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 border-muted-200 dark:border-muted-700 rounded-bl-md border bg-white shadow-sm transition-all duration-200 hover:shadow-md',
                               ]"
                             >
                               <span
@@ -2553,7 +2561,7 @@ const showStatisticsInfo = () => {
                             >
                               <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
                             </BaseButton>
-                           <!-- <BaseButton
+                            <!-- <BaseButton
                               v-if="item.type === 'received'"
                               rounded="full"
                               title="پخش صوتی"
@@ -2581,8 +2589,8 @@ const showStatisticsInfo = () => {
                               class="rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md"
                               :class="[
                                 item.type === 'sent'
-                                  ? 'bg-primary-500 prose-p:text-white text-white rounded-br-md'
-                                  : 'bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-bl-md border border-muted-200 dark:border-muted-700 shadow-sm transition-all duration-200 hover:shadow-md',
+                                  ? 'bg-primary-500 prose-p:text-white rounded-br-md text-white'
+                                  : 'dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 border-muted-200 dark:border-muted-700 rounded-bl-md border bg-white shadow-sm transition-all duration-200 hover:shadow-md',
                               ]"
                             >
                               <span
@@ -2606,13 +2614,13 @@ const showStatisticsInfo = () => {
                             ]"
                           >
                             <!-- Desktop timestamp -->
-                            <span class="text-muted-500 hidden font-sans text-xs sm:block bg-muted-100 dark:bg-muted-800 px-2 py-1 rounded-full">
+                            <span class="text-muted-500 bg-muted-100 dark:bg-muted-800 hidden rounded-full px-2 py-1 font-sans text-xs sm:block">
                               {{ formatTime(item.timestamp) }}
                             </span>
 
                             <!-- Mobile: sent messages - button on right of timestamp -->
                             <template v-if="item.type === 'sent'">
-                              <span class="text-muted-500 block font-sans text-xs sm:hidden bg-muted-100 dark:bg-muted-800 px-2 py-1 rounded-full">
+                              <span class="text-muted-500 bg-muted-100 dark:bg-muted-800 block rounded-full px-2 py-1 font-sans text-xs sm:hidden">
                                 {{ formatTime(item.timestamp) }}
                               </span>
                               <BaseButton
@@ -2651,7 +2659,7 @@ const showStatisticsInfo = () => {
                                   <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
                                 </BaseButton>
                               </div>
-                              <span class="text-muted-500 block font-sans text-xs sm:hidden bg-muted-100 dark:bg-muted-800 px-2 py-1 rounded-full">
+                              <span class="text-muted-500 bg-muted-100 dark:bg-muted-800 block rounded-full px-2 py-1 font-sans text-xs sm:hidden">
                                 {{ formatTime(item.timestamp) }}
                               </span>
                             </template>
@@ -2664,7 +2672,7 @@ const showStatisticsInfo = () => {
                 <!-- Assistant thinking bubble -->
                 <div v-if="isAIThinking" class="mb-4 flex justify-start">
                   <div class="flex max-w-[85%] flex-col items-start">
-                    <div class="bg-white dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 rounded-2xl rounded-bl-md px-4 py-3 border border-muted-200 dark:border-muted-700 shadow-sm transition-all duration-200 hover:shadow-md">
+                    <div class="dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 border-muted-200 dark:border-muted-700 rounded-2xl rounded-bl-md border bg-white px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md">
                       <span class="block flex items-center font-sans">
                         <AddonMarkdownRemark :source="thinkingResponse || 'در حال فکر کردن'" />
                         <span class="typing-ellipsis ml-2" />
@@ -2693,40 +2701,40 @@ const showStatisticsInfo = () => {
                   </div>
                 </BaseMessage>
                 <!-- Premium Upgrade Alert for Non-Premium Users -->
-                <div 
+                <div
                   v-else-if="showPremiumAlert && !aiSettings.isPremium"
                   id="premium-upgrade-alert"
-                  class="bg-gradient-to-l from-yellow-400/20 to-orange-500/20 dark:from-yellow-600/20 dark:to-orange-700/20 border border-yellow-300 dark:border-yellow-700/50 rounded-2xl p-4 sm:p-5 w-full animate-pulse-slow"
+                  class="animate-pulse-slow w-full rounded-2xl border border-yellow-300 bg-gradient-to-l from-yellow-400/20 to-orange-500/20 p-4 dark:border-yellow-700/50 dark:from-yellow-600/20 dark:to-orange-700/20 sm:p-5"
                 >
                   <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
                     <div class="order-1 flex items-start gap-1">
-                      <div class="bg-gradient-to-br from-yellow-400 to-orange-500 dark:from-yellow-500 dark:to-orange-600 flex size-10 items-center justify-center rounded-xl shadow-lg">
-                        <Icon name="ph:crown-fill" class="text-white size-5" />
+                      <div class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg dark:from-yellow-500 dark:to-orange-600">
+                        <Icon name="ph:crown-fill" class="size-5 text-white" />
                       </div>
-                      <div class="text-right mr-2">
-                        <h4 class="font-heading text-yellow-800 dark:text-yellow-200 text-lg font-bold">
+                      <div class="mr-2 text-right">
+                        <h4 class="font-heading text-lg font-bold text-yellow-800 dark:text-yellow-200">
                           ویژگی‌های پیشرفته در انتظار شماست!
                         </h4>
-                        <p class="text-yellow-700 dark:text-yellow-300 mt-1 text-sm">
+                        <p class="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
                           با ارتقاء به نسخه پرمیوم، از تمام امکانات پیشرفته هوش مصنوعی بهره‌مند شوید.
                         </p>
                         <div class="mt-2 flex flex-wrap gap-2">
-                          <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs px-2 py-1 rounded-full">
+                          <span class="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
                             سبک‌های ارتباطی پیشرفته
                           </span>
-                          <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs px-2 py-1 rounded-full">
+                          <span class="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
                             خلاقیت حداکثری
                           </span>
-                          <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs px-2 py-1 rounded-full">
+                          <span class="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
                             قالب‌بندی پیشرفته
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div class="order-3 flex gap-2 items-center">
+                    <div class="order-3 flex items-center gap-2">
                       <BaseButton
                         color="primary"
-                        class="w-full sm:w-auto bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-none shadow-lg hover:shadow-xl transition-all duration-300"
+                        class="w-full border-none bg-gradient-to-r from-yellow-500 to-orange-500 shadow-lg transition-all duration-300 hover:from-yellow-600 hover:to-orange-600 hover:shadow-xl sm:w-auto"
                         @click="showPremiumModal = true"
                       >
                         <Icon name="ph:crown-fill" class="ml-2 size-4" />
@@ -2735,51 +2743,51 @@ const showStatisticsInfo = () => {
                       <div class="order-2">
                         <BaseButtonIcon
                           size="sm"
-                          class="bg-white/50 dark:bg-muted-800/50 hover:bg-white dark:hover:bg-muted-700 backdrop-blur-sm"
+                          class="dark:bg-muted-800/50 dark:hover:bg-muted-700 bg-white/50 backdrop-blur-sm hover:bg-white"
                           @click="showPremiumAlert = false; isPremiumMessageDismissed.value = true; localStorage.setItem('premiumMessageDismissed', 'true')"
                         >
-                          <Icon name="ph:x" class="text-yellow-700 dark:text-yellow-300 size-4" />
+                          <Icon name="ph:x" class="size-4 text-yellow-700 dark:text-yellow-300" />
                         </BaseButtonIcon>
                       </div>
                     </div>
                   </div>
                 </div>
-                
+
                 <!-- Premium Enjoy Message for Premium Users -->
-                <div 
+                <div
                   v-else-if="!showNoCharge && aiSettings.isPremium && showPremiumEnjoyMessage"
                   id="premium-enjoy-message"
-                  class="bg-gradient-to-l from-emerald-400/20 to-teal-500/20 dark:from-emerald-600/20 dark:to-teal-700/20 border border-emerald-300 dark:border-emerald-700/50 rounded-2xl p-4 sm:p-5 w-full"
+                  class="w-full rounded-2xl border border-emerald-300 bg-gradient-to-l from-emerald-400/20 to-teal-500/20 p-4 dark:border-emerald-700/50 dark:from-emerald-600/20 dark:to-teal-700/20 sm:p-5"
                 >
                   <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
                     <div class="order-1 flex items-start gap-1">
-                      <div class="bg-gradient-to-br from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 flex size-10 items-center justify-center rounded-xl shadow-lg">
-                        <Icon name="ph:crown-simple" class="text-white size-5" />
+                      <div class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg dark:from-emerald-600 dark:to-teal-600">
+                        <Icon name="ph:crown-simple" class="size-5 text-white" />
                       </div>
                       <div class="text-right">
-                        <h4 class="font-heading text-emerald-800 dark:text-emerald-200 text-lg font-bold">
+                        <h4 class="font-heading text-lg font-bold text-emerald-800 dark:text-emerald-200">
                           پریمیوم فعال است، لذت ببرید!
                         </h4>
-                        <p class="text-emerald-700 dark:text-emerald-300 mt-1 text-sm">
+                        <p class="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
                           از تمام امکانات پیشرفته هوش مصنوعی در این جلسه بهره‌مند شوید.
                         </p>
                         <div class="mt-2 flex flex-wrap gap-2">
-                          <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs px-2 py-1 rounded-full">
+                          <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
                             سبک‌های ارتباطی پیشرفته
                           </span>
-                          <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs px-2 py-1 rounded-full">
+                          <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
                             خلاقیت حداکثری
                           </span>
-                          <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs px-2 py-1 rounded-full">
+                          <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
                             قالب‌بندی پیشرفته
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div class="order-3 flex gap-2 items-center">
+                    <div class="order-3 flex items-center gap-2">
                       <BaseButton
                         color="success"
-                        class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 border-none shadow-lg"
+                        class="w-full border-none bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg hover:from-emerald-600 hover:to-teal-600 sm:w-auto"
                       >
                         <Icon name="ph:check" class="ml-2 size-4" />
                         وضعیت پریمیوم
@@ -2787,10 +2795,10 @@ const showStatisticsInfo = () => {
                       <div class="order-2">
                         <BaseButtonIcon
                           size="sm"
-                          class="bg-white/50 dark:bg-muted-800/50 hover:bg-white dark:hover:bg-muted-700 backdrop-blur-sm"
+                          class="dark:bg-muted-800/50 dark:hover:bg-muted-700 bg-white/50 backdrop-blur-sm hover:bg-white"
                           @click="showPremiumEnjoyMessage = false"
                         >
-                          <Icon name="ph:x" class="text-emerald-700 dark:text-emerald-300 size-4" />
+                          <Icon name="ph:x" class="size-4 text-emerald-700 dark:text-emerald-300" />
                         </BaseButtonIcon>
                       </div>
                     </div>
@@ -3002,7 +3010,7 @@ const showStatisticsInfo = () => {
           </div>
         </div>
         <!-- User details -->
-        <div v-else class="mt-8 mb-3">
+        <div v-else class="mb-3 mt-8">
           <div class="flex items-center justify-center">
             <BaseAvatar
               size="2xl"
@@ -3146,7 +3154,7 @@ const showStatisticsInfo = () => {
                 :color="aiSettings.isPremium ? 'warning' : 'muted'"
                 class="w-full"
                 :title="aiSettingsDisplayText"
-                @click="openPremiumModal()" 
+                @click="openPremiumModal()"
               >
                 تنظیمات حاضر
                 <Icon
@@ -3155,7 +3163,7 @@ const showStatisticsInfo = () => {
                 />
               </BaseButton>
             </div>
-            
+
             <!-- Statistics Info Button -->
             <!-- <BaseButton
               type="button"
@@ -3166,7 +3174,7 @@ const showStatisticsInfo = () => {
               آمار و ارقام
               <Icon name="ph:chart-line-up" class="mr-2 size-5" />
             </BaseButton> -->
-            
+
             <BaseButton
               type="button"
               class="mt-3"
@@ -3280,7 +3288,7 @@ const showStatisticsInfo = () => {
     </div>
     <div class="p-4 text-center md:p-6">
       <p> {{ isGeneratingAnalysis ? 'در حال ساخت گزارش هستیم. لطفا منتظر  بمانید. . . ' : 'آیا مایل به پایان دادن این جلسه و ساخت گزارش از این گفتگو هستید؟' }} </p>
-      
+
       <!-- Additional information when not generating -->
       <div v-if="!isGeneratingAnalysis" class="mt-4 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
         <div class="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300">
@@ -3288,7 +3296,7 @@ const showStatisticsInfo = () => {
           <span class="text-sm font-medium">زمان تقریبی تولید گزارش: ۲ دقیقه</span>
         </div>
       </div>
-      
+
       <!-- Countdown timer when generating -->
       <div v-if="isGeneratingAnalysis" class="mt-4">
         <div class="text-muted-500 dark:text-muted-400 mb-2 text-sm">
@@ -3463,16 +3471,18 @@ const showStatisticsInfo = () => {
           </div>
 
           <!-- Suicide Risk Evaluation -->
-          <div v-if="selectedMessage.analysisResult.suicideRiskEvaluation" class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 mt-4">
+          <div v-if="selectedMessage.analysisResult.suicideRiskEvaluation" class="mt-4 rounded-xl bg-red-50 p-4 dark:bg-red-900/20">
             <div class="mb-4 flex items-center gap-2">
               <Icon name="ph:warning-circle-duotone" class="size-5 text-red-500" />
               <span class="text-sm font-medium text-red-700 dark:text-red-300">ارزیابی ریسک خودکشی</span>
             </div>
 
             <div class="mb-3">
-              <div class="text-xs font-medium text-red-600 dark:text-red-400 mb-1">سطح ریسک:</div>
+              <div class="mb-1 text-xs font-medium text-red-600 dark:text-red-400">
+                سطح ریسک:
+              </div>
               <div class="inline-flex items-center gap-2">
-                <span 
+                <span
                   class="rounded-full px-3 py-1 text-xs font-semibold"
                   :class="{
                     'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'N/A',
@@ -3489,8 +3499,10 @@ const showStatisticsInfo = () => {
             </div>
 
             <div v-if="selectedMessage.analysisResult.suicideRiskDescription" class="mt-3">
-              <div class="text-xs font-medium text-red-600 dark:text-red-400 mb-1">توضیحات:</div>
-              <div class="text-sm text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-800/30 p-2 rounded">
+              <div class="mb-1 text-xs font-medium text-red-600 dark:text-red-400">
+                توضیحات:
+              </div>
+              <div class="rounded bg-red-100 p-2 text-sm text-red-700 dark:bg-red-800/30 dark:text-red-300">
                 {{ selectedMessage.analysisResult.suicideRiskDescription }}
               </div>
             </div>
@@ -4499,7 +4511,7 @@ const showStatisticsInfo = () => {
         </h3>
       </div>
     </template>
-    <div class="max-h-[70vh] overflow-y-auto space-y-6 px-8 py-2">
+    <div class="max-h-[70vh] space-y-6 overflow-y-auto px-8 py-2">
       <div class="mx-2 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 p-8 dark:from-yellow-950/20 dark:to-amber-950/20">
         <div class="mb-6 flex flex-row-reverse items-start gap-4">
           <div class="rounded-xl bg-yellow-500 p-3 shadow-lg">

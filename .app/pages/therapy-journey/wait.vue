@@ -37,10 +37,10 @@
               {{ dsm5Analysis.primaryDiagnosis }}
             </span>
           </div>
-          
+
           <!-- Wait message -->
-          <div class="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 mt-4 rounded-lg border p-3">
-            <div class="text-amber-700 dark:text-amber-300 flex items-center gap-2 text-sm">
+          <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+            <div class="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
               <Icon name="ph:clock" class="size-4 shrink-0" />
               <span>این فرآیند ممکن است چند دقیقه طول بکشد. لطفاً صبر کنید و صفحه را نبندید.</span>
             </div>
@@ -173,23 +173,23 @@ const getEthnicityLabel = (value: string) => {
     'turkmen': 'ترکمن',
     'mixed': 'مختلط',
     'other': 'سایر',
-    'prefer-not-say': 'ترجیح می‌دهم نگویم'
+    'prefer-not-say': 'ترجیح می‌دهم نگویم',
   }
   return ethnicityMap[value] || value
 }
 
 const getReligionLabel = (value: string) => {
   const religionMap = {
-    'shia': 'شیعه',
-    'sunni': 'سنی',
-    'christian': 'مسیحی',
-    'jewish': 'یهودی',
-    'zoroastrian': 'زرتشتی',
-    'bahai': 'بهایی',
-    'spiritual': 'معنوی اما غیر مذهبی',
-    'atheist': 'بی‌دین',
-    'agnostic': 'آگنوستیک',
-    'other': 'سایر'
+    shia: 'شیعه',
+    sunni: 'سنی',
+    christian: 'مسیحی',
+    jewish: 'یهودی',
+    zoroastrian: 'زرتشتی',
+    bahai: 'بهایی',
+    spiritual: 'معنوی اما غیر مذهبی',
+    atheist: 'بی‌دین',
+    agnostic: 'آگنوستیک',
+    other: 'سایر',
   }
   return religionMap[value] || value
 }
@@ -197,18 +197,18 @@ const getReligionLabel = (value: string) => {
 const currentStep = ref(0)
 const progress = ref(0)
 
-// Dynamic processing steps and status messages  
+// Dynamic processing steps and status messages
 const processingSteps = ref([
-  { text: 'در حال بارگذاری...', status: 'pending' }
+  { text: 'در حال بارگذاری...', status: 'pending' },
 ])
 const statusMessages = ref([
-  { title: 'در حال بارگذاری...', message: 'لطفاً صبر کنید...' }
+  { title: 'در حال بارگذاری...', message: 'لطفاً صبر کنید...' },
 ])
 const hasExistingGoals = ref(false)
 
 const initializeSteps = (hasGoals: boolean) => {
   hasExistingGoals.value = hasGoals
-  
+
   if (hasGoals) {
     // Steps for when user already has goals
     processingSteps.value = [
@@ -218,7 +218,7 @@ const initializeSteps = (hasGoals: boolean) => {
       { text: 'ارزیابی نیازهای فعلی', status: 'pending' },
       { text: 'آماده‌سازی جلسه درمانی', status: 'pending' },
     ]
-    
+
     statusMessages.value = [
       {
         title: 'بررسی اهداف موجود',
@@ -241,7 +241,8 @@ const initializeSteps = (hasGoals: boolean) => {
         message: 'در حال آماده‌سازی جلسه بر اساس اهداف موجود شما...',
       },
     ]
-  } else {
+  }
+  else {
     // Steps for new goal generation
     processingSteps.value = [
       { text: 'تحلیل نتایج ارزیابی', status: 'pending' },
@@ -250,7 +251,7 @@ const initializeSteps = (hasGoals: boolean) => {
       { text: 'ارزیابی عوامل فرهنگی و محیطی', status: 'pending' },
       { text: 'تدوین برنامه مکالمه هوشمند', status: 'pending' },
     ]
-    
+
     statusMessages.value = [
       {
         title: 'تحلیل اطلاعات ارزیابی',
@@ -298,14 +299,14 @@ const processAssessment = async () => {
     if (user.value?.id) {
       existingGoals = await getGoalsByUser(user.value.id)
     }
-    
+
     // Initialize steps based on whether goals exist
     initializeSteps(existingGoals && existingGoals.length > 0)
-    
+
     if (existingGoals && existingGoals.length > 0) {
       // User already has goals - skip goal generation process
       console.log(`Found ${existingGoals.length} existing goals, skipping goal generation`)
-      
+
       // Step 1: Analyze existing goals
       updateStep(0, 'processing')
       await new Promise(resolve => setTimeout(resolve, 1000))
@@ -314,72 +315,74 @@ const processAssessment = async () => {
       // Step 2: Load DSM-5 analysis from existing goals
       updateStep(1, 'processing')
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       // Extract DSM-5 analysis from existing goals using new structure (with safety checks)
       const categories = []
       const culturalFactors = []
       let primaryDiagnosis = null
       let riskAssessment = 'low'
-      
+
       // Parse existing goals that may contain suggestedDisordersToInvestigate
-      (existingGoals || []).forEach(goal => {
+      (existingGoals || []).forEach((goal) => {
         try {
           // Check if goal has the new structure
           const goalData = goal?.goals || goal
           const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || []
-          
+
           if (Array.isArray(disorders)) {
-            disorders.forEach(category => {
+            disorders.forEach((category) => {
               if (category?.categoryTitle) {
                 categories.push({
                   name: category.categoryTitleFa || category.categoryTitle, // Use Persian name if available
                   likelihood: Math.random() * 0.3 + 0.5, // Simulate likelihood 50-80%
-                  evidence: category?.disorders?.slice(0, 2).map(d => d.title || 'شواهد موجود') || ['بر اساس اهداف قبلی']
+                  evidence: category?.disorders?.slice(0, 2).map(d => d.title || 'شواهد موجود') || ['بر اساس اهداف قبلی'],
                 })
               }
-              
+
               // Set primary diagnosis from first disorder
               if (!primaryDiagnosis && category?.disorders?.[0]?.title) {
                 primaryDiagnosis = category.disorders[0].title
               }
-              
+
               // Check for suicide risk in disorders
               if (category?.disorders) {
-                category.disorders.forEach(disorder => {
+                category.disorders.forEach((disorder) => {
                   if (disorder.suicideRisk && disorder.suicideRisk.includes('high')) {
                     riskAssessment = 'high'
-                  } else if (disorder.suicideRisk && disorder.suicideRisk.includes('moderate') && riskAssessment === 'low') {
+                  }
+                  else if (disorder.suicideRisk && disorder.suicideRisk.includes('moderate') && riskAssessment === 'low') {
                     riskAssessment = 'moderate'
                   }
                 })
               }
             })
           }
-          
+
           // Fallback to old structure if no new structure found
           if (categories.length === 0) {
             categories.push({
               name: goalData?.title || 'اهداف موجود',
               likelihood: 0.7,
-              evidence: ['بر اساس اهداف قبلی']
+              evidence: ['بر اساس اهداف قبلی'],
             })
-            
+
             if (!primaryDiagnosis) {
               primaryDiagnosis = goalData?.title || 'تشخیص موجود'
             }
           }
-        } catch (error) {
+        }
+        catch (error) {
           console.warn('Error parsing goal data:', error)
         }
       })
-      
+
       dsm5Analysis.value = {
         categories: categories.slice(0, 3), // Show top 3
         primaryDiagnosis: primaryDiagnosis || 'بر اساس اهداف قبلی',
         culturalFactors: culturalFactors.length > 0 ? culturalFactors : ['در نظر گرفته شده'],
         riskAssessment: riskAssessment,
       }
-      
+
       updateStep(1, 'completed')
 
       // Step 3: Skip goal generation (already exist)
@@ -388,7 +391,7 @@ const processAssessment = async () => {
       updateStep(2, 'completed')
 
       // Step 4: Cultural assessment (quick review)
-      updateStep(3, 'processing')  
+      updateStep(3, 'processing')
       await new Promise(resolve => setTimeout(resolve, 800))
       updateStep(3, 'completed')
 
@@ -396,11 +399,11 @@ const processAssessment = async () => {
       updateStep(4, 'processing')
       await new Promise(resolve => setTimeout(resolve, 1000))
       updateStep(4, 'completed')
-      
-    } else {
+    }
+    else {
       // No existing goals - run full goal generation process
       console.log('No existing goals found, running full goal generation process')
-      
+
       // Step 1: Analyze assessment results
       updateStep(0, 'processing')
       await new Promise(resolve => setTimeout(resolve, 2000))
@@ -421,47 +424,47 @@ const processAssessment = async () => {
       const simulatedCategories = []
       let simulatedPrimaryDiagnosis = null
       let simulatedRiskAssessment = 'low'
-      
+
       // Analyze assessment to simulate categories (using Persian names)
       if (latestAssessment.mood === 'low' || latestAssessment.mood === 'very-low') {
         simulatedCategories.push({
           name: 'اختلالات افسردگی',
           likelihood: 0.8,
-          evidence: ['خلق پایین', 'کاهش انرژی', 'علائم افسردگی']
+          evidence: ['خلق پایین', 'کاهش انرژی', 'علائم افسردگی'],
         })
         simulatedPrimaryDiagnosis = 'اپیزود افسردگی اساسی'
         simulatedRiskAssessment = latestAssessment.mood === 'very-low' ? 'moderate' : 'low'
       }
-      
+
       if (latestAssessment.anxietyLevel >= 4) {
         simulatedCategories.push({
           name: 'اختلالات اضطرابی',
           likelihood: 0.6,
-          evidence: ['اضطراب بالا', 'نگرانی مفرط', 'علائم جسمی']
+          evidence: ['اضطراب بالا', 'نگرانی مفرط', 'علائم جسمی'],
         })
         if (!simulatedPrimaryDiagnosis) {
           simulatedPrimaryDiagnosis = 'اختلال اضطراب عمومی'
         }
       }
-      
+
       if (latestAssessment.sleepQuality <= 2) {
         simulatedCategories.push({
           name: 'اختلالات خواب-بیداری',
           likelihood: 0.4,
-          evidence: ['کیفیت خواب ضعیف', 'اختلال در الگوی خواب']
+          evidence: ['کیفیت خواب ضعیف', 'اختلال در الگوی خواب'],
         })
       }
-      
+
       // Fallback if no categories identified
       if (simulatedCategories.length === 0) {
         simulatedCategories.push({
           name: 'سایر اختلالات روانی',
           likelihood: 0.5,
-          evidence: ['علائم نیازمند بررسی بیشتر']
+          evidence: ['علائم نیازمند بررسی بیشتر'],
         })
         simulatedPrimaryDiagnosis = 'شکایات روانشناختی'
       }
-      
+
       dsm5Analysis.value = {
         categories: simulatedCategories,
         primaryDiagnosis: simulatedPrimaryDiagnosis || 'نیازمند ارزیابی بیشتر',
@@ -480,31 +483,32 @@ const processAssessment = async () => {
         console.log('Starting diagnosis goals generation...')
         diagnosisGoals = await generateDiagnosisGoals(latestAssessment, 1)
         console.log('Generated diagnosis goals:', diagnosisGoals)
-        
+
         if (!diagnosisGoals || diagnosisGoals.length === 0) {
           throw new Error('No diagnosis goals were generated')
         }
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Error in diagnosis goals generation:', error)
         // Create fallback goals to prevent complete failure
         diagnosisGoals = [{
-          categoryTitle: "Depressive Disorders",
-          categoryTitleFa: "اختلالات افسردگی",
-          categoryDescription: "اختلالات افسردگی شامل اختلالاتی هستند که با خلق افسرده مشخص می‌شوند.",
+          categoryTitle: 'Depressive Disorders',
+          categoryTitleFa: 'اختلالات افسردگی',
+          categoryDescription: 'اختلالات افسردگی شامل اختلالاتی هستند که با خلق افسرده مشخص می‌شوند.',
           disorders: [{
-            code: "296.20 (F32.0)",
-            title: "اختلال افسردگی اساسی",
-            description: "اختلال افسردگی اساسی با احساس مداوم غمگینی مشخص می‌شود.",
-            minimumCriteria: "حداقل پنج علامت در دوره دو هفته‌ای",
-            specialNote: "نیاز به ارزیابی بیشتر دارد.",
-            Prevalence: "16.2%",
-            developmentAndCourse: "معمولاً در سن جوانی شروع می‌شود.",
-            suicideRisk: "متوسط"
-          }]
+            code: '296.20 (F32.0)',
+            title: 'اختلال افسردگی اساسی',
+            description: 'اختلال افسردگی اساسی با احساس مداوم غمگینی مشخص می‌شود.',
+            minimumCriteria: 'حداقل پنج علامت در دوره دو هفته‌ای',
+            specialNote: 'نیاز به ارزیابی بیشتر دارد.',
+            Prevalence: '16.2%',
+            developmentAndCourse: 'معمولاً در سن جوانی شروع می‌شود.',
+            suicideRisk: 'متوسط',
+          }],
         }]
         console.warn('Using fallback diagnosis goals due to generation error')
       }
-      
+
       updateStep(2, 'completed')
 
       // Step 4: Cultural and environmental assessment
@@ -520,11 +524,12 @@ const processAssessment = async () => {
       if (diagnosisGoals && diagnosisGoals.length > 0) {
         // Save directly as JSON to suggestedDisordersToInvestigate field
         const dataToSave = diagnosisGoals // This is already the array of categories
-        
+
         console.log('Saving to suggestedDisordersToInvestigate collection:', dataToSave)
         await createTherapyGoal(dataToSave)
         console.log('Successfully saved comprehensive DSM-5 goals:', diagnosisGoals.length, 'categories')
-      } else {
+      }
+      else {
         console.warn('No diagnosis goals generated - nothing to save')
       }
 
@@ -560,7 +565,7 @@ const updateStep = (stepIndex: number, status: 'pending' | 'processing' | 'compl
 onMounted(() => {
   // Initialize with default steps (will be updated in processAssessment)
   initializeSteps(false)
-  
+
   // Start processing after component mounts
   setTimeout(() => {
     processAssessment()

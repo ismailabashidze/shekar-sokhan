@@ -255,7 +255,7 @@ const initSpeechRecognition = () => {
         interimText.value = interimTranscript.trim()
         resetSilenceTimer()
       }
-      
+
       // Force update the UI by triggering a reactivity refresh
       nextTick(() => {
         // This ensures the UI updates even on mobile devices
@@ -265,13 +265,15 @@ const initSpeechRecognition = () => {
     recognition.value.onerror = (event: any) => {
       logStatus(`خطای تشخیص گفتار: ${event.error}`, true)
       console.error('[AudioUser] Recognition error:', event)
-      
+
       // Handle specific mobile errors
       if (event.error === 'no-speech') {
         logStatus('هیچ گفتاری شناسایی نشد. لطفاً دوباره تلاش کنید.', true)
-      } else if (event.error === 'audio-capture') {
+      }
+      else if (event.error === 'audio-capture') {
         logStatus('دستگاه صوتی یافت نشد. لطفاً اتصال میکروفون را بررسی کنید.', true)
-      } else if (event.error === 'not-allowed') {
+      }
+      else if (event.error === 'not-allowed') {
         logStatus('دسترسی به میکروفون رد شد. لطفاً مجوزها را بررسی کنید.', true)
       }
     }
@@ -291,7 +293,7 @@ const initSpeechRecognition = () => {
         }, 100)
       }
     }
-    
+
     logStatus('تشخیص گفتار مقداردهی اولیه شد')
   }
   else {
@@ -522,7 +524,7 @@ onBeforeUnmount(() => {
               <Icon name="ph:info-duotone" class="mr-1 inline size-4" />
               برای شروع ضبط، روی دکمه میکروفون کلیک کنید. در موبایل ممکن است نیاز به تعامل مستقیم با صفحه داشته باشید.
             </div>
-            
+
             <!-- Base message -->
             <div class="mb-4 text-center">
               <div class="text-muted-500 dark:text-muted-400 text-sm">
@@ -536,7 +538,7 @@ onBeforeUnmount(() => {
                 <div>متن وارد شده:</div>
               </div>
               <!-- Show interim text during recognition, final text after release -->
-              <div class="text-muted-800 text-lg dark:text-white break-words">
+              <div class="text-muted-800 break-words text-lg dark:text-white">
                 <span
                   v-if="isStarted && interimText"
                   id="interim_span"

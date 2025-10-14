@@ -326,8 +326,6 @@
           </template>
         </TairoModal>
 
-        
-
         <!-- Demographic Profile Card -->
         <BaseCard shape="curved" class="mt-4 p-6">
           <div class="mb-2 flex items-center justify-between">
@@ -552,8 +550,7 @@
             </div>
           </div>
         </BaseCard>
-
-        </div>
+      </div>
 
       <!-- Sidebar Content -->
       <div class="col-span-12 mb-5 lg:col-span-4">
@@ -631,7 +628,7 @@
           </BaseCard>
         </div>
       </div>
-      
+
       <!-- Possible Risk Factors Card (Full Width) -->
       <div class="col-span-12">
         <BaseCard class="mt-4 p-6" shape="curved">
@@ -670,69 +667,62 @@
               >
                 <BaseCard
                   shape="rounded"
-                  class="border-danger-100 dark:border-danger-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg h-full"
+                  class="border-danger-100 dark:border-danger-500/20 h-full border-2 p-4 transition-all duration-300 hover:shadow-lg"
                 >
-                      <div class="flex w-full items-start gap-3">
-                        <div class="bg-danger-500/10 dark:bg-danger-500/20 rounded-lg p-2">
-                          <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-5" />
-                        </div>
-                        <div class="flex-1">
-                          <BaseHeading
-                            as="h4"
-                            size="sm"
-                            weight="medium"
-                            lead="none"
-                            class="text-danger-500 mb-3"
-                          >
-                            {{ risk.title }}
-                          </BaseHeading>
-                          <BaseText size="xs" class="text-muted-600">
-                            {{ risk.description }}
-                          </BaseText>
-                        </div>
-                      </div>
-                      <div v-if="risk.severity" class="mt-2">
-                        <span class="text-muted-500 text-xs">شدت: </span>
-                        <span 
-                          :class="{
-                            'bg-danger-500/10 text-danger-500': risk.severity === 'High',
-                            'bg-warning-500/10 text-warning-500': risk.severity === 'Medium',
-                            'bg-success-500/10 text-success-500': risk.severity === 'Low'
-                          }"
-                          class="rounded-full px-2 py-0.5 text-xs"
-                        >
-                          {{ risk.severity === 'High' ? 'بالا' : risk.severity === 'Medium' ? 'متوسط' : 'پایین' }}
-                        </span>
-                      </div>
-                      <div v-if="risk.evidence && risk.evidence.length > 0" class="mt-3">
-                        <span class="text-muted-500 text-xs">شواهد: </span>
-                        <ul class="text-muted-600 mt-1 list-disc pr-5 text-xs">
-                          <li v-for="(evidence, evidenceIdx) in risk.evidence" :key="evidenceIdx" class="mb-1">
-                            {{ evidence }}
-                          </li>
-                        </ul>
-                      </div>
-                      <div v-if="risk.potentialIntervention" class="mt-2">
-                        <span class="text-muted-500 text-xs">مداخله‌های بالقوه: </span>
-                        <p class="text-muted-600 mt-1 text-xs">
-                          {{ risk.potentialIntervention }}
-                        </p>
-                      </div>
+                  <div class="flex w-full items-start gap-3">
+                    <div class="bg-danger-500/10 dark:bg-danger-500/20 rounded-lg p-2">
+                      <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-5" />
                     </div>
-                <!-- Show More Button for Risk Factors -->
-                <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
-                  <BaseButton
-                    color="primary"
-                    size="sm"
-                    class="mx-auto"
-                    @click="showMoreRiskFactors"
-                  >
-                    نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
-                  </BaseButton>
-                </div>
+                    <div class="flex-1">
+                      <BaseHeading
+                        as="h4"
+                        size="sm"
+                        weight="medium"
+                        lead="none"
+                        class="text-danger-500 mb-3"
+                      >
+                        {{ risk.title }}
+                      </BaseHeading>
+                      <BaseText size="xs" class="text-muted-600">
+                        {{ risk.description }}
+                      </BaseText>
+                    </div>
+                  </div>
+                  <div v-if="risk.severity" class="mt-2">
+                    <span class="text-muted-500 text-xs">شدت: </span>
+                    <span
+                      :class="{
+                        'bg-danger-500/10 text-danger-500': risk.severity === 'High',
+                        'bg-warning-500/10 text-warning-500': risk.severity === 'Medium',
+                        'bg-success-500/10 text-success-500': risk.severity === 'Low'
+                      }"
+                      class="rounded-full px-2 py-0.5 text-xs"
+                    >
+                      {{ risk.severity === 'High' ? 'بالا' : risk.severity === 'Medium' ? 'متوسط' : 'پایین' }}
+                    </span>
+                  </div>
+                  <div v-if="risk.evidence && risk.evidence.length > 0" class="mt-3">
+                    <span class="text-muted-500 text-xs">شواهد: </span>
+                    <ul class="text-muted-600 mt-1 list-disc pr-5 text-xs">
+                      <li
+                        v-for="(evidence, evidenceIdx) in risk.evidence"
+                        :key="evidenceIdx"
+                        class="mb-1"
+                      >
+                        {{ evidence }}
+                      </li>
+                    </ul>
+                  </div>
+                  <div v-if="risk.potentialIntervention" class="mt-2">
+                    <span class="text-muted-500 text-xs">مداخله‌های بالقوه: </span>
+                    <p class="text-muted-600 mt-1 text-xs">
+                      {{ risk.potentialIntervention }}
+                    </p>
+                  </div>
+                </basecard>
               </div>
               <!-- Show More Button for Risk Factors -->
-              <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="col-span-12 mt-4 text-center">
+              <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="mt-4 text-center">
                 <BaseButton
                   color="primary"
                   size="sm"
@@ -743,68 +733,81 @@
                 </BaseButton>
               </div>
             </div>
-            <div v-else class="text-center">
-              <Icon name="ph:warning-circle-duotone" class="text-muted-400 mb-2 size-12" />
-              <BaseText size="sm" class="text-muted-400">
-                در حال حاضر عامل خطری شناسایی نشده است.
-              </BaseText>
+            <!-- Show More Button for Risk Factors -->
+            <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount" class="col-span-12 mt-4 text-center">
+              <BaseButton
+                color="primary"
+                size="sm"
+                class="mx-auto"
+                @click="showMoreRiskFactors"
+              >
+                نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
+              </BaseButton>
             </div>
           </div>
-        </BaseCard>
+          <div v-else class="text-center">
+            <Icon name="ph:warning-circle-duotone" class="text-muted-400 mb-2 size-12" />
+            <BaseText size="sm" class="text-muted-400">
+              در حال حاضر عامل خطری شناسایی نشده است.
+            </BaseText>
+          </div>
+        </basecard>
       </div>
-      
-      <!-- Delete All Risk Factors Confirmation Modal -->
-      <TairoModal
-        :open="isDeleteAllRiskFactorsModalOpen"
-        size="sm"
-        @close="isDeleteAllRiskFactorsModalOpen = false"
-      >
-        <template #header>
-          <div class="flex w-full items-center justify-between p-4 md:p-6">
-            <BaseHeading
-              tag="h3"
-              size="md"
-              weight="medium"
-              class="text-muted-800 dark:text-white"
-            >
-              تایید حذف همه عوامل خطر
-            </BaseHeading>
-            <div class="flex items-center gap-2">
-              <ButtonClose @click="isDeleteAllRiskFactorsModalOpen = false" />
-            </div>
-          </div>
-        </template>
-        <div class="p-4 text-center md:p-6">
-          <div class="relative mx-auto mb-4 flex size-24 justify-center">
-            <Icon
-              name="ph:trash-duotone"
-              class="text-danger-500 size-24"
-            />
-          </div>
-          <BaseParagraph class="text-muted-700 dark:text-muted-300 mb-4">
-            آیا از حذف تمامی عوامل خطر احتمالی ({{ report.possibleRiskFactors.length }} مورد) اطمینان دارید؟
-          </BaseParagraph>
-          <BaseParagraph class="text-muted-500 mb-4 text-sm">
-            پس از حذف، امکان بازیابی وجود ندارد.
-            تمام عوامل خطر از دسترس هوش مصنوعی خارج خواهد شد.
-          </BaseParagraph>
-        </div>
-        <template #footer>
-          <div class="flex items-center justify-end gap-2 p-4 sm:p-6">
-            <BaseButton @click="isDeleteAllRiskFactorsModalOpen = false">
-              انصراف
-            </BaseButton>
-            <BaseButton
-              color="danger"
-              :loading="isDeletingAllRiskFactors"
-              @click="confirmDeleteAllRiskFactors"
-            >
-              حذف همه
-            </BaseButton>
-          </div>
-        </template>
-      </TairoModal>
+      </BaseCard>
     </div>
+
+    <!-- Delete All Risk Factors Confirmation Modal -->
+    <TairoModal
+      :open="isDeleteAllRiskFactorsModalOpen"
+      size="sm"
+      @close="isDeleteAllRiskFactorsModalOpen = false"
+    >
+      <template #header>
+        <div class="flex w-full items-center justify-between p-4 md:p-6">
+          <BaseHeading
+            tag="h3"
+            size="md"
+            weight="medium"
+            class="text-muted-800 dark:text-white"
+          >
+            تایید حذف همه عوامل خطر
+          </BaseHeading>
+          <div class="flex items-center gap-2">
+            <ButtonClose @click="isDeleteAllRiskFactorsModalOpen = false" />
+          </div>
+        </div>
+      </template>
+      <div class="p-4 text-center md:p-6">
+        <div class="relative mx-auto mb-4 flex size-24 justify-center">
+          <Icon
+            name="ph:trash-duotone"
+            class="text-danger-500 size-24"
+          />
+        </div>
+        <BaseParagraph class="text-muted-700 dark:text-muted-300 mb-4">
+          آیا از حذف تمامی عوامل خطر احتمالی ({{ report.possibleRiskFactors.length }} مورد) اطمینان دارید؟
+        </BaseParagraph>
+        <BaseParagraph class="text-muted-500 mb-4 text-sm">
+          پس از حذف، امکان بازیابی وجود ندارد.
+          تمام عوامل خطر از دسترس هوش مصنوعی خارج خواهد شد.
+        </BaseParagraph>
+      </div>
+      <template #footer>
+        <div class="flex items-center justify-end gap-2 p-4 sm:p-6">
+          <BaseButton @click="isDeleteAllRiskFactorsModalOpen = false">
+            انصراف
+          </BaseButton>
+          <BaseButton
+            color="danger"
+            :loading="isDeletingAllRiskFactors"
+            @click="confirmDeleteAllRiskFactors"
+          >
+            حذف همه
+          </BaseButton>
+        </div>
+      </template>
+    </TairoModal>
+  </div>
   </div>
 </template>
 
@@ -850,18 +853,18 @@ const report = ref({
           id: '',
           name: '',
           picture: '',
-          verified_email: false
+          verified_email: false,
         },
         refreshToken: '',
-        username: ''
+        username: '',
       },
       phoneNumber: '',
       role: '',
       startChargeTime: '',
       updated: '',
       username: '',
-      verified: false
-    }
+      verified: false,
+    },
   },
   finalDemographicProfile: {
     age: null,

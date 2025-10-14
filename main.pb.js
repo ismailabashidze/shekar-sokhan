@@ -408,31 +408,33 @@ routerAdd('POST', '/verifyPayment', (c) => {
     }
 
     const verifyData = verifyResponse.json
-    
+
     // Check if payment was successful (status 100 means success in Iranian gateways)
     if (verifyData.status === 100) {
       // Find and update payment record
       try {
         let payment = null
-        
+
         // Try to find payment by paymentId first, then by authority
         if (paymentId) {
           try {
             payment = $app.dao().findRecordById('payments', paymentId)
-          } catch (e) {
+          }
+          catch (e) {
             console.log('Payment not found by ID:', paymentId)
           }
         }
-        
+
         // If not found by ID, try to find by authority
         if (!payment) {
           try {
             payment = $app.dao().findFirstRecordByData('payments', 'transactionId', authority)
-          } catch (e) {
+          }
+          catch (e) {
             console.log('Payment not found by authority:', authority)
           }
         }
-        
+
         if (payment) {
           payment.set('status', 'success')
           payment.set('transactionId', authority)
@@ -441,7 +443,7 @@ routerAdd('POST', '/verifyPayment', (c) => {
           // Create or update user subscription
           const userId = payment.get('user')
           const user = $app.dao().findRecordById('users', userId)
-          
+
           // Create subscription charge record
           const collection = $app.dao().findCollectionByNameOrId('charge')
           const newCharge = new Record(collection, {
@@ -468,23 +470,25 @@ routerAdd('POST', '/verifyPayment', (c) => {
             refId: verifyData.refId,
             authority: authority,
           })
-        } else {
+        }
+        else {
           // Create payment record if not found - this is a fallback
           console.log('Payment record not found, creating new one')
-          
+
           // We need to get user ID from auth context - this is a fallback scenario
           // In normal flow, payment record should exist from frontend
           console.warn('Warning: Payment record not found. This might indicate an issue in the payment flow.')
-          
+
           return c.json(200, {
             status: 100,
             msg: 'Payment verified successfully but record not found',
             refId: verifyData.refId,
             authority: authority,
-            warning: 'Payment record was missing'
+            warning: 'Payment record was missing',
           })
         }
-      } catch (recordError) {
+      }
+      catch (recordError) {
         console.error('Error updating payment record:', recordError)
         return c.json(200, {
           status: 100,
@@ -493,14 +497,16 @@ routerAdd('POST', '/verifyPayment', (c) => {
           authority: authority,
         })
       }
-    } else {
+    }
+    else {
       return c.json(400, {
         status: verifyData.status,
         msg: verifyData.msg || 'Payment verification failed',
         authority: authority,
       })
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Payment verification error:', error)
     throw new BadRequestError('Payment verification failed: ' + error.message)
   }
@@ -700,7 +706,7 @@ cronAdd('manageInactiveSessions', '0 0 * * *', () => {
     // it is meaningless to check messageCount and close that.
     // instead, we should check each sessions count of messages, and if there are any messages, close that session
     // Case 2: Session open for more than 3 hours OR from yesterday with messages
-    else if ( messageCount > 0) {
+    else if (messageCount > 0) {
       session.set('status', 'closed')
 
       // Calculate and update total time if not already set
@@ -910,4 +916,3 @@ routerAdd('GET', '/api/manage-inactive-sessions', (c) => {
     })
   }
 }, $apis.activityLogger($app))
-

@@ -175,8 +175,6 @@ const closeAlphaModal = () => {
 
 <template>
   <div class="relative">
-
-
     <!-- Alpha State Modal -->
     <TairoModal
       :open="showAlphaModal"
@@ -244,10 +242,8 @@ const closeAlphaModal = () => {
         <DashboardStatisticsCards />
       </div>
 
-
       <!-- Grid -->
       <div class="grid grid-cols-12 gap-6">
-        
         <!-- Main Content Column -->
         <div :class="showFeatures ? 'ltablet:col-span-8 lg:col-span-8' : 'ltablet:col-span-12 lg:col-span-12'" class="col-span-12 mb-3">
           <!-- Inner grid -->
@@ -320,7 +316,7 @@ const closeAlphaModal = () => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Content -->
             <div class="col-span-12">
               <!-- Sub grid -->
@@ -383,36 +379,34 @@ const closeAlphaModal = () => {
         <!-- Right Column (only shown when features are visible) -->
         <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
           <!-- New Features Section -->
-            <div class="col-span-12">
-              <Transition
-                name="features"
-                leave-active-class="transition origin-top duration-75 ease-in"
-                leave-from-class="transform scale-y-100 opacity-100"
-                leave-to-class="transform scale-y-0 opacity-0"
+          <div class="col-span-12">
+            <Transition
+              name="features"
+              leave-active-class="transition origin-top duration-75 ease-in"
+              leave-from-class="transform scale-y-100 opacity-100"
+              leave-to-class="transform scale-y-0 opacity-0"
+            >
+              <div
+                v-if="showFeatures"
+                class="w-full"
+                data-tour="new-features"
               >
-                <div
-                  v-if="showFeatures"
-                  class="w-full"
-                  data-tour="new-features"
-                >
-                  <!--Features widget-->
-                  <NewFeatures>
-                    <template #actions>
-                      <BaseButtonClose
-                        size="sm"
-                        color="muted"
-                        data-nui-tooltip="بستن"
-                        @click="showFeatures = false"
-                      />
-                    </template>
-                  </NewFeatures>
-                </div>
-              </Transition>
-            </div>
+                <!--Features widget-->
+                <NewFeatures>
+                  <template #actions>
+                    <BaseButtonClose
+                      size="sm"
+                      color="muted"
+                      data-nui-tooltip="بستن"
+                      @click="showFeatures = false"
+                    />
+                  </template>
+                </NewFeatures>
+              </div>
+            </Transition>
+          </div>
         </div>
-        
       </div>
-
     </div>
   </div>
 </template>

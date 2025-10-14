@@ -212,7 +212,7 @@ const verifyCodes = async () => {
     if (user.value.hasCharge) {
       setPremiumStatus(true)
     }
-    
+
     // setToken(recor)
     toaster.show({
       title: 'ثبت موفق',

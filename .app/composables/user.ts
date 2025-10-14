@@ -38,16 +38,20 @@ export function useUser() {
     return await nuxtApp.$pb.collection('users').update(u.id as string, u)
     user.value = u
   }
-  
+
   const logout = async () => {
     // Clear user data from localStorage
     user.value = {} as User
     role.value = ''
-    
+
     // Also clear PocketBase auth store
     nuxtApp.$pb.authStore.clear()
+
+    // Note: Lock state is NOT cleared on logout
+    // This is intentional - lock persists across sessions
+    // User must enter PIN when logging back in
   }
-  
+
   return {
     user,
     role,

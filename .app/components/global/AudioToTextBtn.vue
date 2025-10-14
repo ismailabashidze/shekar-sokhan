@@ -6,25 +6,25 @@
       <span id="final_span" class="final">{{ finalText }}</span>
       <span id="interim_span" class="interim">{{ interimText }}</span>
     </div>
-    
+
     <!-- Microphone selection -->
     <div v-if="microphones.length > 1" class="microphone-selector">
       <label for="microphone-select">Microphone:</label>
-      <select 
-        id="microphone-select" 
+      <select
+        id="microphone-select"
         v-model="selectedMicrophone"
         :disabled="recognizing"
       >
-        <option 
-          v-for="mic in microphones" 
-          :key="mic.deviceId" 
+        <option
+          v-for="mic in microphones"
+          :key="mic.deviceId"
           :value="mic.deviceId"
         >
           {{ mic.label }}
         </option>
       </select>
     </div>
-    
+
     <div id="visualization">
       <div id="viz1" class="visual" />
       <div id="viz2" class="visual" />
@@ -72,21 +72,22 @@ const getMicrophones = async () => {
   try {
     // Request microphone permission
     await navigator.mediaDevices.getUserMedia({ audio: true })
-    
+
     // Get all audio input devices
     const devices = await navigator.mediaDevices.enumerateDevices()
     microphones.value = devices
       .filter(device => device.kind === 'audioinput')
       .map(device => ({
         deviceId: device.deviceId,
-        label: device.label || `Microphone ${microphones.value.length + 1}`
+        label: device.label || `Microphone ${microphones.value.length + 1}`,
       }))
-    
+
     // Set default microphone if available
     if (microphones.value.length > 0 && !selectedMicrophone.value) {
       selectedMicrophone.value = microphones.value[0].deviceId
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error getting microphones:', error)
   }
 }

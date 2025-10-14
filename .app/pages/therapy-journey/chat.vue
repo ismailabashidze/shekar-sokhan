@@ -293,15 +293,15 @@ function generateGoalGuidedPrompt(goals, userMessage, analysisResult) {
 
   // Extract priority disorders from the new goal structure
   const priorityDisorders = []
-  
-  goals.forEach(goal => {
+
+  goals.forEach((goal) => {
     const goalData = goal?.goals || goal
     const disorders = goalData?.suggestedDisordersToInvestigate || []
-    
+
     if (Array.isArray(disorders)) {
-      disorders.forEach(category => {
+      disorders.forEach((category) => {
         if (category?.disorders) {
-          category.disorders.forEach(disorder => {
+          category.disorders.forEach((disorder) => {
             priorityDisorders.push({
               category: category.categoryTitle,
               categoryDescription: category.categoryDescription,
@@ -312,7 +312,7 @@ function generateGoalGuidedPrompt(goals, userMessage, analysisResult) {
               suicideRisk: disorder.suicideRisk,
               prevalence: disorder.Prevalence,
               developmentAndCourse: disorder.developmentAndCourse,
-              conversationGuidance: goalData?.conversation_guidance
+              conversationGuidance: goalData?.conversation_guidance,
             })
           })
         }
@@ -350,22 +350,22 @@ function generateGoalGuidedPrompt(goals, userMessage, analysisResult) {
     prompt += `   - Category: ${disorder.category}\n`
     prompt += `   - Description: ${disorder.description}\n`
     prompt += `   - Key Criteria to Assess: ${disorder.minimumCriteria}\n`
-    
+
     if (disorder.suicideRisk && disorder.suicideRisk !== 'low') {
       prompt += `   - ⚠️ SUICIDE RISK: ${disorder.suicideRisk} - Monitor carefully\n`
     }
-    
+
     if (disorder.prevalence) {
       prompt += `   - Prevalence: ${disorder.prevalence}\n`
     }
-    
+
     prompt += `\n`
   })
 
   // Add conversation guidance if available
   if (priorityDisorders[0]?.conversationGuidance?.priority_questions) {
     prompt += `\nPRIORITY QUESTIONS TO EXPLORE:\n`
-    priorityDisorders[0].conversationGuidance.priority_questions.slice(0, 3).forEach(question => {
+    priorityDisorders[0].conversationGuidance.priority_questions.slice(0, 3).forEach((question) => {
       prompt += `- ${question}\n`
     })
   }
