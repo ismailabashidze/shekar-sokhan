@@ -37,5 +37,17 @@ dist/
 *.sln
 *.sw?
 
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log
+firebase-debug.*.log
+.runtimeconfig.json
+
+# Firebase Functions
+functions/node_modules/
+functions/lib/
+functions/.eslintrc.js
+
 # Other
 *Zone.Identifier

@@ -1,0 +1,22 @@
+{
+  "name": "fcm-token-server",
+  "version": "1.0.0",
+  "description": "Simple Node.js server to generate OAuth2 tokens for Firebase Cloud Messaging",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "firebase",
+    "fcm",
+    "oauth2",
+    "token",
+    "pocketbase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

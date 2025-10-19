@@ -1,9 +1,9 @@
 <template>
   <!-- Loading State -->
-  <div v-if="isLoading" class="grid grid-cols-12 gap-6">
+  <div v-if="isLoading" class="grid grid-cols-12 gap-3 sm:gap-4 md:gap-6">
     <!-- Loading Header -->
     <div class="col-span-12">
-      <div class="bg-primary-800 flex animate-pulse flex-col items-center rounded-2xl p-4 sm:flex-row">
+      <div class="bg-primary-800 flex animate-pulse flex-col items-center rounded-xl p-3 sm:rounded-2xl sm:p-4 sm:flex-row">
         <div class="bg-primary-700/50 relative h-[168px] w-[280px] shrink-0" />
         <div class="mt-6 w-full grow sm:mt-0">
           <div class="flex flex-col gap-4 text-center sm:text-right">
@@ -39,11 +39,11 @@
     </div>
   </div>
   <!-- Empty State -->
-  <div v-else-if="!hasData" class="grid grid-cols-12 gap-6">
+  <div v-else-if="!hasData" class="grid grid-cols-12 gap-3 sm:gap-4 md:gap-6">
     <div class="col-span-12">
-      <BaseCard class="p-10" shape="curved">
+      <BaseCard class="p-4 sm:p-6 md:p-10" shape="curved">
         <div class="flex flex-col items-center text-center">
-          <img src="/img/illustrations/dashboards/health/doctor.svg" alt="No report data" class="mb-6 w-72">
+          <img src="/img/illustrations/dashboards/health/doctor.svg" alt="No report data" class="mb-4 w-48 sm:mb-6 sm:w-72">
           <BaseHeading tag="h2" size="2xl" weight="medium" class="text-muted-800 mb-2 dark:text-white">
             گزارشی یافت نشد
           </BaseHeading>
@@ -59,15 +59,15 @@
     </div>
   </div>
   <!-- Report Content (when data exists) -->
-  <div v-else class="grid grid-cols-12 gap-6">
+  <div v-else class="grid grid-cols-12 gap-3 sm:gap-4 md:gap-6">
     <!-- Header -->
     <div class="col-span-12">
-      <div class="bg-primary-800 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
-        <div class="relative h-[168px] w-[280px] shrink-0">
+      <div class="bg-primary-800 flex flex-col items-center rounded-xl p-3 sm:rounded-2xl sm:p-4 sm:flex-row">
+        <div class="relative hidden h-[168px] w-[280px] shrink-0 sm:block">
           <img class="pointer-events-none absolute -start-6 -top-20 sm:-start-10"
             src="/img/illustrations/dashboards/health/doctor.svg" alt="Report illustration">
         </div>
-        <div class="mt-6 grow sm:mt-0">
+        <div class="w-full grow sm:mt-0">
           <div class="text-center sm:text-right">
             <BaseHeading tag="h1" class="text-white opacity-90">
               <span>گزارش نهایی</span>
@@ -79,7 +79,7 @@
                 </span>
               </span>
             </BaseParagraph>
-            <div class="mt-6 flex flex-wrap gap-4 pb-4 text-center sm:mt-4 sm:pb-0 sm:text-right">
+            <div class="mt-4 grid grid-cols-3 gap-2 text-center sm:mt-4 sm:flex sm:flex-wrap sm:gap-4 sm:pb-0 sm:text-right">
               <div class="flex-1">
                 <div class="flex flex-col gap-1">
                   <span class="text-xs font-medium text-white/50">تعداد کل جلسات</span>
@@ -119,9 +119,9 @@
     <!-- Report Content -->
     <div class="col-span-12 mb-8 lg:col-span-8">
       <!-- Summaries Card -->
-      <BaseCard class="p-6" shape="curved">
-        <div class="mb-2 flex items-center justify-between">
-          <BaseHeading as="h3" size="md" weight="semibold" lead="tight" class="text-muted-800 dark:text-white">
+      <BaseCard class="p-3 sm:p-4 md:p-6" shape="curved">
+        <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <BaseHeading as="h3" size="sm" weight="semibold" lead="tight" class="text-muted-800 dark:text-white sm:text-base">
             <span>خلاصه جلسات</span>
           </BaseHeading>
         </div>

@@ -33,30 +33,6 @@
       </div>
       <div class="ml-5 flex flex-row gap-x-2">
         <div class="flex h-16 w-full items-center justify-center">
-          <!-- <NuxtLink
-            to=""
-            title="Settings"
-            class="text-warning-400 hover:text-primary-500 bg-warning-500/20 hover:bg-primary-500/20 flex size-12 cursor-pointer items-center justify-center rounded-2xl transition-colors duration-300"
-            @click.prevent="canDelete"
-          >
-            <Icon name="ph:arrow-clockwise" class="size-5" />
-          </NuxtLink> -->
-        </div>
-        <div class="flex h-16 w-full items-center justify-center">
-          <!-- Notifications Button -->
-          <NuxtLink
-            to="/notifications"
-            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 relative flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="اعلان‌ها"
-          >
-            <Icon name="ph:bell" class="size-5" />
-            <span
-              v-if="unreadCount > 0"
-              class="absolute -right-1 -top-1 flex size-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
-            >
-              {{ unreadCount > 99 ? '99+' : unreadCount }}
-            </span>
-          </NuxtLink>
           <NuxtLink
             to="/dashboard"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
@@ -89,6 +65,25 @@
               />
 
               <BaseDropdownItem
+                to="/notifications"
+                title="اعلان‌ها"
+                text="مشاهده اعلان‌ها"
+                rounded="sm"
+              >
+                <template #icon>
+                  <div class="relative">
+                    <Icon name="ph:bell" class="size-5" />
+                    <span
+                      v-if="unreadCount > 0"
+                      class="absolute -right-1 -top-1 flex size-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+                    >
+                      {{ unreadCount > 99 ? '99+' : unreadCount }}
+                    </span>
+                  </div>
+                </template>
+              </BaseDropdownItem>
+
+              <BaseDropdownItem
                 to="/darmana/therapists/sessions"
                 title="جلسات"
                 text="همه جلسات من"
@@ -108,6 +103,18 @@
                 text="تنظیمات حساب"
                 rounded="sm"
               />
+
+              <BaseDropdownItem
+                to=""
+                title="گزارش مشکل"
+                text="گزارش مشکل یا خطا"
+                rounded="sm"
+                @click.prevent="canDelete"
+              >
+                <template #icon>
+                  <Icon name="ph:arrow-clockwise" class="size-5" />
+                </template>
+              </BaseDropdownItem>
 
               <BaseDropdownDivider />
 
@@ -139,6 +146,12 @@ const { unreadCount } = useNotifications()
 // Computed avatar and name from user
 const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png')
 const displayName = computed(() => user.value.meta?.name || 'کاربر جدید')
+
+// Bug report handler
+const canDelete = () => {
+  // Add your bug report functionality here
+  console.log('Bug report clicked')
+}
 </script>
 
 <style scoped>

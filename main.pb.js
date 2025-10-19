@@ -31,56 +31,6 @@ routerAdd('POST', '/generate-code', (c) => {
     message: finalCodes,
   })
 })
-// verify the user by phone and sms
-routerAdd(
-  'GET',
-  '/verifyBySms/:phoneNumber',
-  (c) => {
-    const phoneNumber = c.pathParam('phoneNumber')
-    const u = $app
-      .dao()
-      .findFirstRecordByData('users', 'phoneNumber', phoneNumber)
-    console.log('u')
-    console.log(u)
-    const res = $http.send({
-      url: `https://api.kavenegar.com/v1/434A544C4C3667303161387A52525049573471444C346C6734617A386F465763/verify/lookup.json?receptor=${phoneNumber}&token=${u.get(
-            'verifyCode',
-          )}&template=verify-fa`,
-      method: 'GET',
-      headers: { 'content-type': 'application/json' },
-      timeout: 120,
-    })
-    return c.json(200, {
-      message: 'code sent to this phone: ' + u.get('phoneNumber'),
-    })
-  },
-  $apis.activityLogger($app),
-)
-
-// verify the user by phone and sms
-routerAdd(
-  'GET',
-  '/verifyBySms/:phoneNumber/:code',
-  (c) => {
-    const phoneNumber = c.pathParam('phoneNumber')
-    const code = c.pathParam('code')
-    const u = $app
-      .dao()
-      .findFirstRecordByData('users', 'phoneNumber', phoneNumber)
-    if (u.get('verifyCode') == code) {
-      u.set('verified', true)
-      u.set('status', 'evaluation')
-      $app.dao().saveRecord(u)
-      return c.json(200, {
-        message: 'user verfied: ' + u.get('id'),
-      })
-    }
-    else {
-      throw new BadRequestError('codes does not match')
-    }
-  },
-  $apis.activityLogger($app),
-)
 
 // if sender is user, then its message will send due to a service on the port 5000
 // and then we have to store the incomming message from agent to the database.

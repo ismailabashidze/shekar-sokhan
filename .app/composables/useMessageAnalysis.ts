@@ -14,9 +14,24 @@ export const useMessageAnalysis = () => {
     }
 
     try {
+      // Extract unique indicator tags from suicideIndicators
+      const indicatorTags: string[] = []
+      if (Array.isArray(analysisData.suicideIndicators)) {
+        analysisData.suicideIndicators.forEach((indicator: any) => {
+          if (indicator?.indicatorType && !indicatorTags.includes(indicator.indicatorType)) {
+            indicatorTags.push(indicator.indicatorType)
+          }
+        })
+      }
+
       return await nuxtApp.$pb.collection('message_analysis').create({
         emotions: analysisData.lastMessage_emotions || [],
         emojis: analysisData.correspondingEmojis || '',
+        emotionalResponse: analysisData.emotionalResponse || '',
+        suicideRiskEvaluation: analysisData.suicideRiskEvaluation || 'N/A',
+        suicideRiskDescription: analysisData.suicideRiskDescription || '',
+        suicideIndicators: analysisData.suicideIndicators || [],
+        indicatorTags: indicatorTags,
       })
     }
     catch (error) {

@@ -1,10 +1,45 @@
-# Tairo Nuxt - Multipurpose Admin and Webapp Tailwind Template
+# Zehna - Mental Health & Therapy Platform
 
-[![cssninja-discord](https://img.shields.io/discord/785473098069311510?label=join%20us%20on%20discord&color=6944EC)](https://go.cssninja.io/discord)
+[![Nuxt](https://img.shields.io/badge/Nuxt-3.11.2-00DC82?logo=nuxt.js)](https://nuxt.com)
+[![Firebase](https://img.shields.io/badge/Firebase-FCM-FFCA28?logo=firebase)](https://firebase.google.com)
+[![PocketBase](https://img.shields.io/badge/PocketBase-Backend-B8DBE4)](https://pocketbase.io)
+
+## 🎯 Overview
+
+Zehna (ذهنا) is a comprehensive mental health and therapy management platform built with Nuxt 3. It features AI-powered therapy sessions, real-time notifications, and advanced scheduling capabilities.
+
+### Key Features
+
+- 🤖 **AI-Powered Therapy** - Intelligent conversational therapy with Mana
+- 🔔 **Smart Notifications** - Firebase-powered push notifications (works when app is closed!)
+- 📅 **Flexible Scheduling** - Schedule notifications from minutes to months
+- 🔐 **Advanced Security** - 5-layer lock system with PIN protection
+- 📊 **Session Analysis** - Comprehensive AI analysis of therapy sessions
+- 💬 **Real-time Updates** - PocketBase realtime subscriptions
+- 📱 **PWA Support** - Full offline functionality and installable
+- 🌙 **RTL Support** - Complete Persian/Farsi language support
+
+## 📬 Notification System
+
+This project includes a **production-ready notification system** that sends push notifications even when the app is closed. Perfect for:
+
+- ✅ Sending analysis results (5 staged notifications)
+- ✅ Reminding inactive users (customizable intervals)
+- ✅ Session follow-ups and check-ins
+- ✅ Scheduled announcements
+
+**Key Benefits:**
+- Works when app is completely closed ✨
+- Flexible timing (1 minute to 1 month+)
+- No code changes needed to adjust timing
+- Free tier supports millions of notifications
+- Admin panel for easy configuration
+
+**Quick Setup:** See [NOTIFICATIONS_QUICKSTART.md](NOTIFICATIONS_QUICKSTART.md) for 30-minute setup guide.
 
 ## ▶️ Getting started
 
-First of all, Thank you so much for purchasing this template and for being our loyal customer. You are awesome! You are entitled to get free lifetime updates to this product and support from the cssninjaStudio team directly. **Tairo** is a product built by [cssninjaStudio](https://cssninja.io/) and [Digisquad](https://digisquad.io/).
+Thank you for using Zehna! This platform is built on the **Tairo** template from [cssninjaStudio](https://cssninja.io/).
 
 ### Prerequisites
 
@@ -56,12 +91,50 @@ This will run the `dev` script from the `package.json` file.
 
 > Access the Tairo frontend in your browser at [http://localhost:4000/](http://localhost:4000/)
 
-## 💡 What to do next ?
+## 📚 Documentation
 
-Our online documentation is a great place to learn how to use Tairo.
-We try to keep it mostly up to date, so you can always find the latest information.
+### Notification System
+- **[Quick Start Guide](NOTIFICATIONS_QUICKSTART.md)** - Get notifications working in 30 minutes
+- **[Firebase Setup](FIREBASE_SETUP.md)** - Complete Firebase Cloud Messaging setup
+- **[Scheduling Guide](NOTIFICATION_SCHEDULING.md)** - How to configure flexible timing
 
-- [Access Online Documentation](https://tairo.cssninja.io/documentation)
-- [Access Shuriken UI Documentation](https://shurikenui.com)
+### System Documentation
+- **[Lock System](LOCK_SYSTEM_IMPLEMENTATION.md)** - Security and PIN protection
+- **[Agents Guide](AGENTS.md)** - AI assistant instructions
+- **[Version Updates](CLAUDE.md)** - Version update checklist
 
-> We also have a great [discord community](https://go.cssninja.io/discord) where you can ask questions and show your work.
+### External Resources
+- [Tairo Documentation](https://tairo.cssninja.io/documentation)
+- [Shuriken UI Documentation](https://shurikenui.com)
+- [Nuxt 3 Documentation](https://nuxt.com/docs)
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [PocketBase Documentation](https://pocketbase.io/docs)
+
+## 🚀 Deployment
+
+The app is configured for deployment on Netlify with the following setup:
+
+```bash
+# Build command
+pnpm run build
+
+# Publish directory
+.app/dist
+
+# Environment variables required
+FIREBASE_API_KEY=your_key
+FIREBASE_PROJECT_ID=your_project
+FIREBASE_VAPID_KEY=your_vapid_key
+# ... (see .env.example)
+```
+
+## 🤝 Contributing
+
+1. Follow the coding standards (ESLint + Prettier)
+2. Test notification system thoroughly
+3. Update documentation for new features
+4. Maintain Persian language support (RTL)
+
+## 📄 License
+
+This project is built on Tairo template. Please refer to your Tairo license for usage terms.

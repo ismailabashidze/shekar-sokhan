@@ -252,6 +252,10 @@ const viewSessionHistory = (sessionId: string) => {
   navigateTo(`/darmana/therapists/history?sessionId=${sessionId}`)
 }
 
+const viewSessionRisk = (sessionId: string) => {
+  navigateTo(`/darmana/therapists/risk?sessionId=${sessionId}`)
+}
+
 // Continue a session
 const continueSession = (therapistId: string) => {
   navigateTo(`/darmana/therapists/messaging?therapistId=${therapistId}`)
@@ -696,6 +700,16 @@ onMounted(() => {
                 >
                   <Icon name="ph:chart-line-duotone" class="ml-1 size-4" />
                   مشاهده تحلیل
+                </BaseButton>
+
+                <BaseButton
+                  v-if="['done', 'inprogress', 'generatingReport'].includes(session.status)"
+                  color="danger"
+                  shape="curved"
+                  @click="viewSessionRisk(session.id)"
+                >
+                  <Icon name="ph:pulse-duotone" class="ml-1 size-4" />
+                  ارزیابی خطر
                 </BaseButton>
 
                 <BaseButton

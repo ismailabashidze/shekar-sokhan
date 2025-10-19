@@ -47,7 +47,7 @@ onBeforeRouteLeave((to, from) => {
   if (to.path.startsWith('/auth')) {
     return true
   }
-  
+
   // Block navigation if still locked
   if (isAppLocked.value) {
     console.log('🔒 [Lock Page] Navigation blocked - App is still locked')
@@ -60,18 +60,21 @@ onBeforeRouteLeave((to, from) => {
     })
     return false
   }
-  
+
   return true
 })
 
 const sanitizeDigit = (value: string | undefined) => {
   if (!value) return ''
 
-  return value
-    .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660))
-    .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0))
-    .replace(/\D/g, '')
-    .slice(-1)
+  // Convert Arabic-Indic digits (٠-٩) to English
+  let sanitized = value.replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660))
+  // Convert Persian digits (۰-۹) to English
+  sanitized = sanitized.replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0))
+  // Remove all non-digit characters
+  sanitized = sanitized.replace(/\D/g, '')
+  // Return only the last digit
+  return sanitized.slice(-1)
 }
 
 const clearPinInputs = () => {
@@ -189,9 +192,20 @@ onMounted(() => {
 })
 
 // Methods for OTP input handling
-const handlePinInput = (index: number) => {
-  const sanitized = sanitizeDigit(pinDigits.value[index])
+const handlePinInput = (index: number, event?: Event) => {
+  // Get the raw input value
+  const rawValue = (event?.target as HTMLInputElement)?.value || pinDigits.value[index]
+
+  // Sanitize and convert any Farsi/Arabic numerals to English
+  const sanitized = sanitizeDigit(rawValue)
+
+  // Update the model with sanitized value
   pinDigits.value[index] = sanitized
+
+  // Also update the input element directly to ensure display is correct
+  if (event?.target) {
+    (event.target as HTMLInputElement).value = sanitized
+  }
 
   if (pinError.value) {
     pinError.value = ''
@@ -229,8 +243,12 @@ const handleKeyDown = (event: KeyboardEvent, index: number) => {
       nextInput?.focus()
     })
   }
-  else if (event.key.length === 1 && !/[0-9]/.test(event.key)) {
-    event.preventDefault()
+  else if (event.key.length === 1) {
+    // Allow English digits (0-9), Arabic-Indic digits (٠-٩), and Persian digits (۰-۹)
+    const isValidDigit = /[0-9٠-٩۰-۹]/.test(event.key)
+    if (!isValidDigit) {
+      event.preventDefault()
+    }
   }
 }
 
@@ -278,13 +296,12 @@ const getInputType = (index: number) => {
 
 <template>
   <div class="flex min-h-screen bg-white dark:bg-muted-800">
-    <div
-      class="relative hidden w-0 flex-1 items-center justify-center bg-muted-100 dark:bg-muted-900 lg:flex lg:w-2/5"
-    >
+    <div class="relative hidden w-0 flex-1 items-center justify-center bg-muted-100 dark:bg-muted-900 lg:flex lg:w-2/5">
       <div class="mx-auto flex size-full max-w-2xl items-center justify-center p-12">
         <!-- Lock Icon -->
         <div class="text-center">
-          <div class="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
+          <div
+            class="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
             <Icon name="ph:lock-fill" class="size-12 text-primary-600 dark:text-primary-400" />
           </div>
           <h1 class="mb-4 text-2xl font-bold text-muted-800 dark:text-muted-200">
@@ -302,13 +319,11 @@ const getInputType = (index: number) => {
         <!-- User Info -->
         <div class="mb-6 text-center">
           <div v-if="user?.avatar" class="mx-auto mb-4">
-            <img
-              :src="`https://pocket.zehna.ir/api/files/users/${user.id}/${user.avatar}`"
-              :alt="user.username || 'User'"
-              class="mx-auto size-16 rounded-full object-cover"
-            >
+            <img :src="`https://pocket.zehna.ir/api/files/users/${user.id}/${user.avatar}`"
+              :alt="user.username || 'User'" class="mx-auto size-16 rounded-full object-cover">
           </div>
-          <div v-else class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted-200 dark:bg-muted-700">
+          <div v-else
+            class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted-200 dark:bg-muted-700">
             <Icon name="ph:user" class="size-8 text-muted-500" />
           </div>
           <h2 class="text-xl font-semibold text-muted-800 dark:text-muted-200">
@@ -320,37 +335,19 @@ const getInputType = (index: number) => {
         </div>
 
         <!-- PIN Input Form -->
-        <form
-          method="POST"
-          action=""
-          class="space-y-6"
-          novalidate
-          @submit.prevent="submitPin"
-        >
+        <form method="POST" action="" class="space-y-6" novalidate @submit.prevent="submitPin">
           <!-- OTP Input Fields -->
           <div class="space-y-3">
             <label class="text-sm font-medium text-muted-700 dark:text-muted-300">
               پین ۴ رقمی
             </label>
             <div class="flex justify-center gap-3" dir="ltr">
-              <input
-                v-for="n in 4"
-                :key="n"
-                :ref="el => setPinInputRef(el, n-1)"
-                v-model="pinDigits[n-1]"
-                :type="getInputType(n-1)"
-                inputmode="numeric"
-                maxlength="1"
-                :autofocus="n === 1"
-                autocomplete="one-time-code"
-                pattern="[0-9]*"
+              <input v-for="n in 4" :key="n" :ref="el => setPinInputRef(el, n - 1)" v-model="pinDigits[n - 1]" type="tel"
+                inputmode="numeric" maxlength="1" :autofocus="n === 1" autocomplete="one-time-code" pattern="[0-9]*"
                 dir="ltr"
                 class="h-14 w-14 rounded-lg border border-muted-300 text-center text-2xl font-bold text-muted-800 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-muted-700 dark:bg-muted-900/50 dark:text-muted-200"
-                @input="handlePinInput(n-1)"
-                @keydown="handleKeyDown($event, n-1)"
-                @paste="handlePaste"
-                @focus="handleFocus(n-1)"
-              />
+                @input="handlePinInput(n - 1, $event)" @keydown="handleKeyDown($event, n - 1)" @paste="handlePaste"
+                @focus="handleFocus(n - 1)" />
             </div>
             <div v-if="pinError" class="text-sm font-medium text-danger-600 dark:text-danger-400">
               {{ pinError }}
@@ -359,39 +356,20 @@ const getInputType = (index: number) => {
 
           <!-- Action Buttons -->
           <div class="space-y-3">
-            <BaseButton
-              :disabled="isVerifying"
-              :loading="isVerifying"
-              type="submit"
-              color="primary"
-              shape="curved"
-              class="!h-12 w-full"
-            >
+            <BaseButton :disabled="isVerifying" :loading="isVerifying" type="submit" color="primary" shape="curved"
+              class="!h-12 w-full">
               باز کردن قفل
               <Icon name="ph:lock-open" class="mr-2 size-4" />
             </BaseButton>
 
             <div class="grid grid-cols-2 gap-3">
-              <BaseButton
-                type="button"
-                color="info"
-                variant="outline"
-                shape="curved"
-                class="!h-12"
-                @click="showSupportModal = true"
-              >
+              <BaseButton type="button" color="info" variant="outline" shape="curved" class="!h-12"
+                @click="showSupportModal = true">
                 پشتیبانی
                 <Icon name="ph:phone" class="mr-2 size-4" />
               </BaseButton>
 
-              <BaseButton
-                type="button"
-                color="muted"
-                variant="outline"
-                shape="curved"
-                class="!h-12"
-                @click="logout"
-              >
+              <BaseButton type="button" color="muted" variant="outline" shape="curved" class="!h-12" @click="logout">
                 خروج
                 <Icon name="ph:sign-out" class="mr-2 size-4" />
               </BaseButton>
@@ -407,8 +385,7 @@ const getInputType = (index: number) => {
             </p>
             <button
               class="mx-auto flex items-center justify-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-500"
-              @click="showSupportModal = true"
-            >
+              @click="showSupportModal = true">
               <span dir="ltr">021 4421 4594</span>
               <Icon name="ph:phone" class="size-4" />
             </button>
@@ -419,14 +396,11 @@ const getInputType = (index: number) => {
   </div>
 
   <!-- Support Modal -->
-  <TairoModal
-    :open="showSupportModal"
-    size="sm"
-    @close="showSupportModal = false"
-  >
+  <TairoModal :open="showSupportModal" size="sm" @close="showSupportModal = false">
     <template #header>
       <div class="flex items-center gap-4 p-4" dir="rtl">
-        <div class="flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-info-500 to-primary-500">
+        <div
+          class="flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-info-500 to-primary-500">
           <Icon name="ph:headset" class="size-6 text-white" />
         </div>
         <div class="flex-1 text-right">
@@ -440,26 +414,22 @@ const getInputType = (index: number) => {
       </div>
     </template>
 
-    <template #body>
-      <div class="space-y-6 px-4 py-2 text-center" dir="rtl">
-        <!-- Main Support Card -->
-        <div class="rounded-2xl bg-gradient-to-br from-info-50 to-primary-50 p-6 dark:from-info-900/20 dark:to-primary-900/20">
-          <div class="mb-4 flex justify-center">
-            <div class="flex size-16 items-center justify-center rounded-full bg-white p-3 shadow-md dark:bg-muted-800">
-              <Icon name="ph:phone-call" class="size-8 text-primary-600 dark:text-primary-400" />
-            </div>
+    <template>
+      <div class="space-y-4 p-4 text-center" dir="rtl">
+        <!-- Phone Number Display -->
+        <div class="rounded-xl bg-primary-50 p-6 dark:bg-primary-900/20">
+          <div class="mb-3 flex justify-center">
+            <Icon name="ph:phone-call" class="size-12 text-primary-600 dark:text-primary-400" />
           </div>
-          <p class="mb-2 text-lg font-medium text-muted-800 dark:text-muted-200">
-            تماس مستقیم با پشتیبانی
+          <p class="mb-2 text-base font-semibold text-muted-800 dark:text-muted-200">
+            شماره تماس پشتیبانی
           </p>
-          <p class="mb-6 text-sm text-muted-600 dark:text-muted-400">
-            شماره تماس: <span dir="ltr" class="font-mono">021 4421 4594</span>
+          <p class="mb-4 text-2xl font-bold text-primary-600 dark:text-primary-400" dir="ltr">
+            021 4421 4594
           </p>
-          <a
-            href="tel:02144214594"
-            class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-3 font-medium text-white transition-all hover:bg-primary-700 hover:shadow-lg"
-          >
-            <Icon name="ph:phone" class="size-5" />
+          <a href="tel:02144214594"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-700">
+            <Icon name="ph:phone" class="size-4" />
             تماس مستقیم
           </a>
         </div>
@@ -475,14 +445,16 @@ const getInputType = (index: number) => {
             ساعات کاری
           </p>
           <div class="space-y-3 text-sm">
-            <div class="flex items-center justify-between rounded-lg bg-white p-3 text-muted-700 shadow-sm dark:bg-muted-900 dark:text-muted-300">
+            <div
+              class="flex items-center justify-between rounded-lg bg-white p-3 text-muted-700 shadow-sm dark:bg-muted-900 dark:text-muted-300">
               <span>شنبه تا چهارشنبه</span>
               <div class="flex items-center gap-2">
                 <span>۹ الی ۱۷</span>
                 <Icon name="ph:calendar-blank" class="size-4 text-info-500" />
               </div>
             </div>
-            <div class="flex items-center justify-between rounded-lg bg-white p-3 text-muted-700 shadow-sm dark:bg-muted-900 dark:text-muted-300">
+            <div
+              class="flex items-center justify-between rounded-lg bg-white p-3 text-muted-700 shadow-sm dark:bg-muted-900 dark:text-muted-300">
               <span>پنج‌شنبه</span>
               <div class="flex items-center gap-2">
                 <span>۹ الی ۱۳</span>
@@ -493,19 +465,21 @@ const getInputType = (index: number) => {
         </div>
 
         <!-- Additional Support Options -->
-        <div class="grid grid-cols-2 gap-4">
-          <a 
-            href="mailto:support@zehna.ir" 
-            class="flex flex-col items-center justify-center rounded-xl border border-muted-300 p-4 text-center transition-all hover:bg-muted-50 dark:border-muted-700 dark:hover:bg-muted-800/50"
-          >
+        <div class="grid grid-cols-3 gap-3">
+          <a href="tel:02144214594"
+            class="flex flex-col items-center justify-center rounded-xl border border-muted-300 p-4 text-center transition-all hover:bg-muted-50 dark:border-muted-700 dark:hover:bg-muted-800/50">
+            <Icon name="ph:phone" class="mb-2 size-6 text-muted-600 dark:text-muted-400" />
+            <span class="text-sm font-medium text-muted-700 dark:text-muted-300">تماس تلفنی</span>
+            <span class="text-xs text-muted-500" dir="ltr">021 4421 4594</span>
+          </a>
+          <a href="mailto:support@zehna.ir"
+            class="flex flex-col items-center justify-center rounded-xl border border-muted-300 p-4 text-center transition-all hover:bg-muted-50 dark:border-muted-700 dark:hover:bg-muted-800/50">
             <Icon name="ph:envelope" class="mb-2 size-6 text-muted-600 dark:text-muted-400" />
             <span class="text-sm font-medium text-muted-700 dark:text-muted-300">ایمیل</span>
             <span class="text-xs text-muted-500">support@zehna.ir</span>
           </a>
-          <a 
-            href="https://t.me/zehnasupport" 
-            class="flex flex-col items-center justify-center rounded-xl border border-muted-300 p-4 text-center transition-all hover:bg-muted-50 dark:border-muted-700 dark:hover:bg-muted-800/50"
-          >
+          <a href="https://t.me/zehnasupport"
+            class="flex flex-col items-center justify-center rounded-xl border border-muted-300 p-4 text-center transition-all hover:bg-muted-50 dark:border-muted-700 dark:hover:bg-muted-800/50">
             <Icon name="ph:paper-plane-tilt" class="mb-2 size-6 text-muted-600 dark:text-muted-400" />
             <span class="text-sm font-medium text-muted-700 dark:text-muted-300">تلگرام</span>
             <span class="text-xs text-muted-500">@zehnasupport</span>
@@ -516,12 +490,7 @@ const getInputType = (index: number) => {
 
     <template #footer>
       <div class="flex flex-row-reverse gap-3 p-4" dir="rtl">
-        <BaseButton
-          color="muted"
-          variant="outline"
-          class="flex-1"
-          @click="showSupportModal = false"
-        >
+        <BaseButton color="muted" variant="outline" class="flex-1" @click="showSupportModal = false">
           بستن
         </BaseButton>
       </div>

@@ -152,24 +152,24 @@ const filterOptions = [
 
 <template>
   <div class="notifications-page bg-muted-50 dark:bg-muted-900 min-h-screen">
-    <div class="container-wrapper mx-auto w-full max-w-6xl px-3 py-4 sm:px-4 sm:py-8">
+    <div class="container-wrapper mx-auto w-full max-w-6xl px-2 py-3 sm:px-4 sm:py-8">
       <!-- Header -->
-      <div class="relative z-10 mb-6 sm:mb-8">
+      <div class="relative z-10 mb-4 sm:mb-6 md:mb-8">
         <!-- Title Section -->
-        <div class="mb-4 sm:mb-6">
-          <h1 class="text-muted-900 text-2xl font-bold dark:text-white sm:text-3xl">
+        <div class="mb-3 sm:mb-4 md:mb-6">
+          <h1 class="text-muted-900 text-xl font-bold dark:text-white sm:text-2xl md:text-3xl">
             اعلان‌ها
           </h1>
-          <p class="text-muted-500 dark:text-muted-400 mt-1 text-sm sm:mt-2 sm:text-base">
+          <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs sm:text-sm md:text-base">
             مدیریت پیام‌ها و اعلان‌های سیستمی
           </p>
         </div>
 
         <!-- Status Indicators - Mobile Optimized -->
-        <div class="mb-4 sm:hidden">
+        <div class="mb-3 sm:hidden">
           <ClientOnly>
             <!-- Mobile Status Bar -->
-            <div class="dark:bg-muted-800 flex items-center justify-between rounded-lg bg-white p-3 shadow-sm">
+            <div class="dark:bg-muted-800 flex items-center justify-between rounded-lg bg-white p-2.5 shadow-sm">              
               <!-- Connection Status -->
               <div v-if="isMounted && !isLoading" class="flex items-center gap-2">
                 <div
@@ -318,7 +318,7 @@ const filterOptions = [
         </div>
 
         <!-- Mobile Action Buttons -->
-        <div class="flex items-center justify-between gap-2 sm:hidden">
+        <div class="flex items-center gap-2 sm:hidden">
           <!-- Refresh button -->
           <BaseButtonIcon
             :loading="isLoading"
@@ -361,34 +361,34 @@ const filterOptions = [
               v-if="isMounted && unreadCount > 0"
               size="sm"
               variant="solid"
-              class="from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 flex-1 bg-gradient-to-r shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
+              class="from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 flex-1 bg-gradient-to-r px-2 py-2 shadow-lg transition-all duration-200"
               @click="markAllAsRead"
             >
-              <Icon name="ph:check-circle" class="ml-1 size-4" />
-              <span class="text-xs">علامت‌گذاری همه</span>
+              <Icon name="ph:check-circle" class="size-3.5" />
+              <span class="ml-1 text-[11px] font-medium">خوانده شده</span>
             </BaseButton>
           </ClientOnly>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="relative z-10 mb-4 sm:mb-6">
+      <div class="relative z-10 mb-3 sm:mb-4 md:mb-6">
         <!-- Mobile Filters -->
         <div class="sm:hidden">
-          <span class="text-muted-600 dark:text-muted-300 mb-3 block text-sm font-medium">
+          <span class="text-muted-600 dark:text-muted-300 mb-2 block text-xs font-medium">
             فیلتر:
           </span>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="grid grid-cols-3 gap-1.5">
             <BaseButton
               v-for="option in filterOptions"
               :key="option.value"
               size="sm"
               :variant="currentFilter === option.value ? 'solid' : 'outline'"
               :class="[
-                'py-2.5 text-xs transition-all duration-200',
+                'py-2 text-[11px] font-medium transition-all duration-200',
                 currentFilter === option.value
-                  ? 'from-primary-500 to-primary-600 ring-primary-200 dark:ring-primary-800 bg-gradient-to-r shadow-lg ring-2'
-                  : 'hover:shadow-md'
+                  ? 'from-primary-500 to-primary-600 ring-primary-200 dark:ring-primary-800 bg-gradient-to-r shadow-md ring-1'
+                  : ''
               ]"
               @click="setFilter(option.value as any)"
             >
@@ -478,24 +478,23 @@ const filterOptions = [
       <!-- Main Content -->
       <div class="mx-auto max-w-5xl">
         <!-- Loading State -->
-        <div v-if="!isMounted || (isLoading && filteredNotifications.length === 0)" class="space-y-3 sm:space-y-4">
+        <div v-if="!isMounted || (isLoading && filteredNotifications.length === 0)" class="space-y-2 sm:space-y-3 md:space-y-4">
           <div
             v-for="i in 5"
             :key="i"
             class="animate-pulse"
           >
-            <BaseCard class="p-3 sm:p-4 md:p-6">
-              <div class="flex items-start gap-3 sm:gap-4">
-                <div class="bg-muted-200 dark:bg-muted-700 size-10 shrink-0 rounded-full sm:size-12" />
-                <div class="flex-1 space-y-2 sm:space-y-3">
-                  <div class="bg-muted-200 dark:bg-muted-700 h-3 w-3/4 rounded sm:h-4" />
-                  <div class="bg-muted-200 dark:bg-muted-700 h-2.5 w-1/2 rounded sm:h-3" />
-                  <div class="bg-muted-200 dark:bg-muted-700 h-2.5 w-1/4 rounded sm:h-3" />
+            <BaseCard class="p-2.5 sm:p-3 md:p-4">
+              <div class="flex items-start gap-2.5 sm:gap-3 md:gap-4">
+                <div class="bg-muted-200 dark:bg-muted-700 size-9 shrink-0 rounded-full sm:size-10 md:size-12" />
+                <div class="flex-1 space-y-1.5 sm:space-y-2 md:space-y-3">
+                  <div class="bg-muted-200 dark:bg-muted-700 h-2.5 w-3/4 rounded sm:h-3 md:h-4" />
+                  <div class="bg-muted-200 dark:bg-muted-700 h-2 w-1/2 rounded sm:h-2.5 md:h-3" />
+                  <div class="bg-muted-200 dark:bg-muted-700 h-2 w-1/4 rounded sm:h-2.5 md:h-3" />
                 </div>
                 <!-- Mobile action placeholders -->
                 <div class="flex flex-col gap-1 sm:hidden">
-                  <div class="bg-muted-200 dark:bg-muted-700 size-8 rounded" />
-                  <div class="bg-muted-200 dark:bg-muted-700 size-8 rounded" />
+                  <div class="bg-muted-200 dark:bg-muted-700 size-9 rounded" />
                 </div>
               </div>
             </BaseCard>
@@ -505,15 +504,15 @@ const filterOptions = [
         <!-- Empty State -->
         <div
           v-else-if="isMounted && filteredNotifications.length === 0 && !isLoading"
-          class="flex flex-col items-center justify-center px-4 py-12 sm:py-16"
+          class="flex flex-col items-center justify-center px-3 py-8 sm:py-12 md:py-16"
         >
-          <div class="bg-muted-100 dark:bg-muted-800 mb-4 flex size-12 items-center justify-center rounded-full sm:size-16">
-            <Icon name="ph:bell-slash" class="text-muted-400 size-6 sm:size-8" />
+          <div class="bg-muted-100 dark:bg-muted-800 mb-3 flex size-14 items-center justify-center rounded-full sm:mb-4 sm:size-16">
+            <Icon name="ph:bell-slash" class="text-muted-400 size-7 sm:size-8" />
           </div>
-          <h3 class="text-muted-900 mb-2 text-center text-base font-semibold dark:text-white sm:text-lg">
+          <h3 class="text-muted-900 mb-2 text-center text-sm font-semibold dark:text-white sm:text-base md:text-lg">
             هیچ اعلانی وجود ندارد
           </h3>
-          <p class="text-muted-500 dark:text-muted-400 max-w-sm text-center text-sm sm:text-base">
+          <p class="text-muted-500 dark:text-muted-400 max-w-sm text-center text-xs sm:text-sm md:text-base">
             {{ currentFilter === 'unread' ? 'همه اعلان‌های شما خوانده شده‌اند' :
               currentFilter === 'read' ? 'هیچ اعلان خوانده شده‌ای وجود ندارد' :
               'هیچ اعلانی دریافت نکرده‌اید' }}
@@ -535,13 +534,13 @@ const filterOptions = [
         </div>
 
         <!-- Notifications List -->
-        <div v-else-if="isMounted && filteredNotifications.length > 0" class="space-y-4">
+        <div v-else-if="isMounted && filteredNotifications.length > 0" class="space-y-2 sm:space-y-3 md:space-y-4">
           <!-- Notifications with transitions -->
           <ClientOnly>
             <TransitionGroup
               name="notification"
               tag="div"
-              class="space-y-4"
+              class="space-y-2 sm:space-y-3 md:space-y-4"
               appear
             >
               <BaseCard
@@ -557,14 +556,14 @@ const filterOptions = [
                 ]"
                 @click="handleNotificationClick(notification)"
               >
-                <div class="p-3 sm:p-4 md:p-5">
+                <div class="p-2.5 sm:p-3 md:p-4">
                   <!-- Unread indicator badge -->
                   <div
                     v-if="!notification.isRead"
                     class="from-primary-500 to-primary-600 dark:ring-muted-800 absolute -right-1 -top-1 z-10 size-3 animate-pulse rounded-full bg-gradient-to-r shadow-lg ring-2 ring-white"
                   />
 
-                  <div class="flex items-start gap-3 sm:gap-4">
+                  <div class="flex items-start gap-2 sm:gap-3 md:gap-4">
                     <!-- Priority indicator -->
                     <div
                       class="mt-1 shrink-0 rounded-full shadow-sm transition-all duration-200 group-hover:scale-150"
@@ -579,7 +578,7 @@ const filterOptions = [
                     <!-- Notification icon -->
                     <div class="shrink-0">
                       <div
-                        class="flex size-10 items-center justify-center rounded-xl shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg sm:size-11"
+                        class="flex size-9 items-center justify-center rounded-lg shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg sm:size-10 md:size-11 sm:rounded-xl"
                         :class="[
                           notification.type === 'success' ? 'from-success-100 to-success-200 dark:from-success-900/20 dark:to-success-800/30 bg-gradient-to-br' :
                           notification.type === 'warning' ? 'from-warning-100 to-warning-200 dark:from-warning-900/20 dark:to-warning-800/30 bg-gradient-to-br' :
@@ -590,7 +589,7 @@ const filterOptions = [
                       >
                         <Icon
                           :name="getTypeIcon(notification.type)"
-                          class="size-5 transition-transform duration-200 group-hover:scale-110"
+                          class="size-4 transition-transform duration-200 group-hover:scale-110 sm:size-5"
                           :class="getTypeColor(notification.type)"
                         />
                       </div>
@@ -600,10 +599,10 @@ const filterOptions = [
                     <div class="min-w-0 flex-1">
                       <!-- Mobile layout: Stack vertically -->
                       <div class="md:hidden">
-                        <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-start justify-between gap-1.5">
                           <div class="min-w-0 flex-1">
                             <h3
-                              class="text-sm leading-tight"
+                              class="text-xs leading-tight sm:text-sm"
                               :class="[
                                 notification.isRead
                                   ? 'text-muted-600 dark:text-muted-300 font-medium'
@@ -614,12 +613,12 @@ const filterOptions = [
                             </h3>
                           </div>
                           <!-- Actions for mobile -->
-                          <div class="flex shrink-0 items-start gap-1">
+                          <div class="flex shrink-0 items-start">
                             <BaseButtonIcon
                               v-if="notification.isRead"
                               size="sm"
                               variant="ghost"
-                              class="hover:bg-muted-100 dark:hover:bg-muted-700 min-h-[40px] min-w-[40px] rounded-lg p-2"
+                              class="hover:bg-muted-100 dark:hover:bg-muted-700 min-h-[36px] min-w-[36px] rounded-lg p-1.5"
                               @click="handleMarkAsUnread($event, notification.id)"
                             >
                               <Icon name="ph:envelope" class="size-4" />
@@ -628,7 +627,7 @@ const filterOptions = [
                               v-else
                               size="sm"
                               variant="ghost"
-                              class="hover:bg-success-50 dark:hover:bg-success-900/10 hover:text-success-600 min-h-[40px] min-w-[40px] rounded-lg p-2"
+                              class="hover:bg-success-50 dark:hover:bg-success-900/10 hover:text-success-600 min-h-[36px] min-w-[36px] rounded-lg p-1.5"
                               @click="handleMarkAsRead($event, notification.id)"
                             >
                               <Icon name="ph:envelope-open" class="size-4" />
@@ -645,7 +644,7 @@ const filterOptions = [
                         </div>
 
                         <p
-                          class="mt-1 text-xs leading-relaxed"
+                          class="mt-1 text-[11px] leading-relaxed sm:text-xs"
                           :class="[
                             notification.isRead
                               ? 'text-muted-500 dark:text-muted-400'
@@ -655,8 +654,8 @@ const filterOptions = [
                           {{ notification.message }}
                         </p>
 
-                        <div class="mt-2 flex items-center justify-between text-xs">
-                          <div class="flex flex-col gap-1">
+                        <div class="mt-2 flex flex-col gap-2 text-[10px] sm:flex-row sm:items-center sm:justify-between sm:text-xs">
+                          <div class="flex flex-col gap-0.5">
                             <span class="text-muted-400 dark:text-muted-500">
                               {{ getRelativeTime(notification.createdAt) }}
                             </span>
@@ -677,26 +676,26 @@ const filterOptions = [
                             </div>
                           </div>
 
-                          <div class="flex items-center gap-2">
+                          <div class="flex flex-wrap items-center gap-1.5">
                             <BaseButton
                               v-if="notification.completeMessage"
                               size="sm"
                               variant="outline"
-                              class="border-info-200 dark:border-info-700 text-info-600 dark:text-info-400 hover:bg-info-50 dark:hover:bg-info-900/10 min-h-[36px] rounded-lg px-3 py-2 text-xs"
+                              class="border-info-200 dark:border-info-700 text-info-600 dark:text-info-400 hover:bg-info-50 dark:hover:bg-info-900/10 min-h-[32px] rounded-md px-2 py-1.5 text-[10px] sm:text-xs"
                               @click="handleReadMoreClick($event, notification)"
                             >
-                              <Icon name="ph:read-cv-logo" class="ml-1 size-3" />
-                              بیشتر بخوانید
+                              <Icon name="ph:read-cv-logo" class="size-3" />
+                              <span class="mr-0.5">بیشتر</span>
                             </BaseButton>
 
                             <BaseButton
                               v-if="notification.actionText && notification.actionUrl"
                               size="sm"
                               variant="outline"
-                              class="border-primary-200 dark:border-primary-700 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10 min-h-[36px] rounded-lg px-3 py-2 text-xs"
+                              class="border-primary-200 dark:border-primary-700 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10 min-h-[32px] rounded-md px-2 py-1.5 text-[10px] sm:text-xs"
                             >
-                              <Icon name="ph:arrow-square-out" class="ml-1 size-3" />
-                              {{ notification.actionText }}
+                              <Icon name="ph:arrow-square-out" class="size-3" />
+                              <span class="mr-0.5">{{ notification.actionText }}</span>
                             </BaseButton>
                           </div>
                         </div>

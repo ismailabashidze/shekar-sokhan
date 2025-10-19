@@ -90,8 +90,7 @@ export const useSessionAnalysis = () => {
   const createAnalysis = async (data: Partial<SessionAnalysis>) => {
     try {
       return await pb.collection('session_analysis_for_system').create(data)
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error('Error creating session analysis:', error)
       throw error
     }
@@ -102,8 +101,7 @@ export const useSessionAnalysis = () => {
       return await pb.collection('session_analysis_for_system').getOne(id, {
         expand: 'session, session.user, session.therapist',
       })
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error('Error getting session analysis:', error)
       throw error
     }
@@ -115,8 +113,7 @@ export const useSessionAnalysis = () => {
         filter,
         sort,
       })
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error('Error listing session analysis:', error)
       throw error
     }
@@ -125,8 +122,7 @@ export const useSessionAnalysis = () => {
   const updateAnalysis = async (id: string, data: Partial<SessionAnalysis>) => {
     try {
       return await pb.collection('session_analysis_for_system').update(id, data)
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error('Error updating session analysis:', error)
       throw error
     }
@@ -135,14 +131,42 @@ export const useSessionAnalysis = () => {
   const deleteAnalysis = async (id: string) => {
     try {
       return await pb.collection('session_analysis_for_system').delete(id)
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error('Error deleting session analysis:', error)
       throw error
     }
   }
 
   // Helper function to make API requests to OpenRouter
+
+  const UNSUPPORTED_SCHEMA_KEYWORDS = new Set([
+    'minItems',
+    'maxItems',
+    'minimum',
+    'maximum',
+    'exclusiveMinimum',
+    'exclusiveMaximum',
+    'multipleOf',
+  ])
+
+  const removeUnsupportedKeywords = (input: any): any => {
+    if (!input || typeof input !== 'object') {
+      return input
+    }
+
+    if (Array.isArray(input)) {
+      return input.map(item => removeUnsupportedKeywords(item))
+    }
+
+    const cleaned: Record<string, any> = {}
+    for (const [key, value] of Object.entries(input)) {
+      if (UNSUPPORTED_SCHEMA_KEYWORDS.has(key)) {
+        continue
+      }
+      cleaned[key] = removeUnsupportedKeywords(value)
+    }
+    return cleaned
+  }
 
   const makeOpenRouterRequest = async (
     messages: any[],
@@ -162,9 +186,11 @@ export const useSessionAnalysis = () => {
       return message
     })
 
+    const sanitizedSchema = removeUnsupportedKeywords(schema)
+
     return await generateStructuredResponse({
       messages: updatedMessages,
-      schema,
+      schema: sanitizedSchema,
       schemaName: 'session_analysis_part',
       model: 'mistralai/mistral-saba',
       maxTokens: Math.max(maxTokens * 2, 0),
@@ -174,10 +200,150 @@ export const useSessionAnalysis = () => {
     })
   }
 
+  const isNonEmptyString = (value: unknown, minLength = 1) => {
+    return typeof value === 'string' && value.trim().length >= minLength
+  }
+
+  const isNonEmptyStringArray = (value: unknown, minItems: number) => {
+    return (
+      Array.isArray(value) &&
+      value.length >= minItems &&
+      value.every((item) => isNonEmptyString(item, 3))
+    )
+  }
+
+  const fetchWithValidation = async <T>(
+    fetcher: () => Promise<T>,
+    validator: (result: T) => boolean,
+    label: string,
+    attempts = 3,
+  ): Promise<T> => {
+    let lastError: Error | null = null
+
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        const result = await fetcher()
+        if (validator(result)) {
+          return result
+        }
+        console.warn(`${label} validation issue`, result)
+        lastError = new Error(`${label} validation failed (attempt ${attempt})`)
+        console.warn(lastError.message)
+      } catch (err: any) {
+        lastError = err instanceof Error ? err : new Error(String(err))
+        console.error(
+          `${label} generation error (attempt ${attempt}):`,
+          lastError,
+        )
+      }
+    }
+
+    throw new Error(
+      `${label} generation failed after ${attempts} attempts${
+        lastError ? `: ${lastError.message}` : ''
+      }`,
+    )
+  }
+
+  const validateOverview = (data: any) => {
+    return (
+      data &&
+      isNonEmptyString(data.title, 5) &&
+      isNonEmptyString(data.summaryOfSession, 80) &&
+      Array.isArray(data.headlines) &&
+      data.headlines.length === 4 &&
+      data.headlines.every(
+        (item: any) =>
+          isNonEmptyString(item?.title, 3) &&
+          isNonEmptyString(item?.description, 20),
+      )
+    )
+  }
+
+  const validateTrustAndOpenness = (data: any) => {
+    return (
+      data &&
+      ['veryHigh', 'high', 'low', 'veryLow'].includes(
+        data.finalTrustAndOppennessOfUser,
+      ) &&
+      isNonEmptyString(
+        data.finalTrustAndOppennessOfUserEvaluationDescription,
+        50,
+      )
+    )
+  }
+
+  const validateTherapistEvaluation = (data: any) => {
+    const negativeListValid =
+      Array.isArray(data?.negativeScoresList) &&
+      data.negativeScoresList.length > 0 &&
+      data.negativeScoresList.every(
+        (item: any) =>
+          typeof item?.points === 'number' &&
+          item.points >= 10 &&
+          item.points <= 20 &&
+          isNonEmptyString(item?.cause, 20),
+      )
+
+    return (
+      data &&
+      isNonEmptyString(data.psychotherapistEvaluation, 80) &&
+      negativeListValid &&
+      isNonEmptyStringArray(
+        data.psychotherapistEvaluationScorePositiveBehavior,
+        3,
+      ) &&
+      isNonEmptyStringArray(
+        data.psychotherapistEvaluationScoreSuggestionsToImprove,
+        3,
+      )
+    )
+  }
+
+  const validateSummaryField =
+    (field: string, minLength = 60) =>
+    (data: any) => {
+      return data && isNonEmptyString(data[field], minLength)
+    }
+
+  const validateRiskFactors = (data: any) => {
+    return (
+      data &&
+      Array.isArray(data.possibleRiskFactorsExtracted) &&
+      data.possibleRiskFactorsExtracted.length > 0 &&
+      data.possibleRiskFactorsExtracted.every(
+        (item: any) =>
+          isNonEmptyString(item?.title, 3) &&
+          isNonEmptyString(item?.description, 20),
+      )
+    )
+  }
+
+  const validateNextSteps = (data: any) => {
+    return (
+      data &&
+      Array.isArray(data.suggestedNextStepsForTherapistForNextSession) &&
+      data.suggestedNextStepsForTherapistForNextSession.length >= 3 &&
+      data.suggestedNextStepsForTherapistForNextSession.every(
+        (item: any) =>
+          isNonEmptyString(item?.title, 3) &&
+          isNonEmptyString(item?.description, 20),
+      )
+    )
+  }
+
+  const validateArrayField = (field: string) => (data: any) => {
+    return data && Array.isArray(data[field])
+  }
+
+  const validateObjectField = (field: string) => (data: any) => {
+    return data && typeof data[field] === 'object' && data[field] !== null
+  }
+
   // Individual analysis functions
   const getSessionOverview = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا با بررسی پیام‌های جلسه، عنوان، خلاصه و تیترهای جلسه را استخراج کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا با بررسی پیام‌های جلسه، عنوان، خلاصه و تیترهای جلسه را استخراج کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -189,8 +355,8 @@ export const useSessionAnalysis = () => {
         },
         summaryOfSession: {
           type: 'string',
-          description: 'خلاصه جامعی از جلسه درمانی - باید کاملاً به زبان فارسی باشد',
-          maxLength: 1000,
+          description:
+            'خلاصه جامعی از جلسه درمانی - باید کاملاً به زبان فارسی باشد',
         },
         headlines: {
           type: 'array',
@@ -199,8 +365,12 @@ export const useSessionAnalysis = () => {
           items: {
             type: 'object',
             properties: {
-              title: { type: 'string' },
-              description: { type: 'string' },
+              title: {
+                type: 'string',
+              },
+              description: {
+                type: 'string',
+              },
             },
             required: ['title', 'description'],
             additionalProperties: false,
@@ -220,7 +390,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -230,8 +400,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getTrustAndOpennessAnalysis = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا سطح اعتماد و صراحت کاربر را نسبت به روان شناس هوش مصنوعی تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند. برای فیلدهایی که مقدار آن‌ها از میان گزینه‌های محدود انتخاب می‌شود (مانند "finalTrustAndOppennessOfUser") دقیقاً یکی از مقادیر انگلیسی تعریف‌شده در schema را برگردان.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا سطح اعتماد و صراحت کاربر را نسبت به روان شناس هوش مصنوعی تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند. برای فیلدهایی که مقدار آن‌ها از میان گزینه‌های محدود انتخاب می‌شود (مانند "finalTrustAndOppennessOfUser") دقیقاً یکی از مقادیر انگلیسی تعریف‌شده در schema را برگردان.'
 
     const schema = {
       type: 'object',
@@ -262,7 +432,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -272,15 +442,18 @@ export const useSessionAnalysis = () => {
   }
 
   const getTherapistEvaluation = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا عملکرد روان شناس را ارزیابی کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا عملکرد روان شناس را ارزیابی کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+      + ' حتماً حداقل یک مورد در فهرست negativeScoresList ارائه بده و مقدار points را بین ۱۰ تا ۲۰ در نظر بگیر.'
+      + ' همچنین ضروری است حداقل سه مورد متمایز برای psychotherapistEvaluationScorePositiveBehavior و حداقل سه مورد متمایز برای psychotherapistEvaluationScoreSuggestionsToImprove تولید کنی و در صورت امکان تعداد آن‌ها را بین سه تا پنج نگه دار.'
 
     const schema = {
       type: 'object',
       properties: {
         psychotherapistEvaluation: {
           type: 'string',
-          description: 'ارزیابی جامع عملکرد روان شناس - باید کاملاً به زبان فارسی باشد',
+          description:
+            'ارزیابی جامع عملکرد روان شناس - باید کاملاً به زبان فارسی باشد',
         },
         negativeScoresList: {
           type: 'array',
@@ -291,8 +464,6 @@ export const useSessionAnalysis = () => {
                 type: 'number',
                 description:
                   'تعداد امتیازات کسر شده برای اشتباه یا خطای روان شناس. توجه داشته باشید که این اشتباهات حرفه ای هستند و باید دقیق و محکم باشند - توضیحات باید به زبان فارسی باشند',
-                minimum: 10,
-                maximum: 20,
               },
               cause: {
                 type: 'string',
@@ -305,25 +476,27 @@ export const useSessionAnalysis = () => {
           },
           description:
             'فهرستی از مسائل عملکردی که امتیاز کلی درمانگر را کاهش می دهد. امتیاز نهایی (psychotherapistEvaluationScore) باید به صورت ۱۰۰ منهای مجموع تمام امتیازات کسر شده محاسبه شود - باید کاملاً به زبان فارسی باشد.',
-          minItems: 0,
+          minItems: 1,
           maxItems: 5,
         },
         psychotherapistEvaluationScorePositiveBehavior: {
           type: 'array',
           items: {
             type: 'string',
-            description: 'رفتار مثبتی که توسط روان شناس نشان داده شده است - باید به زبان فارسی باشد',
+            description:
+              'رفتار مثبتی که توسط روان شناس نشان داده شده است - باید به زبان فارسی باشد',
           },
           description:
             'فهرستی از رفتارهای مثبتی که روان شناس در طول جلسه نشان داده است. دقیقاً باید آرایه ای از رشته ها باشد - تمام رشته ها باید به زبان فارسی باشند',
-          minItems: 0,
+          minItems: 3,
           maxItems: 5,
         },
         psychotherapistEvaluationScoreSuggestionsToImprove: {
           type: 'array',
           items: {
             type: 'string',
-            description: 'پیشنهادی برای بهبود عملکرد روان شناس - باید به زبان فارسی باشد',
+            description:
+              'پیشنهادی برای بهبود عملکرد روان شناس - باید به زبان فارسی باشد',
           },
           description:
             'فهرستی از پیشنهادات برای بهبود عملکرد روان شناس. دقیقاً باید آرایه ای از رشته ها باشد - تمام رشته ها باید به زبان فارسی باشند',
@@ -346,7 +519,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -356,8 +529,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getBehavioralAnalysis = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای رفتاری بیمار و شواهد را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای رفتاری بیمار و شواهد را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -378,7 +551,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -388,8 +561,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getEmotionalAnalysis = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا حالت ها و الگوهای احساسی بیمار را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا حالت ها و الگوهای احساسی بیمار را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -410,7 +583,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -420,8 +593,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getThoughtsAndConcerns = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا افکار و نگرانی های اصلی بیمار را خلاصه کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا افکار و نگرانی های اصلی بیمار را خلاصه کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -442,7 +615,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -452,8 +625,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getPsychoAnalysis = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا تفسیر روانکاوی جلسه را ارائه دهید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا تفسیر روانکاوی جلسه را ارائه دهید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -462,13 +635,11 @@ export const useSessionAnalysis = () => {
           type: 'string',
           description:
             'تفسیر روانکاوی جلسه. باید مفصل و از دیدگاه روانکاوی باشد و به شکل چند جمله مرتبط احساسات، تضادهای درونی و معنای هیجانی تجربه را توضیح دهد. افکار، احساسات و تجربیات ناخودآگاه همراه با من، خود و فراخود را پوشش بده و حتماً به زبان فارسی بنویس.',
-          minLength: 180,
         },
         possibleDeeperGoalsOfPatient: {
           type: 'string',
           description:
             'تحلیل اهداف یا انگیزه های عمیق تر و پنهان بیمار که ممکن است به طور صریح بیان نشده باشد، بر اساس موضوعات مطرح شده در جلسه. توضیح باید به صورت چند جمله منسجم و فارسی باشد که حس و نیاز پنهان مراجع را توضیح دهد.',
-          minLength: 90,
         },
       },
       required: ['psychoAnalysis', 'possibleDeeperGoalsOfPatient'],
@@ -481,7 +652,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -491,8 +662,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getDefenseMechanisms = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مکانیسم های دفاعی شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های تعیین‌شده در schema استفاده کن و اگر مطمئن نیستی مقدار "بدون داده" را قرار بده.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مکانیسم های دفاعی شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های تعیین‌شده در schema استفاده کن و اگر مطمئن نیستی مقدار "بدون داده" را قرار بده.'
 
     const schema = {
       type: 'object',
@@ -556,7 +727,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -566,8 +737,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getSchemas = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای شناسایی شده در طول جلسه بر اساس نظریه الگوهای یانگ را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های فهرست‌شده در schema استفاده کن و در صورت نبود داده مقدار "بدون داده" را قرار بده.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای شناسایی شده در طول جلسه بر اساس نظریه الگوهای یانگ را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های فهرست‌شده در schema استفاده کن و در صورت نبود داده مقدار "بدون داده" را قرار بده.'
 
     const schema = {
       type: 'object',
@@ -628,7 +799,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -638,8 +809,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getDemographicData = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا اطلاعات دموگرافیک بیمار را از جلسه استخراج کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. تمام توضیحات متنی را به زبان فارسی بنویس. برای فیلدهایی که مقدار آن‌ها باید از میان گزینه‌های مشخص انگلیسی انتخاب شود (مانند gender، education، occupation و maritalStatus) دقیقاً از همان مقادیر انگلیسی تعریف‌شده در schema استفاده کن و از تولید معادل فارسی برای این فیلدها خودداری کن.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا اطلاعات دموگرافیک بیمار را از جلسه استخراج کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. تمام توضیحات متنی را به زبان فارسی بنویس. برای فیلدهایی که مقدار آن‌ها باید از میان گزینه‌های مشخص انگلیسی انتخاب شود (مانند gender، education، occupation و maritalStatus) دقیقاً از همان مقادیر انگلیسی تعریف‌شده در schema استفاده کن و از تولید معادل فارسی برای این فیلدها خودداری کن.'
 
     const schema = {
       type: 'object',
@@ -696,7 +867,8 @@ export const useSessionAnalysis = () => {
                 'householder',
                 'other',
               ],
-              description: 'شغل بیمار، اگر ذکر نشده باشد می‌تواند null باشد. مقدار باید دقیقاً یکی از گزینه‌های انگلیسی تعریف‌شده باشد.',
+              description:
+                'شغل بیمار، اگر ذکر نشده باشد می‌تواند null باشد. مقدار باید دقیقاً یکی از گزینه‌های انگلیسی تعریف‌شده باشد.',
               nullable: true,
             },
             maritalStatus: {
@@ -722,7 +894,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -732,8 +904,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getNextSteps = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مراحل پیشنهادی بعدی برای درمانگر را ارائه دهید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مراحل پیشنهادی بعدی برای درمانگر را ارائه دهید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -745,11 +917,13 @@ export const useSessionAnalysis = () => {
             properties: {
               title: {
                 type: 'string',
-                description: 'عنوان پیشنهاد مرحله بعدی برای درمانگر - باید به زبان فارسی باشد',
+                description:
+                  'عنوان پیشنهاد مرحله بعدی برای درمانگر - باید به زبان فارسی باشد',
               },
               description: {
                 type: 'string',
-                description: 'توضیح مفصل پیشنهاد مرحله بعدی - باید کاملاً به زبان فارسی باشد',
+                description:
+                  'توضیح مفصل پیشنهاد مرحله بعدی - باید کاملاً به زبان فارسی باشد',
               },
             },
             required: ['title', 'description'],
@@ -771,7 +945,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -781,8 +955,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getRiskFactors = async (messages: any[]) => {
-    const systemMessage
-      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا عوامل ریسک شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage =
+      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا عوامل ریسک شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -822,7 +996,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map(m => `${m.role}: ${m.content}`)
+            .map((m) => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -842,29 +1016,40 @@ export const useSessionAnalysis = () => {
     error.value = null
 
     try {
-      console.log(
-        '🔍 Starting session analysis generation for session:',
-        sessionId,
-      )
+      console.log('🔍 Generating session analysis for:', sessionId)
       console.log('📨 Number of messages to analyze:', messages.length)
 
-      // Log the first few messages for debugging
-      console.log(
-        '📋 First 3 messages:',
-        messages.slice(0, 3).map(m => ({
-          role: m.role,
-          content: m.content?.substring(0, 100) + '...',
-        })),
+      const overview = await fetchWithValidation(
+        () => getSessionOverview(messages),
+        validateOverview,
+        'خلاصه جلسه',
       )
 
-      // Run all analysis functions with individual error handling
-      console.log('🔄 Starting analysis requests...')
+      const trustAndOpenness = await fetchWithValidation(
+        () => getTrustAndOpennessAnalysis(messages),
+        validateTrustAndOpenness,
+        'تحلیل اعتماد و صراحت',
+      )
 
-      // Run critical analysis functions first
+      const therapistEvaluation = await fetchWithValidation(
+        () => getTherapistEvaluation(messages),
+        validateTherapistEvaluation,
+        'ارزیابی عملکرد درمانگر',
+      )
+
+      const riskFactors = await fetchWithValidation(
+        () => getRiskFactors(messages),
+        validateRiskFactors,
+        'عوامل خطر',
+      )
+
+      const nextSteps = await fetchWithValidation(
+        () => getNextSteps(messages),
+        validateNextSteps,
+        'گام‌های پیشنهادی بعدی',
+      )
+
       const [
-        overview,
-        trustAndOpenness,
-        therapistEvaluation,
         behavioralAnalysis,
         emotionalAnalysis,
         thoughtsAndConcerns,
@@ -872,210 +1057,75 @@ export const useSessionAnalysis = () => {
         defenseMechanisms,
         schemas,
         demographicData,
-        nextSteps,
-        riskFactors,
-      ] = await Promise.allSettled([
-        getSessionOverview(messages),
-        getTrustAndOpennessAnalysis(messages),
-        getTherapistEvaluation(messages),
-        getBehavioralAnalysis(messages),
-        getEmotionalAnalysis(messages),
-        getThoughtsAndConcerns(messages),
-        getPsychoAnalysis(messages),
-        getDefenseMechanisms(messages),
-        getSchemas(messages),
-        getDemographicData(messages),
-        getNextSteps(messages),
-        getRiskFactors(messages),
+      ] = await Promise.all([
+        fetchWithValidation(
+          () => getBehavioralAnalysis(messages),
+          validateSummaryField('behavioralAnalysisSummary', 40),
+          'تحلیل رفتاری',
+          2,
+        ),
+        fetchWithValidation(
+          () => getEmotionalAnalysis(messages),
+          validateSummaryField('emotionalAnalysisSummary', 40),
+          'تحلیل هیجانی',
+          2,
+        ),
+        fetchWithValidation(
+          () => getThoughtsAndConcerns(messages),
+          validateSummaryField('thoughtsAndConcernsSummary', 40),
+          'خلاصه افکار و نگرانی‌ها',
+          2,
+        ),
+        fetchWithValidation(
+          () => getPsychoAnalysis(messages),
+          (data: any) =>
+            isNonEmptyString(data?.psychoAnalysis, 120) &&
+            isNonEmptyString(data?.possibleDeeperGoalsOfPatient, 80),
+          'تحلیل روان‌کاوانه',
+          2,
+        ),
+        fetchWithValidation(
+          () => getDefenseMechanisms(messages),
+          validateArrayField('detectedDefenceMechanisms'),
+          'مکانیسم‌های دفاعی',
+          2,
+        ),
+        fetchWithValidation(
+          () => getSchemas(messages),
+          validateArrayField('detectedSchemas'),
+          'طرحواره‌های شناسایی‌شده',
+          2,
+        ),
+        fetchWithValidation(
+          () => getDemographicData(messages),
+          validateObjectField('demographicData'),
+          'اطلاعات دموگرافیک',
+          2,
+        ),
       ])
 
-      // Process results and handle errors
-      const results: any = {}
-
-      // Helper function to process Promise.allSettled results
-      const processResult = (result: PromiseSettledResult<any>, key: string, defaultValue: any = {}) => {
-        if (result.status === 'fulfilled') {
-          console.log(`✅ ${key} analysis completed successfully`)
-          return result.value
-        }
-        else {
-          console.error(`❌ ${key} analysis failed:`, result.reason)
-          // Return a default structure to prevent complete failure
-          return defaultValue
-        }
-      }
-
-      // Process each analysis with appropriate default values
-      results.overview = processResult(overview, 'Session overview', {
-        title: 'جلسه مشاوره',
-        summaryOfSession: 'به دلیل خطای تحلیل، خلاصه جلسه در دسترس نیست',
-        headlines: [],
-      })
-
-      results.trustAndOpenness = processResult(trustAndOpenness, 'Trust and openness', {
-        finalTrustAndOppennessOfUser: 'low',
-        finalTrustAndOppennessOfUserEvaluationDescription: 'به دلیل خطای تحلیل، ارزیابی سطح اعتماد در دسترس نیست',
-        trustLevelProgression: [],
-        opennessLevelProgression: [],
-      })
-
-      results.therapistEvaluation = processResult(therapistEvaluation, 'Therapist evaluation', {
-        psychotherapistEvaluation: 'به دلیل خطای تحلیل، ارزیابی عملکرد روانشناس در دسترس نیست',
-        negativeScoresList: [],
-        psychotherapistEvaluationScorePositiveBehavior: [],
-        psychotherapistEvaluationScoreSuggestionsToImprove: [],
-      })
-
-      results.behavioralAnalysis = processResult(behavioralAnalysis, 'Behavioral analysis', {
-        behavioralAnalysisSummary: 'به دلیل خطای تحلیل، تحلیل رفتاری در دسترس نیست',
-      })
-
-      results.emotionalAnalysis = processResult(emotionalAnalysis, 'Emotional analysis', {
-        emotionalAnalysisSummary: 'به دلیل خطای تحلیل، تحلیل احساسی در دسترس نیست',
-      })
-
-      results.thoughtsAndConcerns = processResult(thoughtsAndConcerns, 'Thoughts and concerns', {
-        thoughtsAndConcernsSummary: 'به دلیل خطای تحلیل، خلاصه افکار و نگرانی‌ها در دسترس نیست',
-      })
-
-      results.psychoAnalysis = processResult(psychoAnalysis, 'Psycho analysis', {
-        psychoAnalysis: 'تحلیل روانکاوی نشان می‌دهد مراجع میان نیاز به امنیت عاطفی و ترس از آسیب‌پذیری در نوسان است. پیشنهاد می‌شود در جلسه بعدی بر ریشه‌های هیجانی این تعارض و نحوه بروز آن در روابط نزدیک تمرکز شود.',
-        possibleDeeperGoalsOfPatient: 'مراجع در جستجوی ثبات هیجانی، شناخت عمیق‌تر از خود و توانایی بیان نیازها و مرزبندی سالم در روابط نزدیک است.',
-      })
-
-      results.defenseMechanisms = processResult(defenseMechanisms, 'Defense mechanisms', {
-        detectedDefenceMechanisms: [],
-      })
-
-      results.schemas = processResult(schemas, 'Schemas', {
-        detectedSchemas: [],
-      })
-
-      results.demographicData = processResult(demographicData, 'Demographic data', {
-        demographicData: {
-          firstName: null,
-          lastName: null,
-          age: null,
-          gender: null,
-          education: null,
-          occupation: null,
-          maritalStatus: null,
-        },
-      })
-
-      results.nextSteps = processResult(nextSteps, 'Next steps', {
-        suggestedNextStepsForTherapistForNextSession: [],
-      })
-
-      results.riskFactors = processResult(riskFactors, 'Risk factors', {
-        possibleRiskFactorsExtracted: [],
-      })
-
-      // Combine all results into a single object
-      console.log('🔄 Combining analysis results...')
       const combinedResult = {
-        ...results.overview,
-        ...results.trustAndOpenness,
-        ...results.therapistEvaluation,
-        ...results.behavioralAnalysis,
-        ...results.emotionalAnalysis,
-        ...results.thoughtsAndConcerns,
-        ...results.psychoAnalysis,
-        ...results.defenseMechanisms,
-        ...results.schemas,
-        ...results.demographicData,
-        ...results.nextSteps,
-        ...results.riskFactors,
-      }
-
-      // Validate required fields and provide defaults if missing
-      const defaultPsychoSummary = 'تحلیل روانکاوی نشان می‌دهد مراجع برای بازسازی حس امنیت درونی، مواجهه با تعارض‌های هیجانی و یافتن روایت منسجم از تجربه‌های خود تلاش می‌کند. در جلسات بعدی باید به پیوند خاطرات، احساسات و الگوهای رفتاری او پرداخته شود تا امکان ادغام تجربه و کاهش تنش فراهم گردد.'
-      const defaultDeeperGoalSummary = 'مراجع به دنبال ایجاد احساس ثبات هیجانی، فهم روشن‌تر از نیازهای شخصی و توانایی بیان خواسته‌ها در روابط صمیمی است و می‌خواهد مرزهای سالمی میان خود و دیگران برقرار کند.'
-      const ensureDescriptiveText = (value: string | undefined, fallback: string, minLength = 90) => {
-        if (typeof value !== 'string' || !value.trim()) {
-          return fallback
-        }
-        const trimmed = value.trim()
-        if (trimmed.length < minLength) {
-          return `${trimmed} این موضوع نیازمند بررسی عمیق‌تر در جلسه آینده است تا ابعاد هیجانی و شناختی آن روشن‌تر شود.`
-        }
-        return trimmed
-      }
-
-      const validatedResult = {
-        title: combinedResult.title || 'جلسه مشاوره',
-        summaryOfSession: combinedResult.summaryOfSession || 'به دلیل خطای تحلیل، خلاصه جلسه در دسترس نیست',
-        headlines: combinedResult.headlines || [],
-        finalTrustAndOppennessOfUser: combinedResult.finalTrustAndOppennessOfUser || 'low',
-        finalTrustAndOppennessOfUserEvaluationDescription: combinedResult.finalTrustAndOppennessOfUserEvaluationDescription || 'به دلیل خطای تحلیل، ارزیابی سطح اعتماد در دسترس نیست',
-        trustLevelProgression: combinedResult.trustLevelProgression || [],
-        opennessLevelProgression: combinedResult.opennessLevelProgression || [],
-        psychotherapistEvaluation: combinedResult.psychotherapistEvaluation || 'به دلیل خطای تحلیل، ارزیابی عملکرد روانشناس در دسترس نیست',
-        negativeScoresList: combinedResult.negativeScoresList || [],
-        psychotherapistEvaluationScorePositiveBehavior: combinedResult.psychotherapistEvaluationScorePositiveBehavior || [],
-        psychotherapistEvaluationScoreSuggestionsToImprove: combinedResult.psychotherapistEvaluationScoreSuggestionsToImprove || [],
-        behavioralAnalysisSummary: combinedResult.behavioralAnalysisSummary || 'به دلیل خطای تحلیل، تحلیل رفتاری در دسترس نیست',
-        emotionalAnalysisSummary: combinedResult.emotionalAnalysisSummary || 'به دلیل خطای تحلیل، تحلیل احساسی در دسترس نیست',
-        thoughtsAndConcernsSummary: combinedResult.thoughtsAndConcernsSummary || 'به دلیل خطای تحلیل، خلاصه افکار و نگرانی‌ها در دسترس نیست',
-        psychoAnalysis: ensureDescriptiveText(combinedResult.psychoAnalysis, defaultPsychoSummary, 160),
-        possibleDeeperGoalsOfPatient: ensureDescriptiveText(combinedResult.possibleDeeperGoalsOfPatient, defaultDeeperGoalSummary, 100),
-        detectedDefenceMechanisms: combinedResult.detectedDefenceMechanisms || [],
-        detectedSchemas: combinedResult.detectedSchemas || [],
-        demographicData: combinedResult.demographicData || {
-          firstName: null,
-          lastName: null,
-          age: null,
-          gender: null,
-          education: null,
-          occupation: null,
-          maritalStatus: null,
-        },
-        suggestedNextStepsForTherapistForNextSession: combinedResult.suggestedNextStepsForTherapistForNextSession || [],
-        possibleRiskFactorsExtracted: combinedResult.possibleRiskFactorsExtracted || [],
-        ...combinedResult,
+        ...overview,
+        ...trustAndOpenness,
+        ...therapistEvaluation,
+        ...behavioralAnalysis,
+        ...emotionalAnalysis,
+        ...thoughtsAndConcerns,
+        ...psychoAnalysis,
+        ...defenseMechanisms,
+        ...schemas,
+        ...demographicData,
+        ...nextSteps,
+        ...riskFactors,
       }
 
       console.log('✅ Session analysis generation completed successfully')
-      return validatedResult
-    }
-    catch (e: any) {
+      return combinedResult
+    } catch (e: any) {
       console.error('💥 Critical error in generateAnalysis:', e)
       error.value = e.message
-
-      // Return a default analysis structure to prevent complete failure
-      return {
-        title: 'جلسه مشاوره',
-        summaryOfSession: 'به دلیل بروز خطا، خلاصه جلسه در دسترس نیست',
-        headlines: [],
-        finalTrustAndOppennessOfUser: 'low',
-        finalTrustAndOppennessOfUserEvaluationDescription: 'ارزیابی سطح اعتماد به دلیل خطا در دسترس نیست',
-        trustLevelProgression: [],
-        opennessLevelProgression: [],
-        psychotherapistEvaluation: 'ارزیابی عملکرد روانشناس به دلیل خطا در دسترس نیست',
-        negativeScoresList: [],
-        psychotherapistEvaluationScorePositiveBehavior: [],
-        psychotherapistEvaluationScoreSuggestionsToImprove: [],
-        behavioralAnalysisSummary: 'تحلیل رفتاری به دلیل خطا در دسترس نیست',
-        emotionalAnalysisSummary: 'تحلیل احساسی به دلیل خطا در دسترس نیست',
-        thoughtsAndConcernsSummary: 'خلاصه افکار و نگرانی‌ها به دلیل خطا در دسترس نیست',
-        psychoAnalysis: 'تحلیل روانکاوی نشان می‌دهد مراجع برای بازسازی حس امنیت درونی، مواجهه با تعارض‌های هیجانی و یافتن روایت منسجم از تجربه‌های خود تلاش می‌کند. در جلسات بعدی باید به پیوند خاطرات، احساسات و الگوهای رفتاری او پرداخته شود تا امکان ادغام تجربه و کاهش تنش فراهم گردد.',
-        possibleDeeperGoalsOfPatient: 'مراجع به دنبال ایجاد احساس ثبات هیجانی، فهم روشن‌تر از نیازهای شخصی و توانایی بیان خواسته‌ها در روابط صمیمی است و می‌خواهد مرزهای سالمی میان خود و دیگران برقرار کند.',
-        detectedDefenceMechanisms: [],
-        detectedSchemas: [],
-        demographicData: {
-          firstName: null,
-          lastName: null,
-          age: null,
-          gender: null,
-          education: null,
-          occupation: null,
-          maritalStatus: null,
-        },
-        suggestedNextStepsForTherapistForNextSession: [],
-        possibleRiskFactorsExtracted: [],
-      }
-    }
-    finally {
+      throw e
+    } finally {
       processing.value = false
       console.log('🏁 generateAnalysis function completed')
     }
@@ -1098,8 +1148,7 @@ export const useSessionAnalysis = () => {
         return records.items[0] as unknown as SessionAnalysis
       }
       return null
-    }
-    catch (error: any) {
+    } catch (error: any) {
       if (error?.status === 404) {
         return null
       }

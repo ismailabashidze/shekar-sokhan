@@ -65,9 +65,10 @@ const fetchTherapists = async () => {
   pending.value = true
   try {
     const therapists = await getTherapists()
+    const activeTherapists = therapists.filter(therapist => therapist.isActive)
 
     // Map therapists to the format expected by the template
-    const mappedTherapists = therapists.map(therapist => ({
+    const mappedTherapists = activeTherapists.map(therapist => ({
       id: therapist.id,
       username: therapist.name,
       position: therapist.specialty,

@@ -33,23 +33,6 @@
       </div>
       <div class="ml-5 flex flex-row gap-x-2">
         <div class="flex h-16 w-full items-center justify-center">
-          <BugReportIcon :visible="true" />
-        </div>
-        <div class="flex h-16 w-full items-center justify-center">
-          <!-- Notifications Button -->
-          <NuxtLink
-            to="/notifications"
-            class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 relative flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-            title="اعلان‌ها"
-          >
-            <Icon name="ph:bell" class="size-5" />
-            <span
-              v-if="unreadCount > 0"
-              class="absolute -right-1 -top-1 flex size-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
-            >
-              {{ unreadCount > 99 ? '99+' : unreadCount }}
-            </span>
-          </NuxtLink>
           <NuxtLink
             to="/dashboard"
             class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
@@ -79,28 +62,74 @@
                 title="مشاهده پروفایل"
                 :text="displayName"
                 rounded="sm"
-              />
+              >
+                <template #start>
+                  <Icon name="ph:user-circle-duotone" class="me-2 block size-5" />
+                </template>
+              </BaseDropdownItem>
+
+              <BaseDropdownItem
+                to="/notifications"
+                title="اعلان‌ها"
+                text="مشاهده اعلان‌ها"
+                rounded="sm"
+              >
+                <template #start>
+                  <div class="relative me-2">
+                    <Icon name="ph:bell-duotone" class="block size-5" />
+                    <span
+                      v-if="unreadCount > 0"
+                      class="absolute -right-1 -top-1 flex size-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+                    >
+                      {{ unreadCount > 99 ? '99+' : unreadCount }}
+                    </span>
+                  </div>
+                </template>
+              </BaseDropdownItem>
 
               <BaseDropdownItem
                 to="/darmana/therapists/sessions"
                 title="جلسات"
                 text="همه جلسات من"
                 rounded="sm"
-              />
+              >
+                <template #start>
+                  <Icon name="ph:calendar-check-duotone" class="me-2 block size-5" />
+                </template>
+              </BaseDropdownItem>
 
               <BaseDropdownItem
                 to="/payments"
                 title="پرداختی ها"
                 text="مدیریت پرداختی ها"
                 rounded="sm"
-              />
+              >
+                <template #start>
+                  <Icon name="ph:credit-card-duotone" class="me-2 block size-5" />
+                </template>
+              </BaseDropdownItem>
 
               <BaseDropdownItem
                 to="/settings"
                 title="تنظیمات"
                 text="تنظیمات حساب"
                 rounded="sm"
-              />
+              >
+                <template #start>
+                  <Icon name="ph:gear-six-duotone" class="me-2 block size-5" />
+                </template>
+              </BaseDropdownItem>
+
+              <BaseDropdownItem
+                to="/bug-reports/new"
+                title="گزارش مشکل"
+                text="گزارش مشکل یا خطا"
+                rounded="sm"
+              >
+                <template #start>
+                  <Icon name="ph:bug-duotone" class="me-2 block size-5" />
+                </template>
+              </BaseDropdownItem>
 
               <BaseDropdownDivider />
 
@@ -109,7 +138,11 @@
                 title="خروج"
                 text="خروج از حساب کاربری"
                 rounded="sm"
-              />
+              >
+                <template #start>
+                  <Icon name="ph:sign-out-duotone" class="me-2 block size-5" />
+                </template>
+              </BaseDropdownItem>
             </BaseDropdown>
           </div>
         </div>

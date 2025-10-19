@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import { usePushNotifications } from './usePushNotifications'
 
 // PocketBase Notification Record Interface (matches the schema)
 export interface PBNotificationRecord {
@@ -18,6 +19,9 @@ export interface PBNotificationRecord {
   read_at?: string
   recipient_user_id?: string
   announce_time?: string
+  rule_id?: string
+  fcm_sent?: boolean
+  fcm_sent_at?: string
   created: string
   updated: string
   expand?: {
@@ -117,16 +121,8 @@ export function useNotifications() {
   const realtimeSubscription = ref<any>(null)
   const isRealtimeConnected = ref(false)
 
-  // PWA Notifications integration - only on client
-  const pwaNotifications = computed(() => {
-    if (!process.client) return null
-    try {
-      return usePwaNotifications()
-    }
-    catch (err) {
-      return null
-    }
-  })
+  const pwaNotifications = ref<ReturnType<typeof usePwaNotifications> | null>(null)
+  const pushNotifications = ref<ReturnType<typeof usePushNotifications> | null>(null)
 
   // Get current user ID
   const getCurrentUserId = () => {
@@ -221,17 +217,10 @@ export function useNotifications() {
     if (!pwa) return
 
     try {
-      // Check if permission is granted, if not request it immediately
-      if (Notification.permission !== 'granted') {
-        try {
-          const granted = await pwa.autoRequestPermission()
-          if (!granted) {
-            console.warn('PWA notification permission denied, cannot show notification')
-            return
-          }
-        }
-        catch (err) {
-          console.warn('Failed to request PWA permission for notification:', err)
+      if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+        const granted = await pwa.autoRequestPermission()
+        if (!granted) {
+          console.warn('PWA notification permission denied, cannot show notification')
           return
         }
       }
@@ -587,6 +576,8 @@ export function useNotifications() {
     action_url?: string
     action_text?: string
     announce_time?: string
+    rule_id?: string
+    fcm_sent?: boolean
   }) => {
     try {
       const record = await $pb.collection('notifications').create<PBNotificationRecord>({
@@ -603,6 +594,8 @@ export function useNotifications() {
         action_url: data.action_url,
         action_text: data.action_text,
         announce_time: data.announce_time,
+        rule_id: data.rule_id,
+        fcm_sent: data.fcm_sent || false,
         is_read: false,
       })
 
@@ -790,25 +783,35 @@ export function useNotifications() {
         await fetchNotifications()
         await subscribeToNotifications()
 
-        // Auto-request PWA notification permission on first initialization (non-blocking)
         if (process.client) {
-          const pwa = pwaNotifications.value
-          if (pwa) {
-            // Make this non-blocking to prevent hanging the app initialization
-            setTimeout(async () => {
-              try {
-                const granted = await pwa.autoRequestPermission()
-                if (granted) {
-                }
-                else {
-                }
-              }
-              catch (err) {
-                console.warn('Failed to auto-request PWA permission:', err)
-              }
-            }, 2000) // Wait 2 seconds after app is fully loaded
+          if (!pwaNotifications.value) {
+            pwaNotifications.value = usePwaNotifications()
+          }
+
+          if (!pushNotifications.value) {
+            pushNotifications.value = usePushNotifications()
+          }
+
+          if (pushNotifications.value) {
+            await pushNotifications.value.ensureServiceWorker()
           }
         }
+
+        if (process.client && pushNotifications.value) {
+          setTimeout(async () => {
+            try {
+              const granted = await pushNotifications.value!.requestPermission()
+              if (granted) {
+                await pushNotifications.value!.getBrowserToken()
+              }
+            }
+            catch (error) {
+              console.warn('Failed to request push permission', error)
+            }
+          }, 1500)
+        }
+
+        await updateUserActivity()
 
         isInitialized = true
         console.log('Notifications initialized successfully')
@@ -842,13 +845,16 @@ export function useNotifications() {
   }
 
   // Global cleanup function
-  const globalCleanup = () => {
+  const globalCleanup = async () => {
     unsubscribeFromNotifications()
 
-    // Cancel any pending fetch requests
     if (currentFetchController) {
       currentFetchController.abort()
       currentFetchController = null
+    }
+
+    if (process.client && pushNotifications.value) {
+      await pushNotifications.value.deleteBrowserToken()
     }
 
     // Reset PWA permission tracking on logout
@@ -868,6 +874,21 @@ export function useNotifications() {
     notificationsInstance = null
     isInitialized = false
     initPromise = null
+  }
+
+  // Update user activity timestamp (for inactivity tracking)
+  const updateUserActivity = async () => {
+    try {
+      const userId = getCurrentUserId()
+      if (!userId) return
+
+      await $pb.collection('users').update(userId, {
+        last_active_at: new Date().toISOString(),
+      })
+    } catch (err) {
+      // Silent fail - not critical
+      console.debug('Failed to update user activity:', err)
+    }
   }
 
   // Note: No cleanup in composable since this is a global singleton
@@ -917,6 +938,9 @@ export function useNotifications() {
 
     // PWA Integration
     triggerPwaNotification,
+
+    // User activity tracking
+    updateUserActivity,
 
     // Global cleanup
     globalCleanup,

@@ -263,8 +263,7 @@ const loadMessages = async (therapistId: string) => {
                 emotionalResponse: analysisData.emotionalResponse || '',
                 suicideRiskEvaluation: analysisData.suicideRiskEvaluation || 'N/A',
                 suicideRiskDescription: analysisData.suicideRiskDescription || '',
-                // Note: emotionalResponse is not stored in message_analysis collection
-                // It's part of the full analysis result generated dynamically
+                suicideIndicators: analysisData.suicideIndicators || [],
               }
             }
             catch (analysisError) {
@@ -454,6 +453,7 @@ async function submitMessage() {
     thinkingResponse.value = 'در حال تحلیل پیام شما...'
     let analysisResult = null
     let formattedAnalysis = ''
+    let inlineAnalysisContext = ''
     try {
       // Call generateInlineAnalysis with the user message
       const lastMessage = {
@@ -488,6 +488,7 @@ async function submitMessage() {
 
       formattedAnalysis = formatInlineAnalysis(analysisResult)
       thinkingResponse.value = formattedAnalysis
+      inlineAnalysisContext = buildInlineAnalysisContext(analysisResult)
 
       // Update the message with analysis result using message ID
       const messageToUpdate = messages.value.find(msg => msg.id === messageId)
@@ -498,6 +499,7 @@ async function submitMessage() {
           emotionalResponse: analysisResult.emotionalResponse || '',
           suicideRiskEvaluation: analysisResult.suicideRiskEvaluation || 'N/A',
           suicideRiskDescription: analysisResult.suicideRiskDescription || '',
+          suicideIndicators: analysisResult.suicideIndicators || [],
         }
       }
 
@@ -554,14 +556,34 @@ async function submitMessage() {
     }
 
     // Prepare chat history for AI with analysis; let composable inject system prompt
-    const contextMessages = messages.value.map(msg => ({
+    const historyWithoutLatest = messages.value.slice(0, -1).map(msg => ({
       role: msg.type === 'sent' ? 'user' : 'assistant',
       content: msg.text,
     }))
-    const chatMessagesForAI = [
-      ...contextMessages,
-      { role: 'user', content: userMessage.text },
-    ]
+    const chatMessagesForAI = [...historyWithoutLatest]
+
+    if (inlineAnalysisContext) {
+      chatMessagesForAI.push({
+        role: 'system',
+        content: inlineAnalysisContext,
+      })
+    }
+
+    const remainingMinutes = typeof timeToShow.value === 'number' ? Math.max(Math.floor(timeToShow.value), 0) : null
+    const elapsedMinutes = typeof sessionElapsedTime.value === 'number' ? Math.max(Math.floor(sessionElapsedTime.value), 0) : null
+    const timeContext = buildTimeManagementContext(remainingMinutes, elapsedMinutes)
+
+    if (timeContext) {
+      chatMessagesForAI.push({
+        role: 'system',
+        content: timeContext,
+      })
+    }
+
+    chatMessagesForAI.push({
+      role: 'user',
+      content: userMessage.text,
+    })
     // Call streamChat with therapistDetails option (so system prompt is automatically added)
     let aiResponse = ''
     // Show thinking indicator
@@ -710,6 +732,42 @@ function formatInlineAnalysis(analysisResult) {
   output += `- تناسب با هدف جلسه: ${analysisResult.lastMessage_alignmentWithGoal || 'نامشخص'}\n`
   output += `- پاسخ پیشنهادی: ${analysisResult.emotionalResponse || 'نامشخص'}\n\n`
 
+  const indicators = Array.isArray(analysisResult.suicideIndicators) ? analysisResult.suicideIndicators : []
+  output += '**نشانه‌های مرتبط با خودکشی:**\n'
+  if (indicators.length === 0) {
+    output += '- نشانه‌ای شناسایی نشد.\n\n'
+  }
+  else {
+    indicators.forEach((indicator, index) => {
+      const typeLabel = indicator?.indicatorType ? getIndicatorTypeLabel(indicator.indicatorType) : 'نامشخص'
+      const dangerLabel = indicator?.dangerousnessLevel ? getDangerousnessLabel(indicator.dangerousnessLevel) : 'نامشخص'
+      const indicatorDefinition = indicator?.indicatorType ? getIndicatorDefinition(indicator.indicatorType) : ''
+      const indicatorTip = indicator?.indicatorType ? getIndicatorClinicalTip(indicator.indicatorType) : ''
+      output += `- نشانه ${index + 1}: (${typeLabel} | سطح ${dangerLabel})\n`
+      output += `  • متن: ${indicator?.indicatorText || 'نامشخص'}\n`
+      output += `  • توضیح: ${indicator?.reasoning || 'نامشخص'}\n`
+      if (indicatorDefinition) {
+        output += `  • یادداشت آموزشی: ${indicatorDefinition}\n`
+      }
+      if (indicatorTip) {
+        output += `  • تمرکز درمانگر: ${indicatorTip}\n`
+      }
+    })
+    output += '\n'
+  }
+
+  const riskEducation = getRiskEducation(analysisResult.suicideRiskEvaluation)
+
+  output += '**تفسیر بالینی و آموزشی:**\n'
+  output += `- جمع‌بندی خطر: ${riskEducation.summary}\n`
+  if (riskEducation.actions?.length) {
+    output += '- گام‌های توصیه‌شده:\n'
+    riskEducation.actions.forEach((action: string) => {
+      output += `  • ${action}\n`
+    })
+  }
+  output += `- راهنمای آموزشی برای مراجع: ${riskEducation.psychoeducation}\n\n`
+
   // Suicide Risk Evaluation
   output += '**ارزیابی ریسک خودکشی:**\n'
   output += `- سطح ریسک: ${analysisResult.suicideRiskEvaluation || 'نامشخص'}\n`
@@ -837,7 +895,8 @@ onMounted(async () => {
   loading.value = true
   try {
     const therapists = await getTherapists()
-    conversations.value = therapists.map(p => ({ id: p.id, user: p }))
+    const activeTherapists = therapists.filter(therapist => therapist.isActive)
+    conversations.value = activeTherapists.map(p => ({ id: p.id, user: p }))
 
     const u = await nuxtApp.$pb
       .collection('users')
@@ -1165,16 +1224,16 @@ async function startAIConversationWithSummary(therapist: any, sessionId: string,
       role: 'system',
       content: `مراجع قبلا ${report.totalSessions} جلسه مشاوره داشته است. خلاصه جلسات قبلی:
 ${report.summaries?.map((session: any, idx: number) =>
-  `جلسه ${idx + 1}: ${session.title}\n${session.summary}`,
-).join('\n\n')}
+        `جلسه ${idx + 1}: ${session.title}\n${session.summary}`,
+      ).join('\n\n')}
 
 اهداف عمیق‌تر احتمالی مراجع:
 ${report.possibleDeeperGoals?.join('\n')}
 
 عوامل خطر احتمالی:
 ${report.possibleRiskFactors?.flat().map((risk: any) =>
-  `${risk.title}: ${risk.description}`,
-).join('\n')}
+        `${risk.title}: ${risk.description}`,
+      ).join('\n')}
 همچنین ممکن است اطلاعات دموگرافیک ارائه شده باشند: ${report.finalDemographicProfile}
 اگر مقادیر مشخص نیستند، یعنی کاربر اطلاعات دموگرافیک را ارائه نکرده است.
 از اطلاعاتی استفاده کن که کاربر وارد کرده است.
@@ -1690,16 +1749,328 @@ const selectedMessageEmotions = computed(() => {
   }
 })
 
-const getSuicideRiskLabel = (riskLevel) => {
+const selectedMessageRiskEducation = computed(() => {
+  const riskLevel = selectedMessage.value?.analysisResult?.suicideRiskEvaluation
+  if (!riskLevel) return null
+  return getRiskEducation(riskLevel)
+})
+
+const indicatorEducationMap: Record<string, {
+  title: string
+  description: string
+  clinicalTip: string
+}> = {
+  suicidal_ideation: {
+    title: 'افکار خودکشی',
+    description: 'افکار مربوط به خودکشی، خواه مستقیم یا غیرمستقیم، که نشان‌دهنده تمایل به پایان دادن به زندگی است.',
+    clinicalTip: 'ارزیابی فوری سطح خطر، بررسی وجود برنامه و ابزار، و ایجاد برنامه ایمنی ضروری است.',
+  },
+  previous_attempt: {
+    title: 'اقدام قبلی به خودکشی',
+    description: 'سابقه تلاش قبلی برای خودکشی که یکی از قوی‌ترین عوامل پیش‌بینی کننده خطر آینده است.',
+    clinicalTip: 'بررسی دقیق اقدامات قبلی، روش‌های استفاده شده و عوامل محافظتی که مانع شده‌اند الزامی است.',
+  },
+  self_harm: {
+    title: 'آسیب به خود',
+    description: 'رفتارهای عمدی آسیب رساندن به خود که ممکن است با یا بدون قصد خودکشی باشد.',
+    clinicalTip: 'شناسایی محرک‌ها، آموزش مهارت‌های تنظیم هیجان و ارائه راهکارهای جایگزین سالم ضروری است.',
+  },
+  plan: {
+    title: 'برنامه خودکشی',
+    description: 'وجود برنامه مشخص برای خودکشی شامل روش، زمان و مکان که نشانگر خطر بسیار بالاست.',
+    clinicalTip: 'مداخله فوری، ایجاد برنامه ایمنی جامع و ارجاع به خدمات اورژانسی در صورت لزوم الزامی است.',
+  },
+  means: {
+    title: 'ابزار خودکشی',
+    description: 'دسترسی به وسایل یا ابزارهای خودکشی که خطر را به شدت افزایش می‌دهد.',
+    clinicalTip: 'حذف فوری دسترسی به ابزارهای خطرناک، هماهنگی با خانواده و نظارت مداوم ضروری است.',
+  },
+  intent: {
+    title: 'قصد خودکشی',
+    description: 'نیت و تصمیم جدی برای انجام خودکشی که نشان‌دهنده خطر فوری است.',
+    clinicalTip: 'ارزیابی فوری و دقیق قصد، ایجاد نظارت مستمر و فعال‌سازی شبکه حمایت اورژانسی الزامی است.',
+  },
+  recklessness: {
+    title: 'بی‌پروایی',
+    description: 'رفتارهای پرخطر و بی‌پروایانه که ممکن است نشانه‌ای از بی‌تفاوتی نسبت به زندگی باشد.',
+    clinicalTip: 'بررسی انگیزه‌های پشت رفتارهای پرخطر و ارزیابی وجود افکار خودکشی پنهان ضروری است.',
+  },
+  giving_away_possessions: {
+    title: 'اهدای اموال',
+    description: 'بخشیدن اموال شخصی به دیگران که می‌تواند نشانه آماده‌سازی برای خودکشی باشد.',
+    clinicalTip: 'این رفتار نشانه هشدار جدی است و نیازمند ارزیابی فوری خطر خودکشی است.',
+  },
+  saying_goodbye: {
+    title: 'خداحافظی',
+    description: 'خداحافظی‌های غیرمعمول یا قطعی که ممکن است نشانه قصد خودکشی باشد.',
+    clinicalTip: 'این رفتار نشانه خطر بالای خودکشی است و نیازمند مداخله فوری و ارزیابی دقیق است.',
+  },
+  substance_abuse: {
+    title: 'سوء مصرف مواد',
+    description: 'استفاده نامناسب از الکل یا مواد مخدر که خطر خودکشی را افزایش می‌دهد.',
+    clinicalTip: 'بررسی الگوی مصرف، ارتباط آن با افکار خودکشی و ارجاع به خدمات تخصصی اعتیاد ضروری است.',
+  },
+  hopelessness: {
+    title: 'ناامیدی',
+    description: 'احساس عمیق ناامیدی و فقدان امید به آینده که یکی از قوی‌ترین پیش‌بینی کننده‌های خودکشی است.',
+    clinicalTip: 'کار بر بازسازی امید، شناسایی نقاط قوت و موفقیت‌های کوچک می‌تواند موثر باشد.',
+  },
+  depression: {
+    title: 'افسردگی',
+    description: 'علائم افسردگی شامل غم، بی‌انگیزگی و از دست دادن علاقه که با خطر خودکشی مرتبط است.',
+    clinicalTip: 'ارزیابی شدت افسردگی، بررسی وجود افکار خودکشی و ارجاع به درمان تخصصی در صورت نیاز.',
+  },
+  anxiety: {
+    title: 'اضطراب',
+    description: 'سطوح بالای اضطراب و نگرانی مداوم که می‌تواند خطر خودکشی را افزایش دهد.',
+    clinicalTip: 'آموزش تکنیک‌های مدیریت اضطراب، تمرین‌های تنفسی و ارجاع به درمان در صورت نیاز.',
+  },
+  isolation: {
+    title: 'انزوا',
+    description: 'کناره‌گیری از روابط اجتماعی و انزوای شدید که خطر خودکشی را افزایش می‌دهد.',
+    clinicalTip: 'تشویق به برقراری ارتباط با دیگران، شناسایی شبکه حمایت موجود و ایجاد پیوندهای اجتماعی.',
+  },
+  trauma: {
+    title: 'تروما',
+    description: 'تجربه رویدادهای آسیب‌زا که می‌تواند منجر به افکار خودکشی شود.',
+    clinicalTip: 'ارزیابی تاثیر تروما، ارجاع به درمان تخصصی تروما و ایجاد محیط امن برای پردازش.',
+  },
+  loss: {
+    title: 'از دست دادن',
+    description: 'تجربه از دست دادن عزیزان، شغل یا موقعیت مهم که می‌تواند خطر خودکشی را افزایش دهد.',
+    clinicalTip: 'حمایت در فرآیند سوگواری، شناسایی منابع حمایت و کمک به سازگاری با تغییرات.',
+  },
+  crisis: {
+    title: 'بحران',
+    description: 'قرار گرفتن در بحران حاد زندگی که خطر خودکشی را افزایش می‌دهد.',
+    clinicalTip: 'مدیریت بحران فوری، ایجاد برنامه ایمنی و فعال‌سازی منابع حمایت اورژانسی.',
+  },
+  impulsivity: {
+    title: 'تکانشگری',
+    description: 'تمایل به اقدامات ناگهانی و بدون تفکر که خطر اقدام به خودکشی را افزایش می‌دهد.',
+    clinicalTip: 'آموزش مهارت‌های کنترل تکانه، ایجاد فاصله بین تکانه و عمل و افزایش آگاهی.',
+  },
+  aggression: {
+    title: 'پرخاشگری',
+    description: 'رفتارهای پرخاشگرانه و خشونت که می‌تواند با خطر خودکشی مرتبط باشد.',
+    clinicalTip: 'ارزیابی منبع خشم، آموزش مهارت‌های مدیریت خشم و بررسی ارتباط با افکار خودکشی.',
+  },
+  psychosis: {
+    title: 'روان‌پریشی',
+    description: 'علائم روان‌پریشی مانند توهم یا هذیان که خطر خودکشی را به شدت افزایش می‌دهد.',
+    clinicalTip: 'ارجاع فوری به روانپزشک، ارزیابی نیاز به بستری و نظارت مستمر ضروری است.',
+  },
+  emotional_pain: {
+    title: 'درد عاطفی',
+    description: 'درد عاطفی شدید و غیرقابل تحمل که محرک قوی برای افکار خودکشی است.',
+    clinicalTip: 'اعتبارسنجی درد، آموزش مهارت‌های تحمل پریشانی و ارائه حمایت عاطفی فوری.',
+  },
+  worthlessness: {
+    title: 'احساس بی‌ارزشی',
+    description: 'احساس عمیق بی‌ارزشی و فقدان ارزش شخصی که با خطر خودکشی مرتبط است.',
+    clinicalTip: 'کار بر شناسایی نقاط قوت، چالش کردن افکار منفی و بازسازی حس ارزشمندی.',
+  },
+  burden: {
+    title: 'احساس بار بودن',
+    description: 'احساس اینکه بار اضافی برای دیگران هستند که عامل خطر مهم خودکشی است.',
+    clinicalTip: 'چالش کردن این باور، بررسی ادراک واقعی دیگران و تقویت احساس تعلق.',
+  },
+  sleep_disturbance: {
+    title: 'اختلال خواب',
+    description: 'مشکلات خواب شامل بی‌خوابی یا خواب بیش از حد که با خطر خودکشی مرتبط است.',
+    clinicalTip: 'ارزیابی الگوی خواب، آموزش بهداشت خواب و ارجاع به متخصص در صورت نیاز.',
+  },
+  agitation: {
+    title: 'تحریک‌پذیری',
+    description: 'حالت تحریک‌پذیری و بی‌قراری شدید که می‌تواند خطر خودکشی را افزایش دهد.',
+    clinicalTip: 'تکنیک‌های آرام‌سازی، کاهش محرک‌های استرس‌زا و نظارت بر تغییرات شدت.',
+  },
+  withdrawal: {
+    title: 'کناره‌گیری',
+    description: 'کناره‌گیری از فعالیت‌ها و روابط که نشانه هشدار خودکشی است.',
+    clinicalTip: 'تشویق به مشارکت تدریجی، شناسایی موانع و ایجاد پیوندهای معنادار.',
+  },
+  mood_changes: {
+    title: 'تغییرات خلقی',
+    description: 'تغییرات ناگهانی و شدید در خلق و خو که می‌تواند نشانه خطر باشد.',
+    clinicalTip: 'نظارت بر الگوهای تغییرات خلقی، شناسایی محرک‌ها و ارزیابی نیاز به مداخله.',
+  },
+}
+
+const riskEducationMap: Record<string, {
+  summary: string
+  actions: string[]
+  psychoeducation: string
+}> = {
+  default: {
+    summary: 'سطح خطر به شکل قابل اعتمادی مشخص نشده است؛ لازم است بررسی بالینی بیشتری انجام شود.',
+    actions: ['پرسش مستقیم درباره احساس امنیت و افکار خودآسیب‌رسان', 'ایجاد فضای ایمن برای بیان احساسات و ادامه رصد نشانه‌ها'],
+    psychoeducation: 'توضیح دهید که ارزیابی خطر فرآیندی مستمر است و مراجع می‌تواند با بیان صادقانه افکار خود به بهبود حمایت کمک کند.',
+  },
+  'N/A': {
+    summary: 'در این پیام شواهدی از افکار خودکشی یا آسیب به خود دیده نشد، اما مراقبت از وضعیت هیجانی همچنان ضروری است.',
+    actions: ['تقویت مهارت‌های تنظیم هیجان و آگاهی بدنی', 'تشویق به ادامه گفتگو در صورت تغییر احساسات یا افکار خطرناک'],
+    psychoeducation: 'به مراجع یادآوری کنید که تجربه احساس ناراحتی طبیعی است و درخواست کمک نشانه ضعف نیست بلکه مسیری برای مراقبت از خود است.',
+  },
+  veryLow: {
+    summary: 'نشانه‌های خفیفی از فرسودگی یا افکار مبهم درباره نبودن وجود دارد که نیازمند توجه حمایتی است.',
+    actions: ['پرسش باز درباره منابع استرس و راهکارهای مقابله فعلی', 'ارائه تکنیک‌های خودمراقبتی و تنظیم خواب، تغذیه و فعالیت بدنی'],
+    psychoeducation: 'توضیح دهید که افکار مبهم ناامیدی می‌تواند از استرس تجمعی ناشی شود و با مدیریت استرس و حمایت عاطفی کاهش یابد.',
+  },
+  low: {
+    summary: 'بیان ناامیدی یا خستگی عاطفی آشکار است، بدون ذکر برنامه مشخص؛ خطر پایین تا متوسط برآورد می‌شود.',
+    actions: ['ارزیابی مستقیم درباره وجود قصد، روش و دسترسی به وسایل', 'طراحی برنامه ایمنی اولیه و تعیین علائم هشدار شخصی'],
+    psychoeducation: 'به مراجع آموزش دهید که شناسایی علائم هشدار شخصی و درخواست کمک به موقع می‌تواند مانع تشدید خطر شود.',
+  },
+  medium: {
+    summary: 'افکار خودکشی با اشاره به روش یا تصویر ذهنی مشخص گزارش شده است؛ خطر در سطح متوسط رو به بالاست.',
+    actions: ['اجرای کامل برنامه ایمنی شامل افراد قابل تماس، محیط امن و حذف وسایل خطرناک', 'افزایش فراوانی جلسات یا هماهنگی با پشتیبانی انسانی در کوتاه‌مدت'],
+    psychoeducation: 'توضیح دهید که تشکیل شبکه حمایت و توافق بر سر گام‌های فوری (تماس، تنفس عمیق، حواس‌پرتی سالم) می‌تواند احتمال اقدام را کاهش دهد.',
+  },
+  high: {
+    summary: 'مراجع برنامه مشخص و انگیزه قوی برای اقدام گزارش کرده است؛ خطر بالا و نیازمند مداخله اضطراری است.',
+    actions: ['همراه نگه‌داشتن مراجع تا رسیدن کمک انسانی و عدم رها کردن او به تنهایی', 'تماس با خدمات اورژانسی یا ارجاع فوری طبق پروتکل سازمانی'],
+    psychoeducation: 'شفاف توضیح دهید که درخواست کمک فوری اقدامی درمانی است و حفظ امنیت در اولویت مطلق قرار دارد.',
+  },
+  veryHigh: {
+    summary: 'نشانه‌های اقدام قریب‌الوقوع یا در حال انجام بودن مشاهده شده است؛ خطر بحرانی و نیازمند مداخله اورژانسی فوری است.',
+    actions: ['فعال‌سازی فوریت پزشکی یا روانپزشکی بدون تاخیر', 'ایجاد تماس مستقیم با اعضای خانواده یا فرد مورد اعتماد جهت حضور فیزیکی', 'پیروی دقیق از دستورالعمل‌های بحران و ثبت مستندات'],
+    psychoeducation: 'توضیح دهید که انتقال فوری به خدمات اورژانسی برای حفظ جان ضروری است و حمایت تخصصی در این مرحله حیاتی است.',
+  },
+}
+
+function getIndicatorTypeLabel(type?: string) {
+  if (!type) return 'نامشخص'
+  return indicatorEducationMap[type]?.title || type
+}
+
+function getIndicatorDefinition(type?: string) {
+  if (!type) return 'شرحی برای این نشانه ثبت نشده است.'
+  return indicatorEducationMap[type]?.description || 'شرحی برای این نشانه ثبت نشده است.'
+}
+
+function getIndicatorClinicalTip(type?: string) {
+  if (!type) return ''
+  return indicatorEducationMap[type]?.clinicalTip || ''
+}
+
+function getDangerousnessLabel(level?: string) {
+  const map: Record<string, string> = {
+    minimal: 'حداقلی',
+    low: 'کم',
+    moderate: 'متوسط',
+    high: 'زیاد',
+    critical: 'بحرانی',
+  }
+  return map[level] || level
+}
+
+function getSuicideRiskLabel(riskLevel?: string) {
   const labels = {
     'N/A': 'نامربوط',
-    'veryLow': 'خیلی کم',
-    'low': 'کم',
-    'medium': 'متوسط',
-    'high': 'زیاد',
-    'veryHigh': 'خیلی زیاد',
+    veryLow: 'خیلی کم',
+    low: 'کم',
+    medium: 'متوسط',
+    high: 'زیاد',
+    veryHigh: 'خیلی زیاد',
   }
+  if (!riskLevel) return 'نامشخص'
   return labels[riskLevel] || riskLevel
+}
+
+function getRiskEducation(riskLevel: string | undefined) {
+  if (!riskLevel) return riskEducationMap.default
+  return riskEducationMap[riskLevel] || riskEducationMap.default
+}
+
+function buildInlineAnalysisContext(analysisResult: any): string {
+  if (!analysisResult) {
+    return ''
+  }
+
+  const summaryLines: string[] = []
+  summaryLines.push('تحلیل تخصصی پیام اخیر مراجع برای استفاده درمانگر مجازی:')
+
+  const emotions = Array.isArray(analysisResult.lastMessage_emotions)
+    ? analysisResult.lastMessage_emotions.filter((emotion: any) => emotion?.severity && emotion.severity !== 'خالی')
+    : []
+
+  if (emotions.length > 0) {
+    const emotionSummary = emotions
+      .map((emotion: any) => `${emotion.emotionName} (شدت ${emotion.severity})`)
+      .join('، ')
+    summaryLines.push(`• احساسات غالب مراجع: ${emotionSummary}`)
+  }
+
+  const highEmotions = emotions.filter((emotion: any) => emotion.severity === 'زیاد')
+  if (highEmotions.length > 0) {
+    summaryLines.push('• بازتاب احساسات با شدت بالا:')
+    highEmotions.forEach((emotion: any) => {
+      summaryLines.push(
+        `  - ${emotion.emotionName}: با همدلی نام احساس را بازتاب بده، به شدت بالای آن اشاره کن و به مراجع کمک کن معنای پشت این احساس را توضیح دهد.`,
+      )
+    })
+    summaryLines.push('  - در صورت امکان پیوند این احساسات را با نیازها یا موقعیت‌های تنش‌زا بررسی کن.')
+  }
+
+  if (analysisResult.emotionalResponse) {
+    summaryLines.push(`• پیشنهاد همدلانه اولیه: ${analysisResult.emotionalResponse}`)
+  }
+
+  if (analysisResult.suicideIndicators?.length) {
+    summaryLines.push('• نشانه‌های مرتبط با خودکشی در پیام اخیر:')
+    analysisResult.suicideIndicators.forEach((indicator: any) => {
+      summaryLines.push(
+        `  - ${getDangerousnessLabel(indicator?.dangerousnessLevel)} | ${getIndicatorTypeLabel(indicator?.indicatorType)}: ${indicator?.indicatorText || 'متن نامشخص'} — ${indicator?.reasoning || 'بدون توضیح'}`,
+      )
+    })
+  }
+
+  if (analysisResult.suicideRiskEvaluation) {
+    summaryLines.push(`• سطح خطر خودکشی: ${getSuicideRiskLabel(analysisResult.suicideRiskEvaluation)}`)
+  }
+  if (analysisResult.suicideRiskDescription) {
+    summaryLines.push(`• توضیح خطر: ${analysisResult.suicideRiskDescription}`)
+  }
+
+  const riskEducation = getRiskEducation(analysisResult.suicideRiskEvaluation)
+  if (riskEducation.summary) {
+    summaryLines.push(`• جمع‌بندی بالینی: ${riskEducation.summary}`)
+  }
+  if (riskEducation.actions?.length) {
+    summaryLines.push('• اقدام‌های فوری/پیشنهادی:')
+    riskEducation.actions.forEach((action: string) => {
+      summaryLines.push(`  - ${action}`)
+    })
+  }
+  if (riskEducation.psychoeducation) {
+    summaryLines.push(`• نکته آموزشی برای گفتگو: ${riskEducation.psychoeducation}`)
+  }
+
+  summaryLines.push('لطفاً هنگام پاسخ‌دهی به مراجع، این تحلیل را لحاظ کن: احساسات با شدت بالا را بازتاب بده، به ریشه‌های هیجانی اشاره کن و در صورت مشاهده نشانه‌های خودکشی مطابق اقدام‌های پیشنهادی عمل کن.')
+
+  return summaryLines.join('\n')
+}
+
+function buildTimeManagementContext(remainingMinutes: number | null, elapsedMinutes: number | null): string {
+  if (remainingMinutes === null || remainingMinutes > 5) {
+    return ''
+  }
+
+  const lines: string[] = []
+  lines.push('هوش مصنوعی عزیز، تنها چند دقیقه به پایان این جلسه باقی مانده است. لطفاً گفتگو را به شکل حرفه‌ای جمع‌بندی کن:')
+
+  if (elapsedMinutes !== null) {
+    lines.push(`• زمان سپری‌شده از جلسه: حدود ${elapsedMinutes} دقیقه.`)
+  }
+  lines.push(`• زمان باقی‌مانده: تقریبا ${Math.max(remainingMinutes, 0)} دقیقه.`)
+
+  lines.push('• در این بازه کوتاه، احساسات و نکات کلیدی کاربر را مرور و جمع‌بندی کن.')
+  lines.push('• از کاربر بپرس که آیا نکته فوری دیگری باقی مانده است که بخواهد مطرح کند.')
+  lines.push('• اگر گفتگو نیاز به ادامه دارد، پیشنهاد کن جلسه‌ای جدید آغاز شود یا زمان دیگری رزرو گردد.')
+  lines.push('• با لحنی همدلانه و مطمئن پایان جلسه را اعلام و اقدامات بعدی (مثل تمرین یا پیگیری) را به طور خلاصه بیان کن.')
+
+  return lines.join('\n')
 }
 
 const handleEndSession = async () => {
@@ -2148,72 +2519,47 @@ const showStatisticsInfo = () => {
     <div class="bg-muted-100 dark:bg-muted-900 flex min-h-screen overflow-hidden">
       <!-- Sidebar -->
       <div
-        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-30 hidden h-screen w-20 border-r bg-white sm:block"
-      >
+        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 relative z-30 hidden h-screen w-20 border-r bg-white sm:block">
         <div class="flex h-full flex-col justify-between">
           <div class="flex flex-col">
-            <div
-              class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
-            >
+            <div class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full">
               <NuxtLink to="/dashboard" class="flex items-center justify-center">
                 <div class="rounded-full bg-white p-[5px]">
-                  <img
-                    src="/img/logo-no-bg.png"
-                    width="40"
-                    height="40"
-                    alt=""
-                    srcset=""
-                  >
+                  <img src="/img/logo-no-bg.png" width="40" height="40" alt="" srcset="">
                 </div>
-              <!-- <TairoLogo class="text-primary-600 h-10" /> -->
+                <!-- <TairoLogo class="text-primary-600 h-10" /> -->
               </NuxtLink>
             </div>
-            <div
-              class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
-            >
+            <div class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full">
               <BaseThemeToggle />
             </div>
           </div>
           <div class="flex flex-col">
-            <div
-              class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full"
-            >
-              <a
-                href="#"
+            <div class="ltablet:w-full flex size-16 shrink-0 items-center justify-center lg:w-full">
+              <a href="#"
                 class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                title="Back"
-                @click.prevent="gotoList()"
-              >
+                title="Back" @click.prevent="gotoList()">
                 <Icon name="lucide:arrow-right" class="size-5" />
               </a>
             </div>
 
             <div class="flex h-16 w-full items-center justify-center">
-              <button
-                type="button"
+              <button type="button"
                 class="text-danger-400 hover:text-danger-500 hover:bg-danger-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300 disabled:opacity-50"
-                title="پاک کردن چت"
-                @click="openDeleteModal()"
-              >
+                title="پاک کردن چت" @click="openDeleteModal()">
                 <Icon name="ph:trash-duotone" class="size-5" />
               </button>
             </div>
 
             <!-- Premium Status Button -->
             <div class="flex h-16 w-full items-center justify-center">
-              <button
-                type="button"
+              <button type="button"
                 class="flex size-12 items-center justify-center rounded-2xl transition-all duration-300 hover:scale-105"
                 :class="aiSettings.isPremium
                   ? 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-500/20 bg-yellow-500/10'
                   : 'text-gray-500 hover:text-gray-600 hover:bg-gray-500/20 bg-gray-500/10'"
-                :title="aiSettings.isPremium ? 'وضعیت پریمیوم' : 'وضعیت عادی'"
-                @click="openPremiumModal()"
-              >
-                <Icon
-                  :name="aiSettings.isPremium ? 'ph:crown-fill' : 'ph:crown'"
-                  class="size-5"
-                />
+                :title="aiSettings.isPremium ? 'وضعیت پریمیوم' : 'وضعیت عادی'" @click="openPremiumModal()">
+                <Icon :name="aiSettings.isPremium ? 'ph:crown-fill' : 'ph:crown'" class="size-5" />
               </button>
             </div>
 
@@ -2228,48 +2574,26 @@ const showStatisticsInfo = () => {
       </div>
       <!-- Conversations -->
       <div
-        class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 z-70 relative h-screen w-16 bg-white sm:w-20 lg:border-r"
-      >
+        class="ltablet:border-r border-muted-200 dark:border-muted-700 dark:bg-muted-800 z-70 relative h-screen w-16 bg-white sm:w-20 lg:border-r">
         <div class="mt-3 flex h-full flex-col justify-between gap-2">
           <!-- List -->
           <div>
-            <a
-              v-for="conversation in conversations"
-              :key="conversation.id"
-              href="#"
-              class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20"
-              :class="
-                activeTherapistId === conversation.user.id
-                  ? 'border-primary-500'
-                  : 'border-transparent'
-              "
-              @click.prevent="selectConversation(conversation.user.id)"
-            >
+            <a v-for="conversation in conversations" :key="conversation.id" href="#"
+              class="flex size-16 shrink-0 items-center justify-center border-s-2 sm:w-20" :class="activeTherapistId === conversation.user.id
+                ? 'border-primary-500'
+                : 'border-transparent'
+                " @click.prevent="selectConversation(conversation.user.id)">
               <div class="relative flex w-full justify-center gap-2">
-                <div
-                  class="relative flex w-14 shrink-0 items-center justify-center"
-                >
-                  <a
-                    href="#"
-                    class="relative block"
-                    :class="[
-                      selectedConversationComputed?.user.id === conversation.user.id
-                        ? 'z-10'
-                        : '',
-                    ]"
-                    @click.prevent="selectConversation(conversation.user.id)"
-                  >
-                    <BaseAvatar
-                      size="sm"
-                      rounded="full"
-                      :src="
-                        conversation.user.avatar
-                          ? `https://pocket.zehna.ir/api/files/therapists/${conversation.user.id}/${conversation.user.avatar}`
-                          : '/img/avatars/1.svg'
-                      "
-                      :text="conversation.user.name?.charAt(0)"
-                      :class="getRandomColor()"
-                    />
+                <div class="relative flex w-14 shrink-0 items-center justify-center">
+                  <a href="#" class="relative block" :class="[
+                    selectedConversationComputed?.user.id === conversation.user.id
+                      ? 'z-10'
+                      : '',
+                  ]" @click.prevent="selectConversation(conversation.user.id)">
+                    <BaseAvatar size="sm" rounded="full" :src="conversation.user.avatar
+                      ? `https://pocket.zehna.ir/api/files/therapists/${conversation.user.id}/${conversation.user.avatar}`
+                      : '/img/avatars/1.svg'
+                      " :text="conversation.user.name?.charAt(0)" :class="getRandomColor()" />
                   </a>
                 </div>
               </div>
@@ -2278,34 +2602,19 @@ const showStatisticsInfo = () => {
           <div class="mb-12 flex flex-col gap-3 sm:hidden">
             <button
               class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-2 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-              title="نمایش اطلاعات"
-              @click="expanded = !expanded"
-            >
-              <Icon
-                name="ph:robot"
-                class="size-5"
-              />
+              title="نمایش اطلاعات" @click="expanded = !expanded">
+              <Icon name="ph:robot" class="size-5" />
             </button>
             <button
               class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-2 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-              title="پایان جلسه"
-              @click="handleEndSession"
-            >
-              <Icon
-                name="ph:check"
-                class="size-5"
-              />
+              title="پایان جلسه" @click="handleEndSession">
+              <Icon name="ph:check" class="size-5" />
             </button>
             <div class="-mr-1">
-              <NuxtLink
-                to="/settings/ai-response"
+              <NuxtLink to="/settings/ai-response"
                 class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300 "
-                title="AI Controls"
-              >
-                <Icon
-                  name="ph:sliders-duotone"
-                  class="size-5"
-                />
+                title="AI Controls">
+                <Icon name="ph:sliders-duotone" class="size-5" />
               </NuxtLink>
             </div>
           </div>
@@ -2313,102 +2622,63 @@ const showStatisticsInfo = () => {
       </div>
 
       <!-- Current conversation -->
-      <div
-        class="relative w-full transition-all duration-300"
-        :class="
-          expanded
-            ? 'ltablet:max-w-[calc(100%_-_160px)] lg:max-w-[calc(100%_-_160px)]'
-            : 'ltablet:max-w-[calc(100%_-_470px)] lg:max-w-[calc(100%_-_550px)]'
-        "
-      >
+      <div class="relative w-full transition-all duration-300" :class="expanded
+        ? 'ltablet:max-w-[calc(100%_-_160px)] lg:max-w-[calc(100%_-_160px)]'
+        : 'ltablet:max-w-[calc(100%_-_470px)] lg:max-w-[calc(100%_-_550px)]'
+        ">
         <div class="flex w-full flex-col">
           <!-- Header -->
-          <div
-            class="mb-2 flex h-16 w-full items-center justify-between px-4 sm:px-8"
-          >
+          <div class="mb-2 flex h-16 w-full items-center justify-between px-4 sm:px-8">
             <div class="mt-5 flex items-center gap-2">
               <div class="flex">
-                <BaseMessage
-                  v-if="!showNoCharge"
+                <BaseMessage v-if="!showNoCharge"
                   class="absolute-timer w-[180px] sm:relative sm:left-auto sm:top-auto sm:z-auto"
-                  :color="timeToShow > 10 ? 'success' : 'warning'"
-                >
+                  :color="timeToShow > 10 ? 'success' : 'warning'">
                   <span v-if="timeToShow > 0">
                     <span class="mx-2">⏰</span>
                     {{ timeToShow ?? '--' }} دقیقه</span>
                   <span v-else>وقت تقریبا تمام است</span>
                 </BaseMessage>
-                <BaseMessage
-                  v-else
+                <BaseMessage v-else
                   class="absolute-timer w-[280px] justify-center !pl-2 sm:relative sm:left-auto sm:top-auto sm:z-auto"
-                  color="warning"
-                >
+                  color="warning">
                   لطفا اشتراک تهیه فرمایید.
-                  <BaseButtonIcon
-                    rounded="full"
-                    size="sm"
-                    color="success"
-                    class="mr-3"
-                    to="/onboarding"
-                  >
+                  <BaseButtonIcon rounded="full" size="sm" color="success" class="mr-3" to="/onboarding">
                     <Icon name="ph:shopping-cart" class="size-5" />
                   </BaseButtonIcon>
                 </BaseMessage>
                 <div class="hidden sm:flex">
                   <button
                     class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                    title="نمایش اطلاعات"
-                    @click="expanded = !expanded"
-                  >
-                    <Icon
-                      name="ph:robot"
-                      class="size-5"
-                    />
+                    title="نمایش اطلاعات" @click="expanded = !expanded">
+                    <Icon name="ph:robot" class="size-5" />
                   </button>
                   <button
                     class="bg-success-500/30 dark:bg-success-500/70 dark:text-muted-100 text-muted-600 hover:text-success-500 hover:bg-success-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                    title="پایان جلسه"
-                    @click="handleEndSession"
-                  >
-                    <Icon
-                      name="ph:check"
-                      class="size-5"
-                    />
+                    title="پایان جلسه" @click="handleEndSession">
+                    <Icon name="ph:check" class="size-5" />
                   </button>
 
                   <!-- AI Controls button -->
-                  <NuxtLink
-                    to="/settings/ai-response"
+                  <NuxtLink to="/settings/ai-response"
                     class="bg-primary-500/30 dark:bg-primary-500/70 dark:text-muted-100 text-muted-600 hover:text-primary-500 hover:bg-primary-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
-                    title="AI Controls"
-                  >
-                    <Icon
-                      name="ph:sliders-duotone"
-                      class="size-5"
-                    />
+                    title="AI Controls">
+                    <Icon name="ph:sliders-duotone" class="size-5" />
                   </NuxtLink>
                 </div>
               </div>
             </div>
 
             <TairoSidebarTools
-              class="relative -end-4 z-20 flex h-16 w-full scale-90 items-center justify-end gap-2 sm:end-0 sm:scale-100"
-            />
+              class="relative -end-4 z-20 flex h-16 w-full scale-90 items-center justify-end gap-2 sm:end-0 sm:scale-100" />
           </div>
           <!-- Body -->
-          <div
-            ref="chatEl"
-            class="relative flex h-[calc(100vh-4rem)] flex-col p-4 !pb-60 sm:p-8 sm:!pb-60"
-            :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'"
-          >
+          <div ref="chatEl" class="relative flex h-[calc(100vh-4rem)] flex-col p-4 !pb-60 sm:p-8 sm:!pb-60"
+            :class="loading ? 'overflow-hidden' : 'overflow-y-auto nui-slimscroll'">
             <!-- Loader-->
             <div v-if="loading" class="mt-8">
               <div class="mb-3 flex items-center justify-center">
-                <BasePlaceload
-                  class="size-24 shrink-0 rounded-full"
-                  :width="96"
-                  :height="96"
-                />
+                <BasePlaceload class="size-24 shrink-0 rounded-full" :width="96" :height="96" />
               </div>
               <div class="flex flex-col items-center">
                 <BasePlaceload class="mb-2 h-3 w-full max-w-40 rounded" />
@@ -2442,123 +2712,73 @@ const showStatisticsInfo = () => {
                     {{ showNoCharge ? 'دریافت اشتراک' : 'شروع گفت و گو' }}
                   </h3>
                   <p class="text-muted-400 mt-2">
-                    {{ showNoCharge ? 'برای ادامه‌ی استفاده از سامانه لطفا اشتراک تهیه کنید.' : 'به چت درمانی خوش آمدید. اینجا می‌توانید با روانشناس خود گفت و گو کنید.' }}
+                    {{ showNoCharge ? 'برای ادامه‌ی استفاده از سامانه لطفا اشتراک تهیه کنید.' : `به چت درمانی خوش آمدید.
+                    اینجا می‌توانید با روانشناس خود گفت و گو کنید.` }}
                   </p>
                   <div class="mt-4">
-                    <BaseButton
-                      v-if="!showNoCharge"
-                      @click="newMessage = 'سلام، من نیاز به کمک دارم.'"
-                    >
+                    <BaseButton v-if="!showNoCharge" @click="newMessage = 'سلام، من نیاز به کمک دارم.'">
                       شروع گفت و گو
                     </BaseButton>
-                    <BaseButton
-                      v-else
-                      color="primary"
-                      @click="$router.push('/onboarding')"
-                    >
+                    <BaseButton v-else color="primary" @click="$router.push('/onboarding')">
                       دریافت اشتراک
                     </BaseButton>
                   </div>
                 </div>
               </div>
-              <div
-                v-else
-                class="space-y-8"
-              >
-                <div
-                  v-for="item in messages"
-                  :key="item.id"
-                  class="mb-4"
-                >
-                  <div
-                    class="flex"
-                    :class="[
-                      item.type === 'sent' ? 'justify-end' : 'justify-start',
-                    ]"
-                  >
-                    <div
-                      class="flex max-w-[85%] flex-col"
-                      :class="[
+              <div v-else class="space-y-8">
+                <div v-for="item in messages" :key="item.id" class="mb-4">
+                  <div class="flex" :class="[
+                    item.type === 'sent' ? 'justify-end' : 'justify-start',
+                  ]">
+                    <div class="flex max-w-[85%] flex-col" :class="[
+                      item.type === 'sent'
+                        ? 'items-end'
+                        : 'items-start',
+                    ]">
+                      <div class="relative mb-2 flex items-center gap-3" :class="[
                         item.type === 'sent'
-                          ? 'items-end'
-                          : 'items-start',
-                      ]"
-                    >
-                      <div
-                        class="relative mb-2 flex items-center gap-3"
-                        :class="[
+                          ? 'flex-row-reverse'
+                          : 'flex-row',
+                      ]">
+                        <div class="flex flex-col gap-1" :class="[
                           item.type === 'sent'
-                            ? 'flex-row-reverse'
-                            : 'flex-row',
-                        ]"
-                      >
-                        <div
-                          class="flex flex-col gap-1"
-                          :class="[
-                            item.type === 'sent'
-                              ? 'items-end'
-                              : 'items-start',
-                          ]"
-                        >
+                            ? 'items-end'
+                            : 'items-start',
+                        ]">
                           <!-- Message bubble and buttons on desktop -->
-                          <div
-                            class="hidden items-start gap-2 sm:flex"
-                            :class="[
-                              item.type === 'sent'
-                                ? 'flex-row-reverse'
-                                : 'flex-row',
-                            ]"
-                          >
-                            <div
-                              class="rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md"
+                          <div class="hidden items-start gap-2 sm:flex" :class="[
+                            item.type === 'sent'
+                              ? 'flex-row-reverse'
+                              : 'flex-row',
+                          ]">
+                            <div class="rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md"
                               :class="[
                                 item.type === 'sent'
                                   ? 'bg-primary-500 prose-p:text-white rounded-br-md text-white'
                                   : 'dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 border-muted-200 dark:border-muted-700 rounded-bl-md border bg-white shadow-sm transition-all duration-200 hover:shadow-md',
-                              ]"
-                            >
-                              <span
-                                class="block font-sans"
-                                :class="[
-                                  item.type === 'sent'
-                                    ? 'prose-p:text-white text-white'
-                                    : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
-                                ]"
-                              >
+                              ]">
+                              <span class="block font-sans" :class="[
+                                item.type === 'sent'
+                                  ? 'prose-p:text-white text-white'
+                                  : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                              ]">
                                 <AddonMarkdownRemark :source="item.text" />
                               </span>
                             </div>
 
                             <!-- Desktop buttons - next to message bubble -->
-                            <BaseButton
-                              v-if="item.type === 'sent'"
-                              rounded="full"
-                              title="مشاهده جزئیات"
-                              size="sm"
-                              color="primary"
-                              @click="openMessageDetailModal(item)"
-                            >
+                            <BaseButton v-if="item.type === 'sent'" rounded="full" title="مشاهده جزئیات" size="sm"
+                              color="primary" @click="openMessageDetailModal(item)">
                               <Icon name="ph:magnifying-glass-duotone" class="size-4" />
                             </BaseButton>
-                            <BaseButton
-                              v-if="item.type === 'received'"
-                              rounded="full"
-                              title="ثبت بازخورد"
-                              size="sm"
-                              color="info"
-                              @click="openFeedbackModal(item)"
-                            >
+                            <BaseButton v-if="item.type === 'received'" rounded="full" title="ثبت بازخورد" size="sm"
+                              color="info" @click="openFeedbackModal(item)">
                               <Icon name="ph:magnifying-glass-duotone" class="size-4" />
                             </BaseButton>
                             <BaseButton
                               v-if="item.type === 'received' && item.id === [...messages].reverse().find(msg => msg.type === 'received')?.id"
-                              rounded="full"
-                              title="تولید پاسخ جدید"
-                              size="sm"
-                              color="warning"
-                              :disabled="messageLoading || isAIResponding"
-                              @click="confirmRetryMessage"
-                            >
+                              rounded="full" title="تولید پاسخ جدید" size="sm" color="warning"
+                              :disabled="messageLoading || isAIResponding" @click="confirmRetryMessage">
                               <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
                             </BaseButton>
                             <!-- <BaseButton
@@ -2585,52 +2805,40 @@ const showStatisticsInfo = () => {
 
                           <!-- Message bubble only on mobile -->
                           <div class="block sm:hidden">
-                            <div
-                              class="rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md"
+                            <div class="rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md"
                               :class="[
                                 item.type === 'sent'
                                   ? 'bg-primary-500 prose-p:text-white rounded-br-md text-white'
                                   : 'dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 border-muted-200 dark:border-muted-700 rounded-bl-md border bg-white shadow-sm transition-all duration-200 hover:shadow-md',
-                              ]"
-                            >
-                              <span
-                                class="block font-sans"
-                                :class="[
-                                  item.type === 'sent'
-                                    ? 'prose-p:text-white text-white'
-                                    : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
-                                ]"
-                              >
+                              ]">
+                              <span class="block font-sans" :class="[
+                                item.type === 'sent'
+                                  ? 'prose-p:text-white text-white'
+                                  : 'text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100',
+                              ]">
                                 <AddonMarkdownRemark :source="item.text" />
                               </span>
                             </div>
                           </div>
 
                           <!-- Timestamp and mobile buttons -->
-                          <div
-                            class="mt-2 flex items-center gap-2"
-                            :class="[
-                              item.type === 'sent' ? 'justify-end' : 'justify-start'
-                            ]"
-                          >
+                          <div class="mt-2 flex items-center gap-2" :class="[
+                            item.type === 'sent' ? 'justify-end' : 'justify-start'
+                          ]">
                             <!-- Desktop timestamp -->
-                            <span class="text-muted-500 bg-muted-100 dark:bg-muted-800 hidden rounded-full px-2 py-1 font-sans text-xs sm:block">
+                            <span
+                              class="text-muted-500 bg-muted-100 dark:bg-muted-800 hidden rounded-full px-2 py-1 font-sans text-xs sm:block">
                               {{ formatTime(item.timestamp) }}
                             </span>
 
                             <!-- Mobile: sent messages - button on right of timestamp -->
                             <template v-if="item.type === 'sent'">
-                              <span class="text-muted-500 bg-muted-100 dark:bg-muted-800 block rounded-full px-2 py-1 font-sans text-xs sm:hidden">
+                              <span
+                                class="text-muted-500 bg-muted-100 dark:bg-muted-800 block rounded-full px-2 py-1 font-sans text-xs sm:hidden">
                                 {{ formatTime(item.timestamp) }}
                               </span>
-                              <BaseButton
-                                class="block sm:hidden"
-                                rounded="full"
-                                title="مشاهده جزئیات"
-                                size="sm"
-                                color="primary"
-                                @click="openMessageDetailModal(item)"
-                              >
+                              <BaseButton class="block sm:hidden" rounded="full" title="مشاهده جزئیات" size="sm"
+                                color="primary" @click="openMessageDetailModal(item)">
                                 <Icon name="ph:magnifying-glass-duotone" class="size-4" />
                               </BaseButton>
                             </template>
@@ -2638,28 +2846,19 @@ const showStatisticsInfo = () => {
                             <!-- Mobile: received messages - buttons on left of timestamp -->
                             <template v-if="item.type === 'received'">
                               <div class="flex gap-2 sm:hidden">
-                                <BaseButton
-                                  rounded="full"
-                                  title="ثبت بازخورد"
-                                  size="sm"
-                                  color="info"
-                                  @click="openFeedbackModal(item)"
-                                >
+                                <BaseButton rounded="full" title="ثبت بازخورد" size="sm" color="info"
+                                  @click="openFeedbackModal(item)">
                                   <Icon name="ph:magnifying-glass-duotone" class="size-4" />
                                 </BaseButton>
                                 <BaseButton
                                   v-if="item.id === [...messages].reverse().find(msg => msg.type === 'received')?.id"
-                                  rounded="full"
-                                  title="تولید پاسخ جدید"
-                                  size="sm"
-                                  color="warning"
-                                  :disabled="messageLoading || isAIResponding"
-                                  @click="confirmRetryMessage"
-                                >
+                                  rounded="full" title="تولید پاسخ جدید" size="sm" color="warning"
+                                  :disabled="messageLoading || isAIResponding" @click="confirmRetryMessage">
                                   <Icon name="ph:arrow-clockwise-duotone" class="size-4" />
                                 </BaseButton>
                               </div>
-                              <span class="text-muted-500 bg-muted-100 dark:bg-muted-800 block rounded-full px-2 py-1 font-sans text-xs sm:hidden">
+                              <span
+                                class="text-muted-500 bg-muted-100 dark:bg-muted-800 block rounded-full px-2 py-1 font-sans text-xs sm:hidden">
                                 {{ formatTime(item.timestamp) }}
                               </span>
                             </template>
@@ -2672,7 +2871,8 @@ const showStatisticsInfo = () => {
                 <!-- Assistant thinking bubble -->
                 <div v-if="isAIThinking" class="mb-4 flex justify-start">
                   <div class="flex max-w-[85%] flex-col items-start">
-                    <div class="dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 border-muted-200 dark:border-muted-700 rounded-2xl rounded-bl-md border bg-white px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md">
+                    <div
+                      class="dark:bg-muted-800 text-muted-800 dark:text-muted-100 prose-p:text-muted-800 dark:prose-p:text-muted-100 border-muted-200 dark:border-muted-700 rounded-2xl rounded-bl-md border bg-white px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md">
                       <span class="block flex items-center font-sans">
                         <AddonMarkdownRemark :source="thinkingResponse || 'در حال فکر کردن'" />
                         <span class="typing-ellipsis ml-2" />
@@ -2681,17 +2881,10 @@ const showStatisticsInfo = () => {
                   </div>
                 </div>
                 <!-- No Charge Message -->
-                <BaseMessage
-                  v-if="showNoCharge"
-                  id="no-money-message"
-                  color="danger"
-                >
+                <BaseMessage v-if="showNoCharge" id="no-money-message" color="danger">
                   <div class="flex items-center justify-between gap-4">
                     <div class="order-2">
-                      <BaseButton
-                        color="primary"
-                        @click="$router.push('/onboarding')"
-                      >
+                      <BaseButton color="primary" @click="$router.push('/onboarding')">
                         خرید اشتراک
                       </BaseButton>
                     </div>
@@ -2701,14 +2894,12 @@ const showStatisticsInfo = () => {
                   </div>
                 </BaseMessage>
                 <!-- Premium Upgrade Alert for Non-Premium Users -->
-                <div
-                  v-else-if="showPremiumAlert && !aiSettings.isPremium"
-                  id="premium-upgrade-alert"
-                  class="animate-pulse-slow w-full rounded-2xl border border-yellow-300 bg-gradient-to-l from-yellow-400/20 to-orange-500/20 p-4 dark:border-yellow-700/50 dark:from-yellow-600/20 dark:to-orange-700/20 sm:p-5"
-                >
+                <div v-else-if="showPremiumAlert && !aiSettings.isPremium" id="premium-upgrade-alert"
+                  class="animate-pulse-slow w-full rounded-2xl border border-yellow-300 bg-gradient-to-l from-yellow-400/20 to-orange-500/20 p-4 dark:border-yellow-700/50 dark:from-yellow-600/20 dark:to-orange-700/20 sm:p-5">
                   <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
                     <div class="order-1 flex items-start gap-1">
-                      <div class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg dark:from-yellow-500 dark:to-orange-600">
+                      <div
+                        class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg dark:from-yellow-500 dark:to-orange-600">
                         <Icon name="ph:crown-fill" class="size-5 text-white" />
                       </div>
                       <div class="mr-2 text-right">
@@ -2719,33 +2910,32 @@ const showStatisticsInfo = () => {
                           با ارتقاء به نسخه پرمیوم، از تمام امکانات پیشرفته هوش مصنوعی بهره‌مند شوید.
                         </p>
                         <div class="mt-2 flex flex-wrap gap-2">
-                          <span class="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
+                          <span
+                            class="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
                             سبک‌های ارتباطی پیشرفته
                           </span>
-                          <span class="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
+                          <span
+                            class="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
                             خلاقیت حداکثری
                           </span>
-                          <span class="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
+                          <span
+                            class="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
                             قالب‌بندی پیشرفته
                           </span>
                         </div>
                       </div>
                     </div>
                     <div class="order-3 flex items-center gap-2">
-                      <BaseButton
-                        color="primary"
+                      <BaseButton color="primary"
                         class="w-full border-none bg-gradient-to-r from-yellow-500 to-orange-500 shadow-lg transition-all duration-300 hover:from-yellow-600 hover:to-orange-600 hover:shadow-xl sm:w-auto"
-                        @click="showPremiumModal = true"
-                      >
+                        @click="showPremiumModal = true">
                         <Icon name="ph:crown-fill" class="ml-2 size-4" />
                         ارتقاء به پرمیوم
                       </BaseButton>
                       <div class="order-2">
-                        <BaseButtonIcon
-                          size="sm"
+                        <BaseButtonIcon size="sm"
                           class="dark:bg-muted-800/50 dark:hover:bg-muted-700 bg-white/50 backdrop-blur-sm hover:bg-white"
-                          @click="showPremiumAlert = false; isPremiumMessageDismissed.value = true; localStorage.setItem('premiumMessageDismissed', 'true')"
-                        >
+                          @click="showPremiumAlert = false; isPremiumMessageDismissed.value = true; localStorage.setItem('premiumMessageDismissed', 'true')">
                           <Icon name="ph:x" class="size-4 text-yellow-700 dark:text-yellow-300" />
                         </BaseButtonIcon>
                       </div>
@@ -2754,14 +2944,13 @@ const showStatisticsInfo = () => {
                 </div>
 
                 <!-- Premium Enjoy Message for Premium Users -->
-                <div
-                  v-else-if="!showNoCharge && aiSettings.isPremium && showPremiumEnjoyMessage"
+                <div v-else-if="!showNoCharge && aiSettings.isPremium && showPremiumEnjoyMessage"
                   id="premium-enjoy-message"
-                  class="w-full rounded-2xl border border-emerald-300 bg-gradient-to-l from-emerald-400/20 to-teal-500/20 p-4 dark:border-emerald-700/50 dark:from-emerald-600/20 dark:to-teal-700/20 sm:p-5"
-                >
+                  class="w-full rounded-2xl border border-emerald-300 bg-gradient-to-l from-emerald-400/20 to-teal-500/20 p-4 dark:border-emerald-700/50 dark:from-emerald-600/20 dark:to-teal-700/20 sm:p-5">
                   <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
                     <div class="order-1 flex items-start gap-1">
-                      <div class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg dark:from-emerald-600 dark:to-teal-600">
+                      <div
+                        class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg dark:from-emerald-600 dark:to-teal-600">
                         <Icon name="ph:crown-simple" class="size-5 text-white" />
                       </div>
                       <div class="text-right">
@@ -2772,32 +2961,31 @@ const showStatisticsInfo = () => {
                           از تمام امکانات پیشرفته هوش مصنوعی در این جلسه بهره‌مند شوید.
                         </p>
                         <div class="mt-2 flex flex-wrap gap-2">
-                          <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
+                          <span
+                            class="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
                             سبک‌های ارتباطی پیشرفته
                           </span>
-                          <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
+                          <span
+                            class="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
                             خلاقیت حداکثری
                           </span>
-                          <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
+                          <span
+                            class="rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
                             قالب‌بندی پیشرفته
                           </span>
                         </div>
                       </div>
                     </div>
                     <div class="order-3 flex items-center gap-2">
-                      <BaseButton
-                        color="success"
-                        class="w-full border-none bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg hover:from-emerald-600 hover:to-teal-600 sm:w-auto"
-                      >
+                      <BaseButton color="success"
+                        class="w-full border-none bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg hover:from-emerald-600 hover:to-teal-600 sm:w-auto">
                         <Icon name="ph:check" class="ml-2 size-4" />
                         وضعیت پریمیوم
                       </BaseButton>
                       <div class="order-2">
-                        <BaseButtonIcon
-                          size="sm"
+                        <BaseButtonIcon size="sm"
                           class="dark:bg-muted-800/50 dark:hover:bg-muted-700 bg-white/50 backdrop-blur-sm hover:bg-white"
-                          @click="showPremiumEnjoyMessage = false"
-                        >
+                          @click="showPremiumEnjoyMessage = false">
                           <Icon name="ph:x" class="size-4 text-emerald-700 dark:text-emerald-300" />
                         </BaseButtonIcon>
                       </div>
@@ -2810,50 +2998,26 @@ const showStatisticsInfo = () => {
 
           <!-- Compose form - Fixed at bottom -->
 
-          <form
-            method="POST"
-            action=""
-            class="bg-muted-100 dark:bg-muted-900 absolute inset-x-0 bottom-0 w-full p-4"
-            @submit.prevent="submitMessage"
-          >
+          <form method="POST" action="" class="bg-muted-100 dark:bg-muted-900 absolute inset-x-0 bottom-0 w-full p-4"
+            @submit.prevent="submitMessage">
             <div class="relative w-full">
               <!-- Scroll to bottom button -->
-              <button
-                v-if="showScrollButton"
+              <button v-if="showScrollButton"
                 class="bg-primary-500/20 hover:bg-primary-500/30 dark:bg-primary-500/30 dark:hover:bg-primary-500/40 absolute bottom-[calc(var(--messages-form-height))] left-0 z-10 flex items-center gap-2 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm transition-all duration-300"
-                title="پایین صفحه برو"
-                @click="scrollToBottom"
-              >
+                title="پایین صفحه برو" @click="scrollToBottom">
                 <span class="text-primary-500 text-sm">رفتن به آخرین پیام</span>
                 <Icon name="ph:arrow-down-bold" class="text-primary-500 size-5" />
               </button>
-              <BaseTextarea
-                v-model="newMessage"
-                :disabled="showNoCharge || isAIResponding || isAIThinking"
-                size="sm"
-                label="پیام شما"
-                rounded="md"
+              <BaseTextarea v-model="newMessage" :disabled="showNoCharge || isAIResponding || isAIThinking" size="sm"
+                label="پیام شما" rounded="md"
                 :placeholder="showNoCharge ? 'بسته مصرفی شما به اتمام رسیده است' : isAIResponding || isAIThinking ? 'لطفا صبر کنید...' : 'برای ارسال از ↵ + crtl  استفاده کنید.'"
-                :rows="6"
-                addon
-                class="dark:bg-muted-800 bg-white"
-                @click="handleTextareaClick"
-                @keydown="handleKeydown"
-              >
+                :rows="6" addon class="dark:bg-muted-800 bg-white" @click="handleTextareaClick"
+                @keydown="handleKeydown">
                 <template #addon>
                   <div class="flex items-center gap-2">
-                    <BaseAvatar
-                      src="/img/icons/animated/lightbulb.gif"
-                      class="me-1"
-                      size="xs"
-                    />
+                    <BaseAvatar src="/img/icons/animated/lightbulb.gif" class="me-1" size="xs" />
 
-                    <BaseHeading
-                      as="h4"
-                      size="sm"
-                      weight="semibold"
-                      class="text-muted-800 dark:text-white"
-                    >
+                    <BaseHeading as="h4" size="sm" weight="semibold" class="text-muted-800 dark:text-white">
                       <span>درمانا</span>
                     </BaseHeading>
                   </div>
@@ -2861,69 +3025,48 @@ const showStatisticsInfo = () => {
                   <div class="flex items-center gap-2">
                     <!-- Emoji Button -->
                     <div class="relative">
-                      <button
-                        type="button"
+                      <button type="button"
                         class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                        @click.prevent="showEmojiPicker = !showEmojiPicker"
-                      >
+                        @click.prevent="showEmojiPicker = !showEmojiPicker">
                         <Icon name="lucide:smile" class="size-5" />
                       </button>
 
                       <!-- Emoji Picker -->
-                      <div
-                        v-if="showEmojiPicker"
-                        ref="emojiPickerRef"
-                        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute bottom-full end-0 mb-2 w-96 rounded-lg border bg-white shadow-lg"
-                      >
-                        <div class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-2">
+                      <div v-if="showEmojiPicker" ref="emojiPickerRef"
+                        class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 absolute bottom-full end-0 mb-2 w-96 rounded-lg border bg-white shadow-lg">
+                        <div
+                          class="border-muted-200 dark:border-muted-700 flex items-center justify-between border-b p-2">
                           <span class="text-sm font-medium">انتخاب ایموجی</span>
-                          <BaseButtonIcon
-                            size="xs"
-                            @click="showEmojiPicker = false"
-                          >
+                          <BaseButtonIcon size="xs" @click="showEmojiPicker = false">
                             <Icon name="lucide:x" class="size-4" />
                           </BaseButtonIcon>
                         </div>
-                        <div class="dark:bg-muted-900 border-muted-200 dark:border-muted-700 relative flex items-center overflow-hidden border-b bg-white p-2">
-                          <button
-                            type="button"
-                            class="text-muted-600 hover:text-primary-500 p-1"
-                            @click="scrollTabs('left')"
-                          >
+                        <div
+                          class="dark:bg-muted-900 border-muted-200 dark:border-muted-700 relative flex items-center overflow-hidden border-b bg-white p-2">
+                          <button type="button" class="text-muted-600 hover:text-primary-500 p-1"
+                            @click="scrollTabs('left')">
                             <Icon name="lucide:chevron-left" class="size-5" />
                           </button>
                           <div ref="tabContainerRef" class="hide-scrollbar flex flex-1 space-x-2 overflow-x-auto p-1">
-                            <button
-                              v-for="cat in emojiCategories"
-                              :key="cat.name"
-                              type="button"
-                              :class="[
-                                'whitespace-nowrap rounded-t-lg px-3 py-1 transition-colors duration-150',
-                                currentCategory === cat.name
-                                  ? 'bg-muted-100 dark:bg-muted-700 text-muted-800 border-primary-500 dark:border-primary-400 border-b-2 dark:text-white'
-                                  : 'text-muted-600 dark:text-muted-400 hover:bg-muted-700 dark:hover:bg-muted-600 bg-transparent hover:text-white'
-                              ]"
-                              @click="currentCategory = cat.name"
-                            >
+                            <button v-for="cat in emojiCategories" :key="cat.name" type="button" :class="[
+                              'whitespace-nowrap rounded-t-lg px-3 py-1 transition-colors duration-150',
+                              currentCategory === cat.name
+                                ? 'bg-muted-100 dark:bg-muted-700 text-muted-800 border-primary-500 dark:border-primary-400 border-b-2 dark:text-white'
+                                : 'text-muted-600 dark:text-muted-400 hover:bg-muted-700 dark:hover:bg-muted-600 bg-transparent hover:text-white'
+                            ]" @click="currentCategory = cat.name">
                               {{ cat.name }}
                             </button>
                           </div>
-                          <button
-                            type="button"
-                            class="text-muted-600 hover:text-primary-500 p-1"
-                            @click="scrollTabs('right')"
-                          >
+                          <button type="button" class="text-muted-600 hover:text-primary-500 p-1"
+                            @click="scrollTabs('right')">
                             <Icon name="lucide:chevron-right" class="size-5" />
                           </button>
                         </div>
                         <div class="grid grid-cols-8 gap-2 p-2">
-                          <button
-                            v-for="emoji in emojiCategories.find(c => c.name === currentCategory).emojis"
-                            :key="emoji"
-                            type="button"
+                          <button v-for="emoji in emojiCategories.find(c => c.name === currentCategory).emojis"
+                            :key="emoji" type="button"
                             class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer items-center justify-center rounded p-1 text-2xl"
-                            @click="insertEmoji(emoji)"
-                          >
+                            @click="insertEmoji(emoji)">
                             {{ emoji }}
                           </button>
                         </div>
@@ -2932,21 +3075,16 @@ const showStatisticsInfo = () => {
 
                     <!-- Audio User Component -->
                     <div class="relative">
-                      <button
-                        type="button"
+                      <button type="button"
                         class="text-muted-400 hover:text-primary-500 flex h-12 w-10 items-center justify-center transition-colors duration-300"
-                        @click.prevent="toggleAudioUser"
-                      >
+                        @click.prevent="toggleAudioUser">
                         <Icon name="ph:microphone" class="size-5" />
                       </button>
                     </div>
 
                     <!-- Send Button -->
-                    <button
-                      type="submit"
-                      :disabled="!newMessage || messageLoading"
-                      class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-10 items-center justify-center transition-colors duration-300 disabled:opacity-50"
-                    >
+                    <button type="submit" :disabled="!newMessage || messageLoading"
+                      class="text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex h-12 w-10 items-center justify-center transition-colors duration-300 disabled:opacity-50">
                       <Icon name="lucide:send" class="size-5" />
                     </button>
                   </div>
@@ -2961,32 +3099,20 @@ const showStatisticsInfo = () => {
     <!-- Therapist details sidebar -->
     <div
       class="ltablet:w-[310px] dark:bg-muted-800 fixed end-0 top-0 z-20 h-full w-[390px] bg-white transition-transform duration-300"
-      :class="expanded ? '-translate-x-full' : 'translate-x-0'"
-    >
+      :class="expanded ? '-translate-x-full' : 'translate-x-0'">
       <div class="flex h-16 w-full items-center justify-between px-8">
-        <BaseHeading
-          tag="h3"
-          size="lg"
-          class="text-muted-800 dark:text-white"
-        >
+        <BaseHeading tag="h3" size="lg" class="text-muted-800 dark:text-white">
           <span>اطلاعات روانشناس</span>
         </BaseHeading>
         <BaseButtonIcon small @click="expanded = true">
-          <Icon
-            name="lucide:arrow-left"
-            class="pointer-events-none size-4"
-          />
+          <Icon name="lucide:arrow-left" class="pointer-events-none size-4" />
         </BaseButtonIcon>
       </div>
       <div class="relative flex h-[calc(100%-4rem)] w-full flex-col overflow-y-auto px-8">
         <!-- Loader -->
         <div v-if="loading" class="mt-8">
           <div class="mb-3 flex items-center justify-center">
-            <BasePlaceload
-              class="size-24 shrink-0 rounded-full"
-              :width="96"
-              :height="96"
-            />
+            <BasePlaceload class="size-24 shrink-0 rounded-full" :width="96" :height="96" />
           </div>
           <div class="flex flex-col items-center">
             <BasePlaceload class="mb-2 h-3 w-full max-w-40 rounded" />
@@ -3012,25 +3138,13 @@ const showStatisticsInfo = () => {
         <!-- User details -->
         <div v-else class="mb-3 mt-8">
           <div class="flex items-center justify-center">
-            <BaseAvatar
-              size="2xl"
-              rounded="full"
-              :src="
-                selectedConversationComputed?.user.avatar
-                  ? `https://pocket.zehna.ir/api/files/therapists/${selectedConversationComputed.user.id}/${selectedConversationComputed.user.avatar}`
-                  : '/img/avatars/1.svg'
-              "
-              :text="selectedConversationComputed?.user.name?.charAt(0)"
-              :class="getRandomColor()"
-            />
+            <BaseAvatar size="2xl" rounded="full" :src="selectedConversationComputed?.user.avatar
+              ? `https://pocket.zehna.ir/api/files/therapists/${selectedConversationComputed.user.id}/${selectedConversationComputed.user.avatar}`
+              : '/img/avatars/1.svg'
+              " :text="selectedConversationComputed?.user.name?.charAt(0)" :class="getRandomColor()" />
           </div>
           <div class="mt-2 space-y-3 text-center">
-            <BaseHeading
-              as="h3"
-              size="md"
-              weight="medium"
-              class="text-muted-800 dark:text-white"
-            >
+            <BaseHeading as="h3" size="md" weight="medium" class="text-muted-800 dark:text-white">
               <span>{{ selectedConversationComputed?.user.name }}</span>
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-400">
@@ -3045,7 +3159,8 @@ const showStatisticsInfo = () => {
                   <span class="text-muted-600 dark:text-muted-300 text-sm">زمان گذشته</span>
                 </div>
                 <div class="flex items-baseline justify-center gap-1">
-                  <span class="text-muted-800 text-2xl font-semibold dark:text-white">{{ sessionElapsedTime || 0 }}</span>
+                  <span class="text-muted-800 text-2xl font-semibold dark:text-white">{{ sessionElapsedTime || 0
+                  }}</span>
                   <span class="text-muted-500 dark:text-muted-400 text-sm">دقیقه</span>
                 </div>
               </div>
@@ -3064,29 +3179,17 @@ const showStatisticsInfo = () => {
             <div class="my-4 space-y-2">
               <!-- Model search and selector -->
               <div v-if="!modelsError && role === 'admin'" class="relative">
-                <BaseInput
-                  v-model="modelSearchInput"
-                  icon="ph:magnifying-glass"
-                  placeholder="جست و جوی مدل های زبانی . . . "
-                  class="w-full"
-                  @focus="showModelDropdown = true"
-                />
+                <BaseInput v-model="modelSearchInput" icon="ph:magnifying-glass"
+                  placeholder="جست و جوی مدل های زبانی . . . " class="w-full" @focus="showModelDropdown = true" />
 
                 <!-- Model dropdown -->
-                <div
-                  v-if="showModelDropdown"
-                  ref="emojiPickerRef"
-                  class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 absolute z-50 mt-1 w-full rounded-lg border bg-white shadow-lg"
-                >
+                <div v-if="showModelDropdown" ref="emojiPickerRef"
+                  class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 absolute z-50 mt-1 w-full rounded-lg border bg-white shadow-lg">
                   <div class="max-h-60 overflow-y-auto p-2">
-                    <button
-                      v-for="model in filteredModels"
-                      :key="model.id"
-                      type="button"
+                    <button v-for="model in filteredModels" :key="model.id" type="button"
                       class="hover:bg-muted-100 dark:hover:bg-muted-700 w-full cursor-pointer rounded p-2 text-left"
                       :class="{ 'bg-muted-100 dark:bg-muted-700': model.id === selectedModel }"
-                      @click="selectedModel = model.id; showModelDropdown = false"
-                    >
+                      @click="selectedModel = model.id; showModelDropdown = false">
                       <div class="flex items-center justify-between">
                         <span class="font-medium">{{ model.name }}</span>
                         <span class="text-muted-400 text-xs">
@@ -3099,13 +3202,11 @@ const showStatisticsInfo = () => {
               </div>
 
               <!-- Selected model display -->
-              <div
-                v-if="selectedModel && !modelsLoading && role === 'admin'"
-                class="bg-muted-100 dark:bg-muted-800 flex items-center gap-2 rounded p-2"
-              >
+              <div v-if="selectedModel && !modelsLoading && role === 'admin'"
+                class="bg-muted-100 dark:bg-muted-800 flex items-center gap-2 rounded p-2">
                 <Icon name="ph:robot" class="text-primary-500 size-5" />
                 <span class="text-sm">
-                  مدل انتخاب شده : {{ models.find(m => m.id === selectedModel)?.name }}
+                  مدل انتخاب شده : {{models.find(m => m.id === selectedModel)?.name}}
                 </span>
               </div>
 
@@ -3114,20 +3215,14 @@ const showStatisticsInfo = () => {
                 <p class="text-danger-500 mb-2">
                   {{ modelsError }}
                 </p>
-                <BaseButton
-                  color="danger"
-                  :loading="modelsLoading"
-                  @click="retryFetch"
-                >
+                <BaseButton color="danger" :loading="modelsLoading" @click="retryFetch">
                   تلاش برای دریافت مدل ها
                 </BaseButton>
               </div>
 
               <!-- Model error toast -->
-              <div
-                v-if="showModelError && role === 'admin'"
-                class="bg-danger-500 fixed right-4 top-4 z-50 rounded px-4 py-2 text-white shadow-lg"
-              >
+              <div v-if="showModelError && role === 'admin'"
+                class="bg-danger-500 fixed right-4 top-4 z-50 rounded px-4 py-2 text-white shadow-lg">
                 خطایی در پاسخ مدل رخ داد. لطفا دوباره تلاش کنید.
               </div>
             </div>
@@ -3140,27 +3235,14 @@ const showStatisticsInfo = () => {
               استفاده شما از سامانه به معنای پذیرش قوانین استفاده و حریم خصوصی است.
             </BaseMessage>
             <div class="grid grid-cols-2 gap-3">
-              <BaseButton
-                type="button"
-                color="primary"
-                class="w-full"
-                @click="gotoReport()"
-              >
+              <BaseButton type="button" color="primary" class="w-full" @click="gotoReport()">
                 نمایش پیشینه
                 <Icon name="ph:address-book-tabs" class="mr-2 size-5" />
               </BaseButton>
-              <BaseButton
-                type="button"
-                :color="aiSettings.isPremium ? 'warning' : 'muted'"
-                class="w-full"
-                :title="aiSettingsDisplayText"
-                @click="openPremiumModal()"
-              >
+              <BaseButton type="button" :color="aiSettings.isPremium ? 'warning' : 'muted'" class="w-full"
+                :title="aiSettingsDisplayText" @click="openPremiumModal()">
                 تنظیمات حاضر
-                <Icon
-                  name="ph:gear-duotone"
-                  class="mr-2 size-5"
-                />
+                <Icon name="ph:gear-duotone" class="mr-2 size-5" />
               </BaseButton>
             </div>
 
@@ -3175,11 +3257,7 @@ const showStatisticsInfo = () => {
               <Icon name="ph:chart-line-up" class="mr-2 size-5" />
             </BaseButton> -->
 
-            <BaseButton
-              type="button"
-              class="mt-3"
-              @click="expanded = true"
-            >
+            <BaseButton type="button" class="mt-3" @click="expanded = true">
               بستن پنل
               <Icon name="ph:arrow-left" class="mr-2 size-5" />
             </BaseButton>
@@ -3189,11 +3267,7 @@ const showStatisticsInfo = () => {
     </div>
 
     <!-- Audio User Modal -->
-    <TairoModal
-      :open="showAudioUser"
-      size="md"
-      @close="showAudioUser = false"
-    >
+    <TairoModal :open="showAudioUser" size="md" @close="showAudioUser = false">
       <template #header>
         <div class="flex w-full items-center justify-between p-4 sm:p-5">
           <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
@@ -3203,20 +3277,12 @@ const showStatisticsInfo = () => {
         </div>
       </template>
       <div class="p-4 sm:p-5">
-        <AudioUser
-          @close="showAudioUser = false"
-          @text-ready="handleAudioText"
-          @send-message="handleAudioSend"
-        />
+        <AudioUser @close="showAudioUser = false" @text-ready="handleAudioText" @send-message="handleAudioSend" />
       </div>
     </TairoModal>
   </div>
 
-  <TairoModal
-    :open="isDeleteModalOpen"
-    size="sm"
-    @close="closeDeleteModal"
-  >
+  <TairoModal :open="isDeleteModalOpen" size="sm" @close="closeDeleteModal">
     <template #header>
       <div class="flex w-full items-center justify-between p-4 md:p-6">
         <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
@@ -3229,10 +3295,7 @@ const showStatisticsInfo = () => {
     <div class="p-4 md:p-6">
       <div class="mx-auto w-full max-w-xs text-center">
         <div class="relative mx-auto mb-4 flex size-24 justify-center">
-          <Icon
-            name="ph:trash-duotone"
-            class="text-danger-500 size-24"
-          />
+          <Icon name="ph:trash-duotone" class="text-danger-500 size-24" />
         </div>
 
         <h3 class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white">
@@ -3252,11 +3315,7 @@ const showStatisticsInfo = () => {
             انصراف
           </BaseButton>
 
-          <BaseButton
-            color="danger"
-            variant="solid"
-            @click="confirmClearChat"
-          >
+          <BaseButton color="danger" variant="solid" @click="confirmClearChat">
             حذف
           </BaseButton>
         </div>
@@ -3265,29 +3324,22 @@ const showStatisticsInfo = () => {
   </TairoModal>
 
   <!-- Report Modal -->
-  <TairoModal
-    :open="isReportModalOpen"
-    size="sm"
-    @close="closeReportModal"
-  >
+  <TairoModal :open="isReportModalOpen" size="sm" @close="closeReportModal">
     <template #header>
       <div class="flex w-full items-center justify-between p-4 md:p-6">
         <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
           ساخت گزارش
         </h3>
-        <BaseButtonClose
-          @click="closeReportModal"
-        />
+        <BaseButtonClose @click="closeReportModal" />
       </div>
     </template>
     <div class="relative mx-auto mb-4 flex size-24 justify-center">
-      <Icon
-        name="ph:clipboard-text"
-        class="text-success-500 size-24"
-      />
+      <Icon name="ph:clipboard-text" class="text-success-500 size-24" />
     </div>
     <div class="p-4 text-center md:p-6">
-      <p> {{ isGeneratingAnalysis ? 'در حال ساخت گزارش هستیم. لطفا منتظر  بمانید. . . ' : 'آیا مایل به پایان دادن این جلسه و ساخت گزارش از این گفتگو هستید؟' }} </p>
+      <p> {{ isGeneratingAnalysis ? 'در حال ساخت گزارش هستیم. لطفا منتظر بمانید. . . ' : `آیا مایل به پایان دادن این
+        جلسه
+        و ساخت گزارش از این گفتگو هستید؟` }} </p>
 
       <!-- Additional information when not generating -->
       <div v-if="!isGeneratingAnalysis" class="mt-4 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
@@ -3309,17 +3361,10 @@ const showStatisticsInfo = () => {
     </div>
     <template #footer>
       <div class="flex w-full items-center justify-end gap-2 p-4 md:p-6">
-        <BaseButton
-          @click="closeReportModal"
-        >
+        <BaseButton @click="closeReportModal">
           انصراف
         </BaseButton>
-        <BaseButton
-          color="success"
-          variant="solid"
-          :loading="isGeneratingAnalysis"
-          @click="handleConfirmEndSession"
-        >
+        <BaseButton color="success" variant="solid" :loading="isGeneratingAnalysis" @click="handleConfirmEndSession">
           تایید
         </BaseButton>
       </div>
@@ -3327,7 +3372,8 @@ const showStatisticsInfo = () => {
     <template #content>
       <div class="relative">
         <!-- Loading overlay -->
-        <div v-if="isGeneratingAnalysis" class="dark:bg-muted-800/80 absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80">
+        <div v-if="isGeneratingAnalysis"
+          class="dark:bg-muted-800/80 absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80">
           <BaseProgress />
           <p class="text-muted-500 dark:text-muted-400 mt-4">
             در حال تحلیل جلسه و ساخت گزارش...
@@ -3342,11 +3388,7 @@ const showStatisticsInfo = () => {
   </TairoModal>
 
   <!-- Message Detail Modal -->
-  <TairoModal
-    :open="isMessageDetailModalOpen"
-    size="xl"
-    @close="closeMessageDetailModal"
-  >
+  <TairoModal :open="isMessageDetailModalOpen" size="xl" @close="closeMessageDetailModal">
     <template #header>
       <div class="flex w-full items-center justify-between p-4 md:p-6">
         <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
@@ -3414,7 +3456,8 @@ const showStatisticsInfo = () => {
           </div>
         </div>
         <!-- Emotion Wheel -->
-        <div v-if="selectedMessage.analysisResult?.lastMessage_emotions" class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
+        <div v-if="selectedMessage.analysisResult?.lastMessage_emotions"
+          class="bg-muted-100 dark:bg-muted-800 rounded-xl p-4">
           <div class="mb-4 flex items-center gap-2">
             <Icon name="ph:heart-duotone" class="size-5 text-pink-500" />
             <span class="text-muted-600 dark:text-muted-300 text-sm font-medium">حالت احساسی پیام</span>
@@ -3425,17 +3468,13 @@ const showStatisticsInfo = () => {
             <div
               v-for="emotion in selectedMessage.analysisResult.lastMessage_emotions.filter(e => e.severity !== 'خالی')"
               :key="emotion.emotionName"
-              class="dark:bg-muted-700 flex items-center justify-between rounded-lg bg-white p-2"
-            >
+              class="dark:bg-muted-700 flex items-center justify-between rounded-lg bg-white p-2">
               <span class="text-sm font-medium">{{ emotion.emotionName }}</span>
-              <span
-                class="rounded-full px-2 py-1 text-xs"
-                :class="{
-                  'bg-red-100 text-red-800': emotion.severity === 'زیاد',
-                  'bg-orange-100 text-orange-800': emotion.severity === 'متوسط',
-                  'bg-blue-100 text-blue-800': emotion.severity === 'کم'
-                }"
-              >
+              <span class="rounded-full px-2 py-1 text-xs" :class="{
+                'bg-red-100 text-red-800': emotion.severity === 'زیاد',
+                'bg-orange-100 text-orange-800': emotion.severity === 'متوسط',
+                'bg-blue-100 text-blue-800': emotion.severity === 'کم'
+              }">
                 {{ emotion.severity }}
               </span>
             </div>
@@ -3460,7 +3499,8 @@ const showStatisticsInfo = () => {
           </div>
 
           <!-- Emotional Response -->
-          <div v-if="selectedMessage.analysisResult.emotionalResponse" class="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+          <div v-if="selectedMessage.analysisResult.emotionalResponse"
+            class="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
             <div class="mb-2 flex items-center gap-2">
               <Icon name="ph:lightbulb-duotone" class="size-4 text-blue-500" />
               <span class="text-sm font-medium text-blue-700 dark:text-blue-300">پاسخ پیشنهادی</span>
@@ -3471,39 +3511,104 @@ const showStatisticsInfo = () => {
           </div>
 
           <!-- Suicide Risk Evaluation -->
-          <div v-if="selectedMessage.analysisResult.suicideRiskEvaluation" class="mt-4 rounded-xl bg-red-50 p-4 dark:bg-red-900/20">
+          <div v-if="selectedMessage.analysisResult.suicideRiskEvaluation"
+            class="mt-4 rounded-xl bg-red-50 p-4 dark:bg-red-900/20">
             <div class="mb-4 flex items-center gap-2">
               <Icon name="ph:warning-circle-duotone" class="size-5 text-red-500" />
               <span class="text-sm font-medium text-red-700 dark:text-red-300">ارزیابی ریسک خودکشی</span>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 text-right">
               <div class="mb-1 text-xs font-medium text-red-600 dark:text-red-400">
                 سطح ریسک:
               </div>
               <div class="inline-flex items-center gap-2">
-                <span
-                  class="rounded-full px-3 py-1 text-xs font-semibold"
-                  :class="{
-                    'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'N/A',
-                    'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'veryLow',
-                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'low',
-                    'bg-orange-100 text-orange-800 dark:bg-orange-700 dark:text-orange-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'medium',
-                    'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'high',
-                    'bg-red-500 text-white dark:bg-red-800 dark:text-white': selectedMessage.analysisResult.suicideRiskEvaluation === 'veryHigh',
-                  }"
-                >
+                <span class="rounded-full px-3 py-1 text-xs font-semibold" :class="{
+                  'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'N/A',
+                  'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'veryLow',
+                  'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'low',
+                  'bg-orange-100 text-orange-800 dark:bg-orange-700 dark:text-orange-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'medium',
+                  'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200': selectedMessage.analysisResult.suicideRiskEvaluation === 'high',
+                  'bg-red-500 text-white dark:bg-red-800 dark:text-white': selectedMessage.analysisResult.suicideRiskEvaluation === 'veryHigh',
+                }">
                   {{ getSuicideRiskLabel(selectedMessage.analysisResult.suicideRiskEvaluation) }}
                 </span>
               </div>
             </div>
 
-            <div v-if="selectedMessage.analysisResult.suicideRiskDescription" class="mt-3">
+            <div v-if="selectedMessage.analysisResult.suicideRiskDescription" class="mt-3 text-right">
               <div class="mb-1 text-xs font-medium text-red-600 dark:text-red-400">
                 توضیحات:
               </div>
               <div class="rounded bg-red-100 p-2 text-sm text-red-700 dark:bg-red-800/30 dark:text-red-300">
                 {{ selectedMessage.analysisResult.suicideRiskDescription }}
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="mb-2 flex items-center gap-2">
+                <Icon name="ph:list-bullets-duotone" class="size-4 text-red-500" />
+                <span class="text-xs font-semibold text-red-700 dark:text-red-300">نشانه‌های مرتبط</span>
+              </div>
+              <template v-if="selectedMessage.analysisResult?.suicideIndicators?.length">
+                <div class="space-y-3">
+                  <div v-for="(indicator, idx) in selectedMessage.analysisResult.suicideIndicators"
+                    :key="`indicator-${idx}`"
+                    class="rounded-lg border border-red-200 bg-white/70 p-3 text-start shadow-sm dark:border-red-800/40 dark:bg-red-900/10">
+                    <div class="mb-2 flex items-center justify-between gap-3">
+                      <span class="text-sm font-semibold text-red-700 dark:text-red-200">
+                        {{ getIndicatorTypeLabel(indicator.indicatorType) }}
+                      </span>
+                      <span class="rounded-full px-2 py-1 text-xs font-bold text-white" :class="{
+                        'bg-green-500': indicator.dangerousnessLevel === 'minimal',
+                        'bg-yellow-500': indicator.dangerousnessLevel === 'low',
+                        'bg-orange-500': indicator.dangerousnessLevel === 'moderate',
+                        'bg-red-500': indicator.dangerousnessLevel === 'high',
+                        'bg-red-700': indicator.dangerousnessLevel === 'critical',
+                      }">
+                        {{ getDangerousnessLabel(indicator.dangerousnessLevel) }}
+                      </span>
+                    </div>
+                    <p class="mb-2 text-sm font-medium text-red-800 dark:text-red-200">
+                      «{{ indicator.indicatorText }}»
+                    </p>
+                    <p class="text-xs leading-5 text-red-600 dark:text-red-300">
+                      {{ indicator.reasoning }}
+                    </p>
+                    <p class="mt-2 text-xs leading-5 text-red-500 dark:text-red-200/80">
+                      {{ getIndicatorDefinition(indicator.indicatorType) }}
+                    </p>
+                    <div v-if="getIndicatorClinicalTip(indicator.indicatorType)"
+                      class="mt-3 rounded-lg border border-red-200/40 bg-red-50/80 p-2 dark:border-red-800/40 dark:bg-red-900/20">
+                      <span class="text-[11px] font-semibold text-red-700 dark:text-red-200">راهنمای درمانگر</span>
+                      <p class="mt-1 text-xs leading-5 text-red-600 dark:text-red-200/80">
+                        {{ getIndicatorClinicalTip(indicator.indicatorType) }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <p v-else class="rounded bg-red-100/60 p-2 text-xs text-red-600 dark:bg-red-800/20 dark:text-red-200">
+                نشانه‌ای مرتبط با خودکشی در این پیام شناسایی نشد.
+              </p>
+            </div>
+            <div v-if="selectedMessageRiskEducation"
+              class="mt-6 rounded-xl border border-red-200 bg-white/80 p-4 shadow-sm dark:border-red-800/40 dark:bg-red-900/10 text-right">
+              <div class="mb-3 flex items-center gap-2">
+                <Icon name="ph:heartbeat-duotone" class="size-5 text-red-500" />
+                <span class="text-sm font-semibold text-red-700 dark:text-red-200">تفسیر حرفه‌ای و توصیه‌ها</span>
+              </div>
+              <p class="text-sm leading-6 text-red-700 dark:text-red-200">
+                {{ selectedMessageRiskEducation.summary }}
+              </p>
+              <ul v-if="selectedMessageRiskEducation.actions?.length"
+                class="mt-3 list-disc space-y-1 pr-5 text-xs leading-6 text-red-600 dark:text-red-200/90">
+                <li v-for="(action, idx) in selectedMessageRiskEducation.actions" :key="idx">
+                  {{ action }}
+                </li>
+              </ul>
+              <div
+                class="mt-3 rounded-md bg-red-100/60 p-3 text-xs leading-6 text-red-700 dark:bg-red-900/30 dark:text-red-100">
+                {{ selectedMessageRiskEducation.psychoeducation }}
               </div>
             </div>
           </div>
@@ -3533,34 +3638,22 @@ const showStatisticsInfo = () => {
   </TairoModal>
 
   <!-- Message Feedback Modal -->
-  <TairoModal
-    :open="isFeedbackModalOpen"
-    size="xl"
-    @close="closeFeedbackModal"
-  >
+  <TairoModal :open="isFeedbackModalOpen" size="xl" @close="closeFeedbackModal">
     <template #header>
       <div class="flex w-full items-center justify-between p-4 md:p-6">
         <div class="flex items-center gap-3">
           <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
             {{ existingFeedback ? 'ویرایش بازخورد' : 'بازخورد پیام' }}
           </h3>
-          <BaseTag
-            v-if="existingFeedback"
-            color="info"
-            size="sm"
-          >
+          <BaseTag v-if="existingFeedback" color="info" size="sm">
             ویرایش
           </BaseTag>
         </div>
         <div class="flex items-center gap-3">
           <!-- Step indicator -->
           <div class="flex items-center gap-2">
-            <div
-              v-for="step in 3"
-              :key="step"
-              class="h-2 w-8 rounded-full transition-all duration-200"
-              :class="step === feedbackStep ? 'bg-primary-500' : step < feedbackStep ? 'bg-success-500' : 'bg-muted-300'"
-            />
+            <div v-for="step in 3" :key="step" class="h-2 w-8 rounded-full transition-all duration-200"
+              :class="step === feedbackStep ? 'bg-primary-500' : step < feedbackStep ? 'bg-success-500' : 'bg-muted-300'" />
           </div>
           <BaseButtonClose @click="closeFeedbackModal" />
         </div>
@@ -3570,21 +3663,13 @@ const showStatisticsInfo = () => {
     <div ref="feedbackModalContent" class="max-h-[75vh] overflow-y-auto p-4 md:p-6">
       <div v-if="selectedMessageForFeedback">
         <!-- Errors display -->
-        <BaseMessage
-          v-if="feedbackErrors.length > 0"
-          class="mb-6"
-          color="danger"
-        >
+        <BaseMessage v-if="feedbackErrors.length > 0" class="mb-6" color="danger">
           <div class="space-y-1">
             <div class="font-medium">
               لطفا موارد زیر را بررسی کنید:
             </div>
             <ul class="text-sm">
-              <li
-                v-for="error in feedbackErrors"
-                :key="error"
-                class="flex items-center gap-2"
-              >
+              <li v-for="error in feedbackErrors" :key="error" class="flex items-center gap-2">
                 <Icon name="ph:warning-circle-fill" class="size-4" />
                 {{ error }}
               </li>
@@ -3595,18 +3680,21 @@ const showStatisticsInfo = () => {
         <!-- Step 1: Message Display and Category Selection -->
         <div v-if="feedbackStep === 1" class="space-y-8">
           <!-- Message content -->
-          <div class="from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 mb-6 rounded-xl bg-gradient-to-r p-4">
+          <div
+            class="from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 mb-6 rounded-xl bg-gradient-to-r p-4">
             <div class="mb-3 flex items-center gap-2">
               <Icon name="ph:chat-circle-duotone" class="text-primary-500 size-5" />
               <span class="text-primary-700 dark:text-primary-300 text-sm font-medium">پیام روانشناس</span>
             </div>
-            <div class="prose prose-sm dark:prose-invert dark:bg-muted-800 max-h-60 max-w-none overflow-y-auto rounded-lg bg-white p-3 text-right">
+            <div
+              class="prose prose-sm dark:prose-invert dark:bg-muted-800 max-h-60 max-w-none overflow-y-auto rounded-lg bg-white p-3 text-right">
               <AddonMarkdownRemark :source="selectedMessageForFeedback.text" />
             </div>
           </div>
 
           <div class="mb-8 text-center">
-            <div class="from-primary-100 to-info-100 dark:from-primary-900/30 dark:to-info-900/30 mb-4 inline-flex size-16 items-center justify-center rounded-full bg-gradient-to-br">
+            <div
+              class="from-primary-100 to-info-100 dark:from-primary-900/30 dark:to-info-900/30 mb-4 inline-flex size-16 items-center justify-center rounded-full bg-gradient-to-br">
               <Icon name="ph:star-duotone" class="text-primary-600 dark:text-primary-400 size-8" />
             </div>
             <h4 class="text-muted-800 text-xl font-bold dark:text-white">
@@ -3625,14 +3713,9 @@ const showStatisticsInfo = () => {
             <div class="bg-muted-50 dark:bg-muted-800 flex items-center justify-center gap-3 rounded-xl p-4">
               <span class="text-muted-600 text-sm">ضعیف</span>
               <div class="flex gap-2">
-                <button
-                  v-for="star in 5"
-                  :key="star"
-                  type="button"
-                  class="transition-all duration-200 hover:scale-110"
+                <button v-for="star in 5" :key="star" type="button" class="transition-all duration-200 hover:scale-110"
                   :class="star <= feedbackForm.rating ? 'text-yellow-400 drop-shadow-sm' : 'text-muted-300 hover:text-yellow-300'"
-                  @click="feedbackForm.rating = star"
-                >
+                  @click="feedbackForm.rating = star">
                   <Icon name="ph:star-fill" class="size-8" />
                 </button>
               </div>
@@ -3658,87 +3741,57 @@ const showStatisticsInfo = () => {
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <!-- Problems Selection -->
-              <button
-                type="button"
+              <button type="button"
                 class="focus:ring-primary-500/20 group relative rounded-xl border-2 p-6 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4"
                 :class="selectedFeedbackType === 'problems'
                   ? 'border-danger-500 bg-gradient-to-br from-danger-50 to-red-50 dark:from-danger-900/20 dark:to-red-900/20 shadow-lg shadow-danger-500/10'
                   : 'border-muted-200 dark:border-muted-700 bg-white dark:bg-muted-800 hover:border-danger-300 hover:shadow-md'"
-                @click="selectedFeedbackType = 'problems'"
-              >
+                @click="selectedFeedbackType = 'problems'">
                 <div class="mb-3 flex items-center justify-center">
-                  <div
-                    class="flex size-12 items-center justify-center rounded-full transition-all duration-300"
-                    :class="selectedFeedbackType === 'problems'
-                      ? 'bg-danger-100 dark:bg-danger-900/40'
-                      : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-danger-50'"
-                  >
-                    <Icon
-                      name="ph:warning-duotone"
-                      :class="selectedFeedbackType === 'problems'
-                        ? 'text-danger-600 dark:text-danger-400'
-                        : 'text-muted-500 group-hover:text-danger-500'"
-                      class="size-6"
-                    />
+                  <div class="flex size-12 items-center justify-center rounded-full transition-all duration-300" :class="selectedFeedbackType === 'problems'
+                    ? 'bg-danger-100 dark:bg-danger-900/40'
+                    : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-danger-50'">
+                    <Icon name="ph:warning-duotone" :class="selectedFeedbackType === 'problems'
+                      ? 'text-danger-600 dark:text-danger-400'
+                      : 'text-muted-500 group-hover:text-danger-500'" class="size-6" />
                   </div>
                 </div>
-                <h6
-                  class="mb-2 font-bold"
-                  :class="selectedFeedbackType === 'problems'
-                    ? 'text-danger-700 dark:text-danger-300'
-                    : 'text-muted-800 dark:text-white group-hover:text-danger-600'"
-                >
+                <h6 class="mb-2 font-bold" :class="selectedFeedbackType === 'problems'
+                  ? 'text-danger-700 dark:text-danger-300'
+                  : 'text-muted-800 dark:text-white group-hover:text-danger-600'">
                   مشکلات موجود
                 </h6>
-                <p
-                  class="text-sm"
-                  :class="selectedFeedbackType === 'problems'
-                    ? 'text-danger-600 dark:text-danger-400'
-                    : 'text-muted-500 group-hover:text-danger-500'"
-                >
+                <p class="text-sm" :class="selectedFeedbackType === 'problems'
+                  ? 'text-danger-600 dark:text-danger-400'
+                  : 'text-muted-500 group-hover:text-danger-500'">
                   اگر مشکلی در پاسخ دیدید
                 </p>
               </button>
 
               <!-- Quality Selection -->
-              <button
-                type="button"
+              <button type="button"
                 class="focus:ring-primary-500/20 group relative rounded-xl border-2 p-6 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4"
                 :class="selectedFeedbackType === 'quality'
                   ? 'border-success-500 bg-gradient-to-br from-success-50 to-emerald-50 dark:from-success-900/20 dark:to-emerald-900/20 shadow-lg shadow-success-500/10'
                   : 'border-muted-200 dark:border-muted-700 bg-white dark:bg-muted-800 hover:border-success-300 hover:shadow-md'"
-                @click="selectedFeedbackType = 'quality'"
-              >
+                @click="selectedFeedbackType = 'quality'">
                 <div class="mb-3 flex items-center justify-center">
-                  <div
-                    class="flex size-12 items-center justify-center rounded-full transition-all duration-300"
-                    :class="selectedFeedbackType === 'quality'
-                      ? 'bg-success-100 dark:bg-success-900/40'
-                      : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-success-50'"
-                  >
-                    <Icon
-                      name="ph:heart-duotone"
-                      :class="selectedFeedbackType === 'quality'
-                        ? 'text-success-600 dark:text-success-400'
-                        : 'text-muted-500 group-hover:text-success-500'"
-                      class="size-6"
-                    />
+                  <div class="flex size-12 items-center justify-center rounded-full transition-all duration-300" :class="selectedFeedbackType === 'quality'
+                    ? 'bg-success-100 dark:bg-success-900/40'
+                    : 'bg-muted-100 dark:bg-muted-700 group-hover:bg-success-50'">
+                    <Icon name="ph:heart-duotone" :class="selectedFeedbackType === 'quality'
+                      ? 'text-success-600 dark:text-success-400'
+                      : 'text-muted-500 group-hover:text-success-500'" class="size-6" />
                   </div>
                 </div>
-                <h6
-                  class="mb-2 font-bold"
-                  :class="selectedFeedbackType === 'quality'
-                    ? 'text-success-700 dark:text-success-300'
-                    : 'text-muted-800 dark:text-white group-hover:text-success-600'"
-                >
+                <h6 class="mb-2 font-bold" :class="selectedFeedbackType === 'quality'
+                  ? 'text-success-700 dark:text-success-300'
+                  : 'text-muted-800 dark:text-white group-hover:text-success-600'">
                   نقاط قوت پاسخ
                 </h6>
-                <p
-                  class="text-sm"
-                  :class="selectedFeedbackType === 'quality'
-                    ? 'text-success-600 dark:text-success-400'
-                    : 'text-muted-500 group-hover:text-success-500'"
-                >
+                <p class="text-sm" :class="selectedFeedbackType === 'quality'
+                  ? 'text-success-600 dark:text-success-400'
+                  : 'text-muted-500 group-hover:text-success-500'">
                   نقاط مثبت و قوت‌های پاسخ
                 </p>
               </button>
@@ -3750,12 +3803,8 @@ const showStatisticsInfo = () => {
             <label class="text-muted-700 dark:text-muted-300 block text-sm font-medium">
               نظر کلی <span class="text-danger-500">*</span>
             </label>
-            <BaseTextarea
-              v-model="feedbackForm.general_text"
-              placeholder="لطفا نظر کلی خود را درباره این پاسخ بنویسید... (حداقل 10 کاراکتر)"
-              :rows="4"
-              size="lg"
-            />
+            <BaseTextarea v-model="feedbackForm.general_text"
+              placeholder="لطفا نظر کلی خود را درباره این پاسخ بنویسید... (حداقل 10 کاراکتر)" :rows="4" size="lg" />
             <div class="text-muted-400 text-right text-xs">
               {{ feedbackForm.general_text.length }} کاراکتر
             </div>
@@ -3764,30 +3813,20 @@ const showStatisticsInfo = () => {
           <!-- Additional comments -->
           <div class="space-y-3 text-right">
             <label class="text-muted-700 dark:text-muted-300 block text-sm font-medium">توضیحات اضافی</label>
-            <BaseTextarea
-              v-model="feedbackForm.general_other"
-              placeholder="اگر توضیح بیشتری دارید، اینجا بنویسید... (اختیاری)"
-              :rows="3"
-            />
+            <BaseTextarea v-model="feedbackForm.general_other"
+              placeholder="اگر توضیح بیشتری دارید، اینجا بنویسید... (اختیاری)" :rows="3" />
           </div>
         </div>
 
         <!-- Step 2: Selected Category Details -->
         <div v-if="feedbackStep === 2" class="space-y-8">
           <div class="mb-6 text-center">
-            <div
-              class="mb-4 inline-flex size-16 items-center justify-center rounded-full"
-              :class="selectedFeedbackType === 'problems'
-                ? 'bg-danger-100 dark:bg-danger-900/30'
-                : 'bg-success-100 dark:bg-success-900/30'"
-            >
-              <Icon
-                :name="selectedFeedbackType === 'problems' ? 'ph:warning-duotone' : 'ph:heart-duotone'"
-                :class="selectedFeedbackType === 'problems'
-                  ? 'text-danger-600 dark:text-danger-400'
-                  : 'text-success-600 dark:text-success-400'"
-                class="size-8"
-              />
+            <div class="mb-4 inline-flex size-16 items-center justify-center rounded-full" :class="selectedFeedbackType === 'problems'
+              ? 'bg-danger-100 dark:bg-danger-900/30'
+              : 'bg-success-100 dark:bg-success-900/30'">
+              <Icon :name="selectedFeedbackType === 'problems' ? 'ph:warning-duotone' : 'ph:heart-duotone'" :class="selectedFeedbackType === 'problems'
+                ? 'text-danger-600 dark:text-danger-400'
+                : 'text-success-600 dark:text-success-400'" class="size-8" />
             </div>
             <h4 class="text-muted-800 text-xl font-bold dark:text-white">
               {{ selectedFeedbackType === 'problems' ? 'مشکلات موجود' : 'نقاط قوت پاسخ' }}
@@ -3800,62 +3839,56 @@ const showStatisticsInfo = () => {
           </div>
 
           <!-- Problems Section -->
-          <div v-if="selectedFeedbackType === 'problems'" class="from-danger-25 to-orange-25 dark:from-danger-950/20 space-y-5 rounded-2xl bg-gradient-to-br p-6 dark:to-orange-950/20">
+          <div v-if="selectedFeedbackType === 'problems'"
+            class="from-danger-25 to-orange-25 dark:from-danger-950/20 space-y-5 rounded-2xl bg-gradient-to-br p-6 dark:to-orange-950/20">
             <div class="mb-4 flex items-center gap-3">
               <div class="bg-danger-100 dark:bg-danger-900/30 flex size-10 items-center justify-center rounded-xl">
                 <Icon name="ph:warning-duotone" class="text-danger-600 dark:text-danger-400 size-5" />
               </div>
               <div>
-                <label class="text-danger-800 dark:text-danger-200 block text-right text-base font-bold">مشکلات موجود</label>
+                <label class="text-danger-800 dark:text-danger-200 block text-right text-base font-bold">مشکلات
+                  موجود</label>
                 <p class="text-danger-600 dark:text-danger-300 text-sm">
                   در صورت وجود مشکل، انتخاب کنید
                 </p>
               </div>
               <div class="ml-auto">
-                <div class="text-danger-600 dark:text-danger-400 bg-danger-100 dark:bg-danger-900/40 rounded-full px-2 py-1 text-xs">
-                  {{ Object.keys(feedbackForm.problems_categories).filter(k => feedbackForm.problems_categories[k]).length }} انتخاب شده
+                <div
+                  class="text-danger-600 dark:text-danger-400 bg-danger-100 dark:bg-danger-900/40 rounded-full px-2 py-1 text-xs">
+                  {{Object.keys(feedbackForm.problems_categories).filter(k =>
+                    feedbackForm.problems_categories[k]).length
+                  }} انتخاب شده
                 </div>
               </div>
             </div>
 
             <!-- Problem categories with enhanced design -->
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div
-                v-for="problem in FEEDBACK_CATEGORIES.problems.subcategories"
-                :key="problem.id"
-                class="group relative"
-              >
-                <button
-                  type="button"
+              <div v-for="problem in FEEDBACK_CATEGORIES.problems.subcategories" :key="problem.id"
+                class="group relative">
+                <button type="button"
                   class="relative w-full overflow-hidden rounded-xl border-2 p-4 text-right transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                   :class="feedbackForm.problems_categories[problem.id]
                     ? 'border-danger-400 bg-gradient-to-br from-danger-50 to-red-50 text-danger-800 dark:from-danger-900/30 dark:to-red-900/30 dark:text-danger-200 shadow-lg shadow-danger-100/50'
                     : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-danger-300 dark:border-muted-600 hover:bg-danger-25 dark:hover:bg-danger-950/10'"
-                  @click="feedbackForm.problems_categories[problem.id] = !feedbackForm.problems_categories[problem.id]"
-                >
+                  @click="feedbackForm.problems_categories[problem.id] = !feedbackForm.problems_categories[problem.id]">
                   <!-- Severity indicator -->
-                  <div
-                    v-if="problem.severity"
-                    class="absolute left-2 top-2 size-2 rounded-full"
-                    :class="{
-                      'bg-red-500': problem.severity === 'critical',
-                      'bg-orange-500': problem.severity === 'high',
-                      'bg-yellow-500': problem.severity === 'medium',
-                      'bg-blue-500': problem.severity === 'low'
-                    }"
-                  />
+                  <div v-if="problem.severity" class="absolute left-2 top-2 size-2 rounded-full" :class="{
+                    'bg-red-500': problem.severity === 'critical',
+                    'bg-orange-500': problem.severity === 'high',
+                    'bg-yellow-500': problem.severity === 'medium',
+                    'bg-blue-500': problem.severity === 'low'
+                  }" />
 
                   <div class="mb-2 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                       <Icon :name="problem.icon || 'ph:warning-duotone'" class="size-5 opacity-75" />
                       <span class="font-semibold">{{ problem.name }}</span>
                     </div>
-                    <Icon
-                      v-if="feedbackForm.problems_categories[problem.id]"
-                      name="ph:check-circle-fill"
-                      class="text-danger-500 animate-in zoom-in size-6 duration-200"
-                    />
-                    <div v-else class="border-muted-300 group-hover:border-danger-400 size-6 rounded-full border-2 transition-colors" />
+                    <Icon v-if="feedbackForm.problems_categories[problem.id]" name="ph:check-circle-fill"
+                      class="text-danger-500 animate-in zoom-in size-6 duration-200" />
+                    <div v-else
+                      class="border-muted-300 group-hover:border-danger-400 size-6 rounded-full border-2 transition-colors" />
                   </div>
 
                   <p class="mb-3 text-sm leading-relaxed opacity-90">
@@ -3863,19 +3896,13 @@ const showStatisticsInfo = () => {
                   </p>
 
                   <!-- Examples (show on hover or when selected) -->
-                  <div
-                    v-if="problem.examples && (feedbackForm.problems_categories[problem.id] || false)"
-                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs"
-                  >
+                  <div v-if="problem.examples && (feedbackForm.problems_categories[problem.id] || false)"
+                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs">
                     <div class="font-medium opacity-75">
                       مثال:
                     </div>
                     <ul class="space-y-1">
-                      <li
-                        v-for="example in problem.examples"
-                        :key="example"
-                        class="flex items-start gap-1"
-                      >
+                      <li v-for="example in problem.examples" :key="example" class="flex items-start gap-1">
                         <span class="text-danger-400 mt-0.5">•</span>
                         <span class="opacity-80">{{ example }}</span>
                       </li>
@@ -3890,72 +3917,61 @@ const showStatisticsInfo = () => {
               <label class="text-danger-700 dark:text-danger-300 mb-2 block text-right text-sm font-medium">
                 توضیح بیشتر یا مشکل دیگری؟
               </label>
-              <BaseTextarea
-                v-model="feedbackForm.problems_other"
-                placeholder="اگر مشکل خاصی وجود دارد که در فهرست نیست، لطفاً توضیح دهید..."
-                :rows="3"
-                size="lg"
-                class="!border-danger-200 focus:!border-danger-400 dark:!border-danger-800"
-              />
+              <BaseTextarea v-model="feedbackForm.problems_other"
+                placeholder="اگر مشکل خاصی وجود دارد که در فهرست نیست، لطفاً توضیح دهید..." :rows="3" size="lg"
+                class="!border-danger-200 focus:!border-danger-400 dark:!border-danger-800" />
             </div>
           </div>
 
           <!-- Quality Section -->
-          <div v-if="selectedFeedbackType === 'quality'" class="from-success-25 to-emerald-25 dark:from-success-950/20 space-y-5 rounded-2xl bg-gradient-to-br p-6 dark:to-emerald-950/20">
+          <div v-if="selectedFeedbackType === 'quality'"
+            class="from-success-25 to-emerald-25 dark:from-success-950/20 space-y-5 rounded-2xl bg-gradient-to-br p-6 dark:to-emerald-950/20">
             <div class="mb-4 flex items-center gap-3">
               <div class="bg-success-100 dark:bg-success-900/30 flex size-10 items-center justify-center rounded-xl">
                 <Icon name="ph:heart-duotone" class="text-success-600 dark:text-success-400 size-5" />
               </div>
               <div>
-                <label class="text-success-800 dark:text-success-200 block text-right text-base font-bold">نقاط قوت پاسخ</label>
+                <label class="text-success-800 dark:text-success-200 block text-right text-base font-bold">نقاط قوت
+                  پاسخ</label>
                 <p class="text-success-600 dark:text-success-300 text-sm">
                   مواردی که در پاسخ خوب بود
                 </p>
               </div>
               <div class="ml-auto">
-                <div class="text-success-600 dark:text-success-400 bg-success-100 dark:bg-success-900/40 rounded-full px-2 py-1 text-xs">
-                  {{ Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length }} انتخاب شده
+                <div
+                  class="text-success-600 dark:text-success-400 bg-success-100 dark:bg-success-900/40 rounded-full px-2 py-1 text-xs">
+                  {{Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length
+                  }} انتخاب شده
                 </div>
               </div>
             </div>
 
             <!-- Quality categories with enhanced design -->
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div
-                v-for="quality in FEEDBACK_CATEGORIES.quality.subcategories"
-                :key="quality.id"
-                class="group relative"
-              >
-                <button
-                  type="button"
+              <div v-for="quality in FEEDBACK_CATEGORIES.quality.subcategories" :key="quality.id"
+                class="group relative">
+                <button type="button"
                   class="relative w-full overflow-hidden rounded-xl border-2 p-4 text-right transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                   :class="feedbackForm.quality_categories[quality.id]
                     ? 'border-success-400 bg-gradient-to-br from-success-50 to-emerald-50 text-success-800 dark:from-success-900/30 dark:to-emerald-900/30 dark:text-success-200 shadow-lg shadow-success-100/50'
                     : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-success-300 dark:border-muted-600 hover:bg-success-25 dark:hover:bg-success-950/10'"
-                  @click="feedbackForm.quality_categories[quality.id] = !feedbackForm.quality_categories[quality.id]"
-                >
+                  @click="feedbackForm.quality_categories[quality.id] = !feedbackForm.quality_categories[quality.id]">
                   <!-- Impact indicator -->
-                  <div
-                    v-if="quality.impact"
-                    class="absolute left-2 top-2 size-2 rounded-full"
-                    :class="{
-                      'bg-emerald-500': quality.impact === 'high',
-                      'bg-green-500': quality.impact === 'medium',
-                      'bg-lime-500': quality.impact === 'low'
-                    }"
-                  />
+                  <div v-if="quality.impact" class="absolute left-2 top-2 size-2 rounded-full" :class="{
+                    'bg-emerald-500': quality.impact === 'high',
+                    'bg-green-500': quality.impact === 'medium',
+                    'bg-lime-500': quality.impact === 'low'
+                  }" />
 
                   <div class="mb-2 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                       <Icon :name="quality.icon || 'ph:heart-duotone'" class="size-5 opacity-75" />
                       <span class="font-semibold">{{ quality.name }}</span>
                     </div>
-                    <Icon
-                      v-if="feedbackForm.quality_categories[quality.id]"
-                      name="ph:check-circle-fill"
-                      class="text-success-500 animate-in zoom-in size-6 duration-200"
-                    />
-                    <div v-else class="border-muted-300 group-hover:border-success-400 size-6 rounded-full border-2 transition-colors" />
+                    <Icon v-if="feedbackForm.quality_categories[quality.id]" name="ph:check-circle-fill"
+                      class="text-success-500 animate-in zoom-in size-6 duration-200" />
+                    <div v-else
+                      class="border-muted-300 group-hover:border-success-400 size-6 rounded-full border-2 transition-colors" />
                   </div>
 
                   <p class="mb-3 text-sm leading-relaxed opacity-90">
@@ -3963,19 +3979,13 @@ const showStatisticsInfo = () => {
                   </p>
 
                   <!-- Examples -->
-                  <div
-                    v-if="quality.examples && (feedbackForm.quality_categories[quality.id] || false)"
-                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs"
-                  >
+                  <div v-if="quality.examples && (feedbackForm.quality_categories[quality.id] || false)"
+                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs">
                     <div class="font-medium opacity-75">
                       مثال:
                     </div>
                     <ul class="space-y-1">
-                      <li
-                        v-for="example in quality.examples"
-                        :key="example"
-                        class="flex items-start gap-1"
-                      >
+                      <li v-for="example in quality.examples" :key="example" class="flex items-start gap-1">
                         <span class="text-success-400 mt-0.5">•</span>
                         <span class="opacity-80">{{ example }}</span>
                       </li>
@@ -3990,13 +4000,9 @@ const showStatisticsInfo = () => {
               <label class="text-success-700 dark:text-success-300 mb-2 block text-right text-sm font-medium">
                 نقاط قوت دیگر؟
               </label>
-              <BaseTextarea
-                v-model="feedbackForm.quality_other"
-                placeholder="چه چیز دیگری در این پاسخ خوب بود؟ لطفاً توضیح دهید..."
-                :rows="3"
-                size="lg"
-                class="!border-success-200 focus:!border-success-400 dark:!border-success-800"
-              />
+              <BaseTextarea v-model="feedbackForm.quality_other"
+                placeholder="چه چیز دیگری در این پاسخ خوب بود؟ لطفاً توضیح دهید..." :rows="3" size="lg"
+                class="!border-success-200 focus:!border-success-400 dark:!border-success-800" />
             </div>
           </div>
 
@@ -4012,7 +4018,8 @@ const showStatisticsInfo = () => {
         <!-- Step 3: Improvements -->
         <div v-if="feedbackStep === 3" class="space-y-8">
           <div class="mb-8 text-center">
-            <div class="from-warning-100 dark:from-warning-900/30 mb-4 inline-flex size-16 items-center justify-center rounded-full bg-gradient-to-br to-amber-100 dark:to-amber-900/30">
+            <div
+              class="from-warning-100 dark:from-warning-900/30 mb-4 inline-flex size-16 items-center justify-center rounded-full bg-gradient-to-br to-amber-100 dark:to-amber-900/30">
               <Icon name="ph:lightbulb-duotone" class="text-warning-600 dark:text-warning-400 size-8" />
             </div>
             <h4 class="text-muted-800 text-xl font-bold dark:text-white">
@@ -4021,14 +4028,16 @@ const showStatisticsInfo = () => {
             <p class="text-muted-500 mt-2 text-sm">
               چگونه می‌توان پاسخ‌ها را بهتر کرد؟
             </p>
-            <div class="bg-warning-100 dark:bg-warning-900/30 text-warning-700 dark:text-warning-300 mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs">
+            <div
+              class="bg-warning-100 dark:bg-warning-900/30 text-warning-700 dark:text-warning-300 mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs">
               <Icon name="ph:rocket-duotone" class="size-4" />
               <span>ایده‌های شما برای بهبود</span>
             </div>
           </div>
 
           <!-- Improvements Section -->
-          <div class="from-warning-25 to-amber-25 dark:from-warning-950/20 space-y-6 rounded-2xl bg-gradient-to-br p-6 dark:to-amber-950/20">
+          <div
+            class="from-warning-25 to-amber-25 dark:from-warning-950/20 space-y-6 rounded-2xl bg-gradient-to-br p-6 dark:to-amber-950/20">
             <div class="mb-6 flex items-center gap-3">
               <div class="bg-warning-100 dark:bg-warning-900/30 flex size-10 items-center justify-center rounded-xl">
                 <Icon name="ph:lightbulb-duotone" class="text-warning-600 dark:text-warning-400 size-5" />
@@ -4040,49 +4049,40 @@ const showStatisticsInfo = () => {
                 </p>
               </div>
               <div class="ml-auto">
-                <div class="text-warning-600 dark:text-warning-400 bg-warning-100 dark:bg-warning-900/40 rounded-full px-2 py-1 text-xs">
-                  {{ Object.keys(feedbackForm.improvements_categories).filter(k => feedbackForm.improvements_categories[k]).length }} انتخاب شده
+                <div
+                  class="text-warning-600 dark:text-warning-400 bg-warning-100 dark:bg-warning-900/40 rounded-full px-2 py-1 text-xs">
+                  {{Object.keys(feedbackForm.improvements_categories).filter(k =>
+                    feedbackForm.improvements_categories[k]).length}} انتخاب شده
                 </div>
               </div>
             </div>
 
             <!-- Improvements grid with enhanced design -->
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div
-                v-for="improvement in FEEDBACK_CATEGORIES.improvements.subcategories"
-                :key="improvement.id"
-                class="group relative"
-              >
-                <button
-                  type="button"
+              <div v-for="improvement in FEEDBACK_CATEGORIES.improvements.subcategories" :key="improvement.id"
+                class="group relative">
+                <button type="button"
                   class="relative w-full overflow-hidden rounded-xl border-2 p-4 text-right transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                   :class="feedbackForm.improvements_categories[improvement.id]
                     ? 'border-warning-400 bg-gradient-to-br from-warning-50 to-amber-50 text-warning-800 dark:from-warning-900/30 dark:to-amber-900/30 dark:text-warning-200 shadow-lg shadow-warning-100/50'
                     : 'border-muted-200 bg-white dark:bg-muted-800 hover:border-warning-300 dark:border-muted-600 hover:bg-warning-25 dark:hover:bg-warning-950/10'"
-                  @click="feedbackForm.improvements_categories[improvement.id] = !feedbackForm.improvements_categories[improvement.id]"
-                >
+                  @click="feedbackForm.improvements_categories[improvement.id] = !feedbackForm.improvements_categories[improvement.id]">
                   <!-- Priority indicator -->
-                  <div
-                    v-if="improvement.priority"
-                    class="absolute left-2 top-2 size-2 rounded-full"
-                    :class="{
-                      'bg-red-400': improvement.priority === 'high',
-                      'bg-yellow-400': improvement.priority === 'medium',
-                      'bg-blue-400': improvement.priority === 'low'
-                    }"
-                  />
+                  <div v-if="improvement.priority" class="absolute left-2 top-2 size-2 rounded-full" :class="{
+                    'bg-red-400': improvement.priority === 'high',
+                    'bg-yellow-400': improvement.priority === 'medium',
+                    'bg-blue-400': improvement.priority === 'low'
+                  }" />
 
                   <div class="mb-2 flex items-start justify-between">
                     <div class="flex items-center gap-2">
                       <Icon :name="improvement.icon || 'ph:lightbulb-duotone'" class="size-5 opacity-75" />
                       <span class="font-semibold">{{ improvement.name }}</span>
                     </div>
-                    <Icon
-                      v-if="feedbackForm.improvements_categories[improvement.id]"
-                      name="ph:check-circle-fill"
-                      class="text-warning-500 animate-in zoom-in size-6 duration-200"
-                    />
-                    <div v-else class="border-muted-300 group-hover:border-warning-400 size-6 rounded-full border-2 transition-colors" />
+                    <Icon v-if="feedbackForm.improvements_categories[improvement.id]" name="ph:check-circle-fill"
+                      class="text-warning-500 animate-in zoom-in size-6 duration-200" />
+                    <div v-else
+                      class="border-muted-300 group-hover:border-warning-400 size-6 rounded-full border-2 transition-colors" />
                   </div>
 
                   <p class="mb-3 text-sm leading-relaxed opacity-90">
@@ -4090,19 +4090,13 @@ const showStatisticsInfo = () => {
                   </p>
 
                   <!-- Examples -->
-                  <div
-                    v-if="improvement.examples && (feedbackForm.improvements_categories[improvement.id] || false)"
-                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs"
-                  >
+                  <div v-if="improvement.examples && (feedbackForm.improvements_categories[improvement.id] || false)"
+                    class="dark:bg-muted-700/50 space-y-1 rounded-lg bg-white/50 p-2 text-xs">
                     <div class="font-medium opacity-75">
                       مثال:
                     </div>
                     <ul class="space-y-1">
-                      <li
-                        v-for="example in improvement.examples"
-                        :key="example"
-                        class="flex items-start gap-1"
-                      >
+                      <li v-for="example in improvement.examples" :key="example" class="flex items-start gap-1">
                         <span class="text-warning-400 mt-0.5">•</span>
                         <span class="opacity-80">{{ example }}</span>
                       </li>
@@ -4114,17 +4108,14 @@ const showStatisticsInfo = () => {
 
             <!-- Custom improvement input with enhanced design -->
             <div class="dark:bg-muted-800/50 mt-8 rounded-xl bg-white/50 p-5">
-              <label class="text-warning-700 dark:text-warning-300 mb-3 block flex items-center gap-2 text-sm font-semibold">
+              <label
+                class="text-warning-700 dark:text-warning-300 mb-3 block flex items-center gap-2 text-sm font-semibold">
                 <Icon name="ph:chat-circle-text-duotone" class="size-4" />
                 پیشنهاد خاص شما
               </label>
-              <BaseTextarea
-                v-model="feedbackForm.improvements_other"
-                placeholder="ایده‌های شما برای بهبود پاسخ‌ها چیست؟ چه چیزی می‌تواند تجربه را بهتر کند؟"
-                :rows="4"
-                size="lg"
-                class="!border-warning-200 focus:!border-warning-400 dark:!border-warning-800"
-              />
+              <BaseTextarea v-model="feedbackForm.improvements_other"
+                placeholder="ایده‌های شما برای بهبود پاسخ‌ها چیست؟ چه چیزی می‌تواند تجربه را بهتر کند؟" :rows="4"
+                size="lg" class="!border-warning-200 focus:!border-warning-400 dark:!border-warning-800" />
               <div class="text-warning-600 dark:text-warning-400 mt-2 text-xs opacity-75">
                 هر ایده‌ای که دارید، هر کوچک که باشد، برای ما ارزشمند است! ✨
               </div>
@@ -4132,9 +4123,11 @@ const showStatisticsInfo = () => {
           </div>
 
           <!-- Enhanced Summary Section -->
-          <div class="from-info-50 via-blue-25 dark:from-info-950/20 border-info-200/50 dark:border-info-800/30 rounded-2xl border bg-gradient-to-br to-indigo-50 p-6 dark:via-blue-950/10 dark:to-indigo-950/20">
+          <div
+            class="from-info-50 via-blue-25 dark:from-info-950/20 border-info-200/50 dark:border-info-800/30 rounded-2xl border bg-gradient-to-br to-indigo-50 p-6 dark:via-blue-950/10 dark:to-indigo-950/20">
             <div class="mb-6 flex items-center gap-3">
-              <div class="from-info-100 dark:from-info-900/50 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br to-blue-100 dark:to-blue-900/50">
+              <div
+                class="from-info-100 dark:from-info-900/50 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br to-blue-100 dark:to-blue-900/50">
                 <Icon name="ph:clipboard-text-duotone" class="text-info-600 dark:text-info-400 size-6" />
               </div>
               <div>
@@ -4154,13 +4147,8 @@ const showStatisticsInfo = () => {
                   <span class="text-muted-700 dark:text-muted-300 font-medium">امتیاز کلی:</span>
                   <div class="flex items-center gap-2">
                     <div class="flex">
-                      <Icon
-                        v-for="star in 5"
-                        :key="star"
-                        name="ph:star-fill"
-                        class="size-5"
-                        :class="star <= feedbackForm.rating ? 'text-yellow-400' : 'text-muted-300'"
-                      />
+                      <Icon v-for="star in 5" :key="star" name="ph:star-fill" class="size-5"
+                        :class="star <= feedbackForm.rating ? 'text-yellow-400' : 'text-muted-300'" />
                     </div>
                     <span class="text-primary-600 dark:text-primary-400 text-lg font-bold">
                       {{ feedbackForm.rating }}/5
@@ -4178,19 +4166,17 @@ const showStatisticsInfo = () => {
                       <Icon name="ph:warning-duotone" class="text-danger-500 size-4" />
                       <span class="text-danger-700 dark:text-danger-300 text-sm font-medium">مشکلات</span>
                     </div>
-                    <span class="bg-danger-100 dark:bg-danger-900/40 text-danger-600 dark:text-danger-400 rounded-full px-2 py-0.5 text-xs">
-                      {{ Object.keys(feedbackForm.problems_categories).filter(k => feedbackForm.problems_categories[k]).length }}
+                    <span
+                      class="bg-danger-100 dark:bg-danger-900/40 text-danger-600 dark:text-danger-400 rounded-full px-2 py-0.5 text-xs">
+                      {{Object.keys(feedbackForm.problems_categories).filter(k =>
+                        feedbackForm.problems_categories[k]).length}}
                     </span>
                   </div>
                   <div class="space-y-1 text-xs">
-                    <div
-                      v-for="(selected, key) in feedbackForm.problems_categories"
-                      v-if="selected"
-                      :key="key"
-                      class="text-danger-600 dark:text-danger-400 flex items-center gap-1"
-                    >
+                    <div v-for="(selected, key) in feedbackForm.problems_categories" v-if="selected" :key="key"
+                      class="text-danger-600 dark:text-danger-400 flex items-center gap-1">
                       <span>•</span>
-                      <span>{{ FEEDBACK_CATEGORIES.problems.subcategories.find(p => p.id === key)?.name }}</span>
+                      <span>{{FEEDBACK_CATEGORIES.problems.subcategories.find(p => p.id === key)?.name}}</span>
                     </div>
                   </div>
                 </div>
@@ -4202,19 +4188,17 @@ const showStatisticsInfo = () => {
                       <Icon name="ph:heart-duotone" class="text-success-500 size-4" />
                       <span class="text-success-700 dark:text-success-300 text-sm font-medium">نقاط قوت</span>
                     </div>
-                    <span class="bg-success-100 dark:bg-success-900/40 text-success-600 dark:text-success-400 rounded-full px-2 py-0.5 text-xs">
-                      {{ Object.keys(feedbackForm.quality_categories).filter(k => feedbackForm.quality_categories[k]).length }}
+                    <span
+                      class="bg-success-100 dark:bg-success-900/40 text-success-600 dark:text-success-400 rounded-full px-2 py-0.5 text-xs">
+                      {{Object.keys(feedbackForm.quality_categories).filter(k =>
+                        feedbackForm.quality_categories[k]).length}}
                     </span>
                   </div>
                   <div class="space-y-1 text-xs">
-                    <div
-                      v-for="(selected, key) in feedbackForm.quality_categories"
-                      v-if="selected"
-                      :key="key"
-                      class="text-success-600 dark:text-success-400 flex items-center gap-1"
-                    >
+                    <div v-for="(selected, key) in feedbackForm.quality_categories" v-if="selected" :key="key"
+                      class="text-success-600 dark:text-success-400 flex items-center gap-1">
                       <span>•</span>
-                      <span>{{ FEEDBACK_CATEGORIES.quality.subcategories.find(q => q.id === key)?.name }}</span>
+                      <span>{{FEEDBACK_CATEGORIES.quality.subcategories.find(q => q.id === key)?.name}}</span>
                     </div>
                   </div>
                 </div>
@@ -4226,26 +4210,26 @@ const showStatisticsInfo = () => {
                       <Icon name="ph:lightbulb-duotone" class="text-warning-500 size-4" />
                       <span class="text-warning-700 dark:text-warning-300 text-sm font-medium">پیشنهادات</span>
                     </div>
-                    <span class="bg-warning-100 dark:bg-warning-900/40 text-warning-600 dark:text-warning-400 rounded-full px-2 py-0.5 text-xs">
-                      {{ Object.keys(feedbackForm.improvements_categories).filter(k => feedbackForm.improvements_categories[k]).length }}
+                    <span
+                      class="bg-warning-100 dark:bg-warning-900/40 text-warning-600 dark:text-warning-400 rounded-full px-2 py-0.5 text-xs">
+                      {{Object.keys(feedbackForm.improvements_categories).filter(k =>
+                        feedbackForm.improvements_categories[k]).length}}
                     </span>
                   </div>
                   <div class="space-y-1 text-xs">
-                    <div
-                      v-for="(selected, key) in feedbackForm.improvements_categories"
-                      v-if="selected"
-                      :key="key"
-                      class="text-warning-600 dark:text-warning-400 flex items-center gap-1"
-                    >
+                    <div v-for="(selected, key) in feedbackForm.improvements_categories" v-if="selected" :key="key"
+                      class="text-warning-600 dark:text-warning-400 flex items-center gap-1">
                       <span>•</span>
-                      <span>{{ FEEDBACK_CATEGORIES.improvements.subcategories.find(i => i.id === key)?.name }}</span>
+                      <span>{{FEEDBACK_CATEGORIES.improvements.subcategories.find(i => i.id === key)?.name}}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- Custom Comments Summary -->
-              <div v-if="feedbackForm.general_text?.trim() || feedbackForm.problems_other?.trim() || feedbackForm.quality_other?.trim() || feedbackForm.improvements_other?.trim()" class="dark:bg-muted-800/70 rounded-xl bg-white/70 p-4">
+              <div
+                v-if="feedbackForm.general_text?.trim() || feedbackForm.problems_other?.trim() || feedbackForm.quality_other?.trim() || feedbackForm.improvements_other?.trim()"
+                class="dark:bg-muted-800/70 rounded-xl bg-white/70 p-4">
                 <h6 class="text-muted-700 dark:text-muted-300 mb-3 flex items-center gap-2 font-medium">
                   <Icon name="ph:chat-circle-text-duotone" class="size-4" />
                   نظرات تفصیلی
@@ -4269,7 +4253,8 @@ const showStatisticsInfo = () => {
 
             <!-- Final message -->
             <div class="mt-6 text-center">
-              <div class="text-info-700 dark:text-info-300 bg-info-100/50 dark:bg-info-900/30 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm">
+              <div
+                class="text-info-700 dark:text-info-300 bg-info-100/50 dark:bg-info-900/30 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm">
                 <Icon name="ph:heart-duotone" class="size-4" />
                 <span>ممنون از وقتی که برای بازخورد گذاشتید! 🙏</span>
               </div>
@@ -4291,37 +4276,21 @@ const showStatisticsInfo = () => {
       <div class="p-4 md:p-6">
         <div class="flex justify-between">
           <div>
-            <BaseButton
-              v-if="feedbackStep > 1"
-              variant="outline"
-              @click="prevFeedbackStep"
-            >
+            <BaseButton v-if="feedbackStep > 1" variant="outline" @click="prevFeedbackStep">
               <Icon name="ph:arrow-right" class="ml-1 size-4" />
               قبلی
             </BaseButton>
           </div>
           <div class="flex gap-2">
-            <BaseButton
-              :disabled="isSubmittingFeedback"
-              @click="closeFeedbackModal"
-            >
+            <BaseButton :disabled="isSubmittingFeedback" @click="closeFeedbackModal">
               انصراف
             </BaseButton>
-            <BaseButton
-              v-if="feedbackStep < 3"
-              color="primary"
-              @click="nextFeedbackStep"
-            >
+            <BaseButton v-if="feedbackStep < 3" color="primary" @click="nextFeedbackStep">
               بعدی
               <Icon name="ph:arrow-left" class="mr-1 size-4" />
             </BaseButton>
-            <BaseButton
-              v-else
-              color="success"
-              :loading="isSubmittingFeedback"
-              :disabled="isSubmittingFeedback || feedbackForm.rating === 0"
-              @click="submitMessageFeedback"
-            >
+            <BaseButton v-else color="success" :loading="isSubmittingFeedback"
+              :disabled="isSubmittingFeedback || feedbackForm.rating === 0" @click="submitMessageFeedback">
               <Icon name="ph:check" class="ml-1 size-4" />
               {{ existingFeedback ? 'به‌روزرسانی' : 'ثبت بازخورد' }}
             </BaseButton>
@@ -4332,11 +4301,7 @@ const showStatisticsInfo = () => {
   </TairoModal>
 
   <!-- Retry Confirmation Modal -->
-  <TairoModal
-    :open="showRetryConfirm"
-    size="sm"
-    @close="cancelRetry"
-  >
+  <TairoModal :open="showRetryConfirm" size="sm" @close="cancelRetry">
     <template #header>
       <div class="flex w-full items-center justify-between p-4 md:p-6">
         <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
@@ -4349,10 +4314,7 @@ const showStatisticsInfo = () => {
     <div class="p-4 md:p-6">
       <div class="mx-auto w-full max-w-xs text-center">
         <div class="relative mx-auto mb-4 flex size-24 justify-center">
-          <Icon
-            name="ph:arrow-clockwise-duotone"
-            class="text-warning-500 size-24"
-          />
+          <Icon name="ph:arrow-clockwise-duotone" class="text-warning-500 size-24" />
         </div>
 
         <h3 class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white">
@@ -4379,11 +4341,7 @@ const showStatisticsInfo = () => {
             انصراف
           </BaseButton>
 
-          <BaseButton
-            color="warning"
-            variant="solid"
-            @click="retryLastMessage"
-          >
+          <BaseButton color="warning" variant="solid" @click="retryLastMessage">
             <Icon name="ph:arrow-clockwise" class="ml-1 size-4" />
             تولید پاسخ جدید
           </BaseButton>
@@ -4393,11 +4351,7 @@ const showStatisticsInfo = () => {
   </TairoModal>
 
   <!-- Premium Status Modal -->
-  <TairoModal
-    :open="isPremiumModalOpen"
-    size="md"
-    @close="closePremiumModal"
-  >
+  <TairoModal :open="isPremiumModalOpen" size="md" @close="closePremiumModal">
     <template #header>
       <div class="flex w-full items-center justify-between p-4 md:p-6">
         <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
@@ -4410,26 +4364,23 @@ const showStatisticsInfo = () => {
     <div class="max-h-[70vh] overflow-y-auto p-4 md:p-6">
       <div class="space-y-6">
         <!-- Premium Status Card -->
-        <div
-          class="rounded-xl p-6"
+        <div class="rounded-xl p-6"
           :class="aiSettings.isPremium
             ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 dark:from-yellow-950/30 dark:to-orange-950/30 dark:border-yellow-800/30'
-            : 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 dark:from-gray-900/30 dark:to-gray-800/30 dark:border-gray-700/30'"
-        >
+            : 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 dark:from-gray-900/30 dark:to-gray-800/30 dark:border-gray-700/30'">
           <div class="mb-4 flex items-center gap-4">
-            <div
-              class="flex size-12 items-center justify-center rounded-xl"
-              :class="aiSettings.isPremium
-                ? 'bg-yellow-500/20 text-yellow-600'
-                : 'bg-gray-500/20 text-gray-600'"
-            >
+            <div class="flex size-12 items-center justify-center rounded-xl" :class="aiSettings.isPremium
+              ? 'bg-yellow-500/20 text-yellow-600'
+              : 'bg-gray-500/20 text-gray-600'">
               <Icon :name="aiSettings.isPremium ? 'ph:crown-fill' : 'ph:crown'" class="size-6" />
             </div>
             <div>
-              <h4 class="text-lg font-semibold" :class="aiSettings.isPremium ? 'text-yellow-800 dark:text-yellow-200' : 'text-gray-800 dark:text-gray-200'">
+              <h4 class="text-lg font-semibold"
+                :class="aiSettings.isPremium ? 'text-yellow-800 dark:text-yellow-200' : 'text-gray-800 dark:text-gray-200'">
                 {{ aiSettings.isPremium ? 'کاربر پریمیوم' : 'کاربر عادی' }}
               </h4>
-              <p class="text-sm" :class="aiSettings.isPremium ? 'text-yellow-600 dark:text-yellow-300' : 'text-gray-600 dark:text-gray-300'">
+              <p class="text-sm"
+                :class="aiSettings.isPremium ? 'text-yellow-600 dark:text-yellow-300' : 'text-gray-600 dark:text-gray-300'">
                 {{ aiSettings.isPremium ? 'تمام امکانات فعال است' : 'دسترسی محدود به امکانات' }}
               </p>
             </div>
@@ -4442,15 +4393,15 @@ const showStatisticsInfo = () => {
               :class="aiSettings.isPremium
                 ? 'bg-gray-500/20 text-gray-700 dark:text-gray-300 hover:bg-gray-500/30'
                 : 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-500/30'"
-              @click="togglePremiumStatus"
-            >
+              @click="togglePremiumStatus">
               <Icon :name="aiSettings.isPremium ? 'ph:crown' : 'ph:crown-fill'" class="size-4" />
               {{ aiSettings.isPremium ? 'تبدیل به عادی' : 'فعال‌سازی پریمیوم' }}
             </button>
           </div>
         </div>
         <!-- AI Settings Summary -->
-        <div class="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-6 dark:border-purple-800/30 dark:from-purple-950/30 dark:to-pink-950/30">
+        <div
+          class="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-6 dark:border-purple-800/30 dark:from-purple-950/30 dark:to-pink-950/30">
           <div class="mb-4 flex items-center gap-3">
             <div class="flex size-10 items-center justify-center rounded-lg bg-purple-500/20 text-purple-600">
               <Icon name="ph:robot" class="size-5" />
@@ -4464,19 +4415,23 @@ const showStatisticsInfo = () => {
             <div class="flex items-center gap-2">
               <Icon name="ph:chat-circle" class="size-4 text-purple-500" />
               <span class="text-purple-700 dark:text-purple-300">
-                {{ aiSettings.multiMsgMode === 'single' ? 'تک پیام' : aiSettings.multiMsgMode === 'multi_short' ? 'چند پیام کوتاه' : 'چند پیام متوسط' }}
+                {{ aiSettings.multiMsgMode === 'single' ? 'تک پیام' : aiSettings.multiMsgMode === 'multi_short' ? `چند
+                پیام کوتاه` : 'چند پیام متوسط' }}
               </span>
             </div>
             <div class="flex items-center gap-2">
               <Icon name="ph:text-aa" class="size-4 text-purple-500" />
               <span class="text-purple-700 dark:text-purple-300">
-                {{ aiSettings.lengthPref === 'short' ? 'کوتاه' : aiSettings.lengthPref === 'medium' ? 'متوسط' : 'بلند' }}
+                {{ aiSettings.lengthPref === 'short' ? 'کوتاه' : aiSettings.lengthPref === 'medium' ? 'متوسط' : 'بلند'
+                }}
               </span>
             </div>
             <div class="flex items-center gap-2">
               <Icon name="ph:smiley" class="size-4 text-purple-500" />
               <span class="text-purple-700 dark:text-purple-300">
-                {{ aiSettings.emojiLevel === 'very_high' ? 'فوق‌العاده' : aiSettings.emojiLevel === 'high' ? 'زیاد' : aiSettings.emojiLevel === 'medium' ? 'متعادل' : aiSettings.emojiLevel === 'low' ? 'کم' : 'بدون ایموجی' }}
+                {{ aiSettings.emojiLevel === 'very_high' ? 'فوق‌العاده' : aiSettings.emojiLevel === 'high' ? 'زیاد' :
+                  aiSettings.emojiLevel === 'medium' ? 'متعادل' : aiSettings.emojiLevel === 'low' ? 'کم' : 'بدون ایموجی'
+                }}
               </span>
             </div>
             <div class="flex items-center gap-2">
@@ -4488,10 +4443,8 @@ const showStatisticsInfo = () => {
           </div>
 
           <div class="mt-4 border-t border-purple-200 pt-4 dark:border-purple-700">
-            <NuxtLink
-              to="/settings/ai-response"
-              class="inline-flex items-center gap-2 text-sm text-purple-600 transition-colors hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200"
-            >
+            <NuxtLink to="/settings/ai-response"
+              class="inline-flex items-center gap-2 text-sm text-purple-600 transition-colors hover:text-purple-700 dark:text-purple-300 dark:hover:text-purple-200">
               <Icon name="ph:gear" class="size-4" />
               تغییر تنظیمات AI
             </NuxtLink>
@@ -4512,7 +4465,8 @@ const showStatisticsInfo = () => {
       </div>
     </template>
     <div class="max-h-[70vh] space-y-6 overflow-y-auto px-8 py-2">
-      <div class="mx-2 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 p-8 dark:from-yellow-950/20 dark:to-amber-950/20">
+      <div
+        class="mx-2 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 p-8 dark:from-yellow-950/20 dark:to-amber-950/20">
         <div class="mb-6 flex flex-row-reverse items-start gap-4">
           <div class="rounded-xl bg-yellow-500 p-3 shadow-lg">
             <Icon name="ph:sparkle-duotone" class="size-7 text-white" />
@@ -4562,19 +4516,12 @@ const showStatisticsInfo = () => {
     </div>
     <template #footer>
       <div class="flex items-center justify-between gap-6 px-8 py-6">
-        <BaseButton
-          color="muted"
-          size="lg"
-          class="px-6 py-3 leading-tight"
-          @click="showPremiumModal = false"
-        >
+        <BaseButton color="muted" size="lg" class="px-6 py-3 leading-tight" @click="showPremiumModal = false">
           بعداً
         </BaseButton>
-        <BaseButton
-          size="lg"
+        <BaseButton size="lg"
           class="bg-gradient-to-r from-yellow-500 to-amber-500 px-8 py-3 font-semibold leading-tight text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
-          @click="$router.push('/onboarding')"
-        >
+          @click="$router.push('/onboarding')">
           <Icon name="ph:crown-duotone" class="ml-2 size-5" />
           بروزرسانی به پرمیوم
         </BaseButton>
@@ -4587,40 +4534,74 @@ const showStatisticsInfo = () => {
 .typing-ellipsis {
   display: inline-block;
   width: 1.5em;
-  text-align: right; /* RTL support */
+  text-align: right;
+  /* RTL support */
   direction: rtl;
 }
+
 .typing-ellipsis::after {
   content: '';
   display: inline-block;
   width: 1.5em;
   vertical-align: bottom;
-  animation: ellipsis-rtl steps(4,end) 1.2s infinite;
+  animation: ellipsis-rtl steps(4, end) 1.2s infinite;
 }
+
 @keyframes ellipsis-rtl {
-  0% { content: ''; }
-  25% { content: '\002E'; }        /* . */
-  50% { content: '\002E\002E'; }  /* .. */
-  75% { content: '\002E\002E\002E'; } /* ... */
-  100% { content: ''; }
+  0% {
+    content: '';
+  }
+
+  25% {
+    content: '\002E';
+  }
+
+  /* . */
+  50% {
+    content: '\002E\002E';
+  }
+
+  /* .. */
+  75% {
+    content: '\002E\002E\002E';
+  }
+
+  /* ... */
+  100% {
+    content: '';
+  }
 }
 
 /* Pulse animation for premium alert */
 @keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.9; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
 }
+
 .animate-pulse-slow {
   animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-
 </style>
 <style scoped>
 #no-money-message {
   justify-content: space-evenly;
 }
-.hide-scrollbar::-webkit-scrollbar { display: none; }
-.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
 /* Mobile timer positioning */
 @media (max-width: 640px) {
@@ -4628,12 +4609,14 @@ const showStatisticsInfo = () => {
     position: absolute;
     top: 85px;
     right: 1rem;
-    z-index: 10; /* Lower z-index to ensure sidebar is above */
+    z-index: 10;
+    /* Lower z-index to ensure sidebar is above */
   }
 }
 
 /* Ensure sidebar is above timer */
 .border-r {
-  z-index: 20; /* Higher z-index for sidebar */
+  z-index: 20;
+  /* Higher z-index for sidebar */
 }
 </style>
