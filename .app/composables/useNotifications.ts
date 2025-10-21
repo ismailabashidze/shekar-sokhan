@@ -1,953 +1,817 @@
-import type { Ref } from 'vue'
-import { usePushNotifications } from './usePushNotifications'
+import { getToken, onMessage } from 'firebase/messaging'
+import type { Messaging } from 'firebase/messaging'
+import type PocketBase from 'pocketbase'
 
-// PocketBase Notification Record Interface (matches the schema)
-export interface PBNotificationRecord {
-  id: string
+// Types for notification preferences
+interface NotificationPreferences {
+  id?: string
+  user_id: string
+  enabled: boolean
+  session_reminders: boolean
+  admin_messages: boolean
+  system_alerts: boolean
+  quiet_hours_start: string // "22:00"
+  quiet_hours_end: string   // "08:00"
+  frequency: 'immediate' | 'hourly' | 'daily'
+  timezone: string
+  created?: string
+  updated?: string
+}
+
+// Types for notification analytics
+interface NotificationAnalytics {
+  id?: string
   title: string
   message: string
-  complete_message?: string
-  type: 'info' | 'success' | 'warning' | 'error' | 'system'
+  type: 'session' | 'admin' | 'system'
   priority: 'low' | 'medium' | 'high' | 'urgent'
+  recipient_user_id: string
+  campaign_id?: string
+  template_id?: string
   is_read: boolean
-  user_id?: string
-  user_name?: string
-  user_avatar?: string
-  user_role?: string
+  read_at?: string
   action_url?: string
   action_text?: string
-  read_at?: string
-  recipient_user_id?: string
-  announce_time?: string
-  rule_id?: string
-  fcm_sent?: boolean
-  fcm_sent_at?: string
-  created: string
-  updated: string
-  expand?: {
-    user?: {
-      id: string
-      name: string
-      avatar?: string
-      role?: string
-    }
-    recipient_user_id?: {
-      id: string
-      name: string
-      avatar?: string
-    }
-  }
+  scheduled_for: string
+  sent_at?: string
+  delivered_at?: string
+  clicked_at?: string
+  metadata?: Record<string, any>
+  created?: string
+  updated?: string
 }
 
-// Frontend Notification Interface (for easier use in components)
-export interface Notification {
-  id: string
-  title: string
-  message: string
-  completeMessage?: string // فیلد جدید برای محتوای کامل rich editor
-  type: 'info' | 'success' | 'warning' | 'error' | 'system'
-  priority: 'low' | 'medium' | 'high' | 'urgent'
-  isRead: boolean
-  createdAt: string
-  readAt?: string
-  announceTime?: string // زمان اعلان - اختیاری
-  user?: {
-    id: string
-    name: string
-    avatar: string
-    role?: string
-  }
-  actionUrl?: string
-  actionText?: string
-}
+export const useNotifications = () => {
+  const { $messaging, $pb } = useNuxtApp()
+  const pb = $pb as PocketBase // PocketBase instance
 
-export type NotificationFilter = 'all' | 'unread' | 'read'
+  // VAPID key for web push
+  const VAPID_KEY =
+    'BNAoJ2HinfmirzJvdj5nKlX4k5mY_RO0Wz0CbFtfck6hApgo9rYxwhy6n0G8UW5n5c5nt-gsHRdsIx7LY80fmJ0'
 
-// Transform PocketBase record to frontend interface
-function transformPBRecord(record: PBNotificationRecord): Notification {
-  return {
-    id: record.id,
-    title: record.title,
-    message: record.message,
-    completeMessage: record.complete_message,
-    type: record.type,
-    priority: record.priority,
-    isRead: record.is_read,
-    createdAt: record.created,
-    readAt: record.read_at,
-    announceTime: record.announce_time,
-    user: record.user_id
-      ? {
-          id: record.user_id,
-          name: record.user_name || 'نامشخص',
-          avatar: record.user_avatar || '/img/avatars/placeholder.webp',
-          role: record.user_role,
-        }
-      : record.expand?.user
-        ? {
-            id: record.expand.user.id,
-            name: record.expand.user.name,
-            avatar: record.expand.user.avatar || '/img/avatars/placeholder.webp',
-            role: record.expand.user.role,
-          }
-        : undefined,
-    actionUrl: record.action_url,
-    actionText: record.action_text,
-  }
-}
-
-// Global singleton instance
-let notificationsInstance: any = null
-let isInitialized = false
-let initPromise: Promise<void> | null = null
-let cleanupHandler: (() => void) | null = null
-let currentFetchController: AbortController | null = null
-
-export function useNotifications() {
-  // Return existing instance if available
-  if (notificationsInstance) {
-    return notificationsInstance
-  }
-
-  const { $pb } = useNuxtApp()
-  const notifications: Ref<Notification[]> = ref([])
-  const currentFilter: Ref<NotificationFilter> = ref('unread')
-  const isLoading = ref(false)
-  const isUpdating = ref(false)
-  const lastUpdateTime = ref(Date.now())
-  const error = ref<string | null>(null)
-
-  // Realtime subscription reference
-  const realtimeSubscription = ref<any>(null)
-  const isRealtimeConnected = ref(false)
-
-  const pwaNotifications = ref<ReturnType<typeof usePwaNotifications> | null>(null)
-  const pushNotifications = ref<ReturnType<typeof usePushNotifications> | null>(null)
-
-  // Get current user ID
-  const getCurrentUserId = () => {
-    if (!process.client) return null
-    return $pb.authStore.model?.id || null
-  }
-
-  // Computed properties
-  const unreadCount = computed(() => {
-    const count = visibleNotifications.value.filter(n => !n.isRead).length
-    console.debug('Unread count computed:', count, 'from', visibleNotifications.value.length, 'visible notifications')
-    return count
-  })
-
-  const highPriorityNotifications = computed(() => {
-    return visibleNotifications.value.filter(n => !n.isRead && (n.priority === 'high' || n.priority === 'urgent'))
-  })
-
-  // اعلانات زمان‌بندی شده که هنوز زمان‌شان نرسیده
-  const scheduledNotifications = computed(() => {
-    const now = new Date()
-    return notifications.value.filter((n) => {
-      // بررسی وجود و اعتبار announce_time
-      const hasValidAnnounceTime = n.announceTime
-        && n.announceTime.trim() !== ''
-        && n.announceTime !== 'null'
-        && n.announceTime !== 'undefined'
-
-      if (!hasValidAnnounceTime) return false
-
-      const announceTime = new Date(n.announceTime)
-
-      // بررسی معتبر بودن تاریخ parsed شده
-      if (isNaN(announceTime.getTime())) {
+  /**
+   * Request notification permission from user
+   */
+  const requestPermission = async () => {
+    try {
+      if (!('Notification' in window)) {
+        console.error('❌ This browser does not support notifications')
         return false
       }
 
-      return announceTime > now
-    })
-  })
+      const permission = await Notification.requestPermission()
 
-  // اعلانات قابل نمایش (فقط اعلاناتی که زمان‌شان رسیده)
-  const visibleNotifications = computed(() => {
-    const now = new Date()
-    return notifications.value.filter((n) => {
-      // بررسی وجود و اعتبار announce_time
-      const hasValidAnnounceTime = n.announceTime
-        && n.announceTime.trim() !== ''
-        && n.announceTime !== 'null'
-        && n.announceTime !== 'undefined'
-
-      // اگر زمان اعلان تنظیم نشده یا نامعتبر است، همیشه نمایش داده شود
-      if (!hasValidAnnounceTime) {
+      if (permission === 'granted') {
+        console.log('✅ Notification permission granted')
+        await saveFCMToken()
         return true
+      } else if (permission === 'denied') {
+        console.log('❌ Notification permission denied')
+        return false
+      } else {
+        console.log('⚠️ Notification permission dismissed')
+        return false
       }
-
-      // Parse announce time
-      const announceTime = new Date(n.announceTime)
-
-      // بررسی معتبر بودن تاریخ parsed شده
-      if (isNaN(announceTime.getTime())) {
-        return true
-      }
-
-      // اگر زمان اعلان رسیده، نمایش داده شود
-      return announceTime <= now
-    })
-  })
-
-  // بروزرسانی filteredNotifications برای استفاده از visibleNotifications
-  const filteredNotifications = computed(() => {
-    const visible = visibleNotifications.value
-    switch (currentFilter.value) {
-      case 'unread':
-        return visible.filter(n => !n.isRead)
-      case 'read':
-        return visible.filter(n => n.isRead)
-      default:
-        return visible
-    }
-  })
-
-  const urgentNotifications = computed(() => {
-    return visibleNotifications.value.filter(n => !n.isRead && n.priority === 'urgent')
-  })
-
-  // PWA notification helper - handles both immediate and scheduled notifications
-  const triggerPwaNotification = async (notification: Notification) => {
-    if (!process.client) return
-
-    const pwa = pwaNotifications.value
-    if (!pwa) return
-
-    try {
-      if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
-        const granted = await pwa.autoRequestPermission()
-        if (!granted) {
-          console.warn('PWA notification permission denied, cannot show notification')
-          return
-        }
-      }
-
-      const notificationOptions = {
-        title: notification.title,
-        message: notification.message,
-        type: notification.type,
-        priority: notification.priority,
-        url: notification.actionUrl || '/notifications',
-        actionText: notification.actionText,
-        tag: `notification-${notification.id}`,
-      }
-
-      // Check if this notification should be scheduled for the future
-      if (notification.announceTime) {
-        const announceDate = new Date(notification.announceTime)
-        const now = new Date()
-
-        if (announceDate > now) {
-          // This is a future notification - schedule it instead of showing immediately
-          const scheduledId = await pwa.scheduleLocalNotification(notificationOptions, announceDate)
-
-          if (scheduledId) {
-          }
-          return
-        }
-      }
-
-      // Show immediate notification for current/past announcements
-      await pwa.showLocalNotification(notificationOptions)
-    }
-    catch (err) {
-
+    } catch (error) {
+      console.error('❌ Error requesting notification permission:', error)
+      return false
     }
   }
 
-  // Realtime subscription management
-  const subscribeToNotifications = async () => {
-    if (!process.client) return
-
-    const userId = getCurrentUserId()
-    if (!userId || !$pb.authStore.isValid) {
-      console.warn('Cannot subscribe to notifications: user not authenticated')
-      return
-    }
-
-    // Unsubscribe from previous connection if exists
-    await unsubscribeFromNotifications()
-
+  /**
+   * Get FCM token and save to PocketBase with enhanced handling
+   */
+  const saveFCMToken = async (forceRefresh = false) => {
     try {
-      console.log('Attempting to subscribe to realtime notifications...')
+      const messaging = $messaging as Messaging
 
-      // Subscribe to notifications with filter for current user
-      realtimeSubscription.value = await $pb.collection('notifications').subscribe('*', async (e) => {
-        console.log('Realtime notification event:', e.action, e.record)
+      if (!messaging) {
+        console.error('❌ Firebase messaging not initialized')
+        return null
+      }
 
-        // Only process notifications for current user
-        const record = e.record as PBNotificationRecord
-        if (record.recipient_user_id !== userId) return
+      // Check if we need to refresh the token
+      if (!forceRefresh && pb.authStore.model?.id) {
+        const user = await pb.collection('users').getOne(pb.authStore.model.id)
+        const tokenUpdatedAt = user.fcm_token_updated_at ? new Date(user.fcm_token_updated_at) : null
 
-        const transformedNotification = transformPBRecord(record)
-
-        switch (e.action) {
-          case 'create':
-            // Add new notification to the beginning of the list
-            notifications.value.unshift(transformedNotification)
-            console.debug('Realtime: Added new notification', transformedNotification.id, 'Total notifications:', notifications.value.length)
-
-            // Always trigger PWA notification for new notifications (even if read)
-            // This ensures the user sees the notification immediately
-            await triggerPwaNotification(transformedNotification)
-            break
-
-          case 'update':
-            // Update existing notification
-            const updateIndex = notifications.value.findIndex(n => n.id === transformedNotification.id)
-            if (updateIndex > -1) {
-              notifications.value[updateIndex] = transformedNotification
-              console.debug('Realtime: Updated notification', transformedNotification.id, 'at index', updateIndex)
-            }
-            break
-
-          case 'delete':
-            // Remove notification from list
-            const deleteIndex = notifications.value.findIndex(n => n.id === record.id)
-            if (deleteIndex > -1) {
-              notifications.value.splice(deleteIndex, 1)
-              console.debug('Realtime: Deleted notification', record.id, 'from index', deleteIndex)
-            }
-            break
+        // If token was updated less than 24 hours ago, don't refresh unless forced
+        if (tokenUpdatedAt && (Date.now() - tokenUpdatedAt.getTime()) < 24 * 60 * 60 * 1000) {
+          console.log('📱 FCM token is still fresh, skipping refresh')
+          return user.fcm_token
         }
+      }
 
-        lastUpdateTime.value = Date.now()
+      // Get FCM token (this will refresh if needed)
+      const token = await getToken(messaging, {
+        vapidKey: VAPID_KEY,
       })
 
-      isRealtimeConnected.value = true
-      console.log('Successfully subscribed to notifications realtime updates')
-    }
-    catch (err: any) {
-      console.error('Error subscribing to notifications:', err)
-      isRealtimeConnected.value = false
+      console.log('📱 FCM Token obtained:', token)
 
-      // Don't show error for network issues - just log it
-      if (err.message?.includes('INCOMPLETE_CHUNKED_ENCODING')
-        || err.message?.includes('net::ERR_')
-        || err.name === 'TypeError') {
-        console.warn('Realtime connection failed, will retry later:', err.message)
+      // Save to PocketBase if user is logged in
+      if (pb.authStore.model?.id) {
+        await pb.collection('users').update(pb.authStore.model.id, {
+          fcm_token: token,
+          fcm_token_updated_at: new Date().toISOString(),
+          last_active_at: new Date().toISOString(),
+        })
 
-        // Retry connection after a delay
-        setTimeout(() => {
-          if (process.client && $pb.authStore.isValid) {
-            console.log('Retrying realtime connection...')
-            subscribeToNotifications()
-          }
-        }, 5000) // Retry after 5 seconds
+        console.log('✅ FCM token saved to PocketBase')
+      } else {
+        console.warn('⚠️ User not logged in, token not saved')
       }
-      else {
-        error.value = 'خطا در اتصال به سیستم اعلانات فوری'
-      }
+
+      return token
+    } catch (error) {
+      console.error('❌ Error getting/saving FCM token:', error)
+      return null
     }
   }
 
-  const unsubscribeFromNotifications = async () => {
-    if (realtimeSubscription.value) {
-      try {
-        await $pb.collection('notifications').unsubscribe(realtimeSubscription.value)
-        console.log('Unsubscribed from notifications realtime updates')
+  /**
+   * Validate FCM token before sending notifications
+   */
+  const validateFCMToken = async (): Promise<boolean> => {
+    try {
+      if (!pb.authStore.model?.id) {
+        return false
       }
-      catch (err: any) {
-        // Ignore errors when unsubscribing - connection might already be closed
-        console.warn('Error unsubscribing from notifications (this is usually harmless):', err.message)
+
+      const user = await pb.collection('users').getOne(pb.authStore.model.id)
+
+      // Check if token exists
+      if (!user.fcm_token) {
+        console.log('📱 No FCM token found, requesting new one')
+        const newToken = await saveFCMToken(true)
+        return !!newToken
       }
-      finally {
-        // Always reset the subscription state
-        realtimeSubscription.value = null
-        isRealtimeConnected.value = false
+
+      // Check if token is older than 7 days (FCM tokens can expire)
+      const tokenUpdatedAt = user.fcm_token_updated_at ? new Date(user.fcm_token_updated_at) : null
+      if (!tokenUpdatedAt || (Date.now() - tokenUpdatedAt.getTime()) > 7 * 24 * 60 * 60 * 1000) {
+        console.log('📱 FCM token is old, refreshing')
+        const newToken = await saveFCMToken(true)
+        return !!newToken
       }
+
+      return true
+    } catch (error) {
+      console.error('❌ Error validating FCM token:', error)
+      return false
     }
   }
 
-  // Methods
-  const fetchNotifications = async (page = 1, perPage = 50) => {
-    if (!process.client) return
+  /**
+   * Refresh FCM token automatically
+   */
+  const refreshFCMToken = async (): Promise<string | null> => {
+    try {
+      console.log('🔄 Refreshing FCM token')
+      return await saveFCMToken(true)
+    } catch (error) {
+      console.error('❌ Error refreshing FCM token:', error)
+      return null
+    }
+  }
 
-    const userId = getCurrentUserId()
-    console.log('Fetch notifications called:', {
-      page,
-      perPage,
-      userId,
-      authValid: $pb?.authStore?.isValid,
-      authModel: $pb?.authStore?.model?.id,
-    })
+  /**
+   * Listen for foreground messages
+   */
+  const listenToMessages = () => {
+    const messaging = $messaging as Messaging
 
-    if (!userId) {
-      console.warn('Cannot fetch notifications: user not authenticated')
-      error.value = 'User not authenticated'
+    if (!messaging) {
+      console.error('❌ Firebase messaging not initialized')
       return
     }
 
-    // Cancel previous request if still pending
-    if (currentFetchController) {
-      currentFetchController.abort()
-    }
+    onMessage(messaging, (payload) => {
+      console.log('📬 Foreground message received:', payload)
 
-    // Create new abort controller
-    currentFetchController = new AbortController()
-    const signal = currentFetchController.signal
+      // Show notification when app is in foreground
+      if (payload.notification) {
+        const notificationTitle = payload.notification.title || 'New notification'
+        const notificationOptions = {
+          body: payload.notification.body || '',
+          icon: '/icon.png',
+          badge: '/badge.png',
+          data: payload.data,
+          tag: payload.data?.notificationId || 'default',
+          requireInteraction: false,
+        }
 
-    try {
-      if (page === 1) {
-        isLoading.value = true
+        // Show browser notification
+        if (Notification.permission === 'granted') {
+          const notification = new Notification(
+            notificationTitle,
+            notificationOptions,
+          )
+
+          // Handle notification click
+          notification.onclick = (event) => {
+            event.preventDefault()
+            const actionUrl = payload.data?.actionUrl || '/'
+            window.open(actionUrl, '_blank')
+            notification.close()
+          }
+        }
       }
-      error.value = null
 
-      // Add signal to the request
-      const records = await $pb.collection('notifications').getList<PBNotificationRecord>(page, perPage, {
-        filter: `recipient_user_id = "${userId}"`,
+      // Optional: Update UI, show toast, etc.
+      // You can emit an event here or update a reactive state
+    })
+  }
+
+  /**
+   * Update user's last active timestamp
+   */
+  const updateLastActive = async () => {
+    try {
+      if (pb.authStore.model?.id) {
+        await pb.collection('users').update(pb.authStore.model.id, {
+          last_active_at: new Date().toISOString(),
+        })
+      }
+    } catch (error) {
+      console.debug('Could not update last_active_at:', error)
+    }
+  }
+
+  /**
+   * Get user's unread notifications
+   */
+  const getUnreadNotifications = async () => {
+    try {
+      if (!pb.authStore.model?.id) {
+        return []
+      }
+
+      const notifications = await pb.collection('notifications').getList(1, 50, {
+        filter: `recipient_user_id = "${pb.authStore.model.id}" && is_read = false`,
         sort: '-created',
-        expand: 'user,recipient_user_id',
-        signal, // Add abort signal
       })
 
-      // Transform PocketBase records to frontend format
-      const transformedNotifications = records.items.map(transformPBRecord)
-
-      // Check for new notifications to trigger PWA notifications
-      if (page === 1 && notifications.value.length > 0) {
-        const newNotifications = transformedNotifications.filter(newNotif =>
-          !notifications.value.some(existing => existing.id === newNotif.id),
-        )
-
-        // Trigger PWA notifications for all new notifications
-        for (const newNotif of newNotifications) {
-          await triggerPwaNotification(newNotif)
-        }
-      }
-
-      if (page === 1) {
-        notifications.value = transformedNotifications
-      }
-      else {
-        notifications.value.push(...transformedNotifications)
-      }
-
-      lastUpdateTime.value = Date.now()
-    }
-    catch (err: any) {
-      // Ignore abort errors - they're expected when we cancel requests
-      if (err.name === 'AbortError' || err.message?.includes('autocancelled')) {
-        console.log('Fetch request was cancelled - this is normal')
-        return
-      }
-
-      console.error('Error fetching notifications:', err)
-      error.value = err.message || 'خطا در دریافت اعلان‌ها'
-    }
-    finally {
-      if (page === 1) {
-        isLoading.value = false
-      }
-      // Clear the controller reference if this was the active request
-      if (currentFetchController?.signal === signal) {
-        currentFetchController = null
-      }
+      return notifications.items
+    } catch (error) {
+      console.error('❌ Error fetching notifications:', error)
+      return []
     }
   }
 
+  /**
+   * Get user's notification history with pagination
+   */
+  const getNotificationHistory = async (page = 1, perPage = 20, filters?: {
+    type?: 'session' | 'admin' | 'system'
+    priority?: 'low' | 'medium' | 'high' | 'urgent'
+    isRead?: boolean
+    dateFrom?: Date
+    dateTo?: Date
+  }) => {
+    try {
+      if (!pb.authStore.model?.id) {
+        return { items: [], totalItems: 0, totalPages: 0, page: 1, perPage: 20 }
+      }
+
+      // Build filter string
+      let filterParts = [`recipient_user_id = "${pb.authStore.model.id}"`]
+
+      if (filters?.type) {
+        filterParts.push(`type = "${filters.type}"`)
+      }
+
+      if (filters?.priority) {
+        filterParts.push(`priority = "${filters.priority}"`)
+      }
+
+      if (filters?.isRead !== undefined) {
+        filterParts.push(`is_read = ${filters.isRead}`)
+      }
+
+      if (filters?.dateFrom) {
+        filterParts.push(`created >= "${filters.dateFrom.toISOString()}"`)
+      }
+
+      if (filters?.dateTo) {
+        filterParts.push(`created <= "${filters.dateTo.toISOString()}"`)
+      }
+
+      const filterString = filterParts.join(' && ')
+
+      const result = await pb.collection('notifications').getList(page, perPage, {
+        filter: filterString,
+        sort: '-created',
+        expand: 'campaign_id,template_id'
+      })
+
+      return result
+    } catch (error) {
+      console.error('❌ Error fetching notification history:', error)
+      return { items: [], totalItems: 0, totalPages: 0, page: 1, perPage: 20 }
+    }
+  }
+
+  /**
+   * Get all notifications (read and unread) with pagination
+   */
+  const getAllNotifications = async (page = 1, perPage = 20) => {
+    return await getNotificationHistory(page, perPage)
+  }
+
+  /**
+   * Mark notification as read with analytics tracking
+   */
   const markAsRead = async (notificationId: string) => {
     try {
-      const notification = notifications.value.find(n => n.id === notificationId)
-      if (!notification || notification.isRead) return
-
-      // Update in PocketBase
-      await $pb.collection('notifications').update(notificationId, {
+      await pb.collection('notifications').update(notificationId, {
         is_read: true,
         read_at: new Date().toISOString(),
       })
 
-      // Update local state
-      notification.isRead = true
-      notification.readAt = new Date().toISOString()
-    }
-    catch (err: any) {
-      console.error('Error marking notification as read:', err)
-      error.value = err.message || 'خطا در به‌روزرسانی اعلان'
+      console.log('✅ Notification marked as read:', notificationId)
+      return true
+    } catch (error) {
+      console.error('❌ Error marking notification as read:', error)
+      return false
     }
   }
 
-  const markAsUnread = async (notificationId: string) => {
+  /**
+   * Mark all notifications as read
+   */
+  const markAllAsRead = async () => {
     try {
-      const notification = notifications.value.find(n => n.id === notificationId)
-      if (!notification || !notification.isRead) return
+      if (!pb.authStore.model?.id) {
+        return false
+      }
 
-      // Update in PocketBase
-      await $pb.collection('notifications').update(notificationId, {
-        is_read: false,
-        read_at: null,
+      const unreadNotifications = await getUnreadNotifications()
+
+      for (const notification of unreadNotifications) {
+        await markAsRead(notification.id)
+      }
+
+      console.log('✅ All notifications marked as read')
+      return true
+    } catch (error) {
+      console.error('❌ Error marking all as read:', error)
+      return false
+    }
+  }
+
+  /**
+   * Bulk mark notifications as read by IDs
+   */
+  const bulkMarkAsRead = async (notificationIds: string[]): Promise<boolean> => {
+    try {
+      const promises = notificationIds.map(id => markAsRead(id))
+      await Promise.all(promises)
+
+      console.log(`✅ ${notificationIds.length} notifications marked as read`)
+      return true
+    } catch (error) {
+      console.error('❌ Error bulk marking notifications as read:', error)
+      return false
+    }
+  }
+
+  /**
+   * Delete notification from history
+   */
+  const deleteNotification = async (notificationId: string): Promise<boolean> => {
+    try {
+      await pb.collection('notifications').delete(notificationId)
+      console.log('✅ Notification deleted:', notificationId)
+      return true
+    } catch (error) {
+      console.error('❌ Error deleting notification:', error)
+      return false
+    }
+  }
+
+  /**
+   * Bulk delete notifications by IDs
+   */
+  const bulkDeleteNotifications = async (notificationIds: string[]): Promise<boolean> => {
+    try {
+      const promises = notificationIds.map(id => deleteNotification(id))
+      await Promise.all(promises)
+
+      console.log(`✅ ${notificationIds.length} notifications deleted`)
+      return true
+    } catch (error) {
+      console.error('❌ Error bulk deleting notifications:', error)
+      return false
+    }
+  }
+
+  /**
+   * Clear old notifications (older than specified days)
+   */
+  const clearOldNotifications = async (olderThanDays = 30): Promise<boolean> => {
+    try {
+      if (!pb.authStore.model?.id) {
+        return false
+      }
+
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - olderThanDays)
+
+      const oldNotifications = await pb.collection('notifications').getList(1, 1000, {
+        filter: `recipient_user_id = "${pb.authStore.model.id}" && created < "${cutoffDate.toISOString()}"`,
       })
 
-      // Update local state
-      notification.isRead = false
-      notification.readAt = undefined
-    }
-    catch (err: any) {
-      console.error('Error marking notification as unread:', err)
-      error.value = err.message || 'خطا در به‌روزرسانی اعلان'
+      if (oldNotifications.items.length > 0) {
+        const ids = oldNotifications.items.map(n => n.id)
+        await bulkDeleteNotifications(ids)
+        console.log(`✅ Cleared ${ids.length} old notifications`)
+      }
+
+      return true
+    } catch (error) {
+      console.error('❌ Error clearing old notifications:', error)
+      return false
     }
   }
 
-  const markAllAsRead = async () => {
-    const userId = getCurrentUserId()
-    if (!userId) return
+  /**
+   * Check if user has granted notification permission
+   */
+  const hasPermission = () => {
+    if (!('Notification' in window)) {
+      return false
+    }
+    return Notification.permission === 'granted'
+  }
 
+  /**
+   * Initialize notifications with enhanced token management (call this on app mount or login)
+   */
+  const initialize = async () => {
     try {
-      isUpdating.value = true
+      // Check if permission already granted
+      if (hasPermission()) {
+        // Validate and refresh token if needed
+        await validateFCMToken()
+        listenToMessages()
 
-      // Get all unread notifications for this user
-      const unreadNotifications = notifications.value.filter(n => !n.isRead)
+        // Set up periodic token refresh (every 6 hours)
+        setInterval(async () => {
+          await validateFCMToken()
+        }, 6 * 60 * 60 * 1000)
 
-      // Update each notification in PocketBase
-      const updatePromises = unreadNotifications.map(notification =>
-        $pb.collection('notifications').update(notification.id, {
-          is_read: true,
-          read_at: new Date().toISOString(),
-        }),
+        return true
+      }
+
+      return false
+    } catch (error) {
+      console.error('❌ Error initializing notifications:', error)
+      return false
+    }
+  }
+
+  /**
+   * Get user's notification preferences
+   */
+  const getNotificationPreferences = async (): Promise<NotificationPreferences | null> => {
+    try {
+      if (!pb.authStore.model?.id) {
+        return null
+      }
+
+      const preferences = await pb.collection('notification_preferences').getFirstListItem(
+        `user_id = "${pb.authStore.model.id}"`
       )
 
-      await Promise.all(updatePromises)
+      return preferences as unknown as NotificationPreferences
+    } catch (error) {
+      // If no preferences found, return default preferences
+      if ((error as any).status === 404) {
+        return {
+          user_id: pb.authStore.model?.id || '',
+          enabled: true,
+          session_reminders: true,
+          admin_messages: true,
+          system_alerts: true,
+          quiet_hours_start: '22:00',
+          quiet_hours_end: '08:00',
+          frequency: 'immediate',
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        }
+      }
+      console.error('❌ Error fetching notification preferences:', error)
+      return null
+    }
+  }
 
-      // Update local state
-      notifications.value.forEach((notification) => {
-        if (!notification.isRead) {
-          notification.isRead = true
-          notification.readAt = new Date().toISOString()
+  /**
+   * Create or update user's notification preferences
+   */
+  const updateNotificationPreferences = async (preferences: Partial<NotificationPreferences>): Promise<boolean> => {
+    try {
+      if (!pb.authStore.model?.id) {
+        return false
+      }
+
+      // Validate quiet hours format
+      if (preferences.quiet_hours_start && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(preferences.quiet_hours_start)) {
+        throw new Error('Invalid quiet_hours_start format. Use HH:MM format.')
+      }
+      if (preferences.quiet_hours_end && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(preferences.quiet_hours_end)) {
+        throw new Error('Invalid quiet_hours_end format. Use HH:MM format.')
+      }
+
+      // Validate frequency
+      if (preferences.frequency && !['immediate', 'hourly', 'daily'].includes(preferences.frequency)) {
+        throw new Error('Invalid frequency. Must be immediate, hourly, or daily.')
+      }
+
+      const existingPreferences = await getNotificationPreferences()
+
+      if (existingPreferences?.id) {
+        // Update existing preferences
+        const updated = await pb.collection('notification_preferences').update(existingPreferences.id, {
+          ...preferences,
+          user_id: pb.authStore.model.id
+        })
+        console.log('✅ Notification preferences updated')
+        return true
+      } else {
+        // Create new preferences
+        const created = await pb.collection('notification_preferences').create({
+          user_id: pb.authStore.model.id,
+          enabled: true,
+          session_reminders: true,
+          admin_messages: true,
+          system_alerts: true,
+          quiet_hours_start: '22:00',
+          quiet_hours_end: '08:00',
+          frequency: 'immediate',
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          ...preferences
+        })
+        console.log('✅ Notification preferences created')
+        return true
+      }
+    } catch (error) {
+      console.error('❌ Error updating notification preferences:', error)
+      return false
+    }
+  }
+
+  /**
+   * Check if current time is within user's quiet hours
+   */
+  const isWithinQuietHours = async (): Promise<boolean> => {
+    try {
+      const preferences = await getNotificationPreferences()
+      if (!preferences || !preferences.enabled) {
+        return true // If disabled, consider it quiet hours
+      }
+
+      const now = new Date()
+      const userTimezone = preferences.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+
+      // Convert current time to user's timezone
+      const userTime = new Date(now.toLocaleString("en-US", { timeZone: userTimezone }))
+      const currentHour = userTime.getHours()
+      const currentMinute = userTime.getMinutes()
+      const currentTimeMinutes = currentHour * 60 + currentMinute
+
+      // Parse quiet hours
+      const [startHour, startMinute] = preferences.quiet_hours_start.split(':').map(Number)
+      const [endHour, endMinute] = preferences.quiet_hours_end.split(':').map(Number)
+      const startTimeMinutes = startHour * 60 + startMinute
+      const endTimeMinutes = endHour * 60 + endMinute
+
+      // Handle overnight quiet hours (e.g., 22:00 to 08:00)
+      if (startTimeMinutes > endTimeMinutes) {
+        return currentTimeMinutes >= startTimeMinutes || currentTimeMinutes <= endTimeMinutes
+      } else {
+        return currentTimeMinutes >= startTimeMinutes && currentTimeMinutes <= endTimeMinutes
+      }
+    } catch (error) {
+      console.error('❌ Error checking quiet hours:', error)
+      return false
+    }
+  }
+
+  /**
+   * Check if user should receive a specific type of notification
+   */
+  const shouldReceiveNotification = async (type: 'session' | 'admin' | 'system'): Promise<boolean> => {
+    try {
+      const preferences = await getNotificationPreferences()
+      if (!preferences || !preferences.enabled) {
+        return false
+      }
+
+      // Check if within quiet hours
+      if (await isWithinQuietHours()) {
+        return false
+      }
+
+      // Check type-specific preferences
+      switch (type) {
+        case 'session':
+          return preferences.session_reminders
+        case 'admin':
+          return preferences.admin_messages
+        case 'system':
+          return preferences.system_alerts
+        default:
+          return false
+      }
+    } catch (error) {
+      console.error('❌ Error checking notification permission:', error)
+      return false
+    }
+  }
+
+  /**
+   * Track notification delivery
+   */
+  const trackNotificationDelivery = async (notificationId: string): Promise<boolean> => {
+    try {
+      await pb.collection('notifications').update(notificationId, {
+        delivered_at: new Date().toISOString(),
+      })
+
+      console.log('📊 Notification delivery tracked:', notificationId)
+      return true
+    } catch (error) {
+      console.error('❌ Error tracking notification delivery:', error)
+      return false
+    }
+  }
+
+  /**
+   * Track notification click/interaction
+   */
+  const trackNotificationClick = async (notificationId: string, actionUrl?: string): Promise<boolean> => {
+    try {
+      const updateData: any = {
+        clicked_at: new Date().toISOString(),
+      }
+
+      // If not already read, mark as read when clicked
+      const notification = await pb.collection('notifications').getOne(notificationId)
+      if (!notification.is_read) {
+        updateData.is_read = true
+        updateData.read_at = new Date().toISOString()
+      }
+
+      await pb.collection('notifications').update(notificationId, updateData)
+
+      console.log('📊 Notification click tracked:', notificationId)
+
+      // Navigate to action URL if provided
+      if (actionUrl) {
+        window.open(actionUrl, '_blank')
+      }
+
+      return true
+    } catch (error) {
+      console.error('❌ Error tracking notification click:', error)
+      return false
+    }
+  }
+
+  /**
+   * Get notification analytics for a user
+   */
+  const getNotificationAnalytics = async (days = 30) => {
+    try {
+      if (!pb.authStore.model?.id) {
+        return null
+      }
+
+      const startDate = new Date()
+      startDate.setDate(startDate.getDate() - days)
+
+      const notifications = await pb.collection('notifications').getList(1, 1000, {
+        filter: `recipient_user_id = "${pb.authStore.model.id}" && created >= "${startDate.toISOString()}"`,
+        sort: '-created',
+      })
+
+      const analytics = {
+        total: notifications.items.length,
+        delivered: notifications.items.filter((n: any) => n.delivered_at).length,
+        opened: notifications.items.filter((n: any) => n.read_at).length,
+        clicked: notifications.items.filter((n: any) => n.clicked_at).length,
+        byType: {
+          session: notifications.items.filter((n: any) => n.type === 'session').length,
+          admin: notifications.items.filter((n: any) => n.type === 'admin').length,
+          system: notifications.items.filter((n: any) => n.type === 'system').length,
+        },
+        byPriority: {
+          low: notifications.items.filter((n: any) => n.priority === 'low').length,
+          medium: notifications.items.filter((n: any) => n.priority === 'medium').length,
+          high: notifications.items.filter((n: any) => n.priority === 'high').length,
+          urgent: notifications.items.filter((n: any) => n.priority === 'urgent').length,
+        },
+        engagementScore: 0
+      }
+
+      // Calculate engagement score (0-100)
+      if (analytics.delivered > 0) {
+        const openRate = analytics.opened / analytics.delivered
+        const clickRate = analytics.clicked / analytics.delivered
+        analytics.engagementScore = Math.round((openRate * 0.6 + clickRate * 0.4) * 100)
+      }
+
+      return analytics
+    } catch (error) {
+      console.error('❌ Error getting notification analytics:', error)
+      return null
+    }
+  }
+
+  /**
+   * Update notification metadata for tracking
+   */
+  const updateNotificationMetadata = async (notificationId: string, metadata: Record<string, any>): Promise<boolean> => {
+    try {
+      const notification = await pb.collection('notifications').getOne(notificationId)
+      const existingMetadata = notification.metadata || {}
+
+      await pb.collection('notifications').update(notificationId, {
+        metadata: { ...existingMetadata, ...metadata }
+      })
+
+      console.log('📊 Notification metadata updated:', notificationId)
+      return true
+    } catch (error) {
+      console.error('❌ Error updating notification metadata:', error)
+      return false
+    }
+  }
+
+  /**
+   * Setup authentication management for notifications
+   */
+  const setupAuthManagement = async (): Promise<boolean> => {
+    try {
+      console.log('🔐 Setting up notifications auth management...')
+
+      // Listen for auth state changes
+      pb.authStore.onChange((token, model) => {
+        if (model) {
+          console.log('✅ User authenticated, initializing notifications')
+          // User logged in - initialize notifications
+          initialize()
+        } else {
+          console.log('🔓 User logged out, clearing notification state')
+          // User logged out - could clear any notification state if needed
         }
       })
-    }
-    catch (err: any) {
-      console.error('Error marking all notifications as read:', err)
-      error.value = err.message || 'خطا در به‌روزرسانی اعلان‌ها'
-    }
-    finally {
-      isUpdating.value = false
-    }
-  }
 
-  const deleteNotification = async (notificationId: string) => {
-    try {
-      // Delete from PocketBase
-      await $pb.collection('notifications').delete(notificationId)
-
-      // Update local state
-      const index = notifications.value.findIndex(n => n.id === notificationId)
-      if (index > -1) {
-        notifications.value.splice(index, 1)
-      }
-    }
-    catch (err: any) {
-      console.error('Error deleting notification:', err)
-      error.value = err.message || 'خطا در حذف اعلان'
-    }
-  }
-
-  const refreshNotifications = async () => {
-    // Prevent multiple simultaneous refresh operations
-    if (isLoading.value || isUpdating.value) {
-      console.log('Refresh already in progress, skipping')
-      return
-    }
-
-    isUpdating.value = true
-    try {
-      await fetchNotifications()
-    }
-    finally {
-      isUpdating.value = false
-    }
-  }
-
-  // Create new notification (admin/system use)
-  const createNotification = async (data: {
-    title: string
-    message: string
-    complete_message?: string
-    type: 'info' | 'success' | 'warning' | 'error' | 'system'
-    priority: 'low' | 'medium' | 'high' | 'urgent'
-    recipient_user_id: string
-    user_id?: string
-    user_name?: string
-    user_avatar?: string
-    user_role?: string
-    action_url?: string
-    action_text?: string
-    announce_time?: string
-    rule_id?: string
-    fcm_sent?: boolean
-  }) => {
-    try {
-      const record = await $pb.collection('notifications').create<PBNotificationRecord>({
-        title: data.title,
-        message: data.message,
-        complete_message: data.complete_message,
-        type: data.type,
-        priority: data.priority,
-        recipient_user_id: data.recipient_user_id,
-        user_id: data.user_id,
-        user_name: data.user_name,
-        user_avatar: data.user_avatar,
-        user_role: data.user_role,
-        action_url: data.action_url,
-        action_text: data.action_text,
-        announce_time: data.announce_time,
-        rule_id: data.rule_id,
-        fcm_sent: data.fcm_sent || false,
-        is_read: false,
-      })
-
-      // If this notification is for the current user, add it to local state
-      const currentUserId = getCurrentUserId()
-      if (data.recipient_user_id === currentUserId) {
-        const transformedNotification = transformPBRecord(record)
-        notifications.value.unshift(transformedNotification)
-
-        // Always trigger PWA notification for new notification
-        await triggerPwaNotification(transformedNotification)
-      }
-
-      return record
-    }
-    catch (err: any) {
-      console.error('Error creating notification:', err)
-      error.value = err.message || 'خطا در ایجاد اعلان'
-      throw err
-    }
-  }
-
-  const setFilter = (filter: NotificationFilter) => {
-    currentFilter.value = filter
-  }
-
-  const getRelativeTime = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInMs = now.getTime() - date.getTime()
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60))
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
-
-    if (diffInMinutes < 1) return 'همین الان'
-    if (diffInMinutes < 60) return `${diffInMinutes} دقیقه پیش`
-    if (diffInHours < 24) return `${diffInHours} ساعت پیش`
-    if (diffInDays < 30) return `${diffInDays} روز پیش`
-
-    return new Intl.DateTimeFormat('fa-IR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(date)
-  }
-
-  const getTypeIcon = (type: Notification['type']) => {
-    switch (type) {
-      case 'info': return 'lucide:info'
-      case 'success': return 'lucide:check-circle'
-      case 'warning': return 'lucide:alert-triangle'
-      case 'error': return 'lucide:x-circle'
-      case 'system': return 'lucide:settings'
-      default: return 'lucide:bell'
-    }
-  }
-
-  const getTypeColor = (type: Notification['type']) => {
-    switch (type) {
-      case 'info': return 'primary'
-      case 'success': return 'success'
-      case 'warning': return 'warning'
-      case 'error': return 'danger'
-      case 'system': return 'muted'
-      default: return 'muted'
-    }
-  }
-
-  const getPriorityColor = (priority: Notification['priority']) => {
-    switch (priority) {
-      case 'urgent': return 'danger'
-      case 'high': return 'warning'
-      case 'medium': return 'primary'
-      case 'low': return 'muted'
-      default: return 'muted'
-    }
-  }
-
-  // NOTE: Auto-refresh is deprecated - using realtime subscriptions instead
-
-  // Setup auth state management - call this from app initialization
-  const setupAuthManagement = async () => {
-    if (!process.client || !$pb?.authStore) return
-
-    // Prevent multiple setups
-    if (cleanupHandler) {
-      console.log('Auth management already setup, skipping')
-      return
-    }
-
-    console.log('Setting up auth management for notifications...')
-
-    // Setup cleanup on browser close
-    cleanupHandler = () => {
-      globalCleanup()
-    }
-    window.addEventListener('beforeunload', cleanupHandler)
-
-    // Check if user is already authenticated and initialize if needed
-    console.log('Auth state check:', {
-      isValid: $pb.authStore.isValid,
-      isInitialized,
-      hasInitPromise: !!initPromise,
-      userId: $pb.authStore.model?.id,
-    })
-
-    if ($pb.authStore.isValid && !isInitialized && !initPromise) {
-      console.log('User already authenticated, initializing notifications for user:', $pb.authStore.model?.id)
-      try {
+      // If user is already authenticated, initialize immediately
+      if (pb.authStore.isValid && pb.authStore.model) {
+        console.log('✅ User already authenticated, initializing notifications')
         await initialize()
-        console.log('Notifications initialized successfully from auth management')
       }
-      catch (error) {
-        console.error('Failed to initialize notifications for authenticated user:', error)
-      }
-    }
-    else {
-      console.log('Skipping auto-initialization:', {
-        reason: !$pb.authStore.isValid
-          ? 'not authenticated'
-          : isInitialized
-            ? 'already initialized'
-            : initPromise ? 'initialization in progress' : 'unknown',
-      })
-    }
 
-    // Handle auth state changes
-    $pb.authStore.onChange(async (token, model) => {
-      if (!token || !model) {
-        // User logged out
-        console.log('User logged out, cleaning up notifications')
-        globalCleanup()
-        isInitialized = false
-        initPromise = null
-      }
-      else if (!isInitialized) {
-        // User logged in, reinitialize
-        console.log('User authenticated, reinitializing notifications for:', model.id)
-
-        try {
-          await reinitialize()
-          isInitialized = true
-        }
-        catch (error) {
-          console.error('Failed to reinitialize notifications:', error)
-          isInitialized = false
-          initPromise = null
-        }
-      }
-    })
-  }
-
-  // Initialize function
-  const initialize = async () => {
-    console.log('Initialize called with state:', {
-      isClient: process.client,
-      isLoading: isLoading.value,
-      isInitialized,
-      hasInitPromise: !!initPromise,
-      authValid: $pb?.authStore?.isValid,
-      userId: $pb?.authStore?.model?.id,
-    })
-
-    if (!process.client) {
-      console.warn('Initialize called on server side, skipping')
-      return
-    }
-
-    // Prevent multiple initialization attempts
-    if (isLoading.value || isInitialized) {
-      console.log('Initialization already completed or in progress')
-      return
-    }
-
-    if (initPromise) {
-      console.log('Waiting for existing initialization to complete')
-      return initPromise
-    }
-
-    initPromise = (async () => {
-      try {
-        isLoading.value = true
-        error.value = null
-
-        await fetchNotifications()
-        await subscribeToNotifications()
-
-        if (process.client) {
-          if (!pwaNotifications.value) {
-            pwaNotifications.value = usePwaNotifications()
-          }
-
-          if (!pushNotifications.value) {
-            pushNotifications.value = usePushNotifications()
-          }
-
-          if (pushNotifications.value) {
-            await pushNotifications.value.ensureServiceWorker()
-          }
-        }
-
-        if (process.client && pushNotifications.value) {
-          setTimeout(async () => {
-            try {
-              const granted = await pushNotifications.value!.requestPermission()
-              if (granted) {
-                await pushNotifications.value!.getBrowserToken()
-              }
-            }
-            catch (error) {
-              console.warn('Failed to request push permission', error)
-            }
-          }, 1500)
-        }
-
-        await updateUserActivity()
-
-        isInitialized = true
-        console.log('Notifications initialized successfully')
-      }
-      catch (err: any) {
-        console.error('Error initializing notifications:', err)
-        error.value = err.message || 'خطا در بارگیری اعلان‌ها'
-        isInitialized = false
-      }
-      finally {
-        isLoading.value = false
-        initPromise = null
-      }
-    })()
-
-    return initPromise
-  }
-
-  // Re-initialize for new user (after login)
-  const reinitialize = async () => {
-    // Clear existing data
-    notifications.value = []
-    currentFilter.value = 'unread'
-    error.value = null
-
-    // Unsubscribe from previous realtime connection
-    await unsubscribeFromNotifications()
-
-    // Initialize fresh
-    await initialize()
-  }
-
-  // Global cleanup function
-  const globalCleanup = async () => {
-    unsubscribeFromNotifications()
-
-    if (currentFetchController) {
-      currentFetchController.abort()
-      currentFetchController = null
-    }
-
-    if (process.client && pushNotifications.value) {
-      await pushNotifications.value.deleteBrowserToken()
-    }
-
-    // Reset PWA permission tracking on logout
-    if (process.client) {
-      const pwa = pwaNotifications.value
-      if (pwa && pwa.resetPermissionTracking) {
-        pwa.resetPermissionTracking()
-      }
-    }
-
-    // Remove window event listener if exists
-    if (process.client && cleanupHandler) {
-      window.removeEventListener('beforeunload', cleanupHandler)
-      cleanupHandler = null
-    }
-
-    notificationsInstance = null
-    isInitialized = false
-    initPromise = null
-  }
-
-  // Update user activity timestamp (for inactivity tracking)
-  const updateUserActivity = async () => {
-    try {
-      const userId = getCurrentUserId()
-      if (!userId) return
-
-      await $pb.collection('users').update(userId, {
-        last_active_at: new Date().toISOString(),
-      })
-    } catch (err) {
-      // Silent fail - not critical
-      console.debug('Failed to update user activity:', err)
+      console.log('✅ Notifications auth management setup complete')
+      return true
+    } catch (error) {
+      console.error('❌ Error setting up auth management:', error)
+      return false
     }
   }
 
-  // Note: No cleanup in composable since this is a global singleton
-  // Individual components should not cleanup the global instance
-
-  // Create the instance object
-  const instance = {
-    // State
-    notifications,
-    currentFilter,
-    isLoading,
-    isUpdating,
-    lastUpdateTime,
-    error,
-    isRealtimeConnected,
-
-    // Computed
-    unreadCount,
-    filteredNotifications,
-    visibleNotifications,
-    urgentNotifications,
-    highPriorityNotifications,
-    scheduledNotifications,
-
-    // Methods
-    fetchNotifications,
+  return {
+    requestPermission,
+    saveFCMToken,
+    listenToMessages,
+    updateLastActive,
+    getUnreadNotifications,
     markAsRead,
-    markAsUnread,
     markAllAsRead,
-    deleteNotification,
-    refreshNotifications,
-    createNotification,
-    setFilter,
+    hasPermission,
     initialize,
-    reinitialize,
+    // New preference management methods
+    getNotificationPreferences,
+    updateNotificationPreferences,
+    isWithinQuietHours,
+    shouldReceiveNotification,
+    // Enhanced FCM token management
+    validateFCMToken,
+    refreshFCMToken,
+    // Analytics tracking methods
+    trackNotificationDelivery,
+    trackNotificationClick,
+    getNotificationAnalytics,
+    updateNotificationMetadata,
+    // Notification history management
+    getNotificationHistory,
+    getAllNotifications,
+    bulkMarkAsRead,
+    deleteNotification,
+    bulkDeleteNotifications,
+    clearOldNotifications,
+    // Auth management
     setupAuthManagement,
-
-    // Realtime
-    subscribeToNotifications,
-    unsubscribeFromNotifications,
-
-    // Utility
-    getRelativeTime,
-    getTypeIcon,
-    getTypeColor,
-    getPriorityColor,
-
-    // PWA Integration
-    triggerPwaNotification,
-
-    // User activity tracking
-    updateUserActivity,
-
-    // Global cleanup
-    globalCleanup,
   }
-
-  // Store as singleton
-  notificationsInstance = instance
-
-  return instance
 }

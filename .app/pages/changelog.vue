@@ -2,1016 +2,104 @@
   <div class="bg-muted-100 dark:bg-muted-900 min-h-screen px-4 pb-10 pt-20 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-4xl">
       <div class="dark:bg-muted-800 rounded-lg bg-white p-6 shadow">
-        <h1 class="text-muted-900 mb-6 text-2xl font-bold dark:text-white">
-          تاریخچه تغییرات
-        </h1>
-
-        <div class="space-y-8">
-          <!-- Version 3.3.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 3.3.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              14 سپتامبر 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              بهبود‌ها
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>به‌روزرسانی نسخه به 3.3.0</li>
-              <li>بهبود سیستم مدیریت نسخه در کل پلتفرم</li>
-              <li>بهبود عملکرد PWA و سیستم کش</li>
-            </ul>
-          </div>
-
-          <!-- Version 3.1.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 3.1.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              12 سپتامبر 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              بهبود‌ها
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>به‌روزرسانی نسخه به 3.1.0</li>
-              <li>بهبود سیستم مدیریت نسخه در کل پلتفرم</li>
-            </ul>
-          </div>
-
-          <!-- Version 3.0.1 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 3.0.1
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              16 اوت 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              بهبود‌ها
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>تصحیح تنظیم پیش‌فرض برای حالت چند پیامه - حالا "چند پیام کوتاه" به جای "تک پیام" به عنوان پیش‌فرض انتخاب می‌شود</li>
-              <li>بهبود تجربه کاربری هنگام پاک کردن داده‌های مرورگر و ورود مجدد</li>
-            </ul>
-          </div>
-
-          <!-- Version 3.0.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 3.0.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              15 اوت 2025
-            </p>
-
-            <h3 class="text-warning-500 mb-2 text-lg font-medium">
-              تغییرات بزرگ
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بازطراحی کامل سیستم تنظیمات پاسخ‌های هوش مصنوعی</li>
-              <li>پیاده‌سازی سیستم چند پیامه با ساختار JSON و نمایش متوالی</li>
-              <li>حذف دستورالعمل‌های سخت و غیرقابل تشخیص قبلی</li>
-            </ul>
-
-            <h3 class="text-success-500 mb-2 mt-4 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>سیستم پیشرفته کنترل پارامترهای API (max_tokens، temperature)</li>
-              <li>حالت چند پیامه با JSON response و نمایش تأخیری پیام‌ها</li>
-              <li>پردازش پس از تولید برای تزریق ایموجی و قالب‌بندی</li>
-              <li>محاسبه دینامیک تعداد پیام‌ها با تصادف‌سازی وزنی</li>
-              <li>حالت استثنای آغازگر مکالمه برای خلاصه‌های جامع</li>
-              <li>دکمه وضعیت پریمیوم در نوار کناری و مودال اطلاعات</li>
-            </ul>
-
-            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های تجربه کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>استفاده از زبان طبیعی به جای placeholder های قالبی</li>
-              <li>نمایش درست نقشه ایموجی‌ها شامل سطح very_high</li>
-              <li>حذف نمایش reasoning/thoughts از پاسخ‌های AI</li>
-              <li>مودال قابل اسکرول برای نمایش اطلاعات کامل</li>
-              <li>چینش بهتر دکمه‌های نوار کناری با grid layout</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              تغییرات فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>واسط AIResponseConfig پیشرفته برای کنترل پاسخ‌ها</li>
-              <li>الگوریتم‌های پردازش چندپیامه با validation کامل</li>
-              <li>سیستم fallback برای مدیریت خطاهای JSON parsing</li>
-              <li>تنظیمات جداگانه برای آغازگرهای مکالمه</li>
-              <li>لاگ‌گذاری جامع برای debugging و monitoring</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.13.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.13.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              8 اوت 2025
-            </p>
-
-            <h3 class="text-warning-500 mb-2 text-lg font-medium">
-              تغییرات مهم
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>حذف کامل سیستم mem0 و قابلیت‌های مدیریت خاطره از سیستم</li>
-              <li>بازگشت به سیستم پیام‌رسانی ساده و استاندارد</li>
-            </ul>
-
-            <h3 class="text-success-500 mb-2 mt-4 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>افزودن گرادیینت رنگی زیبا به صفحات onboarding (فقط در دسکتاپ)</li>
-              <li>بهبود نمایش جلسات در حال انجام با عدم نمایش دکمه‌های تاریخچه</li>
-              <li>نمایش "در حال انجام" برای زمان، تعداد پیام و شناسه جلسات فعال</li>
-            </ul>
-
-            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های رابط کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بازطراحی دکمه‌های Memory Debug و AI Controls با استایل یکپارچه</li>
-              <li>بهبود نمایش کارت‌های جلسات برای جلسات در حال انجام</li>
-              <li>حذف پنل دیباگ خاطره و المان‌های مربوطه</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              تغییرات فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>حذف composables های useMem0، useMemoryIntegratedChat و useEnhancedMessaging</li>
-              <li>حذف صفحات memories.vue، debug-memory.vue و simple-memory-test.vue</li>
-              <li>حذف types مربوط به memory و API endpoints خاطره</li>
-              <li>پاک‌سازی وابستگی mem0ai از package.json و nuxt.config</li>
-              <li>تمیز کردن کامل کدبیس از منطق mem0</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.12.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.12.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              8 فوریه 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>افزودن قابلیت کلیک روی کارت‌های قفل شده برای نمایش مودال پرمیوم</li>
-              <li>بهبود تجربه کاربری برای ویژگی‌های پرمیوم با راهنمایی بهتر</li>
-            </ul>
-
-            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های رابط کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود فاصله‌گذاری در حاشیه‌های مودال پرمیوم</li>
-              <li>فشرده‌سازی متن‌های داخلی با تنظیم ارتفاع خط</li>
-              <li>تصحیح ساختار RTL برای آیکون‌ها و قرارگیری متن</li>
-              <li>بهبود قابلیت کلیک و تعامل کاربری کارت‌های تنظیمات</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              رفع مشکلات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>حل مشکل عدم فعال شدن رویدادهای کلیک در کارت‌های غیرفعال</li>
-              <li>رفع مسدود شدن pointer events در اجزای radio غیرفعال</li>
-              <li>افزودن debug logging برای ردیابی بهتر مشکلات</li>
-            </ul>
-          </div>
-
-          <h1>تغییرات نسخه 2.10.0</h1>
-          <ul>
-            <li>بهبود کامل سیستم PWA notifications برای نمایش native در اندروید و ویندوز حتی در حالت بسته بودن اپ</li>
-            <li>تست و راهنمای کامل برای نوتیفیکیشن‌ها در صفحه /test-notifications</li>
-            <li>رفع مشکل auto-cancellation در تست‌های PocketBase</li>
-            <li>بهبود واکنش‌پذیری permission و subscription</li>
-          </ul>
-          <!-- Version 2.9.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.9.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              1 فوریه 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود سیستم ناوبری واکنش‌گرا با قابلیت نوار جانبی افقی بهبود یافته</li>
-              <li>گسترش محدوده نمایش نوار جانبی افقی برای پشتیبانی از تبلت‌ها و صفحه‌های متوسط</li>
-              <li>بهبود تجربه ناوبری موبایل با نقاط شکست واکنش‌گرا مناسب</li>
-            </ul>
-
-            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های رابط کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>رفع مشکل عدم نمایش نوار جانبی افقی در دستگاه‌های موبایل و تبلت</li>
-              <li>تنظیم نوار جانبی افقی برای نمایش تا عرض 1280 پیکسل (نقطه شکست XL)</li>
-              <li>بهبود نوار جانبی عمودی برای نمایش از عرض 1280 پیکسل به بالا</li>
-              <li>افزودن فاصله‌گذاری و padding مناسب برای محتوا هنگام نمایش نوار جانبی افقی</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>به‌روزرسانی نقاط شکست واکنش‌گرا از <code>sm:hidden</code> به <code>xl:hidden</code> برای نوار جانبی افقی</li>
-              <li>اصلاح نوار جانبی عمودی از <code>sm:block</code> به <code>xl:block</code> برای رفتار واکنش‌گرا یکپارچه</li>
-              <li>افزودن padding-top به ناحیه محتوا (pt-16 xl:pt-0) برای جلوگیری از تداخل با نوار جانبی افقی</li>
-              <li>یکپارچه‌سازی کامپوننت HorizontalSideBar در TairoSidebarLayout برای مدیریت صحیح چیدمان</li>
-            </ul>
-
-            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>رفع مشکل عدم نمایش نوار جانبی افقی در دستگاه‌های موبایل و تبلت</li>
-              <li>حل مشکل تداخل محتوا با نوار جانبی افقی</li>
-              <li>رفع مشکل تعویض ناوبری واکنش‌گرا بین نوارهای جانبی افقی و عمودی</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.8.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.8.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              31 ژانویه 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>ارتقاء نسخه به 2.8.0 با مدیریت بهبود یافته کش PWA</li>
-              <li>بهبود نمایش نسخه و مدیریت تاریخچه تغییرات</li>
-              <li>بهبود پایپ‌لاین استقرار و فرآیند ساخت</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>به‌روزرسانی تمام فایل‌های package.json به نسخه 2.8.0</li>
-              <li>همگام‌سازی کامپوننت نمایش نسخه با ورژن جدید</li>
-              <li>به‌روزرسانی نسخه کش service worker PWA به v2.8.0</li>
-              <li>بهبود مدیریت تاریخچه تغییرات با پشتیبانی دوزبانه</li>
-            </ul>
-
-            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>رفع مشکل همگام‌سازی نسخه در تمام کامپوننت‌ها</li>
-              <li>حل مشکلات سازگاری اسکریپت استقرار</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.7.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.7.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              30 ژانویه 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>پیاده‌سازی سیستم جامع اعلان‌های PWA push با یکپارچه‌سازی کامل</li>
-              <li>افزودن کامپوننت تنظیمات اعلان‌های PWA با مدیریت وضعیت و کنترل‌ها</li>
-              <li>ایجاد composable پیشرفته اعلان‌های PWA با مدیریت push subscription</li>
-              <li>بهبود service worker با مدیریت اعلان‌های push و همگام‌سازی آفلاین</li>
-              <li>افزودن رابط درخواست مجوز اعلان با نشانگرهای بصری وضعیت</li>
-            </ul>
-
-            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های رابط کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود آیکون اعلان با انیمیشن wiggle پویا برای اعلان‌های خوانده نشده</li>
-              <li>افزودن بدج تعداد خوانده نشده با انتقال‌های روان و انیمیشن‌های ping</li>
-              <li>بهبود sidebar اعلان‌ها با initialization و فیلتربندی صحیح</li>
-              <li>بهبود صفحه مدیریت اعلان‌ها با یکپارچه‌سازی تنظیمات PWA</li>
-              <li>افزودن نشانگرهای وضعیت رنگی و انیمیشن‌های بارگذاری روان</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>ایجاد composable <code>usePwaNotifications</code> برای مدیریت متمرکز اعلان‌های PWA</li>
-              <li>بهبود service worker با مدیریت جامع رویدادهای push notification</li>
-              <li>افزودن مدیریت کلید VAPID و lifecycle handling برای push subscription</li>
-              <li>پیاده‌سازی فعال‌سازی خودکار اعلان‌های PWA برای اعلان‌های جدید</li>
-              <li>افزودن پشتیبانی RTL و زبان فارسی در سراسر سیستم PWA</li>
-              <li>بهبود سیستم initialization اعلان‌ها با computed properties</li>
-              <li>رفع مشکلات نمایش بدج و انیمیشن زنگوله اعلان</li>
-            </ul>
-
-            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های سیستم اعلان
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>رفع مشکل خالی بودن sidebar اعلان‌ها با initialization صحیح فیلتربندی</li>
-              <li>بهبود محاسبه و نمایش تعداد اعلان‌های خوانده نشده</li>
-              <li>افزودن به‌روزرسانی خودکار بدج اعلان با همگام‌سازی بلادرنگ</li>
-              <li>پیاده‌سازی مدیریت کلیک اعلان با ناوبری هوشمند</li>
-              <li>افزودن رفتار اعلان مبتنی بر اولویت با نشانگرهای بصری</li>
-            </ul>
-
-            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>رفع مشکل نمایش نادرست بدج آیکون اعلان</li>
-              <li>حل مشکلات انیمیشن زنگوله اعلان</li>
-              <li>رفع خطاهای Vite ناشی از تکرار computed properties</li>
-              <li>اصلاح initialization و فیلتربندی sidebar اعلان‌ها</li>
-              <li>رفع مشکل همگام‌سازی تعداد اعلان در کامپوننت‌ها</li>
-            </ul>
-
-            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
-              بومی‌سازی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود پشتیبانی زبان فارسی برای رابط اعلان‌های PWA</li>
-              <li>بهینه‌سازی چیدمان‌های RTL برای اعلان‌های PWA و انیمیشن‌ها</li>
-              <li>بهبود پیام‌های خطا و متن‌های وضعیت فارسی در سراسر سیستم اعلان</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.6.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.6.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              30 ژانویه 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>پیاده‌سازی سیستم پیشرفته مدیریت اعلان‌های ادمین با عملیات CRUD کامل</li>
-              <li>افزودن صفحه‌بندی سمت سرور و اسکرول نامحدود برای لیست کاربران در پنل اعلان‌ها</li>
-              <li>یکپارچه‌سازی جستجوی بلادرنگ با قابلیت debounce برای جستجوی کاربران</li>
-              <li>ایجاد داشبورد جامع اعلان‌ها با آمار و تحلیل‌ها</li>
-              <li>افزودن قابلیت ارسال اعلان گروهی با فیلتر بر اساس نقش</li>
-              <li>پیاده‌سازی قالب‌های اعلان سیستم (خوش‌آمدگویی، یادآوری، هشدار، تعمیرات)</li>
-            </ul>
-
-            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های رابط کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود کارت‌های اعلان با نشانگرهای بصری وضعیت و طراحی مدرن</li>
-              <li>افزودن آواتار کاربران و نمایش جامع اطلاعات فرستنده/گیرنده</li>
-              <li>پیاده‌سازی طراحی واکنش‌گرا با چیدمان بهینه‌شده برای موبایل</li>
-              <li>بهبود سلسله‌مراتب بصری با نشان‌ها، آیکون‌ها و نشانگرهای رنگی وضعیت</li>
-              <li>افزودن سطوح اولویت و تصویرسازی وضعیت خوانده/نخوانده</li>
-              <li>بهبود قابلیت پیش‌نمایش اعلان با اعتبارسنجی فرم بلادرنگ</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>ایجاد composable <code>useAdminNotifications</code> برای مدیریت متمرکز اعلان‌ها</li>
-              <li>یکپارچه‌سازی PocketBase با گسترش صحیح روابط برای داده‌های کاربران</li>
-              <li>پیاده‌سازی سیستم صفحه‌بندی کارآمد با بارگذاری 20 آیتم در هر صفحه</li>
-              <li>افزودن مدیریت صحیح خطاها و وضعیت‌های بارگذاری در سراسر سیستم</li>
-              <li>ایجاد middleware ادمین برای کنترل دسترسی مبتنی بر نقش</li>
-              <li>بهبود ابزارهای تبدیل داده برای فرمت یکسان داده‌های UI</li>
-            </ul>
-
-            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>رفع خطاهای syntax در کامپوننت‌های Vue</li>
-              <li>اصلاح نمایش تعداد کاربران در آمار داشبورد</li>
-              <li>حل مشکل فعال‌سازی اسکرول نامحدود و قابلیت بارگذاری بیشتر</li>
-              <li>رفع مشکلات چیدمان واکنش‌گرا در دستگاه‌های موبایل</li>
-            </ul>
-
-            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
-              بومی‌سازی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>پشتیبانی کامل زبان فارسی برای رابط اعلان‌های ادمین</li>
-              <li>چیدمان بهینه‌شده RTL با جهت متن صحیح برای تمام کامپوننت‌ها</li>
-              <li>فرمت‌بندی تاریخ/زمان فارسی و پیام‌های وضعیت کاربرپسند</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.5.1 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.5.1
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              30 ژانویه 2025
-            </p>
-
-            <h3 class="text-danger-500 mb-2 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>رفع اشکالات جزئی و بهبود عملکرد</li>
-              <li>بهبود پایداری و تجربه کاربری</li>
-              <li>به‌روزرسانی وابستگی‌ها و پچ‌های امنیتی</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهینه‌سازی و پاکسازی کد</li>
-              <li>بهبود مدیریت خطاها</li>
-              <li>بهبود تجربه توسعه</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.5.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.5.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              2 ژولای 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>پیاده‌سازی قابلیت Progressive Web App (PWA) برای پشتیبانی آفلاین و نصب اپلیکیشن</li>
-              <li>افزودن PWA install prompt با تجربه نصب شبیه اپلیکیشن‌های بومی</li>
-              <li>ایجاد manifest و service worker دستی PWA برای عملکرد قابل اعتماد</li>
-              <li>افزودن کامپوننت دکمه نصب در کنار دکمه تور</li>
-            </ul>
-
-            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های رابط کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود پاپ‌آپ نصب PWA با فاصله‌گذاری بهتر، آیکون‌های بزرگ‌تر و تایپوگرافی بهتر</li>
-              <li>افزودن آیکون دانلود به دکمه نصب برای بهتر شناخته شدن توسط کاربر</li>
-              <li>بهبود پشتیبانی چیدمان RTL برای install prompt با هم‌ترازی مناسب متن فارسی</li>
-              <li>بهبود سازگاری حالت تاریک برای کامپوننت‌های PWA</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>ایجاد service worker سفارشی برای استراتژی‌های کش و قابلیت آفلاین</li>
-              <li>پیاده‌سازی manifest PWA با متادیتای فارسی مناسب و جهت RTL</li>
-              <li>افزودن پلاگین Nuxt برای ثبت و مدیریت service worker</li>
-              <li>حذف قابلیت شروع خودکار تور برای جلوگیری از تداخل با مودال‌ها</li>
-              <li>افزودن meta tag ها برای قابلیت‌های web app موبایل و رنگ‌های تم</li>
-            </ul>
-
-            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>رفع تداخل شروع خودکار تور با مودال نسخه آزمایشی</li>
-              <li>حذف لاگ‌های debug از کامپوننت‌های PWA برای کنسول تمیزتر</li>
-              <li>غیرفعال کردن راه‌اندازی خودکار تور در بارگذاری صفحه</li>
-            </ul>
-
-            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
-              بومی‌سازی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>پشتیبانی کامل زبان فارسی برای رابط نصب PWA</li>
-              <li>افزودن نام و توضیحات فارسی اپلیکیشن در manifest PWA</li>
-              <li>بهینه‌سازی RTL برای install prompt با جهت متن مناسب</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.4.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.4.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              27 ژانویه 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>پیاده‌سازی سیستم جامع تور محصول با استفاده از Driver.js</li>
-              <li>افزودن تورهای تعاملی راهنما برای شروع کار کاربران و کشف ویژگی‌ها</li>
-              <li>ایجاد کامپوننت دکمه تور با بومی‌سازی فارسی</li>
-              <li>یکپارچه‌سازی قابلیت تور در سراسر برنامه با پشتیبانی RTL مناسب</li>
-            </ul>
-
-            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های رابط کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>افزودن استایل زیبا برای پاپ‌آپ تور با افکت‌های شیشه‌ای</li>
-              <li>پیاده‌سازی رابط تور بهینه‌شده برای RTL با فونت‌های فارسی</li>
-              <li>افزودن افکت‌های گرادیانت انیمیشنی و انتقال‌های روان برای عناصر تور</li>
-              <li>ایجاد طراحی واکنش‌گرا برای تور که در موبایل و دسکتاپ کار می‌کند</li>
-              <li>بهبود تجربه کاربری با نشانگرهای پیشرفت و کنترل‌های ناوبری</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>افزودن کتابخانه Driver.js برای قابلیت تور</li>
-              <li>ایجاد composable <code>useTour</code> برای مدیریت وضعیت تور</li>
-              <li>پیاده‌سازی پلاگین client تور برای راه‌اندازی صحیح</li>
-              <li>افزودن استایل‌های جامع CSS برای کامپوننت‌های تور با پشتیبانی تم تاریک/روشن</li>
-              <li>ایجاد صفحه نمایشی تور برای تست و توسعه</li>
-            </ul>
-
-            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>اصلاح یکپارچه‌سازی سیستم پرداخت و مدیریت callback</li>
-              <li>بهبود مدیریت جلسات و قابلیت داشبورد</li>
-              <li>بهبود جریان شروع کار با مدیریت بهتر خطاها</li>
-            </ul>
-
-            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
-              بومی‌سازی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>پشتیبانی کامل زبان فارسی برای رابط تور</li>
-              <li>بهینه‌سازی چیدمان RTL برای عناصر تور</li>
-              <li>تایپوگرافی و رندر فونت فارسی مناسب در تورها</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.3.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.3.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              26 ژانویه 2025
-            </p>
-
-            <h3 class="text-success-500 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>پیاده‌سازی سیستم جامع تحلیل احساسات برای جلسات درمان</li>
-              <li>افزودن تحلیل احساسات بلادرنگ برای پیام‌های کاربران در جلسات درمان</li>
-              <li>ایجاد مودال تفصیلی تحلیل پیام با نمایش چرخ احساسات</li>
-              <li>یکپارچه‌سازی ذخیره‌سازی داده‌های تحلیل در پایگاه داده</li>
-              <li>گسترش صفحه تاریخچه با قابلیت مشاهده تحلیل احساسات</li>
-            </ul>
-
-            <h3 class="text-info-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های رابط کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>افزودن دکمه‌های ذره‌بین برای مشاهده تحلیل تفصیلی پیام‌ها</li>
-              <li>پیاده‌سازی کامپوننت تعاملی چرخ احساسات</li>
-              <li>افزودن نشان‌های رنگی احساسات (قرمز=زیاد، نارنجی=متوسط، آبی=کم)</li>
-              <li>بهبود تجربه کاربری با نمایش فوری پیام‌ها قبل از تکمیل تحلیل</li>
-              <li>ایجاد مودال جامع برای مشاهده متادیتا و تحلیل احساسات پیام</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های فنی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بازطراحی schema JSON تحلیل احساسات OpenRouter</li>
-              <li>ایجاد ابزارهای mapping احساسات برای تبدیل تحلیل فارسی به فرمت چرخ</li>
-              <li>افزودن composable جدید <code>useMessageAnalysis</code> برای عملیات پایگاه داده</li>
-              <li>پیاده‌سازی جریان صحیح داده‌های احساسات از API به کامپوننت‌های UI</li>
-              <li>پشتیبانی از 9 احساس اصلی با نام‌های فارسی و سطوح شدت</li>
-            </ul>
-
-            <h3 class="text-danger-500 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>اصلاح پیام‌های validation صفحه ورود برای نمایش متن فارسی به جای "Required"</li>
-              <li>تصحیح schema اعتبارسنجی Zod برای فیلدهای ایمیل و رمز عبور</li>
-              <li>رفع خطاهای linter در ساختار HTML صفحه ورود</li>
-            </ul>
-
-            <h3 class="text-warning-500 mb-2 mt-4 text-lg font-medium">
-              بومی‌سازی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود پشتیبانی زبان فارسی در رابط تحلیل احساسات</li>
-              <li>افزودن mapping نام‌های فارسی احساسات (شادی، اعتماد، ترس، تعجب، غم، انزجار، خشم، انتظار، نامشخص)</li>
-              <li>بهبود پیام‌های اعتبارسنجی با ترجمه‌های فارسی مناسب</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.2.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.2.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              26 ژانویه 2025
-            </p>
-
-            <h3 class="text-danger-500 mb-2 text-lg font-medium">
-              تغییرات اساسی
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>حذف کامل <code>userRecord</code> از localStorage</li>
-              <li>حذف سیستم همگام‌سازی بین localStorage و پایگاه داده</li>
-            </ul>
-
-            <h3 class="text-success-500 mb-2 mt-4 text-lg font-medium">
-              بهبود عملکرد
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>ساده‌سازی جریان داده با استفاده مستقیم از API</li>
-              <li>حذف عملیات همگام‌سازی غیرضروری که باعث کاهش عملکرد می‌شد</li>
-              <li>حذف ناسازگاری احتمالی داده بین localStorage و پایگاه داده</li>
-            </ul>
-
-            <h3 class="text-primary-500 mb-2 mt-4 text-lg font-medium">
-              تمیزسازی کد
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>حذف توابع <code>syncUserRecord</code>, <code>loadUserRecord</code>, <code>updateUserRecord</code></li>
-              <li>حذف فایل <code>composables/sync.ts</code></li>
-              <li>ساده‌سازی مدیریت اطلاعات کاربر در کامپوننت پیام‌رسانی</li>
-              <li>کاهش پیچیدگی کد و بهبود قابلیت نگهداری</li>
-            </ul>
-          </div>
-
-          <!-- Version 2.1.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.1.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              23 خرداد 1404
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>جا به جایی فرم پرداخت با کار نیک و افزودن دکمه ی همدلی</li>
-            </ul>
-          </div>
-          <!-- Version 2.0.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 2.0.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              31 خرداد 1404
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>به‌روزرسانی اصلی به نسخه 2.0.0</li>
-              <li>افزودن قابلیت جامع مدیریت پرداخت‌ها با کنترل‌های ادمین</li>
-              <li>پیاده‌سازی نمایش پرداخت‌های کاربران با قابلیت فیلتر و صفحه‌بندی</li>
-              <li>افزودن دکمه‌های عملیاتی برای مدیریت پرداخت‌ها</li>
-            </ul>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
-              بهبود‌های رابط کاربری
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود جدول پرداخت‌ها با نشانگر وضعیت و دکمه‌های عملیاتی</li>
-              <li>بهبود رابط مدیریت پرداخت‌ها برای مدیران سیستم</li>
-            </ul>
-          </div>
-
-          <!-- Version 1.9.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.9.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              17 می 2025
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>افزودن قابلیت شروع مکالمه توسط هوش مصنوعی با خلاصه‌ای از جلسات قبلی کاربر</li>
-              <li>بهبود نمایشگر تایپ برای نشان دادن پیشرفت هوش مصنوعی در هنگام تولید پاسخ</li>
-              <li>غیرفعال کردن ورودی پیام در هنگام پاسخگویی هوش مصنوعی</li>
-            </ul>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
-              بهبود‌ها
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود تجربه کاربری برای نشان دادن وضعیت پردازش پیام‌ها</li>
-              <li>بهینه‌سازی عملکرد در صفحه گزارش با حالت‌های بارگذاری و خالی</li>
-            </ul>
-          </div>
-
-          <!-- Version 1.8.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.8.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              14 می 2025
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>ارتقای تجربه کاربری جدول کاربران: بومی‌سازی فارسی، تاریخ جلالی و نمایش زمان نسبی</li>
-              <li>افزودن حالت اسکلتی (skeleton) هنگام بارگذاری لیست کاربران</li>
-              <li>افزودن منوی کشویی با آیکون و ترجمه فارسی برای عملیات کاربران</li>
-              <li>نمایش نشان طلایی برای کاربران جدید</li>
-              <li>بهبود صفحه‌بندی و واکنش‌گرایی جدول کاربران</li>
-            </ul>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>اصلاح منطق نمایش نشان کاربران جدید</li>
-              <li>اصلاح نمایش آیکون‌ها در منوی کشویی (استفاده از slot #start)</li>
-              <li>اصلاح منبع ایمیل و کنترل مقدار null</li>
-            </ul>
-          </div>
-
-          <!-- Version 1.7.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.7.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              2 می 2025
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بروزرسانی نسخه به 1.7.0 در package.json و VersionDisplay.vue</li>
-            </ul>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>تغییر الگوی ارجاع به شناسه کاربر از <code>user.value.record.id</code> به <code>user.value.id</code> در چندین کامپوننت</li>
-              <li>افزودن بررسی مقدار null برای نقش کاربر در کامپوننت DemoAccountMenu</li>
-              <li>اصلاح ارجاع به کاربر در composable تخفیف (discountCoupon)</li>
-              <li>بهبود فرمت‌بندی کد و حذف خطوط خالی غیرضروری</li>
-              <li>بروزرسانی ورودی‌های changelog در CHANGELOG.md و changelog.vue</li>
-            </ul>
-          </div>
-
-          <!-- Version 1.6.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.6.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              23 آوریل 2025
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>طبقه‌بندی ایموجی‌ها بر اساس احساسات با رابط تب و اسکرول افقی</li>
-              <li>افزودن دسته‌های جدید (ترس، حیوانات، غذا، ورزش) و گسترش مجموعه ایموجی‌ها</li>
-            </ul>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
-              بهبود‌ها
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود کنتراست تب‌ها در حالت تاریک</li>
-              <li>مخفی‌سازی نوار اسکرول و انیمیشن پیمایش نرم برای ناوبری تب‌ها</li>
-            </ul>
-          </div>
-
-          <!-- Version 1.5.1 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.5.1
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              10 آوریل 2025
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              بهبود‌ها
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>بهبود رابط کاربری در صفحات مختلف</li>
-              <li>بهینه‌سازی نمایش جلسات مشاوره</li>
-              <li>بهبود نمایش لیست اعمال نیک</li>
-            </ul>
-          </div>
-
-          <!-- Version 1.4.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.4.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              9 آوریل 2025
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              بهبود‌ها
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 space-y-2">
-              <li>
-                بهبود فرآیند استقرار:
-                <ul class="mr-6 mt-1 list-disc space-y-1">
-                  <li>بهبود مدیریت فرآیند‌های PM2</li>
-                  <li>پیاده‌سازی استقرار تمیز با حذف دایرکتوری .output</li>
-                  <li>افزودن محافظت‌های لازم برای توقف و راه‌اندازی مجدد فرآیند</li>
-                  <li>بهبود مدیریت خطا در اسکریپت استقرار</li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Version 1.3.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.3.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              5 آوریل 2025
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              به‌روزرسانی‌های سیستم
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 list-disc space-y-2 pl-6">
-              <li>
-                <span class="font-medium">تحلیل جلسات:</span> بهبود سیستم ارزیابی درمانگر
-                <ul class="mt-1 list-inside list-disc space-y-1 pl-4">
-                  <li>حذف امتیاز ارزیابی مستقیم و جایگزینی با سیستم محاسبه خودکار</li>
-                  <li>به‌روزرسانی لیست امتیازات منفی با امتیازات و دلایل دقیق</li>
-                  <li>اضافه کردن رفتارهای مثبت و پیشنهادات بهبود ساختاریافته</li>
-                  <li>پیاده‌سازی محاسبه خودکار امتیاز نهایی</li>
-                  <li>بهبود رابط کاربری با بخش‌های رنگ‌بندی شده برای بازخورد</li>
-                </ul>
-              </li>
-              <li>
-                <span class="font-medium">ارزیابی ریسک:</span> بهبود تحلیل عوامل خطر
-                <ul class="mt-1 list-inside list-disc space-y-1 pl-4">
-                  <li>به‌روزرسانی ساختار برای تاکید بر شدت و نگرانی‌های فوری</li>
-                  <li>بهبود توضیحات عوامل خطر برای وضوح بیشتر</li>
-                  <li>تنظیم الزامات حداقلی برای گزارش عوامل خطر</li>
-                  <li>بهبود شاخص‌های نیاز به مداخله تخصصی</li>
-                </ul>
-              </li>
-            </ul>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 mt-4 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-500 dark:text-muted-400 list-disc space-y-2 pl-6">
-              <li>
-                <span class="font-medium">مدیریت جلسات:</span> رفع مشکلات حیاتی در مدیریت جلسات
-                <ul class="mt-1 list-inside list-disc space-y-1 pl-4">
-                  <li>رفع خطای 400 در هنگام بستن جلسات</li>
-                  <li>بهبود مدیریت بستن خودکار جلسات</li>
-                  <li>بهبود هدایت به صفحه تحلیل پس از پایان جلسه</li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-          <!-- Version 1.2.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.2.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              3 آوریل 2025
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-600 dark:text-muted-300 mb-4 list-inside list-disc space-y-1">
-              <li>اضافه شدن ردیابی تکمیل اعمال نیک شخصی</li>
-              <li>ایجاد صفحه «اعمال نیک من» برای نمایش اعمال تکمیل شده</li>
-              <li>اضافه شدن نمایش آمار بازدید، تکمیل‌ها و تکمیل‌های شخصی</li>
-              <li>بهبود مدیریت کدهای تخفیف با ردیابی کاربر</li>
-            </ul>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              بهبودها
-            </h3>
-            <ul class="text-muted-600 dark:text-muted-300 mb-4 list-inside list-disc space-y-1">
-              <li>بهبود نمایش آمار با آیکون‌های متمایز</li>
-              <li>بهبود چیدمان با تراز مرکزی و فاصله‌گذاری مناسب</li>
-              <li>رنگ‌بندی آیکون‌ها برای تمایز بهتر</li>
-            </ul>
-          </div>
-
-          <!-- Version 1.1.0 -->
-          <div class="border-muted-200 dark:border-muted-700 border-b pb-6">
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.1.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              1 آوریل 2025
-            </p>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              ویژگی‌های جدید
-            </h3>
-            <ul class="text-muted-600 dark:text-muted-300 mb-4 list-inside list-disc space-y-1">
-              <li>اضافه شدن آمار و ارقام در داشبورد</li>
-              <li>اضافه شدن صفحه تاریخچه تغییرات</li>
-              <li>اضافه شدن بخش اعمال نیک</li>
-              <li>بهبود رابط کاربری در بخش پیام‌رسانی</li>
-              <li>اضافه شدن قابلیت ویرایش اعمال نیک برای مدیران</li>
-              <li>بهبود نمایش اطلاعات جمعیت‌شناختی در بخش تحلیل</li>
-            </ul>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              بهبودها
-            </h3>
-            <ul class="text-muted-600 dark:text-muted-300 mb-4 list-inside list-disc space-y-1">
-              <li>بهینه‌سازی نمایش در نسخه موبایل</li>
-              <li>بهبود عملکرد در بخش پیام‌رسانی</li>
-              <li>اصلاح باگ‌های جزئی در رابط کاربری</li>
-            </ul>
-
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              رفع اشکالات
-            </h3>
-            <ul class="text-muted-600 dark:text-muted-300 list-inside list-disc space-y-1">
-              <li>رفع خطای 400 هنگام پایان جلسه</li>
-              <li>رفع مشکل آمار نادرست کاربران منحصر به فرد</li>
-              <li>رفع مشکل عدم نمایش صحیح صفحه تحلیل پس از پایان جلسه</li>
-            </ul>
-          </div>
-
-          <!-- Version 1.0.0 -->
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 class="text-primary-500 mb-2 text-xl font-semibold">
-              نسخه 1.0.0
-            </h2>
-            <p class="text-muted-400 mb-4 text-sm">
-              15 مارس 2025
+            <h1 class="text-muted-900 text-2xl font-bold dark:text-white">
+              تاریخچه تغییرات
+            </h1>
+            <p v-if="latestRelease" class="text-muted-500 text-sm dark:text-muted-400">
+              آخرین نسخه منتشر شده: {{ latestRelease.version }} ({{ formatDate(latestRelease.releaseDate) }})
+            </p>
+          </div>
+          <div class="text-xs text-muted-500 dark:text-muted-400">
+            نسخه نصب شده شما: {{ appVersion }}
+          </div>
+        </div>
+
+        <div v-if="error" class="text-danger-600 mt-6 text-sm">
+          خطا در دریافت اطلاعات تغییرات. لطفاً کمی بعد دوباره تلاش کنید.
+        </div>
+
+        <div v-else class="mt-6 space-y-8">
+          <div v-if="!releases.length" class="text-muted-500 text-sm dark:text-muted-400">
+            هنوز اطلاعاتی برای نمایش وجود ندارد.
+          </div>
+
+          <div
+            v-for="release in releases"
+            :key="release.version"
+            class="border-muted-200 dark:border-muted-700 border-b pb-6 last:border-b-0"
+          >
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 class="text-primary-500 text-xl font-semibold">
+                  نسخه {{ release.version }}
+                </h2>
+                <p class="text-muted-400 text-sm">
+                  {{ formatDate(release.releaseDate) }}
+                </p>
+              </div>
+              <div v-if="release.product?.codename" class="text-xs font-medium text-purple-500 uppercase tracking-wide">
+                {{ release.product.codename }}
+              </div>
+            </div>
+
+            <p v-if="release.product?.summary" class="text-muted-600 dark:text-muted-300 mt-4 text-sm leading-6">
+              {{ release.product.summary }}
             </p>
 
-            <h3 class="text-muted-800 dark:text-muted-100 mb-2 text-lg font-medium">
-              ویژگی‌ها
-            </h3>
-            <ul class="text-muted-600 dark:text-muted-300 list-inside list-disc space-y-1">
-              <li>انتشار اولیه نرم‌افزار</li>
-              <li>امکان گفتگو با روانشناس هوش مصنوعی</li>
-              <li>سیستم مدیریت جلسات</li>
-              <li>داشبورد کاربری</li>
-              <li>سیستم گزارش خطا</li>
-            </ul>
+            <div class="mt-6 grid gap-6 md:grid-cols-2">
+              <div v-if="release.product?.highlights?.length" class="space-y-3">
+                <h3 class="text-success-500 text-lg font-medium">
+                  نکات محصولی
+                </h3>
+                <ul class="text-muted-500 dark:text-muted-400 space-y-2 text-sm leading-6">
+                  <li v-for="item in release.product.highlights" :key="item" class="flex items-start gap-2">
+                    <Icon name="ph:sparkle" class="mt-1 size-4 text-success-500" />
+                    <span>{{ item }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div v-if="release.technical?.changes?.length" class="space-y-3">
+                <h3 class="text-info-500 text-lg font-medium">
+                  تغییرات فنی
+                </h3>
+                <ul class="text-muted-500 dark:text-muted-400 space-y-2 text-sm leading-6">
+                  <li v-for="item in release.technical.changes" :key="item" class="flex items-start gap-2">
+                    <Icon name="ph:code" class="mt-1 size-4 text-info-500" />
+                    <span>{{ item }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div v-if="release.technical?.fixes?.length" class="space-y-3 md:col-span-2">
+                <h3 class="text-warning-500 text-lg font-medium">
+                  رفع اشکالات
+                </h3>
+                <ul class="text-muted-500 dark:text-muted-400 space-y-2 text-sm leading-6">
+                  <li v-for="item in release.technical.fixes" :key="item" class="flex items-start gap-2">
+                    <Icon name="ph:wrench" class="mt-1 size-4 text-warning-500" />
+                    <span>{{ item }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div v-if="release.rollout?.checks?.length || release.rollout?.announcement" class="space-y-3 md:col-span-2">
+                <h3 class="text-primary-500 text-lg font-medium">
+                  برنامه انتشار
+                </h3>
+                <p v-if="release.rollout?.announcement" class="text-muted-500 text-sm dark:text-muted-400">
+                  {{ release.rollout.announcement }}
+                </p>
+                <ul v-if="release.rollout?.checks?.length" class="text-muted-500 dark:text-muted-400 space-y-2 text-sm leading-6">
+                  <li v-for="item in release.rollout.checks" :key="item" class="flex items-start gap-2">
+                    <Icon name="ph:list-checks" class="mt-1 size-4 text-primary-500" />
+                    <span>{{ item }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1020,24 +108,27 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: 'sidebar',
-  title: 'تاریخچه تغییرات',
-  preview: {
-    title: 'تاریخچه تغییرات',
-    description: 'تاریخچه تغییرات و بروزرسانیهای نرم‌افزار',
-    categories: ['layouts'],
-    src: '/img/logo.svg',
-    srcDark: '/img/logo.svg',
-    order: 84,
-  },
-})
+const { version: appVersion } = useAppVersion()
+const { releases, latestRelease, error } = await useReleaseNotes()
 
-useHead({
-  title: 'تاریخچه تغییرات',
+const pageTitle = computed(() => latestRelease.value
+  ? `تاریخچه تغییرات - نسخه ${latestRelease.value.version}`
+  : 'تاریخچه تغییرات'
+)
+
+const metaDescription = computed(() => latestRelease.value?.product?.summary ?? 'نمایش کامل تغییرات محصول و نسخه‌های منتشر شده.')
+
+useHead(() => ({
+  title: pageTitle.value,
   meta: [
-    { name: 'description', content: 'تاریخچه تغییرات و بروزرسانی‌های نرم‌افزار' },
+    { name: 'description', content: metaDescription.value },
   ],
-  htmlAttrs: { dir: 'rtl' },
-})
+}))
+
+const formatDate = (value?: string) => {
+  if (!value) return 'تاریخ نامشخص'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' })
+}
 </script>

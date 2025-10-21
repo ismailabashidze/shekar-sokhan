@@ -1,0 +1,183 @@
+[
+  {
+    "id": "scheduled_notifications_collection",
+    "name": "scheduled_notifications",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "system": false,
+        "id": "rule_id_field",
+        "name": "rule_id",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "e9qpc1annfecmem",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": ["name"]
+        }
+      },
+      {
+        "system": false,
+        "id": "user_id_field",
+        "name": "user_id",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "ak540af3bt3w7r8",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": ["name", "email"]
+        }
+      },
+      {
+        "system": false,
+        "id": "session_id_field",
+        "name": "session_id",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "eworm0zqhqpz5fz",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": null
+        }
+      },
+      {
+        "system": false,
+        "id": "campaign_id_field",
+        "name": "campaign_id",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "notification_campaigns_id",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": ["name"]
+        }
+      },
+      {
+        "system": false,
+        "id": "scheduled_for_field",
+        "name": "scheduled_for",
+        "type": "date",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "status_field",
+        "name": "status",
+        "type": "select",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "pending",
+            "sent",
+            "failed",
+            "cancelled"
+          ]
+        }
+      },
+      {
+        "system": false,
+        "id": "retry_count_field",
+        "name": "retry_count",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 10,
+          "noDecimal": true
+        }
+      },
+      {
+        "system": false,
+        "id": "last_attempt_field",
+        "name": "last_attempt",
+        "type": "date",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "next_retry_field",
+        "name": "next_retry",
+        "type": "date",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "error_message_field",
+        "name": "error_message",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 1000,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "metadata_field",
+        "name": "metadata",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      }
+    ],
+    "indexes": [
+      "CREATE INDEX idx_scheduled_for ON scheduled_notifications (scheduled_for)",
+      "CREATE INDEX idx_status ON scheduled_notifications (status)",
+      "CREATE INDEX idx_user_id ON scheduled_notifications (user_id)",
+      "CREATE INDEX idx_next_retry ON scheduled_notifications (next_retry)"
+    ],
+    "listRule": "@request.auth.id != \"\" && (@request.auth.role = \"admin\" || user_id.id = @request.auth.id)",
+    "viewRule": "@request.auth.id != \"\" && (@request.auth.role = \"admin\" || user_id.id = @request.auth.id)",
+    "createRule": "@request.auth.id != \"\" && @request.auth.role = \"admin\"",
+    "updateRule": "@request.auth.id != \"\" && @request.auth.role = \"admin\"",
+    "deleteRule": "@request.auth.id != \"\" && @request.auth.role = \"admin\"",
+    "options": {}
+  }
+]

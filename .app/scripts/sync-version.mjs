@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * این script ورژن را از package.json می‌خواند و در service worker بروزرسانی می‌کند
+ * همگام‌سازی کامل نسخه بین لایه‌های فنی و داده‌های محصولی
  */
 
 import { readFileSync, writeFileSync } from 'fs'
@@ -10,54 +10,100 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-console.log('🔄 Starting version sync process...')
+const paths = {
+  rootPackage: resolve(__dirname, '../../package.json'),
+  appPackage: resolve(__dirname, '../package.json'),
+  nuxtConfig: resolve(__dirname, '../nuxt.config.ts'),
+  manifest: resolve(__dirname, '../public/manifest.json'),
+  serviceWorker: resolve(__dirname, '../public/sw.js'),
+  releases: resolve(__dirname, '../../prd/releases.json'),
+}
+
+const log = (msg) => console.log(`🔄  ${msg}`)
+const warn = (msg) => console.warn(`⚠️  ${msg}`)
+
+const readJson = (filePath) => JSON.parse(readFileSync(filePath, 'utf-8'))
+const writeJson = (filePath, data) => writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`)
+
+const updateNuxtConfig = (filePath, version) => {
+  let content = readFileSync(filePath, 'utf-8')
+  content = content.replace(/let appVersion = '[^']+'/g, `let appVersion = '${version}'`)
+  content = content.replace(/packageJson\.version \|\| '[^']+'/g, `packageJson.version || '${version}'`)
+  writeFileSync(filePath, content)
+}
+
+const updateServiceWorker = (filePath, version) => {
+  let content = readFileSync(filePath, 'utf-8')
+  if (!content.includes('CACHE_VERSION')) {
+    throw new Error('CACHE_VERSION not found in service worker')
+  }
+  content = content.replace(/const CACHE_VERSION = '[^']+'/g, `const CACHE_VERSION = 'v${version}'`)
+  writeFileSync(filePath, content)
+}
+
+const validateProductData = (filePath, version) => {
+  try {
+    const releases = readJson(filePath)
+    if (!Array.isArray(releases) || releases.length === 0) {
+      warn('prd/releases.json is empty or invalid – skipping validation.')
+      return
+    }
+    const latest = releases[0]
+    if (latest.version !== version) {
+      warn(`Latest product release (${latest.version}) does not match package version (${version}).`)
+    }
+  }
+  catch (error) {
+    warn(`Unable to validate product data: ${error.message}`)
+  }
+}
 
 try {
-  // خواندن ورژن از package.json
-  const packagePath = resolve(__dirname, '../package.json')
-  console.log(`📂 Reading package.json from: ${packagePath}`)
-  
-  const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'))
-  const version = packageJson.version
+  log(`Reading root package.json from ${paths.rootPackage}`)
+  const rootPackage = readJson(paths.rootPackage)
+  const version = rootPackage.version
 
-  console.log(`📦 Current version: ${version}`)
-
-  // بروزرسانی service worker
-  const swPath = resolve(__dirname, '../public/sw.js')
-  console.log(`📂 Reading service worker from: ${swPath}`)
-  
-  let swContent = readFileSync(swPath, 'utf-8')
-
-  // پیدا کردن خط فعلی ورژن
-  const currentVersionMatch = swContent.match(/const CACHE_VERSION = '[^']+'/g)
-  if (currentVersionMatch) {
-    console.log(`🔍 Found current version line: ${currentVersionMatch[0]}`)
-  } else {
-    console.warn('⚠️ Could not find CACHE_VERSION line')
+  if (!version) {
+    throw new Error('Version property is missing in root package.json')
   }
 
-  // پیدا کردن و جایگزین کردن ورژن
-  const versionRegex = /const CACHE_VERSION = '[^']+'/g
-  const newVersionLine = `const CACHE_VERSION = 'v${version}'`
+  log(`Using version ${version}`)
 
-  if (swContent.includes('CACHE_VERSION')) {
-    console.log(`🔄 Replacing with: ${newVersionLine}`)
-    swContent = swContent.replace(versionRegex, newVersionLine)
-    writeFileSync(swPath, swContent, 'utf-8')
-    console.log(`✅ Service Worker version updated to v${version}`)
-  } else {
-    console.warn('⚠️ Could not find CACHE_VERSION in service worker')
-    console.log('📝 First 10 lines of service worker:')
-    const firstLines = swContent.split('\n').slice(0, 10)
-    firstLines.forEach((line, i) => {
-      console.log(`${i + 1}: ${line}`)
-    })
+  log('Syncing .app/package.json')
+  const appPackage = readJson(paths.appPackage)
+  if (appPackage.version !== version) {
+    appPackage.version = version
+    writeJson(paths.appPackage, appPackage)
+    log('Updated .app/package.json version')
+  }
+  else {
+    log('App package.json already up to date')
   }
 
-  console.log('🎉 Version sync completed!')
+  log('Updating nuxt.config.ts runtime version')
+  updateNuxtConfig(paths.nuxtConfig, version)
 
-} catch (error) {
-  console.error('❌ Error syncing version:', error.message)
-  console.error('📍 Stack trace:', error.stack)
+  log('Updating manifest.json version field')
+  const manifest = readJson(paths.manifest)
+  if (manifest.version !== version) {
+    manifest.version = version
+    writeJson(paths.manifest, manifest)
+    log('Manifest version updated')
+  }
+  else {
+    log('Manifest version already latest')
+  }
+
+  log('Updating service worker cache version')
+  updateServiceWorker(paths.serviceWorker, version)
+
+  log('Validating product release data')
+  validateProductData(paths.releases, version)
+
+  log('Version sync completed successfully ✅')
+}
+catch (error) {
+  console.error('❌ Error during version sync:', error.message)
+  console.error(error.stack)
   process.exit(1)
-} 
+}

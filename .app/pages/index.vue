@@ -14,7 +14,7 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const nuxtApp = useNuxtApp()
 const toaster = useToaster()
-
+navigateTo('/dashboard')
 // Temporarily disabled authentication check for testing
 // if (!nuxtApp.$pb.authStore.isValid) {
 //   toaster.clearAll()
@@ -28,8 +28,9 @@ const toaster = useToaster()
 //   navigateTo('/auth/login', { redirectCode: 401 })
 // }
 // else {
+// TEMPORARILY DISABLED FOR ADMIN TESTING
 // navigateTo('/mana/chat', { redirectCode: 301 })
-navigateTo('/dashboard', { redirectCode: 301 })
+// navigateTo('/dashboard', { redirectCode: 301 })
 // }
 </script>
 

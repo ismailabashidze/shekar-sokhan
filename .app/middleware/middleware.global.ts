@@ -1,4 +1,13 @@
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware((to, from) => {
+  // BYPASS ALL MIDDLEWARE FOR ADMIN MONITORING ROUTES
+  if (to.path.startsWith('/admin/monitoring')) {
+    console.log('🚀 BYPASSING ALL MIDDLEWARE FOR ADMIN ROUTE:', to.path)
+    return
+  }
+
+  console.log('🔍 GLOBAL MIDDLEWARE - Navigating FROM:', from?.path, 'TO:', to.path)
+  console.log('🔍 GLOBAL MIDDLEWARE - Full URL:', to.fullPath)
+
   const nuxtApp = useNuxtApp()
   const toaster = useToaster()
 
@@ -12,11 +21,21 @@ export default defineNuxtRouteMiddleware((to) => {
     '/bug-reports',
   ]
 
+  // Development: Allow admin monitoring routes completely in dev mode
+  const isDevelopmentAdminAccess = process.dev && to.path.startsWith('/admin/monitoring')
+  console.log('🔍 GLOBAL MIDDLEWARE - isDevelopmentAdminAccess:', isDevelopmentAdminAccess)
+  console.log('🔍 GLOBAL MIDDLEWARE - process.dev:', process.dev)
+  console.log('🔍 GLOBAL MIDDLEWARE - path starts with /admin/monitoring:', to.path.startsWith('/admin/monitoring'))
+
   // Also allow paths that start with /bug-reports/ (for detail pages)
-  const isAllowedPath = allowedPaths.includes(to.path) || to.path.startsWith('/bug-reports/')
+  const isAllowedPath = allowedPaths.includes(to.path) || to.path.startsWith('/bug-reports/') || isDevelopmentAdminAccess
+  console.log('🔍 GLOBAL MIDDLEWARE - isAllowedPath:', isAllowedPath)
 
   // Check if the user is authenticated or if the target path is one of the allowed paths
+  console.log('🔍 GLOBAL MIDDLEWARE - PB auth valid:', nuxtApp.$pb.authStore.isValid)
+
   if (!nuxtApp.$pb.authStore.isValid && !isAllowedPath) {
+    console.log('❌ GLOBAL MIDDLEWARE - REDIRECTING TO LOGIN - Auth invalid and path not allowed')
     toaster.clearAll()
     toaster.show({
       title: 'احراز هویت', // Authentication
@@ -27,6 +46,8 @@ export default defineNuxtRouteMiddleware((to) => {
     })
     // Redirect to login page with a 401 redirect code
     return navigateTo('/auth/login', { redirectCode: 401 })
+  } else {
+    console.log('✅ GLOBAL MIDDLEWARE - ALLOWING ACCESS - Auth valid or path allowed')
   }
 
   // LOCK SYSTEM CHECK - Enforce lock at middleware level (strongest check)
@@ -37,16 +58,16 @@ export default defineNuxtRouteMiddleware((to) => {
       if (lockStateStr) {
         const lockState = JSON.parse(lockStateStr)
         const { user } = useUser()
-        
+
         // Check if app is locked for current user
         const isLocked = lockState.isLocked && lockState.userId === user.value?.id && !!lockState.pin
-        
+
         // If locked, only allow access to /lock page and auth pages
         if (isLocked && to.path !== '/lock' && !to.path.startsWith('/auth')) {
           console.log('🔒 Navigation blocked - App is locked. Redirecting to /lock')
           return navigateTo('/lock', { replace: true })
         }
-        
+
         // If not locked but trying to access lock page, redirect to dashboard
         if (!isLocked && to.path === '/lock') {
           return navigateTo('/dashboard', { replace: true })

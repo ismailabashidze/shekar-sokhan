@@ -1,0 +1,268 @@
+[
+  {
+    "id": "_pb_users_auth_",
+    "created": "2024-01-01 00:00:00.000Z",
+    "updated": "2024-01-01 00:00:00.000Z",
+    "name": "notification_logs",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "system": false,
+        "id": "level",
+        "name": "level",
+        "type": "select",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "DEBUG",
+            "INFO",
+            "WARN",
+            "ERROR",
+            "CRITICAL"
+          ]
+        }
+      },
+      {
+        "system": false,
+        "id": "category",
+        "name": "category",
+        "type": "select",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "NOTIFICATION_DELIVERY",
+            "FCM_TOKEN",
+            "SCHEDULING",
+            "TEMPLATE_RENDERING",
+            "USER_GROUPS",
+            "CAMPAIGNS",
+            "SERVICE_WORKER",
+            "DATABASE",
+            "AUTHENTICATION",
+            "SYSTEM",
+            "PERFORMANCE",
+            "USER_INTERACTION"
+          ]
+        }
+      },
+      {
+        "system": false,
+        "id": "message",
+        "name": "message",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "details",
+        "name": "details",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      },
+      {
+        "system": false,
+        "id": "user_id",
+        "name": "user_id",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "cascadeDelete": false,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": null
+        }
+      },
+      {
+        "system": false,
+        "id": "session_id",
+        "name": "session_id",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "campaign_id",
+        "name": "campaign_id",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "notification_id",
+        "name": "notification_id",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "component",
+        "name": "component",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "method",
+        "name": "method",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "duration_ms",
+        "name": "duration_ms",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "noDecimal": true
+        }
+      },
+      {
+        "system": false,
+        "id": "memory_usage",
+        "name": "memory_usage",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "noDecimal": true
+        }
+      },
+      {
+        "system": false,
+        "id": "error_stack",
+        "name": "error_stack",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "user_agent",
+        "name": "user_agent",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "ip_address",
+        "name": "ip_address",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": null,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "timestamp",
+        "name": "timestamp",
+        "type": "date",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      }
+    ],
+    "indexes": [
+      "CREATE INDEX `idx_notification_logs_level` ON `notification_logs` (`level`)",
+      "CREATE INDEX `idx_notification_logs_category` ON `notification_logs` (`category`)",
+      "CREATE INDEX `idx_notification_logs_user_id` ON `notification_logs` (`user_id`)",
+      "CREATE INDEX `idx_notification_logs_timestamp` ON `notification_logs` (`timestamp`)",
+      "CREATE INDEX `idx_notification_logs_component` ON `notification_logs` (`component`)",
+      "CREATE INDEX `idx_notification_logs_session_id` ON `notification_logs` (`session_id`)",
+      "CREATE INDEX `idx_notification_logs_campaign_id` ON `notification_logs` (`campaign_id`)",
+      "CREATE INDEX `idx_notification_logs_notification_id` ON `notification_logs` (`notification_id`)"
+    ],
+    "listRule": "@request.auth.role = 'admin'",
+    "viewRule": "@request.auth.role = 'admin'",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": null,
+    "deleteRule": "@request.auth.role = 'admin'",
+    "options": {}
+  }
+]

@@ -38,6 +38,7 @@ export default defineAppConfig({
             alt: 'Logo',
             class: 'h-10',
           },
+          to: '/dashboard',
         },
         items: [
           // {

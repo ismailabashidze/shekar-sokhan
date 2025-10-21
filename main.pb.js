@@ -721,6 +721,298 @@ cronAdd('manageInactiveSessions', '0 0 * * *', () => {
 })
 
 /**
+ * Cron job to process scheduled push notifications via Nuxt API
+ * Runs every minute to dispatch due notifications from PocketBase
+ */
+cronAdd('processScheduledNotifications', '*/1 * * * *', () => {
+  const startTime = Date.now()
+  console.log('[Cron] Processing scheduled notifications...')
+
+  try {
+    const nowIso = new Date().toISOString()
+
+    const scheduled = $app
+      .dao()
+      .findRecordsByFilter(
+        'scheduled_notifications',
+        'status = "pending" && scheduled_for <= {:now} && (next_retry = "" || next_retry <= {:now})',
+        '+scheduled_for',
+        50,
+        0,
+        { now: nowIso },
+      )
+
+    const rawBaseUrl = process.env.NUXT_PUBLIC_BASE_URL || process.env.APP_BASE_URL || ''
+    const baseUrl = rawBaseUrl ? rawBaseUrl.replace(/\/$/, '') : ''
+
+    if (!scheduled.length) {
+      console.log('[Cron] No notifications ready to process')
+      return
+    }
+
+    if (!baseUrl) {
+      console.error('[Cron] Base URL not configured. Set NUXT_PUBLIC_BASE_URL or APP_BASE_URL for notification dispatch.')
+      scheduled.forEach((record) => {
+        const metadata = record.get('metadata') || {}
+        record.set('status', 'failed')
+        record.set('error_message', 'Notification dispatcher base URL is not configured')
+        record.set('metadata', {
+          ...metadata,
+          failureReason: 'missing_base_url',
+          failedAt: new Date().toISOString(),
+        })
+        $app.dao().saveRecord(record)
+      })
+      return
+    }
+
+    console.log(`[Cron] Found ${scheduled.length} notifications to dispatch`)
+
+    scheduled.forEach((record) => {
+      try {
+        const metadata = record.get('metadata') || {}
+        const userId = record.get('user_id')
+        if (!userId) {
+          record.set('status', 'failed')
+          record.set('error_message', 'Missing user_id on scheduled notification')
+          $app.dao().saveRecord(record)
+          console.warn(`[Cron] Skipping notification ${record.id}: missing user_id`)
+          return
+        }
+
+        let user = null
+        try {
+          user = $app.dao().findRecordById('users', userId)
+        }
+        catch (userError) {
+          record.set('status', 'failed')
+          record.set('error_message', 'Recipient user not found')
+          record.set('metadata', {
+            ...metadata,
+            failureReason: 'missing_user',
+            failedAt: new Date().toISOString(),
+          })
+          $app.dao().saveRecord(record)
+          console.warn(`[Cron] User ${userId} not found for notification ${record.id}`)
+          return
+        }
+
+        const token = user?.get('fcm_token')
+
+        if (!token) {
+          record.set('status', 'failed')
+          record.set('error_message', 'User has no FCM token')
+          record.set('metadata', {
+            ...metadata,
+            failureReason: 'missing_token',
+            failedAt: new Date().toISOString(),
+          })
+          $app.dao().saveRecord(record)
+          console.warn(`[Cron] User ${userId} lacks FCM token for notification ${record.id}`)
+          return
+        }
+
+        const replaceVariables = (value) => {
+          if (!value || typeof value !== 'string') {
+            return value || ''
+          }
+
+          const templateVariables = metadata.templateVariables || {}
+          return value.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_match, key) => {
+            const trimmed = String(key).trim()
+            const replacement = templateVariables[trimmed]
+            return replacement !== undefined && replacement !== null ? String(replacement) : ''
+          })
+        }
+
+        let template = {}
+        const ruleId = record.get('rule_id')
+        if (ruleId) {
+          try {
+            const ruleRecord = $app.dao().findRecordById('notification_rules', ruleId)
+            if (ruleRecord) {
+              template = ruleRecord.get('template') || {}
+            }
+          }
+          catch (ruleError) {
+            console.warn(`[Cron] Unable to load rule ${ruleId} for notification ${record.id}:`, ruleError)
+          }
+        }
+
+        const resolvedTitle = metadata.title || replaceVariables(template.title) || 'اطلاع رسانی جدید'
+        const resolvedBody = metadata.message || metadata.body || replaceVariables(template.message) || 'پیام جدیدی برای شما موجود است.'
+        const resolvedActionUrl = metadata.actionUrl || metadata.action_url || replaceVariables(template.action_url) || '/notifications'
+        const resolvedActionText = metadata.actionText || metadata.action_text || replaceVariables(template.action_text) || 'مشاهده'
+        const notificationType = metadata.type || template.type || 'system'
+        const priority = metadata.priority || template.priority || record.get('priority') || 'medium'
+
+        const payload = {
+          token,
+          title: resolvedTitle,
+          body: resolvedBody,
+          actionUrl: resolvedActionUrl,
+          data: {
+            notificationId: record.id,
+            ruleId: record.get('rule_id') || '',
+            priority: String(priority),
+            type: String(notificationType),
+            actionText: resolvedActionText,
+          },
+        }
+
+        const request = {
+          url: `${baseUrl}/api/notifications/send`,
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-pocketbase-cron': 'processScheduledNotifications',
+          },
+          body: JSON.stringify(payload),
+          timeout: 60,
+        }
+
+        const response = $http.send(request)
+
+        let responseJson = null
+        try {
+          const maybeJson = response?.json
+          responseJson = typeof maybeJson === 'function' ? maybeJson() : maybeJson
+        }
+        catch (jsonError) {
+          responseJson = null
+        }
+
+        if (response.statusCode >= 200 && response.statusCode < 300 && responseJson?.success !== false) {
+          record.set('status', 'sent')
+          record.set('retry_count', record.get('retry_count') || 0)
+          record.set('last_attempt', new Date().toISOString())
+          record.set('next_retry', '')
+          record.set('error_message', '')
+          record.set('metadata', {
+            ...metadata,
+            messageId: responseJson?.messageId || null,
+            dispatchedAt: new Date().toISOString(),
+            actionText: resolvedActionText,
+          })
+          $app.dao().saveRecord(record)
+
+          try {
+            const historyCollection = $app.dao().findCollectionByNameOrId('notifications')
+            if (historyCollection) {
+              const historyRecord = new Record(historyCollection, {
+                title: payload.title,
+                message: payload.body,
+                type: payload.data.type,
+                priority: payload.data.priority,
+                recipient_user_id: userId,
+                scheduled_for: record.get('scheduled_for'),
+                sent_at: new Date().toISOString(),
+                is_read: false,
+                action_url: payload.actionUrl,
+                metadata: {
+                  ...metadata,
+                  originalScheduledId: record.id,
+                },
+              })
+              $app.dao().saveRecord(historyRecord)
+            }
+          }
+          catch (historyError) {
+            console.warn('[Cron] Unable to record notification history:', historyError)
+          }
+
+          try {
+            const logsCollection = $app.dao().findCollectionByNameOrId('notification_logs')
+            if (logsCollection) {
+              const logRecord = new Record(logsCollection, {
+                level: 'INFO',
+                category: 'NOTIFICATION_DELIVERY',
+                message: 'Scheduled notification dispatched',
+                notification_id: record.id,
+                user_id: userId,
+                timestamp: new Date().toISOString(),
+                details: {
+                  response: responseJson,
+                  statusCode: response.statusCode,
+                },
+              })
+              $app.dao().saveRecord(logRecord)
+            }
+          }
+          catch (logError) {
+            console.warn('[Cron] Failed to record notification log:', logError)
+          }
+
+          console.log(`[Cron] Notification ${record.id} sent successfully`)
+        }
+        else {
+          const retryCount = (record.get('retry_count') || 0) + 1
+          record.set('retry_count', retryCount)
+          record.set('last_attempt', new Date().toISOString())
+
+          const nextRetry = new Date()
+          const backoffMinutes = Math.min(Math.pow(2, retryCount), 60)
+          nextRetry.setMinutes(nextRetry.getMinutes() + backoffMinutes)
+          record.set('next_retry', nextRetry.toISOString())
+          record.set('status', retryCount >= 5 ? 'failed' : 'pending')
+          const fallbackMessage = responseJson?.error || response?.body || response?.rawBody || `HTTP ${response.statusCode}`
+          record.set('error_message', fallbackMessage)
+          record.set('metadata', {
+            ...metadata,
+            lastError: fallbackMessage,
+            lastAttemptStatus: response.statusCode,
+            nextRetry: nextRetry.toISOString(),
+          })
+          $app.dao().saveRecord(record)
+
+          if (retryCount >= 5) {
+            try {
+              const deadLetterCollection = $app.dao().findCollectionByNameOrId('dead_letter_notifications')
+              if (deadLetterCollection) {
+                const deadLetterRecord = new Record(deadLetterCollection, {
+                  original_notification_id: record.id,
+                  user_id: userId,
+                  rule_id: record.get('rule_id'),
+                  template_id: metadata?.template_id || '',
+                  failure_reason: 'MAX_RETRIES_EXCEEDED',
+                  retry_attempts: retryCount,
+                  last_error: record.get('error_message'),
+                  metadata,
+                })
+                $app.dao().saveRecord(deadLetterRecord)
+              }
+            }
+            catch (deadLetterError) {
+              console.error('[Cron] Failed to record dead letter entry:', deadLetterError)
+            }
+          }
+
+          console.warn(`[Cron] Notification ${record.id} delivery failed (retry ${retryCount})`)
+        }
+      }
+      catch (processingError) {
+        console.error('[Cron] Error processing scheduled notification:', processingError)
+        record.set('status', 'failed')
+        const errorMessage = processingError?.message || 'Unexpected error'
+        record.set('error_message', errorMessage)
+        record.set('metadata', {
+          ...metadata,
+          failureReason: 'unexpected_error',
+          failedAt: new Date().toISOString(),
+          errorStack: processingError?.stack || null,
+        })
+        $app.dao().saveRecord(record)
+      }
+    })
+
+    console.log(`[Cron] Completed scheduled notification processing in ${Date.now() - startTime}ms`)
+  }
+  catch (error) {
+    console.error('[Cron] Failed to process scheduled notifications:', error)
+  }
+})
+
+/**
  * Custom endpoint to manage inactive sessions
  *
  * Allows manual triggering of the session cleanup process

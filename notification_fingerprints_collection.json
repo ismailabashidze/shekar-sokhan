@@ -1,0 +1,180 @@
+[
+  {
+    "id": "notification_fingerprints_collection",
+    "name": "notification_fingerprints",
+    "type": "base",
+    "system": false,
+    "schema": [
+      {
+        "system": false,
+        "id": "user_id_field",
+        "name": "user_id",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "ak540af3bt3w7r8",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": ["name", "email"]
+        }
+      },
+      {
+        "system": false,
+        "id": "rule_id_field",
+        "name": "rule_id",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "e9qpc1annfecmem",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": ["name"]
+        }
+      },
+      {
+        "system": false,
+        "id": "session_id_field",
+        "name": "session_id",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "eworm0zqhqpz5fz",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": null
+        }
+      },
+      {
+        "system": false,
+        "id": "campaign_id_field",
+        "name": "campaign_id",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "notification_campaigns_id",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": ["name"]
+        }
+      },
+      {
+        "system": false,
+        "id": "template_id_field",
+        "name": "template_id",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 50,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "content_hash_field",
+        "name": "content_hash",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 100,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "fingerprint_key_field",
+        "name": "fingerprint_key",
+        "type": "text",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 500,
+          "pattern": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "created_at_field",
+        "name": "created_at",
+        "type": "date",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "expires_at_field",
+        "name": "expires_at",
+        "type": "date",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "system": false,
+        "id": "occurrence_count_field",
+        "name": "occurrence_count",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 100,
+          "noDecimal": true
+        }
+      },
+      {
+        "system": false,
+        "id": "metadata_field",
+        "name": "metadata",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      }
+    ],
+    "indexes": [
+      "CREATE INDEX idx_fingerprint_key ON notification_fingerprints (fingerprint_key)",
+      "CREATE INDEX idx_expires_at ON notification_fingerprints (expires_at)",
+      "CREATE INDEX idx_user_id ON notification_fingerprints (user_id)",
+      "CREATE INDEX idx_created_at ON notification_fingerprints (created_at)"
+    ],
+    "listRule": "@request.auth.id != \"\" && @request.auth.role = \"admin\"",
+    "viewRule": "@request.auth.id != \"\" && @request.auth.role = \"admin\"",
+    "createRule": "@request.auth.id != \"\" && @request.auth.role = \"admin\"",
+    "updateRule": "@request.auth.id != \"\" && @request.auth.role = \"admin\"",
+    "deleteRule": "@request.auth.id != \"\" && @request.auth.role = \"admin\"",
+    "options": {}
+  }
+]
