@@ -75,45 +75,45 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue';
 
 const dashboardData = ref({
   time_of_usage: 0,
   count_of_messages: 0,
   count_of_users: 0,
   count_of_sessions: 0,
-})
+});
 
 // Format numbers with Persian digits and commas
 const formatNumber = (num) => {
-  if (!num) return '۰'
-  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
+  if (!num) return '۰';
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   // Convert number to string and add standard comma as thousands separator
-  let str = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  let str = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   // Replace English digits with Persian digits
-  return str.replace(/[0-9]/g, d => persianDigits[d])
-}
+  return str.replace(/[0-9]/g, d => persianDigits[d]);
+};
 
 // Format minutes to hours and minutes in Persian
 const formatMinutes = (minutes) => {
-  if (!minutes) return '۰'
+  if (!minutes) return '۰';
 
   // Convert to hours and minutes
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
 
   if (hours > 0) {
-    return `${hours.toLocaleString('fa-IR')}:${remainingMinutes.toString().padStart(2, '0').toLocaleString('fa-IR')}`
+    return `${hours.toLocaleString('fa-IR')}:${remainingMinutes.toString().padStart(2, '0').toLocaleString('fa-IR')}`;
   }
 
-  return minutes.toLocaleString('fa-IR')
-}
+  return minutes.toLocaleString('fa-IR');
+};
 
 // Fetch dashboard data from PocketBase
 const fetchDashboardData = async () => {
   try {
-    const nuxtApp = useNuxtApp()
-    const response = await nuxtApp.$pb.collection('dashboard_data').getOne('dashboard-12345')
+    const nuxtApp = useNuxtApp();
+    const response = await nuxtApp.$pb.collection('dashboard_data').getOne('dashboard-12345');
 
     // Update dashboard data
     dashboardData.value = {
@@ -121,15 +121,15 @@ const fetchDashboardData = async () => {
       count_of_messages: response.count_of_messages || 0,
       count_of_users: response.count_of_users || 0,
       count_of_sessions: response.count_of_sessions || 0,
-    }
+    };
   }
   catch (error) {
-    console.error('Error fetching dashboard data:', error)
+    console.error('Error fetching dashboard data:', error);
   }
-}
+};
 
 // Fetch data on component mount
 onMounted(() => {
-  fetchDashboardData()
-})
+  fetchDashboardData();
+});
 </script>

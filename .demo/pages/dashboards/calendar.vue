@@ -10,13 +10,13 @@ import {
   addDays,
   addMinutes,
   roundToNearestMinutes,
-} from 'date-fns'
-import { Calendar } from 'v-calendar'
-import { Container, Draggable } from 'vue3-smooth-dnd'
+} from 'date-fns';
+import { Calendar } from 'v-calendar';
+import { Container, Draggable } from 'vue3-smooth-dnd';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar-weekly.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar-weekly.css';
+import '~/assets/css/vcalendar.css';
 
 import {
   type VCalendarAttribute,
@@ -34,7 +34,7 @@ import {
   useDragEventPending,
   useCreateEvent,
   useViewPan,
-} from '~/utils/bundles/calendar'
+} from '~/utils/bundles/calendar';
 
 definePageMeta({
   title: 'Calendar',
@@ -47,10 +47,10 @@ definePageMeta({
     srcDark: '/img/screens/dashboard-calendar-dark.png',
     order: 25,
   },
-})
+});
 
-const scrollCalendarRef = ref<HTMLElement>()
-const showSettings = ref(false)
+const scrollCalendarRef = ref<HTMLElement>();
+const showSettings = ref(false);
 const settings = reactive<CalendarSettings>({
   hideWeekends: false,
   hourOpen: 8,
@@ -59,16 +59,16 @@ const settings = reactive<CalendarSettings>({
   hourHeight: 160,
   dayOffsetY: 0,
   weekStartsOn: 0,
-})
+});
 function getChildPayload(index: number) {
-  return pendingEvents.value?.[index - 1]
+  return pendingEvents.value?.[index - 1];
 }
 
-const { fromDate, toDate, weekdays, onPageChange } = useDateRange(settings)
+const { fromDate, toDate, weekdays, onPageChange } = useDateRange(settings);
 const { calendarEvents, pendingEvents } = useCalendarEvents({
   fromDate,
   toDate,
-})
+});
 
 const {
   isHeightDragging,
@@ -82,7 +82,7 @@ const {
   async (event) => {
     // update event
   },
-)
+);
 
 const { onCalendarClick, clearNew, hasNew } = useCreateEvent(
   settings,
@@ -102,111 +102,111 @@ const { onCalendarClick, clearNew, hasNew } = useCreateEvent(
       isHeightDragging.value
       || isPositionDragging.value
       || isViewPaning.value
-    )
+    );
   },
   // on create
   async (event) => {
-    calendarEvents.value.push(event)
-    onSelectEvent(event.customData)
+    calendarEvents.value.push(event);
+    onSelectEvent(event.customData);
   },
-)
+);
 
-const selectedEventId = ref<string>()
+const selectedEventId = ref<string>();
 const selectedEvent = computed(() => {
   return (
     calendarEvents.value.find(
       event => event?.customData?.id === selectedEventId.value,
     )?.customData
     || pendingEvents.value.find(event => event.id === selectedEventId.value)
-  )
-})
+  );
+});
 function onSelectEvent(event: CalendarEvent) {
   if (event.id !== 'new' && hasNew.value) {
-    clearNew()
+    clearNew();
   }
 
-  selectedEventId.value = event.id
+  selectedEventId.value = event.id;
 }
 
-const { now, showNow } = useNowMarker(scrollCalendarRef, settings)
+const { now, showNow } = useNowMarker(scrollCalendarRef, settings);
 const { isViewPaning, isViewMoved } = useViewPan(scrollCalendarRef, () => {
-  return !(isHeightDragging.value || isPositionDragging.value)
-})
+  return !(isHeightDragging.value || isPositionDragging.value);
+});
 
 const { isPendingEventDragging, onPendingEventDragStart } = useDragEventPending(
   settings,
   calendarEvents,
   // on drag end
   (event) => {
-    onSelectEvent(event.customData)
-    calendarEvents.value.push(event)
+    onSelectEvent(event.customData);
+    calendarEvents.value.push(event);
 
     const idx = pendingEvents.value.findIndex(
       item => item.id === event.customData.id,
-    )
+    );
     if (idx === -1) {
-      return
+      return;
     }
-    pendingEvents.value.splice(idx, 1)
+    pendingEvents.value.splice(idx, 1);
   },
-)
+);
 
 const isDragging = computed(
   () =>
     isPendingEventDragging.value
     || isPositionDragging.value
     || isHeightDragging.value,
-)
+);
 
 function scrollCalendarToTop(top = 0, behavior: ScrollBehavior = 'smooth') {
   if (!scrollCalendarRef.value) {
-    return
+    return;
   }
 
   scrollCalendarRef.value.scrollTo({
     top,
     behavior,
-  })
+  });
 }
 
 function updateHeight(height = 160) {
   if (!scrollCalendarRef.value) {
-    return
+    return;
   }
 
-  const top = scrollCalendarRef.value.scrollTop
-  const initialDate = topToDate(settings, top)
+  const top = scrollCalendarRef.value.scrollTop;
+  const initialDate = topToDate(settings, top);
 
-  settings.hourHeight = height
+  settings.hourHeight = height;
 
   if (!initialDate) {
-    return
+    return;
   }
 
   nextTick(() => {
-    scrollCalendarToTop(dateToTop(settings, initialDate), 'instant')
-  })
+    scrollCalendarToTop(dateToTop(settings, initialDate), 'instant');
+  });
 }
 const selectedEventFeatures = computed({
   get() {
     return selectedEvent.value?.features
       ? Object.keys(selectedEvent.value?.features)
-      : []
+      : [];
   },
   set(values: string[]) {
     if (!selectedEvent.value) {
-      return
+      return;
     }
 
     selectedEvent.value.features = values.reduce(
       (acc, value) => {
-        acc[value] = true
-        return acc
+        acc[value] = true;
+        return acc;
       },
       {} as Record<string, boolean>,
-    )
+    );
   },
-})
+});
 </script>
 
 <template>

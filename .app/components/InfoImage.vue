@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    title?: string
-    text?: string
-    image: string
-    imageDark?: string
-    rounded?: 'none' | 'sm' | 'md' | 'lg'
+    title?: string;
+    text?: string;
+    image: string;
+    imageDark?: string;
+    rounded?: 'none' | 'sm' | 'md' | 'lg';
   }>(),
   {
     title: undefined,
@@ -13,7 +13,7 @@ const props = withDefaults(
     imageDark: undefined,
     rounded: 'sm',
   },
-)
+);
 </script>
 
 <template>

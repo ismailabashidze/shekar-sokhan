@@ -6,55 +6,55 @@ const {
   autoLockTimer,
   remainingTime,
   progressPercentage,
-} = useLockSystem()
-const { user } = useUser()
+} = useLockSystem();
+const { user } = useUser();
 
-const isLocking = ref(false)
+const isLocking = ref(false);
 
 const handleLock = async () => {
   if (!hasPin.value) {
     // Redirect to setup PIN if no PIN is set
-    await navigateTo('/settings/lock-setup')
-    return
+    await navigateTo('/settings/lock-setup');
+    return;
   }
 
-  isLocking.value = true
+  isLocking.value = true;
 
   try {
     // Lock the app
-    lockApp()
+    lockApp();
 
     // Navigate to lock screen
-    await navigateTo('/lock')
+    await navigateTo('/lock');
   }
   catch (error) {
-    console.error('Lock error:', error)
+    console.error('Lock error:', error);
   }
   finally {
-    isLocking.value = false
+    isLocking.value = false;
   }
-}
+};
 
 // Only show lock button if user has PIN set
 const shouldShow = computed(() => {
-  return user.value && hasPin.value && !isAppLocked.value
-})
+  return user.value && hasPin.value && !isAppLocked.value;
+});
 
 // Format time as mm:ss
 const formatTime = (seconds: number) => {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return `${mins}:${secs.toString().padStart(2, '0')}`
-}
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
 
 // SVG circle calculations
-const radius = 20
-const circumference = 2 * Math.PI * radius
+const radius = 20;
+const circumference = 2 * Math.PI * radius;
 const strokeDashoffset = computed(() => {
-  if (!autoLockTimer.value) return 0
-  const progress = progressPercentage.value / 100
-  return circumference * (1 - progress)
-})
+  if (!autoLockTimer.value) return 0;
+  const progress = progressPercentage.value / 100;
+  return circumference * (1 - progress);
+});
 </script>
 
 <template>

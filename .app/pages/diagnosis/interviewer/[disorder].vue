@@ -505,66 +505,66 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useDSMInfoGenerator } from '~/composables/useDSMInfoGenerator'
+import { ref, computed, onMounted } from 'vue';
+import { useDSMInfoGenerator } from '~/composables/useDSMInfoGenerator';
 
 // Types
 interface InterviewStep {
-  id: string
-  title: string
-  description: string
-  goals: string[]
-  precautions: string[]
-  tasks: Task[]
-  passCriteria: PassCriteria
-  connectedSteps: string[]
-  isStatic?: boolean
+  id: string;
+  title: string;
+  description: string;
+  goals: string[];
+  precautions: string[];
+  tasks: Task[];
+  passCriteria: PassCriteria;
+  connectedSteps: string[];
+  isStatic?: boolean;
 }
 
 interface Task {
-  id: string
-  type: 'observation' | 'question' | 'assessment' | 'documentation'
-  content: string
-  required: boolean
-  options?: string[]
+  id: string;
+  type: 'observation' | 'question' | 'assessment' | 'documentation';
+  content: string;
+  required: boolean;
+  options?: string[];
 }
 
 interface PassCriteria {
-  requiredTasks: string[]
-  optionalTasks: string[]
-  minimumScore?: number
+  requiredTasks: string[];
+  optionalTasks: string[];
+  minimumScore?: number;
 }
 
 interface InterviewLog {
-  id: string
-  timestamp: Date
-  action: 'step_started' | 'step_completed' | 'step_failed' | 'task_completed' | 'note_added'
-  stepId: string
-  details: Record<string, any>
+  id: string;
+  timestamp: Date;
+  action: 'step_started' | 'step_completed' | 'step_failed' | 'task_completed' | 'note_added';
+  stepId: string;
+  details: Record<string, any>;
 }
 
 // Route params
-const route = useRoute()
-const disorderSlug = route.params.disorder as string
+const route = useRoute();
+const disorderSlug = route.params.disorder as string;
 
 // Composables
-const { fetchDisorderBySlug } = useDSMInfoGenerator()
+const { fetchDisorderBySlug } = useDSMInfoGenerator();
 
 // State
-const disorderInfo = ref<any>(null)
-const loading = ref(true)
-const error = ref<string | null>(null)
-const currentStepId = ref<string>('')
-const completedSteps = ref<string[]>([])
-const taskResponses = ref<Record<string, any>>({})
-const taskNotes = ref<Record<string, string>>({})
-const quickNotes = ref('')
-const activityLogs = ref<InterviewLog[]>([])
+const disorderInfo = ref<any>(null);
+const loading = ref(true);
+const error = ref<string | null>(null);
+const currentStepId = ref<string>('');
+const completedSteps = ref<string[]>([]);
+const taskResponses = ref<Record<string, any>>({});
+const taskNotes = ref<Record<string, string>>({});
+const quickNotes = ref('');
+const activityLogs = ref<InterviewLog[]>([]);
 const session = ref({
   disorderId: '',
   startTime: new Date(),
   endTime: null as Date | null,
-})
+});
 
 // Generate interview steps based on disorder info
 const generateInterviewSteps = (disorder: any): InterviewStep[] => {
@@ -768,10 +768,10 @@ const generateInterviewSteps = (disorder: any): InterviewStep[] => {
       },
       connectedSteps: [],
     },
-  ]
+  ];
 
-  return steps
-}
+  return steps;
+};
 
 // Helper functions for task generation
 const generateSymptomTasks = (disorder: any): Task[] => {
@@ -783,7 +783,7 @@ const generateSymptomTasks = (disorder: any): Task[] => {
       required: true,
       options: ['بله، همه علائم', 'بله، برخی علائم', 'خیر'],
     },
-  ]
+  ];
 
   if (disorder.diagnosticMarkers) {
     disorder.diagnosticMarkers.forEach((category: any, index: number) => {
@@ -792,12 +792,12 @@ const generateSymptomTasks = (disorder: any): Task[] => {
         type: 'observation',
         content: `بررسی ${category.category}`,
         required: false,
-      })
-    })
+      });
+    });
   }
 
-  return tasks
-}
+  return tasks;
+};
 
 const generateDiagnosticCriteriaTasks = (disorder: any): Task[] => {
   const tasks: Task[] = [
@@ -807,10 +807,10 @@ const generateDiagnosticCriteriaTasks = (disorder: any): Task[] => {
       content: 'ارزیابی کلی معیارهای تشخیصی',
       required: true,
     },
-  ]
+  ];
 
-  return tasks
-}
+  return tasks;
+};
 
 const generateDifferentialTasks = (disorder: any): Task[] => {
   const tasks: Task[] = [
@@ -820,7 +820,7 @@ const generateDifferentialTasks = (disorder: any): Task[] => {
       content: 'بررسی اختلالات افتراقی',
       required: true,
     },
-  ]
+  ];
 
   if (disorder.differentialDiagnosis) {
     disorder.differentialDiagnosis.forEach((diff: any, index: number) => {
@@ -829,122 +829,122 @@ const generateDifferentialTasks = (disorder: any): Task[] => {
         type: 'question',
         content: `آیا علائم ${diff.disorder} وجود دارد؟`,
         required: false,
-      })
-    })
+      });
+    });
   }
 
-  return tasks
-}
+  return tasks;
+};
 
 // Computed properties
 const interviewSteps = computed(() => {
-  if (!disorderInfo.value) return []
-  return generateInterviewSteps(disorderInfo.value)
-})
+  if (!disorderInfo.value) return [];
+  return generateInterviewSteps(disorderInfo.value);
+});
 
 const currentStep = computed(() => {
-  return interviewSteps.value.find(step => step.id === currentStepId.value)
-})
+  return interviewSteps.value.find(step => step.id === currentStepId.value);
+});
 
 const currentStepIndex = computed(() => {
-  return interviewSteps.value.findIndex(step => step.id === currentStepId.value)
-})
+  return interviewSteps.value.findIndex(step => step.id === currentStepId.value);
+});
 
 const isLastStep = computed(() => {
-  return currentStepIndex.value === interviewSteps.value.length - 1
-})
+  return currentStepIndex.value === interviewSteps.value.length - 1;
+});
 
 const canCompleteStep = computed(() => {
-  if (!currentStep.value) return false
+  if (!currentStep.value) return false;
 
-  const requiredTasks = currentStep.value.passCriteria.requiredTasks
+  const requiredTasks = currentStep.value.passCriteria.requiredTasks;
   return requiredTasks.every((taskId) => {
-    return taskResponses.value[taskId] !== undefined && taskResponses.value[taskId] !== ''
-  })
-})
+    return taskResponses.value[taskId] !== undefined && taskResponses.value[taskId] !== '';
+  });
+});
 
 // Methods
 const navigateToStep = (stepId: string) => {
   if (canNavigateToStep(stepId)) {
-    console.log('🚀 Navigating to step:', stepId)
-    addActivityLog('step_started', stepId)
-    currentStepId.value = stepId
+    console.log('🚀 Navigating to step:', stepId);
+    addActivityLog('step_started', stepId);
+    currentStepId.value = stepId;
   }
   else {
-    console.log('❌ Cannot navigate to step:', stepId)
+    console.log('❌ Cannot navigate to step:', stepId);
   }
-}
+};
 
 const canNavigateToStep = (stepId: string): boolean => {
-  const stepIndex = interviewSteps.value.findIndex(step => step.id === stepId)
-  const currentIndex = currentStepIndex.value
+  const stepIndex = interviewSteps.value.findIndex(step => step.id === stepId);
+  const currentIndex = currentStepIndex.value;
 
   // Can always go to completed steps or current step
   if (completedSteps.value.includes(stepId) || stepId === currentStepId.value) {
-    return true
+    return true;
   }
 
   // Can only go forward one step at a time
-  return stepIndex === currentIndex + 1
-}
+  return stepIndex === currentIndex + 1;
+};
 
 const completeStep = () => {
-  if (!currentStep.value || !canCompleteStep.value) return
+  if (!currentStep.value || !canCompleteStep.value) return;
 
   // Mark step as completed
   if (!completedSteps.value.includes(currentStep.value.id)) {
-    completedSteps.value.push(currentStep.value.id)
+    completedSteps.value.push(currentStep.value.id);
   }
 
   addActivityLog('step_completed', currentStep.value.id, {
     responses: { ...taskResponses.value },
     notes: { ...taskNotes.value },
-  })
+  });
 
   // Move to next step or finish
   if (!isLastStep.value) {
-    const nextStepIndex = currentStepIndex.value + 1
-    currentStepId.value = interviewSteps.value[nextStepIndex].id
+    const nextStepIndex = currentStepIndex.value + 1;
+    currentStepId.value = interviewSteps.value[nextStepIndex].id;
   }
   else {
-    finishInterview()
+    finishInterview();
   }
-}
+};
 
 const goToPreviousStep = () => {
   if (currentStepIndex.value > 0) {
-    const prevStepIndex = currentStepIndex.value - 1
-    currentStepId.value = interviewSteps.value[prevStepIndex].id
+    const prevStepIndex = currentStepIndex.value - 1;
+    currentStepId.value = interviewSteps.value[prevStepIndex].id;
   }
-}
+};
 
 const saveStepProgress = () => {
   addActivityLog('note_added', currentStepId.value, {
     progress_saved: true,
     responses: { ...taskResponses.value },
-  })
-}
+  });
+};
 
 const saveQuickNotes = () => {
   addActivityLog('note_added', currentStepId.value, {
     quick_note: quickNotes.value,
-  })
-}
+  });
+};
 
 const finishInterview = () => {
-  session.value.endTime = new Date()
+  session.value.endTime = new Date();
   addActivityLog('step_completed', 'interview', {
     total_duration: getElapsedTime(),
     completed_steps: completedSteps.value.length,
-  })
+  });
 
   // Here you would typically save the interview results
   console.log('Interview completed!', {
     session: session.value,
     responses: taskResponses.value,
     logs: activityLogs.value,
-  })
-}
+  });
+};
 
 const addActivityLog = (action: InterviewLog['action'], stepId: string, details: Record<string, any> = {}) => {
   activityLogs.value.push({
@@ -953,8 +953,8 @@ const addActivityLog = (action: InterviewLog['action'], stepId: string, details:
     action,
     stepId,
     details,
-  })
-}
+  });
+};
 
 // Helper functions
 const getStepIcon = (stepId: string): string => {
@@ -965,9 +965,9 @@ const getStepIcon = (stepId: string): string => {
     'differential-diagnosis': 'ph:scales',
     'risk-assessment': 'ph:warning-circle',
     'treatment-planning': 'ph:calendar-check',
-  }
-  return iconMap[stepId] || 'ph:circle'
-}
+  };
+  return iconMap[stepId] || 'ph:circle';
+};
 
 const getTaskIcon = (type: string): string => {
   const iconMap: Record<string, string> = {
@@ -975,9 +975,9 @@ const getTaskIcon = (type: string): string => {
     question: 'ph:question',
     assessment: 'ph:clipboard-text',
     documentation: 'ph:note-pencil',
-  }
-  return iconMap[type] || 'ph:circle'
-}
+  };
+  return iconMap[type] || 'ph:circle';
+};
 
 const getTaskTypeLabel = (type: string): string => {
   const labelMap: Record<string, string> = {
@@ -985,17 +985,17 @@ const getTaskTypeLabel = (type: string): string => {
     question: 'پرسش',
     assessment: 'ارزیابی',
     documentation: 'مستندسازی',
-  }
-  return labelMap[type] || type
-}
+  };
+  return labelMap[type] || type;
+};
 
 const getTaskPlaceholder = (type: string): string => {
   const placeholderMap: Record<string, string> = {
     observation: 'مشاهدات خود را ثبت کنید...',
     documentation: 'جزئیات را مستند کنید...',
-  }
-  return placeholderMap[type] || 'توضیحات...'
-}
+  };
+  return placeholderMap[type] || 'توضیحات...';
+};
 
 const getLogIcon = (action: string): string => {
   const iconMap: Record<string, string> = {
@@ -1004,66 +1004,66 @@ const getLogIcon = (action: string): string => {
     step_failed: 'ph:x-circle',
     task_completed: 'ph:check',
     note_added: 'ph:note',
-  }
-  return iconMap[action] || 'ph:circle'
-}
+  };
+  return iconMap[action] || 'ph:circle';
+};
 
 const getLogDescription = (log: InterviewLog): string => {
-  const step = interviewSteps.value.find(s => s.id === log.stepId)
-  const stepTitle = step?.title || log.stepId
+  const step = interviewSteps.value.find(s => s.id === log.stepId);
+  const stepTitle = step?.title || log.stepId;
 
   switch (log.action) {
-    case 'step_started': return `شروع مرحله: ${stepTitle}`
-    case 'step_completed': return `تکمیل مرحله: ${stepTitle}`
-    case 'step_failed': return `عدم تکمیل مرحله: ${stepTitle}`
-    case 'task_completed': return `تکمیل وظیفه در ${stepTitle}`
-    case 'note_added': return `افزودن یادداشت در ${stepTitle}`
-    default: return `فعالیت در ${stepTitle}`
+    case 'step_started': return `شروع مرحله: ${stepTitle}`;
+    case 'step_completed': return `تکمیل مرحله: ${stepTitle}`;
+    case 'step_failed': return `عدم تکمیل مرحله: ${stepTitle}`;
+    case 'task_completed': return `تکمیل وظیفه در ${stepTitle}`;
+    case 'note_added': return `افزودن یادداشت در ${stepTitle}`;
+    default: return `فعالیت در ${stepTitle}`;
   }
-}
+};
 
 const formatTime = (date: Date): string => {
   return new Intl.DateTimeFormat('fa-IR', {
     hour: '2-digit',
     minute: '2-digit',
-  }).format(date)
-}
+  }).format(date);
+};
 
 const getElapsedTime = (): string => {
-  const now = new Date()
-  const elapsed = now.getTime() - session.value.startTime.getTime()
-  const minutes = Math.floor(elapsed / 60000)
-  const seconds = Math.floor((elapsed % 60000) / 1000)
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`
-}
+  const now = new Date();
+  const elapsed = now.getTime() - session.value.startTime.getTime();
+  const minutes = Math.floor(elapsed / 60000);
+  const seconds = Math.floor((elapsed % 60000) / 1000);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
 
 const getStepTitle = (stepId: string): string => {
-  const step = interviewSteps.value.find(s => s.id === stepId)
-  return step?.title || stepId
-}
+  const step = interviewSteps.value.find(s => s.id === stepId);
+  return step?.title || stepId;
+};
 
 // Initialize
 onMounted(async () => {
   try {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
 
-    const disorderResult = await fetchDisorderBySlug(disorderSlug)
-    disorderInfo.value = disorderResult
+    const disorderResult = await fetchDisorderBySlug(disorderSlug);
+    disorderInfo.value = disorderResult;
 
     // Initialize session
-    session.value.disorderId = disorderResult.id
+    session.value.disorderId = disorderResult.id;
 
     // Start with first step
     if (interviewSteps.value.length > 0) {
-      currentStepId.value = interviewSteps.value[0].id
-      console.log('✅ Initial step set to:', currentStepId.value)
-      console.log('📋 All steps:', interviewSteps.value.map(s => s.id))
-      console.log('🎯 Current step object:', currentStep.value)
-      addActivityLog('step_started', currentStepId.value)
+      currentStepId.value = interviewSteps.value[0].id;
+      console.log('✅ Initial step set to:', currentStepId.value);
+      console.log('📋 All steps:', interviewSteps.value.map(s => s.id));
+      console.log('🎯 Current step object:', currentStep.value);
+      addActivityLog('step_started', currentStepId.value);
     }
     else {
-      console.error('❌ No interview steps generated!')
+      console.error('❌ No interview steps generated!');
     }
 
     useHead({
@@ -1075,21 +1075,21 @@ onMounted(async () => {
           content: `مصاحبه تشخیصی گام به گام برای ${disorderResult.title} بر اساس معیارهای DSM-5`,
         },
       ],
-    })
+    });
   }
   catch (err: any) {
-    console.error('Error loading disorder data:', err)
-    error.value = err.message || 'خطا در بارگذاری اطلاعات'
+    console.error('Error loading disorder data:', err);
+    error.value = err.message || 'خطا در بارگذاری اطلاعات';
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 definePageMeta({
   layout: 'default',
   title: 'مصاحبه تشخیصی | ذهنا',
-})
+});
 </script>
 
 <style scoped>

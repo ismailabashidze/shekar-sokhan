@@ -1,4 +1,4 @@
-import { defineEventHandler } from 'h3'
+import { defineEventHandler } from 'h3';
 
 export default defineEventHandler(async () => {
   // Mock data for lessons list
@@ -39,9 +39,9 @@ export default defineEventHandler(async () => {
       techniques: ['ارزیابی خطر', 'مداخله فوری', 'ارجاع مناسب'],
       image: '/img/illustrations/lessons/crisis.svg',
     },
-  ]
+  ];
 
   return {
     lessons,
-  }
-})
+  };
+});

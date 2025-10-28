@@ -31,6 +31,6 @@
 </template>
 
 <script setup lang="ts">
-const amount = ref<number | undefined>(undefined)
-const taxes = ref('With taxes')
+const amount = ref<number | undefined>(undefined);
+const taxes = ref('With taxes');
 </script>

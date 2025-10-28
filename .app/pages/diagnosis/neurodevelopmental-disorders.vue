@@ -382,12 +382,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 
 definePageMeta({
   layout: 'default',
   title: 'اختلالات نوروتکاملی - DSM-5 | ذهنا',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -402,10 +402,10 @@ useHead({
       content: 'اختلالات نوروتکاملی, اوتیسم, ADHD, اختلالات یادگیری, DSM-5, تشخیص کودکان, رشد عصبی',
     },
   ],
-})
+});
 
 // State
-const expandedItems = ref(new Set())
+const expandedItems = ref(new Set());
 
 // Category Information
 const categoryData = {
@@ -455,7 +455,7 @@ const categoryData = {
       color: 'purple',
     },
   ],
-}
+};
 
 // Complete list of Neurodevelopmental Disorders from DSM-5
 const disorders = [
@@ -867,20 +867,20 @@ const disorders = [
     associatedFeatures: ['نیاز به بررسی', 'علائم اولیه', 'مشکلات شناسایی‌نشده'],
     treatmentApproaches: ['ارزیابی جامع', 'مداخله موقت', 'مانیتورینگ'],
   },
-]
+];
 
 // Helper functions
 const toggleDisorder = (index: number) => {
   if (expandedItems.value.has(index)) {
-    expandedItems.value.delete(index)
+    expandedItems.value.delete(index);
   }
   else {
-    expandedItems.value.add(index)
+    expandedItems.value.add(index);
   }
-}
+};
 
 const viewDisorderDetails = (disorder: any) => {
-  const router = useRouter()
+  const router = useRouter();
 
   // Navigate to specific disorder detail pages where available
   const disorderRoutes = {
@@ -889,19 +889,19 @@ const viewDisorderDetails = (disorder: any) => {
     // 'اختلال طیف اوتیسم': '/diagnosis/autism-spectrum-disorder',
     // 'ADHD - نوع ترکیبی': '/diagnosis/adhd-combined',
     // etc.
-  }
+  };
 
-  const route = disorderRoutes[disorder.titleFa]
+  const route = disorderRoutes[disorder.titleFa];
   if (route) {
     // Navigate to dedicated disorder page
-    router.push(route)
+    router.push(route);
   }
   else {
     // For disorders without dedicated pages yet, show detailed information
-    console.log('Viewing detailed information for:', disorder.titleFa)
-    alert(`جزئیات ${disorder.titleFa}:\n\nکد DSM-5: ${disorder.code}\nشیوع: ${disorder.prevalence}\nسن شروع: ${disorder.ageOfOnset}\n\nبرای اطلاعات تشخیصی کامل، لطفاً با متخصص مشورت کنید.\n\nصفحه تخصصی این اختلال به زودی اضافه خواهد شد.`)
+    console.log('Viewing detailed information for:', disorder.titleFa);
+    alert(`جزئیات ${disorder.titleFa}:\n\nکد DSM-5: ${disorder.code}\nشیوع: ${disorder.prevalence}\nسن شروع: ${disorder.ageOfOnset}\n\nبرای اطلاعات تشخیصی کامل، لطفاً با متخصص مشورت کنید.\n\nصفحه تخصصی این اختلال به زودی اضافه خواهد شد.`);
   }
-}
+};
 
 const getDisorderGradient = (index: number) => {
   const gradients = [
@@ -915,9 +915,9 @@ const getDisorderGradient = (index: number) => {
     'bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 relative',
     'bg-gradient-to-br from-teal-500 via-teal-600 to-teal-700 relative',
     'bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 relative',
-  ]
-  return gradients[index % gradients.length]
-}
+  ];
+  return gradients[index % gradients.length];
+};
 </script>
 
 <style scoped>

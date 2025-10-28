@@ -1,12 +1,12 @@
 <script setup lang="ts">
-const { y } = useNinjaWindowScroll()
+const { y } = useNinjaWindowScroll();
 
-const gaugePersonal = reactive(useGaugePersonal())
+const gaugePersonal = reactive(useGaugePersonal());
 
 function useGaugePersonal() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 220
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 220;
 
   const options = {
     title: {
@@ -65,16 +65,16 @@ function useGaugePersonal() {
       },
     },
     labels: ['Average Results'],
-  }
+  };
 
-  const series = shallowRef([76])
+  const series = shallowRef([76]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

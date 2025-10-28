@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Deed } from '~/composables/useDeed'
+import type { Deed } from '~/composables/useDeed';
 
 definePageMeta({
   title: 'پیشنهاد کار نیک - مرحله ۳',
@@ -11,18 +11,18 @@ definePageMeta({
     srcDark: '/img/screens/wizard-3-dark.png',
     order: 32,
   },
-})
+});
 useHead({
   title: 'جزئیات کار نیک',
   htmlAttrs: { dir: 'rtl' },
-})
+});
 
-const { deed, createDeed } = useDeed()
+const { deed, createDeed } = useDeed();
 
 async function onSubmit() {
-  const success = await createDeed()
+  const success = await createDeed();
   if (success) {
-    navigateTo('/deeds')
+    navigateTo('/deeds');
   }
 }
 </script>

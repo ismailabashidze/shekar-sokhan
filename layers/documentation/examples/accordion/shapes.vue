@@ -40,5 +40,5 @@ const accordion = [
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quo tandem modo? Inde igitur, inquit, ordiendum est. Primum quid tu dicis breve? Duo Reges: constructio interrete.',
   },
-]
+];
 </script>

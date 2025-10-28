@@ -7,11 +7,11 @@ definePageMeta({
     categories: ['dashboards', 'admin'],
     order: 2,
   },
-})
+});
 
 // Get user ID from route params
-const route = useRoute()
-const userId = route.params.id as string
+const route = useRoute();
+const userId = route.params.id as string;
 
 // Mock user data - this will be replaced with real API data
 const userData = ref({
@@ -106,7 +106,7 @@ const userData = ref({
       priority: 'medium',
     },
   ],
-})
+});
 
 // Statistics
 const stats = computed(() => ({
@@ -117,62 +117,62 @@ const stats = computed(() => ({
   averageDuration: Math.round(
     userData.value.sessions.reduce((acc, s) => acc + s.duration, 0) / userData.value.sessions.length,
   ),
-}))
+}));
 
 // Helper functions
 function getRiskColor(level: string) {
   switch (level) {
     case 'critical':
-      return 'danger'
+      return 'danger';
     case 'high':
-      return 'warning'
+      return 'warning';
     case 'medium':
-      return 'muted'
+      return 'muted';
     case 'low':
-      return 'success'
+      return 'success';
     default:
-      return 'muted'
+      return 'muted';
   }
 }
 
 function getRiskLabel(level: string) {
   switch (level) {
     case 'critical':
-      return 'بحرانی'
+      return 'بحرانی';
     case 'high':
-      return 'پرریسک'
+      return 'پرریسک';
     case 'medium':
-      return 'متوسط'
+      return 'متوسط';
     case 'low':
-      return 'کم'
+      return 'کم';
     default:
-      return level
+      return level;
   }
 }
 
 function getMoodColor(mood: string) {
   switch (mood) {
     case 'مثبت':
-      return 'success'
+      return 'success';
     case 'خنثی':
-      return 'muted'
+      return 'muted';
     case 'منفی':
-      return 'danger'
+      return 'danger';
     default:
-      return 'muted'
+      return 'muted';
   }
 }
 
 function getPriorityColor(priority: string) {
   switch (priority) {
     case 'high':
-      return 'danger'
+      return 'danger';
     case 'medium':
-      return 'warning'
+      return 'warning';
     case 'low':
-      return 'success'
+      return 'success';
     default:
-      return 'muted'
+      return 'muted';
   }
 }
 </script>

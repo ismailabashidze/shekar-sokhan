@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import { FocusTrap } from '@headlessui/vue'
+import { FocusTrap } from '@headlessui/vue';
 
 const props = withDefaults(
   defineProps<{
-    task?: any
-    project?: any
+    task?: any;
+    project?: any;
   }>(),
   {
     task: undefined,
     project: undefined,
   },
-)
+);
 
 const emits = defineEmits<{
-  message: [props: any]
-}>()
+  message: [props: any];
+}>();
 
-const { close } = usePanels()
-onKeyStroke('Escape', close)
+const { close } = usePanels();
+onKeyStroke('Escape', close);
 
-const commentArea = ref('')
+const commentArea = ref('');
 </script>
 
 <template>

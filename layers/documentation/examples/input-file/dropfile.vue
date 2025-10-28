@@ -167,5 +167,5 @@
 </template>
 
 <script setup lang="ts">
-const uploadedFiles = ref<FileList | null>(null)
+const uploadedFiles = ref<FileList | null>(null);
 </script>

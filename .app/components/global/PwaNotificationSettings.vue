@@ -10,68 +10,68 @@ const {
   unsubscribeFromPush,
   testNotification,
   checkSubscriptionStatus,
-} = usePwaNotifications()
+} = usePwaNotifications();
 
 // Local state
-const showSettings = ref(false)
-const isTestingNotification = ref(false)
+const showSettings = ref(false);
+const isTestingNotification = ref(false);
 
 // Computed
 const canEnableNotifications = computed(() => {
-  return isSupported.value && permission.value !== 'denied'
-})
+  return isSupported.value && permission.value !== 'denied';
+});
 
 const notificationStatusText = computed(() => {
   if (!isSupported.value) {
-    return 'مرورگر شما از اعلان‌های فوری پشتیبانی نمی‌کند'
+    return 'مرورگر شما از اعلان‌های فوری پشتیبانی نمی‌کند';
   }
 
   switch (permission.value) {
     case 'granted':
-      return isSubscribed.value ? 'اعلان‌های فوری فعال است' : 'مجوز داده شده، در حال فعال‌سازی...'
+      return isSubscribed.value ? 'اعلان‌های فوری فعال است' : 'مجوز داده شده، در حال فعال‌سازی...';
     case 'denied':
-      return 'دسترسی به اعلان‌ها رد شده. از تنظیمات مرورگر فعال کنید.'
+      return 'دسترسی به اعلان‌ها رد شده. از تنظیمات مرورگر فعال کنید.';
     default:
-      return 'برای دریافت اعلان‌های فوری، مجوز لازم است'
+      return 'برای دریافت اعلان‌های فوری، مجوز لازم است';
   }
-})
+});
 
 const statusColor = computed(() => {
-  if (!isSupported.value || permission.value === 'denied') return 'danger'
-  if (permission.value === 'granted' && isSubscribed.value) return 'success'
-  return 'warning'
-})
+  if (!isSupported.value || permission.value === 'denied') return 'danger';
+  if (permission.value === 'granted' && isSubscribed.value) return 'success';
+  return 'warning';
+});
 
 // Methods
 const handleEnableNotifications = async () => {
-  const success = await requestPermission()
+  const success = await requestPermission();
   if (success) {
     // Optional: Show success message
-    console.log('اعلان‌های فوری فعال شد')
+    console.log('اعلان‌های فوری فعال شد');
   }
-}
+};
 
 const handleDisableNotifications = async () => {
-  const success = await unsubscribeFromPush()
+  const success = await unsubscribeFromPush();
   if (success) {
-    console.log('اعلان‌های فوری غیرفعال شد')
+    console.log('اعلان‌های فوری غیرفعال شد');
   }
-}
+};
 
 const handleTestNotification = async () => {
-  isTestingNotification.value = true
+  isTestingNotification.value = true;
   try {
-    await testNotification()
+    await testNotification();
   }
   finally {
-    isTestingNotification.value = false
+    isTestingNotification.value = false;
   }
-}
+};
 
 // Initialize on mount
 onMounted(() => {
-  checkSubscriptionStatus()
-})
+  checkSubscriptionStatus();
+});
 </script>
 
 <template>

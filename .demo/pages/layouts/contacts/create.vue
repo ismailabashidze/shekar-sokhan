@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useFieldError, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useFieldError, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 definePageMeta({
   title: 'New Contact',
@@ -14,10 +14,10 @@ definePageMeta({
     order: 47,
     new: true,
   },
-})
+});
 
 // This is the object that will contain the validation messages
-const ONE_MB = 1000000
+const ONE_MB = 1000000;
 const VALIDATION_TEXT = {
   FIRST_NAME_REQUIRED: 'First name can\'t be empty',
   LAST_NAME_REQUIRED: 'Last name can\'t be empty',
@@ -35,7 +35,7 @@ const VALIDATION_TEXT = {
   ROUTING_NUMBER_REQUIRED: 'Routing number can\'t be empty',
   TAXID_REQUIRED: 'Tax ID can\'t be empty',
   AVATAR_TOO_BIG: `Avatar size must be less than 1MB`,
-}
+};
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -91,43 +91,43 @@ const zodSchema = z
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.AVATAR_TOO_BIG,
         path: ['avatar'],
-      })
+      });
     }
     if (data.contact.firstName === '' && data.contact.type === 'person') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.FIRST_NAME_REQUIRED,
         path: ['contact.firstName'],
-      })
+      });
     }
     if (data.contact.lastName === '' && data.contact.type === 'person') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.LAST_NAME_REQUIRED,
         path: ['contact.lastName'],
-      })
+      });
     }
     if (data.contact.companyName === '' && data.contact.type === 'company') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.COMPANY_NAME_REQUIRED,
         path: ['contact.companyName'],
-      })
+      });
     }
     if (!data.contact.status) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.STATUS_REQUIRED,
         path: ['contact.status'],
-      })
+      });
     }
-  })
+  });
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   avatar: null,
   contact: {
@@ -151,7 +151,7 @@ const initialValues = {
     taxId: null,
     paymentMethod: null,
   },
-} satisfies FormInput
+} satisfies FormInput;
 
 const {
   handleSubmit,
@@ -166,41 +166,41 @@ const {
 } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
 // This is the computed value that will be used to display the current avatar
 const currentAvatar = computed(
   () => `/img/avatars/default-${values.contact?.gender}.jpg`,
-)
+);
 
-const success = ref(false)
-const fieldsWithErrors = computed(() => Object.keys(errors.value).length)
+const success = ref(false);
+const fieldsWithErrors = computed(() => Object.keys(errors.value).length);
 
 // BaseInputFileHeadless gives us a listfile input, but we need to
 // extract the file from the list and set it to the form
-const inputFile = ref<FileList | null>(null)
-const fileError = useFieldError('avatar')
+const inputFile = ref<FileList | null>(null);
+const fileError = useFieldError('avatar');
 watch(inputFile, (value) => {
-  const file = value?.item(0) || null
-  setFieldValue('avatar', file)
-})
+  const file = value?.item(0) || null;
+  setFieldValue('avatar', file);
+});
 
 // Ask the user for confirmation before leaving the page if the form has unsaved changes
 onBeforeRouteLeave(() => {
   if (meta.value.dirty) {
-    return confirm('You have unsaved changes. Are you sure you want to leave?')
+    return confirm('You have unsaved changes. Are you sure you want to leave?');
   }
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     // here you have access to the validated form values
-    console.log('contact-create-success', values)
+    console.log('contact-create-success', values);
 
     try {
       // fake delay, this will make isSubmitting value to be true
@@ -210,68 +210,68 @@ const onSubmit = handleSubmit(
           setTimeout(
             () => reject(new Error('Fake backend validation error')),
             2000,
-          )
+          );
         }
-        setTimeout(resolve, 4000)
-      })
+        setTimeout(resolve, 4000);
+      });
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'Success',
         message: `Contact has been created!`,
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
     }
     catch (error: any) {
       // this will set the error on the form
       if (error.message === 'Fake backend validation error') {
-        setFieldError('contact.title', 'This title is not allowed')
+        setFieldError('contact.title', 'This title is not allowed');
 
         document.documentElement.scrollTo({
           top: 0,
           behavior: 'smooth',
-        })
+        });
 
-        toaster.clearAll()
+        toaster.clearAll();
         toaster.show({
           title: 'Oops!',
           message: 'Please review the errors in the form',
           color: 'danger',
           icon: 'lucide:alert-triangle',
           closable: true,
-        })
+        });
       }
-      return
+      return;
     }
 
-    resetForm()
+    resetForm();
 
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
 
-    success.value = true
+    success.value = true;
     setTimeout(() => {
-      success.value = false
-    }, 3000)
+      success.value = false;
+    }, 3000);
   },
   (error) => {
     // this callback is optional and called only if the form has errors
-    success.value = false
+    success.value = false;
 
     // here you have access to the error
-    console.log('contact-create-error', error)
+    console.log('contact-create-error', error);
 
     // you can use it to scroll to the first error
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 </script>
 
 <template>

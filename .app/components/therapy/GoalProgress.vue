@@ -164,107 +164,107 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useGoal, type TherapyGoal } from '~/composables/goal'
+import { ref, computed, watch } from 'vue';
+import { useGoal, type TherapyGoal } from '~/composables/goal';
 
 interface Props {
-  goal: TherapyGoal
+  goal: TherapyGoal;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 const emit = defineEmits<{
-  goalUpdated: [goal: TherapyGoal]
-}>()
+  goalUpdated: [goal: TherapyGoal];
+}>();
 
-const { updateTherapyGoal, updateSubGoalStatus: updateSubGoalStatusAPI } = useGoal()
+const { updateTherapyGoal, updateSubGoalStatus: updateSubGoalStatusAPI } = useGoal();
 
-const notes = ref(props.goal.notes || '')
+const notes = ref(props.goal.notes || '');
 
 const subGoalStatusOptions = [
   { value: 'pending', label: 'در انتظار', icon: 'ph:clock', color: 'muted' },
   { value: 'in_progress', label: 'در حال انجام', icon: 'ph:play', color: 'primary' },
   { value: 'completed', label: 'تکمیل شده', icon: 'ph:check', color: 'success' },
-]
+];
 
 const statusColor = computed(() => {
   switch (props.goal.status) {
-    case 'pending': return 'muted'
-    case 'in_progress': return 'primary'
-    case 'achieved': return 'success'
-    default: return 'muted'
+    case 'pending': return 'muted';
+    case 'in_progress': return 'primary';
+    case 'achieved': return 'success';
+    default: return 'muted';
   }
-})
+});
 
 const statusLabel = computed(() => {
   switch (props.goal.status) {
-    case 'pending': return 'در انتظار'
-    case 'in_progress': return 'در حال انجام'
-    case 'achieved': return 'تحقق یافته'
-    default: return 'نامشخص'
+    case 'pending': return 'در انتظار';
+    case 'in_progress': return 'در حال انجام';
+    case 'achieved': return 'تحقق یافته';
+    default: return 'نامشخص';
   }
-})
+});
 
 const progressBarColor = computed(() => {
-  if (props.goal.progress_percentage >= 100) return 'bg-success-500'
-  if (props.goal.progress_percentage >= 75) return 'bg-primary-500'
-  if (props.goal.progress_percentage >= 50) return 'bg-warning-500'
-  return 'bg-muted-400'
-})
+  if (props.goal.progress_percentage >= 100) return 'bg-success-500';
+  if (props.goal.progress_percentage >= 75) return 'bg-primary-500';
+  if (props.goal.progress_percentage >= 50) return 'bg-warning-500';
+  return 'bg-muted-400';
+});
 
 const getSubGoalStatusColor = (status: string) => {
-  const option = subGoalStatusOptions.find(opt => opt.value === status)
-  return option?.color || 'muted'
-}
+  const option = subGoalStatusOptions.find(opt => opt.value === status);
+  return option?.color || 'muted';
+};
 
 const getSubGoalStatusLabel = (status: string) => {
-  const option = subGoalStatusOptions.find(opt => opt.value === status)
-  return option?.label || 'نامشخص'
-}
+  const option = subGoalStatusOptions.find(opt => opt.value === status);
+  return option?.label || 'نامشخص';
+};
 
 const updateSubGoalStatus = async (subGoalIndex: number, status: 'pending' | 'in_progress' | 'completed') => {
   try {
-    const updatedGoal = await updateSubGoalStatusAPI(props.goal.id!, subGoalIndex, status)
-    emit('goalUpdated', updatedGoal)
+    const updatedGoal = await updateSubGoalStatusAPI(props.goal.id!, subGoalIndex, status);
+    emit('goalUpdated', updatedGoal);
 
-    const toaster = useToaster()
+    const toaster = useToaster();
     toaster.show({
       title: 'موفقیت',
       message: 'وضعیت هدف فرعی به‌روزرسانی شد',
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
+    });
   }
   catch (error) {
-    console.error('Error updating sub-goal status:', error)
-    const toaster = useToaster()
+    console.error('Error updating sub-goal status:', error);
+    const toaster = useToaster();
     toaster.show({
       title: 'خطا',
       message: 'خطا در به‌روزرسانی وضعیت',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
-}
+};
 
 const saveNotes = async () => {
-  if (notes.value === props.goal.notes) return
+  if (notes.value === props.goal.notes) return;
 
   try {
-    const updatedGoal = await updateTherapyGoal(props.goal.id!, { notes: notes.value })
-    emit('goalUpdated', updatedGoal)
+    const updatedGoal = await updateTherapyGoal(props.goal.id!, { notes: notes.value });
+    emit('goalUpdated', updatedGoal);
   }
   catch (error) {
-    console.error('Error saving notes:', error)
+    console.error('Error saving notes:', error);
   }
-}
+};
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fa-IR')
-}
+  return new Date(dateString).toLocaleDateString('fa-IR');
+};
 
 watch(() => props.goal.notes, (newNotes) => {
-  notes.value = newNotes || ''
-})
+  notes.value = newNotes || '';
+});
 </script>

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg'
+    rounded?: 'none' | 'sm' | 'md' | 'lg';
   }>(),
   {
     rounded: 'sm',
   },
-)
+);
 
-const search = ref('')
+const search = ref('');
 </script>
 
 <template>

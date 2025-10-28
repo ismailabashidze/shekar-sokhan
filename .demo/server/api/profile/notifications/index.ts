@@ -1,6 +1,6 @@
 export default defineEventHandler(async () => {
-  return await getDemoData()
-})
+  return await getDemoData();
+});
 
 async function getDemoData() {
   return Promise.resolve([
@@ -182,5 +182,5 @@ async function getDemoData() {
       },
       people: [],
     },
-  ])
+  ]);
 }

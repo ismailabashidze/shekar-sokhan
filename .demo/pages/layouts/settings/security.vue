@@ -10,10 +10,10 @@ definePageMeta({
     order: 37,
     new: true,
   },
-})
+});
 
-const session = ref(true)
-const password = ref(true)
+const session = ref(true);
+const password = ref(true);
 </script>
 
 <template>

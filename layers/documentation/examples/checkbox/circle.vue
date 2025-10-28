@@ -61,5 +61,5 @@ const options = reactive({
   fifth: true,
   sixth: true,
   seventh: true,
-})
+});
 </script>

@@ -1,10 +1,10 @@
-const stylistic = require('@stylistic/eslint-plugin')
+const stylistic = require('@stylistic/eslint-plugin');
 
 const customized = stylistic.configs.customize({
   indent: 2,
   quotes: 'single',
   semi: true,
-})
+});
 
 module.exports = {
   root: true,
@@ -128,4 +128,4 @@ module.exports = {
       },
     },
   ],
-}
+};

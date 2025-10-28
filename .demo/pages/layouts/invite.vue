@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import type { Invite, StepData } from '../../types'
+import type { Invite, StepData } from '../../types';
 
 definePageMeta({
   layout: 'empty',
-})
+});
 useHead({
   titleTemplate: title => `${title} | Invite - Step ${currentStepId.value + 1}`,
-})
+});
 
 const initialState = ref<Invite>({
   firstName: '',
   lastName: '',
   email: '',
   role: null,
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = provideMultiStepForm({
   initialState,
@@ -29,10 +29,10 @@ const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = pro
           'Enter the name of the person that you want to invite to your organization',
       },
       async validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['email', 'firstName', 'lastName'])
-        if (!data.value.email) setFieldError('email', 'Enter user email address')
-        if (!data.value.firstName) setFieldError('firstName', 'Enter user first name')
-        if (!data.value.lastName) setFieldError('lastName', 'Enter user las name')
+        resetFieldError(['email', 'firstName', 'lastName']);
+        if (!data.value.email) setFieldError('email', 'Enter user email address');
+        if (!data.value.firstName) setFieldError('firstName', 'Enter user first name');
+        if (!data.value.lastName) setFieldError('lastName', 'Enter user las name');
       },
     },
     {
@@ -44,8 +44,8 @@ const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = pro
           'A team member\'s role determines what they can see and do on your Tairo organization account',
       },
       async validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['role'])
-        if (!data.value.role) setFieldError('role', 'You must choose a role')
+        resetFieldError(['role']);
+        if (!data.value.role) setFieldError('role', 'You must choose a role');
       },
     },
     {
@@ -60,28 +60,28 @@ const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = pro
   ],
   onSubmit: async (data, ctx) => {
     // Simulate async request
-    await new Promise(resolve => setTimeout(resolve, 4000))
+    await new Promise(resolve => setTimeout(resolve, 4000));
 
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Success',
       message: `Invitation has been sent!`,
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
+    });
   },
   onError: (error) => {
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Error',
       message: error.message,
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   },
-})
+});
 </script>
 
 <template>

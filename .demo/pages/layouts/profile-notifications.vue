@@ -9,16 +9,16 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-notifications-dark.png',
     order: 80,
   },
-})
+});
 
 const { data, pending, error, refresh } = await useFetch(
   '/api/profile/notifications',
-)
+);
 
-const notifications = ref()
+const notifications = ref();
 
 if (data.value) {
-  notifications.value = data.value
+  notifications.value = data.value;
 }
 </script>
 

@@ -2,7 +2,7 @@
 definePageMeta({
   title: 'Sidebar Layout',
   layout: 'empty',
-})
+});
 </script>
 
 <template>

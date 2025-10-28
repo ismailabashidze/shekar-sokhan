@@ -7,7 +7,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       resetInactivityTimer,
       startInactivityMonitor,
       stopInactivityMonitor,
-    } = useLockSystem()
+    } = useLockSystem();
 
     // Activity events to monitor
     const activityEvents = [
@@ -17,15 +17,15 @@ export default defineNuxtPlugin((nuxtApp) => {
       'touchstart',
       'scroll',
       'click',
-    ]
+    ];
 
     // Throttle activity handler (max once per second to avoid performance issues)
-    let lastResetTime = 0
-    const THROTTLE_MS = 1000
+    let lastResetTime = 0;
+    const THROTTLE_MS = 1000;
 
     const handleActivity = () => {
-      const now = Date.now()
-      if (now - lastResetTime < THROTTLE_MS) return
+      const now = Date.now();
+      if (now - lastResetTime < THROTTLE_MS) return;
 
       // Only track if conditions are met
       if (
@@ -33,34 +33,34 @@ export default defineNuxtPlugin((nuxtApp) => {
         && !isAppLocked.value
         && hasPin.value
       ) {
-        resetInactivityTimer()
-        lastResetTime = now
+        resetInactivityTimer();
+        lastResetTime = now;
       }
-    }
+    };
 
     // Watch for auto-lock timer changes
     watch([autoLockTimer, isAppLocked, hasPin], ([timer, locked, pin]) => {
       if (timer && !locked && pin) {
         // Start monitoring
-        startInactivityMonitor()
+        startInactivityMonitor();
       }
       else {
         // Stop monitoring
-        stopInactivityMonitor()
+        stopInactivityMonitor();
       }
-    }, { immediate: true })
+    }, { immediate: true });
 
     // Add event listeners with passive option for performance
     activityEvents.forEach((event) => {
-      window.addEventListener(event, handleActivity, { passive: true })
-    })
+      window.addEventListener(event, handleActivity, { passive: true });
+    });
 
     // Cleanup on unmount
     nuxtApp.hook('app:unmounted', () => {
       activityEvents.forEach((event) => {
-        window.removeEventListener(event, handleActivity)
-      })
-      stopInactivityMonitor()
-    })
+        window.removeEventListener(event, handleActivity);
+      });
+      stopInactivityMonitor();
+    });
   }
-})
+});

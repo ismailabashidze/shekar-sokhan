@@ -1,78 +1,78 @@
-import { useNuxtApp } from '#app'
-import { ref, readonly, computed } from 'vue'
+import { useNuxtApp } from '#app';
+import { ref, readonly, computed } from 'vue';
 
 export interface DiagnosisCriterion {
-  alphabet: string
-  description: string
-  subsets: CriterionSubset[]
+  alphabet: string;
+  description: string;
+  subsets: CriterionSubset[];
 }
 
 export interface CriterionSubset {
-  number: string
-  description: string
+  number: string;
+  description: string;
 }
 
 export interface Specifier {
-  title: string
-  conditions: string[]
+  title: string;
+  conditions: string[];
 }
 
 export interface DiagnosticFeature {
-  title: string
-  description: string
+  title: string;
+  description: string;
 }
 
 export interface AssociatedFeature {
-  category: string
-  items: string[]
+  category: string;
+  items: string[];
 }
 
 export interface DiagnosticMarker {
-  category: string
-  markers: string[]
+  category: string;
+  markers: string[];
 }
 
 export interface DifferentialDiagnosis {
-  disorder: string
-  disorderEn: string
-  code: string
-  differentiatingFeatures: string[]
+  disorder: string;
+  disorderEn: string;
+  code: string;
+  differentiatingFeatures: string[];
 }
 
 export interface RiskAndPrognosticFactor {
-  category: string
-  factors: string[]
+  category: string;
+  factors: string[];
 }
 
 export interface CultureRelatedDiagnosticIssue {
-  aspect: string
-  considerations: string[]
+  aspect: string;
+  considerations: string[];
 }
 
 export interface GenderRelatedDiagnosticIssue {
-  aspect: string
-  considerations: string[]
+  aspect: string;
+  considerations: string[];
 }
 
 export interface DisorderInfo {
-  code: string
-  title: string
-  titleEn: string
-  description: string
-  minimumCriteria: string
-  specialNote: string
-  Prevalence: string
-  developmentAndCourse: string
-  suicideRisk: string
-  diagnosisCriteria: DiagnosisCriterion[]
-  specifiers: Specifier[]
-  diagnosticFeatures: DiagnosticFeature[]
-  associated_features: AssociatedFeature[]
-  diagnosticMarkers: DiagnosticMarker[]
-  differentialDiagnosis: DifferentialDiagnosis[]
-  riskAndPrognosticFactors: RiskAndPrognosticFactor[]
-  cultureRelatedDiagnosticIssues: CultureRelatedDiagnosticIssue[]
-  genderRelatedDiagnosticIssues: GenderRelatedDiagnosticIssue[]
+  code: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  minimumCriteria: string;
+  specialNote: string;
+  Prevalence: string;
+  developmentAndCourse: string;
+  suicideRisk: string;
+  diagnosisCriteria: DiagnosisCriterion[];
+  specifiers: Specifier[];
+  diagnosticFeatures: DiagnosticFeature[];
+  associated_features: AssociatedFeature[];
+  diagnosticMarkers: DiagnosticMarker[];
+  differentialDiagnosis: DifferentialDiagnosis[];
+  riskAndPrognosticFactors: RiskAndPrognosticFactor[];
+  cultureRelatedDiagnosticIssues: CultureRelatedDiagnosticIssue[];
+  genderRelatedDiagnosticIssues: GenderRelatedDiagnosticIssue[];
 }
 
 // Define section names for detailed progress tracking
@@ -87,30 +87,30 @@ export const DISORDER_SECTIONS = [
   { id: 'riskFactors', name: 'عوامل خطر', nameEn: 'Risk Factors' },
   { id: 'cultureIssues', name: 'مسائل فرهنگی', nameEn: 'Culture Issues' },
   { id: 'genderIssues', name: 'مسائل جنسیتی', nameEn: 'Gender Issues' },
-] as const
+] as const;
 
-export type SectionId = typeof DISORDER_SECTIONS[number]['id']
+export type SectionId = typeof DISORDER_SECTIONS[number]['id'];
 
 export interface DisorderProgress {
-  disorderName: string
-  categoryTitle: string
-  status: 'pending' | 'processing' | 'completed' | 'failed'
-  error?: string
+  disorderName: string;
+  categoryTitle: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  error?: string;
   sections: Record<SectionId, {
-    status: 'pending' | 'processing' | 'completed' | 'failed'
-    error?: string
-    startTime?: number
-    endTime?: number
-  }>
-  startTime?: number
-  endTime?: number
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    error?: string;
+    startTime?: number;
+    endTime?: number;
+  }>;
+  startTime?: number;
+  endTime?: number;
 }
 
 export const useDSMInfoGenerator = () => {
-  const nuxtApp = useNuxtApp()
-  const error = ref<string | null>(null)
-  const processing = ref(false)
-  const disorderProgress = ref<Map<string, DisorderProgress>>(new Map())
+  const nuxtApp = useNuxtApp();
+  const error = ref<string | null>(null);
+  const processing = ref(false);
+  const disorderProgress = ref<Map<string, DisorderProgress>>(new Map());
 
   const generateBasicInfo = async (disorderEnglishName: string) => {
     try {
@@ -186,21 +186,21 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 6000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating basic info:', e)
-      throw e
+      console.error('Error generating basic info:', e);
+      throw e;
     }
-  }
+  };
 
   const generateDiagnosisCriteria = async (disorderEnglishName: string) => {
     try {
@@ -276,21 +276,21 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 4000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating diagnosis criteria:', e)
-      throw e
+      console.error('Error generating diagnosis criteria:', e);
+      throw e;
     }
-  }
+  };
 
   const generateSpecifiers = async (disorderEnglishName: string) => {
     try {
@@ -352,21 +352,21 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 4000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating specifiers:', e)
-      throw e
+      console.error('Error generating specifiers:', e);
+      throw e;
     }
-  }
+  };
 
   const generateDiagnosticFeatures = async (disorderEnglishName: string) => {
     try {
@@ -425,21 +425,21 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 6000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating diagnostic features:', e)
-      throw e
+      console.error('Error generating diagnostic features:', e);
+      throw e;
     }
-  }
+  };
 
   const generateAssociatedFeatures = async (disorderEnglishName: string) => {
     try {
@@ -501,21 +501,21 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 3000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating associated features:', e)
-      throw e
+      console.error('Error generating associated features:', e);
+      throw e;
     }
-  }
+  };
 
   const generateDiagnosticMarkers = async (disorderEnglishName: string) => {
     try {
@@ -577,21 +577,21 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 3000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating diagnostic markers:', e)
-      throw e
+      console.error('Error generating diagnostic markers:', e);
+      throw e;
     }
-  }
+  };
 
   const generateDifferentialDiagnosis = async (disorderEnglishName: string) => {
     try {
@@ -661,21 +661,21 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 6000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating differential diagnosis:', e)
-      throw e
+      console.error('Error generating differential diagnosis:', e);
+      throw e;
     }
-  }
+  };
 
   const generateRiskAndPrognosticFactors = async (disorderEnglishName: string) => {
     try {
@@ -737,21 +737,21 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 3000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating risk and prognostic factors:', e)
-      throw e
+      console.error('Error generating risk and prognostic factors:', e);
+      throw e;
     }
-  }
+  };
 
   const generateCultureRelatedIssues = async (disorderEnglishName: string) => {
     try {
@@ -813,21 +813,21 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 3000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating culture related issues:', e)
-      throw e
+      console.error('Error generating culture related issues:', e);
+      throw e;
     }
-  }
+  };
 
   const generateGenderRelatedIssues = async (disorderEnglishName: string) => {
     try {
@@ -889,41 +889,41 @@ export const useDSMInfoGenerator = () => {
           temperature: 0.8,
           max_tokens: 3000,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      return typeof content === 'string' ? parseJSONSafely(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      return typeof content === 'string' ? parseJSONSafely(content) : content;
     }
     catch (e: any) {
-      console.error('Error generating gender related issues:', e)
-      throw e
+      console.error('Error generating gender related issues:', e);
+      throw e;
     }
-  }
+  };
 
   const generateCompleteDisorderInfo = async (
     disorderEnglishName: string,
     categoryTitle?: string,
     enableDetailedProgress: boolean = false,
   ): Promise<DisorderInfo> => {
-    processing.value = true
-    error.value = null
+    processing.value = true;
+    error.value = null;
 
     // Initialize progress tracking if detailed progress is enabled
     if (enableDetailedProgress) {
-      initializeDisorderProgress(disorderEnglishName, categoryTitle || 'Unknown Category')
+      initializeDisorderProgress(disorderEnglishName, categoryTitle || 'Unknown Category');
     }
 
     try {
-      console.log(`🧠 Starting generation: ${disorderEnglishName} (${DISORDER_SECTIONS.length} sections)`)
+      console.log(`🧠 Starting generation: ${disorderEnglishName} (${DISORDER_SECTIONS.length} sections)`);
 
       // Update overall status
       if (enableDetailedProgress) {
-        updateDisorderStatus(disorderEnglishName, 'processing')
+        updateDisorderStatus(disorderEnglishName, 'processing');
       }
 
       // Define the generation functions with their corresponding section IDs
@@ -938,89 +938,89 @@ export const useDSMInfoGenerator = () => {
         { sectionId: 'riskFactors' as SectionId, fn: () => generateRiskAndPrognosticFactors(disorderEnglishName) },
         { sectionId: 'cultureIssues' as SectionId, fn: () => generateCultureRelatedIssues(disorderEnglishName) },
         { sectionId: 'genderIssues' as SectionId, fn: () => generateGenderRelatedIssues(disorderEnglishName) },
-      ]
+      ];
 
       // Run all generation requests in parallel with section tracking
       const results = await Promise.allSettled(
         generationTasks.map(async ({ sectionId, fn }) => {
           if (enableDetailedProgress) {
-            updateSectionStatus(disorderEnglishName, sectionId, 'processing')
+            updateSectionStatus(disorderEnglishName, sectionId, 'processing');
           }
 
           try {
-            const sectionInfo = DISORDER_SECTIONS.find(s => s.id === sectionId)
-            const sectionName = sectionInfo ? sectionInfo.name : sectionId
+            const sectionInfo = DISORDER_SECTIONS.find(s => s.id === sectionId);
+            const sectionName = sectionInfo ? sectionInfo.name : sectionId;
 
-            const result = await retryWithBackoff(fn, 5, sectionName)
+            const result = await retryWithBackoff(fn, 5, sectionName);
 
             if (enableDetailedProgress) {
-              updateSectionStatus(disorderEnglishName, sectionId, 'completed')
+              updateSectionStatus(disorderEnglishName, sectionId, 'completed');
             }
 
-            return { sectionId, result, success: true }
+            return { sectionId, result, success: true };
           }
           catch (error: any) {
             if (enableDetailedProgress) {
-              updateSectionStatus(disorderEnglishName, sectionId, 'failed', error.message)
+              updateSectionStatus(disorderEnglishName, sectionId, 'failed', error.message);
             }
 
-            console.error(`Section ${sectionId} failed for ${disorderEnglishName}:`, error)
-            return { sectionId, result: null, success: false, error: error.message }
+            console.error(`Section ${sectionId} failed for ${disorderEnglishName}:`, error);
+            return { sectionId, result: null, success: false, error: error.message };
           }
         }),
-      )
+      );
 
-      console.log(`✅ Completed generation: ${disorderEnglishName}`)
+      console.log(`✅ Completed generation: ${disorderEnglishName}`);
 
       // Process results and separate successful from failed ones
-      const successfulResults: Array<{ sectionId: SectionId, result: any, success: boolean }> = []
-      const failedResults: Array<{ sectionId: SectionId, success: boolean, error?: string }> = []
+      const successfulResults: Array<{ sectionId: SectionId; result: any; success: boolean }> = [];
+      const failedResults: Array<{ sectionId: SectionId; success: boolean; error?: string }> = [];
 
       results.forEach((settledResult) => {
         if (settledResult.status === 'fulfilled') {
-          const { sectionId, result, success, error } = settledResult.value
+          const { sectionId, result, success, error } = settledResult.value;
           if (success) {
-            successfulResults.push({ sectionId, result, success })
+            successfulResults.push({ sectionId, result, success });
           }
           else {
-            failedResults.push({ sectionId, success: false, error })
+            failedResults.push({ sectionId, success: false, error });
           }
         }
         else {
           // This shouldn't happen since we're catching errors, but just in case
-          failedResults.push({ sectionId: 'unknown' as SectionId, success: false, error: settledResult.reason?.message })
+          failedResults.push({ sectionId: 'unknown' as SectionId, success: false, error: settledResult.reason?.message });
         }
-      })
+      });
 
-      const successCount = successfulResults.length
-      const totalCount = generationTasks.length
-      const failedCount = failedResults.length
+      const successCount = successfulResults.length;
+      const totalCount = generationTasks.length;
+      const failedCount = failedResults.length;
 
       if (failedCount > 0) {
-        console.log(`⚠️  ${disorderEnglishName}: ${successCount}/${totalCount} sections successful, ${failedCount} failed`)
+        console.log(`⚠️  ${disorderEnglishName}: ${successCount}/${totalCount} sections successful, ${failedCount} failed`);
       }
 
       // Check if we can do a partial save (9 out of 10 parts successful)
-      const shouldPartialSave = successCount >= 9 && failedCount <= 1
+      const shouldPartialSave = successCount >= 9 && failedCount <= 1;
 
       if (successCount === totalCount) {
         // All sections successful - normal flow
         const sectionResults = successfulResults.reduce((acc, { sectionId, result }) => {
-          acc[sectionId] = result
-          return acc
-        }, {} as Record<SectionId, any>)
+          acc[sectionId] = result;
+          return acc;
+        }, {} as Record<SectionId, any>);
 
-        const completeInfo = buildCompleteDisorderInfo(sectionResults)
+        const completeInfo = buildCompleteDisorderInfo(sectionResults);
 
         if (enableDetailedProgress) {
-          updateDisorderStatus(disorderEnglishName, 'completed')
+          updateDisorderStatus(disorderEnglishName, 'completed');
         }
 
-        return completeInfo
+        return completeInfo;
       }
       else if (shouldPartialSave) {
         // Partial save: 9/10 or 10/10 sections successful
-        console.log(`🔄 Partial save: ${disorderEnglishName} (${successCount}/${totalCount} sections)`)
+        console.log(`🔄 Partial save: ${disorderEnglishName} (${successCount}/${totalCount} sections)`);
 
         const partialInfo = await createPartialSave(
           disorderEnglishName,
@@ -1028,49 +1028,49 @@ export const useDSMInfoGenerator = () => {
           successfulResults,
           failedResults,
           enableDetailedProgress,
-        )
+        );
 
         if (enableDetailedProgress) {
-          updateDisorderStatus(disorderEnglishName, 'completed', `Partial save: ${successCount}/${totalCount} sections`)
+          updateDisorderStatus(disorderEnglishName, 'completed', `Partial save: ${successCount}/${totalCount} sections`);
         }
 
-        return partialInfo
+        return partialInfo;
       }
       else {
         // Too many failures - throw error
-        const errorMessage = `Only ${successCount}/${totalCount} sections completed. Failed sections: ${failedResults.map(f => f.sectionId).join(', ')}`
+        const errorMessage = `Only ${successCount}/${totalCount} sections completed. Failed sections: ${failedResults.map(f => f.sectionId).join(', ')}`;
 
         if (enableDetailedProgress) {
-          updateDisorderStatus(disorderEnglishName, 'failed', errorMessage)
+          updateDisorderStatus(disorderEnglishName, 'failed', errorMessage);
         }
 
-        throw new Error(errorMessage)
+        throw new Error(errorMessage);
       }
     }
     catch (e: any) {
-      console.error(`Failed parallel generation for: ${disorderEnglishName}`, e)
-      error.value = e.message
+      console.error(`Failed parallel generation for: ${disorderEnglishName}`, e);
+      error.value = e.message;
 
       if (enableDetailedProgress) {
-        updateDisorderStatus(disorderEnglishName, 'failed', e.message)
+        updateDisorderStatus(disorderEnglishName, 'failed', e.message);
       }
 
-      throw e
+      throw e;
     }
     finally {
-      processing.value = false
+      processing.value = false;
     }
-  }
+  };
 
   // Progress tracking functions
   const initializeDisorderProgress = (disorderName: string, categoryTitle: string) => {
-    const sections = {} as Record<SectionId, DisorderProgress['sections'][SectionId]>
+    const sections = {} as Record<SectionId, DisorderProgress['sections'][SectionId]>;
 
     DISORDER_SECTIONS.forEach((section) => {
       sections[section.id] = {
         status: 'pending',
-      }
-    })
+      };
+    });
 
     const progress: DisorderProgress = {
       disorderName,
@@ -1078,22 +1078,22 @@ export const useDSMInfoGenerator = () => {
       status: 'pending',
       sections,
       startTime: Date.now(),
-    }
+    };
 
-    disorderProgress.value.set(disorderName, progress)
-  }
+    disorderProgress.value.set(disorderName, progress);
+  };
 
   const updateDisorderStatus = (disorderName: string, status: DisorderProgress['status'], error?: string) => {
-    const progress = disorderProgress.value.get(disorderName)
+    const progress = disorderProgress.value.get(disorderName);
     if (progress) {
-      progress.status = status
-      if (error) progress.error = error
+      progress.status = status;
+      if (error) progress.error = error;
       if (status === 'completed' || status === 'failed') {
-        progress.endTime = Date.now()
+        progress.endTime = Date.now();
       }
-      disorderProgress.value.set(disorderName, progress)
+      disorderProgress.value.set(disorderName, progress);
     }
-  }
+  };
 
   const updateSectionStatus = (
     disorderName: string,
@@ -1101,34 +1101,34 @@ export const useDSMInfoGenerator = () => {
     status: DisorderProgress['sections'][SectionId]['status'],
     error?: string,
   ) => {
-    const progress = disorderProgress.value.get(disorderName)
+    const progress = disorderProgress.value.get(disorderName);
     if (progress) {
-      const section = progress.sections[sectionId]
-      section.status = status
-      if (error) section.error = error
+      const section = progress.sections[sectionId];
+      section.status = status;
+      if (error) section.error = error;
 
       if (status === 'processing') {
-        section.startTime = Date.now()
+        section.startTime = Date.now();
       }
       else if (status === 'completed' || status === 'failed') {
-        section.endTime = Date.now()
+        section.endTime = Date.now();
       }
 
-      disorderProgress.value.set(disorderName, progress)
+      disorderProgress.value.set(disorderName, progress);
     }
-  }
+  };
 
   const clearProgress = () => {
-    disorderProgress.value.clear()
-  }
+    disorderProgress.value.clear();
+  };
 
   const getProgressForDisorder = (disorderName: string): DisorderProgress | undefined => {
-    return disorderProgress.value.get(disorderName)
-  }
+    return disorderProgress.value.get(disorderName);
+  };
 
   const getAllProgress = (): DisorderProgress[] => {
-    return Array.from(disorderProgress.value.values())
-  }
+    return Array.from(disorderProgress.value.values());
+  };
 
   // Helper function to build complete disorder info from successful results
   const buildCompleteDisorderInfo = (sectionResults: Record<SectionId, any>): DisorderInfo => {
@@ -1143,22 +1143,22 @@ export const useDSMInfoGenerator = () => {
       riskAndPrognosticFactors: sectionResults.riskFactors.riskAndPrognosticFactors,
       cultureRelatedDiagnosticIssues: sectionResults.cultureIssues.cultureRelatedDiagnosticIssues,
       genderRelatedDiagnosticIssues: sectionResults.genderIssues.genderRelatedDiagnosticIssues,
-    }
-  }
+    };
+  };
 
   // Helper function to create partial save with empty objects for missing parts
   const createPartialSave = async (
     disorderEnglishName: string,
     categoryTitle: string,
-    successfulResults: Array<{ sectionId: SectionId, result: any, success: boolean }>,
-    failedResults: Array<{ sectionId: SectionId, success: boolean, error?: string }>,
+    successfulResults: Array<{ sectionId: SectionId; result: any; success: boolean }>,
+    failedResults: Array<{ sectionId: SectionId; success: boolean; error?: string }>,
     enableDetailedProgress: boolean,
   ): Promise<DisorderInfo> => {
     // Create a map of successful results
-    const sectionResults: Record<SectionId, any> = {}
+    const sectionResults: Record<SectionId, any> = {};
     successfulResults.forEach(({ sectionId, result }) => {
-      sectionResults[sectionId] = result
-    })
+      sectionResults[sectionId] = result;
+    });
 
     // Create empty objects for failed sections
     const emptySectionDefaults: Record<SectionId, any> = {
@@ -1182,60 +1182,60 @@ export const useDSMInfoGenerator = () => {
       riskFactors: { riskAndPrognosticFactors: [] },
       cultureIssues: { cultureRelatedDiagnosticIssues: [] },
       genderIssues: { genderRelatedDiagnosticIssues: [] },
-    }
+    };
 
     // Fill in missing sections with empty defaults
     failedResults.forEach(({ sectionId }) => {
       if (!sectionResults[sectionId]) {
-        sectionResults[sectionId] = emptySectionDefaults[sectionId]
-        console.log(`📄 Empty default for failed section: ${sectionId}`)
+        sectionResults[sectionId] = emptySectionDefaults[sectionId];
+        console.log(`📄 Empty default for failed section: ${sectionId}`);
       }
-    })
+    });
 
     // Ensure we have all required sections
     DISORDER_SECTIONS.forEach((section) => {
       if (!sectionResults[section.id]) {
-        sectionResults[section.id] = emptySectionDefaults[section.id]
-        console.log(`📄 Adding missing section: ${section.id}`)
+        sectionResults[section.id] = emptySectionDefaults[section.id];
+        console.log(`📄 Adding missing section: ${section.id}`);
       }
-    })
+    });
 
     // Build the partial disorder info
-    let partialInfo: DisorderInfo
+    let partialInfo: DisorderInfo;
 
     try {
-      partialInfo = buildCompleteDisorderInfo(sectionResults)
+      partialInfo = buildCompleteDisorderInfo(sectionResults);
 
       // Modify the title to indicate partial completion
       if (sectionResults.basicInfo && sectionResults.basicInfo.title) {
-        partialInfo.title = `${partialInfo.title} (نیاز به تکمیل)`
+        partialInfo.title = `${partialInfo.title} (نیاز به تکمیل)`;
       }
       if (sectionResults.basicInfo && sectionResults.basicInfo.titleEn) {
-        partialInfo.titleEn = `${partialInfo.titleEn}-need`
+        partialInfo.titleEn = `${partialInfo.titleEn}-need`;
       }
 
       // Add a special note about missing sections
       const missingSections = failedResults.map((f) => {
-        const sectionInfo = DISORDER_SECTIONS.find(s => s.id === f.sectionId)
-        return sectionInfo ? sectionInfo.name : f.sectionId
-      })
+        const sectionInfo = DISORDER_SECTIONS.find(s => s.id === f.sectionId);
+        return sectionInfo ? sectionInfo.name : f.sectionId;
+      });
 
-      const missingNote = `این اختلال به صورت جزئی ایجاد شده است. بخش‌های ناقص: ${missingSections.join(', ')}. نیاز به تکمیل دارد.`
+      const missingNote = `این اختلال به صورت جزئی ایجاد شده است. بخش‌های ناقص: ${missingSections.join(', ')}. نیاز به تکمیل دارد.`;
       partialInfo.specialNote = partialInfo.specialNote
         ? `${partialInfo.specialNote}\n\n${missingNote}`
-        : missingNote
+        : missingNote;
 
-      console.log(`📝 Created partial disorder: ${disorderEnglishName} (missing: ${missingSections.join(', ')})`)
+      console.log(`📝 Created partial disorder: ${disorderEnglishName} (missing: ${missingSections.join(', ')})`);
     }
     catch (buildError: any) {
-      console.error('Error building partial disorder info:', buildError)
-      throw new Error(`Failed to build partial disorder info: ${buildError.message}`)
+      console.error('Error building partial disorder info:', buildError);
+      throw new Error(`Failed to build partial disorder info: ${buildError.message}`);
     }
 
     // Save partial disorder to database if we have database access
     try {
-      const nuxtApp = useNuxtApp()
-      const pb = nuxtApp.$pb
+      const nuxtApp = useNuxtApp();
+      const pb = nuxtApp.$pb;
 
       const data = {
         code: partialInfo.code,
@@ -1256,216 +1256,216 @@ export const useDSMInfoGenerator = () => {
         cultureRelatedDiagnosticIssues: JSON.stringify(partialInfo.cultureRelatedDiagnosticIssues),
         genderRelatedDiagnosticIssues: JSON.stringify(partialInfo.genderRelatedDiagnosticIssues),
         differentialDiagnosis: JSON.stringify(partialInfo.differentialDiagnosis),
-      }
+      };
 
-      const record = await pb.collection('DSM5_disorders').create(data)
-      console.log(`💾 Partial disorder saved: ${partialInfo.titleEn} (ID: ${record.id})`)
+      const record = await pb.collection('DSM5_disorders').create(data);
+      console.log(`💾 Partial disorder saved: ${partialInfo.titleEn} (ID: ${record.id})`);
     }
     catch (dbError: any) {
-      console.warn('Failed to save partial disorder to database (will still return the data):', dbError)
+      console.warn('Failed to save partial disorder to database (will still return the data):', dbError);
       // Don't throw here, just log the warning since we still want to return the partial data
     }
 
-    return partialInfo
-  }
+    return partialInfo;
+  };
 
   // Retry mechanism with exponential backoff
   const retryWithBackoff = async <T>(fn: () => Promise<T>, maxRetries = 5, sectionName?: string): Promise<T> => {
-    let lastError: any
+    let lastError: any;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         if (sectionName && attempt > 1) {
-          console.log(`${sectionName}: Retry attempt ${attempt}/${maxRetries}`)
+          console.log(`${sectionName}: Retry attempt ${attempt}/${maxRetries}`);
         }
         else if (!sectionName && attempt > 1) {
-          console.log(`Attempt ${attempt}/${maxRetries}`)
+          console.log(`Attempt ${attempt}/${maxRetries}`);
         }
-        const result = await fn()
+        const result = await fn();
 
         // If successful, return result
         if (attempt > 1) {
-          console.log(`✓ ${sectionName ? sectionName : 'Request'} succeeded on attempt ${attempt}`)
+          console.log(`✓ ${sectionName ? sectionName : 'Request'} succeeded on attempt ${attempt}`);
         }
-        return result
+        return result;
       }
       catch (error: any) {
-        lastError = error
+        lastError = error;
         if (sectionName) {
-          console.warn(`✗ ${sectionName}: Attempt ${attempt}/${maxRetries} failed:`, error.message)
+          console.warn(`✗ ${sectionName}: Attempt ${attempt}/${maxRetries} failed:`, error.message);
         }
         else {
-          console.warn(`✗ Attempt ${attempt}/${maxRetries} failed:`, error.message)
+          console.warn(`✗ Attempt ${attempt}/${maxRetries} failed:`, error.message);
         }
 
         // If it's the last attempt, throw the error
         if (attempt === maxRetries) {
-          console.error(`${sectionName ? sectionName : 'Request'} failed after ${maxRetries} attempts`)
-          throw error
+          console.error(`${sectionName ? sectionName : 'Request'} failed after ${maxRetries} attempts`);
+          throw error;
         }
 
         // Determine delay based on error type (reduced by 1/5)
-        let delay = Math.pow(2, attempt) * 200 // Default exponential backoff (reduced from 1000 to 200)
+        let delay = Math.pow(2, attempt) * 200; // Default exponential backoff (reduced from 1000 to 200)
 
         // For JSON parsing errors, use moderate delays
         if (error.message.includes('JSON') || error.message.includes('Unterminated string')) {
-          delay = delay * 1.5 // Slightly longer delay for JSON issues (reduced from 2x)
-          console.log(`${sectionName ? sectionName + ': ' : ''}JSON parsing error detected, using moderate delay`)
+          delay = delay * 1.5; // Slightly longer delay for JSON issues (reduced from 2x)
+          console.log(`${sectionName ? sectionName + ': ' : ''}JSON parsing error detected, using moderate delay`);
         }
 
         // For rate limiting, use longer delays
         if (error.status === 429 || error.message.includes('rate limit')) {
-          delay = delay * 2 // Double the delay for rate limiting (reduced from 3x)
-          console.log(`${sectionName ? sectionName + ': ' : ''}Rate limiting detected, using extended delay`)
+          delay = delay * 2; // Double the delay for rate limiting (reduced from 3x)
+          console.log(`${sectionName ? sectionName + ': ' : ''}Rate limiting detected, using extended delay`);
         }
 
-        console.log(`${sectionName ? sectionName + ': ' : ''}Retrying in ${delay / 1000} seconds...`)
-        await new Promise(resolve => setTimeout(resolve, delay))
+        console.log(`${sectionName ? sectionName + ': ' : ''}Retrying in ${delay / 1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
 
-    throw lastError
-  }
+    throw lastError;
+  };
 
   // Enhanced JSON parsing with error handling
   const parseJSONSafely = (content: string): any => {
     try {
-      return JSON.parse(content)
+      return JSON.parse(content);
     }
     catch (error) {
-      console.error('JSON parsing failed, attempting to fix...', error)
+      console.error('JSON parsing failed, attempting to fix...', error);
 
       // Try multiple fix strategies
-      let fixedContent = content.trim()
+      let fixedContent = content.trim();
 
       // Strategy 1: Remove any trailing commas before closing braces/brackets
-      fixedContent = fixedContent.replace(/,(\s*[}\]])/g, '$1')
+      fixedContent = fixedContent.replace(/,(\s*[}\]])/g, '$1');
 
       // Strategy 2: Fix unterminated strings by finding the last opening quote
-      const lastQuoteIndex = fixedContent.lastIndexOf('"')
+      const lastQuoteIndex = fixedContent.lastIndexOf('"');
       const lastOpenBrace = Math.max(
         fixedContent.lastIndexOf('{'),
         fixedContent.lastIndexOf('['),
-      )
+      );
 
       // If the content seems truncated and ends without proper closing
       if (lastQuoteIndex > lastOpenBrace && !fixedContent.endsWith('"')) {
-        console.log('Adding missing closing quote...')
-        fixedContent = fixedContent + '"'
+        console.log('Adding missing closing quote...');
+        fixedContent = fixedContent + '"';
       }
 
       // Strategy 3: Try to complete the JSON structure
-      const openBraces = (fixedContent.match(/\{/g) || []).length
-      const closeBraces = (fixedContent.match(/\}/g) || []).length
-      const openBrackets = (fixedContent.match(/\[/g) || []).length
-      const closeBrackets = (fixedContent.match(/\]/g) || []).length
+      const openBraces = (fixedContent.match(/\{/g) || []).length;
+      const closeBraces = (fixedContent.match(/\}/g) || []).length;
+      const openBrackets = (fixedContent.match(/\[/g) || []).length;
+      const closeBrackets = (fixedContent.match(/\]/g) || []).length;
 
       // Add missing closing braces/brackets
-      const missingCloseBraces = openBraces - closeBraces
-      const missingCloseBrackets = openBrackets - closeBrackets
+      const missingCloseBraces = openBraces - closeBraces;
+      const missingCloseBrackets = openBrackets - closeBrackets;
 
       if (missingCloseBraces > 0 || missingCloseBrackets > 0) {
-        console.log(`Adding ${missingCloseBraces} closing braces and ${missingCloseBrackets} closing brackets`)
-        fixedContent += '}}'.repeat(missingCloseBraces)
-        fixedContent += ']]'.repeat(missingCloseBrackets)
+        console.log(`Adding ${missingCloseBraces} closing braces and ${missingCloseBrackets} closing brackets`);
+        fixedContent += '}}'.repeat(missingCloseBraces);
+        fixedContent += ']]'.repeat(missingCloseBrackets);
       }
 
       // Strategy 4: Try to extract valid JSON from the beginning if content is truncated
       try {
-        return JSON.parse(fixedContent)
+        return JSON.parse(fixedContent);
       }
       catch (secondError) {
-        console.log('Second fix attempt failed, trying content truncation...')
+        console.log('Second fix attempt failed, trying content truncation...');
 
         // Find the last complete object/array by looking for the last valid closing
-        let truncatedContent = fixedContent
+        let truncatedContent = fixedContent;
         const lastValidClose = Math.max(
           truncatedContent.lastIndexOf('}'),
           truncatedContent.lastIndexOf(']'),
-        )
+        );
 
         if (lastValidClose > 0) {
-          truncatedContent = truncatedContent.substring(0, lastValidClose + 1)
+          truncatedContent = truncatedContent.substring(0, lastValidClose + 1);
 
           try {
-            console.log('Trying truncated content...')
-            return JSON.parse(truncatedContent)
+            console.log('Trying truncated content...');
+            return JSON.parse(truncatedContent);
           }
           catch (thirdError) {
-            console.log('Truncation fix failed')
+            console.log('Truncation fix failed');
           }
         }
 
         // Strategy 5: Last resort - try to find and parse just the main object
-        const firstBrace = fixedContent.indexOf('{')
+        const firstBrace = fixedContent.indexOf('{');
         if (firstBrace >= 0) {
-          let braceCount = 0
-          let endIndex = firstBrace
+          let braceCount = 0;
+          let endIndex = firstBrace;
 
           for (let i = firstBrace; i < fixedContent.length; i++) {
-            if (fixedContent[i] === '{') braceCount++
-            if (fixedContent[i] === '}') braceCount--
+            if (fixedContent[i] === '{') braceCount++;
+            if (fixedContent[i] === '}') braceCount--;
 
             if (braceCount === 0) {
-              endIndex = i + 1
-              break
+              endIndex = i + 1;
+              break;
             }
           }
 
           if (endIndex > firstBrace) {
-            const extractedContent = fixedContent.substring(firstBrace, endIndex)
+            const extractedContent = fixedContent.substring(firstBrace, endIndex);
             try {
-              console.log('Trying extracted main object...')
-              return JSON.parse(extractedContent)
+              console.log('Trying extracted main object...');
+              return JSON.parse(extractedContent);
             }
             catch (extractError) {
-              console.log('Main object extraction failed')
+              console.log('Main object extraction failed');
             }
           }
         }
 
-        console.error('All JSON fix strategies failed, throwing original error')
-        throw error
+        console.error('All JSON fix strategies failed, throwing original error');
+        throw error;
       }
     }
-  }
+  };
 
   // PocketBase data fetching functions
   const fetchCategoryData = async (categorySlug: string) => {
     try {
-      const pb = nuxtApp.$pb
+      const pb = nuxtApp.$pb;
 
-      console.log(`🔍 Searching for category with slug: "${categorySlug}"`)
+      console.log(`🔍 Searching for category with slug: "${categorySlug}"`);
 
       // Convert slug back to proper title format for matching
       const titlePattern = categorySlug
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
+        .join(' ');
 
-      console.log(`🔍 Converted slug to title pattern: "${titlePattern}"`)
+      console.log(`🔍 Converted slug to title pattern: "${titlePattern}"`);
 
       // First try exact match
-      let categoryRecord
+      let categoryRecord;
       try {
         categoryRecord = await pb.collection('DSM5_categories').getFirstListItem(
           `titleEn = "${titlePattern}"`,
           { expand: '' },
-        )
-        console.log(`✅ Found exact match for: ${titlePattern}`)
+        );
+        console.log(`✅ Found exact match for: ${titlePattern}`);
       }
       catch (e) {
-        console.log(`⚠️ Exact match failed, trying wildcard search...`)
+        console.log(`⚠️ Exact match failed, trying wildcard search...`);
         // Fallback to wildcard search
         categoryRecord = await pb.collection('DSM5_categories').getFirstListItem(
           `titleEn ~ "${titlePattern}"`,
           { expand: '' },
-        )
-        console.log(`✅ Found wildcard match for: ${titlePattern}`)
+        );
+        console.log(`✅ Found wildcard match for: ${titlePattern}`);
       }
 
       if (!categoryRecord) {
-        throw new Error(`Category not found: ${categorySlug}`)
+        throw new Error(`Category not found: ${categorySlug}`);
       }
 
       // Helper function to safely parse JSON
@@ -1473,23 +1473,23 @@ export const useDSMInfoGenerator = () => {
         if (typeof data === 'string') {
           // Skip parsing if it looks like '[object Object]' error
           if (data === '[object Object]') {
-            console.warn('Received [object Object] instead of valid JSON, using fallback')
-            return fallback
+            console.warn('Received [object Object] instead of valid JSON, using fallback');
+            return fallback;
           }
           try {
-            return JSON.parse(data)
+            return JSON.parse(data);
           }
           catch (e) {
-            console.warn('Failed to parse JSON:', data, e)
-            return fallback
+            console.warn('Failed to parse JSON:', data, e);
+            return fallback;
           }
         }
         // If it's already an object, return it
         if (typeof data === 'object' && data !== null) {
-          return data
+          return data;
         }
-        return data || fallback
-      }
+        return data || fallback;
+      };
 
       // Parse JSON fields safely
       const categoryData = {
@@ -1505,53 +1505,53 @@ export const useDSMInfoGenerator = () => {
         overview: safeJSONParse(categoryRecord.overview, { title: '', description: '' }),
         resources: safeJSONParse(categoryRecord.resources, []),
         disorders: safeJSONParse(categoryRecord.disorders, []),
-      }
+      };
 
-      console.log(`✅ Fetched category data: ${categoryData.titleEn} with ${categoryData.disorders.length} disorders`)
-      return categoryData
+      console.log(`✅ Fetched category data: ${categoryData.titleEn} with ${categoryData.disorders.length} disorders`);
+      return categoryData;
     }
     catch (err: any) {
-      console.error('Error fetching category data:', err)
-      error.value = err.message
-      throw err
+      console.error('Error fetching category data:', err);
+      error.value = err.message;
+      throw err;
     }
-  }
+  };
 
   const fetchCategoryDisorders = async (categorySlug: string) => {
     try {
-      const pb = nuxtApp.$pb
+      const pb = nuxtApp.$pb;
 
-      console.log(`🔍 Searching for disorders in category: "${categorySlug}"`)
+      console.log(`🔍 Searching for disorders in category: "${categorySlug}"`);
 
       // Convert slug back to proper title format for matching
       const titlePattern = categorySlug
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
+        .join(' ');
 
-      console.log(`🔍 Converted slug to title pattern: "${titlePattern}"`)
+      console.log(`🔍 Converted slug to title pattern: "${titlePattern}"`);
 
       // Find the category record which should contain disorders in its disorders field
-      let categoryRecord
+      let categoryRecord;
       try {
         categoryRecord = await pb.collection('DSM5_categories').getFirstListItem(
           `titleEn = "${titlePattern}"`,
           { expand: '' },
-        )
-        console.log(`✅ Found exact match for: ${titlePattern}`)
+        );
+        console.log(`✅ Found exact match for: ${titlePattern}`);
       }
       catch (e) {
-        console.log(`⚠️ Exact match failed, trying wildcard search...`)
+        console.log(`⚠️ Exact match failed, trying wildcard search...`);
         categoryRecord = await pb.collection('DSM5_categories').getFirstListItem(
           `titleEn ~ "${titlePattern}"`,
           { expand: '' },
-        )
-        console.log(`✅ Found wildcard match for: ${titlePattern}`)
+        );
+        console.log(`✅ Found wildcard match for: ${titlePattern}`);
       }
 
       if (!categoryRecord) {
-        console.warn(`Category not found for slug: ${categorySlug}`)
-        return []
+        console.warn(`Category not found for slug: ${categorySlug}`);
+        return [];
       }
 
       // Helper function to safely parse JSON
@@ -1559,45 +1559,45 @@ export const useDSMInfoGenerator = () => {
         if (typeof data === 'string') {
           // Skip parsing if it looks like '[object Object]' error
           if (data === '[object Object]') {
-            console.warn('Received [object Object] instead of valid JSON, using fallback')
-            return fallback
+            console.warn('Received [object Object] instead of valid JSON, using fallback');
+            return fallback;
           }
           try {
-            return JSON.parse(data)
+            return JSON.parse(data);
           }
           catch (e) {
-            console.warn('Failed to parse JSON:', data, e)
-            return fallback
+            console.warn('Failed to parse JSON:', data, e);
+            return fallback;
           }
         }
         // If it's already an object, return it
         if (typeof data === 'object' && data !== null) {
-          return data
+          return data;
         }
-        return data || fallback
-      }
+        return data || fallback;
+      };
 
       // Extract disorders from the category record's disorders field
-      const disordersData = safeJSONParse(categoryRecord.disorders, [])
-      console.log(`🔍 Found ${disordersData.length} disorders in category record`)
+      const disordersData = safeJSONParse(categoryRecord.disorders, []);
+      console.log(`🔍 Found ${disordersData.length} disorders in category record`);
 
-      return disordersData
+      return disordersData;
     }
     catch (err: any) {
-      console.error('Error fetching category disorders:', err)
-      error.value = err.message
-      throw err
+      console.error('Error fetching category disorders:', err);
+      error.value = err.message;
+      throw err;
     }
-  }
+  };
 
   const fetchAllCategories = async () => {
     try {
-      const pb = nuxtApp.$pb
+      const pb = nuxtApp.$pb;
 
       const categoryRecords = await pb.collection('DSM5_categories').getFullList({
         sort: 'titleEn',
         fields: 'id,code,titleFa,titleEn,icon,description,stats,disorders',
-      })
+      });
 
       const categories = categoryRecords.map((record) => {
         // Helper function to safely parse JSON
@@ -1605,23 +1605,23 @@ export const useDSMInfoGenerator = () => {
           if (typeof data === 'string') {
             // Skip parsing if it looks like '[object Object]' error
             if (data === '[object Object]') {
-              console.warn('Received [object Object] instead of valid JSON, using fallback')
-              return fallback
+              console.warn('Received [object Object] instead of valid JSON, using fallback');
+              return fallback;
             }
             try {
-              return JSON.parse(data)
+              return JSON.parse(data);
             }
             catch (e) {
-              console.warn('Failed to parse JSON:', data, e)
-              return fallback
+              console.warn('Failed to parse JSON:', data, e);
+              return fallback;
             }
           }
           // If it's already an object, return it
           if (typeof data === 'object' && data !== null) {
-            return data
+            return data;
           }
-          return data || fallback
-        }
+          return data || fallback;
+        };
 
         return {
           id: record.id,
@@ -1636,104 +1636,104 @@ export const useDSMInfoGenerator = () => {
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
             .trim(),
-        }
-      })
+        };
+      });
 
-      console.log(`✅ Fetched ${categories.length} categories`)
-      return categories
+      console.log(`✅ Fetched ${categories.length} categories`);
+      return categories;
     }
     catch (err: any) {
-      console.error('Error fetching all categories:', err)
-      error.value = err.message
-      throw err
+      console.error('Error fetching all categories:', err);
+      error.value = err.message;
+      throw err;
     }
-  }
+  };
 
   const fetchDisorderBySlug = async (disorderSlug: string) => {
     try {
-      const pb = nuxtApp.$pb
+      const pb = nuxtApp.$pb;
 
-      console.log(`🔍 Searching for disorder with slug: "${disorderSlug}"`)
+      console.log(`🔍 Searching for disorder with slug: "${disorderSlug}"`);
 
       // Helper function for safe JSON parsing (local copy)
       const safeJSONParse = (data: any, fallback: any = {}) => {
         if (typeof data === 'string') {
           if (data === '[object Object]') {
-            console.warn('Received [object Object] instead of valid JSON, using fallback')
-            return fallback
+            console.warn('Received [object Object] instead of valid JSON, using fallback');
+            return fallback;
           }
           try {
-            return JSON.parse(data)
+            return JSON.parse(data);
           }
           catch (e) {
-            console.warn('Failed to parse JSON:', data, e)
-            return fallback
+            console.warn('Failed to parse JSON:', data, e);
+            return fallback;
           }
         }
         if (typeof data === 'object' && data !== null) {
-          return data
+          return data;
         }
-        return data || fallback
-      }
+        return data || fallback;
+      };
 
       // Convert slug back to title format for matching
       const titlePattern = disorderSlug
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
+        .join(' ');
 
-      console.log(`🔍 Converted slug to title pattern: "${titlePattern}"`)
+      console.log(`🔍 Converted slug to title pattern: "${titlePattern}"`);
 
       // Try exact match first
-      let disorderRecord
+      let disorderRecord;
       try {
         disorderRecord = await pb.collection('DSM5_disorders').getFirstListItem(
           `titleEn = "${titlePattern}"`,
-        )
-        console.log('✅ Found disorder by exact titleEn match')
+        );
+        console.log('✅ Found disorder by exact titleEn match');
       }
       catch {
         // Try partial match
         try {
           disorderRecord = await pb.collection('DSM5_disorders').getFirstListItem(
             `titleEn ~ "${titlePattern}"`,
-          )
-          console.log('✅ Found disorder by partial titleEn match')
+          );
+          console.log('✅ Found disorder by partial titleEn match');
         }
         catch {
           // Try by title field
           try {
             disorderRecord = await pb.collection('DSM5_disorders').getFirstListItem(
               `title ~ "${titlePattern}"`,
-            )
-            console.log('✅ Found disorder by title match')
+            );
+            console.log('✅ Found disorder by title match');
           }
           catch {
             // Final attempt: search all records and find best match
-            const allDisorders = await pb.collection('DSM5_disorders').getFullList()
+            const allDisorders = await pb.collection('DSM5_disorders').getFullList();
             disorderRecord = allDisorders.find(d =>
               d.titleEn?.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '-') === disorderSlug
               || d.title?.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '-') === disorderSlug
               || d.titleEn?.toLowerCase().includes(disorderSlug)
               || d.title?.toLowerCase().includes(disorderSlug),
-            )
+            );
             if (disorderRecord) {
-              console.log('✅ Found disorder by manual search')
+              console.log('✅ Found disorder by manual search');
             }
           }
         }
       }
 
       if (!disorderRecord) {
-        throw new Error(`Disorder not found: ${disorderSlug}`)
+        throw new Error(`Disorder not found: ${disorderSlug}`);
       }
 
-      console.log('🔍 Found disorder record:', disorderRecord.titleEn)
+      console.log('🔍 Found disorder record:', disorderRecord.titleEn);
 
       // Helper function to transform diagnosticFeatures array to simplified expected structure
       const transformDiagnosticFeatures = (features: any, associatedFeatures: any) => {
-        console.log('🔍 Transforming diagnosticFeatures:', features)
-        console.log('🔍 Using associatedFeatures:', associatedFeatures)
+        console.log('🔍 Transforming diagnosticFeatures:', features);
+        console.log('🔍 Using associatedFeatures:', associatedFeatures);
 
         // Simplified structure based on actual data available
         const transformed = {
@@ -1745,7 +1745,7 @@ export const useDSMInfoGenerator = () => {
           // Remove complex temporal and functional sections that don't exist in data
           contextual_factors: [],
           differential_diagnostics: [],
-        }
+        };
 
         // Extract mandatory symptoms from diagnosticFeatures array
         if (Array.isArray(features) && features.length > 0) {
@@ -1763,7 +1763,7 @@ export const useDSMInfoGenerator = () => {
                       comparison: feature.description,
                     },
                   ],
-                })
+                });
               }
               // All other diagnostic features are mandatory symptoms
               else {
@@ -1771,10 +1771,10 @@ export const useDSMInfoGenerator = () => {
                   symptom: feature.title,
                   description: feature.description,
                   quantification: 'بر اساس معیارهای DSM-5',
-                })
+                });
               }
             }
-          })
+          });
         }
 
         // Extract associated symptoms from associated_features
@@ -1786,20 +1786,20 @@ export const useDSMInfoGenerator = () => {
                   symptom: item,
                   description: `علامت ${category.category}`,
                   category: category.category,
-                })
-              })
+                });
+              });
             }
-          })
+          });
         }
 
-        console.log('🔍 Transformed structure:', transformed)
-        return transformed
-      }
+        console.log('🔍 Transformed structure:', transformed);
+        return transformed;
+      };
 
-      const rawDiagnosticFeatures = safeJSONParse(disorderRecord.diagnosticFeatures, [])
-      const rawAssociatedFeatures = safeJSONParse(disorderRecord.associated_features, [])
-      console.log('🔍 Raw diagnosticFeatures:', rawDiagnosticFeatures)
-      console.log('🔍 Raw associated_features:', rawAssociatedFeatures)
+      const rawDiagnosticFeatures = safeJSONParse(disorderRecord.diagnosticFeatures, []);
+      const rawAssociatedFeatures = safeJSONParse(disorderRecord.associated_features, []);
+      console.log('🔍 Raw diagnosticFeatures:', rawDiagnosticFeatures);
+      console.log('🔍 Raw associated_features:', rawAssociatedFeatures);
 
       // Helper function to transform diagnosticMarkers array to expected format
       const transformDiagnosticMarkers = (markers: any) => {
@@ -1810,7 +1810,7 @@ export const useDSMInfoGenerator = () => {
               return {
                 name: marker.category,
                 subtype: marker.markers,
-              }
+              };
             }
             // Handle other possible structures for backward compatibility
             else if (typeof marker === 'object' && marker !== null) {
@@ -1825,48 +1825,48 @@ export const useDSMInfoGenerator = () => {
                       : marker.methods
                         ? (Array.isArray(marker.methods) ? marker.methods : [marker.methods])
                         : [marker.description || marker.title || 'تست تشخیصی'],
-              }
+              };
             }
             else if (typeof marker === 'string') {
               // If it's just a string, create a basic marker structure
               return {
                 name: marker.includes('آزمون') || marker.includes('test') ? 'diagnostic_test' : 'clinical_assessment',
                 subtype: [marker],
-              }
+              };
             }
             return {
               name: `marker_${index + 1}`,
               subtype: ['تست تشخیصی استاندارد'],
-            }
-          })
+            };
+          });
         }
         else if (typeof markers === 'object' && markers !== null && !Array.isArray(markers)) {
           // If it's an object, try to extract markers
-          const markerArray = []
+          const markerArray = [];
           Object.keys(markers).forEach((key) => {
             if (Array.isArray(markers[key])) {
               markerArray.push({
                 name: key,
                 subtype: markers[key],
-              })
+              });
             }
             else if (typeof markers[key] === 'string') {
               markerArray.push({
                 name: key,
                 subtype: [markers[key]],
-              })
+              });
             }
-          })
-          return markerArray.length > 0 ? markerArray : []
+          });
+          return markerArray.length > 0 ? markerArray : [];
         }
         else {
           // Return empty array for invalid data
-          return []
+          return [];
         }
-      }
+      };
 
-      const rawDiagnosticMarkers = safeJSONParse(disorderRecord.diagnosticMarkers, [])
-      console.log('🔍 Raw diagnosticMarkers:', rawDiagnosticMarkers)
+      const rawDiagnosticMarkers = safeJSONParse(disorderRecord.diagnosticMarkers, []);
+      console.log('🔍 Raw diagnosticMarkers:', rawDiagnosticMarkers);
 
       const disorder = {
         id: disorderRecord.id,
@@ -1888,17 +1888,17 @@ export const useDSMInfoGenerator = () => {
         riskAndPrognosticFactors: safeJSONParse(disorderRecord.riskAndPrognosticFactors, []),
         cultureRelatedDiagnosticIssues: safeJSONParse(disorderRecord.cultureRelatedDiagnosticIssues, []),
         genderRelatedDiagnosticIssues: safeJSONParse(disorderRecord.genderRelatedDiagnosticIssues, []),
-      }
+      };
 
-      console.log(`✅ Fetched disorder: ${disorder.titleEn}`)
-      return disorder
+      console.log(`✅ Fetched disorder: ${disorder.titleEn}`);
+      return disorder;
     }
     catch (err: any) {
-      console.error('Error fetching disorder:', err)
-      error.value = err.message
-      throw err
+      console.error('Error fetching disorder:', err);
+      error.value = err.message;
+      throw err;
     }
-  }
+  };
 
   return {
     error,
@@ -1928,5 +1928,5 @@ export const useDSMInfoGenerator = () => {
     fetchCategoryDisorders,
     fetchAllCategories,
     fetchDisorderBySlug,
-  }
-}
+  };
+};

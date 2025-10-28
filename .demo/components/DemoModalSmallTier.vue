@@ -1,14 +1,14 @@
 <script setup lang="ts">
-const isModalOpen = ref(false)
+const isModalOpen = ref(false);
 
 function closeModal() {
-  isModalOpen.value = false
+  isModalOpen.value = false;
 }
 function openModal() {
-  isModalOpen.value = true
+  isModalOpen.value = true;
 }
 
-const isModalMdOpen = ref(false)
+const isModalMdOpen = ref(false);
 </script>
 
 <template>

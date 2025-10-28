@@ -166,7 +166,7 @@
 
     if (queryUserId && !isAdmin.value) {
       // Non-admin trying to access another user's sessions - redirect to their own sessions
-      router.push('/darmana/therapists/sessions');
+      router.push('/hamdel/sessions');
       return false;
     }
     return true;
@@ -187,7 +187,8 @@
       // Check if we're manually filtering by status
       if (statusFilter.value !== 'all') {
         filterObj.status = statusFilter.value;
-      } else {
+      }
+ else {
         // Auto-filter logic: first check for ongoing sessions
         filterObj.status = 'inprogress';
       }
@@ -209,7 +210,8 @@
       }
 
       console.log('Sessions loaded:', sessions.value);
-    } catch (error) {
+    }
+ catch (error) {
       console.error('Error fetching sessions:', error);
       toaster.show({
         title: 'خطا',
@@ -218,7 +220,8 @@
         icon: 'ph:warning-circle-fill',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       loading.value = false;
     }
   };
@@ -228,7 +231,8 @@
     // Reset to auto-filter mode when refreshing
     if (statusFilter.value === 'all') {
       fetchSessions();
-    } else {
+    }
+ else {
       // If manually filtered, keep the filter
       fetchSessions();
     }
@@ -244,21 +248,21 @@
 
   // Navigate to session analysis
   const viewSessionAnalysis = (sessionId: string) => {
-    navigateTo(`/darmana/therapists/analysis?analysis_id=${sessionId}`);
+    navigateTo(`/hamdel/analysis?analysis_id=${sessionId}`);
   };
 
   // Navigate to session history
   const viewSessionHistory = (sessionId: string) => {
-    navigateTo(`/darmana/therapists/history?sessionId=${sessionId}`);
+    navigateTo(`/hamdel/history?sessionId=${sessionId}`);
   };
 
   const viewSessionRisk = (sessionId: string) => {
-    navigateTo(`/darmana/therapists/risk?sessionId=${sessionId}`);
+    navigateTo(`/hamdel/risk?sessionId=${sessionId}`);
   };
 
   // Continue a session
   const continueSession = (therapistId: string) => {
-    navigateTo(`/darmana/therapists/messaging?therapistId=${therapistId}`);
+    navigateTo(`/hamdel/messaging?therapistId=${therapistId}`);
   };
 
   // Filter sessions based on search term
@@ -297,7 +301,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center">
           <Icon name="ph:chat-circle-text-duotone" class="text-primary-500 ml-2 size-6" />
-          <BaseHeading tag="h2" size="md" weight="medium" class="text-muted-800 dark:text-white">
+          <BaseHeading
+            tag="h2"
+            size="md"
+            weight="medium"
+            class="text-muted-800 dark:text-white"
+          >
             جلسات مشاوره
           </BaseHeading>
         </div>
@@ -310,12 +319,24 @@
             data-tour="sessions-filter"
             @update:model-value="fetchSessions"
           >
-            <option value="all">جلسات فعال/تکمیل شده</option>
-            <option value="inprogress">در حال انجام</option>
-            <option value="done">تکمیل شده</option>
-            <option value="generatingReport">در انتظار گزارش</option>
-            <option value="closed">بسته شده</option>
-            <option value="deleted">حذف شده</option>
+            <option value="all">
+              جلسات فعال/تکمیل شده
+            </option>
+            <option value="inprogress">
+              در حال انجام
+            </option>
+            <option value="done">
+              تکمیل شده
+            </option>
+            <option value="generatingReport">
+              در انتظار گزارش
+            </option>
+            <option value="closed">
+              بسته شده
+            </option>
+            <option value="deleted">
+              حذف شده
+            </option>
           </BaseSelect>
 
           <BaseInput
@@ -352,7 +373,9 @@
         </div>
       </div>
 
-      <BaseParagraph size="sm" class="text-muted-400 mt-2">تاریخچه جلسات مشاوره شما با روانشناسان</BaseParagraph>
+      <BaseParagraph size="sm" class="text-muted-400 mt-2">
+        تاریخچه جلسات مشاوره شما با روانشناسان
+      </BaseParagraph>
 
       <!-- Loading state -->
       <div v-if="loading" class="py-10">
@@ -397,12 +420,12 @@
               class="block dark:hidden"
               src="/img/illustrations/placeholders/flat/placeholder-search.png"
               alt="Placeholder image"
-            />
+            >
             <img
               class="hidden dark:block"
               src="/img/illustrations/placeholders/flat/placeholder-search.png"
               alt="Placeholder image"
-            />
+            >
           </template>
           <template #action>
             <div class="flex gap-2">
@@ -419,7 +442,11 @@
               >
                 نمایش جلسات فعال/تکمیل شده
               </BaseButton>
-              <BaseButton color="primary" shape="curved" @click="navigateTo('/darmana/therapists/chooseTherapist')">
+              <BaseButton
+                color="primary"
+                shape="curved"
+                @click="navigateTo('/hamdel/chooseTherapist')"
+              >
                 شروع جلسه جدید
               </BaseButton>
             </div>
@@ -428,7 +455,11 @@
       </div>
 
       <!-- Results list -->
-      <div v-else class="mt-6 grid auto-rows-fr grid-cols-1 gap-4 md:grid-cols-2" data-tour="sessions-list">
+      <div
+        v-else
+        class="mt-6 grid auto-rows-fr grid-cols-1 gap-4 md:grid-cols-2"
+        data-tour="sessions-list"
+      >
         <TransitionGroup
           enter-active-class="transform-gpu"
           enter-from-class="opacity-0 -translate-y-4"
@@ -469,7 +500,12 @@
                           {{ getSessionTypeInfo(session.session_type).text }}
                         </div>
                       </BaseTag>
-                      <BaseHeading tag="h3" size="sm" weight="medium" class="text-muted-800 dark:text-white">
+                      <BaseHeading
+                        tag="h3"
+                        size="sm"
+                        weight="medium"
+                        class="text-muted-800 dark:text-white"
+                      >
                         {{ session.expand?.therapist?.name || 'روانشناس' }}
                       </BaseHeading>
                     </div>
@@ -488,7 +524,11 @@
                 </div>
 
                 <div class="mt-3 md:mt-0">
-                  <BaseTag :color="getStatusInfo(session.status).color" shape="curved" size="sm">
+                  <BaseTag
+                    :color="getStatusInfo(session.status).color"
+                    shape="curved"
+                    size="sm"
+                  >
                     <div class="px-3 py-1">
                       {{ getStatusInfo(session.status).text }}
                     </div>
@@ -556,7 +596,12 @@
                     <div class="bg-info-100 dark:bg-info-500/20 ml-2 rounded-full p-1">
                       <Icon name="ph:brain-duotone" class="text-info-500 size-4" />
                     </div>
-                    <BaseHeading tag="h4" size="xs" weight="medium" class="text-muted-700 dark:text-muted-300">
+                    <BaseHeading
+                      tag="h4"
+                      size="xs"
+                      weight="medium"
+                      class="text-muted-700 dark:text-muted-300"
+                    >
                       تحلیل جلسه
                     </BaseHeading>
                   </div>
@@ -564,7 +609,12 @@
                   <div class="space-y-3">
                     <!-- Session Title -->
                     <div v-if="session.expand.session_analysis_for_system.title">
-                      <BaseHeading tag="h5" size="xs" weight="medium" class="text-muted-600 dark:text-muted-400 mb-1">
+                      <BaseHeading
+                        tag="h5"
+                        size="xs"
+                        weight="medium"
+                        class="text-muted-600 dark:text-muted-400 mb-1"
+                      >
                         {{ session.expand.session_analysis_for_system.title }}
                       </BaseHeading>
                       <BaseParagraph
@@ -598,7 +648,7 @@
                     <div
                       v-if="
                         session.expand.session_analysis_for_system.headlines &&
-                        session.expand.session_analysis_for_system.headlines.length > 0
+                          session.expand.session_analysis_for_system.headlines.length > 0
                       "
                     >
                       <span class="text-muted-600 dark:text-muted-400 mb-2 block text-xs">نکات کلیدی:</span>
@@ -626,7 +676,12 @@
                     <div class="bg-muted-200 dark:bg-muted-700 ml-2 rounded-full p-1">
                       <Icon name="ph:clock-duotone" class="text-muted-500 size-4" />
                     </div>
-                    <BaseHeading tag="h4" size="xs" weight="medium" class="text-muted-600 dark:text-muted-400">
+                    <BaseHeading
+                      tag="h4"
+                      size="xs"
+                      weight="medium"
+                      class="text-muted-600 dark:text-muted-400"
+                    >
                       اطلاعات جلسه
                     </BaseHeading>
                   </div>
@@ -650,12 +705,16 @@
 
                     <div v-else-if="session.status === 'done'" class="text-center">
                       <Icon name="ph:clock-countdown-duotone" class="text-info-500 mx-auto mb-2 size-6" />
-                      <BaseParagraph size="xs" class="text-muted-500">تحلیل این جلسه در حال پردازش است</BaseParagraph>
+                      <BaseParagraph size="xs" class="text-muted-500">
+                        تحلیل این جلسه در حال پردازش است
+                      </BaseParagraph>
                     </div>
 
                     <div v-else class="text-center">
                       <Icon name="ph:info-duotone" class="text-muted-400 mx-auto mb-2 size-6" />
-                      <BaseParagraph size="xs" class="text-muted-400">تحلیل برای این جلسه در دسترس نیست</BaseParagraph>
+                      <BaseParagraph size="xs" class="text-muted-400">
+                        تحلیل برای این جلسه در دسترس نیست
+                      </BaseParagraph>
                     </div>
                   </div>
                 </div>

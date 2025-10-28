@@ -1,52 +1,52 @@
 <script setup lang="ts">
 const props = defineProps<{
-  prefix?: string
-}>()
+  prefix?: string;
+}>();
 
-const meta = ref<string[]>([])
+const meta = ref<string[]>([]);
 
-const componentsMeta = await $fetch(`/api/component-meta`)
+const componentsMeta = await $fetch(`/api/component-meta`);
 // const componentsMeta = { value: {} }
-const { docRoutes: routesFlat } = await useDocumentationRoutes()
+const { docRoutes: routesFlat } = await useDocumentationRoutes();
 
 // filter unwanted components
 watchEffect(() => {
   meta.value = Object.keys(componentsMeta ?? {})?.filter((name) => {
-    if (!props.prefix) return true
+    if (!props.prefix) return true;
 
-    return new RegExp(props.prefix).test(name)
-  })
-})
+    return new RegExp(props.prefix).test(name);
+  });
+});
 
 // map component meta to documentation routes
 const componentsPagesMap = computed(() => {
   return meta.value.map((name) => {
     const route = routesFlat.value.find(
       (route: any) => route.components?.includes(name),
-    )
+    );
     return {
       name,
       route,
-    }
-  })
-})
+    };
+  });
+});
 
 // filter components without documentation routes
 const componentsWithPages = computed(() => {
   return componentsPagesMap.value.filter((c) => {
     return routesFlat.value.find(
       (route: any) => route.components?.includes(c.name),
-    )
-  })
-})
+    );
+  });
+});
 const componentsWithoutPages = computed(() => {
   return componentsPagesMap.value.filter((c) => {
     const route = routesFlat.value.find(
       (route: any) => route.components?.includes(c.name),
-    )
-    return !route
-  })
-})
+    );
+    return !route;
+  });
+});
 </script>
 
 <template>

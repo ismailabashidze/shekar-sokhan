@@ -24,7 +24,7 @@ export interface HorizontalNavItem {
 }
 
 export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
-  admin: {
+  'admin': {
     name: 'admin',
     path: '/admin',
     icon: 'ph:shield-check',
@@ -87,7 +87,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  hamdel: {
+  'hamdel': {
     name: 'hamdel',
     path: '/hamdel',
     icon: 'ph:heart',
@@ -130,7 +130,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  darmana: {
+  'darmana': {
     name: 'darmana',
     path: '/darmana',
     icon: 'ph:first-aid-kit',
@@ -211,7 +211,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  clinic: {
+  'clinic': {
     name: 'clinic',
     path: '/clinic',
     icon: 'ph:hospital',
@@ -288,7 +288,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  hammasir: {
+  'hammasir': {
     name: 'hammasir',
     path: '/hammasir',
     icon: 'ph:heartbeat',
@@ -331,7 +331,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  baham: {
+  'baham': {
     name: 'baham',
     path: '/baham',
     icon: 'ph:shopping-cart',
@@ -374,7 +374,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  khebre: {
+  'khebre': {
     name: 'khebre',
     path: '/khebre',
     icon: 'ph:newspaper',
@@ -417,7 +417,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  togetherMama: {
+  'togetherMama': {
     name: 'togetherMama',
     path: '/togetherMama',
     icon: 'ph:users-three',
@@ -460,7 +460,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  kanape: {
+  'kanape': {
     name: 'kanape',
     path: '/kanape',
     icon: 'ph:couch',
@@ -503,7 +503,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  synapse: {
+  'synapse': {
     name: 'synapse',
     path: '/synapse',
     icon: 'ph:brain',
@@ -546,7 +546,7 @@ export const ZONE_CONFIGS: Record<string, ZoneConfig> = {
       },
     ],
   },
-  hampazhooh: {
+  'hampazhooh': {
     name: 'hampazhooh',
     path: '/hampazhooh',
     icon: 'ph:buildings',
@@ -614,7 +614,7 @@ export const useZones = () => {
   // Get user zones with their configs
   const userZones = computed(() => {
     if (!user.value?.zones) return [];
-    return user.value.zones.map((zone) => ZONE_CONFIGS[zone]).filter(Boolean);
+    return user.value.zones.map(zone => ZONE_CONFIGS[zone]).filter(Boolean);
   });
 
   // Check if user has access to a specific zone

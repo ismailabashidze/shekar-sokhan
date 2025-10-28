@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
-import { ref } from 'vue'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useForm } from 'vee-validate';
+import { z } from 'zod';
+import { ref } from 'vue';
 
 definePageMeta({
   title: 'گزارش خطا',
@@ -15,8 +15,8 @@ definePageMeta({
     order: 50,
   },
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 const VALIDATION_TEXT = {
   TITLE_REQUIRED: 'عنوان خطا باید حداقل ۵ کاراکتر باشد',
@@ -25,7 +25,7 @@ const VALIDATION_TEXT = {
   OPTION_REQUIRED: 'لطفاً یک گزینه را انتخاب کنید',
   PRIORITY_REQUIRED: 'انتخاب اولویت الزامی است',
   CATEGORY_REQUIRED: 'انتخاب دسته‌بندی الزامی است',
-}
+};
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -51,15 +51,15 @@ const zodSchema = z
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.OPTION_REQUIRED,
         path: ['bug.steps'],
-      })
+      });
     }
-  })
+  });
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   bug: {
     title: '',
@@ -72,21 +72,21 @@ const initialValues = {
       reported: null,
     },
   },
-}
+};
 
 const { resetForm, meta, values, validate, errors } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
-const { createBugReport } = useBugReportApi()
-const { user } = useUser()
-const router = useRouter()
-const toaster = useToaster()
-const isSubmitting = ref(false)
+const { createBugReport } = useBugReportApi();
+const { user } = useUser();
+const router = useRouter();
+const toaster = useToaster();
+const isSubmitting = ref(false);
 
 const submitForm = async () => {
-  isSubmitting.value = true
+  isSubmitting.value = true;
 
   try {
     // Get values from the form
@@ -97,30 +97,30 @@ const submitForm = async () => {
       priority: values.bug?.priority || '',
       category: values.bug?.category || '',
       user: user.value?.id,
-    }
+    };
 
     // Log the data being submitted
-    console.log('Submitting bug report:', bugData)
+    console.log('Submitting bug report:', bugData);
 
     // Validate manually if needed
     if (!bugData.title || bugData.title.length < 5) {
-      throw new Error(VALIDATION_TEXT.TITLE_REQUIRED)
+      throw new Error(VALIDATION_TEXT.TITLE_REQUIRED);
     }
     if (!bugData.shortDesc || bugData.shortDesc.length < 10) {
-      throw new Error(VALIDATION_TEXT.SHORTDESC_REQUIRED)
+      throw new Error(VALIDATION_TEXT.SHORTDESC_REQUIRED);
     }
     if (!bugData.longDesc || bugData.longDesc.length < 40) {
-      throw new Error(VALIDATION_TEXT.LONGDESC_REQUIRED)
+      throw new Error(VALIDATION_TEXT.LONGDESC_REQUIRED);
     }
     if (!bugData.priority) {
-      throw new Error(VALIDATION_TEXT.PRIORITY_REQUIRED)
+      throw new Error(VALIDATION_TEXT.PRIORITY_REQUIRED);
     }
     if (!bugData.category) {
-      throw new Error(VALIDATION_TEXT.CATEGORY_REQUIRED)
+      throw new Error(VALIDATION_TEXT.CATEGORY_REQUIRED);
     }
 
     // Submit to API
-    await createBugReport(bugData)
+    await createBugReport(bugData);
 
     toaster.show({
       title: 'موفقیت',
@@ -128,40 +128,40 @@ const submitForm = async () => {
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
-    resetForm()
-    router.push('/bug-reports')
+    });
+    resetForm();
+    router.push('/bug-reports');
   }
   catch (error) {
-    console.error('Error submitting bug report:', error)
+    console.error('Error submitting bug report:', error);
     toaster.show({
       title: 'خطا',
       message: error instanceof Error ? error.message : 'خطا در ثبت گزارش. لطفا دوباره تلاش کنید',
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   }
   finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
-}
+};
 
 // Ask the user for confirmation before leaving the page if the form has unsaved changes
 onBeforeRouteLeave((to, from, next) => {
   // Only show confirmation if form has unsaved changes
   if (meta.value && meta.value.dirty) {
     if (confirm('تغییرات ذخیره نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟')) {
-      next()
+      next();
     }
     else {
-      next(false)
+      next(false);
     }
   }
   else {
-    next()
+    next();
   }
-})
+});
 
 </script>
 

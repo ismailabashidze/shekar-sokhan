@@ -56,117 +56,117 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
-const { isPressed, setIsPressed } = useUser()
-const finalText = ref('')
-const interimText = ref('')
-const recognizing = ref(false)
-const showTip = ref(false)
-const microphones = ref([])
-const selectedMicrophone = ref('')
-let recognition
-let tipTimeout
+const { isPressed, setIsPressed } = useUser();
+const finalText = ref('');
+const interimText = ref('');
+const recognizing = ref(false);
+const showTip = ref(false);
+const microphones = ref([]);
+const selectedMicrophone = ref('');
+let recognition;
+let tipTimeout;
 
 const getMicrophones = async () => {
   try {
     // Request microphone permission
-    await navigator.mediaDevices.getUserMedia({ audio: true })
+    await navigator.mediaDevices.getUserMedia({ audio: true });
 
     // Get all audio input devices
-    const devices = await navigator.mediaDevices.enumerateDevices()
+    const devices = await navigator.mediaDevices.enumerateDevices();
     microphones.value = devices
       .filter(device => device.kind === 'audioinput')
       .map(device => ({
         deviceId: device.deviceId,
         label: device.label || `Microphone ${microphones.value.length + 1}`,
-      }))
+      }));
 
     // Set default microphone if available
     if (microphones.value.length > 0 && !selectedMicrophone.value) {
-      selectedMicrophone.value = microphones.value[0].deviceId
+      selectedMicrophone.value = microphones.value[0].deviceId;
     }
   }
   catch (error) {
-    console.error('Error getting microphones:', error)
+    console.error('Error getting microphones:', error);
   }
-}
+};
 
 const initSpeechRecognition = () => {
   if ('webkitSpeechRecognition' in window) {
-    recognition = new webkitSpeechRecognition()
-    recognition.interimResults = true
-    recognition.continuous = true
+    recognition = new webkitSpeechRecognition();
+    recognition.interimResults = true;
+    recognition.continuous = true;
 
     // Set the microphone if selected
     if (selectedMicrophone.value) {
-      recognition.lang = 'en-US' // Set appropriate language
+      recognition.lang = 'en-US'; // Set appropriate language
       // Note: webkitSpeechRecognition doesn't directly support deviceId,
       // but we can constrain the media stream later
     }
 
     recognition.onresult = (event) => {
-      let finalTranscript = ''
-      let interimTranscript = ''
+      let finalTranscript = '';
+      let interimTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript
+          finalTranscript += event.results[i][0].transcript;
         }
         else {
-          interimTranscript += event.results[i][0].transcript
+          interimTranscript += event.results[i][0].transcript;
         }
       }
 
-      finalText.value = finalTranscript
-      interimText.value = interimTranscript
-    }
+      finalText.value = finalTranscript;
+      interimText.value = interimTranscript;
+    };
 
     recognition.onend = () => {
-      recognizing.value = false
+      recognizing.value = false;
       if (finalText.value.trim() === '') {
-        showTipMessage()
+        showTipMessage();
       }
-    }
+    };
   }
-}
+};
 
 const startRecognition = () => {
   if (!recognizing.value) {
-    finalText.value = ''
-    interimText.value = ''
-    recognizing.value = true
-    setIsPressed(true)
-    console.log(isPressed.value)
-    recognition.start()
+    finalText.value = '';
+    interimText.value = '';
+    recognizing.value = true;
+    setIsPressed(true);
+    console.log(isPressed.value);
+    recognition.start();
   }
-}
+};
 
 const endRecognition = () => {
   if (recognizing.value) {
-    recognition.stop()
-    recognizing.value = false
-    setIsPressed(false)
-    console.log(isPressed.value)
+    recognition.stop();
+    recognizing.value = false;
+    setIsPressed(false);
+    console.log(isPressed.value);
   }
-}
+};
 
 const showTipMessage = () => {
-  showTip.value = true
-  clearTimeout(tipTimeout)
+  showTip.value = true;
+  clearTimeout(tipTimeout);
   tipTimeout = setTimeout(() => {
-    showTip.value = false
-  }, 3000)
-}
+    showTip.value = false;
+  }, 3000);
+};
 
 onMounted(() => {
-  initSpeechRecognition()
-  getMicrophones()
-})
+  initSpeechRecognition();
+  getMicrophones();
+});
 
 onBeforeUnmount(() => {
-  if (recognition) recognition.abort()
-})
+  if (recognition) recognition.abort();
+});
 
 </script>
 

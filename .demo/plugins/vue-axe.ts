@@ -11,21 +11,21 @@
 export default defineNuxtPlugin(async (nuxtApp) => {
   if (import.meta.client && import.meta.dev && import.meta.env.ENABLE_A11Y_AXE) {
     // @ts-ignore - vue-axe is not typed
-    const vueAxe = await import('vue-axe').then(m => m.default)
-    nuxtApp.vueApp.use(vueAxe)
+    const vueAxe = await import('vue-axe').then(m => m.default);
+    nuxtApp.vueApp.use(vueAxe);
 
     const VueAxePopup = defineAsyncComponent({
       // @ts-ignore - vue-axe is not typed
       loader: () => import('vue-axe').then(m => m.VueAxePopup),
-    })
-    nuxtApp.vueApp.component('VueAxePopup', VueAxePopup)
-    return
+    });
+    nuxtApp.vueApp.component('VueAxePopup', VueAxePopup);
+    return;
   }
 
   // mock empty component to avoid errors
   const VueAxePopup = defineComponent({
     // @ts-ignore
     render: (_, { slots }) => (slots ? slots.default() : null),
-  })
-  nuxtApp.vueApp.component('VueAxePopup', VueAxePopup)
-})
+  });
+  nuxtApp.vueApp.component('VueAxePopup', VueAxePopup);
+});

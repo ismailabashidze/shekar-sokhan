@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-const password = ref('')
+const password = ref('');
 
-const fr = () => import('@zxcvbn-ts/language-fr')
+const fr = () => import('@zxcvbn-ts/language-fr');
 </script>

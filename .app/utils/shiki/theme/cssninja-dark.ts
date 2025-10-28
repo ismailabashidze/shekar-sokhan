@@ -1081,4 +1081,4 @@ export default {
       token: 'invalid.illegal.unrecognized-tag.html',
     },
   ],
-}
+};

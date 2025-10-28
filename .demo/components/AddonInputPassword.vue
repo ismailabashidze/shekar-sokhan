@@ -1,68 +1,68 @@
 <script setup lang="ts">
-import type { Options, OptionsType, ZxcvbnResult } from '@zxcvbn-ts/core'
+import type { Options, OptionsType, ZxcvbnResult } from '@zxcvbn-ts/core';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-type LocaleImport = typeof import('@zxcvbn-ts/language-en')
+type LocaleImport = typeof import('@zxcvbn-ts/language-en');
 
 const props = withDefaults(defineProps<{
   /**
    * The password input.
    */
-  modelValue?: string
+  modelValue?: string;
   /**
    * The user inputs to include in the calculation.
    */
-  userInputs?: string[]
+  userInputs?: string[];
   /**
    * The locale to use for the feedback strings and dictionary.
    */
-  locale?: () => Promise<LocaleImport> | LocaleImport
+  locale?: () => Promise<LocaleImport> | LocaleImport;
   /**
    * The radius of the input.
    */
-  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   /**
    * Whether the password is visible or not by default.
    */
-  show?: boolean
+  show?: boolean;
   /**
    * Whether the input has been touched or not, this is used to show the feedback.
    */
-  touched?: boolean
-  disabled?: boolean
+  touched?: boolean;
+  disabled?: boolean;
 }>(), {
   modelValue: '',
   userInputs: () => [],
   locale: undefined,
   rounded: 'sm',
-})
+});
 
 const emits = defineEmits<{
-  'update:modelValue': [value?: string]
-  'validation': [state: { validation: ZxcvbnResult | null, touched: boolean }]
-  'visibility': [state: boolean]
-}>()
+  'update:modelValue': [value?: string];
+  'validation': [state: { validation: ZxcvbnResult | null; touched: boolean }];
+  'visibility': [state: boolean];
+}>();
 
 defineOptions({
   inheritAttrs: false,
-})
+});
 
 const vmodel = useVModel(props, 'modelValue', emits, {
   passive: true,
   defaultValue: '',
-})
+});
 
-const showPassword = ref(props.show ?? false)
+const showPassword = ref(props.show ?? false);
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-let zxcvbn: typeof import('@zxcvbn-ts/core').zxcvbnAsync
-let zxcvbnOptions: Options
-let options: OptionsType
-let parsePending = false
+let zxcvbn: typeof import('@zxcvbn-ts/core').zxcvbnAsync;
+let zxcvbnOptions: Options;
+let options: OptionsType;
+let parsePending = false;
 
-const inputRef = ref<any>()
-const isTouched = ref(props.touched ?? false)
-const validation = shallowRef<ZxcvbnResult | null>(null)
+const inputRef = ref<any>();
+const isTouched = ref(props.touched ?? false);
+const validation = shallowRef<ZxcvbnResult | null>(null);
 
 defineExpose({
   touched: isTouched,
@@ -70,39 +70,39 @@ defineExpose({
   showPassword,
   toggleVisibility,
   inputRef,
-})
+});
 
 function handleInput(value: string, _touched = true) {
-  vmodel.value = value
-  isTouched.value = _touched
+  vmodel.value = value;
+  isTouched.value = _touched;
 }
 
 function toggleVisibility() {
-  showPassword.value = !showPassword.value
+  showPassword.value = !showPassword.value;
 }
-watch(showPassword, value => emits('visibility', value))
+watch(showPassword, value => emits('visibility', value));
 
 async function checkPassword(value: string) {
   if (!zxcvbn) {
-    parsePending = true
-    return
+    parsePending = true;
+    return;
   }
 
-  zxcvbnOptions.setOptions(options)
-  validation.value = await zxcvbn(value, props.userInputs)
+  zxcvbnOptions.setOptions(options);
+  validation.value = await zxcvbn(value, props.userInputs);
 
   // add a point for passwords that take over a century to crack
-  const fastHashingCenturies = validation.value.crackTimesSeconds.offlineFastHashing1e10PerSecond > 1e9
-  validation.value.score += (fastHashingCenturies ? 1 : 0)
+  const fastHashingCenturies = validation.value.crackTimesSeconds.offlineFastHashing1e10PerSecond > 1e9;
+  validation.value.score += (fastHashingCenturies ? 1 : 0);
 
-  emits('validation', { validation: validation.value, touched: isTouched.value })
+  emits('validation', { validation: validation.value, touched: isTouched.value });
 }
 
 watchDebounced(
   [vmodel, () => props.userInputs],
   ([value]) => checkPassword(value),
   { debounce: 200, immediate: true },
-)
+);
 
 onNuxtReady(async () => {
   const [
@@ -113,7 +113,7 @@ onNuxtReady(async () => {
     import('@zxcvbn-ts/core'),
     import('@zxcvbn-ts/language-common'),
     props.locale ? props.locale() : import('@zxcvbn-ts/language-en'),
-  ])
+  ]);
 
   options = {
     useLevenshteinDistance: true,
@@ -124,36 +124,36 @@ onNuxtReady(async () => {
     },
     // locale used for feedback strings (e.g. too guessable, etc)
     translations: translationsLocale,
-  } satisfies OptionsType
+  } satisfies OptionsType;
 
-  zxcvbn = _zxcvbn
-  zxcvbnOptions = _zxcvbnOptions
+  zxcvbn = _zxcvbn;
+  zxcvbnOptions = _zxcvbnOptions;
 
   if (parsePending) {
-    parsePending = false
+    parsePending = false;
 
     if (!vmodel.value) {
-      return
+      return;
     }
-    checkPassword(vmodel.value)
+    checkPassword(vmodel.value);
   }
-})
+});
 
 // styles
 const buttonBorder = computed(() => {
   switch (props.rounded) {
     case 'sm':
-      return '[&_.nui-text-button]:rounded-s'
+      return '[&_.nui-text-button]:rounded-s';
     case 'md':
-      return '[&_.nui-text-button]:rounded-s-md'
+      return '[&_.nui-text-button]:rounded-s-md';
     case 'lg':
-      return '[&_.nui-text-button]:rounded-s-xl'
+      return '[&_.nui-text-button]:rounded-s-xl';
     case 'full':
-      return '[&_.nui-text-button]:rounded-s-full'
+      return '[&_.nui-text-button]:rounded-s-full';
     case 'none':
-      return ''
+      return '';
   }
-})
+});
 </script>
 
 <template>

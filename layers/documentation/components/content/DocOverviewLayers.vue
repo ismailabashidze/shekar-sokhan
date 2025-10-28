@@ -1,8 +1,8 @@
 <script setup lang="ts">
 const props = defineProps<{
-  tag?: string
-  title?: string
-}>()
+  tag?: string;
+  title?: string;
+}>();
 
 const layerTree = [
   {
@@ -436,7 +436,7 @@ const layerTree = [
       },
     ],
   },
-]
+];
 const mergedTree = [
   {
     item: {
@@ -652,7 +652,7 @@ const mergedTree = [
       icon: 'vscode-icons:file-type-typescript',
     },
   },
-]
+];
 </script>
 
 <template>

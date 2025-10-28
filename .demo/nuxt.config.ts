@@ -2,7 +2,7 @@ import {
   demoRules,
   documentationRules,
   landingRules,
-} from './config/routes-rules'
+} from './config/routes-rules';
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -196,4 +196,4 @@ export default defineNuxtConfig({
       ],
     },
   },
-})
+});

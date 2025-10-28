@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from '#imports'
+import { defineComponent } from '#imports';
 export default defineComponent({
   props: {
     code: {
@@ -25,13 +25,13 @@ export default defineComponent({
   },
   setup: (props) => {
     const markdown = computed(() => {
-      return `\`\`\`${props.language}\n${props.code}\`\`\``
-    })
+      return `\`\`\`${props.language}\n${props.code}\`\`\``;
+    });
 
-    const inCodeGroup = inject('code-group-context', false)
+    const inCodeGroup = inject('code-group-context', false);
     const { copy, copied, isSupported } = useClipboard({
       source: () => props.code,
-    })
+    });
 
     return {
       markdown,
@@ -39,9 +39,9 @@ export default defineComponent({
       copy,
       copied,
       isSupported,
-    }
+    };
   },
-})
+});
 </script>
 
 <template>

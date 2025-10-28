@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import HorizontalSideBar from '~/components/global/HorizontalSideBar.vue'
-import { useSessionAnalysis } from '~/composables/useSessionAnalysis'
-import { ref, onMounted, onUnmounted } from 'vue'
-import { navigateTo } from '#imports'
+import HorizontalSideBar from '~/components/global/HorizontalSideBar.vue';
+import { useSessionAnalysis } from '~/composables/useSessionAnalysis';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { navigateTo } from '#imports';
 
 definePageMeta({
   title: 'در حال آماده سازی گزارش',
@@ -16,20 +16,20 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-notifications-dark.png',
     order: 80,
   },
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { getAnalysisForSession } = useSessionAnalysis()
-const toaster = useToaster()
-const isModalOpen = ref(false)
-const analysisId = ref('')
-const isLoading = ref(true)
-const checkInterval = ref(null)
-const sessionId = ref('')
+const { getAnalysisForSession } = useSessionAnalysis();
+const toaster = useToaster();
+const isModalOpen = ref(false);
+const analysisId = ref('');
+const isLoading = ref(true);
+const checkInterval = ref(null);
+const sessionId = ref('');
 
 onMounted(async () => {
   // Get session ID from localStorage
-  sessionId.value = localStorage.getItem('pendingAnalysisSessionId')
+  sessionId.value = localStorage.getItem('pendingAnalysisSessionId');
 
   if (!sessionId.value) {
     toaster.show({
@@ -38,60 +38,60 @@ onMounted(async () => {
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
-    isLoading.value = false
-    return
+    });
+    isLoading.value = false;
+    return;
   }
 
   // Start checking for analysis
-  checkForAnalysis()
+  checkForAnalysis();
 
   // Set up interval to check every 5 seconds
-  checkInterval.value = setInterval(checkForAnalysis, 5000)
-})
+  checkInterval.value = setInterval(checkForAnalysis, 5000);
+});
 
 onUnmounted(() => {
   // Clear interval when component is unmounted
   if (checkInterval.value) {
-    clearInterval(checkInterval.value)
+    clearInterval(checkInterval.value);
   }
-})
+});
 
 const checkForAnalysis = async () => {
-  if (!sessionId.value) return
+  if (!sessionId.value) return;
 
   try {
     // Check if analysis exists for this session
-    const analysis = await getAnalysisForSession(sessionId.value)
+    const analysis = await getAnalysisForSession(sessionId.value);
 
     if (analysis && analysis.id) {
       // Analysis is ready
-      analysisId.value = analysis.id
-      isLoading.value = false
+      analysisId.value = analysis.id;
+      isLoading.value = false;
 
       // Clear interval
       if (checkInterval.value) {
-        clearInterval(checkInterval.value)
-        checkInterval.value = null
+        clearInterval(checkInterval.value);
+        checkInterval.value = null;
       }
 
       // Show modal
-      isModalOpen.value = true
+      isModalOpen.value = true;
 
       // Clear localStorage
-      localStorage.removeItem('pendingAnalysisSessionId')
+      localStorage.removeItem('pendingAnalysisSessionId');
     }
   }
   catch (error) {
-    console.error('Error checking for analysis:', error)
+    console.error('Error checking for analysis:', error);
   }
-}
+};
 
 const goToAnalysis = () => {
   if (analysisId.value) {
-    navigateTo(`/darmana/therapists/analysis?analysis_id=${analysisId.value}`)
+    navigateTo(`/darmana/therapists/analysis?analysis_id=${analysisId.value}`);
   }
-}
+};
 </script>
 
 <template>

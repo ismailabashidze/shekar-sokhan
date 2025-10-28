@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { Float } from '@headlessui-float/vue'
-import { FocusTrap, Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
+import { Float } from '@headlessui-float/vue';
+import { FocusTrap, Popover, PopoverButton, PopoverPanel } from '@headlessui/vue';
 
 const props = withDefaults(
   defineProps<{
     /**
      * The radius of the popover.
      */
-    rounded?: 'none' | 'sm' | 'md' | 'lg'
+    rounded?: 'none' | 'sm' | 'md' | 'lg';
 
     /**
      * The size of the popover.
      */
-    size?: 'sm' | 'md' | 'lg'
+    size?: 'sm' | 'md' | 'lg';
 
     /**
      * The orientation of the popover.
      *
      * @deprecated use placement instead
      */
-    orientation?: 'start' | 'end'
+    orientation?: 'start' | 'end';
     /**
      * Used a fixed strategy to float the component
      */
-    fixed?: boolean
+    fixed?: boolean;
 
     /**
      * The placement of the dropdown via floating-ui.
@@ -40,7 +40,7 @@ const props = withDefaults(
       | 'bottom-end'
       | 'left'
       | 'left-start'
-      | 'left-end'
+      | 'left-end';
   }>(),
   {
     rounded: 'sm',
@@ -49,7 +49,7 @@ const props = withDefaults(
     placement: undefined,
     fixed: false,
   },
-)
+);
 
 /**
  * fallback placement with old orientation value
@@ -57,11 +57,11 @@ const props = withDefaults(
  */
 const placementValue = computed(() => {
   if (props.placement) {
-    return props.placement
+    return props.placement;
   }
 
-  return props.orientation === 'end' ? 'bottom-end' : 'bottom-start'
-})
+  return props.orientation === 'end' ? 'bottom-end' : 'bottom-start';
+});
 </script>
 
 <template>

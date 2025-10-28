@@ -1,23 +1,23 @@
-import type { DriveStep } from 'driver.js'
+import type { DriveStep } from 'driver.js';
 
 interface TourStep extends DriveStep {
-  element: string
+  element: string;
   popover: {
-    title: string
-    description: string
-    side?: 'left' | 'right' | 'top' | 'bottom'
-    align?: 'start' | 'center' | 'end'
-  }
+    title: string;
+    description: string;
+    side?: 'left' | 'right' | 'top' | 'bottom';
+    align?: 'start' | 'center' | 'end';
+  };
 }
 
 interface Tour {
-  id: string
-  name: string
-  steps: TourStep[]
+  id: string;
+  name: string;
+  steps: TourStep[];
 }
 
 export const useTour = () => {
-  const { $tour } = useNuxtApp()
+  const { $tour } = useNuxtApp();
 
   // Define available tours
   const tours: Tour[] = [
@@ -292,37 +292,37 @@ export const useTour = () => {
         },
       ],
     },
-  ]
+  ];
 
   // Start a specific tour
   const startTour = (tourId: string) => {
-    const tour = tours.find(t => t.id === tourId)
+    const tour = tours.find(t => t.id === tourId);
     if (!tour) {
-      console.warn(`Tour with id "${tourId}" not found`)
-      return
+      console.warn(`Tour with id "${tourId}" not found`);
+      return;
     }
 
     // Check if elements exist before starting
-    const firstElement = document.querySelector(tour.steps[0].element)
+    const firstElement = document.querySelector(tour.steps[0].element);
     if (!firstElement) {
-      console.warn(`First tour element "${tour.steps[0].element}" not found`)
-      return
+      console.warn(`First tour element "${tour.steps[0].element}" not found`);
+      return;
     }
 
-    $tour.setSteps(tour.steps)
-    $tour.drive()
-  }
+    $tour.setSteps(tour.steps);
+    $tour.drive();
+  };
 
   // Highlight a single element
   const highlight = (selector: string, options?: {
-    title?: string
-    description?: string
-    side?: 'left' | 'right' | 'top' | 'bottom'
+    title?: string;
+    description?: string;
+    side?: 'left' | 'right' | 'top' | 'bottom';
   }) => {
-    const element = document.querySelector(selector)
+    const element = document.querySelector(selector);
     if (!element) {
-      console.warn(`Element "${selector}" not found`)
-      return
+      console.warn(`Element "${selector}" not found`);
+      return;
     }
 
     $tour.highlight({
@@ -332,50 +332,50 @@ export const useTour = () => {
         description: options?.description || 'این المان مهم است',
         side: options?.side || 'top',
       },
-    })
-  }
+    });
+  };
 
   // Check if user has seen a tour
   const hasSeen = (tourId: string): boolean => {
     if (process.client) {
-      return localStorage.getItem(`tour_${tourId}_seen`) === 'true'
+      return localStorage.getItem(`tour_${tourId}_seen`) === 'true';
     }
-    return false
-  }
+    return false;
+  };
 
   // Mark tour as seen
   const markAsSeen = (tourId: string) => {
     if (process.client) {
-      localStorage.setItem(`tour_${tourId}_seen`, 'true')
+      localStorage.setItem(`tour_${tourId}_seen`, 'true');
     }
-  }
+  };
 
   // Reset tour status
   const resetTour = (tourId: string) => {
     if (process.client) {
-      localStorage.removeItem(`tour_${tourId}_seen`)
+      localStorage.removeItem(`tour_${tourId}_seen`);
     }
-  }
+  };
 
   // Reset all tours
   const resetAllTours = () => {
     if (process.client) {
       tours.forEach((tour) => {
-        localStorage.removeItem(`tour_${tour.id}_seen`)
-      })
-      localStorage.removeItem('tour_completed')
+        localStorage.removeItem(`tour_${tour.id}_seen`);
+      });
+      localStorage.removeItem('tour_completed');
     }
-  }
+  };
 
   // Auto-start tour if user hasn't seen it
   const autoStartTour = (tourId: string, delay: number = 1000) => {
     if (!hasSeen(tourId)) {
       setTimeout(() => {
-        startTour(tourId)
-        markAsSeen(tourId)
-      }, delay)
+        startTour(tourId);
+        markAsSeen(tourId);
+      }, delay);
     }
-  }
+  };
 
   return {
     tours,
@@ -386,5 +386,5 @@ export const useTour = () => {
     resetTour,
     resetAllTours,
     autoStartTour,
-  }
-}
+  };
+};

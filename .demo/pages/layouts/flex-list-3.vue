@@ -9,49 +9,49 @@ definePageMeta({
     srcDark: '/img/screens/layouts-list-flex-3-dark.png',
     order: 43,
   },
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(10)
+const filter = ref('');
+const perPage = ref(10);
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch('/api/courses', {
   query,
-})
+});
 
 function difficultyLabel(itemDifficulty: number) {
   switch (itemDifficulty) {
     case 1:
-      return 'Very easy'
+      return 'Very easy';
     case 2:
-      return 'Easy'
+      return 'Easy';
     case 3:
-      return 'Normal'
+      return 'Normal';
     case 4:
-      return 'Hard'
+      return 'Hard';
     case 5:
-      return 'Expert'
+      return 'Expert';
     default:
-      break
+      break;
   }
 }
 </script>

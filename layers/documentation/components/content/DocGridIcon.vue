@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{
-  name?: string
+  name?: string;
   color?:
     | 'primary'
     | 'info'
@@ -12,47 +12,47 @@ const props = defineProps<{
     | 'pink'
     | 'orange'
     | 'lime'
-    | 'blue'
-  to?: string
-}>()
+    | 'blue';
+  to?: string;
+}>();
 
 const isExternal = computed(() => {
-  return props.to?.startsWith('http')
-})
+  return props.to?.startsWith('http');
+});
 
 const iconColor = computed(() => {
   switch (props.color) {
     case 'success':
-      return 'bg-success-500/10 text-success-500'
+      return 'bg-success-500/10 text-success-500';
     case 'primary':
-      return 'bg-primary-500/10 text-primary-500'
+      return 'bg-primary-500/10 text-primary-500';
     case 'info':
-      return 'bg-info-500/10 text-info-500'
+      return 'bg-info-500/10 text-info-500';
     case 'warning':
-      return 'bg-warning-500/10 text-warning-500'
+      return 'bg-warning-500/10 text-warning-500';
     case 'danger':
-      return 'bg-danger-500/10 text-danger-500'
+      return 'bg-danger-500/10 text-danger-500';
     case 'yellow':
-      return 'bg-yellow-500/10 text-yellow-500'
+      return 'bg-yellow-500/10 text-yellow-500';
     case 'orange':
-      return 'bg-orange-500/10 text-orange-500'
+      return 'bg-orange-500/10 text-orange-500';
     case 'sky':
-      return 'bg-sky-500/10 text-sky-500'
+      return 'bg-sky-500/10 text-sky-500';
     case 'pink':
-      return 'bg-pink-500/10 text-pink-500'
+      return 'bg-pink-500/10 text-pink-500';
     case 'lime':
-      return 'bg-lime-500/10 text-lime-500'
+      return 'bg-lime-500/10 text-lime-500';
     case 'blue':
-      return 'bg-blue-500/10 text-blue-500'
+      return 'bg-blue-500/10 text-blue-500';
     default:
-      return 'bg-muted-500/10 text-muted-500'
+      return 'bg-muted-500/10 text-muted-500';
   }
-})
+});
 
 defineSlots<{
-  default(): any
-  description(): any
-}>()
+  default(): any;
+  description(): any;
+}>();
 </script>
 
 <template>

@@ -184,13 +184,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useDSMInfoGenerator } from '~/composables/useDSMInfoGenerator'
+import { ref, onMounted } from 'vue';
+import { useDSMInfoGenerator } from '~/composables/useDSMInfoGenerator';
 
 definePageMeta({
   layout: 'default',
   title: 'دسته‌بندی‌های DSM-5 | ذهنا',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -198,43 +198,43 @@ useHead({
   meta: [
     { name: 'description', content: '۲۲ دسته‌بندی اصلی اختلالات روانی بر اساس راهنمای تشخیصی DSM-5 با توضیحات کامل' },
   ],
-})
+});
 
 // Dynamic data fetching
-const { fetchAllCategories } = useDSMInfoGenerator()
+const { fetchAllCategories } = useDSMInfoGenerator();
 
 // State
-const dsmCategories = ref<any[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
+const dsmCategories = ref<any[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
 
 // Load categories on mount
 onMounted(async () => {
   try {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
 
-    console.log('🔄 Starting to fetch categories...')
-    const categories = await fetchAllCategories()
+    console.log('🔄 Starting to fetch categories...');
+    const categories = await fetchAllCategories();
 
     if (categories && categories.length > 0) {
-      dsmCategories.value = categories
-      console.log(`✅ Loaded ${categories.length} categories from database`)
+      dsmCategories.value = categories;
+      console.log(`✅ Loaded ${categories.length} categories from database`);
     }
     else {
       // If no categories in database, show message
-      console.warn('⚠️ No categories found in database')
-      error.value = 'هنوز هیچ دسته‌بندی‌ای در پایگاه داده ایجاد نشده است. لطفاً ابتدا با استفاده از صفحه تولید دسته‌بندی‌ها، داده‌ها را ایجاد کنید.'
+      console.warn('⚠️ No categories found in database');
+      error.value = 'هنوز هیچ دسته‌بندی‌ای در پایگاه داده ایجاد نشده است. لطفاً ابتدا با استفاده از صفحه تولید دسته‌بندی‌ها، داده‌ها را ایجاد کنید.';
     }
   }
   catch (err: any) {
-    console.error('❌ Error loading categories:', err)
-    error.value = err.message || 'خطا در اتصال به پایگاه داده'
+    console.error('❌ Error loading categories:', err);
+    error.value = err.message || 'خطا در اتصال به پایگاه داده';
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 // Fallback static data (removed - using dynamic data)
 const staticCategories = [
@@ -370,7 +370,7 @@ const staticCategories = [
     description: 'مشکلات و شرایطی که ممکن است نیاز به توجه بالینی داشته باشند اما اختلال روانی محسوب نمی‌شوند.',
     examples: ['مشکلات ازدواج', 'مشکلات شغلی', 'مشکلات تحصیلی'],
   },
-]
+];
 
 // Helper functions for styling
 const getCategoryGradient = (index: number) => {
@@ -397,9 +397,9 @@ const getCategoryGradient = (index: number) => {
     'bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600',
     'bg-gradient-to-br from-cyan-400 via-cyan-500 to-cyan-600',
     'bg-gradient-to-br from-indigo-400 via-indigo-500 to-indigo-600',
-  ]
-  return gradients[index % gradients.length]
-}
+  ];
+  return gradients[index % gradients.length];
+};
 
 const getCategoryIcon = (index: number) => {
   const icons = [
@@ -425,32 +425,32 @@ const getCategoryIcon = (index: number) => {
     'ph:question-fill', // Other Mental
     'ph:capsule-fill', // Medication-Induced
     'ph:info-fill', // Other Conditions
-  ]
-  return icons[index % icons.length]
-}
+  ];
+  return icons[index % icons.length];
+};
 
 // Handle learn more button clicks
 const handleLearnMore = (index: number) => {
-  const router = useRouter()
+  const router = useRouter();
 
   // Get the category from the dynamic data
-  const category = dsmCategories.value[index]
+  const category = dsmCategories.value[index];
   if (!category) {
-    console.error('Category not found at index:', index)
-    return
+    console.error('Category not found at index:', index);
+    return;
   }
 
   // Create a slug from the English title
   const categorySlug = category.titleEn.toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-    .trim()
+    .trim();
 
   // Navigate to the dynamic category page
-  const route = `/diagnosis/${categorySlug}`
-  console.log(`Navigating to: ${route}`)
-  router.push(route)
-}
+  const route = `/diagnosis/${categorySlug}`;
+  console.log(`Navigating to: ${route}`);
+  router.push(route);
+};
 </script>
 
 <style scoped>

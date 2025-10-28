@@ -1,99 +1,99 @@
 export interface PwaNotificationOptions {
-  title: string
-  message: string
-  type?: 'info' | 'success' | 'warning' | 'error' | 'system'
-  priority?: 'low' | 'medium' | 'high' | 'urgent'
-  icon?: string
-  image?: string
-  url?: string
-  actionText?: string
-  tag?: string
-  silent?: boolean
+  title: string;
+  message: string;
+  type?: 'info' | 'success' | 'warning' | 'error' | 'system';
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  icon?: string;
+  image?: string;
+  url?: string;
+  actionText?: string;
+  tag?: string;
+  silent?: boolean;
 }
 
 export interface PushSubscriptionData {
-  endpoint: string
+  endpoint: string;
   keys: {
-    p256dh: string
-    auth: string
-  }
+    p256dh: string;
+    auth: string;
+  };
 }
 
 export function usePwaNotifications() {
-  const { $pb } = useNuxtApp()
+  const { $pb } = useNuxtApp();
 
   // State
-  const isSupported = ref(false)
-  const permission = ref<NotificationPermission>('default')
-  const subscription = ref<PushSubscription | null>(null)
-  const isSubscribed = ref(false)
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
+  const isSupported = ref(false);
+  const permission = ref<NotificationPermission>('default');
+  const subscription = ref<PushSubscription | null>(null);
+  const isSubscribed = ref(false);
+  const isLoading = ref(false);
+  const error = ref<string | null>(null);
 
   // Check PWA notification support
   const checkSupport = () => {
     if (process.client) {
       isSupported.value = 'serviceWorker' in navigator
       && 'PushManager' in window
-      && 'Notification' in window
-      permission.value = Notification.permission
+      && 'Notification' in window;
+      permission.value = Notification.permission;
 
       // Listen for permission changes
       if ('permissions' in navigator) {
         navigator.permissions.query({ name: 'notifications' }).then((permissionStatus) => {
-          permission.value = permissionStatus.state as NotificationPermission
+          permission.value = permissionStatus.state as NotificationPermission;
           permissionStatus.onchange = () => {
-            permission.value = permissionStatus.state as NotificationPermission
-          }
+            permission.value = permissionStatus.state as NotificationPermission;
+          };
         }).catch(() => {
           // Fallback to polling for permission changes
           const checkPermissionChange = () => {
             if (permission.value !== Notification.permission) {
-              permission.value = Notification.permission
+              permission.value = Notification.permission;
             }
-          }
-          setInterval(checkPermissionChange, 1000)
-        })
+          };
+          setInterval(checkPermissionChange, 1000);
+        });
       }
     }
-  }
+  };
 
   // Request notification permission
   const requestPermission = async (): Promise<boolean> => {
     if (!isSupported.value) {
-      error.value = 'مرورگر شما از اعلان‌های PWA پشتیبانی نمی‌کند'
-      return false
+      error.value = 'مرورگر شما از اعلان‌های PWA پشتیبانی نمی‌کند';
+      return false;
     }
 
     try {
-      const result = await Notification.requestPermission()
-      permission.value = result
+      const result = await Notification.requestPermission();
+      permission.value = result;
 
       if (result === 'granted') {
-        await subscribeToPush()
-        return true
+        await subscribeToPush();
+        return true;
       }
       else if (result === 'denied') {
-        error.value = 'دسترسی به اعلان‌ها رد شد. می‌توانید از تنظیمات مرورگر آن را فعال کنید.'
+        error.value = 'دسترسی به اعلان‌ها رد شد. می‌توانید از تنظیمات مرورگر آن را فعال کنید.';
       }
 
-      return false
+      return false;
     }
     catch (err: any) {
-      error.value = err.message || 'خطا در درخواست مجوز اعلان‌ها'
-      return false
+      error.value = err.message || 'خطا در درخواست مجوز اعلان‌ها';
+      return false;
     }
-  }
+  };
 
   // Subscribe to push notifications
   const subscribeToPush = async (): Promise<boolean> => {
     if (!isSupported.value || permission.value !== 'granted') {
-      return false
+      return false;
     }
 
     try {
-      isLoading.value = true
-      error.value = null
+      isLoading.value = true;
+      error.value = null;
 
       // const registration = await navigator.serviceWorker.ready
 
@@ -114,49 +114,49 @@ export function usePwaNotifications() {
       // })
 
       // subscription.value = newSubscription
-      isSubscribed.value = true
+      isSubscribed.value = true;
 
       // await saveSubscriptionToBackend(newSubscription)
-      return true
+      return true;
     }
     catch (err: any) {
-      console.error('Error subscribing to push notifications:', err)
-      error.value = err.message || 'خطا در فعال‌سازی اعلان‌های فوری'
-      return false
+      console.error('Error subscribing to push notifications:', err);
+      error.value = err.message || 'خطا در فعال‌سازی اعلان‌های فوری';
+      return false;
     }
     finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
-  }
+  };
 
   // Unsubscribe from push notifications
   const unsubscribeFromPush = async (): Promise<boolean> => {
     try {
       if (subscription.value) {
-        await subscription.value.unsubscribe()
-        await removeSubscriptionFromBackend()
+        await subscription.value.unsubscribe();
+        await removeSubscriptionFromBackend();
 
-        subscription.value = null
-        isSubscribed.value = false
-        return true
+        subscription.value = null;
+        isSubscribed.value = false;
+        return true;
       }
-      return false
+      return false;
     }
     catch (err: any) {
-      error.value = err.message || 'خطا در لغو اشتراک اعلان‌ها'
-      return false
+      error.value = err.message || 'خطا در لغو اشتراک اعلان‌ها';
+      return false;
     }
-  }
+  };
 
   // Show local notification
   const showLocalNotification = async (options: PwaNotificationOptions): Promise<boolean> => {
     if (!isSupported.value || permission.value !== 'granted') {
-      return false
+      return false;
     }
 
     try {
-      const registration = await navigator.serviceWorker.ready
-      console.log('Service worker ready, showing notification:', options.title)
+      const registration = await navigator.serviceWorker.ready;
+      console.log('Service worker ready, showing notification:', options.title);
 
       await registration.showNotification(options.title, {
         body: options.message,
@@ -184,139 +184,139 @@ export function usePwaNotifications() {
         lang: 'fa',
         renotify: true, // Always show notification even if tag exists
         timestamp: Date.now(),
-      })
+      });
 
-      return true
+      return true;
     }
     catch (err: any) {
-      error.value = err.message || 'خطا در نمایش اعلان محلی'
-      return false
+      error.value = err.message || 'خطا در نمایش اعلان محلی';
+      return false;
     }
-  }
+  };
 
   // Schedule notification for future display
   const scheduleLocalNotification = async (options: PwaNotificationOptions, scheduleDate: Date): Promise<string | null> => {
     if (!isSupported.value) {
-      console.warn('PWA notifications not supported')
-      return null
+      console.warn('PWA notifications not supported');
+      return null;
     }
 
     // Check if scheduled time is in the future
-    const now = new Date()
+    const now = new Date();
     if (scheduleDate <= now) {
-      console.log('Scheduled time is in the past or now, showing immediately')
-      await showLocalNotification(options)
-      return null
+      console.log('Scheduled time is in the past or now, showing immediately');
+      await showLocalNotification(options);
+      return null;
     }
 
-    const delay = scheduleDate.getTime() - now.getTime()
-    const notificationId = options.tag || `scheduled-${Date.now()}`
+    const delay = scheduleDate.getTime() - now.getTime();
+    const notificationId = options.tag || `scheduled-${Date.now()}`;
 
     // Use setTimeout to schedule the notification
     const timeoutId = setTimeout(async () => {
       try {
-        await showLocalNotification(options)
+        await showLocalNotification(options);
 
         // Remove from scheduled notifications store
         if (process.client && window.localStorage) {
-          const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
-          delete scheduled[notificationId]
-          localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
+          const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}');
+          delete scheduled[notificationId];
+          localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled));
         }
       }
       catch (err) {
-        console.error('Error showing scheduled PWA notification:', err)
+        console.error('Error showing scheduled PWA notification:', err);
       }
-    }, delay)
+    }, delay);
 
     // Store scheduled notification info for cleanup and persistence
     if (process.client && window.localStorage) {
-      const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
+      const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}');
       scheduled[notificationId] = {
         options,
         scheduleDate: scheduleDate.toISOString(),
         timeoutId,
         created: now.toISOString(),
-      }
-      localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
+      };
+      localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled));
     }
 
-    return notificationId
-  }
+    return notificationId;
+  };
 
   // Cancel scheduled notification
   const cancelScheduledNotification = (notificationId: string): boolean => {
-    if (!process.client) return false
+    if (!process.client) return false;
 
     try {
-      const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
+      const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}');
 
       if (scheduled[notificationId]) {
         // Clear the timeout
         if (scheduled[notificationId].timeoutId) {
-          clearTimeout(scheduled[notificationId].timeoutId)
+          clearTimeout(scheduled[notificationId].timeoutId);
         }
 
         // Remove from storage
-        delete scheduled[notificationId]
-        localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
+        delete scheduled[notificationId];
+        localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled));
 
-        return true
+        return true;
       }
 
-      return false
+      return false;
     }
     catch (err) {
-      console.error('Error cancelling scheduled notification:', err)
-      return false
+      console.error('Error cancelling scheduled notification:', err);
+      return false;
     }
-  }
+  };
 
   // Cleanup expired scheduled notifications on page load
   const cleanupExpiredScheduledNotifications = () => {
-    if (!process.client) return
+    if (!process.client) return;
 
     try {
-      const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}')
-      const now = new Date()
-      let hasChanges = false
+      const scheduled = JSON.parse(localStorage.getItem('pwa-scheduled-notifications') || '{}');
+      const now = new Date();
+      let hasChanges = false;
 
       Object.keys(scheduled).forEach((notificationId) => {
-        const notification = scheduled[notificationId]
-        const scheduleDate = new Date(notification.scheduleDate)
+        const notification = scheduled[notificationId];
+        const scheduleDate = new Date(notification.scheduleDate);
 
         // Clean up notifications that are more than 1 hour past their scheduled time
         if (now.getTime() - scheduleDate.getTime() > 3600000) {
           if (notification.timeoutId) {
-            clearTimeout(notification.timeoutId)
+            clearTimeout(notification.timeoutId);
           }
-          delete scheduled[notificationId]
-          hasChanges = true
+          delete scheduled[notificationId];
+          hasChanges = true;
         }
-      })
+      });
 
       if (hasChanges) {
-        localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled))
+        localStorage.setItem('pwa-scheduled-notifications', JSON.stringify(scheduled));
       }
     }
     catch (err) {
-      console.error('Error cleaning up scheduled notifications:', err)
+      console.error('Error cleaning up scheduled notifications:', err);
     }
-  }
+  };
 
   // Helper function for vibration patterns
   const getVibrationPattern = (priority?: string): number[] => {
     switch (priority) {
       case 'urgent':
-        return [200, 100, 200, 100, 200, 100, 200]
+        return [200, 100, 200, 100, 200, 100, 200];
       case 'high':
-        return [300, 100, 300]
+        return [300, 100, 300];
       case 'medium':
-        return [200, 100, 200]
+        return [200, 100, 200];
       default:
-        return [100]
+        return [100];
     }
-  }
+  };
 
   // Send push notification via backend
   const sendPushNotification = async (
@@ -330,30 +330,30 @@ export function usePwaNotifications() {
           recipientIds,
           notification,
         },
-      })
+      });
 
-      return response.success
+      return response.success;
     }
     catch (err: any) {
-      error.value = err.message || 'خطا در ارسال اعلان فوری'
-      return false
+      error.value = err.message || 'خطا در ارسال اعلان فوری';
+      return false;
     }
-  }
+  };
 
   // Get VAPID public key from backend
   const getVapidPublicKey = async (): string => {
     try {
       const response = await $pb.send('/api/notifications/vapid-key', {
         method: 'GET',
-      })
+      });
 
-      return response.publicKey || 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NM9f'
+      return response.publicKey || 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NM9f';
     }
     catch (err) {
       // Fallback key for development
-      return 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NM9fPNNw6V2SCQvJbLexhqNUe3Z9B3PbQNABJBp4QFG4xZA2EKKhHM'
+      return 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NM9fPNNw6V2SCQvJbLexhqNUe3Z9B3PbQNABJBp4QFG4xZA2EKKhHM';
     }
-  }
+  };
 
   // Save subscription to backend
   const saveSubscriptionToBackend = async (subscription: PushSubscription) => {
@@ -364,34 +364,34 @@ export function usePwaNotifications() {
           p256dh: arrayBufferToBase64(subscription.getKey('p256dh')!),
           auth: arrayBufferToBase64(subscription.getKey('auth')!),
         },
-      }
+      };
 
       const payload = {
         subscription: subscriptionData,
         userId: $pb.authStore.model?.id,
-      }
+      };
 
-      console.log('Attempting to save subscription with payload:', payload)
+      console.log('Attempting to save subscription with payload:', payload);
 
       // Send data with the correct structure expected by PocketBase
       await $pb.send('/api/notifications/subscribe', {
         method: 'POST',
         body: payload,
-      })
+      });
 
-      console.log('Subscription saved successfully to backend')
+      console.log('Subscription saved successfully to backend');
     }
     catch (err: any) {
-      console.error('Error saving subscription to backend:', err)
-      console.error('Error details:', err.response || err.message)
+      console.error('Error saving subscription to backend:', err);
+      console.error('Error details:', err.response || err.message);
 
       // For now, don't throw the error to prevent blocking the subscription process
       // But log it clearly so we can debug
       if (err.status === 404) {
-        console.warn('Subscription endpoint not found - backend may not support PWA notifications yet')
+        console.warn('Subscription endpoint not found - backend may not support PWA notifications yet');
       }
     }
-  }
+  };
 
   // Remove subscription from backend
   const removeSubscriptionFromBackend = async () => {
@@ -401,53 +401,53 @@ export function usePwaNotifications() {
         body: {
           userId: $pb.authStore.model?.id,
         },
-      })
+      });
     }
     catch (err) {
-      console.error('Error removing subscription from backend:', err)
+      console.error('Error removing subscription from backend:', err);
       // Don't throw the error to prevent blocking other operations
     }
-  }
+  };
 
   // Listen for service worker messages
   const setupServiceWorkerListener = () => {
     if (process.client && 'serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
-        const { type, notificationId } = event.data
+        const { type, notificationId } = event.data;
 
         if (type === 'NOTIFICATION_CLICKED' && notificationId) {
           // Mark notification as read when clicked from PWA notification
-          const { markAsRead } = useNotifications()
-          markAsRead(notificationId)
+          const { markAsRead } = useNotifications();
+          markAsRead(notificationId);
         }
-      })
+      });
     }
-  }
+  };
 
   // Utility functions
   const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4)
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
       .replace(/-/g, '+')
-      .replace(/_/g, '/')
+      .replace(/_/g, '/');
 
-    const rawData = window.atob(base64)
-    const outputArray = new Uint8Array(rawData.length)
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
 
     for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i)
+      outputArray[i] = rawData.charCodeAt(i);
     }
-    return outputArray
-  }
+    return outputArray;
+  };
 
   const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-    const bytes = new Uint8Array(buffer)
-    let binary = ''
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
     for (let i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i])
+      binary += String.fromCharCode(bytes[i]);
     }
-    return window.btoa(binary)
-  }
+    return window.btoa(binary);
+  };
 
   // Test notification
   const testNotification = async () => {
@@ -457,100 +457,100 @@ export function usePwaNotifications() {
       type: 'success',
       priority: 'medium',
       url: '/notifications',
-    })
+    });
 
     if (!success) {
-      error.value = 'خطا در نمایش اعلان تستی'
+      error.value = 'خطا در نمایش اعلان تستی';
     }
 
-    return success
-  }
+    return success;
+  };
 
   // Check subscription status
   const checkSubscriptionStatus = async () => {
-    if (!isSupported.value) return
+    if (!isSupported.value) return;
 
     try {
-      const registration = await navigator.serviceWorker.ready
-      const existingSubscription = await registration.pushManager.getSubscription()
+      const registration = await navigator.serviceWorker.ready;
+      const existingSubscription = await registration.pushManager.getSubscription();
 
       if (existingSubscription) {
-        subscription.value = existingSubscription
-        isSubscribed.value = true
+        subscription.value = existingSubscription;
+        isSubscribed.value = true;
       }
     }
     catch (err) {
-      console.error('Error checking subscription status:', err)
+      console.error('Error checking subscription status:', err);
     }
-  }
+  };
 
   // Auto-request permission on user interaction
   const autoRequestPermission = async (): Promise<boolean> => {
     if (!isSupported.value) {
-      return false
+      return false;
     }
 
     // Reset tracking if permission was previously denied
     if (permission.value === 'denied') {
-      resetPermissionTracking()
+      resetPermissionTracking();
     }
 
     // Skip if already granted
     if (permission.value === 'granted') {
-      await subscribeToPush()
-      return true
+      await subscribeToPush();
+      return true;
     }
 
     // Check local storage for previous decision
-    const userDecision = localStorage.getItem('pwa-notification-decision')
+    const userDecision = localStorage.getItem('pwa-notification-decision');
 
     // If user previously denied, don't ask again unless they reset
     if (userDecision === 'denied' && permission.value === 'default') {
-      return false
+      return false;
     }
 
     // Request permission immediately without delay
     try {
-      const result = await Notification.requestPermission()
-      permission.value = result
+      const result = await Notification.requestPermission();
+      permission.value = result;
 
       // Store user decision
-      localStorage.setItem('pwa-notification-decision', result)
-      localStorage.setItem('pwa-permission-timestamp', Date.now().toString())
+      localStorage.setItem('pwa-notification-decision', result);
+      localStorage.setItem('pwa-permission-timestamp', Date.now().toString());
 
       if (result === 'granted') {
-        await subscribeToPush()
-        return true
+        await subscribeToPush();
+        return true;
       }
       else {
-        return false
+        return false;
       }
     }
     catch (err: any) {
-      console.error('Error requesting PWA notification permission:', err)
-      error.value = err.message || 'خطا در درخواست مجوز اعلان‌ها'
-      return false
+      console.error('Error requesting PWA notification permission:', err);
+      error.value = err.message || 'خطا در درخواست مجوز اعلان‌ها';
+      return false;
     }
-  }
+  };
 
   // Reset permission tracking (for testing or after logout)
   const resetPermissionTracking = () => {
-    localStorage.removeItem('pwa-permission-asked')
-    localStorage.removeItem('pwa-permission-last-ask')
-    sessionStorage.removeItem('pwa-prompt-dismissed')
-  }
+    localStorage.removeItem('pwa-permission-asked');
+    localStorage.removeItem('pwa-permission-last-ask');
+    sessionStorage.removeItem('pwa-prompt-dismissed');
+  };
 
   // Initialize on client
   if (process.client) {
-    checkSupport()
+    checkSupport();
   }
 
   // Initialize
   onMounted(() => {
-    setupServiceWorkerListener()
-    checkSubscriptionStatus()
-    cleanupExpiredScheduledNotifications()
-  })
+    setupServiceWorkerListener();
+    checkSubscriptionStatus();
+    cleanupExpiredScheduledNotifications();
+  });
 
   return {
     // State
@@ -576,5 +576,5 @@ export function usePwaNotifications() {
     // Utilities
     checkSupport,
     cleanupExpiredScheduledNotifications,
-  }
+  };
 }

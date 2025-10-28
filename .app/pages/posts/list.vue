@@ -10,9 +10,9 @@ definePageMeta({
     order: 14,
   },
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 // استفاده از کامپوزبل posts
 const {
@@ -26,14 +26,14 @@ const {
   searchPosts,
   getPostsByCategory,
   getUserPosts,
-} = usePosts()
+} = usePosts();
 
 // Avatar manager برای مدیریت آواتارها
-const { getUserAvatarUrl } = useAvatarManager()
+const { getUserAvatarUrl } = useAvatarManager();
 
 // State for pagination and filtering
-const currentPage = ref(1)
-const postsPerPage = ref(9)
+const currentPage = ref(1);
+const postsPerPage = ref(9);
 
 // Sample posts for backup - will be replaced by API data
 const samplePosts = [
@@ -105,38 +105,38 @@ const samplePosts = [
       avatar: '/img/avatars/16.svg',
     },
   },
-]
+];
 
 // Active filter
-const activeFilter = ref('all')
+const activeFilter = ref('all');
 const filters = [
   { value: 'all', label: 'همه' },
   { value: 'latest', label: 'جدیدترین' },
   { value: 'popular', label: 'محبوب‌ترین' },
   { value: 'featured', label: 'ویژه' },
-]
+];
 
 // Search query
-const searchQuery = ref('')
+const searchQuery = ref('');
 
 // Categories
-const selectedCategory = ref('all')
+const selectedCategory = ref('all');
 const categories = [
   { value: 'all', label: 'همه', icon: 'ph:circles-four-duotone' },
   { value: 'psychology', label: 'روانشناسی', icon: 'ph:brain-duotone' },
   { value: 'meditation', label: 'مدیتیشن', icon: 'ph:person-simple-duotone' },
   { value: 'yoga', label: 'یوگا', icon: 'ph:person-simple-walk-duotone' },
   { value: 'mental-health', label: 'سلامت روان', icon: 'ph:heartbeat-duotone' },
-]
+];
 
 // Sorting options
-const sortBy = ref('newest')
+const sortBy = ref('newest');
 const sortOptions = [
   { value: 'newest', label: 'جدیدترین' },
   { value: 'oldest', label: 'قدیمی‌ترین' },
   { value: 'popular', label: 'محبوب‌ترین' },
   { value: 'views', label: 'پربازدیدترین' },
-]
+];
 
 // Search and filter functions
 const performSearch = async () => {
@@ -145,41 +145,41 @@ const performSearch = async () => {
       page: currentPage.value,
       perPage: postsPerPage.value,
       sort: getSortValue(),
-    })
+    });
   }
   else {
-    await loadPosts()
+    await loadPosts();
   }
-}
+};
 
 const filterByCategory = async (category: string) => {
-  selectedCategory.value = category
-  currentPage.value = 1
+  selectedCategory.value = category;
+  currentPage.value = 1;
 
   if (category === 'all') {
-    await loadPosts()
+    await loadPosts();
   }
   else {
     await getPostsByCategory(category, {
       page: currentPage.value,
       perPage: postsPerPage.value,
       sort: getSortValue(),
-    })
+    });
   }
-}
+};
 
 const getSortValue = () => {
   switch (sortBy.value) {
     case 'oldest':
-      return '+created'
+      return '+created';
     case 'popular':
-      return '-likeCount'
+      return '-likeCount';
     case 'views':
-      return '-viewCount'
+      return '-viewCount';
     default: // newest
-      return '-created'
+      return '-created';
   }
-}
+};
 
 // Main load posts function
 const loadPosts = async () => {
@@ -191,101 +191,101 @@ const loadPosts = async () => {
       filters: {
         status: 'published', // فقط مقالات منتشر شده
       },
-    })
+    });
   }
   catch (err) {
-    console.error('Error loading posts:', err)
+    console.error('Error loading posts:', err);
   }
-}
+};
 
 // Watch for changes in sort and search
 watch(sortBy, () => {
   if (searchQuery.value.trim()) {
-    performSearch()
+    performSearch();
   }
   else if (selectedCategory.value !== 'all') {
-    filterByCategory(selectedCategory.value)
+    filterByCategory(selectedCategory.value);
   }
   else {
-    loadPosts()
+    loadPosts();
   }
-})
+});
 
 // Simple debounce function
-let searchTimeout: NodeJS.Timeout | null = null
+let searchTimeout: NodeJS.Timeout | null = null;
 
 watch(searchQuery, () => {
   if (searchTimeout) {
-    clearTimeout(searchTimeout)
+    clearTimeout(searchTimeout);
   }
 
   searchTimeout = setTimeout(() => {
-    performSearch()
-  }, 500)
-})
+    performSearch();
+  }, 500);
+});
 
 // Pagination
 const changePage = (page: number) => {
-  currentPage.value = page
+  currentPage.value = page;
   if (searchQuery.value.trim()) {
-    performSearch()
+    performSearch();
   }
   else if (selectedCategory.value !== 'all') {
-    filterByCategory(selectedCategory.value)
+    filterByCategory(selectedCategory.value);
   }
   else {
-    loadPosts()
+    loadPosts();
   }
-}
+};
 
 // Delete post function
 const handleDeletePost = async (postId: string) => {
   if (confirm('آیا از حذف این مقاله اطمینان دارید؟')) {
     try {
-      await deletePost(postId)
-      await loadPosts() // Reload after delete
+      await deletePost(postId);
+      await loadPosts(); // Reload after delete
     }
     catch (err) {
-      console.error('Error deleting post:', err)
+      console.error('Error deleting post:', err);
     }
   }
-}
+};
 
 // Format functions for display
 const formatViewCount = (count: number | string): string => {
-  const num = typeof count === 'string' ? parseInt(count) : count
+  const num = typeof count === 'string' ? parseInt(count) : count;
   if (num >= 1000) {
-    return `${(num / 1000).toFixed(1)}K`
+    return `${(num / 1000).toFixed(1)}K`;
   }
-  return num.toString()
-}
+  return num.toString();
+};
 
 const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffInMs = now.getTime() - date.getTime()
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  if (diffInDays === 0) return 'امروز'
-  if (diffInDays === 1) return 'دیروز'
-  if (diffInDays < 7) return `${diffInDays} روز پیش`
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} هفته پیش`
-  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} ماه پیش`
-  return `${Math.floor(diffInDays / 365)} سال پیش`
-}
+  if (diffInDays === 0) return 'امروز';
+  if (diffInDays === 1) return 'دیروز';
+  if (diffInDays < 7) return `${diffInDays} روز پیش`;
+  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} هفته پیش`;
+  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} ماه پیش`;
+  return `${Math.floor(diffInDays / 365)} سال پیش`;
+};
 
 // Load posts on mount
 onMounted(() => {
-  loadPosts()
-})
+  loadPosts();
+});
 
 // Computed properties for display
 const displayPosts = computed(() => {
-  return posts.value.length > 0 ? posts.value : samplePosts
-})
+  return posts.value.length > 0 ? posts.value : samplePosts;
+});
 
 // View mode (grid or list)
-const viewMode = ref('grid')
+const viewMode = ref('grid');
 </script>
 
 <template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { watch, ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import AudioUser from '@/components/global/AudioUser.vue'
-import { useUser } from '@/composables/user'
+import { useRoute } from 'vue-router';
+import { watch, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import AudioUser from '@/components/global/AudioUser.vue';
+import { useUser } from '@/composables/user';
 
 definePageMeta({
   title: 'Messaging',
@@ -15,29 +15,29 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-messaging-dark.png',
     order: 26,
   },
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
-const { open } = usePanels()
-const { getPatients } = usePatient()
-const { getMessages, sendMessage, createSeparator, clearMessages, updateMessage } = usePatientMessages()
-const route = useRoute()
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
+const { open } = usePanels();
+const { getPatients } = usePatient();
+const { getMessages, sendMessage, createSeparator, clearMessages, updateMessage } = usePatientMessages();
+const route = useRoute();
 
-const conversations = ref<{ id: string, user: Patient }[]>([])
-const messages = ref<Message[]>([])
-const loading = ref(false)
-const messageLoading = ref(false)
-const chatEl = ref<HTMLElement>()
-const expanded = ref(false)
-const search = ref('')
-const newMessage = ref('')
-const activePatientId = ref<string | null>(null)
-const showEmojiPicker = ref(false)
-const showAudioUser = ref(false)
-const { role } = useUser()
+const conversations = ref<{ id: string; user: Patient }[]>([]);
+const messages = ref<Message[]>([]);
+const loading = ref(false);
+const messageLoading = ref(false);
+const chatEl = ref<HTMLElement>();
+const expanded = ref(false);
+const search = ref('');
+const newMessage = ref('');
+const activePatientId = ref<string | null>(null);
+const showEmojiPicker = ref(false);
+const showAudioUser = ref(false);
+const { role } = useUser();
 
 const toggleAudioUser = () => {
-  showAudioUser.value = !showAudioUser.value
-}
+  showAudioUser.value = !showAudioUser.value;
+};
 
 const emojis = [
   '😀', '😃', '😄', '😁', '😆', '😂', '🤣', '😊',
@@ -52,45 +52,45 @@ const emojis = [
   '🙉', '🙊', '🙋', '🙌', '🙍', '🙎', '🙏',
   '💪', '🤝', '❤️', '💔', '⭐', '🌟', '🎉',
   '🎊', '🎈', '🎁', '👨‍⚕️', '🏥',
-]
+];
 
 const insertEmoji = (emoji: string) => {
-  newMessage.value += emoji
-}
+  newMessage.value += emoji;
+};
 
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Enter' && e.ctrlKey) {
-    e.preventDefault()
-    submitMessage()
+    e.preventDefault();
+    submitMessage();
   }
-}
+};
 
-const emojiPickerRef = ref<HTMLElement>()
+const emojiPickerRef = ref<HTMLElement>();
 onClickOutside(emojiPickerRef, () => {
-  showEmojiPicker.value = false
-})
+  showEmojiPicker.value = false;
+});
 
 const initializeFromRoute = async () => {
-  const patientId = route.query.patientId as string
+  const patientId = route.query.patientId as string;
   if (patientId && conversations.value.length > 0) {
-    const conversation = conversations.value.find(c => c.user.id === patientId)
+    const conversation = conversations.value.find(c => c.user.id === patientId);
     if (conversation) {
-      activePatientId.value = patientId
-      await loadMessages(patientId)
+      activePatientId.value = patientId;
+      await loadMessages(patientId);
     }
   }
   else if (conversations.value.length > 0 && !activePatientId.value) {
-    activePatientId.value = conversations.value[0].user.id
-    await loadMessages(conversations.value[0].user.id)
+    activePatientId.value = conversations.value[0].user.id;
+    await loadMessages(conversations.value[0].user.id);
   }
-}
+};
 
-const currentLoadingPatientId = ref<string | null>(null)
+const currentLoadingPatientId = ref<string | null>(null);
 
 const formatTime = (timestamp: string | Date) => {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp
-  return date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
-}
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+  return date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+};
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -98,122 +98,122 @@ const scrollToBottom = () => {
       chatEl.value.scrollTo({
         top: chatEl.value.scrollHeight,
         behavior: 'smooth',
-      })
+      });
     }
-  })
-}
+  });
+};
 
 const loadMessages = async (patientId: string) => {
-  if (currentLoadingPatientId.value === patientId) return
+  if (currentLoadingPatientId.value === patientId) return;
 
-  loading.value = true
-  currentLoadingPatientId.value = patientId
+  loading.value = true;
+  currentLoadingPatientId.value = patientId;
 
   try {
-    const nuxtApp = useNuxtApp()
+    const nuxtApp = useNuxtApp();
     if (!nuxtApp.$pb.authStore.isValid) {
-      await navigateTo('/auth/login')
-      return
+      await navigateTo('/auth/login');
+      return;
     }
 
-    const loadedMessages = await getMessages(patientId)
+    const loadedMessages = await getMessages(patientId);
     messages.value = loadedMessages.map(msg => ({
       ...msg,
       timestamp: msg.created,
-    }))
-    scrollToBottom()
+    }));
+    scrollToBottom();
   }
   catch (error) {
-    console.error('Error loading messages:', error)
-    messages.value = []
+    console.error('Error loading messages:', error);
+    messages.value = [];
   }
   finally {
-    loading.value = false
-    currentLoadingPatientId.value = null
+    loading.value = false;
+    currentLoadingPatientId.value = null;
   }
-}
+};
 
 const selectConversation = async (patientId: string) => {
-  activePatientId.value = patientId
-  await loadMessages(patientId)
+  activePatientId.value = patientId;
+  await loadMessages(patientId);
   navigateTo({
     query: {
       ...route.query,
       patientId,
     },
-  })
-}
+  });
+};
 
 onMounted(async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const nuxtApp = useNuxtApp()
+    const nuxtApp = useNuxtApp();
     if (!nuxtApp.$pb.authStore.isValid) {
-      return
+      return;
     }
-    const patients = await getPatients()
+    const patients = await getPatients();
     conversations.value = patients.map((patient: any) => ({
       user: patient,
       unread: 0,
       lastMessage: '',
       lastMessageTime: '',
-    }))
+    }));
 
     if (route.query.patientId) {
-      const patientId = route.query.patientId as string
-      activePatientId.value = patientId
-      await loadMessages(patientId)
+      const patientId = route.query.patientId as string;
+      activePatientId.value = patientId;
+      await loadMessages(patientId);
     }
     else if (conversations.value.length > 0) {
-      activePatientId.value = conversations.value[0].user.id
-      await loadMessages(conversations.value[0].user.id)
+      activePatientId.value = conversations.value[0].user.id;
+      await loadMessages(conversations.value[0].user.id);
     }
   }
   catch (error: any) {
-    console.error('Error initializing chat:', error)
+    console.error('Error initializing chat:', error);
     if (error?.isAbort) {
       // Request was cancelled, likely due to component unmount
-      return
+      return;
     }
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 watch(
   () => route.query.patientId,
   async (newPatientId) => {
     if (newPatientId) {
-      await initializeFromRoute()
+      await initializeFromRoute();
     }
   },
-)
+);
 
 watch(
   () => conversations.value,
   async (newConversations) => {
     if (newConversations.length > 0 && !activePatientId.value) {
-      await initializeFromRoute()
+      await initializeFromRoute();
     }
   },
-)
+);
 
 watch(activePatientId, async (newId) => {
   if (newId) {
-    await loadMessages(newId)
+    await loadMessages(newId);
   }
-})
+});
 
 onUnmounted(() => {
-  currentLoadingPatientId.value = null
-})
+  currentLoadingPatientId.value = null;
+});
 
 const selectedConversationComputed = computed(() => {
   return conversations.value.find(
     conversation => conversation.user.id === activePatientId.value,
-  )
-})
+  );
+});
 
 const getRandomColor = () => {
   const colors = [
@@ -226,9 +226,9 @@ const getRandomColor = () => {
     'bg-yellow-500',
     'bg-pink-500',
     'bg-indigo-500',
-  ]
-  return colors[Math.floor(Math.random() * colors.length)]
-}
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+};
 
 const {
   streamChat,
@@ -240,25 +240,25 @@ const {
   searchQuery,
   retryFetch,
   filteredModels,
-} = useOpenRouter()
+} = useOpenRouter();
 
-const streamingResponse = ref('')
-const showModelError = ref(false)
-const modelSearchInput = ref('')
-const showModelDropdown = ref(false)
+const streamingResponse = ref('');
+const showModelError = ref(false);
+const modelSearchInput = ref('');
+const showModelDropdown = ref(false);
 
 // Sync model search input with composable's searchQuery
 watch(modelSearchInput, (newValue) => {
-  searchQuery.value = newValue
-})
+  searchQuery.value = newValue;
+});
 
 // Reset streaming response when selecting a new conversation
 watch(activePatientId, async (newId) => {
-  streamingResponse.value = ''
+  streamingResponse.value = '';
   if (newId) {
-    await loadMessages(newId)
+    await loadMessages(newId);
   }
-})
+});
 
 async function submitMessage() {
   if (showNoCharge.value) {
@@ -268,31 +268,31 @@ async function submitMessage() {
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
-    return
+    });
+    return;
   }
 
-  if (!newMessage.value || messageLoading.value) return
+  if (!newMessage.value || messageLoading.value) return;
 
   try {
-    messageLoading.value = true
-    const now = new Date().toISOString()
-    streamingResponse.value = '' // Reset streaming response for new message
+    messageLoading.value = true;
+    const now = new Date().toISOString();
+    streamingResponse.value = ''; // Reset streaming response for new message
     const userMessage = {
       type: 'sent',
       text: newMessage.value,
       timestamp: now,
-    }
+    };
 
     // First save and show the user message
-    const savedUserMessage = await sendMessage(activePatientId.value, userMessage.text, 'sent')
+    const savedUserMessage = await sendMessage(activePatientId.value, userMessage.text, 'sent');
     messages.value.push({
       ...userMessage,
       id: savedUserMessage.id,
       timestamp: savedUserMessage.created,
-    })
-    newMessage.value = ''
-    scrollToBottom()
+    });
+    newMessage.value = '';
+    scrollToBottom();
 
     // Only proceed with AI response if user has charge
     if (!showNoCharge.value) {
@@ -301,23 +301,23 @@ async function submitMessage() {
         type: 'received',
         text: '',
         timestamp: now,
-      }
+      };
 
       // Add the empty message to UI
       messages.value.push({
         ...assistantMessage,
         id: 'temp-' + Date.now(),
-      })
-      scrollToBottom()
+      });
+      scrollToBottom();
 
       // Get current patient details and proceed with chat
-      const currentPatient = conversations.value.find(c => c.user.id === activePatientId.value)?.user
+      const currentPatient = conversations.value.find(c => c.user.id === activePatientId.value)?.user;
 
       // Create message history excluding the empty message we just added
       const messageHistory = messages.value.slice(0, -1).map(msg => ({
         role: msg.type === 'sent' ? 'user' : 'assistant',
         content: msg.text,
-      }))
+      }));
 
       await streamChat(
         messageHistory,
@@ -338,42 +338,42 @@ async function submitMessage() {
             : undefined,
         },
         async (chunk) => {
-          const content = chunk.choices[0]?.delta?.content || ''
+          const content = chunk.choices[0]?.delta?.content || '';
           if (content) {
-            streamingResponse.value += content
-            messages.value[messages.value.length - 1].text = streamingResponse.value
-            scrollToBottom()
+            streamingResponse.value += content;
+            messages.value[messages.value.length - 1].text = streamingResponse.value;
+            scrollToBottom();
           }
         },
-      )
+      );
 
       // After stream is complete, save the full message
-      const savedAssistantMessage = await sendMessage(activePatientId.value, streamingResponse.value, 'received')
+      const savedAssistantMessage = await sendMessage(activePatientId.value, streamingResponse.value, 'received');
       // Update the message ID and timestamp in the UI
-      const lastMessage = messages.value[messages.value.length - 1]
-      lastMessage.id = savedAssistantMessage.id
-      lastMessage.timestamp = savedAssistantMessage.created
-      scrollToBottom()
+      const lastMessage = messages.value[messages.value.length - 1];
+      lastMessage.id = savedAssistantMessage.id;
+      lastMessage.timestamp = savedAssistantMessage.created;
+      scrollToBottom();
     }
   }
   catch (e) {
-    console.error('Error in chat:', e)
+    console.error('Error in chat:', e);
     messages.value.push({
       type: 'received',
       text: 'متاسفانه خطایی رخ داد. لطفا دوباره تلاش کنید.',
       timestamp: new Date().toISOString(),
       id: 'error-' + Date.now(),
-    })
-    scrollToBottom()
+    });
+    scrollToBottom();
   }
   finally {
-    messageLoading.value = false
+    messageLoading.value = false;
   }
 }
 
 watch(messages, () => {
-  scrollToBottom()
-}, { deep: true })
+  scrollToBottom();
+}, { deep: true });
 
 onMounted(() => {
   setTimeout(() => {
@@ -381,51 +381,51 @@ onMounted(() => {
       chatEl.value.scrollTo({
         top: chatEl.value.scrollHeight,
         behavior: 'smooth',
-      })
+      });
     }
-  }, 300)
-})
+  }, 300);
+});
 
-const { counter, reset, pause, resume } = useInterval(1000, { controls: true })
-const showNoCharge = ref(false)
-const remainingTime = ref<Date>()
-const currentTime = ref(new Date())
+const { counter, reset, pause, resume } = useInterval(1000, { controls: true });
+const showNoCharge = ref(false);
+const remainingTime = ref<Date>();
+const currentTime = ref(new Date());
 const timeToShow = computed(() => {
-  if (!remainingTime.value) return 0
-  const diff = remainingTime.value.getTime() - currentTime.value.getTime()
-  return Math.max(0, Math.floor(diff / (1000 * 60)))
-})
-const startChargeTime = ref<Date>()
-const showTenMin = ref(false)
-const isGoingToDone = ref(false)
-const type = ref('briefing')
+  if (!remainingTime.value) return 0;
+  const diff = remainingTime.value.getTime() - currentTime.value.getTime();
+  return Math.max(0, Math.floor(diff / (1000 * 60)));
+});
+const startChargeTime = ref<Date>();
+const showTenMin = ref(false);
+const isGoingToDone = ref(false);
+const type = ref('briefing');
 
 // Time and charge monitoring
 const checkForHalfTime = () => {
-  const start = new Date(startChargeTime.value)
-  const now = new Date()
-  const temp = Math.floor((now.getTime() - start.getTime()) / 60000)
-  return (temp / timeToShow.value > 1)
-}
+  const start = new Date(startChargeTime.value);
+  const now = new Date();
+  const temp = Math.floor((now.getTime() - start.getTime()) / 60000);
+  return (temp / timeToShow.value > 1);
+};
 
 onMounted(async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const nuxtApp = useNuxtApp()
-    const patients = await getPatients()
-    conversations.value = patients.map(p => ({ id: p.id, user: p }))
-    await initializeFromRoute()
+    const nuxtApp = useNuxtApp();
+    const patients = await getPatients();
+    conversations.value = patients.map(p => ({ id: p.id, user: p }));
+    await initializeFromRoute();
 
     // Initialize charge and time data
     const u = await nuxtApp.$pb
       .collection('users')
-      .getOne(nuxtApp.$pb.authStore.model.id, {})
-    showNoCharge.value = !u.hasCharge
-    remainingTime.value = new Date(u.expireChargeTime)
-    startChargeTime.value = new Date(u.startChargeTime)
+      .getOne(nuxtApp.$pb.authStore.model.id, {});
+    showNoCharge.value = !u.hasCharge;
+    remainingTime.value = new Date(u.expireChargeTime);
+    startChargeTime.value = new Date(u.startChargeTime);
     if (timeToShow.value <= 0) {
-      showNoCharge.value = true
-      pause()
+      showNoCharge.value = true;
+      pause();
     }
 
     // Subscribe to user changes for real-time charge updates
@@ -434,75 +434,75 @@ onMounted(async () => {
         nuxtApp.$pb.authStore.model.id,
         (e) => {
           // Update remainingTime; computed timeToShow will recalc automatically
-          remainingTime.value = new Date(e.record.expireChargeTime)
+          remainingTime.value = new Date(e.record.expireChargeTime);
           if (!e.record.hasCharge) {
-            showNoCharge.value = true
+            showNoCharge.value = true;
           }
-          console.log('[Timer] Subscription event: new expireChargeTime =', e.record.expireChargeTime, 'updated remainingTime =', remainingTime.value, 'timeToShow =', timeToShow.value)
+          console.log('[Timer] Subscription event: new expireChargeTime =', e.record.expireChargeTime, 'updated remainingTime =', remainingTime.value, 'timeToShow =', timeToShow.value);
         },
         {},
-      )
+      );
     }
   }
   catch (error) {
-    console.error('Error initializing:', error)
+    console.error('Error initializing:', error);
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 // Start the counter and time updater when component is mounted
 onMounted(() => {
-  resume()
-  console.log('[Timer] Starting clock ticks, initial timeToShow =', timeToShow.value)
+  resume();
+  console.log('[Timer] Starting clock ticks, initial timeToShow =', timeToShow.value);
   const timer = setInterval(() => {
-    currentTime.value = new Date()
-    console.log('[Timer] Tick at', currentTime.value, 'timeToShow =', timeToShow.value)
-  }, 60000)
+    currentTime.value = new Date();
+    console.log('[Timer] Tick at', currentTime.value, 'timeToShow =', timeToShow.value);
+  }, 60000);
   onUnmounted(() => {
-    console.log('[Timer] Clearing clock ticks')
-    clearInterval(timer)
-  })
-})
+    console.log('[Timer] Clearing clock ticks');
+    clearInterval(timer);
+  });
+});
 
 // Log whenever timeToShow recomputes
 watch(timeToShow, (newVal, oldVal) => {
-  console.log('[Timer] timeToShow changed from', oldVal, 'to', newVal)
-})
+  console.log('[Timer] timeToShow changed from', oldVal, 'to', newVal);
+});
 
 // Log initial remainingTime, startChargeTime, and timeToShow after loading user data
 onMounted(async () => {
-  console.log('[Timer] Initialized: remainingTime =', remainingTime.value, 'startChargeTime =', startChargeTime.value, 'timeToShow =', timeToShow.value)
-})
+  console.log('[Timer] Initialized: remainingTime =', remainingTime.value, 'startChargeTime =', startChargeTime.value, 'timeToShow =', timeToShow.value);
+});
 
-const nuxtApp = useNuxtApp()
-const toaster = useToaster()
+const nuxtApp = useNuxtApp();
+const toaster = useToaster();
 const logout = () => {
-  nuxtApp.$pb.authStore.clear()
+  nuxtApp.$pb.authStore.clear();
   toaster.show({
     title: 'خروج از سیستم',
     message: `خروج موفقیت آمیز بود`,
     color: 'success',
     icon: 'ph:check',
     closable: true,
-  })
-  navigateTo('/auth/login')
-}
+  });
+  navigateTo('/auth/login');
+};
 const changeExpanded = () => {
-  expanded.value = !expanded.value
-  localStorage.setItem('expanded', expanded.value + '')
-}
+  expanded.value = !expanded.value;
+  localStorage.setItem('expanded', expanded.value + '');
+};
 
-const isDeleteModalOpen = ref(false)
+const isDeleteModalOpen = ref(false);
 
 const openDeleteModal = () => {
-  isDeleteModalOpen.value = true
-}
+  isDeleteModalOpen.value = true;
+};
 
 const closeDeleteModal = () => {
-  isDeleteModalOpen.value = false
-}
+  isDeleteModalOpen.value = false;
+};
 
 const confirmClearChat = async () => {
   if (showNoCharge.value) {
@@ -512,26 +512,26 @@ const confirmClearChat = async () => {
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
-    return
+    });
+    return;
   }
 
   try {
-    await clearMessages(activePatientId.value!)
-    messages.value = []
-    closeDeleteModal()
+    await clearMessages(activePatientId.value!);
+    messages.value = [];
+    closeDeleteModal();
   }
   catch (error) {
-    console.error('Error clearing messages:', error)
+    console.error('Error clearing messages:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در پاک کردن پیام‌ها',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
-}
+};
 
 const clearChat = () => {
   if (showNoCharge.value) {
@@ -541,25 +541,25 @@ const clearChat = () => {
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
-    return
+    });
+    return;
   }
-  openDeleteModal()
-}
+  openDeleteModal();
+};
 
 const gotoList = () => {
-  navigateTo('/darmana/patients/choosePatient')
-}
+  navigateTo('/darmana/patients/choosePatient');
+};
 
-const isReportModalOpen = ref(false)
+const isReportModalOpen = ref(false);
 
 const openReportModal = () => {
-  isReportModalOpen.value = true
-}
+  isReportModalOpen.value = true;
+};
 
 const closeReportModal = () => {
-  isReportModalOpen.value = false
-}
+  isReportModalOpen.value = false;
+};
 
 const submitReport = async () => {
   try {
@@ -570,20 +570,20 @@ const submitReport = async () => {
       color: 'success',
       icon: 'ph:check-circle-fill',
       closable: true,
-    })
-    closeReportModal()
+    });
+    closeReportModal();
   }
   catch (error) {
-    console.error('Error generating report:', error)
+    console.error('Error generating report:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در ساخت گزارش',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
-}
+};
 
 const handleTextareaClick = () => {
   if (showNoCharge.value) {
@@ -593,9 +593,9 @@ const handleTextareaClick = () => {
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
-}
+};
 </script>
 
 <template>

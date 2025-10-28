@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoArea = reactive(useDemoArea())
+const demoArea = reactive(useDemoArea());
 
 function useDemoArea() {
-  const { primary } = useTailwindColors()
-  const type = 'area'
-  const height = 280
+  const { primary } = useTailwindColors();
+  const type = 'area';
+  const height = 280;
 
   const options = {
     chart: {
@@ -58,7 +58,7 @@ function useDemoArea() {
     legend: {
       horizontalAlign: 'left',
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -69,14 +69,14 @@ function useDemoArea() {
         8496.25, 8600.65, 8881.1, 9340.85,
       ],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

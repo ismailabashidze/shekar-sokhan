@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoBubble = reactive(useDemoBubble())
+const demoBubble = reactive(useDemoBubble());
 
 function useDemoBubble() {
-  const { primary, info, success, danger } = useTailwindColors()
-  const type = 'bubble'
-  const height = 280
+  const { primary, info, success, danger } = useTailwindColors();
+  const type = 'bubble';
+  const height = 280;
 
   const options = {
     chart: {
@@ -33,7 +33,7 @@ function useDemoBubble() {
       position: 'top',
       horizontalAlign: 'center',
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -64,26 +64,26 @@ function useDemoBubble() {
         max: 60,
       }),
     },
-  ])
+  ]);
 
   function generateData(
     baseval: number,
     count: number,
-    yrange: { min: number, max: number },
+    yrange: { min: number; max: number },
   ) {
-    let i = 0
-    const _series = []
+    let i = 0;
+    const _series = [];
     while (i < count) {
-      const x = Math.floor(Math.random() * (750 - 1 + 1)) + 1
+      const x = Math.floor(Math.random() * (750 - 1 + 1)) + 1;
       const y
-        = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min
-      const z = Math.floor(Math.random() * (75 - 15 + 1)) + 15
+        = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
+      const z = Math.floor(Math.random() * (75 - 15 + 1)) + 15;
 
-      _series.push([x, y, z])
-      baseval += 86400000
-      i++
+      _series.push([x, y, z]);
+      baseval += 86400000;
+      i++;
     }
-    return _series
+    return _series;
   }
 
   return {
@@ -91,7 +91,7 @@ function useDemoBubble() {
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

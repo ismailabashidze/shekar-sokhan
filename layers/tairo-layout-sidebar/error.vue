@@ -1,9 +1,9 @@
 <script setup lang="ts">
 const props = defineProps<{
-  error: any
-}>()
+  error: any;
+}>();
 
-const app = useAppConfig()
+const app = useAppConfig();
 </script>
 
 <template>

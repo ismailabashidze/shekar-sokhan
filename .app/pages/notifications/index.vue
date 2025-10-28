@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getRelativeTimeToAnnounce } from '~/utils/persian-date'
+import { getRelativeTimeToAnnounce } from '~/utils/persian-date';
 
 definePageMeta({
   title: 'اعلان‌ها',
@@ -12,12 +12,12 @@ definePageMeta({
     order: 80,
   },
   layout: 'sidebar',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'اعلان‌ها - ذهنا',
-})
+});
 
 // Initialize notifications composable
 const {
@@ -41,113 +41,113 @@ const {
   getTypeIcon,
   getTypeColor,
   getPriorityColor,
-} = useNotifications()
+} = useNotifications();
 
 // Client-side only state to prevent hydration mismatches
-const isMounted = ref(false)
-const showTransition = ref(false)
-const showPwaSettings = ref(false)
+const isMounted = ref(false);
+const showTransition = ref(false);
+const showPwaSettings = ref(false);
 
 // Initialize only on client side
 onMounted(async () => {
-  console.log('Notifications page mounted')
-  isMounted.value = true
+  console.log('Notifications page mounted');
+  isMounted.value = true;
 
   // Wait for next tick to ensure DOM is ready
-  await nextTick()
-  console.log('DOM ready, enabling transitions')
-  showTransition.value = true
+  await nextTick();
+  console.log('DOM ready, enabling transitions');
+  showTransition.value = true;
 
   // Ensure notifications are initialized when component mounts
   try {
-    console.log('Checking if notifications need initialization...')
+    console.log('Checking if notifications need initialization...');
     console.log('Current state:', {
       isLoading: isLoading.value,
       notificationsCount: filteredNotifications.value.length,
       hasError: !!error.value,
-    })
+    });
 
     // Always try to initialize - the function has guards to prevent duplicates
-    console.log('Attempting to initialize notifications...')
-    await initialize()
-    console.log('Initialize call completed')
+    console.log('Attempting to initialize notifications...');
+    await initialize();
+    console.log('Initialize call completed');
   }
   catch (err) {
-    console.warn('Failed to initialize notifications:', err)
+    console.warn('Failed to initialize notifications:', err);
   }
 
   // Fallback: If no data after 2 seconds, try direct fetch
   setTimeout(async () => {
     if (!isLoading.value && filteredNotifications.value.length === 0 && !error.value) {
-      console.log('No data loaded after timeout, trying direct fetch...')
+      console.log('No data loaded after timeout, trying direct fetch...');
       try {
         // Try direct fetch first
-        await fetchNotifications()
+        await fetchNotifications();
 
         // If still no data, try refresh
         if (filteredNotifications.value.length === 0) {
-          console.log('Direct fetch had no results, trying refresh...')
-          await refreshNotifications()
+          console.log('Direct fetch had no results, trying refresh...');
+          await refreshNotifications();
         }
       }
       catch (err) {
-        console.warn('Fallback fetch/refresh failed:', err)
+        console.warn('Fallback fetch/refresh failed:', err);
       }
     }
-  }, 2000)
-})
+  }, 2000);
+});
 
 onBeforeUnmount(() => {
-  console.log('Notifications page unmounting...')
-  isMounted.value = false
-  console.log('Notifications page unmounted, keeping global instance active')
-})
+  console.log('Notifications page unmounting...');
+  isMounted.value = false;
+  console.log('Notifications page unmounted, keeping global instance active');
+});
 
 const handleNotificationClick = async (notification: any) => {
   if (!notification.isRead) {
-    await markAsRead(notification.id)
+    await markAsRead(notification.id);
   }
 
   // Navigate based on priority: details > action_url > notifications page
   if (notification.completeMessage) {
     // اگه جزئیات داشته باشه می‌ریم به صفحه جزئیات
-    await navigateTo(`/notifications/${notification.id}`)
+    await navigateTo(`/notifications/${notification.id}`);
   }
   else if (notification.actionUrl) {
     // اگه جزئیات نداشت ولی action_url داشت می‌ریم به اون صفحه
-    await navigateTo(notification.actionUrl)
+    await navigateTo(notification.actionUrl);
   }
   else {
     // اگه هیچکدوم رو نداشت می‌ریم به صفحه اعلان‌ها (همین جا هستیم)
     // No navigation needed - we're already on notifications page
   }
-}
+};
 
 const handleReadMoreClick = async (e: Event, notification: any) => {
-  e.stopPropagation()
-  await navigateTo(`/notifications/${notification.id}`)
-}
+  e.stopPropagation();
+  await navigateTo(`/notifications/${notification.id}`);
+};
 
 const handleMarkAsRead = async (e: Event, notificationId: string) => {
-  e.stopPropagation()
-  await markAsRead(notificationId)
-}
+  e.stopPropagation();
+  await markAsRead(notificationId);
+};
 
 const handleMarkAsUnread = async (e: Event, notificationId: string) => {
-  e.stopPropagation()
-  await markAsUnread(notificationId)
-}
+  e.stopPropagation();
+  await markAsUnread(notificationId);
+};
 
 const handleDelete = async (e: Event, notificationId: string) => {
-  e.stopPropagation()
-  await deleteNotification(notificationId)
-}
+  e.stopPropagation();
+  await deleteNotification(notificationId);
+};
 
 const filterOptions = [
   { value: 'all', label: 'همه اعلان‌ها' },
   { value: 'unread', label: 'خوانده نشده' },
   { value: 'read', label: 'خوانده شده' },
-]
+];
 </script>
 
 <template>

@@ -1,14 +1,14 @@
-import { addMinutes, roundToNearestMinutes } from 'date-fns'
-import { onKeyStroke } from '@vueuse/core'
+import { addMinutes, roundToNearestMinutes } from 'date-fns';
+import { onKeyStroke } from '@vueuse/core';
 
 import type {
   Awaitable,
   CalendarCustomAttribute,
   CalendarSettings,
   CalendarEvent,
-} from '../types'
+} from '../types';
 
-import { topToDate } from '../view'
+import { topToDate } from '../view';
 
 export function useCreateEvent(
   settings: CalendarSettings,
@@ -19,39 +19,39 @@ export function useCreateEvent(
     event: CalendarCustomAttribute<CalendarEvent>,
   ) => Awaitable<void> = () => {},
 ) {
-  onKeyStroke('Escape', clearNew)
+  onKeyStroke('Escape', clearNew);
 
   const hasNew = computed(() => {
-    return toValue(calendarEvents).some(attr => attr.key === 'new')
-  })
+    return toValue(calendarEvents).some(attr => attr.key === 'new');
+  });
 
   function clearNew() {
-    const calendarEventsValue = toValue(calendarEvents)
+    const calendarEventsValue = toValue(calendarEvents);
     // clear new
-    const idx = calendarEventsValue.findIndex(attr => attr.key === 'new')
+    const idx = calendarEventsValue.findIndex(attr => attr.key === 'new');
 
     if (idx !== -1) {
-      calendarEventsValue.splice(idx, 1)
+      calendarEventsValue.splice(idx, 1);
     }
   }
 
   async function onCalendarClick(event: MouseEvent, currentDay = new Date()) {
     if (!toValue(canCreate)) {
-      return
+      return;
     }
-    clearNew()
+    clearNew();
 
-    const y = event.offsetY
-    const dateClick = topToDate(settings, y, currentDay)
+    const y = event.offsetY;
+    const dateClick = topToDate(settings, y, currentDay);
     if (!dateClick) {
-      return
+      return;
     }
 
     const date = roundToNearestMinutes(addMinutes(dateClick, -5), {
       nearestTo: settings.hourPrecision,
-    })
+    });
 
-    const newEventData = await eventFactory(date)
+    const newEventData = await eventFactory(date);
     const newEvent = {
       key: 'new',
       customData: {
@@ -59,14 +59,14 @@ export function useCreateEvent(
         ...newEventData,
       },
       dates: [newEventData.startDate, newEventData.endDate],
-    }
+    };
 
-    await onCreate(newEvent)
+    await onCreate(newEvent);
   }
 
   return {
     hasNew,
     clearNew,
     onCalendarClick,
-  }
+  };
 }

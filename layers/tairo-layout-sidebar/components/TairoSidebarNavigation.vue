@@ -1,25 +1,25 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    subsidebar?: boolean
-    expanded?: boolean
+    subsidebar?: boolean;
+    expanded?: boolean;
   }>(),
   {
     subsidebar: true,
     expanded: false,
   },
-)
-const { isOpen, sidebars } = useSidebar()
+);
+const { isOpen, sidebars } = useSidebar();
 
 const startSidebars = computed(
   () =>
     sidebars.value?.filter(
       sidebar => !sidebar.position || sidebar.position === 'start',
     ),
-)
+);
 const endSidebars = computed(
   () => sidebars.value?.filter(sidebar => sidebar.position === 'end'),
-)
+);
 </script>
 
 <template>

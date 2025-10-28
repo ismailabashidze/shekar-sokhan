@@ -7775,4 +7775,4 @@ export const dictionray = {
   66664: 'zoologist',
   66665: 'zoology',
   66666: 'zoom',
-} as const
+} as const;

@@ -1,45 +1,45 @@
 <script lang="ts" setup>
-import type { PhoneNumber, CountryCode } from 'libphonenumber-js/max'
-import type { CountriesInfo } from '~/utils/bundles/countries'
+import type { PhoneNumber, CountryCode } from 'libphonenumber-js/max';
+import type { CountriesInfo } from '~/utils/bundles/countries';
 
 const props = withDefaults(defineProps<{
   /**
    * The value of the input.
    */
-  modelValue?: string
+  modelValue?: string;
   /**
    * Default country code, in ISO 3166-1 alpha-2 format.
    */
-  country?: string
+  country?: string;
   /**
    * When set to `national`, the country indicator is omitted.
    */
-  format?: 'national' | 'international'
+  format?: 'national' | 'international';
   /**
    * The max height of the dropdown.
    */
-  height?: number
+  height?: number;
   /**
    * The height of each dropdown item.
    */
-  itemHeight?: number
+  itemHeight?: number;
   /**
    * Default icon used when no country is selected/detected.
    */
-  icon?: string
+  icon?: string;
   /**
    * The size of the input.
    */
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg';
   /**
    * The radius of the input.
    */
-  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   /**
    * An error message or boolean value indicating whether the input is in an error state.
    */
-  error?: string | boolean
-  disabled?: boolean
+  error?: string | boolean;
+  disabled?: boolean;
 }>(), {
   modelValue: '',
   rounded: 'sm',
@@ -50,42 +50,42 @@ const props = withDefaults(defineProps<{
   error: false,
   size: 'md',
   country: undefined,
-})
+});
 
 const emits = defineEmits<{
-  'update:modelValue': [value?: string]
-  'update:country': [value?: string]
-  'validation': [state: { valid: boolean, touched: boolean, error: string }]
-}>()
+  'update:modelValue': [value?: string];
+  'update:country': [value?: string];
+  'validation': [state: { valid: boolean; touched: boolean; error: string }];
+}>();
 
 defineOptions({
   inheritAttrs: false,
-})
+});
 
-const appConfig = useAppConfig()
+const appConfig = useAppConfig();
 
 const vmodel = useVModel(props, 'modelValue', emits, {
   passive: true,
   defaultValue: '',
-})
+});
 const vcountry = useVModel(props, 'country', emits, {
   passive: true,
   defaultValue: undefined,
-})
+});
 
-const countriesMap = shallowRef<CountriesInfo>({})
-const countries = computed(() => Object.values(countriesMap.value))
-const possibleCountries = shallowRef<CountryCode[]>([])
+const countriesMap = shallowRef<CountriesInfo>({});
+const countries = computed(() => Object.values(countriesMap.value));
+const possibleCountries = shallowRef<CountryCode[]>([]);
 
-const filter = ref('')
+const filter = ref('');
 
 const countriesFiltered = computed(() => {
   const source = possibleCountries.value.length > 0
     ? possibleCountries.value.map(code => countriesMap.value[code])
-    : countries.value
+    : countries.value;
 
   if (!filter.value) {
-    return source
+    return source;
   }
 
   return source.filter((country) => {
@@ -96,32 +96,32 @@ const countriesFiltered = computed(() => {
       || country.callingCode
         .toLowerCase()
         .includes(filter.value.toLowerCase())
-    )
-  })
-})
+    );
+  });
+});
 
 const currentCountry = computed(() => {
   if (!vcountry.value || !countriesMap.value) {
-    return null
+    return null;
   }
-  return countriesMap.value[vcountry.value.toUpperCase()]
-})
+  return countriesMap.value[vcountry.value.toUpperCase()];
+});
 
-let parsed: PhoneNumber | undefined
+let parsed: PhoneNumber | undefined;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-let parser: typeof import('libphonenumber-js/max')['parsePhoneNumber'] | undefined
+let parser: typeof import('libphonenumber-js/max')['parsePhoneNumber'] | undefined;
 
-const internal = ref('')
-const dropdownRef = ref<any>()
-const filterRef = ref<any>()
-const inputRef = ref<any>()
+const internal = ref('');
+const dropdownRef = ref<any>();
+const filterRef = ref<any>();
+const inputRef = ref<any>();
 
 const validation = reactive({
   valid: false,
   touched: false,
   error: '',
-})
+});
 
 defineExpose({
   modelValue: vmodel,
@@ -133,196 +133,196 @@ defineExpose({
   filterRef,
   dropdownRef,
   inputRef,
-})
+});
 
 const dropdownHeight = computed(() => {
-  const maxHeight = props.height
-  const items = countriesFiltered.value.length
-  const height = Math.max(1, items) * props.itemHeight
-  return Math.min(height, maxHeight)
-})
+  const maxHeight = props.height;
+  const items = countriesFiltered.value.length;
+  const height = Math.max(1, items) * props.itemHeight;
+  return Math.min(height, maxHeight);
+});
 
 const { list, containerProps, wrapperProps, scrollTo } = useVirtualList(
   countriesFiltered,
   {
     itemHeight: props.itemHeight,
   },
-)
+);
 
-let parsePending = false
+let parsePending = false;
 const handleInput = (value: string, touched = true) => {
-  internal.value = value ?? ''
-  validation.touched = touched
-  possibleCountries.value = []
+  internal.value = value ?? '';
+  validation.touched = touched;
+  possibleCountries.value = [];
 
   try {
-    formatInput(value)
+    formatInput(value);
   }
   catch (error) {
-    validation.valid = false
-    validation.error = (error instanceof Error) ? error.message : ''
-    emits('validation', validation)
+    validation.valid = false;
+    validation.error = (error instanceof Error) ? error.message : '';
+    emits('validation', validation);
   }
   finally {
-    vmodel.value = internal.value
+    vmodel.value = internal.value;
   }
-}
+};
 
 function selectCountry(country?: CountryCode | string) {
-  if (props.disabled) return
+  if (props.disabled) return;
 
-  vcountry.value = country
-  handleInput(internal.value, validation.touched)
+  vcountry.value = country;
+  handleInput(internal.value, validation.touched);
 
   setTimeout(() => {
-    inputRef.value?.el?.focus()
-  }, 100)
+    inputRef.value?.el?.focus();
+  }, 100);
 }
 function formatInput(value: string) {
   if (!parser) {
     // delay parsing until libphonenumber-js is loaded
-    parsePending = true
-    return
+    parsePending = true;
+    return;
   }
   parsed = parser(value, {
     defaultCountry: (vcountry.value?.toUpperCase() || currentCountry.value?.code) as CountryCode,
-  })
+  });
   if (!parsed) {
-    throw new Error('INVALID_FORMAT')
+    throw new Error('INVALID_FORMAT');
   }
 
-  const isPossible = parsed.isPossible()
-  possibleCountries.value = parsed.getPossibleCountries()
+  const isPossible = parsed.isPossible();
+  possibleCountries.value = parsed.getPossibleCountries();
   if (possibleCountries.value.length === 0) {
-    throw new Error('NO_POSSIBLE_COUNTRIES')
+    throw new Error('NO_POSSIBLE_COUNTRIES');
   }
 
   if (!vcountry.value || (vcountry.value && !possibleCountries.value.includes(vcountry.value as CountryCode))) {
-    vcountry.value = possibleCountries.value[0]
+    vcountry.value = possibleCountries.value[0];
   }
 
   if (!isPossible) {
-    throw new Error('PHONE_NUMBER_NOT_POSSIBLE')
+    throw new Error('PHONE_NUMBER_NOT_POSSIBLE');
   }
 
   if (!validation.valid) {
-    validation.valid = true
-    validation.error = ''
-    emits('validation', validation)
+    validation.valid = true;
+    validation.error = '';
+    emits('validation', validation);
   }
 
   if (props.format === 'international') {
-    internal.value = parsed.formatInternational()
-    return
+    internal.value = parsed.formatInternational();
+    return;
   }
-  internal.value = parsed.formatNational()
+  internal.value = parsed.formatNational();
 }
 
 // scroll to top when filter changes, to ensure results are visible
 watch(filter, () => {
-  scrollTo(0)
-})
+  scrollTo(0);
+});
 
 // update internal value when model changes externally
 watch(
   () => props.modelValue,
   (value) => {
     if (value === internal.value) {
-      return
+      return;
     }
-    handleInput(value, validation.touched)
+    handleInput(value, validation.touched);
   },
   {
     immediate: true,
   },
-)
+);
 
 // delay filter input focus when dropdown is opened
-let focusTimeout: ReturnType<typeof setTimeout>
+let focusTimeout: ReturnType<typeof setTimeout>;
 watch(filterRef, () => {
   if (filterRef.value) {
-    clearTimeout(focusTimeout)
+    clearTimeout(focusTimeout);
     focusTimeout = setTimeout(() => {
-      filterRef.value?.el?.focus()
-    }, 100)
+      filterRef.value?.el?.focus();
+    }, 100);
   }
-})
+});
 onUnmounted(() => {
-  clearTimeout(focusTimeout)
-})
+  clearTimeout(focusTimeout);
+});
 
 // lazy load heavy dependencies
 onNuxtReady(() => {
   import('~/utils/bundles/countries').then(({ getPhoneCountries }) => {
-    countriesMap.value = getPhoneCountries()
-  })
+    countriesMap.value = getPhoneCountries();
+  });
   import('libphonenumber-js/max').then(({ parsePhoneNumber }) => {
-    parser = parsePhoneNumber
+    parser = parsePhoneNumber;
     if (parsePending) {
       // if there was a pending parse, run it now
-      parsePending = false
-      handleInput(internal.value, validation.touched)
+      parsePending = false;
+      handleInput(internal.value, validation.touched);
     }
-  })
-})
+  });
+});
 
 // styles
 const addonHeight = computed(() => {
   switch (props.size) {
     case 'sm':
-      return 'h-8'
+      return 'h-8';
     case 'lg':
-      return 'h-12'
+      return 'h-12';
     case 'md':
     default:
-      return 'h-10'
+      return 'h-10';
   }
-})
+});
 const addonTop = computed(() => {
   switch (props.size) {
     case 'sm':
-      return 'top-[1.58rem]'
+      return 'top-[1.58rem]';
     case 'lg':
-      return 'top-[1.7rem]'
+      return 'top-[1.7rem]';
     case 'md':
     default:
-      return 'top-[1.5rem]'
+      return 'top-[1.5rem]';
   }
-})
+});
 const iconSize = computed(() => {
   switch (props.size) {
     case 'lg':
-      return 'w-6'
+      return 'w-6';
     case 'sm':
     case 'md':
     default:
-      return 'w-4'
+      return 'w-4';
   }
-})
+});
 const inputStart = computed(() => {
   switch (props.size) {
     case 'lg':
-      return '!ps-[5rem]'
+      return '!ps-[5rem]';
     case 'sm':
     case 'md':
     default:
-      return '!ps-[4.5rem]'
+      return '!ps-[4.5rem]';
   }
-})
+});
 const dropdownBorder = computed(() => {
   switch (props.rounded) {
     case 'sm':
-      return '[&_.nui-text-button]:rounded-s'
+      return '[&_.nui-text-button]:rounded-s';
     case 'md':
-      return '[&_.nui-text-button]:rounded-s-md'
+      return '[&_.nui-text-button]:rounded-s-md';
     case 'lg':
-      return '[&_.nui-text-button]:rounded-s-xl'
+      return '[&_.nui-text-button]:rounded-s-xl';
     case 'full':
-      return '[&_.nui-text-button]:rounded-s-full'
+      return '[&_.nui-text-button]:rounded-s-full';
     case 'none':
-      return ''
+      return '';
   }
-})
+});
 </script>
 
 <template>

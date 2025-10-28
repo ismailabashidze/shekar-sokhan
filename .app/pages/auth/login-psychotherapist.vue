@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 definePageMeta({
   layout: 'empty',
@@ -14,14 +14,14 @@ definePageMeta({
     srcDark: '/img/screens/auth-login-2-dark.png',
     order: 97,
   },
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 const VALIDATION_TEXT = {
   EMAIL_REQUIRED: 'یک ایمیل معتبر نیاز است',
   PASSWORD_REQUIRED: 'رمز عبور نیاز است',
-}
+};
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -29,18 +29,18 @@ const zodSchema = z.object({
   email: z.string().email(VALIDATION_TEXT.EMAIL_REQUIRED),
   password: z.string().min(1, VALIDATION_TEXT.PASSWORD_REQUIRED),
   trustDevice: z.boolean(),
-})
+});
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = computed<FormInput>(() => ({
   email: '',
   password: '',
   trustDevice: false,
-}))
+}));
 
 const {
   handleSubmit,
@@ -55,15 +55,15 @@ const {
 } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
-const router = useRouter()
-const toaster = useToaster()
+const router = useRouter();
+const toaster = useToaster();
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(async (values) => {
   // here you have access to the validated form values
-  console.log('auth-success', values)
+  console.log('auth-success', values);
 
   try {
     // fake delay, this will make isSubmitting value to be true
@@ -73,57 +73,57 @@ const onSubmit = handleSubmit(async (values) => {
         setTimeout(
           () => reject(new Error('Fake backend validation error')),
           2000,
-        )
+        );
       }
-      setTimeout(resolve, 4000)
-    })
+      setTimeout(resolve, 4000);
+    });
 
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Success',
       message: `خوش آمدید`,
       color: 'success',
       icon: 'ph:user-circle-fill',
       closable: true,
-    })
+    });
   }
   catch (error: any) {
     // this will set the error on the form
     if (error.message === 'Fake backend validation error') {
-      setFieldError('email', 'نام کاربری یا رمز عبور اشتباه است')
-      setFieldError('password', 'نام کاربری یا رمز عبور اشتباه است')
+      setFieldError('email', 'نام کاربری یا رمز عبور اشتباه است');
+      setFieldError('password', 'نام کاربری یا رمز عبور اشتباه است');
     }
-    return
+    return;
   }
 
-  router.push('/dashboards')
-})
-const nuxtApp = useNuxtApp()
-const { setUser } = useUser()
+  router.push('/dashboards');
+});
+const nuxtApp = useNuxtApp();
+const { setUser } = useUser();
 const loginWithGoogle = async () => {
   const authData = await nuxtApp.$pb
     .collection('users')
-    .authWithOAuth2({ provider: 'google' })
+    .authWithOAuth2({ provider: 'google' });
   // Persist Google OAuth meta into PocketBase user record
-  await nuxtApp.$pb.collection('users').update(authData.record.id, { meta: authData.meta })
+  await nuxtApp.$pb.collection('users').update(authData.record.id, { meta: authData.meta });
   // Store only the user record
-  setUser(authData.record, 'psychotherapist')
+  setUser(authData.record, 'psychotherapist');
 
-  toaster.clearAll()
+  toaster.clearAll();
   toaster.show({
     title: 'ورود موفق',
     message: `خوش آمدید`,
     color: 'success',
     icon: 'ph:user-circle-fill',
     closable: true,
-  })
+  });
   setTimeout(() => {
-    router.push('clinic/psychotherapist-register')
-  }, 2000)
-}
+    router.push('clinic/psychotherapist-register');
+  }, 2000);
+};
 
 if (nuxtApp.$pb.authStore.isValid) {
-  navigateTo('/dashboard')
+  navigateTo('/dashboard');
 }
 </script>
 

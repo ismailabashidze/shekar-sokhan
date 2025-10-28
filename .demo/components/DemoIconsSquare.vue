@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    shape?: 'straight' | 'rounded' | 'curved'
+    shape?: 'straight' | 'rounded' | 'curved';
   }>(),
   {
     shape: 'rounded',
   },
-)
+);
 
 const links = [
   {
@@ -29,7 +29,7 @@ const links = [
     icon: 'ph:check-circle-duotone',
     url: '#',
   },
-]
+];
 </script>
 
 <template>

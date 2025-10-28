@@ -56,5 +56,5 @@ const tree = [
   {
     item: 'Item 4',
   },
-]
+];
 </script>

@@ -82,11 +82,11 @@ const {
   isLoading,
   error,
   requestPermission,
-} = usePwaNotifications()
+} = usePwaNotifications();
 
 // State
-const showPrompt = ref(false)
-const isDismissed = ref(false)
+const showPrompt = ref(false);
+const isDismissed = ref(false);
 
 // Show prompt conditions
 const shouldShowPrompt = computed(() => {
@@ -94,42 +94,42 @@ const shouldShowPrompt = computed(() => {
     && !isDismissed.value
     && isSupported.value
     && permission.value !== 'granted'
-    && !isSubscribed.value
-})
+    && !isSubscribed.value;
+});
 
 // Methods
 const handleEnableNotifications = async () => {
-  const success = await requestPermission()
+  const success = await requestPermission();
   if (success) {
-    showPrompt.value = false
+    showPrompt.value = false;
   }
-}
+};
 
 const dismissPrompt = () => {
-  showPrompt.value = false
-  isDismissed.value = true
+  showPrompt.value = false;
+  isDismissed.value = true;
 
   // Remember dismissal for this session
-  sessionStorage.setItem('pwa-prompt-dismissed', 'true')
-}
+  sessionStorage.setItem('pwa-prompt-dismissed', 'true');
+};
 
 // Auto-show logic
 onMounted(() => {
   // Don't show if user just logged in (wait for auto-request to finish first)
-  const justLoggedIn = sessionStorage.getItem('just-logged-in')
+  const justLoggedIn = sessionStorage.getItem('just-logged-in');
   if (justLoggedIn) {
     // Wait longer if user just logged in to avoid overwhelming
     setTimeout(() => {
-      sessionStorage.removeItem('just-logged-in')
-    }, 10000)
-    return
+      sessionStorage.removeItem('just-logged-in');
+    }, 10000);
+    return;
   }
 
   // Check if already dismissed this session
-  const sessionDismissed = sessionStorage.getItem('pwa-prompt-dismissed')
+  const sessionDismissed = sessionStorage.getItem('pwa-prompt-dismissed');
   if (sessionDismissed) {
-    isDismissed.value = true
-    return
+    isDismissed.value = true;
+    return;
   }
 
   // Check if we should show the prompt
@@ -138,24 +138,24 @@ onMounted(() => {
     setTimeout(() => {
       // Double check conditions before showing
       if (permission.value === 'default' && !isSubscribed.value) {
-        showPrompt.value = true
+        showPrompt.value = true;
       }
-    }, 5000) // Show after 5 seconds to let user get oriented
+    }, 5000); // Show after 5 seconds to let user get oriented
   }
-})
+});
 
 // Watch for permission changes to hide prompt
 watch(permission, (newPermission) => {
   if (newPermission === 'granted') {
-    showPrompt.value = false
+    showPrompt.value = false;
   }
-})
+});
 
 watch(isSubscribed, (newSubscribed) => {
   if (newSubscribed) {
-    showPrompt.value = false
+    showPrompt.value = false;
   }
-})
+});
 </script>
 
 <style scoped>

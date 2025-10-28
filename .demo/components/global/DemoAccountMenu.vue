@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 
 const props = defineProps<{
-  horizontal?: boolean
-}>()
+  horizontal?: boolean;
+}>();
 </script>
 
 <template>

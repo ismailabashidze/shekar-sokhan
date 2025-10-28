@@ -1,4 +1,4 @@
-import type { EventCategory, EventCategoryTheme } from './types'
+import type { EventCategory, EventCategoryTheme } from './types';
 
 export const categoryTheme: Record<EventCategory, EventCategoryTheme> = {
   none: {
@@ -26,4 +26,4 @@ export const categoryTheme: Record<EventCategory, EventCategoryTheme> = {
     color: 'bg-rose-500',
     outline: 'outline-rose-500/30',
   },
-}
+};

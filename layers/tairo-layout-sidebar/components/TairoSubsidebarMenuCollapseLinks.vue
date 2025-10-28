@@ -1,62 +1,62 @@
 <script setup lang="ts">
 const props = defineProps<{
-  name: string
+  name: string;
   children: {
-    name: string
-    icon: string
-    to: string
-    exact?: boolean
-  }[]
-}>()
+    name: string;
+    icon: string;
+    to: string;
+    exact?: boolean;
+  }[];
+}>();
 
-const open = ref(false)
-const route = useRoute()
-const buttonRef = shallowRef<HTMLElement>()
+const open = ref(false);
+const route = useRoute();
+const buttonRef = shallowRef<HTMLElement>();
 
 const hasActiveChild = computed(() => {
   return props.children.some((item) => {
     if (item.exact === true) {
-      return route.path === item.to
+      return route.path === item.to;
     }
 
-    return route.path.startsWith(item.to)
-  })
-})
+    return route.path.startsWith(item.to);
+  });
+});
 
 watchEffect(() => {
   if (hasActiveChild.value) {
-    open.value = true
+    open.value = true;
   }
-})
+});
 
 function onDropClick() {
-  open.value = !open.value
+  open.value = !open.value;
   if (!open.value) {
-    buttonRef.value?.blur()
+    buttonRef.value?.blur();
   }
 }
 
 function isChildActive(link: {
-  name: string
-  icon: string
-  to: string
-  exact?: boolean
+  name: string;
+  icon: string;
+  to: string;
+  exact?: boolean;
 }) {
   return (
     (link.exact && route.path === link.to)
     || (!link.exact && route.path.startsWith(link.to))
-  )
+  );
 }
 
-const { toggle } = useSidebar()
-const { xl } = useTailwindBreakpoints()
+const { toggle } = useSidebar();
+const { xl } = useTailwindBreakpoints();
 
 function onLinkClick() {
   if (xl.value) {
-    return
+    return;
   }
 
-  toggle()
+  toggle();
 }
 </script>
 

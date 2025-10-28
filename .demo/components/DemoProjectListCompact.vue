@@ -80,7 +80,7 @@ const projects = [
       },
     ],
   },
-]
+];
 </script>
 
 <template>

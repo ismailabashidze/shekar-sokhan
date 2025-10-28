@@ -4,7 +4,7 @@ import type {
   ProjectStepData,
   TeamMember,
   TeamMemberRole,
-} from '../../types'
+} from '../../types';
 
 definePageMeta({
   title: 'Wizard — Step 5',
@@ -16,16 +16,16 @@ definePageMeta({
     srcDark: '/img/screens/wizard-5-dark.png',
     order: 34,
   },
-})
+});
 useHead({
   title: 'Team members',
-})
+});
 
-const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>()
+const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 
-const toggled = ref(false)
+const toggled = ref(false);
 
 const team: TeamMember[] = [
   {
@@ -53,60 +53,60 @@ const team: TeamMember[] = [
     name: 'Eddy Fisher',
     role: undefined,
   },
-]
+];
 
-const search = ref('')
-const filteredUsers = ref<Omit<TeamMember, 'role'>[]>([])
+const search = ref('');
+const filteredUsers = ref<Omit<TeamMember, 'role'>[]>([]);
 
 function addTeammate(teammate: Omit<TeamMember, 'role'>) {
   project.value.team?.push({
     ...teammate,
     role: 'reader',
-  })
-  search.value = ''
+  });
+  search.value = '';
 }
 
 function setTeammateRole(index: number, role: TeamMemberRole) {
   if (project.value.team && project.value.team[index]) {
-    project.value.team[index].role = role
+    project.value.team[index].role = role;
   }
 }
 
 function removeTeammate(index: number) {
   if (project.value.team) {
-    project.value.team.splice(index, 1)
+    project.value.team.splice(index, 1);
   }
 }
 
 function getRoleLevel(teammate: TeamMember) {
   switch (teammate.role) {
     case 'collaborator':
-      return 1
+      return 1;
     case 'manager':
-      return 2
+      return 2;
     case 'owner':
-      return 3
+      return 3;
     case 'reader':
     default:
-      return 0
+      return 0;
   }
 }
 
 watchEffect(() => {
-  const teamRef = project.value.team
+  const teamRef = project.value.team;
   if (!search.value) {
-    filteredUsers.value = []
-    return
+    filteredUsers.value = [];
+    return;
   }
 
   filteredUsers.value = team
     .filter((item) => {
       return !teamRef?.find((_item) => {
-        return item.name === _item.name
-      })
+        return item.name === _item.name;
+      });
     })
-    .filter(item => item.name.match(new RegExp(search.value, 'i')))
-})
+    .filter(item => item.name.match(new RegExp(search.value, 'i')));
+});
 </script>
 
 <template>

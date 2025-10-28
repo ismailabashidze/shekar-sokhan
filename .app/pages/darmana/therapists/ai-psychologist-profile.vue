@@ -419,11 +419,11 @@
 definePageMeta({
   title: 'پروفایل هوش مصنوعی روان‌شناس',
   layout: 'sidebar',
-})
+});
 
 // Reactive state
-const isLoading = ref(false)
-const hasData = ref(true)
+const isLoading = ref(false);
+const hasData = ref(true);
 
 // Mock data for AI Psychologist
 const aiPsychologist = ref({
@@ -432,7 +432,7 @@ const aiPsychologist = ref({
   experience: '5 سال',
   totalSessions: 1247,
   successRate: 94,
-})
+});
 
 // Session Goals Mock Data
 const sessionGoals = ref([
@@ -484,7 +484,7 @@ const sessionGoals = ref([
     estimatedSessions: '2-4',
     icon: 'ph:graduation-cap-duotone',
   },
-])
+]);
 
 // Therapeutic Techniques Mock Data
 const therapeuticTechniques = ref([
@@ -530,7 +530,7 @@ const therapeuticTechniques = ref([
     icon: 'ph:circles-three-duotone',
     tags: ['MBCT', 'شناختی', 'ذهن‌آگاهی'],
   },
-])
+]);
 
 // Therapeutic Approaches Mock Data
 const therapeuticApproaches = ref([
@@ -566,7 +566,7 @@ const therapeuticApproaches = ref([
     icon: 'ph:shield-duotone',
     suitableFor: ['سلامت روان', 'پیشگیری', 'تقویت تاب‌آوری'],
   },
-])
+]);
 
 // Assessment Methods Mock Data
 const assessmentMethods = ref([
@@ -602,7 +602,7 @@ const assessmentMethods = ref([
     accuracy: 89,
     icon: 'ph:user-circle-duotone',
   },
-])
+]);
 
 // Quick Stats Mock Data
 const quickStats = ref([
@@ -630,7 +630,7 @@ const quickStats = ref([
     icon: 'ph:users-duotone',
     color: 'text-primary-500',
   },
-])
+]);
 
 // Recent Activities Mock Data
 const recentActivities = ref([
@@ -658,36 +658,36 @@ const recentActivities = ref([
     time: '1 روز پیش',
     icon: 'ph:plus-circle-duotone',
   },
-])
+]);
 
 // Methods
 const createProfile = () => {
   // Navigate to create profile page
-  console.log('Create new AI psychologist profile')
-}
+  console.log('Create new AI psychologist profile');
+};
 
 const editProfile = () => {
   // Navigate to edit profile page
-  console.log('Edit AI psychologist profile')
-}
+  console.log('Edit AI psychologist profile');
+};
 
 const startSession = () => {
   // Start a new therapy session
-  console.log('Start new therapy session')
-}
+  console.log('Start new therapy session');
+};
 
 const viewHistory = () => {
   // View session history
-  console.log('View session history')
-}
+  console.log('View session history');
+};
 
 // Simulate loading state
 onMounted(() => {
-  isLoading.value = true
+  isLoading.value = true;
   setTimeout(() => {
-    isLoading.value = false
-  }, 1000)
-})
+    isLoading.value = false;
+  }, 1000);
+});
 </script>
 
 <style scoped>

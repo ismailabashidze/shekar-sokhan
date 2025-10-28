@@ -1,166 +1,166 @@
 <script setup lang="ts">
-import { FocusTrap } from '@headlessui/vue'
+import { FocusTrap } from '@headlessui/vue';
 
 const props = defineProps<{
-  src?: string
-  srcDark?: string
-  zoomSrc?: string
-  zoomSrcDark?: string
-}>()
+  src?: string;
+  srcDark?: string;
+  zoomSrc?: string;
+  zoomSrcDark?: string;
+}>();
 
 defineOptions({
   inheritAttrs: false,
-})
+});
 
 const initialSize = ref<{
-  top: number
-  left: number
-  width: number
-  height: number
+  top: number;
+  left: number;
+  width: number;
+  height: number;
 }>({
   top: 0,
   left: 0,
   width: 0,
   height: 0,
-})
+});
 
-const modalRef = ref<HTMLElement | null>(null)
-const buttonRef = ref<HTMLElement | null>(null)
-const isZoomed = ref(false)
-const isUnzooming = ref(false)
+const modalRef = ref<HTMLElement | null>(null);
+const buttonRef = ref<HTMLElement | null>(null);
+const isZoomed = ref(false);
+const isUnzooming = ref(false);
 
-let y = 0
+let y = 0;
 
 const wheelListener = (event: WheelEvent) => {
-  if (event.ctrlKey) return
-  event.stopPropagation()
+  if (event.ctrlKey) return;
+  event.stopPropagation();
 
-  y += event.deltaY
+  y += event.deltaY;
   if (modalRef.value) {
-    modalRef.value.style.transform = `translateY(${-y}px)`
+    modalRef.value.style.transform = `translateY(${-y}px)`;
   }
 
-  unzoom()
-}
+  unzoom();
+};
 
 const resizeListener = () => {
-  if (!isZoomed.value) return
-  if (!buttonRef.value) return
+  if (!isZoomed.value) return;
+  if (!buttonRef.value) return;
 
-  const { top, left, width, height } = buttonRef.value.getBoundingClientRect()
-  initialSize.value = { top, left, width, height }
-}
+  const { top, left, width, height } = buttonRef.value.getBoundingClientRect();
+  initialSize.value = { top, left, width, height };
+};
 
 const keydownListener = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
-    event.stopPropagation()
-    unzoom()
+    event.stopPropagation();
+    unzoom();
   }
-}
+};
 
-let touchstartScreenY = 0
+let touchstartScreenY = 0;
 const touchstartListener = (event: TouchEvent) => {
-  event.stopPropagation()
-  touchstartScreenY = event.changedTouches[0].screenY
-}
+  event.stopPropagation();
+  touchstartScreenY = event.changedTouches[0].screenY;
+};
 
 const touchmoveListener = (event: TouchEvent) => {
-  event.stopPropagation()
+  event.stopPropagation();
 
-  y = touchstartScreenY - event.changedTouches[0].screenY
+  y = touchstartScreenY - event.changedTouches[0].screenY;
 
   if (modalRef.value) {
-    modalRef.value.style.transform = `translateY(${-y}px)`
+    modalRef.value.style.transform = `translateY(${-y}px)`;
   }
 
-  unzoom()
-}
+  unzoom();
+};
 
 function zoom() {
-  if (isZoomed.value) return
+  if (isZoomed.value) return;
 
-  isZoomed.value = true
-  isUnzooming.value = false
+  isZoomed.value = true;
+  isUnzooming.value = false;
 
-  attachZoomEvents()
+  attachZoomEvents();
 }
 function unzoom() {
-  if (!isZoomed.value) return
+  if (!isZoomed.value) return;
 
-  isZoomed.value = false
-  isUnzooming.value = true
+  isZoomed.value = false;
+  isUnzooming.value = true;
 
   if (modalRef.value) {
-    modalRef.value.style.top = `${initialSize.value.top}px`
-    modalRef.value.style.left = `${initialSize.value.left}px`
-    modalRef.value.style.width = `${initialSize.value.width}px`
-    modalRef.value.style.height = `${initialSize.value.height}px`
+    modalRef.value.style.top = `${initialSize.value.top}px`;
+    modalRef.value.style.left = `${initialSize.value.left}px`;
+    modalRef.value.style.width = `${initialSize.value.width}px`;
+    modalRef.value.style.height = `${initialSize.value.height}px`;
 
-    modalRef.value.addEventListener('transitionend', detachZoomEvents, { once: true })
+    modalRef.value.addEventListener('transitionend', detachZoomEvents, { once: true });
   }
 }
 function attachZoomEvents() {
-  window.addEventListener('wheel', wheelListener, { passive: true })
-  window.addEventListener('resize', resizeListener, { passive: true })
-  window.addEventListener('touchstart', touchstartListener, { passive: true })
-  window.addEventListener('touchmove', touchmoveListener, { passive: true })
-  window.addEventListener('touchend', touchmoveListener, { passive: true })
+  window.addEventListener('wheel', wheelListener, { passive: true });
+  window.addEventListener('resize', resizeListener, { passive: true });
+  window.addEventListener('touchstart', touchstartListener, { passive: true });
+  window.addEventListener('touchmove', touchmoveListener, { passive: true });
+  window.addEventListener('touchend', touchmoveListener, { passive: true });
 
-  document.addEventListener('keydown', keydownListener)
+  document.addEventListener('keydown', keydownListener);
 }
 function detachZoomEvents() {
-  y = 0
+  y = 0;
 
-  isZoomed.value = false
-  isUnzooming.value = false
+  isZoomed.value = false;
+  isUnzooming.value = false;
 
-  window.removeEventListener('wheel', wheelListener)
-  window.removeEventListener('resize', resizeListener)
-  window.removeEventListener('touchstart', touchstartListener)
-  window.removeEventListener('touchmove', touchmoveListener)
-  window.removeEventListener('touchend', touchmoveListener)
+  window.removeEventListener('wheel', wheelListener);
+  window.removeEventListener('resize', resizeListener);
+  window.removeEventListener('touchstart', touchstartListener);
+  window.removeEventListener('touchmove', touchmoveListener);
+  window.removeEventListener('touchend', touchmoveListener);
 
-  document.removeEventListener('keydown', keydownListener)
+  document.removeEventListener('keydown', keydownListener);
 
-  modalRef.value?.removeEventListener('transitionend', detachZoomEvents)
+  modalRef.value?.removeEventListener('transitionend', detachZoomEvents);
 }
 
 function handleClick() {
   if (!buttonRef.value) {
-    return
+    return;
   }
 
   if (isZoomed.value) {
-    return
+    return;
   }
 
   // Get the initial screen position of the image
-  const { top, left, width, height } = buttonRef.value.getBoundingClientRect()
-  initialSize.value = { top, left, width, height }
+  const { top, left, width, height } = buttonRef.value.getBoundingClientRect();
+  initialSize.value = { top, left, width, height };
 
-  zoom()
+  zoom();
 }
 function onBeforeEnter(el: HTMLElement) {
-  el.style.top = `${initialSize.value.top}px`
-  el.style.left = `${initialSize.value.left}px`
-  el.style.width = `${initialSize.value.width}px`
-  el.style.height = `${initialSize.value.height}px`
-  el.style.willChange = 'top, left, width, height'
+  el.style.top = `${initialSize.value.top}px`;
+  el.style.left = `${initialSize.value.left}px`;
+  el.style.width = `${initialSize.value.width}px`;
+  el.style.height = `${initialSize.value.height}px`;
+  el.style.willChange = 'top, left, width, height';
 }
 function onEnter(el: HTMLElement, done: () => void) {
   // Add a task to the event loop to allow the browser to apply the styles
   setTimeout(() => {
-    el.style.top = '3rem'
-    el.style.left = '3rem'
-    el.style.width = 'calc(100vw - 6rem)'
-    el.style.height = 'calc(100vh - 6rem)'
-    done()
-  }, 0)
+    el.style.top = '3rem';
+    el.style.left = '3rem';
+    el.style.width = 'calc(100vw - 6rem)';
+    el.style.height = 'calc(100vh - 6rem)';
+    done();
+  }, 0);
 }
 
 onBeforeUnmount(() => {
-  detachZoomEvents()
-})
+  detachZoomEvents();
+});
 </script>
 
 <template>

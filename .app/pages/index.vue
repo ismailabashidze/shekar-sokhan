@@ -10,11 +10,11 @@ definePageMeta({
     srcDark: '/img/logo.svg',
     order: 84,
   },
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
-const nuxtApp = useNuxtApp()
-const toaster = useToaster()
-navigateTo('/dashboard')
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
+const nuxtApp = useNuxtApp();
+const toaster = useToaster();
+navigateTo('/dashboard');
 // Temporarily disabled authentication check for testing
 // if (!nuxtApp.$pb.authStore.isValid) {
 //   toaster.clearAll()

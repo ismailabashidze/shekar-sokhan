@@ -1,8 +1,8 @@
 <script setup lang="ts">
 const props = defineProps<{
-  prev?: string
-  next?: string
-}>()
+  prev?: string;
+  next?: string;
+}>();
 
 const { data } = await useAsyncData('doc-page-nav', async () => {
   const prev = !props.prev
@@ -14,7 +14,7 @@ const { data } = await useAsyncData('doc-page-nav', async () => {
         _path: props.prev,
       })
       .only(['_path', 'title'])
-      .findOne()
+      .findOne();
 
   const next = !props.next
     ? Promise.resolve(null)
@@ -25,21 +25,21 @@ const { data } = await useAsyncData('doc-page-nav', async () => {
         _path: props.next,
       })
       .only(['_path', 'title'])
-      .findOne()
+      .findOne();
 
-  return Promise.all([prev, next])
-})
+  return Promise.all([prev, next]);
+});
 
 const nav = computed(() => {
-  if (!data.value) return {}
+  if (!data.value) return {};
 
-  const [prev, next] = data.value
+  const [prev, next] = data.value;
 
   return {
     prev,
     next,
-  }
-})
+  };
+});
 </script>
 
 <template>

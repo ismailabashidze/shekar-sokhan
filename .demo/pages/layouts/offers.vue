@@ -10,64 +10,64 @@ definePageMeta({
     order: 37,
     new: true,
   },
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(100)
+const filter = ref('');
+const perPage = ref(100);
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch('/api/offers', {
   query,
-})
+});
 
 const popular = computed(() => {
   return data?.value?.data.filter((item: any) =>
     item.categories.includes('popular'),
-  )
-})
+  );
+});
 
 const recent = computed(() => {
   return data?.value?.data.filter((item: any) =>
     item.categories.includes('recent'),
-  )
-})
+  );
+});
 
 const communication = computed(() => {
   return data?.value?.data.filter((item: any) =>
     item.categories.includes('communication'),
-  )
-})
+  );
+});
 
 const design = computed(() => {
   return data?.value?.data.filter((item: any) =>
     item.categories.includes('design'),
-  )
-})
+  );
+});
 
 const development = computed(() => {
   return data?.value?.data.filter((item: any) =>
     item.categories.includes('development'),
-  )
-})
+  );
+});
 </script>
 
 <template>

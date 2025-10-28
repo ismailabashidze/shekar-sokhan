@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoScatter = reactive(useDemoScatter())
+const demoScatter = reactive(useDemoScatter());
 
 function useDemoScatter() {
-  const { primary, info, success, danger } = useTailwindColors()
-  const type = 'scatter'
-  const height = 280
+  const { primary, info, success, danger } = useTailwindColors();
+  const type = 'scatter';
+  const height = 280;
 
   const options = {
     title: {
@@ -44,7 +44,7 @@ function useDemoScatter() {
       position: 'top',
       horizontalAlign: 'center',
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -102,24 +102,24 @@ function useDemoScatter() {
         },
       ),
     },
-  ])
+  ]);
 
   function generateDayWiseTimeSeries(
     baseval: number,
     count: number,
-    yrange: { min: number, max: number },
+    yrange: { min: number; max: number },
   ) {
-    let i = 0
-    const series = []
+    let i = 0;
+    const series = [];
     while (i < count) {
       const y
-        = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min
+        = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
 
-      series.push([baseval, y])
-      baseval += 86400000
-      i++
+      series.push([baseval, y]);
+      baseval += 86400000;
+      i++;
     }
-    return series
+    return series;
   }
 
   return {
@@ -127,7 +127,7 @@ function useDemoScatter() {
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

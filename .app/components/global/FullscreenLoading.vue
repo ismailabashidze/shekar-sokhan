@@ -24,16 +24,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-const props = defineProps(['loaderType'])
-let LOADERS = []
+import { ref, onMounted } from 'vue';
+const props = defineProps(['loaderType']);
+let LOADERS = [];
 
 onMounted(() => {
-  cycleLoader() // Initial run
-  setInterval(updateLoader, LOADER_INTERVAL)
-})
+  cycleLoader(); // Initial run
+  setInterval(updateLoader, LOADER_INTERVAL);
+});
 
-const LOADER_INTERVAL = 1600
+const LOADER_INTERVAL = 1600;
 const REPORT_LOADERS = [
   ['🧠', 'تحلیل وضعیت روانی مراجع'],
   ['🔍', 'ارزیابی الگوهای رفتاری'],
@@ -97,7 +97,7 @@ const REPORT_LOADERS = [
   ['🔓', 'باز کردن زوایای جدید مشکلات'],
   ['🔑', 'کشف راه‌حل‌های جایگزین'],
   ['🌟', 'شناسایی نقاط پیشرفت'],
-]
+];
 const USER_LOADERS = [
   ['🧠', 'تحلیل افکار'],
   ['🔍', 'بررسی احساسات'],
@@ -163,30 +163,30 @@ const USER_LOADERS = [
   ['🎯', 'دستیابی به موفقیت'],
   ['🌟', 'درخشیدن در مسیر پیشرفت'],
   ['⚗️', 'آزمایش راهکارهای جدید'],
-]
+];
 
-const currentLoader = ref({ emoji: '', text: '' })
-const animateOut = ref(false)
+const currentLoader = ref({ emoji: '', text: '' });
+const animateOut = ref(false);
 
 const cycleLoader = () => {
-  const index = Math.floor(Math.random() * LOADERS.length)
-  const selected = LOADERS[index]
-  currentLoader.value = { emoji: selected[0], text: selected[1] }
-}
+  const index = Math.floor(Math.random() * LOADERS.length);
+  const selected = LOADERS[index];
+  currentLoader.value = { emoji: selected[0], text: selected[1] };
+};
 
 const updateLoader = () => {
-  animateOut.value = true
+  animateOut.value = true;
 
   setTimeout(() => {
-    cycleLoader()
-    animateOut.value = false
-  }, 300) // Matches CSS transition duration
-}
+    cycleLoader();
+    animateOut.value = false;
+  }, 300); // Matches CSS transition duration
+};
 if (props.loaderType === 'user') {
-  LOADERS = USER_LOADERS
+  LOADERS = USER_LOADERS;
 }
 else {
-  LOADERS = REPORT_LOADERS
+  LOADERS = REPORT_LOADERS;
 }
 </script>
 

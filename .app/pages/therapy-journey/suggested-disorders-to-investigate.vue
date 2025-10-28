@@ -992,85 +992,85 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue';
 
 definePageMeta({
   layout: 'default',
   title: 'اختلالات پیشنهادی جهت بررسی | ذهنا',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'اختلالات پیشنهادی جهت بررسی | ذهنا',
-})
+});
 
-const { getGoalsByUser } = useGoals()
-const { user } = useUser()
+const { getGoalsByUser } = useGoals();
+const { user } = useUser();
 
 // State
-const disorderCategories = ref([])
-const expandedItems = ref(new Set())
-const isLoading = ref(true)
-const loadingError = ref(null)
+const disorderCategories = ref([]);
+const expandedItems = ref(new Set());
+const isLoading = ref(true);
+const loadingError = ref(null);
 
 // Computed
 const totalDisorders = computed(() => {
   return disorderCategories.value.reduce((total, category) => {
-    return total + (category.disorders?.length || 0)
-  }, 0)
-})
+    return total + (category.disorders?.length || 0);
+  }, 0);
+});
 
 // Methods
 const toggleDisorder = (categoryIndex: number, disorderIndex: number) => {
-  const key = `${categoryIndex}-${disorderIndex}`
+  const key = `${categoryIndex}-${disorderIndex}`;
   if (expandedItems.value.has(key)) {
-    expandedItems.value.delete(key)
+    expandedItems.value.delete(key);
   }
   else {
-    expandedItems.value.add(key)
+    expandedItems.value.add(key);
   }
-}
+};
 
 const isExpanded = (categoryIndex: number, disorderIndex: number) => {
-  const key = `${categoryIndex}-${disorderIndex}`
-  return expandedItems.value.has(key)
-}
+  const key = `${categoryIndex}-${disorderIndex}`;
+  return expandedItems.value.has(key);
+};
 
 const getSuicideRiskClass = (risk: string) => {
   if (risk?.includes('بالا') || risk?.includes('high')) {
-    return 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+    return 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300';
   }
   else if (risk?.includes('متوسط') || risk?.includes('moderate')) {
-    return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+    return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300';
   }
   else {
-    return 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+    return 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300';
   }
-}
+};
 
 const getSuicideRiskLabel = (risk: string) => {
   if (risk?.includes('بالا') || risk?.includes('high')) {
-    return 'خطر بالا'
+    return 'خطر بالا';
   }
   else if (risk?.includes('متوسط') || risk?.includes('moderate')) {
-    return 'خطر متوسط'
+    return 'خطر متوسط';
   }
   else {
-    return 'خطر پایین'
+    return 'خطر پایین';
   }
-}
+};
 
 const getSuicideRiskIcon = (risk: string) => {
   if (risk?.includes('بالا') || risk?.includes('high')) {
-    return 'ph:warning-circle-fill'
+    return 'ph:warning-circle-fill';
   }
   else if (risk?.includes('متوسط') || risk?.includes('moderate')) {
-    return 'ph:warning-fill'
+    return 'ph:warning-fill';
   }
   else {
-    return 'ph:shield-check-fill'
+    return 'ph:shield-check-fill';
   }
-}
+};
 
 const getCategoryGradient = (index: number) => {
   const gradients = [
@@ -1080,9 +1080,9 @@ const getCategoryGradient = (index: number) => {
     'bg-gradient-to-br from-rose-500 via-rose-600 to-rose-700',
     'bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700',
     'bg-gradient-to-br from-cyan-500 via-cyan-600 to-cyan-700',
-  ]
-  return gradients[index % gradients.length]
-}
+  ];
+  return gradients[index % gradients.length];
+};
 
 const getCategoryIcon = (index: number) => {
   const icons = [
@@ -1092,21 +1092,21 @@ const getCategoryIcon = (index: number) => {
     'ph:lightning-fill',
     'ph:shield-star-fill',
     'ph:star-four-fill',
-  ]
-  return icons[index % icons.length]
-}
+  ];
+  return icons[index % icons.length];
+};
 
 const getSuicideRiskDetailClass = (risk: string) => {
   if (risk?.includes('بالا') || risk?.includes('high')) {
-    return 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+    return 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300';
   }
   else if (risk?.includes('متوسط') || risk?.includes('moderate')) {
-    return 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+    return 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300';
   }
   else {
-    return 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+    return 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300';
   }
-}
+};
 
 const getSymptomCategoryIcon = (category: string) => {
   const icons = {
@@ -1114,9 +1114,9 @@ const getSymptomCategoryIcon = (category: string) => {
     anxiety: 'ph:lightning',
     behavioral: 'ph:user',
     somatic: 'ph:heart',
-  }
-  return icons[category] || 'ph:circle'
-}
+  };
+  return icons[category] || 'ph:circle';
+};
 
 const getFunctionalDomainLabel = (domain: string) => {
   const labels = {
@@ -1124,18 +1124,18 @@ const getFunctionalDomainLabel = (domain: string) => {
     social: 'اجتماعی',
     academic: 'تحصیلی',
     interpersonal: 'بین‌فردی',
-  }
-  return labels[domain] || domain
-}
+  };
+  return labels[domain] || domain;
+};
 
 const getSeverityLabel = (level: string) => {
   const labels = {
     mild: 'خفیف',
     moderate: 'متوسط',
     severe: 'شدید',
-  }
-  return labels[level] || level
-}
+  };
+  return labels[level] || level;
+};
 
 const getContextTypeLabel = (type: string) => {
   const labels = {
@@ -1143,9 +1143,9 @@ const getContextTypeLabel = (type: string) => {
     cultural_background: 'پیشینه فرهنگی',
     family_dynamics: 'دینامیک خانواده',
     socioeconomic_status: 'وضعیت اقتصادی-اجتماعی',
-  }
-  return labels[type] || type.replace(/_/g, ' ')
-}
+  };
+  return labels[type] || type.replace(/_/g, ' ');
+};
 
 const getMarkerTypeLabel = (type: string) => {
   const labels = {
@@ -1154,60 +1154,60 @@ const getMarkerTypeLabel = (type: string) => {
     cognitive_behavioral: 'شناختی-رفتاری',
     digital: 'دیجیتال',
     other: 'سایر',
-  }
-  return labels[type] || type
-}
+  };
+  return labels[type] || type;
+};
 
 // Load user goals on mount
 const loadUserGoals = async () => {
-  isLoading.value = true
-  loadingError.value = null
+  isLoading.value = true;
+  loadingError.value = null;
 
   try {
     if (!user.value?.id) {
-      throw new Error('کاربر وارد سیستم نشده است')
+      throw new Error('کاربر وارد سیستم نشده است');
     }
 
-    const goals = await getGoalsByUser(user.value.id)
-    console.log('Loaded goals:', goals)
+    const goals = await getGoalsByUser(user.value.id);
+    console.log('Loaded goals:', goals);
 
     if (goals && goals.length > 0) {
       // Extract suggestedDisordersToInvestigate from the first goal
-      const firstGoal = goals[0]
-      const goalData = firstGoal?.goals || firstGoal
+      const firstGoal = goals[0];
+      const goalData = firstGoal?.goals || firstGoal;
 
       if (goalData?.suggestedDisordersToInvestigate) {
-        disorderCategories.value = goalData.suggestedDisordersToInvestigate
-        console.log('Loaded disorder categories:', disorderCategories.value)
+        disorderCategories.value = goalData.suggestedDisordersToInvestigate;
+        console.log('Loaded disorder categories:', disorderCategories.value);
       }
       else {
-        console.warn('No suggestedDisordersToInvestigate found in goals')
-        disorderCategories.value = []
+        console.warn('No suggestedDisordersToInvestigate found in goals');
+        disorderCategories.value = [];
       }
     }
     else {
-      console.warn('No goals found for user')
-      disorderCategories.value = []
+      console.warn('No goals found for user');
+      disorderCategories.value = [];
     }
   }
   catch (error) {
-    console.error('Error loading user goals:', error)
-    loadingError.value = error.message || 'خطا در بارگذاری اطلاعات تشخیصی. لطفاً دوباره تلاش کنید.'
-    disorderCategories.value = []
+    console.error('Error loading user goals:', error);
+    loadingError.value = error.message || 'خطا در بارگذاری اطلاعات تشخیصی. لطفاً دوباره تلاش کنید.';
+    disorderCategories.value = [];
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // Retry loading function
 const retryLoading = () => {
-  loadUserGoals()
-}
+  loadUserGoals();
+};
 
 onMounted(() => {
-  loadUserGoals()
-})
+  loadUserGoals();
+});
 </script>
 
 <style scoped>

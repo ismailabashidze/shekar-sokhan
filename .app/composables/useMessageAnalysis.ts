@@ -1,7 +1,7 @@
 // Composable for managing message analysis
 
 export const useMessageAnalysis = () => {
-  const nuxtApp = useNuxtApp()
+  const nuxtApp = useNuxtApp();
 
   /**
    * Create a new message analysis record
@@ -10,18 +10,18 @@ export const useMessageAnalysis = () => {
    */
   const createMessageAnalysis = async (analysisData: any) => {
     if (!analysisData) {
-      throw new Error('Analysis data is required')
+      throw new Error('Analysis data is required');
     }
 
     try {
       // Extract unique indicator tags from suicideIndicators
-      const indicatorTags: string[] = []
+      const indicatorTags: string[] = [];
       if (Array.isArray(analysisData.suicideIndicators)) {
         analysisData.suicideIndicators.forEach((indicator: any) => {
           if (indicator?.indicatorType && !indicatorTags.includes(indicator.indicatorType)) {
-            indicatorTags.push(indicator.indicatorType)
+            indicatorTags.push(indicator.indicatorType);
           }
-        })
+        });
       }
 
       return await nuxtApp.$pb.collection('message_analysis').create({
@@ -32,13 +32,13 @@ export const useMessageAnalysis = () => {
         suicideRiskDescription: analysisData.suicideRiskDescription || '',
         suicideIndicators: analysisData.suicideIndicators || [],
         indicatorTags: indicatorTags,
-      })
+      });
     }
     catch (error) {
-      console.error('Error creating message analysis:', error)
-      throw error
+      console.error('Error creating message analysis:', error);
+      throw error;
     }
-  }
+  };
 
   /**
    * Link message analysis to a therapist message
@@ -49,13 +49,13 @@ export const useMessageAnalysis = () => {
     try {
       return await nuxtApp.$pb.collection('therapists_messages').update(messageId, {
         message_analysis: analysisId,
-      })
+      });
     }
     catch (error) {
-      console.error('Error linking analysis to message:', error)
-      throw error
+      console.error('Error linking analysis to message:', error);
+      throw error;
     }
-  }
+  };
 
   /**
    * Get message analysis by ID
@@ -64,13 +64,13 @@ export const useMessageAnalysis = () => {
    */
   const getMessageAnalysis = async (analysisId: string) => {
     try {
-      return await nuxtApp.$pb.collection('message_analysis').getOne(analysisId)
+      return await nuxtApp.$pb.collection('message_analysis').getOne(analysisId);
     }
     catch (error) {
-      console.error('Error getting message analysis:', error)
-      throw error
+      console.error('Error getting message analysis:', error);
+      throw error;
     }
-  }
+  };
 
   /**
    * Create analysis and link it to message in one operation
@@ -81,26 +81,26 @@ export const useMessageAnalysis = () => {
   const createAndLinkAnalysis = async (messageId: string, analysisData: any) => {
     try {
       // Create analysis record
-      const analysisRecord = await createMessageAnalysis(analysisData)
+      const analysisRecord = await createMessageAnalysis(analysisData);
 
       // Link to message
-      const updatedMessage = await linkAnalysisToMessage(messageId, analysisRecord.id)
+      const updatedMessage = await linkAnalysisToMessage(messageId, analysisRecord.id);
 
       return {
         analysis: analysisRecord,
         message: updatedMessage,
-      }
+      };
     }
     catch (error) {
-      console.error('Error creating and linking analysis:', error)
-      throw error
+      console.error('Error creating and linking analysis:', error);
+      throw error;
     }
-  }
+  };
 
   return {
     createMessageAnalysis,
     linkAnalysisToMessage,
     getMessageAnalysis,
     createAndLinkAnalysis,
-  }
-}
+  };
+};

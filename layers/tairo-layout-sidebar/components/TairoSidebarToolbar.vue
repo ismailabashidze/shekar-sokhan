@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { useSidebar } from '../composables/sidebar'
+import { useSidebar } from '../composables/sidebar';
 
 const props = withDefaults(
   defineProps<{
-    sidebar?: boolean
-    horizontalScroll?: boolean
+    sidebar?: boolean;
+    horizontalScroll?: boolean;
   }>(),
   {
     sidebar: true,
   },
-)
+);
 
-const app = useAppConfig()
-const { hasSubsidebar } = useSidebar()
+const app = useAppConfig();
+const { hasSubsidebar } = useSidebar();
 
-const route = useRoute()
+const route = useRoute();
 
 const showNavBurger = computed(() => {
   return (
     props.sidebar
     && app.tairo?.sidebar?.toolbar?.showNavBurger
     && hasSubsidebar.value
-  )
-})
+  );
+});
 </script>
 
 <template>

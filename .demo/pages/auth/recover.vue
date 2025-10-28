@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 definePageMeta({
   layout: 'empty',
@@ -14,50 +14,50 @@ definePageMeta({
     srcDark: '/img/screens/auth-recover-dark.png',
     order: 156,
   },
-})
+});
 
 const VALIDATION_TEXT = {
   EMAIL_REQUIRED: 'A valid email is required',
-}
+};
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
 const zodSchema = z.object({
   email: z.string().email(VALIDATION_TEXT.EMAIL_REQUIRED),
-})
+});
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   email: '',
-} satisfies FormInput
+} satisfies FormInput;
 
 const { handleSubmit, isSubmitting } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
-const success = ref(false)
+const success = ref(false);
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(async (values) => {
   // here you have access to the validated form values
-  console.log('recover-success', values)
+  console.log('recover-success', values);
 
   try {
     // fake delay, this will make isSubmitting value to be true
-    await new Promise(resolve => setTimeout(resolve, 4000))
+    await new Promise(resolve => setTimeout(resolve, 4000));
   }
   catch {
     // discard errors
   }
 
   // always display success message
-  success.value = true
-})
+  success.value = true;
+});
 </script>
 
 <template>

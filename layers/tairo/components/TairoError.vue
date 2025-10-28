@@ -1,38 +1,38 @@
 <script setup lang="ts">
 const props = defineProps<{
-  error: any
-}>()
+  error: any;
+}>();
 
 const title = computed(() => {
   if (props.error?.statusCode === 401) {
-    return 'Not authorized'
+    return 'Not authorized';
   }
 
   if (props.error?.statusCode === 404) {
-    return 'Page not found'
+    return 'Page not found';
   }
 
-  return 'Oops... Something went wrong'
-})
+  return 'Oops... Something went wrong';
+});
 
 const description = computed(() => {
   if (props.error?.statusCode === 401) {
-    return 'You are not authorized to access this page.'
+    return 'You are not authorized to access this page.';
   }
 
   if (props.error?.statusCode === 404) {
-    return 'We couldn\'t find the page you were looking for, please contact a system administrator or try again later.'
+    return 'We couldn\'t find the page you were looking for, please contact a system administrator or try again later.';
   }
 
-  return 'An error has occured. If the problem persists, please contact a system administrator or try again later.'
-})
+  return 'An error has occured. If the problem persists, please contact a system administrator or try again later.';
+});
 
-const app = useAppConfig()
-const handleError = () => clearError({ redirect: '/' })
-const retry = () => clearError()
+const app = useAppConfig();
+const handleError = () => clearError({ redirect: '/' });
+const retry = () => clearError();
 
 // Show/hide demo stack trace
-const showStackTrace = ref(true)
+const showStackTrace = ref(true);
 </script>
 
 <template>

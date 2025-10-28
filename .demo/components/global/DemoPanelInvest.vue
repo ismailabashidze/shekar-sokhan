@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { FocusTrap } from '@headlessui/vue'
+import { FocusTrap } from '@headlessui/vue';
 
 const props = withDefaults(
   defineProps<{
-    option?: any
+    option?: any;
   }>(),
   {
     option: undefined,
   },
-)
+);
 
-const { close } = usePanels()
-onKeyStroke('Escape', close)
+const { close } = usePanels();
+onKeyStroke('Escape', close);
 </script>
 
 <template>

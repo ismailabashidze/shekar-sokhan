@@ -9,15 +9,15 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-personal-2-dark.png',
     order: 2,
   },
-})
+});
 
-const areaTaskCompletion = reactive(useAreaTaskCompletion())
-const barTeamEfficiency = reactive(useBarTeamEfficiency())
+const areaTaskCompletion = reactive(useAreaTaskCompletion());
+const barTeamEfficiency = reactive(useBarTeamEfficiency());
 
 function useAreaTaskCompletion() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 295
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 295;
 
   const options = {
     chart: {
@@ -53,7 +53,7 @@ function useAreaTaskCompletion() {
         format: 'dd/MM/yy HH:mm',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -68,20 +68,20 @@ function useAreaTaskCompletion() {
       name: 'Blocked',
       data: [78, 53, 36, 10, 14, 5, 2],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useBarTeamEfficiency() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'bar'
-  const height = 250
+  const { primary, info, success } = useTailwindColors();
+  const type = 'bar';
+  const height = 250;
 
   const options = {
     chart: {
@@ -124,7 +124,7 @@ function useBarTeamEfficiency() {
     yaxis: {
       labels: {
         formatter: function (val: string) {
-          return val + 70
+          return val + 70;
         },
       },
     },
@@ -134,11 +134,11 @@ function useBarTeamEfficiency() {
     tooltip: {
       y: {
         formatter: function (val: string) {
-          return val + 'hrs'
+          return val + 'hrs';
         },
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -153,14 +153,14 @@ function useBarTeamEfficiency() {
       name: 'Management',
       data: [-35, -29, -34, -44, -25, -22, -18, -17, -29],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

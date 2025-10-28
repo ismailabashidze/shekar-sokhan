@@ -9,50 +9,50 @@ definePageMeta({
     srcDark: '/img/screens/layouts-table-list-3-dark.png',
     order: 46,
   },
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(10)
+const filter = ref('');
+const perPage = ref(10);
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch(
   '/api/company/documents/',
   {
     query,
   },
-)
+);
 
-const selected = ref<number[]>([])
+const selected = ref<number[]>([]);
 
 const isAllVisibleSelected = computed(() => {
-  return selected.value.length === data.value?.data.length
-})
+  return selected.value.length === data.value?.data.length;
+});
 
 function toggleAllVisibleSelection() {
   if (isAllVisibleSelected.value) {
-    selected.value = []
+    selected.value = [];
   }
   else {
-    selected.value = data.value?.data.map(item => item.id) ?? []
+    selected.value = data.value?.data.map(item => item.id) ?? [];
   }
 }
 </script>

@@ -4,7 +4,7 @@ export default defineNuxtPlugin(async () => {
       // Register PWA service worker
       const pwaRegistration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
-      })
+      });
 
       // Check if service worker is already active
       if (pwaRegistration.active) {
@@ -13,7 +13,7 @@ export default defineNuxtPlugin(async () => {
 
       // Update service worker if needed
       pwaRegistration.addEventListener('updatefound', () => {
-        const newWorker = pwaRegistration.installing
+        const newWorker = pwaRegistration.installing;
 
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
@@ -26,14 +26,14 @@ export default defineNuxtPlugin(async () => {
                 // Content is cached for offline use
               }
             }
-          })
+          });
         }
-      })
+      });
 
       // Listen for service worker errors
       pwaRegistration.addEventListener('error', (error) => {
         // Service worker error
-      })
+      });
 
       // Check for waiting service worker
       if (pwaRegistration.waiting) {
@@ -41,11 +41,11 @@ export default defineNuxtPlugin(async () => {
       }
     }
     catch (error) {
-      console.error('[PWA] Service worker registration failed:', error)
+      console.error('[PWA] Service worker registration failed:', error);
       // More detailed error info
       if (error instanceof Error) {
-        console.error('[PWA] Error message:', error.message)
-        console.error('[PWA] Error stack:', error.stack)
+        console.error('[PWA] Error message:', error.message);
+        console.error('[PWA] Error stack:', error.stack);
       }
     }
   }
@@ -56,32 +56,32 @@ export default defineNuxtPlugin(async () => {
   // Global PWA install prompt management
   if (process.client) {
     // Create global state for deferred prompt
-    const globalDeferredPrompt = ref(null)
+    const globalDeferredPrompt = ref(null);
 
     // Listen for beforeinstallprompt event globally
     window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault()
-      globalDeferredPrompt.value = e
+      e.preventDefault();
+      globalDeferredPrompt.value = e;
 
       // Store in global state that components can access
       if (window) {
-        window._pwaInstallPrompt = e
+        window._pwaInstallPrompt = e;
       }
-    })
+    });
 
     // Listen for app installation
     window.addEventListener('appinstalled', () => {
-      globalDeferredPrompt.value = null
+      globalDeferredPrompt.value = null;
       if (window) {
-        window._pwaInstallPrompt = null
+        window._pwaInstallPrompt = null;
       }
-    })
+    });
 
     // Make the prompt available globally
     return {
       provide: {
         pwaInstallPrompt: globalDeferredPrompt,
       },
-    }
+    };
   }
-})
+});

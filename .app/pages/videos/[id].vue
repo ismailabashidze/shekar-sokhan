@@ -14,8 +14,8 @@ definePageMeta({
     srcDark: '/img/screens/videos-dark.png',
     order: 18,
   },
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 // Video data (in real app, this would come from an API)
 const videos = [
@@ -89,21 +89,21 @@ const videos = [
       bio: 'مشاور ارشد و مدرس دانشگاه',
     },
   },
-]
+];
 
 // Get route params
-const route = useRoute()
-const videoId = parseInt(route.params.id as string)
+const route = useRoute();
+const videoId = parseInt(route.params.id as string);
 
 // Find the current video
-const currentVideo = videos.find(v => v.id === videoId)
+const currentVideo = videos.find(v => v.id === videoId);
 
 // Handle video not found
 if (!currentVideo) {
   throw createError({
     statusCode: 404,
     message: 'ویدیو مورد نظر یافت نشد',
-  })
+  });
 }
 
 // Get related videos (excluding current video)
@@ -112,7 +112,7 @@ const relatedVideos = computed(() =>
     .filter(v => v.id !== videoId)
     .filter(v => v.category === currentVideo.category)
     .slice(0, 3),
-)
+);
 </script>
 
 <template>

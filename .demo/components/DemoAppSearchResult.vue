@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router';
 
 const props = defineProps<{
-  to?: RouteLocationRaw
-  title?: string
-  subtitle?: string
-  icon?: string
-  search?: string
-}>()
+  to?: RouteLocationRaw;
+  title?: string;
+  subtitle?: string;
+  icon?: string;
+  search?: string;
+}>();
 const markedTitle = useNinjaMark(
   () => props.title,
   () => props.search,
   'nui-text-800 group-focus:text-primary-500 underline decoration-muted-500/40 group-focus:decoration-primary-500/40 group-hover:decoration-primary-500/40 group-hover:text-primary-500 dark:group-focus:text-primary-400 dark:group-hover:text-primary-400 bg-transparent',
-)
+);
 const markedSubtitle = useNinjaMark(
   () => props.subtitle,
   () => props.search,
   'nui-text-500 bg-transparent underline decoration-muted-500/30',
-)
+);
 </script>
 
 <template>

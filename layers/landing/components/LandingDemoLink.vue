@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import type { RouteRecordName } from 'vue-router'
+import type { RouteRecordName } from 'vue-router';
 
 const props = defineProps<{
-  name?: RouteRecordName
+  name?: RouteRecordName;
   preview?: {
-    title: string
-    new?: boolean
-    description: string
-    categories?: string[]
-    src: string
-    srcDark?: string
-    order?: number
-    params?: Record<string, string>
-  }
-}>()
+    title: string;
+    new?: boolean;
+    description: string;
+    categories?: string[];
+    src: string;
+    srcDark?: string;
+    order?: number;
+    params?: Record<string, string>;
+  };
+}>();
 </script>
 
 <template>

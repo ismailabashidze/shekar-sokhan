@@ -1,4 +1,4 @@
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath } from 'node:url';
 
 export default defineNuxtConfig({
   modules: ['@nuxt/content', 'nuxt-component-meta'],
@@ -9,13 +9,13 @@ export default defineNuxtConfig({
     metaSources: ['@shuriken-ui/nuxt/component-meta'],
     exclude: [
       (component: any) => {
-        const hasTairoPrefix = component?.pascalName?.startsWith('Tairo')
-        const hasAddonPrefix = component?.pascalName?.startsWith('Addon')
-        const isBlacklisted = ['TairoWelcome'].includes(component?.pascalName)
+        const hasTairoPrefix = component?.pascalName?.startsWith('Tairo');
+        const hasAddonPrefix = component?.pascalName?.startsWith('Addon');
+        const isBlacklisted = ['TairoWelcome'].includes(component?.pascalName);
 
-        const isExcluded = !(hasTairoPrefix || hasAddonPrefix)
+        const isExcluded = !(hasTairoPrefix || hasAddonPrefix);
 
-        return isBlacklisted || isExcluded
+        return isBlacklisted || isExcluded;
       },
     ],
   },
@@ -28,7 +28,7 @@ export default defineNuxtConfig({
         config.content.push(
           fileURLToPath(new URL('./examples', import.meta.url))
           + '/**/*.{vue,js,ts}',
-        )
+        );
       }
     },
   },
@@ -43,4 +43,4 @@ export default defineNuxtConfig({
       },
     },
   },
-})
+});

@@ -318,11 +318,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 
-const isModalStartOpen = ref(false)
-const isModalEndOpen = ref(false)
-const isModalCenterOpen = ref(false)
-const isModalBetweenOpen = ref(false)
-const isModalBodyOpen = ref(false)
+const isModalStartOpen = ref(false);
+const isModalEndOpen = ref(false);
+const isModalCenterOpen = ref(false);
+const isModalBetweenOpen = ref(false);
+const isModalBodyOpen = ref(false);
 </script>

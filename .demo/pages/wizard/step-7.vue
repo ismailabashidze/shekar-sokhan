@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Project, ProjectStepData } from '../../types'
+import type { Project, ProjectStepData } from '../../types';
 
 definePageMeta({
   title: 'Wizard — Step 7',
@@ -11,21 +11,21 @@ definePageMeta({
     srcDark: '/img/screens/wizard-7-dark.png',
     order: 36,
   },
-})
+});
 useHead({
   title: 'Submit project',
-})
+});
 
 const {
   data: project,
   complete,
   getStep,
   checkPreviousSteps,
-} = useMultiStepForm<Project, ProjectStepData>()
+} = useMultiStepForm<Project, ProjectStepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 
-const avatarPreview = useNinjaFilePreview(() => project.value.avatar)
+const avatarPreview = useNinjaFilePreview(() => project.value.avatar);
 </script>
 
 <template>

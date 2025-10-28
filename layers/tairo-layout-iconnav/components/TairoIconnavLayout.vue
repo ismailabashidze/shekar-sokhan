@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { useIconnav } from '../composables/iconnav'
+import { useIconnav } from '../composables/iconnav';
 
 const props = withDefaults(
   defineProps<{
-    topnav?: boolean
-    toolbar?: boolean
-    circularMenu?: boolean
+    topnav?: boolean;
+    toolbar?: boolean;
+    circularMenu?: boolean;
     display?:
       | 'condensed'
       | 'horizontal-scroll'
       | 'expanded-sm'
       | 'expanded-md'
       | 'expanded-lg'
-      | 'expanded-xl'
+      | 'expanded-xl';
   }>(),
   {
     topnav: true,
@@ -20,44 +20,44 @@ const props = withDefaults(
     circularMenu: true,
     display: 'expanded-lg',
   },
-)
+);
 
-const route = useRoute()
-const app = useAppConfig()
-const config = useAppConfig().tairo.iconnav
-const { selectedMenuItem } = useIconnav()
+const route = useRoute();
+const app = useAppConfig();
+const config = useAppConfig().tairo.iconnav;
+const { selectedMenuItem } = useIconnav();
 
 const iconnavEnabled = computed(() => {
-  return config?.navigation?.enabled !== false
-})
+  return config?.navigation?.enabled !== false;
+});
 const toolbarEnabled = computed(() => {
   return (
     app.tairo.collapse?.toolbar?.enabled !== false && props.toolbar !== false
-  )
-})
+  );
+});
 const circularMenuEnabled = computed(() => {
-  return config?.circularMenu?.enabled !== false && props.circularMenu !== false
-})
+  return config?.circularMenu?.enabled !== false && props.circularMenu !== false;
+});
 
 const mainClass = computed(() => {
   if (props.display === 'condensed') {
-    return 'bg-muted-50 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden'
+    return 'bg-muted-50 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden';
   }
 
   if (!iconnavEnabled.value) {
-    return 'bg-muted-50 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10'
+    return 'bg-muted-50 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10';
   }
 
   const list = [
     'bg-muted-50 dark:bg-muted-900 relative min-h-screen w-full overflow-x-hidden px-4 transition-all duration-300 xl:px-10',
-  ]
+  ];
 
   if (props.display === 'horizontal-scroll') {
-    list.push('!pe-0 xl:!pe-0')
+    list.push('!pe-0 xl:!pe-0');
   }
 
-  return list
-})
+  return list;
+});
 </script>
 
 <template>

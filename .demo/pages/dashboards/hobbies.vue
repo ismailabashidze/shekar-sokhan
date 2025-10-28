@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Hobbies',
@@ -14,7 +14,7 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-hobbies-dark.png',
     order: 16,
   },
-})
+});
 
 const trending = [
   {
@@ -41,7 +41,7 @@ const trending = [
     image: '/img/illustrations/dashboards/hobbies/landscape-thumb-1.svg',
     icon: 'map:bicycle-store',
   },
-]
+];
 
 const popular = [
   {
@@ -68,7 +68,7 @@ const popular = [
     image: '/img/illustrations/dashboards/hobbies/landscape-thumb-1.svg',
     icon: 'map:waterskiing',
   },
-]
+];
 </script>
 
 <template>

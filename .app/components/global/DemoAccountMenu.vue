@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
-import { computed } from 'vue'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
+import { computed } from 'vue';
 
 const props = defineProps<{
-  horizontal?: boolean
-}>()
-const { user } = useUser()
-const { getUserAvatarUrl } = useAvatarManager()
+  horizontal?: boolean;
+}>();
+const { user } = useUser();
+const { getUserAvatarUrl } = useAvatarManager();
 
-const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png')
-const displayName = computed(() => user.value.meta?.name || 'کاربر جدید')
+const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png');
+const displayName = computed(() => user.value.meta?.name || 'کاربر جدید');
 </script>
 
 <template>

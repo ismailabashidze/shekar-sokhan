@@ -159,21 +159,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useDeedCategory } from '~/composables/useDeedCategory'
-import IconSelector from '~/components/icons/IconSelector.vue'
+import { ref } from 'vue';
+import { useDeedCategory } from '~/composables/useDeedCategory';
+import IconSelector from '~/components/icons/IconSelector.vue';
 
 definePageMeta({
   title: 'افزودن کار نیک پیشنهادی',
   layout: 'sidebar',
-})
+});
 
 useHead({
   title: 'افزودن کار نیک پیشنهادی',
   htmlAttrs: { dir: 'rtl' },
-})
+});
 
-const { category, createCategory } = useDeedCategory()
+const { category, createCategory } = useDeedCategory();
 
 const difficultyLevels = [
   {
@@ -200,24 +200,24 @@ const difficultyLevels = [
     timeLabel: 'بیش از ۱ ساعت',
     icon: 'ph:mountains',
   },
-]
+];
 
-const newTag = ref('')
-const showIconSelector = ref(false)
+const newTag = ref('');
+const showIconSelector = ref(false);
 
 function addTag() {
   if (newTag.value.trim() && !category.value.tags.includes(newTag.value.trim())) {
-    category.value.tags.push(newTag.value.trim())
-    newTag.value = ''
+    category.value.tags.push(newTag.value.trim());
+    newTag.value = '';
   }
 }
 
 function removeTag(index: number) {
-  category.value.tags.splice(index, 1)
+  category.value.tags.splice(index, 1);
 }
 
 async function onSubmit() {
-  await createCategory()
-  navigateTo('/deeds/categories')
+  await createCategory();
+  navigateTo('/deeds/categories');
 }
 </script>

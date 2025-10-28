@@ -1,41 +1,41 @@
 <script setup lang="ts">
-import KeyPointsList from '~/components/sessions/KeyPointsList.vue'
-import EmotionalJourney from '~/components/sessions/EmotionalJourney.vue'
-import SessionSummary from '~/components/sessions/SessionSummary.vue'
+import KeyPointsList from '~/components/sessions/KeyPointsList.vue';
+import EmotionalJourney from '~/components/sessions/EmotionalJourney.vue';
+import SessionSummary from '~/components/sessions/SessionSummary.vue';
 
 definePageMeta({
   title: 'گزارش جلسه',
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { open } = usePanels()
+const { open } = usePanels();
 
-const route = useRoute()
-const slug = computed(() => route.params.slug)
+const route = useRoute();
+const slug = computed(() => route.params.slug);
 
 const query = computed(() => {
   return {
     slug: slug.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch(
   '/api/company/projects',
   {
     query,
   },
-)
+);
 
 if (!data.value?.project) {
-  await navigateTo('/layouts/projects')
+  await navigateTo('/layouts/projects');
 }
 
-const currentTask = ref()
+const currentTask = ref();
 
 function openTaskPanel(id: number, tasks: any) {
-  currentTask.value = tasks.find((task: any) => task.id === id)
-  open('task', { task: currentTask })
+  currentTask.value = tasks.find((task: any) => task.id === id);
+  open('task', { task: currentTask });
 }
 
 // Define data for patient report
@@ -56,7 +56,7 @@ const achievements = [
     details: 'در یک موقعیت کاری که معمولاً مضطرب می‌شوم، با استفاده از تکنیک تنفس عمیق توانستم آرامشم را حفظ کنم و واکنش بهتری نشان دهم.',
     icon: '😌',
   },
-]
+];
 
 const strengthsData = [
   { label: 'انعطاف‌پذیری', icon: '🌱' },
@@ -64,7 +64,7 @@ const strengthsData = [
   { label: 'پذیرش بازخورد', icon: '🧠' },
   { label: 'توانایی فکر کردن قبل از واکنش', icon: '⏳' },
   { label: 'شجاعت در بیان احساسات', icon: '💬' },
-]
+];
 
 const growthAreas = [
   {
@@ -85,7 +85,7 @@ const growthAreas = [
       { title: 'استفاده از تکنیک‌های آرام‌سازی و یادداشت‌برداری از افکارم', icon: '📝' },
     ],
   },
-]
+];
 
 const nextSteps = [
   {
@@ -109,21 +109,21 @@ const nextSteps = [
     description: 'هر روز حداقل ۵ دقیقه تمرین ذهن‌آگاهی انجام دهم و تاثیر آن را یادداشت کنم.',
     icon: '🧘‍♀️',
   },
-]
+];
 
 const actionItems = [
   { title: 'تمرین گفتن نه در موقعیت‌های روزمره، حتی اگر سخت باشد', completed: false, dueDate: '2025-05-10', icon: '🛑' },
   { title: 'نوشتن خاطرات و احساساتم درباره مرزها', completed: true, icon: '✍️' },
   { title: 'شناسایی موقعیت‌هایی که مرزهایم رعایت نمی‌شود و تحلیل واکنشم', completed: false, icon: '🔍' },
   { title: 'مطالعه مقاله‌ای درباره مرزهای سالم در روابط', completed: false, icon: '📚' },
-]
+];
 
 const insightsData = [
   { text: 'یاد گرفتم باید از خودم مراقبت کنم و این کار خودخواهی نیست.', icon: '🧡' },
   { text: 'فهمیدم تعیین مرزهای سالم در روابط چقدر مهم است و باعث احترام بیشتر دیگران به من می‌شود.', icon: '🚧' },
   { text: 'متوجه شدم که احساسات من ارزشمند هستند و باید به آن‌ها توجه کنم.', icon: '💭' },
   { text: 'درک کردم که می‌توانم رفتارها و واکنش‌هایم را تغییر دهم و رشد کنم.', icon: '🌻' },
-]
+];
 
 const learningsData = [
   { text: 'مهارت نه گفتن بدون احساس گناه', icon: '🙅‍♀️' },
@@ -131,27 +131,27 @@ const learningsData = [
   { text: 'تشخیص احساساتم و نام‌گذاری آن‌ها', icon: '🔖' },
   { text: 'استفاده از تکنیک‌های آرام‌سازی هنگام استرس', icon: '🧊' },
   { text: 'یادگیری اینکه اشتباه کردن بخشی از مسیر رشد است', icon: '🪜' },
-]
+];
 
 const strategiesData = [
   { title: 'تنفس عمیق و تمرکز بر نفس‌هایم وقتی مضطرب می‌شوم', icon: '🌬️' },
   { title: 'مطالعه کتاب‌های الهام‌بخش برای تقویت روحیه', icon: '📖' },
   { title: 'گفتگو با دوستان نزدیک وقتی احساس تنهایی دارم', icon: '👥' },
   { title: 'نوشتن احساساتم در دفترچه روزانه', icon: '📓' },
-]
+];
 
 const mainPointsData = [
   { title: 'تمرین نه گفتن', icon: '🙅‍♂️', description: 'آموختم که چگونه با اعتماد به نفس «نه» بگویم و مرزهای خود را تعیین کنم.' },
   { title: 'مدیریت استرس', icon: '😮‍💨', description: 'تکنیک‌های آرام‌سازی و مدیریت استرس را برای کاهش اضطراب یاد گرفتم.' },
   { title: 'تقویت جرأت‌مندی', icon: '🗣️', description: 'تمرین بیان نیازها و خواسته‌هایم به صورت مناسب و احترام‌آمیز.' },
   { title: 'تمرین ذهن‌آگاهی', icon: '🧘‍♂️', description: 'تمرکز بر لحظه حال و آگاهی از افکار و احساسات بدون قضاوت.' },
-]
+];
 
 const relationshipSteps = [
   { title: 'در جلسه بعدی احساساتم را شفاف‌تر بیان کنم و از بیان نگرانی‌هایم نترسم', icon: '🗣️' },
   { title: 'سوالات و ابهاماتم را یادداشت کنم تا فراموش نکنم', icon: '📝' },
   { title: 'در صورت نیاز از درمانگر درخواست راهنمایی بیشتر کنم', icon: '🤲' },
-]
+];
 
 const tasksData = [
   {
@@ -199,16 +199,16 @@ const tasksData = [
     progress: 40,
     completed: false,
   },
-]
+];
 
-const keyEmotions = { شادی: 4, اضطراب: 3, امیدواری: 4, تردید: 2, آرامش: 3 }
+const keyEmotions = { شادی: 4, اضطراب: 3, امیدواری: 4, تردید: 2, آرامش: 3 };
 const mainPoints = [
   { title: 'تعیین مرزهای سالم', icon: '🚧' },
   { title: 'تمرین نه گفتن', icon: '🙅‍♂️' },
   { title: 'مدیریت استرس', icon: '😮‍💨' },
   { title: 'تقویت جرأت‌مندی', icon: '🗣️' },
   { title: 'تمرین ذهن‌آگاهی', icon: '🧘‍♂️' },
-]
+];
 
 const homeworksData = [
   {
@@ -256,32 +256,32 @@ const homeworksData = [
     progress: 45,
     category: 'تمرین',
   },
-]
+];
 
-const activeFilter = ref('all')
+const activeFilter = ref('all');
 
 const filteredHomeworks = computed(() => {
-  const today = new Date()
+  const today = new Date();
 
   if (activeFilter.value === 'all') {
-    return homeworksData
+    return homeworksData;
   }
   else if (activeFilter.value === 'completed') {
-    return homeworksData.filter(hw => hw.completed)
+    return homeworksData.filter(hw => hw.completed);
   }
   else if (activeFilter.value === 'pending') {
-    return homeworksData.filter(hw => !hw.completed)
+    return homeworksData.filter(hw => !hw.completed);
   }
   else if (activeFilter.value === 'upcoming') {
     return homeworksData.filter((hw) => {
-      if (!hw.dueDate) return false
-      const dueDate = new Date(hw.dueDate)
-      return dueDate > today && !hw.completed
-    })
+      if (!hw.dueDate) return false;
+      const dueDate = new Date(hw.dueDate);
+      return dueDate > today && !hw.completed;
+    });
   }
 
-  return homeworksData
-})
+  return homeworksData;
+});
 
 // Add emotions data for the chart showing intensity over the 4 quarters of the session
 const emotionsTimeData = ref([
@@ -335,7 +335,7 @@ const emotionsTimeData = ref([
     ],
     color: '#60a5fa', // light blue
   },
-])
+]);
 
 // Add dominant emotion per quarter for background coloring
 const quarterDominantEmotions = ref([
@@ -343,7 +343,7 @@ const quarterDominantEmotions = ref([
   { emotion: 'امیدواری', color: 'rgba(59, 130, 246, 0.1)', emoji: '🙂' }, // Q2: hope growing
   { emotion: 'امیدواری', color: 'rgba(59, 130, 246, 0.1)', emoji: '😊' }, // Q3: hope strong
   { emotion: 'شادی', color: 'rgba(16, 185, 129, 0.1)', emoji: '😄' }, // Q4: happiness dominant
-])
+]);
 
 // Setup chart options
 const emotionChartOptions = ref({
@@ -374,41 +374,41 @@ const emotionChartOptions = ref({
       labelVisible: true,
     },
   },
-})
+});
 
 // For chart DOM reference
-const emotionChartEl = ref()
+const emotionChartEl = ref();
 
 // Function to generate SVG path for line chart - make variables available in component
-const width = 400
-const height = 180
-const paddingTop = 20
-const paddingBottom = 20
-const paddingLeft = 5
-const paddingRight = 5
-const xScale = (width - paddingLeft - paddingRight) / 3 // 3 = distance between 4 quarters
-const yScale = (height - paddingTop - paddingBottom) / 5 // 0-5 scale for emotional intensity
+const width = 400;
+const height = 180;
+const paddingTop = 20;
+const paddingBottom = 20;
+const paddingLeft = 5;
+const paddingRight = 5;
+const xScale = (width - paddingLeft - paddingRight) / 3; // 3 = distance between 4 quarters
+const yScale = (height - paddingTop - paddingBottom) / 5; // 0-5 scale for emotional intensity
 
 function generateLinePath(data) {
   // Generate path
-  let path = ''
+  let path = '';
   data.forEach((point, index) => {
     // X coordinate distributes points evenly across chart width
-    const x = paddingLeft + index * xScale
+    const x = paddingLeft + index * xScale;
 
     // Y coordinate places points by intensity level (5 = top, 1 = bottom)
     // Flip Y axis since SVG 0,0 is at top-left
-    const y = height - paddingBottom - point.value * yScale
+    const y = height - paddingBottom - point.value * yScale;
 
     if (index === 0) {
-      path += `M ${x},${y}`
+      path += `M ${x},${y}`;
     }
     else {
-      path += ` L ${x},${y}`
+      path += ` L ${x},${y}`;
     }
-  })
+  });
 
-  return path
+  return path;
 }
 
 </script>

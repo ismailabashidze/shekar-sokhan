@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 definePageMeta({
   title: 'New card',
@@ -15,9 +15,9 @@ definePageMeta({
     order: 14,
     new: true,
   },
-})
+});
 
-const complete = ref(false)
+const complete = ref(false);
 const accounts = ref([
   {
     id: 1,
@@ -40,7 +40,7 @@ const accounts = ref([
     number: '3524 65456 3245 6279',
     balance: 4653.97,
   },
-])
+]);
 
 // This is the object that will contain the validation messages
 const VALIDATION_TEXT = {
@@ -51,7 +51,7 @@ const VALIDATION_TEXT = {
   OWNER_SELECTION: 'You must select an owner',
   BRAND_SELECTION: 'You must select a card brand',
   TYPE_SELECTION: 'You must select a card type',
-}
+};
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -80,29 +80,29 @@ const zodSchema = z
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.ACCOUNT_SELECTION,
         path: ['account'],
-      })
+      });
     }
     if (data.dailySpend === null || data.dailySpend <= 50) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.DAILY_LIMIT,
         path: ['dailySpend'],
-      })
+      });
     }
     if (data.dailyWithdraw === null || data.dailyWithdraw <= 50) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.DAILY_LIMIT,
         path: ['dailyWithdraw'],
-      })
+      });
     }
-  })
+  });
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   owner: '',
   account: null,
@@ -110,7 +110,7 @@ const initialValues = {
   type: '',
   dailySpend: 0,
   dailyWithdraw: 0,
-} satisfies FormInput
+} satisfies FormInput;
 
 const {
   handleSubmit,
@@ -125,27 +125,27 @@ const {
 } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
-const success = ref(false)
-const fieldsWithErrors = computed(() => Object.keys(errors.value).length)
+const success = ref(false);
+const fieldsWithErrors = computed(() => Object.keys(errors.value).length);
 
 // Ask the user for confirmation before leaving the page if the form has unsaved changes
 onBeforeRouteLeave(() => {
   if (meta.value.dirty && !success.value) {
-    return confirm('You have unsaved changes. Are you sure you want to leave?')
+    return confirm('You have unsaved changes. Are you sure you want to leave?');
   }
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     // here you have access to the validated form values
-    console.log('card-create-success', values)
+    console.log('card-create-success', values);
 
     try {
       // fake delay, this will make isSubmitting value to be true
@@ -155,40 +155,40 @@ const onSubmit = handleSubmit(
           setTimeout(
             () => reject(new Error('Fake backend validation error')),
             2000,
-          )
+          );
         }
-        setTimeout(resolve, 4000)
-      })
+        setTimeout(resolve, 4000);
+      });
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'Success',
         message: `Card has been created!`,
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
     }
     catch (error: any) {
       // this will set the error on the form
       if (error.message === 'Fake backend validation error') {
-        setFieldError('dailySpend', 'The maximum allowed limit is $5000')
+        setFieldError('dailySpend', 'The maximum allowed limit is $5000');
 
         document.documentElement.scrollTo({
           top: 0,
           behavior: 'smooth',
-        })
+        });
 
-        toaster.clearAll()
+        toaster.clearAll();
         toaster.show({
           title: 'Oops!',
           message: 'Please review the errors in the form',
           color: 'danger',
           icon: 'lucide:alert-triangle',
           closable: true,
-        })
+        });
       }
-      return
+      return;
     }
 
     // resetForm()
@@ -196,24 +196,24 @@ const onSubmit = handleSubmit(
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
 
-    success.value = true
+    success.value = true;
   },
   (error) => {
     // this callback is optional and called only if the form has errors
-    success.value = false
+    success.value = false;
 
     // here you have access to the error
-    console.log('card-create-error', error)
+    console.log('card-create-error', error);
 
     // you can use it to scroll to the first error
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 </script>
 
 <template>

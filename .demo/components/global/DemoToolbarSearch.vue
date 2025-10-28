@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const isSearchOpen = useState('search-open', () => false)
+const isSearchOpen = useState('search-open', () => false);
 </script>
 
 <template>

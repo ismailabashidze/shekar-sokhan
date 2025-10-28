@@ -9,18 +9,18 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-jobs-dark.png',
     order: 14,
   },
-})
+});
 
-const search = ref('')
-const location = ref('')
-const alertKeyword = ref('')
+const search = ref('');
+const location = ref('');
+const alertKeyword = ref('');
 
-const selectedType = ref('all')
-const selectedRange = ref('all')
+const selectedType = ref('all');
+const selectedRange = ref('all');
 
-const jobTypes = ref([])
-const jobSeniority = ref([])
-const jobSalary = ref([])
+const jobTypes = ref([]);
+const jobSeniority = ref([]);
+const jobSalary = ref([]);
 
 const jobs = [
   {
@@ -183,7 +183,7 @@ const jobs = [
       },
     ],
   },
-]
+];
 </script>
 
 <template>

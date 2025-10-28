@@ -325,128 +325,128 @@
 definePageMeta({
   title: 'مدیریت هشدارها',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 // Composables
-const systemAlerting = useSystemAlerting()
-const monitoring = useNotificationMonitoring()
+const systemAlerting = useSystemAlerting();
+const monitoring = useNotificationMonitoring();
 
 // Reactive state
-const isTesting = ref(false)
-const isSaving = ref(false)
-const isRefreshing = ref(false)
-const isLoadingAlerts = ref(true)
+const isTesting = ref(false);
+const isSaving = ref(false);
+const isRefreshing = ref(false);
+const isLoadingAlerts = ref(true);
 
 // Configuration
-const escalationConfig = ref(systemAlerting.escalationConfig.value)
-const recoveryActions = ref(systemAlerting.recoveryActions.value)
+const escalationConfig = ref(systemAlerting.escalationConfig.value);
+const recoveryActions = ref(systemAlerting.recoveryActions.value);
 
 // Alerts
-const activeAlerts = ref<SystemAlert[]>([])
-const recentAlerts = ref<SystemAlert[]>([])
+const activeAlerts = ref<SystemAlert[]>([]);
+const recentAlerts = ref<SystemAlert[]>([]);
 
 // Initialize
 onMounted(async () => {
-  await initializeAlertingSystem()
-  await loadAlerts()
-})
+  await initializeAlertingSystem();
+  await loadAlerts();
+});
 
 /**
  * Initialize the alerting system
  */
 const initializeAlertingSystem = async (): Promise<void> => {
   try {
-    await systemAlerting.initializeAlerting()
+    await systemAlerting.initializeAlerting();
   }
   catch (error) {
-    console.error('❌ خطا در راه‌اندازی سیستم هشدار:', error)
+    console.error('❌ خطا در راه‌اندازی سیستم هشدار:', error);
   }
-}
+};
 
 /**
  * Load active and recent alerts
  */
 const loadAlerts = async (): Promise<void> => {
   try {
-    isLoadingAlerts.value = true
+    isLoadingAlerts.value = true;
 
     // Load active alerts (unresolved)
     const activeAlertsResponse = await monitoring.getAlerts({
       filter: 'resolved_at = ""',
       sort: '-triggered_at',
       perPage: 50,
-    })
-    activeAlerts.value = activeAlertsResponse.items
+    });
+    activeAlerts.value = activeAlertsResponse.items;
 
     // Load recent alerts (last 24 hours)
-    const yesterday = new Date()
-    yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayISO = yesterday.toISOString()
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayISO = yesterday.toISOString();
 
     const recentAlertsResponse = await monitoring.getAlerts({
       filter: `triggered_at >= "${yesterdayISO}"`,
       sort: '-triggered_at',
       perPage: 20,
-    })
-    recentAlerts.value = recentAlertsResponse.items
+    });
+    recentAlerts.value = recentAlertsResponse.items;
   }
   catch (error) {
-    console.error('❌ خطا در بارگذاری هشدارها:', error)
+    console.error('❌ خطا در بارگذاری هشدارها:', error);
   }
   finally {
-    isLoadingAlerts.value = false
+    isLoadingAlerts.value = false;
   }
-}
+};
 
 /**
  * Get trigger text in Persian
  */
 const getTriggerText = (trigger: string) => {
   switch (trigger) {
-    case 'automatic': return 'خودکار'
-    case 'manual': return 'دستی'
-    default: return trigger
+    case 'automatic': return 'خودکار';
+    case 'manual': return 'دستی';
+    default: return trigger;
   }
-}
+};
 
 /**
  * Get channel type text in Persian
  */
 const getChannelTypeText = (channelType: string) => {
   switch (channelType) {
-    case 'email': return 'ایمیل'
-    case 'sms': return 'پیامک'
-    case 'webhook': return 'وب‌هوک'
-    case 'push_notification': return 'اعلان فوری'
-    case 'slack': return 'اسلک'
-    case 'discord': return 'دیسکورد'
-    case 'telegram': return 'تلگرام'
-    default: return channelType.replace('_', ' ')
+    case 'email': return 'ایمیل';
+    case 'sms': return 'پیامک';
+    case 'webhook': return 'وب‌هوک';
+    case 'push_notification': return 'اعلان فوری';
+    case 'slack': return 'اسلک';
+    case 'discord': return 'دیسکورد';
+    case 'telegram': return 'تلگرام';
+    default: return channelType.replace('_', ' ');
   }
-}
+};
 
 /**
  * Get severity text in Persian
  */
 const getSeverityText = (severity: string) => {
   switch (severity.toLowerCase()) {
-    case 'low': return 'کم'
-    case 'medium': return 'متوسط'
-    case 'high': return 'زیاد'
-    case 'critical': return 'بحرانی'
-    case 'urgent': return 'فوری'
-    default: return severity.toUpperCase()
+    case 'low': return 'کم';
+    case 'medium': return 'متوسط';
+    case 'high': return 'زیاد';
+    case 'critical': return 'بحرانی';
+    case 'urgent': return 'فوری';
+    default: return severity.toUpperCase();
   }
-}
+};
 
 /**
  * Test the alert system
  */
 const testAlertSystem = async (): Promise<void> => {
   try {
-    isTesting.value = true
+    isTesting.value = true;
 
     // Create a test alert
     const testAlert: Omit<SystemAlert, 'id' | 'created' | 'updated'> = {
@@ -460,94 +460,94 @@ const testAlertSystem = async (): Promise<void> => {
       threshold: 80,
       triggered_at: new Date().toISOString(),
       auto_resolved: false,
-    }
+    };
 
     // Process the test alert
-    const createdAlert = await monitoring.createAlert(testAlert)
+    const createdAlert = await monitoring.createAlert(testAlert);
     if (createdAlert) {
-      await systemAlerting.processAlert(createdAlert)
+      await systemAlerting.processAlert(createdAlert);
     }
 
     // Refresh alerts to show the new test alert
-    await loadAlerts()
+    await loadAlerts();
 
     // Show success message
-    console.log('✅ هشدار تست با موفقیت ایجاد و پردازش شد')
+    console.log('✅ هشدار تست با موفقیت ایجاد و پردازش شد');
   }
   catch (error) {
-    console.error('❌ خطا در تست سیستم هشدار:', error)
+    console.error('❌ خطا در تست سیستم هشدار:', error);
   }
   finally {
-    isTesting.value = false
+    isTesting.value = false;
   }
-}
+};
 
 /**
  * Save configuration changes
  */
 const saveConfiguration = async (): Promise<void> => {
   try {
-    isSaving.value = true
+    isSaving.value = true;
 
     // In a real implementation, you would save the configuration to the database
     // For now, we'll just update the local configuration
     console.log('✅ پیکربندی ذخیره شد:', {
       escalationConfig: escalationConfig.value,
       recoveryActions: recoveryActions.value,
-    })
+    });
 
     // Show success message
-    console.log('✅ پیکربندی هشدار با موفقیت ذخیره شد')
+    console.log('✅ پیکربندی هشدار با موفقیت ذخیره شد');
   }
   catch (error) {
-    console.error('❌ خطا در ذخیره پیکربندی:', error)
+    console.error('❌ خطا در ذخیره پیکربندی:', error);
   }
   finally {
-    isSaving.value = false
+    isSaving.value = false;
   }
-}
+};
 
 /**
  * Refresh alerts
  */
 const refreshAlerts = async (): Promise<void> => {
   try {
-    isRefreshing.value = true
-    await loadAlerts()
+    isRefreshing.value = true;
+    await loadAlerts();
   }
   catch (error) {
-    console.error('❌ خطا در بروزرسانی هشدارها:', error)
+    console.error('❌ خطا در بروزرسانی هشدارها:', error);
   }
   finally {
-    isRefreshing.value = false
+    isRefreshing.value = false;
   }
-}
+};
 
 /**
  * Acknowledge an alert
  */
 const acknowledgeAlert = async (alertId: string): Promise<void> => {
   try {
-    await monitoring.acknowledgeAlert(alertId)
-    await loadAlerts()
-    console.log('✅ هشدار با موفقیت تأیید شد')
+    await monitoring.acknowledgeAlert(alertId);
+    await loadAlerts();
+    console.log('✅ هشدار با موفقیت تأیید شد');
   }
   catch (error) {
-    console.error('❌ خطا در تأیید هشدار:', error)
+    console.error('❌ خطا در تأیید هشدار:', error);
   }
-}
+};
 
 /**
  * Resolve an alert
  */
 const resolveAlert = async (alertId: string): Promise<void> => {
   try {
-    await monitoring.resolveAlert(alertId)
-    await loadAlerts()
-    console.log('✅ هشدار با موفقیت حل شد')
+    await monitoring.resolveAlert(alertId);
+    await loadAlerts();
+    console.log('✅ هشدار با موفقیت حل شد');
   }
   catch (error) {
-    console.error('❌ خطا در حل هشدار:', error)
+    console.error('❌ خطا در حل هشدار:', error);
   }
-}
+};
 </script>

@@ -1,5 +1,5 @@
-import { isProduction } from 'std-env'
-import type { NitroConfig, NitroRouteConfig } from 'nitropack'
+import { isProduction } from 'std-env';
+import type { NitroConfig, NitroRouteConfig } from 'nitropack';
 
 const staticAssetsRule: NitroRouteConfig = isProduction
   ? {
@@ -7,7 +7,7 @@ const staticAssetsRule: NitroRouteConfig = isProduction
         'Cache-Control': 'public, max-age=31536000',
       },
     }
-  : {}
+  : {};
 
 const staticPageRule: NitroRouteConfig = isProduction
   ? {
@@ -22,7 +22,7 @@ const staticPageRule: NitroRouteConfig = isProduction
           'public, max-age=3600, s-maxage=3600, stale-while-revalidate=3600, stale-if-error=3600',
       },
     }
-  : {}
+  : {};
 
 export const demoRules: NitroConfig['routeRules'] = {
   '/img/**': staticAssetsRule,
@@ -31,13 +31,13 @@ export const demoRules: NitroConfig['routeRules'] = {
   '/layouts/**': staticPageRule,
   '/wizard/**': staticPageRule,
   '/auth/**': staticPageRule,
-}
+};
 
 export const landingRules: NitroConfig['routeRules'] = {
   '/': staticPageRule,
   '/demos': staticPageRule,
-}
+};
 
 export const documentationRules: NitroConfig['routeRules'] = {
   '/documentation/**': staticPageRule,
-}
+};

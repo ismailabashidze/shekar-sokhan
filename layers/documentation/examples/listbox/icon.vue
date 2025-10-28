@@ -56,7 +56,7 @@ const value = ref({
   name: 'Travel',
   text: 'Tourism & travel',
   icon: 'ph:airplane-duotone',
-})
+});
 
 const hobbies = [
   {
@@ -89,5 +89,5 @@ const hobbies = [
     text: 'singing with friends',
     icon: 'ph:microphone-stage-duotone',
   },
-]
+];
 </script>

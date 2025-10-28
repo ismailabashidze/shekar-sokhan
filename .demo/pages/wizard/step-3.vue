@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { DatePicker } from 'v-calendar'
+import { DatePicker } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
-import type { Customer, Project, ProjectStepData } from '../../types'
+import type { Customer, Project, ProjectStepData } from '../../types';
 
 definePageMeta({
   title: 'Wizard — Step 3',
@@ -16,14 +16,14 @@ definePageMeta({
     srcDark: '/img/screens/wizard-3-dark.png',
     order: 32,
   },
-})
+});
 useHead({
   title: 'Project details',
-})
+});
 
-const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>()
+const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 
 const customers: Customer[] = [
   {
@@ -76,14 +76,14 @@ const customers: Customer[] = [
     name: 'Udemy',
     location: 'Los Angeles, CA',
   },
-]
+];
 
-const search = ref('')
-const itemSelected = ref(false)
+const search = ref('');
+const itemSelected = ref(false);
 
 const filteredCustomers = computed<Customer[]>(() => {
   if (!search.value) {
-    return []
+    return [];
   }
 
   return customers
@@ -91,33 +91,33 @@ const filteredCustomers = computed<Customer[]>(() => {
       return (
         item.name?.match(new RegExp(search.value, 'i'))
         || item.location?.match(new RegExp(search.value, 'i'))
-      )
+      );
     })
-    .splice(0, 4)
-})
+    .splice(0, 4);
+});
 
 function selectCustomer(customerData: Customer) {
-  project.value.customer = customerData
-  itemSelected.value = true
-  search.value = ''
+  project.value.customer = customerData;
+  itemSelected.value = true;
+  search.value = '';
 }
 
 function dismissCustomer() {
   if (project.value.customer) {
-    project.value.customer.name = undefined
-    project.value.customer.logo = undefined
-    project.value.customer.location = undefined
+    project.value.customer.name = undefined;
+    project.value.customer.logo = undefined;
+    project.value.customer.location = undefined;
   }
 
-  itemSelected.value = false
-  search.value = ''
+  itemSelected.value = false;
+  search.value = '';
 }
 
 const masks = ref({
   input: 'YYYY-MM-DD',
-})
+});
 
-const budget = ref('< 5K')
+const budget = ref('< 5K');
 </script>
 
 <template>

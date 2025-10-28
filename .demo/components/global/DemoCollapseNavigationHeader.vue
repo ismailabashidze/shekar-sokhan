@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const { isOpen, isMobileOpen } = useCollapse()
+const { isOpen, isMobileOpen } = useCollapse();
 
-const isSearchOpen = useState('search-open', () => false)
+const isSearchOpen = useState('search-open', () => false);
 </script>
 
 <template>

@@ -1,35 +1,35 @@
 interface Member {
-  id: number
-  picture?: string
-  badge?: string
-  username: string
-  initials: string
-  status: string
-  location: string
-  position: string
-  completed: number
-  bio: string
+  id: number;
+  picture?: string;
+  badge?: string;
+  username: string;
+  initials: string;
+  status: string;
+  location: string;
+  position: string;
+  completed: number;
+  bio: string;
   socialProfiles: {
-    name: string
-    icon: string
-    url: string
-  }[]
+    name: string;
+    icon: string;
+    url: string;
+  }[];
 }
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const perPage = parseInt((query.perPage as string) || '5', 10)
-  const page = parseInt((query.page as string) || '1', 10)
-  const filter = (query.filter as string) || ''
+  const query = getQuery(event);
+  const perPage = parseInt((query.perPage as string) || '5', 10);
+  const page = parseInt((query.page as string) || '1', 10);
+  const filter = (query.filter as string) || '';
 
   if (perPage >= 50) {
     // Create an artificial delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  const data = await getDemoData()
-  const offset = (page - 1) * perPage
-  const filterRe = new RegExp(filter, 'i')
+  const data = await getDemoData();
+  const offset = (page - 1) * perPage;
+  const filterRe = new RegExp(filter, 'i');
 
   return {
     total: data.length,
@@ -39,11 +39,11 @@ export default defineEventHandler(async (event) => {
         .filter((item) => {
           return [item.username, item.location, item.position].some(item =>
             item.match(filterRe),
-          )
+          );
         })
         .slice(offset, offset + perPage),
-  }
-})
+  };
+});
 
 async function getDemoData(): Promise<Member[]> {
   return Promise.resolve([
@@ -1000,5 +1000,5 @@ async function getDemoData(): Promise<Member[]> {
         },
       ],
     },
-  ])
+  ]);
 }

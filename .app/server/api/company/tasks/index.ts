@@ -362,5 +362,5 @@ export default defineEventHandler(async () => {
         },
       ],
     },
-  ]
-})
+  ];
+});

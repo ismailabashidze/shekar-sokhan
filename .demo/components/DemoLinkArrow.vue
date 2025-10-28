@@ -1,13 +1,13 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    label?: string
-    to: string
+    label?: string;
+    to: string;
   }>(),
   {
     label: '',
   },
-)
+);
 </script>
 
 <template>

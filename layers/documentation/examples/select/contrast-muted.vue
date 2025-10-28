@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-const first = ref('')
-const second = ref('')
-const third = ref('')
+const first = ref('');
+const second = ref('');
+const third = ref('');
 </script>

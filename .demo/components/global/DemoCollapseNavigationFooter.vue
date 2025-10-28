@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { isOpen } = useCollapse()
+const { isOpen } = useCollapse();
 </script>
 
 <template>

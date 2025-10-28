@@ -142,26 +142,26 @@
 </template>
 
 <script setup>
-import { useRoute } from '#app'
-import { computed } from 'vue'
+import { useRoute } from '#app';
+import { computed } from 'vue';
 
-const route = useRoute()
-const isAuthPage = computed(() => route.path.startsWith('/auth'))
+const route = useRoute();
+const isAuthPage = computed(() => route.path.startsWith('/auth'));
 
-const { user } = useUser()
-const { getUserAvatarUrl } = useAvatarManager()
-const { unreadCount } = useNotifications()
+const { user } = useUser();
+const { getUserAvatarUrl } = useAvatarManager();
+const { unreadCount } = useNotifications();
 
 // Import and use panels composable for notification panel
-const { open } = usePanels()
+const { open } = usePanels();
 
 // Computed avatar and name from user
-const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png')
+const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png');
 
 // Function to open notifications panel
 const openNotifications = () => {
-  open('notifications')
-}
+  open('notifications');
+};
 </script>
 
 <style scoped>

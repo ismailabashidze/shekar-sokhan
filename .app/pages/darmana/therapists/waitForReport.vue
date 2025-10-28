@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import HorizontalSideBar from '~/components/global/HorizontalSideBar.vue'
-import { useSessionAnalysis } from '~/composables/useSessionAnalysis'
-import { useUser } from '~/composables/user'
-import { ref, onMounted, onUnmounted } from 'vue'
+import HorizontalSideBar from '~/components/global/HorizontalSideBar.vue';
+import { useSessionAnalysis } from '~/composables/useSessionAnalysis';
+import { useUser } from '~/composables/user';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 definePageMeta({
   title: 'در حال آماده سازی گزارش',
@@ -16,93 +16,93 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-notifications-dark.png',
     order: 80,
   },
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { getAnalysisForSession, generateAnalysis, createAnalysis } = useSessionAnalysis()
-const { user, updateUser } = useUser()
-const toaster = useToaster()
-const isModalOpen = ref(false)
-const isPhoneModalOpen = ref(false)
-const isSavingPhone = ref(false)
-const analysisId = ref('')
-const isLoading = ref(true)
-const checkInterval = ref(null)
-const sessionId = ref('')
-const hasCheckedForExistingAnalysis = ref(false)
-const phoneNumber = ref('')
-const phoneError = ref('')
+const { getAnalysisForSession, generateAnalysis, createAnalysis } = useSessionAnalysis();
+const { user, updateUser } = useUser();
+const toaster = useToaster();
+const isModalOpen = ref(false);
+const isPhoneModalOpen = ref(false);
+const isSavingPhone = ref(false);
+const analysisId = ref('');
+const isLoading = ref(true);
+const checkInterval = ref(null);
+const sessionId = ref('');
+const hasCheckedForExistingAnalysis = ref(false);
+const phoneNumber = ref('');
+const phoneError = ref('');
 
 onMounted(async () => {
-  console.log(user.value)
+  console.log(user.value);
 
   if (!user.value?.phoneNumber) {
-    isPhoneModalOpen.value = true
-    isLoading.value = false
+    isPhoneModalOpen.value = true;
+    isLoading.value = false;
   }
 
   // Check if analysis already exists
   try {
-    const existingAnalysis = await getAnalysisForSession(sessionId.value)
+    const existingAnalysis = await getAnalysisForSession(sessionId.value);
     if (existingAnalysis && existingAnalysis.id) {
       // Analysis already exists, go directly to it
-      analysisId.value = existingAnalysis.id
-      isLoading.value = false
-      isModalOpen.value = true
-      hasCheckedForExistingAnalysis.value = true
-      return
+      analysisId.value = existingAnalysis.id;
+      isLoading.value = false;
+      isModalOpen.value = true;
+      hasCheckedForExistingAnalysis.value = true;
+      return;
     }
 
     // Set up interval to check every 2 seconds for better UX
-    checkInterval.value = setInterval(checkForAnalysis, 2000)
+    checkInterval.value = setInterval(checkForAnalysis, 2000);
   }
   catch (error) {
-    console.error('Error checking for existing analysis:', error)
+    console.error('Error checking for existing analysis:', error);
   }
-  hasCheckedForExistingAnalysis.value = true
-})
+  hasCheckedForExistingAnalysis.value = true;
+});
 
 onUnmounted(() => {
   // Clear interval when component is unmounted
   if (checkInterval.value) {
-    clearInterval(checkInterval.value)
+    clearInterval(checkInterval.value);
   }
-})
+});
 
 const checkForAnalysis = async () => {
   if (!sessionId.value) {
-    console.error('No session ID found')
-    return
+    console.error('No session ID found');
+    return;
   }
 
   try {
     // Check if analysis exists for this session
-    const analysis = await getAnalysisForSession(sessionId.value)
+    const analysis = await getAnalysisForSession(sessionId.value);
 
     if (analysis && analysis.id) {
       // Analysis is ready
-      analysisId.value = analysis.id
-      isLoading.value = false
+      analysisId.value = analysis.id;
+      isLoading.value = false;
 
       // Clear interval
       if (checkInterval.value) {
-        clearInterval(checkInterval.value)
-        checkInterval.value = null
+        clearInterval(checkInterval.value);
+        checkInterval.value = null;
       }
 
       // Show modal
-      isModalOpen.value = true
+      isModalOpen.value = true;
 
       // Clear localStorage
-      localStorage.removeItem('pendingAnalysisSessionId')
+      localStorage.removeItem('pendingAnalysisSessionId');
     }
   }
   catch (error) {
-    console.error('Error checking for analysis:', error)
+    console.error('Error checking for analysis:', error);
     // If there's an error, we should stop checking and show an error message
     if (checkInterval.value) {
-      clearInterval(checkInterval.value)
-      checkInterval.value = null
+      clearInterval(checkInterval.value);
+      checkInterval.value = null;
     }
 
     // Show error to user
@@ -112,68 +112,68 @@ const checkForAnalysis = async () => {
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
 
     // Redirect to dashboard after showing error
     setTimeout(() => {
-      navigateTo('/dashboard')
-    }, 3000)
+      navigateTo('/dashboard');
+    }, 3000);
   }
-}
+};
 
 const goToAnalysis = () => {
   if (analysisId.value) {
-    navigateTo(`/darmana/therapists/analysis?analysis_id=${analysisId.value}`)
+    navigateTo(`/darmana/therapists/analysis?analysis_id=${analysisId.value}`);
   }
   else {
     // If for some reason analysisId is not set, redirect to dashboard
-    navigateTo('/dashboard')
+    navigateTo('/dashboard');
   }
-}
+};
 
 const validatePhoneNumber = (value) => {
   // Convert Persian numbers to English
   const persianToEnglish = (str) => {
-    const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
-    const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     for (let i = 0; i < 10; i++) {
-      str = str.replace(new RegExp(persianNumbers[i], 'g'), englishNumbers[i])
+      str = str.replace(new RegExp(persianNumbers[i], 'g'), englishNumbers[i]);
     }
-    return str
-  }
+    return str;
+  };
 
-  const sanitizedValue = persianToEnglish(value).replace(/\D/g, '')
+  const sanitizedValue = persianToEnglish(value).replace(/\D/g, '');
 
   // Check length
   if (sanitizedValue.length !== 11) {
-    return 'شماره تماس باید یازده رقم باشد'
+    return 'شماره تماس باید یازده رقم باشد';
   }
 
   // Check if it starts with 09
   if (!sanitizedValue.startsWith('09')) {
-    return 'شماره باید با ۰۹ شروع شود'
+    return 'شماره باید با ۰۹ شروع شود';
   }
 
   // Check if all characters are digits
   if (!/^\d+$/.test(sanitizedValue)) {
-    return 'شماره تماس باید فقط شامل ارقام باشد'
+    return 'شماره تماس باید فقط شامل ارقام باشد';
   }
 
-  return null // Valid phone number
-}
+  return null; // Valid phone number
+};
 
 const savePhoneNumber = async () => {
-  const error = validatePhoneNumber(phoneNumber.value)
+  const error = validatePhoneNumber(phoneNumber.value);
   if (error) {
-    phoneError.value = error
-    return
+    phoneError.value = error;
+    return;
   }
 
-  phoneError.value = ''
-  isSavingPhone.value = true
+  phoneError.value = '';
+  isSavingPhone.value = true;
 
   try {
-    await updateUser({ ...user.value, phoneNumber: phoneNumber.value })
+    await updateUser({ ...user.value, phoneNumber: phoneNumber.value });
 
     // Show success message
     toaster.show({
@@ -182,86 +182,86 @@ const savePhoneNumber = async () => {
       color: 'success',
       icon: 'ph:check-circle-fill',
       closable: true,
-    })
+    });
 
     // Close phone modal and continue with analysis
-    isPhoneModalOpen.value = false
-    isSavingPhone.value = false
-    isLoading.value = true
+    isPhoneModalOpen.value = false;
+    isSavingPhone.value = false;
+    isLoading.value = true;
 
     try {
-      const existingAnalysis = await getAnalysisForSession(sessionId.value)
+      const existingAnalysis = await getAnalysisForSession(sessionId.value);
       if (existingAnalysis && existingAnalysis.id) {
         // Analysis already exists, go directly to it
-        analysisId.value = existingAnalysis.id
-        isLoading.value = false
-        isModalOpen.value = true
-        hasCheckedForExistingAnalysis.value = true
-        return
+        analysisId.value = existingAnalysis.id;
+        isLoading.value = false;
+        isModalOpen.value = true;
+        hasCheckedForExistingAnalysis.value = true;
+        return;
       }
     }
     catch (error) {
-      console.error('Error checking for existing analysis:', error)
+      console.error('Error checking for existing analysis:', error);
     }
-    hasCheckedForExistingAnalysis.value = true
+    hasCheckedForExistingAnalysis.value = true;
   }
   catch (error) {
-    console.error('Error saving phone number:', error)
-    isSavingPhone.value = false
+    console.error('Error saving phone number:', error);
+    isSavingPhone.value = false;
     toaster.show({
       title: 'خطا',
       message: 'خطا در ذخیره شماره تماس. لطفا دوباره تلاش کنید.',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
-}
+};
 
 const startAnalysisGeneration = async () => {
-  if (!sessionId.value || !hasCheckedForExistingAnalysis.value) return
+  if (!sessionId.value || !hasCheckedForExistingAnalysis.value) return;
 
   try {
     // Get session details and messages
-    const nuxtApp = useNuxtApp()
+    const nuxtApp = useNuxtApp();
     const session = await nuxtApp.$pb.collection('sessions').getOne(sessionId.value, {
       expand: 'user, therapist',
-    })
+    });
 
     // Get messages for this session
     const messagesRecords = await nuxtApp.$pb.collection('messages').getList(1, 100, {
       filter: `session="${sessionId.value}"`,
       sort: 'time',
-    })
+    });
 
     // Format messages for analysis
     const allMessages = messagesRecords.items.map(msg => ({
       role: msg.type === 'sent' ? 'patient' : 'therapist',
       content: msg.message,
-    }))
+    }));
 
     // Remove first AI message if it was the starting message
-    let messagesToAnalyze = allMessages
+    let messagesToAnalyze = allMessages;
     if (allMessages.length > 0 && allMessages[0].role === 'therapist') {
-      messagesToAnalyze = allMessages.slice(1)
+      messagesToAnalyze = allMessages.slice(1);
     }
 
     // Generate analysis
     const generatedAnalysis = await generateAnalysis({
       sessionId: sessionId.value,
       messages: messagesToAnalyze,
-    })
+    });
 
     // Save analysis
     const savedAnalysis = await createAnalysis({
       session: sessionId.value,
       ...generatedAnalysis,
-    })
+    });
 
     // Update session with analysis ID
-    const endTime = new Date()
-    const startTime = new Date(session.created)
-    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60))
+    const endTime = new Date();
+    const startTime = new Date(session.created);
+    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60));
 
     await nuxtApp.$pb.collection('sessions').update(sessionId.value, {
       status: 'done',
@@ -270,21 +270,21 @@ const startAnalysisGeneration = async () => {
       total_time_passed: totalTimePassedMinutes,
       updated: endTime.toISOString(),
       session_analysis_for_system: savedAnalysis.id,
-    })
+    });
 
-    console.log('Analysis generation completed and saved:', savedAnalysis.id)
+    console.log('Analysis generation completed and saved:', savedAnalysis.id);
   }
   catch (error) {
-    console.error('Error generating analysis:', error)
+    console.error('Error generating analysis:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در تولید گزارش. لطفا دوباره تلاش کنید.',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
-}
+};
 </script>
 
 <template>

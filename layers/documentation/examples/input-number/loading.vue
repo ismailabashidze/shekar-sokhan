@@ -36,5 +36,5 @@
 </template>
 
 <script setup lang="ts">
-const value = ref(12.23)
+const value = ref(12.23);
 </script>

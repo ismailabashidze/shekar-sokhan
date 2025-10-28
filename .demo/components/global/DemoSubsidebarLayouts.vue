@@ -539,7 +539,7 @@ const navigation = [
       },
     ],
   },
-]
+];
 </script>
 
 <template>

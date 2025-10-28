@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-delivery-dark.png',
     order: 22,
   },
-})
+});
 
 const genres = [
   {
@@ -52,7 +52,7 @@ const genres = [
     name: 'Sushi',
     icon: '/img/icons/food/icon-8.svg',
   },
-]
+];
 
 const meals = [
   {
@@ -136,7 +136,7 @@ const meals = [
     rating: 4.9,
     reviews: 71,
   },
-]
+];
 
 const order = {
   items: [
@@ -173,25 +173,25 @@ const order = {
       quantity: 1,
     },
   ],
-}
+};
 
-const activeGenre = ref(1)
+const activeGenre = ref(1);
 
 const subTotal = computed(() => {
-  let price = 0
+  let price = 0;
   order.items.forEach((item) => {
-    price += item.price * item.quantity
-  })
-  return price
-})
+    price += item.price * item.quantity;
+  });
+  return price;
+});
 
 const taxes = computed(() => {
-  return subTotal.value * 0.0625
-})
+  return subTotal.value * 0.0625;
+});
 
 const total = computed(() => {
-  return subTotal.value + taxes.value
-})
+  return subTotal.value + taxes.value;
+});
 </script>
 
 <template>

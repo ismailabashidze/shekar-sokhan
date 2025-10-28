@@ -85,8 +85,8 @@ export default defineAppConfig({
             title: 'Customize',
             icon: { name: 'ph:drop-half-bottom-duotone', class: 'w-5 h-5' },
             click: () => {
-              const isOpen = useState('switcher-open', () => false)
-              isOpen.value = true
+              const isOpen = useState('switcher-open', () => false);
+              isOpen.value = true;
             },
             position: 'end',
           },
@@ -94,8 +94,8 @@ export default defineAppConfig({
             title: 'Search',
             icon: { name: 'ph:magnifying-glass-duotone', class: 'w-5 h-5' },
             click: () => {
-              const isOpen = useState('search-open', () => false)
-              isOpen.value = true
+              const isOpen = useState('search-open', () => false);
+              isOpen.value = true;
             },
             position: 'end',
           },
@@ -329,8 +329,8 @@ export default defineAppConfig({
             name: 'Customize',
             icon: { name: 'ph:drop-half-bottom-duotone', class: 'w-5 h-5' },
             click: () => {
-              const isSwitcherOpen = useState('switcher-open', () => false)
-              isSwitcherOpen.value = true
+              const isSwitcherOpen = useState('switcher-open', () => false);
+              isSwitcherOpen.value = true;
             },
             position: 'end',
           },
@@ -613,8 +613,8 @@ export default defineAppConfig({
             name: 'Customize',
             icon: { name: 'ph:drop-half-bottom-duotone', class: 'w-6 h-6' },
             click: () => {
-              const isSwitcherOpen = useState('switcher-open', () => false)
-              isSwitcherOpen.value = true
+              const isSwitcherOpen = useState('switcher-open', () => false);
+              isSwitcherOpen.value = true;
             },
           },
         ],
@@ -754,4 +754,4 @@ export default defineAppConfig({
       },
     },
   },
-})
+});

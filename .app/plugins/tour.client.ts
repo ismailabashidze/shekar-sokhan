@@ -1,5 +1,5 @@
-import { driver } from 'driver.js'
-import 'driver.js/dist/driver.css'
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
 
 export default defineNuxtPlugin(() => {
   // Configuration for RTL support and Persian language
@@ -14,13 +14,13 @@ export default defineNuxtPlugin(() => {
     closeBtnText: '×',
     onDestroyed: () => {
       // Clean up when tour is finished
-      localStorage.setItem('tour_completed', 'true')
+      localStorage.setItem('tour_completed', 'true');
     },
-  })
+  });
 
   return {
     provide: {
       tour: tourDriver,
     },
-  }
-})
+  };
+});

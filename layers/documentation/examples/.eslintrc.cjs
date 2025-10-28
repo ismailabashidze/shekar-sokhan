@@ -13,4 +13,4 @@ module.exports = {
     'vue/padding-line-between-blocks': 'error',
     'vue/padding-line-between-tags': ['error', [{ blankLine: 'always', next: '*', prev: '*' }]],
   },
-}
+};

@@ -9,14 +9,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 
-const { version } = useAppVersion()
-const { latestRelease } = await useReleaseNotes()
+const { version } = useAppVersion();
+const { latestRelease } = await useReleaseNotes();
 
-const tooltip = computed(() => latestRelease.value?.product?.summary ?? 'مشاهده تاریخچه تغییرات')
+const tooltip = computed(() => latestRelease.value?.product?.summary ?? 'مشاهده تاریخچه تغییرات');
 
 const navigateToChangelog = () => {
-  navigateTo('/changelog')
-}
+  navigateTo('/changelog');
+};
 </script>

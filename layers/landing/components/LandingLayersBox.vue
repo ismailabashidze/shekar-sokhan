@@ -1,16 +1,16 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    title: string
-    icon: string
-    to?: string
-    color?: string
+    title: string;
+    icon: string;
+    to?: string;
+    color?: string;
   }>(),
   {
     to: '/',
     color: 'primary',
   },
-)
+);
 </script>
 
 <template>

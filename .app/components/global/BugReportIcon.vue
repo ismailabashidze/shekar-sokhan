@@ -14,9 +14,9 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-})
+});
 
-const router = useRouter()
+const router = useRouter();
 </script>
 
 <style scoped>

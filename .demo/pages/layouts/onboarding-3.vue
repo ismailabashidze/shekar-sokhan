@@ -10,9 +10,9 @@ definePageMeta({
     srcDark: '/img/screens/layouts-onboarding-3-dark.png',
     order: 95,
   },
-})
+});
 
-const roleType = ref(0)
+const roleType = ref(0);
 
 const roles = [
   {
@@ -63,7 +63,7 @@ const roles = [
     avatar: '/img/avatars/21.svg',
     logo: '/img/stacks/android.svg',
   },
-]
+];
 </script>
 
 <template>

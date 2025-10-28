@@ -10,16 +10,16 @@ definePageMeta({
     order: 37,
     new: true,
   },
-})
+});
 
-const incoming = ref(true)
-const outgoing = ref(false)
-const failed = ref(false)
-const uncashed = ref(false)
-const payments = ref(true)
-const low = ref(true)
-const features = ref(true)
-const offers = ref(true)
+const incoming = ref(true);
+const outgoing = ref(false);
+const failed = ref(false);
+const uncashed = ref(false);
+const payments = ref(true);
+const low = ref(true);
+const features = ref(true);
+const offers = ref(true);
 </script>
 
 <template>

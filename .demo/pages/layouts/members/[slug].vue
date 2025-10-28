@@ -27,24 +27,24 @@ definePageMeta({
       new: true,
     },
   ],
-})
+});
 
-const { open } = usePanels()
-const route = useRoute()
-const slug = computed(() => route.params.slug)
+const { open } = usePanels();
+const route = useRoute();
+const slug = computed(() => route.params.slug);
 
 const query = computed(() => {
   return {
     slug: slug.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch('/api/members', {
   query,
-})
+});
 
 if (!data.value?.member) {
-  await navigateTo('/layouts/members/kendra-wilson')
+  await navigateTo('/layouts/members/kendra-wilson');
 }
 </script>
 

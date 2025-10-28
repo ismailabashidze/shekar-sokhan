@@ -10,13 +10,13 @@ definePageMeta({
     order: 14,
   },
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
-const toaster = useToaster()
+const route = useRoute();
+const router = useRouter();
+const toaster = useToaster();
 
 // استفاده از کامپوزبل posts
 const {
@@ -27,30 +27,30 @@ const {
   getPostsByCategory,
   incrementViewCount,
   toggleLike,
-} = usePosts()
+} = usePosts();
 
-const { getUserAvatarUrl } = useAvatarManager()
+const { getUserAvatarUrl } = useAvatarManager();
 
-const postId = route.params.id as string
+const postId = route.params.id as string;
 
 // State for related posts and comments
-const relatedPosts = ref<any[]>([])
-const comments = ref<any[]>([])
+const relatedPosts = ref<any[]>([]);
+const comments = ref<any[]>([]);
 
 // Load post and related data
 const loadPost = async () => {
   try {
-    console.log('Loading post with ID:', postId)
-    console.log('PocketBase instance:', useNuxtApp().$pb)
-    console.log('Auth store valid:', useNuxtApp().$pb.authStore.isValid)
-    console.log('Current user:', useNuxtApp().$pb.authStore.model)
+    console.log('Loading post with ID:', postId);
+    console.log('PocketBase instance:', useNuxtApp().$pb);
+    console.log('Auth store valid:', useNuxtApp().$pb.authStore.isValid);
+    console.log('Current user:', useNuxtApp().$pb.authStore.model);
 
-    await getPost(postId)
-    console.log('Post loaded:', currentPost.value)
+    await getPost(postId);
+    console.log('Post loaded:', currentPost.value);
 
     if (currentPost.value) {
       // Increment view count
-      await incrementViewCount(postId)
+      await incrementViewCount(postId);
 
       // Load related posts from same category
       if (currentPost.value.category) {
@@ -58,56 +58,56 @@ const loadPost = async () => {
           page: 1,
           perPage: 3,
           filters: { status: 'published' },
-        })
+        });
         // Exclude current post from related posts
-        relatedPosts.value = relatedData.items?.filter(p => p.id !== postId).slice(0, 2) || []
+        relatedPosts.value = relatedData.items?.filter(p => p.id !== postId).slice(0, 2) || [];
       }
     }
   }
   catch (err: any) {
-    console.error('Error loading post:', err)
+    console.error('Error loading post:', err);
     console.error('Error details:', {
       message: err.message,
       status: err.status,
       response: err.response,
       data: err.data,
-    })
+    });
     if (err?.message?.includes('404') || err?.message?.includes('not found')) {
       // Post not found, redirect to 404 or posts list
-      router.push('/posts/list')
+      router.push('/posts/list');
     }
   }
-}
+};
 
 // Format functions
 const formatDate = (dateString: string): string => {
-  if (!dateString) return ''
+  if (!dateString) return '';
 
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffInMs = now.getTime() - date.getTime()
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  if (diffInDays === 0) return 'امروز'
-  if (diffInDays === 1) return 'دیروز'
-  if (diffInDays < 7) return `${diffInDays} روز پیش`
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} هفته پیش`
-  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} ماه پیش`
-  return `${Math.floor(diffInDays / 365)} سال پیش`
-}
+  if (diffInDays === 0) return 'امروز';
+  if (diffInDays === 1) return 'دیروز';
+  if (diffInDays < 7) return `${diffInDays} روز پیش`;
+  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} هفته پیش`;
+  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} ماه پیش`;
+  return `${Math.floor(diffInDays / 365)} سال پیش`;
+};
 
 const formatViewCount = (count: number): string => {
   if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K`
+    return `${(count / 1000).toFixed(1)}K`;
   }
-  return count.toString()
-}
+  return count.toString();
+};
 
 // Computed properties for display
-const post = computed(() => currentPost.value)
+const post = computed(() => currentPost.value);
 
 const displayAuthor = computed(() => {
-  if (!post.value?.author) return null
+  if (!post.value?.author) return null;
 
   // Handle both expanded and non-expanded author data
   if (typeof post.value.author === 'string') {
@@ -116,7 +116,7 @@ const displayAuthor = computed(() => {
       role: 'نویسنده مقاله',
       avatar: '/img/avatars/1.png',
       bio: 'نویسنده محترم این مقاله',
-    }
+    };
   }
 
   return {
@@ -124,18 +124,18 @@ const displayAuthor = computed(() => {
     role: 'نویسنده مقاله',
     avatar: getUserAvatarUrl(post.value.author as any) || '/img/avatars/1.png',
     bio: (post.value.author as any)?.bio || 'نویسنده محترم این مقاله',
-  }
-})
+  };
+});
 
 // Load data on mount
 onMounted(() => {
-  loadPost()
-})
+  loadPost();
+});
 
 // Comment form
-const newComment = ref('')
+const newComment = ref('');
 const submitComment = () => {
-  if (!newComment.value.trim()) return
+  if (!newComment.value.trim()) return;
 
   // TODO: Implement comment API
   toaster.show({
@@ -144,28 +144,28 @@ const submitComment = () => {
     color: 'info',
     icon: 'ph:info',
     closable: true,
-  })
-  newComment.value = ''
-}
+  });
+  newComment.value = '';
+};
 
 // Like post
 const likePost = async () => {
-  if (!post.value?.id) return
+  if (!post.value?.id) return;
 
   try {
-    await toggleLike(post.value.id)
+    await toggleLike(post.value.id);
     toaster.show({
       title: 'پسندیدن',
       message: 'مقاله پسندیده شد',
       color: 'success',
       icon: 'ph:heart',
       closable: true,
-    })
+    });
   }
   catch (err) {
-    console.error('Error liking post:', err)
+    console.error('Error liking post:', err);
   }
-}
+};
 
 // SEO Meta
 watchEffect(() => {
@@ -180,9 +180,9 @@ watchEffect(() => {
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'keywords', content: post.value.tags?.join(', ') || '' },
       ],
-    })
+    });
   }
-})
+});
 </script>
 
 <template>

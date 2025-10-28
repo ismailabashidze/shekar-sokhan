@@ -10,49 +10,49 @@ definePageMeta({
     order: 37,
     new: true,
   },
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(45)
-const { open } = usePanels()
+const filter = ref('');
+const perPage = ref(45);
+const { open } = usePanels();
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch('/api/invest', {
   query,
-})
+});
 
-const currentOption = ref()
+const currentOption = ref();
 
 function openOptionPanel(id: number, options: any) {
-  currentOption.value = options.find((option: any) => option.id === id)
-  open('invest', { option: currentOption })
+  currentOption.value = options.find((option: any) => option.id === id);
+  open('invest', { option: currentOption });
 }
 
-const gaugePersonal = reactive(useGaugePersonal())
+const gaugePersonal = reactive(useGaugePersonal());
 
 function useGaugePersonal() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 220
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 220;
 
   const options = {
     title: {
@@ -111,16 +111,16 @@ function useGaugePersonal() {
       },
     },
     labels: ['Average Results'],
-  }
+  };
 
-  const series = shallowRef([76])
+  const series = shallowRef([76]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

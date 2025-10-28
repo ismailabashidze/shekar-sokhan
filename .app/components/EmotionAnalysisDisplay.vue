@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { convertToEmotionWheel, getActiveEmotions, getDominantEmotion } from '~/utils/emotion-mapper'
+import { ref, computed } from 'vue';
+import { convertToEmotionWheel, getActiveEmotions, getDominantEmotion } from '~/utils/emotion-mapper';
 
 // Example JSON data from API response
 const emotionAnalysisData = ref([
@@ -40,22 +40,22 @@ const emotionAnalysisData = ref([
     emotionName: 'نامشخص',
     severity: 'خالی',
   },
-])
+]);
 
 // Convert to EmotionWheel format
-const selectedEmotions = computed(() => convertToEmotionWheel(emotionAnalysisData.value))
+const selectedEmotions = computed(() => convertToEmotionWheel(emotionAnalysisData.value));
 
 // Get active emotions for summary
-const activeEmotions = computed(() => getActiveEmotions(emotionAnalysisData.value))
+const activeEmotions = computed(() => getActiveEmotions(emotionAnalysisData.value));
 
 // Get dominant emotion
-const dominantEmotion = computed(() => getDominantEmotion(emotionAnalysisData.value))
+const dominantEmotion = computed(() => getDominantEmotion(emotionAnalysisData.value));
 
 // Handle emotion wheel changes
 const handleEmotionChange = (newSelected: string[]) => {
-  console.log('Selected emotions changed:', newSelected)
+  console.log('Selected emotions changed:', newSelected);
   // You can update your data or emit to parent component
-}
+};
 </script>
 
 <template>

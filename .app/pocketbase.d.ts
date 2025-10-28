@@ -1,14 +1,14 @@
-import 'nuxt'
-import type PocketBase from 'pocketbase'
+import 'nuxt';
+import type PocketBase from 'pocketbase';
 
 declare module '#app' {
   interface NuxtApp {
-    $pb: PocketBase
+    $pb: PocketBase;
   }
 }
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
-    $pb: PocketBase
+    $pb: PocketBase;
   }
 }

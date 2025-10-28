@@ -9,11 +9,11 @@ definePageMeta({
     srcDark: '/img/screens/layouts-placeload-2-dark.png',
     order: 54,
   },
-})
-const fake = ref('')
-const fakePerPage = ref('')
-const fakeAll = ref(true)
-const fakeItems = ref([])
+});
+const fake = ref('');
+const fakePerPage = ref('');
+const fakeAll = ref(true);
+const fakeItems = ref([]);
 </script>
 
 <template>

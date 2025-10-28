@@ -9,12 +9,12 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-search-results-dark.png',
     order: 82,
   },
-})
+});
 
-const { data, pending, error, refresh } = await useFetch('/api/search')
+const { data, pending, error, refresh } = await useFetch('/api/search');
 
-const searchTerms = ref('internal projects')
-const results = ref()
+const searchTerms = ref('internal projects');
+const results = ref();
 const filters = reactive({
   publication: {
     new: false,
@@ -33,21 +33,21 @@ const filters = reactive({
     projects: false,
     files: false,
   },
-})
+});
 
 if (data.value) {
-  results.value = data.value
+  results.value = data.value;
 }
 
-const activeFilter = ref('all')
+const activeFilter = ref('all');
 const filteredResults = computed(() => {
   if (activeFilter.value === 'all') {
-    return results.value
+    return results.value;
   }
   return results.value.filter(
     (result: any) => result.type === activeFilter.value,
-  )
-})
+  );
+});
 </script>
 
 <template>

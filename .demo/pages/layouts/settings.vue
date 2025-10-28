@@ -1,25 +1,25 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'empty',
-})
+});
 
-const route = useRoute()
+const route = useRoute();
 
 const isPersonal = computed(() => {
-  return route.path.match('^/layouts/settings$')
-})
+  return route.path.match('^/layouts/settings$');
+});
 
 const isSecurity = computed(() => {
-  return route.path.startsWith('/layouts/settings/security')
-})
+  return route.path.startsWith('/layouts/settings/security');
+});
 
 const isNotifications = computed(() => {
-  return route.path.startsWith('/layouts/settings/notifications')
-})
+  return route.path.startsWith('/layouts/settings/notifications');
+});
 
 const isTokens = computed(() => {
-  return route.path.startsWith('/layouts/settings/tokens')
-})
+  return route.path.startsWith('/layouts/settings/tokens');
+});
 </script>
 
 <template>

@@ -4,22 +4,22 @@ const props = withDefaults(
     /**
      * The title of the help popover.
      */
-    title: string
+    title: string;
 
     /**
      * The subtitle of the help popover.
      */
-    subtitle: string
+    subtitle: string;
 
     /**
      * The text of the help popover.
      */
-    text: string
+    text: string;
 
     /**
      * The name of the icon to display.
      */
-    icon: string
+    icon: string;
 
     /**
      * The color of the icon.
@@ -36,12 +36,12 @@ const props = withDefaults(
     | 'warning'
     | 'danger'
     | 'default-contrast'
-    | 'muted-contrast'
+    | 'muted-contrast';
   }>(),
   {
     iconColor: 'primary',
   },
-)
+);
 </script>
 
 <template>

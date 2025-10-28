@@ -40,9 +40,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed } from 'vue';
 
-defineEmits(['select', 'close'])
+defineEmits(['select', 'close']);
 
 // Common Phosphor icons - you can expand this list
 const icons = [
@@ -77,13 +77,13 @@ const icons = [
   'ph:coffee',
   'ph:flower',
   'ph:butterfly',
-]
+];
 
-const search = ref('')
+const search = ref('');
 
 const filteredIcons = computed(() => {
-  if (!search.value) return icons
-  return icons.filter(icon => icon.toLowerCase().includes(search.value.toLowerCase()))
-})
+  if (!search.value) return icons;
+  return icons.filter(icon => icon.toLowerCase().includes(search.value.toLowerCase()));
+});
 
 </script>

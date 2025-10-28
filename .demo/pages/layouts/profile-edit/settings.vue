@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import IMask, { type InputMask } from 'imask'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import IMask, { type InputMask } from 'imask';
+import { Field, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 const VALIDATION_TEXT = {
   OLD_PASSWORD_REQUIRED: 'Your current password is required',
   NEW_PASSWORD_LENGTH: 'Password must be at least 8 characters',
   NEW_PASSWORD_MATCH: 'Passwords do not match',
-}
+};
 
 definePageMeta({
   title: 'Settings',
@@ -28,7 +28,7 @@ definePageMeta({
     leaveFromClass: 'translate-y-0 opacity-100',
     leaveToClass: 'translate-y-20 opacity-0',
   },
-})
+});
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -58,14 +58,14 @@ const zodSchema = z
           code: z.ZodIssueCode.custom,
           message: VALIDATION_TEXT.NEW_PASSWORD_LENGTH,
           path: ['newPassword'],
-        })
+        });
       }
       if (data.newPassword !== data.confirmPassword) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: VALIDATION_TEXT.NEW_PASSWORD_MATCH,
           path: ['confirmPassword'],
-        })
+        });
       }
     }
 
@@ -74,17 +74,17 @@ const zodSchema = z
         code: z.ZodIssueCode.custom,
         message: 'A phone number is required',
         path: ['twoFactor.phoneNumber'],
-      })
+      });
     }
-  })
+  });
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const { data, pending, error, refresh } = await useFetch('/api/profile')
+const { data, pending, error, refresh } = await useFetch('/api/profile');
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   currentPassword: 'password',
   newPassword: '',
@@ -99,7 +99,7 @@ const initialValues = {
     marketing: false,
     partners: false,
   },
-} satisfies FormInput
+} satisfies FormInput;
 
 const {
   handleSubmit,
@@ -114,52 +114,52 @@ const {
 } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
-const success = ref(false)
-const fieldsWithErrors = computed(() => Object.keys(errors.value).length)
+const success = ref(false);
+const fieldsWithErrors = computed(() => Object.keys(errors.value).length);
 
 // Here we register the phone number input with IMask
-const phoneInput = ref<any>()
-const mask = shallowRef<InputMask<{ mask: string }> | undefined>(undefined)
+const phoneInput = ref<any>();
+const mask = shallowRef<InputMask<{ mask: string }> | undefined>(undefined);
 onMounted(() => {
   mask.value = IMask(phoneInput.value?.el, {
     mask: '(000) 000-0000',
-  })
-})
+  });
+});
 onBeforeUnmount(() => {
-  mask.value?.destroy()
-  mask.value = undefined
-})
+  mask.value?.destroy();
+  mask.value = undefined;
+});
 
 // Reset notifications when the user disables them
 watch(
   () => values.notifications?.enabled,
   (value) => {
     if (!value) {
-      setFieldValue('notifications.flushLowPriority', false)
-      setFieldValue('notifications.marketing', false)
-      setFieldValue('notifications.partners', false)
+      setFieldValue('notifications.flushLowPriority', false);
+      setFieldValue('notifications.marketing', false);
+      setFieldValue('notifications.partners', false);
     }
   },
-)
+);
 
 // Ask the user for confirmation before leaving the page if the form has unsaved changes
 onBeforeRouteLeave(() => {
   if (meta.value.dirty) {
-    return confirm('You have unsaved changes. Are you sure you want to leave?')
+    return confirm('You have unsaved changes. Are you sure you want to leave?');
   }
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     // here you have access to the validated form values
-    console.log('profile-settings-success', values)
+    console.log('profile-settings-success', values);
 
     try {
       // fake delay, this will make isSubmitting value to be true
@@ -169,68 +169,68 @@ const onSubmit = handleSubmit(
           setTimeout(
             () => reject(new Error('Fake backend validation error')),
             2000,
-          )
+          );
         }
-        setTimeout(resolve, 4000)
-      })
+        setTimeout(resolve, 4000);
+      });
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'Success',
         message: `Your profile has been updated!`,
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
     }
     catch (error: any) {
       // this will set the error on the form
       if (error.message === 'Fake backend validation error') {
-        setFieldError('currentPassword', 'Your current password is incorrect')
+        setFieldError('currentPassword', 'Your current password is incorrect');
 
         document.documentElement.scrollTo({
           top: 0,
           behavior: 'smooth',
-        })
+        });
 
-        toaster.clearAll()
+        toaster.clearAll();
         toaster.show({
           title: 'Oops!',
           message: 'Please review the errors in the form',
           color: 'danger',
           icon: 'lucide:alert-triangle',
           closable: true,
-        })
+        });
       }
-      return
+      return;
     }
 
-    resetForm()
+    resetForm();
 
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
 
-    success.value = true
+    success.value = true;
     setTimeout(() => {
-      success.value = false
-    }, 3000)
+      success.value = false;
+    }, 3000);
   },
   (error) => {
     // this callback is optional and called only if the form has errors
-    success.value = false
+    success.value = false;
 
     // here you have access to the error
-    console.log('profile-settings-error', error)
+    console.log('profile-settings-error', error);
 
     // you can use it to scroll to the first error
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 </script>
 
 <template>

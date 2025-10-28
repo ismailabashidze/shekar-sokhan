@@ -10,10 +10,10 @@ definePageMeta({
     order: 37,
     new: true,
   },
-})
+});
 
-const visibility = ref(true)
-const privateMessages = ref(true)
+const visibility = ref(true);
+const privateMessages = ref(true);
 </script>
 
 <template>

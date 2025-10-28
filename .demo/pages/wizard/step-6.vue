@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Project, ProjectStepData, Tool } from '../../types'
+import type { Project, ProjectStepData, Tool } from '../../types';
 
 definePageMeta({
   title: 'Wizard — Step 6',
@@ -11,14 +11,14 @@ definePageMeta({
     srcDark: '/img/screens/wizard-6-dark.png',
     order: 35,
   },
-})
+});
 useHead({
   title: 'Project tools',
-})
+});
 
-const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>()
+const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 
 const tools: Tool[] = [
   {
@@ -81,7 +81,7 @@ const tools: Tool[] = [
     description: 'Code Repository',
     logo: '/img/logos/tools/gitlab.svg',
   },
-]
+];
 </script>
 
 <template>

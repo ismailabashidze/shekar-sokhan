@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const route = useRoute()
-const app = useAppConfig()
+const route = useRoute();
+const app = useAppConfig();
 
 /**
  * Global head configuration
@@ -11,7 +11,7 @@ useHead({
   titleTemplate: (titleChunk) => {
     return titleChunk
       ? `${titleChunk} - ${app.tairo?.title}`
-      : `${app.tairo?.title}`
+      : `${app.tairo?.title}`;
   },
   htmlAttrs: {
     lang: 'en',
@@ -68,7 +68,7 @@ useHead({
       )}`,
     },
   ],
-})
+});
 </script>
 
 <template>

@@ -10,20 +10,20 @@ definePageMeta({
     order: 67,
   },
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(12)
-const isLoading = ref(true)
-const noResults = ref(false)
+const filter = ref('');
+const perPage = ref(12);
+const isLoading = ref(true);
+const noResults = ref(false);
 
-const { getPatients } = usePatient()
-const { role } = useUser()
+const { getPatients } = usePatient();
+const { role } = useUser();
 
 // Random colors for avatars
 const colors = [
@@ -35,65 +35,65 @@ const colors = [
   'bg-purple-500',
   'bg-yellow-500',
   'bg-pink-500',
-]
+];
 
 const getRandomColor = () => {
-  return colors[Math.floor(Math.random() * colors.length)]
-}
+  return colors[Math.floor(Math.random() * colors.length)];
+};
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 // Fetch patients data
-const patients = ref([])
-const totalPatients = ref(0)
+const patients = ref([]);
+const totalPatients = ref(0);
 
 const fetchPatients = async () => {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const data = await getPatients()
-    patients.value = data
-    patients.value.map(p => p.badge = '/img/logo.svg')
-    totalPatients.value = data.length
+    const data = await getPatients();
+    patients.value = data;
+    patients.value.map(p => p.badge = '/img/logo.svg');
+    totalPatients.value = data.length;
 
     // Filter patients if search filter is applied
     if (filter.value) {
       patients.value = patients.value.filter(patient =>
         patient.name.toLowerCase().includes(filter.value.toLowerCase())
         || (patient.shortDescription && patient.shortDescription.toLowerCase().includes(filter.value.toLowerCase())),
-      )
+      );
     }
 
-    noResults.value = patients.value.length === 0
+    noResults.value = patients.value.length === 0;
   }
   catch (error) {
-    console.error('Error fetching patients:', error)
+    console.error('Error fetching patients:', error);
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // Initial fetch
-fetchPatients()
+fetchPatients();
 
 // Watch for filter changes to refetch
 watch(filter, () => {
-  fetchPatients()
-})
+  fetchPatients();
+});
 </script>
 
 <template>

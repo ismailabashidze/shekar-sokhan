@@ -79,16 +79,16 @@
 
 <script setup lang="ts">
 
-const value = ref()
+const value = ref();
 
-const frameworks = ['Javascript', 'Vue.js', 'React.js', 'Angular', 'Alpine.js']
+const frameworks = ['Javascript', 'Vue.js', 'React.js', 'Angular', 'Alpine.js'];
 
 const objectValue = ref({
   id: 2,
   name: 'Aaron Splatter',
   text: 'Project Manager',
   media: '/img/avatars/16.svg',
-})
+});
 
 const people = [
   {
@@ -121,5 +121,5 @@ const people = [
     text: 'Product Manager',
     media: '/img/avatars/2.svg',
   },
-]
+];
 </script>

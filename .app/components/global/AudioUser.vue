@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { useHead } from '@vueuse/head'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useHead } from '@vueuse/head';
 
 // Define emits
-const emit = defineEmits(['close', 'textReady', 'sendMessage'])
+const emit = defineEmits(['close', 'textReady', 'sendMessage']);
 
 // Inject the external script for dat.GUI using the CDN
 useHead({
@@ -13,79 +13,79 @@ useHead({
       type: 'text/javascript',
     },
   ],
-})
+});
 
-const canvas = ref(null)
-const isStarted = ref(false) // Changed to a toggle state instead of press state
+const canvas = ref(null);
+const isStarted = ref(false); // Changed to a toggle state instead of press state
 
-let context, analyser, freqs
-let recognition = ref<any>(null) // Explicitly type recognition
-let recognitionTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
-let tipTimeout
+let context, analyser, freqs;
+let recognition = ref<any>(null); // Explicitly type recognition
+let recognitionTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+let tipTimeout;
 
-const finalText = ref('')
-const interimText = ref('')
-const allText = ref('') // Store all completed sentences
-const lastProcessedIndex = ref(-1) // Track last processed result index
-const showTip = ref(false)
+const finalText = ref('');
+const interimText = ref('');
+const allText = ref(''); // Store all completed sentences
+const lastProcessedIndex = ref(-1); // Track last processed result index
+const showTip = ref(false);
 
-const silenceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-const countDown = ref(3)
-const showCountdown = ref(false)
+const silenceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
+const countDown = ref(3);
+const showCountdown = ref(false);
 
-const deviceInfo = ref('')
-const audioStatus = ref('')
-const errorMessage = ref('')
+const deviceInfo = ref('');
+const audioStatus = ref('');
+const errorMessage = ref('');
 
 // Helper function to log status with visual feedback
 const logStatus = (status: string, error = false) => {
-  audioStatus.value = status
-  console.log(`[AudioUser] ${status}`)
+  audioStatus.value = status;
+  console.log(`[AudioUser] ${status}`);
   if (error) {
-    errorMessage.value = status
+    errorMessage.value = status;
   }
-}
+};
 
 // Get device information
 const getDeviceInfo = async () => {
   try {
-    const devices = await navigator.mediaDevices.enumerateDevices()
-    const audioDevices = devices.filter(device => device.kind === 'audioinput')
-    deviceInfo.value = `دستگاه‌های صوتی موجود: ${audioDevices.map(d => d.label || 'دستگاه بدون نام').join(', ')}`
-    console.log('[AudioUser] اطلاعات دستگاه:', deviceInfo.value)
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const audioDevices = devices.filter(device => device.kind === 'audioinput');
+    deviceInfo.value = `دستگاه‌های صوتی موجود: ${audioDevices.map(d => d.label || 'دستگاه بدون نام').join(', ')}`;
+    console.log('[AudioUser] اطلاعات دستگاه:', deviceInfo.value);
   }
   catch (err) {
-    console.error('[AudioUser] خطا در دریافت اطلاعات دستگاه:', err)
-    deviceInfo.value = `خطا در دریافت اطلاعات دستگاه: ${err.message}`
+    console.error('[AudioUser] خطا در دریافت اطلاعات دستگاه:', err);
+    deviceInfo.value = `خطا در دریافت اطلاعات دستگاه: ${err.message}`;
   }
-}
+};
 
 const startSilenceTimer = () => {
-  if (silenceTimer.value) clearTimeout(silenceTimer.value)
-  showCountdown.value = true
-  countDown.value = 1.5
+  if (silenceTimer.value) clearTimeout(silenceTimer.value);
+  showCountdown.value = true;
+  countDown.value = 1.5;
 
   const countdown = () => {
     if (countDown.value > 0) {
-      countDown.value -= 0.5
-      silenceTimer.value = setTimeout(countdown, 500)
+      countDown.value -= 0.5;
+      silenceTimer.value = setTimeout(countdown, 500);
     }
     else {
-      handleAutoClose()
+      handleAutoClose();
     }
-  }
+  };
 
-  silenceTimer.value = setTimeout(countdown, 500)
-}
+  silenceTimer.value = setTimeout(countdown, 500);
+};
 
 const resetSilenceTimer = () => {
   if (silenceTimer.value) {
-    clearTimeout(silenceTimer.value)
-    silenceTimer.value = null
+    clearTimeout(silenceTimer.value);
+    silenceTimer.value = null;
   }
-  showCountdown.value = false
-  countDown.value = 1.5
-}
+  showCountdown.value = false;
+  countDown.value = 1.5;
+};
 
 // Set the visualization options
 const opts = {
@@ -103,398 +103,398 @@ const opts = {
   shift: 30, // Reduced shift
   width: 30, // Reduced width
   amp: 0.5, // Reduced amplitude
-}
+};
 
 // Helper functions for visualizing frequencies
-const shuffle = [1, 3, 0, 4, 2]
-const range = i => Array.from(Array(i).keys())
+const shuffle = [1, 3, 0, 4, 2];
+const range = i => Array.from(Array(i).keys());
 
 const freq = (channel, i) => {
-  const band = 2 * channel + shuffle[i] * 6
-  return freqs[band]
-}
+  const band = 2 * channel + shuffle[i] * 6;
+  return freqs[band];
+};
 
 const scale = (i) => {
-  const x = Math.abs(2 - i)
-  const s = 3 - x
-  return (s / 3) * opts.amp
-}
+  const x = Math.abs(2 - i);
+  const s = 3 - x;
+  return (s / 3) * opts.amp;
+};
 
 // Function to draw the visualization path
 const path = (channel) => {
-  if (!canvas.value) return
+  if (!canvas.value) return;
 
-  const ctx = canvas.value.getContext('2d')
-  const color = opts[`color${channel + 1}`].map(Math.floor)
-  ctx.fillStyle = `rgba(${color}, ${opts.fillOpacity})`
-  ctx.strokeStyle = ctx.shadowColor = `rgb(${color})`
+  const ctx = canvas.value.getContext('2d');
+  const color = opts[`color${channel + 1}`].map(Math.floor);
+  ctx.fillStyle = `rgba(${color}, ${opts.fillOpacity})`;
+  ctx.strokeStyle = ctx.shadowColor = `rgb(${color})`;
 
-  ctx.lineWidth = opts.lineWidth
-  ctx.shadowBlur = opts.glow
-  ctx.globalCompositeOperation = opts.blend
+  ctx.lineWidth = opts.lineWidth;
+  ctx.shadowBlur = opts.glow;
+  ctx.globalCompositeOperation = opts.blend;
 
-  const HEIGHT = canvas.value.height
-  const WIDTH = canvas.value.width
-  const m = HEIGHT / 2
+  const HEIGHT = canvas.value.height;
+  const WIDTH = canvas.value.width;
+  const m = HEIGHT / 2;
 
   // Adjust width parameters based on canvas size
-  const scaleFactor = WIDTH / 500 // Scale based on reference width of 500px
-  const adjustedWidth = opts.width * scaleFactor
-  const adjustedShift = opts.shift * scaleFactor
+  const scaleFactor = WIDTH / 500; // Scale based on reference width of 500px
+  const adjustedWidth = opts.width * scaleFactor;
+  const adjustedShift = opts.shift * scaleFactor;
 
-  const offset = (WIDTH - 15 * adjustedWidth) / 2
-  const x = range(15).map(i => offset + channel * adjustedShift + i * adjustedWidth)
-  const y = range(5).map(i => Math.max(0, m - scale(i) * freq(channel, i)))
-  const h = 2 * m
+  const offset = (WIDTH - 15 * adjustedWidth) / 2;
+  const x = range(15).map(i => offset + channel * adjustedShift + i * adjustedWidth);
+  const y = range(5).map(i => Math.max(0, m - scale(i) * freq(channel, i)));
+  const h = 2 * m;
 
-  ctx.beginPath()
-  ctx.moveTo(0, m)
-  ctx.lineTo(x[0], m + 1)
-  ctx.bezierCurveTo(x[1], m + 1, x[2], y[0], x[3], y[0])
-  ctx.bezierCurveTo(x[4], y[0], x[4], y[1], x[5], y[1])
-  ctx.bezierCurveTo(x[6], y[1], x[6], y[2], x[7], y[2])
-  ctx.bezierCurveTo(x[8], y[2], x[8], y[3], x[9], y[3])
-  ctx.bezierCurveTo(x[10], y[3], x[10], y[4], x[11], y[4])
-  ctx.bezierCurveTo(x[12], y[4], x[12], m, x[13], m)
-  ctx.lineTo(WIDTH, m + 1)
-  ctx.lineTo(x[13], m - 1)
+  ctx.beginPath();
+  ctx.moveTo(0, m);
+  ctx.lineTo(x[0], m + 1);
+  ctx.bezierCurveTo(x[1], m + 1, x[2], y[0], x[3], y[0]);
+  ctx.bezierCurveTo(x[4], y[0], x[4], y[1], x[5], y[1]);
+  ctx.bezierCurveTo(x[6], y[1], x[6], y[2], x[7], y[2]);
+  ctx.bezierCurveTo(x[8], y[2], x[8], y[3], x[9], y[3]);
+  ctx.bezierCurveTo(x[10], y[3], x[10], y[4], x[11], y[4]);
+  ctx.bezierCurveTo(x[12], y[4], x[12], m, x[13], m);
+  ctx.lineTo(WIDTH, m + 1);
+  ctx.lineTo(x[13], m - 1);
 
-  ctx.bezierCurveTo(x[12], m, x[12], h - y[4], x[11], h - y[4])
-  ctx.bezierCurveTo(x[10], h - y[4], x[10], h - y[3], x[9], h - y[3])
-  ctx.bezierCurveTo(x[8], h - y[3], x[8], h - y[2], x[7], h - y[2])
-  ctx.bezierCurveTo(x[6], h - y[2], x[6], h - y[1], x[5], h - y[1])
-  ctx.bezierCurveTo(x[4], h - y[1], x[4], h - y[0], x[3], h - y[0])
-  ctx.bezierCurveTo(x[2], h - y[0], x[1], m, x[0], m)
+  ctx.bezierCurveTo(x[12], m, x[12], h - y[4], x[11], h - y[4]);
+  ctx.bezierCurveTo(x[10], h - y[4], x[10], h - y[3], x[9], h - y[3]);
+  ctx.bezierCurveTo(x[8], h - y[3], x[8], h - y[2], x[7], h - y[2]);
+  ctx.bezierCurveTo(x[6], h - y[2], x[6], h - y[1], x[5], h - y[1]);
+  ctx.bezierCurveTo(x[4], h - y[1], x[4], h - y[0], x[3], h - y[0]);
+  ctx.bezierCurveTo(x[2], h - y[0], x[1], m, x[0], m);
 
-  ctx.lineTo(0, m)
-  ctx.fill()
-  ctx.stroke()
-}
+  ctx.lineTo(0, m);
+  ctx.fill();
+  ctx.stroke();
+};
 
 // Visualize frequencies
 const visualize = () => {
-  if (!canvas.value) return
+  if (!canvas.value) return;
 
-  const ctx = canvas.value.getContext('2d')
-  const containerWidth = canvas.value.parentElement?.clientWidth || 500
-  const WIDTH = canvas.value.width = containerWidth
-  const HEIGHT = canvas.value.height = 150
+  const ctx = canvas.value.getContext('2d');
+  const containerWidth = canvas.value.parentElement?.clientWidth || 500;
+  const WIDTH = canvas.value.width = containerWidth;
+  const HEIGHT = canvas.value.height = 150;
 
   // Center the visualization in the canvas
-  ctx.clearRect(0, 0, WIDTH, HEIGHT)
-  ctx.translate(0, 0)
+  ctx.clearRect(0, 0, WIDTH, HEIGHT);
+  ctx.translate(0, 0);
 
   if (isStarted.value && analyser && freqs) {
-    analyser.smoothingTimeConstant = opts.smoothing
-    analyser.fftSize = Math.pow(2, opts.fft)
-    analyser.minDecibels = opts.minDecibels
-    analyser.maxDecibels = 0
-    analyser.getByteFrequencyData(freqs)
+    analyser.smoothingTimeConstant = opts.smoothing;
+    analyser.fftSize = Math.pow(2, opts.fft);
+    analyser.minDecibels = opts.minDecibels;
+    analyser.maxDecibels = 0;
+    analyser.getByteFrequencyData(freqs);
 
-    path(0)
-    path(1)
-    path(2)
+    path(0);
+    path(1);
+    path(2);
   }
   else {
     // Draw a flat line when not recording
-    ctx.beginPath()
-    ctx.moveTo(0, HEIGHT / 2)
-    ctx.lineTo(WIDTH, HEIGHT / 2)
-    ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)'
-    ctx.lineWidth = 1
-    ctx.stroke()
+    ctx.beginPath();
+    ctx.moveTo(0, HEIGHT / 2);
+    ctx.lineTo(WIDTH, HEIGHT / 2);
+    ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
   }
 
   if (isStarted.value) {
-    requestAnimationFrame(visualize)
+    requestAnimationFrame(visualize);
   }
-}
+};
 
 // Initialize speech recognition
 const initSpeechRecognition = () => {
-  logStatus('بررسی تشخیص گفتار...')
+  logStatus('بررسی تشخیص گفتار...');
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
-    recognition.value = new SpeechRecognition()
-    recognition.value.continuous = true
-    recognition.value.interimResults = true
-    recognition.value.lang = 'fa-IR'
-    recognition.value.maxAlternatives = 1
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    recognition.value = new SpeechRecognition();
+    recognition.value.continuous = true;
+    recognition.value.interimResults = true;
+    recognition.value.lang = 'fa-IR';
+    recognition.value.maxAlternatives = 1;
 
     recognition.value.onstart = () => {
-      logStatus('تشخیص گفتار آغاز شد')
-    }
+      logStatus('تشخیص گفتار آغاز شد');
+    };
 
     recognition.value.onresult = (event: any) => {
-      let finalTranscript = ''
-      let interimTranscript = ''
+      let finalTranscript = '';
+      let interimTranscript = '';
 
       // Process all results to ensure nothing is missed on mobile
       for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i]
+        const result = event.results[i];
         if (result.isFinal) {
-          finalTranscript += result[0].transcript + ' '
+          finalTranscript += result[0].transcript + ' ';
           // Update lastProcessedIndex to prevent reprocessing
-          lastProcessedIndex.value = i
+          lastProcessedIndex.value = i;
         }
         else {
           // Always process interim results
-          interimTranscript += result[0].transcript + ' '
+          interimTranscript += result[0].transcript + ' ';
         }
       }
 
       // Update the display text
       if (finalTranscript) {
-        finalText.value = finalTranscript.trim()
+        finalText.value = finalTranscript.trim();
         // Add a space only if allText is not empty
-        allText.value = allText.value ? `${allText.value} ${finalTranscript}`.trim() : finalTranscript.trim()
-        interimText.value = '' // Clear interim when we have final text
-        startSilenceTimer()
+        allText.value = allText.value ? `${allText.value} ${finalTranscript}`.trim() : finalTranscript.trim();
+        interimText.value = ''; // Clear interim when we have final text
+        startSilenceTimer();
       }
       else if (interimTranscript) {
-        interimText.value = interimTranscript.trim()
-        resetSilenceTimer()
+        interimText.value = interimTranscript.trim();
+        resetSilenceTimer();
       }
 
       // Force update the UI by triggering a reactivity refresh
       nextTick(() => {
         // This ensures the UI updates even on mobile devices
-      })
-    }
+      });
+    };
 
     recognition.value.onerror = (event: any) => {
-      logStatus(`خطای تشخیص گفتار: ${event.error}`, true)
-      console.error('[AudioUser] Recognition error:', event)
+      logStatus(`خطای تشخیص گفتار: ${event.error}`, true);
+      console.error('[AudioUser] Recognition error:', event);
 
       // Handle specific mobile errors
       if (event.error === 'no-speech') {
-        logStatus('هیچ گفتاری شناسایی نشد. لطفاً دوباره تلاش کنید.', true)
+        logStatus('هیچ گفتاری شناسایی نشد. لطفاً دوباره تلاش کنید.', true);
       }
       else if (event.error === 'audio-capture') {
-        logStatus('دستگاه صوتی یافت نشد. لطفاً اتصال میکروفون را بررسی کنید.', true)
+        logStatus('دستگاه صوتی یافت نشد. لطفاً اتصال میکروفون را بررسی کنید.', true);
       }
       else if (event.error === 'not-allowed') {
-        logStatus('دسترسی به میکروفون رد شد. لطفاً مجوزها را بررسی کنید.', true)
+        logStatus('دسترسی به میکروفون رد شد. لطفاً مجوزها را بررسی کنید.', true);
       }
-    }
+    };
 
     recognition.value.onend = () => {
-      logStatus('تشخیص گفتار پایان یافت')
+      logStatus('تشخیص گفتار پایان یافت');
       if (isStarted.value) {
         // Add a small delay before restarting recognition
         recognitionTimeout.value = setTimeout(() => {
           try {
-            recognition.value.start()
+            recognition.value.start();
           }
           catch (e) {
-            console.error('خطا در راه‌اندازی مجدد تشخیص گفتار:', e)
-            logStatus(`خطا در راه‌اندازی مجدد: ${e.message}`, true)
+            console.error('خطا در راه‌اندازی مجدد تشخیص گفتار:', e);
+            logStatus(`خطا در راه‌اندازی مجدد: ${e.message}`, true);
           }
-        }, 100)
+        }, 100);
       }
-    }
+    };
 
-    logStatus('تشخیص گفتار مقداردهی اولیه شد')
+    logStatus('تشخیص گفتار مقداردهی اولیه شد');
   }
   else {
-    logStatus('تشخیص گفتار در این مرورگر پشتیبانی نمی‌شود', true)
-    console.warn('Speech recognition not supported in this browser.')
+    logStatus('تشخیص گفتار در این مرورگر پشتیبانی نمی‌شود', true);
+    console.warn('Speech recognition not supported in this browser.');
   }
-}
+};
 
 // Modified to toggle recording on/off with a single click
 const toggleRecognition = () => {
   if (isStarted.value) {
-    endRecognition()
+    endRecognition();
   }
   else {
-    startRecognition()
+    startRecognition();
   }
-}
+};
 
 const startRecognition = () => {
   if (recognition.value && !isStarted.value) {
-    finalText.value = ''
-    interimText.value = ''
-    allText.value = ''
-    lastProcessedIndex.value = -1
+    finalText.value = '';
+    interimText.value = '';
+    allText.value = '';
+    lastProcessedIndex.value = -1;
 
     // Add a small delay before starting recognition
     setTimeout(() => {
       try {
-        recognition.value.start()
-        isStarted.value = true
+        recognition.value.start();
+        isStarted.value = true;
 
         // Create audio context for visualization
-        context = new (window.AudioContext || (window as any).webkitAudioContext)()
-        analyser = context.createAnalyser()
-        freqs = new Uint8Array(analyser.frequencyBinCount)
+        context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        analyser = context.createAnalyser();
+        freqs = new Uint8Array(analyser.frequencyBinCount);
 
         // Get audio stream for visualization
         navigator.mediaDevices
           .getUserMedia({ audio: true })
           .then(onStream)
-          .catch(onStreamError)
+          .catch(onStreamError);
       }
       catch (e) {
-        console.error('خطا در شروع تشخیص گفتار:', e)
-        logStatus(`خطا در شروع تشخیص گفتار: ${e.message}`, true)
+        console.error('خطا در شروع تشخیص گفتار:', e);
+        logStatus(`خطا در شروع تشخیص گفتار: ${e.message}`, true);
       }
-    }, 100)
+    }, 100);
   }
-}
+};
 
 const endRecognition = () => {
   if (recognition.value && isStarted.value) {
     if (recognitionTimeout.value) {
-      clearTimeout(recognitionTimeout.value)
-      recognitionTimeout.value = null
+      clearTimeout(recognitionTimeout.value);
+      recognitionTimeout.value = null;
     }
 
     try {
-      recognition.value.stop()
+      recognition.value.stop();
     }
     catch (e) {
-      console.error('خطا در توقف تشخیص گفتار:', e)
+      console.error('خطا در توقف تشخیص گفتار:', e);
     }
 
-    isStarted.value = false
+    isStarted.value = false;
 
     // Stop the audio context
     if (context) {
-      context.close()
-      context = null
+      context.close();
+      context = null;
     }
   }
-}
+};
 
 const onStream = (stream) => {
-  logStatus('جریان صوتی راه‌اندازی شد')
+  logStatus('جریان صوتی راه‌اندازی شد');
   try {
     // Handle different browser prefixes for AudioContext
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext
-    context = new AudioContext()
-    const source = context.createMediaStreamSource(stream)
-    analyser = context.createAnalyser()
-    freqs = new Uint8Array(analyser.frequencyBinCount)
-    source.connect(analyser)
-    visualize()
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    context = new AudioContext();
+    const source = context.createMediaStreamSource(stream);
+    analyser = context.createAnalyser();
+    freqs = new Uint8Array(analyser.frequencyBinCount);
+    source.connect(analyser);
+    visualize();
   }
   catch (e) {
-    console.error('[AudioUser] Error setting up audio context:', e)
-    logStatus(`خطا در راه‌اندازی زمینه صوتی: ${e.message}`, true)
+    console.error('[AudioUser] Error setting up audio context:', e);
+    logStatus(`خطا در راه‌اندازی زمینه صوتی: ${e.message}`, true);
   }
-}
+};
 
 const onStreamError = (e) => {
-  logStatus(`خطای میکروفون: ${e.message}`, true)
-  console.error('[AudioUser] Stream error:', e)
-  isStarted.value = false
-}
+  logStatus(`خطای میکروفون: ${e.message}`, true);
+  console.error('[AudioUser] Stream error:', e);
+  isStarted.value = false;
+};
 
 const showTipMessage = () => {
-  showTip.value = true
-  clearTimeout(tipTimeout)
+  showTip.value = true;
+  clearTimeout(tipTimeout);
   tipTimeout = setTimeout(() => {
-    showTip.value = false
-  }, 3000)
-}
+    showTip.value = false;
+  }, 3000);
+};
 
 const submitText = () => {
-  const textToSubmit = allText.value.trim()
+  const textToSubmit = allText.value.trim();
   if (textToSubmit) {
-    emit('textReady', textToSubmit)
-    emit('sendMessage')
+    emit('textReady', textToSubmit);
+    emit('sendMessage');
   }
-  closeModal()
-}
+  closeModal();
+};
 
 const closeModal = () => {
-  const textToSubmit = allText.value.trim()
+  const textToSubmit = allText.value.trim();
   if (textToSubmit) {
-    emit('textReady', textToSubmit)
-    emit('sendMessage')
+    emit('textReady', textToSubmit);
+    emit('sendMessage');
   }
-  emit('close')
-  resetState()
-}
+  emit('close');
+  resetState();
+};
 
 const handleAutoClose = () => {
-  const textToSubmit = allText.value.trim()
+  const textToSubmit = allText.value.trim();
   if (textToSubmit) {
-    emit('textReady', textToSubmit)
-    emit('sendMessage')
+    emit('textReady', textToSubmit);
+    emit('sendMessage');
   }
-  emit('close')
-  resetState()
-}
+  emit('close');
+  resetState();
+};
 
 const resetState = () => {
-  allText.value = ''
-  interimText.value = ''
-  finalText.value = ''
-  isStarted.value = false
-  showCountdown.value = false
-  countDown.value = 1.5
+  allText.value = '';
+  interimText.value = '';
+  finalText.value = '';
+  isStarted.value = false;
+  showCountdown.value = false;
+  countDown.value = 1.5;
   if (recognition.value) {
     try {
-      recognition.value.stop()
+      recognition.value.stop();
     }
     catch (e) {
-      console.error('خطا در توقف تشخیص گفتار:', e)
+      console.error('خطا در توقف تشخیص گفتار:', e);
     }
   }
-}
+};
 
 // Update the autoCloseTimer to use handleAutoClose
 const startAutoCloseTimer = () => {
-  showCountdown.value = true
-  countDown.value = 1.5
+  showCountdown.value = true;
+  countDown.value = 1.5;
 
   const timer = setInterval(() => {
-    countDown.value -= 0.5
+    countDown.value -= 0.5;
     if (countDown.value <= 0) {
-      clearInterval(timer)
-      handleAutoClose()
+      clearInterval(timer);
+      handleAutoClose();
     }
-  }, 500)
-}
+  }, 500);
+};
 
 onMounted(() => {
-  logStatus('کامپوننت بارگذاری شد')
-  getDeviceInfo()
-  initSpeechRecognition()
-  visualize()
-})
+  logStatus('کامپوننت بارگذاری شد');
+  getDeviceInfo();
+  initSpeechRecognition();
+  visualize();
+});
 
 onBeforeUnmount(() => {
   // Clean up resources
   if (recognition.value) {
     try {
-      recognition.value.stop()
+      recognition.value.stop();
     }
     catch (e) {
-      console.error('خطا در توقف تشخیص گفتار:', e)
+      console.error('خطا در توقف تشخیص گفتار:', e);
     }
   }
 
   if (recognitionTimeout.value) {
-    clearTimeout(recognitionTimeout.value)
+    clearTimeout(recognitionTimeout.value);
   }
 
   if (context) {
     try {
-      context.close()
+      context.close();
     }
     catch (e) {
-      console.error('خطا در بستن زمینه صوتی:', e)
+      console.error('خطا در بستن زمینه صوتی:', e);
     }
   }
 
   if (tipTimeout) {
-    clearTimeout(tipTimeout)
+    clearTimeout(tipTimeout);
   }
-})
+});
 </script>
 
 <template>

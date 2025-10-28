@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { kebabCase } from 'scule'
+import { kebabCase } from 'scule';
 
 const props = defineProps<{
-  name: string
-}>()
-const docs = await useDocumentationMeta(() => props.name as any)
+  name: string;
+}>();
+const docs = await useDocumentationMeta(() => props.name as any);
 
 /**
  * Wrap https://... links in markdown with <a href="...">...</a>
@@ -14,7 +14,7 @@ function wrapExternalLinks(string: string) {
     /https?:\/\/[^\s)]+/g,
     url =>
       `<a class="text-primary-600 dark:text-primary-400 hover:underline" href="${url}" rel="noopener noreferrer" target="_blank">${url}</a>`,
-  )
+  );
 }
 </script>
 

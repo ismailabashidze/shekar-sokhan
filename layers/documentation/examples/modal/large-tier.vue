@@ -133,8 +133,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 
-const isModal2XlOpen = ref(false)
-const isModal3XlOpen = ref(false)
+const isModal2XlOpen = ref(false);
+const isModal3XlOpen = ref(false);
 </script>

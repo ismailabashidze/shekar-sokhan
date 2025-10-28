@@ -4,7 +4,7 @@ definePageMeta({
   description:
     'Explore 100+ prebuilt pages, including dashboards and app examples. Kickstart your project with Nuxt and Tailwind CSS.',
   layout: 'landing',
-})
+});
 </script>
 
 <template>

@@ -40,5 +40,5 @@
 </template>
 
 <script setup lang="ts">
-const progress = ref(25)
+const progress = ref(25);
 </script>

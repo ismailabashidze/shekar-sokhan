@@ -61,7 +61,8 @@
         closable: true,
       });
       navigateTo('/hamdel/chooseTherapist');
-    } else {
+    }
+ else {
       toaster.show({
         title: 'عدم ثبت',
         message: `کد نامعتبر است یا قبلا استفاده شده است`,
@@ -85,10 +86,12 @@
           .catch((err) => {
             console.error('Failed to read clipboard: ', err);
           });
-      } else {
+      }
+ else {
         console.warn('Clipboard API not available');
       }
-    } catch (error) {
+    }
+ catch (error) {
       console.error('Clipboard error: ', error);
     }
   };
@@ -104,9 +107,19 @@
             <div class="order-2 sm:order-1">
               <div class="flex flex-col p-8">
                 <BaseThemeToggle />
-                <BaseAvatar class="mx-auto" size="xl" src="/img/avatars/mana.jpg" badge-src="/img/logo.svg" />
+                <BaseAvatar
+                  class="mx-auto"
+                  size="xl"
+                  src="/img/avatars/mana.jpg"
+                  badge-src="/img/logo.svg"
+                />
                 <div class="mx-auto mb-4 max-w-xs text-center">
-                  <BaseHeading as="h2" size="md" weight="medium" class="mt-4">
+                  <BaseHeading
+                    as="h2"
+                    size="md"
+                    weight="medium"
+                    class="mt-4"
+                  >
                     ذهنا اولین
                     <span class="text-primary-500">سکوی هوش مصنوعی</span>
                     به زبان فارسی را ساخته‌است که به شما حمایت‌های روانشناختی ارائه می‌دهد.
@@ -141,19 +154,37 @@
                     >
                       پرداخت اشتراک
                     </BaseButton>
-                    <BaseButton class="w-full" :loading="isSubmitting" data-tour="coupon-button" @click="openModal">
+                    <BaseButton
+                      class="w-full"
+                      :loading="isSubmitting"
+                      data-tour="coupon-button"
+                      @click="openModal"
+                    >
                       کد تخفیف دارم
                     </BaseButton>
                   </div>
                   <div class="mt-2 flex items-center justify-between gap-2">
-                    <BaseButton to="/deeds/start" color="success" class="w-full">دریافت کد در قبال کار نیک</BaseButton>
+                    <BaseButton
+                      to="/deeds/start"
+                      color="success"
+                      class="w-full"
+                    >
+                      دریافت کد در قبال کار نیک
+                    </BaseButton>
                   </div>
                 </div>
               </div>
             </div>
             <div class="order-1 sm:order-2">
               <div class="flex flex-col p-8">
-                <BaseHeading tag="h2" size="md" weight="medium" class="mt-8">با کمک هم می توانیم!</BaseHeading>
+                <BaseHeading
+                  tag="h2"
+                  size="md"
+                  weight="medium"
+                  class="mt-8"
+                >
+                  با کمک هم می توانیم!
+                </BaseHeading>
                 <BaseText size="xs" class="text-muted-500 dark:text-muted-400 mt-1 max-w-xs">
                   کمک‌های مالی شما در فعالیت‌ها و موارد زیر هزینه خواهد شد:
                 </BaseText>
@@ -166,7 +197,13 @@
                         <Icon name="lucide:check" class="text-success-500 size-4" />
                       </div>
                       <div>
-                        <BaseHeading as="h3" size="sm" weight="medium">توسعه و بهبود نرم افزاری</BaseHeading>
+                        <BaseHeading
+                          as="h3"
+                          size="sm"
+                          weight="medium"
+                        >
+                          توسعه و بهبود نرم افزاری
+                        </BaseHeading>
                         <BaseText size="xs" class="text-muted-500 dark:text-muted-400 max-w-full text-justify">
                           با کمک شما می توانیم امکانات بیشتری را به سامانه اضافه کنیم.
                         </BaseText>
@@ -179,7 +216,13 @@
                         <Icon name="lucide:check" class="text-success-500 size-4" />
                       </div>
                       <div>
-                        <BaseHeading as="h3" size="sm" weight="medium">سخت افزار و سرور</BaseHeading>
+                        <BaseHeading
+                          as="h3"
+                          size="sm"
+                          weight="medium"
+                        >
+                          سخت افزار و سرور
+                        </BaseHeading>
                         <BaseText size="xs" class="text-muted-500 dark:text-muted-400 max-w-full text-justify">
                           هزینه‌های پردازنده‌های گرافیکی بسیار پیشرفته را پوشش می‌دهیم.
                         </BaseText>
@@ -193,7 +236,13 @@
                         <Icon name="lucide:check" class="text-success-500 size-4" />
                       </div>
                       <div>
-                        <BaseHeading as="h3" size="sm" weight="medium">نگه داری و دردسترس پذیری</BaseHeading>
+                        <BaseHeading
+                          as="h3"
+                          size="sm"
+                          weight="medium"
+                        >
+                          نگه داری و دردسترس پذیری
+                        </BaseHeading>
                         <BaseText size="xs" class="text-muted-500 dark:text-muted-400 max-w-full text-justify">
                           شما به تیم ذهنا کمک می کنید که سرویس را پایدار و بدون مشکل ارائه دهند.
                         </BaseText>
@@ -206,7 +255,13 @@
                         <Icon name="lucide:check" class="text-success-500 size-4" />
                       </div>
                       <div>
-                        <BaseHeading as="h3" size="sm" weight="medium">حمایت از ذهنا</BaseHeading>
+                        <BaseHeading
+                          as="h3"
+                          size="sm"
+                          weight="medium"
+                        >
+                          حمایت از ذهنا
+                        </BaseHeading>
                         <BaseText size="xs" class="text-muted-500 dark:text-muted-400 max-w-full text-justify">
                           شما به تیم ذهنا و کمک رسانی به افرادی که نیاز به حمایت روانی دارند کمک می کنید.
                         </BaseText>
@@ -222,11 +277,18 @@
     </div>
   </div>
   <!-- Modal component -->
-  <TairoModal :open="isModalOpen" size="sm" footer-align="center" @close="closeModal">
+  <TairoModal
+    :open="isModalOpen"
+    size="sm"
+    footer-align="center"
+    @close="closeModal"
+  >
     <template #header>
       <!-- Header -->
       <div class="flex w-full items-center justify-between p-4 md:p-6">
-        <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">ورود کد تخفیف</h3>
+        <h3 class="font-heading text-muted-900 text-lg font-medium leading-6 dark:text-white">
+          ورود کد تخفیف
+        </h3>
 
         <BaseButtonClose @click="closeModal" />
       </div>
@@ -235,9 +297,13 @@
     <!-- Body -->
     <div class="p-4 md:p-6">
       <div class="mx-auto w-full max-w-xs text-center">
-        <h3 class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white">ورود کد تخفیف</h3>
+        <h3 class="font-heading text-muted-800 text-lg font-medium leading-6 dark:text-white">
+          ورود کد تخفیف
+        </h3>
 
-        <p class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-sm leading-5">کد خود را در زیر وارد نمایید.</p>
+        <p class="font-alt text-muted-500 dark:text-muted-400 mt-2 text-sm leading-5">
+          کد خود را در زیر وارد نمایید.
+        </p>
         <div class="mt-4">
           <BaseInput
             v-model="couponCode"
@@ -266,9 +332,17 @@
       <!-- Footer -->
       <div class="p-4 md:p-6">
         <div class="flex gap-x-2">
-          <BaseButton @click="closeModal">بازگشت</BaseButton>
+          <BaseButton @click="closeModal">
+            بازگشت
+          </BaseButton>
 
-          <BaseButton color="primary" variant="solid" @click="redeem">ثبت و فعال‌سازی</BaseButton>
+          <BaseButton
+            color="primary"
+            variant="solid"
+            @click="redeem"
+          >
+            ثبت و فعال‌سازی
+          </BaseButton>
         </div>
       </div>
     </template>

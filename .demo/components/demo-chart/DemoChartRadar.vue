@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoRadar = reactive(useDemoRadar())
+const demoRadar = reactive(useDemoRadar());
 
 function useDemoRadar() {
-  const { primary, success, info, danger } = useTailwindColors()
-  const height = 350
-  const type = 'radar'
+  const { primary, success, info, danger } = useTailwindColors();
+  const height = 350;
+  const type = 'radar';
 
   const options = {
     chart: {
@@ -19,21 +19,21 @@ function useDemoRadar() {
     xaxis: {
       categories: ['January', 'February', 'March', 'April', 'May', 'June'],
     },
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'Series 1',
       data: [80, 50, 30, 40, 100, 20],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

@@ -2,18 +2,18 @@
 definePageMeta({
   title: 'کارهای نیک',
   layout: 'sidebar',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
-})
+});
 
-const { autoStartTour } = useTour()
+const { autoStartTour } = useTour();
 
 onMounted(() => {
   // Auto-start the deeds tour with a slight delay
-  autoStartTour('deeds-start', 1500)
-})
+  autoStartTour('deeds-start', 1500);
+});
 </script>
 
 <template>

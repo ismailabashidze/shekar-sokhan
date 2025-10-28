@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoPie = reactive(useDemoPie())
+const demoPie = reactive(useDemoPie());
 
 function useDemoPie() {
-  const { success, danger } = useTailwindColors()
-  const height = 335
-  const type = 'pie'
+  const { success, danger } = useTailwindColors();
+  const height = 335;
+  const type = 'pie';
 
   const options = {
     dataLabels: {
@@ -35,16 +35,16 @@ function useDemoPie() {
       position: 'right',
       horizontalAlign: 'center',
     },
-  }
+  };
 
-  const series = shallowRef([44, 55])
+  const series = shallowRef([44, 55]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

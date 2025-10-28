@@ -1,63 +1,63 @@
 <script setup lang="ts">
-import type { RouteLocationRaw } from 'vue-router'
-import { Carousel, Navigation, Slide } from 'vue3-carousel'
-import 'vue3-carousel/dist/carousel.css'
+import type { RouteLocationRaw } from 'vue-router';
+import { Carousel, Navigation, Slide } from 'vue3-carousel';
+import 'vue3-carousel/dist/carousel.css';
 
 export interface CarouselSlideSkill {
-  logo: string
-  name: string
+  logo: string;
+  name: string;
 }
 
 export interface CarouselSlideItem {
-  avatar?: string
-  badge?: string
-  name?: string
-  role?: string
-  text?: string
-  to?: RouteLocationRaw
-  skills?: CarouselSlideSkill[]
+  avatar?: string;
+  badge?: string;
+  name?: string;
+  role?: string;
+  text?: string;
+  to?: RouteLocationRaw;
+  skills?: CarouselSlideSkill[];
 }
 
 export interface CarouselProps {
-  slides: CarouselSlideItem[]
+  slides: CarouselSlideItem[];
   carousel?: {
     // carousel props
-    itemsToShow?: number
-    itemsToScroll?: number
-    wrapAround?: boolean
-    throttle?: number
-    snapAlign?: 'start' | 'end' | 'center' | 'center-even' | 'center-odd'
-    transition?: number
-    breakpoints?: Record<string, any>
-    autoplay?: number
-    pauseAutoplayOnHover?: boolean
-    modelValue?: number
-    mouseDrag?: boolean
-    touchDrag?: boolean
-    dir?: 'rtl' | 'ltr'
-    i18n?: Record<string, any>
-    settings?: Record<string, any>
+    itemsToShow?: number;
+    itemsToScroll?: number;
+    wrapAround?: boolean;
+    throttle?: number;
+    snapAlign?: 'start' | 'end' | 'center' | 'center-even' | 'center-odd';
+    transition?: number;
+    breakpoints?: Record<string, any>;
+    autoplay?: number;
+    pauseAutoplayOnHover?: boolean;
+    modelValue?: number;
+    mouseDrag?: boolean;
+    touchDrag?: boolean;
+    dir?: 'rtl' | 'ltr';
+    i18n?: Record<string, any>;
+    settings?: Record<string, any>;
 
     // carousel events
-    onBeforeInit?: () => void
-    onInit?: () => void
+    onBeforeInit?: () => void;
+    onInit?: () => void;
     onSlideStart?: (props: {
-      slidingToIndex: number
-      currentSlideIndex: number
-      prevSlideIndex: number
-      slidesCount: number
-    }) => void
+      slidingToIndex: number;
+      currentSlideIndex: number;
+      prevSlideIndex: number;
+      slidesCount: number;
+    }) => void;
     onLoop?: (props: {
-      currentSlideIndex: number
-      slidingToIndex: number
-    }) => void
-    onUpdateModelValue?: (currentSlideIndex: number) => void
+      currentSlideIndex: number;
+      slidingToIndex: number;
+    }) => void;
+    onUpdateModelValue?: (currentSlideIndex: number) => void;
     onSlideEnd?: (props: {
-      currentSlideIndex: number
-      prevSlideIndex: number
-      slidesCount: number
-    }) => void
-  }
+      currentSlideIndex: number;
+      prevSlideIndex: number;
+      slidesCount: number;
+    }) => void;
+  };
 }
 
 const props = withDefaults(defineProps<CarouselProps>(), {
@@ -80,7 +80,7 @@ const props = withDefaults(defineProps<CarouselProps>(), {
       },
     },
   }),
-})
+});
 </script>
 
 <template>

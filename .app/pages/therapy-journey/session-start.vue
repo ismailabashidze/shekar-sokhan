@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue';
 
 definePageMeta({
   title: 'سفر درمانی - شروع جلسه اول',
@@ -12,7 +12,7 @@ definePageMeta({
     srcDark: '/img/logo.svg',
     order: 2,
   },
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -20,13 +20,13 @@ useHead({
   meta: [
     { name: 'description', content: 'آغاز جلسه اول درمان: تحلیل جامع شکایت اصلی، بررسی علائم و درک وضعیت بیمار' },
   ],
-})
+});
 
-const router = useRouter()
-const route = useRoute()
-const isVisible = ref(false)
-const currentStep = ref(0)
-const isStarting = ref(false)
+const router = useRouter();
+const route = useRoute();
+const isVisible = ref(false);
+const currentStep = ref(0);
+const isStarting = ref(false);
 
 // اهداف ساده جلسه اول
 const sessionFocus = ref({
@@ -82,7 +82,7 @@ const sessionFocus = ref({
       ],
     },
   ],
-})
+});
 
 // روش‌های ساده ارزیابی
 const assessmentTools = ref([
@@ -104,7 +104,7 @@ const assessmentTools = ref([
     icon: 'ph:heart',
     duration: '15 دقیقه',
   },
-])
+]);
 
 // آماده‌سازی ذهنی
 const psychologicalPreparation = ref([
@@ -138,7 +138,7 @@ const psychologicalPreparation = ref([
       'راه حل‌هایی وجود دارد',
     ],
   },
-])
+]);
 
 const expectations = ref([
   {
@@ -161,37 +161,37 @@ const expectations = ref([
     description: 'برنامه‌ای متناسب با نیازهای شما خواهیم داشت',
     icon: 'ph:calendar',
   },
-])
+]);
 
 onMounted(() => {
   setTimeout(() => {
-    isVisible.value = true
-  }, 100)
+    isVisible.value = true;
+  }, 100);
 
   // Progressive reveal
   const interval = setInterval(() => {
     if (currentStep.value < 3) {
-      currentStep.value++
+      currentStep.value++;
     }
     else {
-      clearInterval(interval)
+      clearInterval(interval);
     }
-  }, 1000)
-})
+  }, 1000);
+});
 
 const startSession = async () => {
-  isStarting.value = true
+  isStarting.value = true;
 
   // Add loading effect
-  await new Promise(resolve => setTimeout(resolve, 2000))
+  await new Promise(resolve => setTimeout(resolve, 2000));
 
   // Navigate to the actual session/chat
-  router.push('/therapy-journey/chat?session=1&focus=chief-complaint')
-}
+  router.push('/therapy-journey/chat?session=1&focus=chief-complaint');
+};
 
 const goBack = () => {
-  router.push('/therapy-journey/result')
-}
+  router.push('/therapy-journey/result');
+};
 </script>
 
 <template>

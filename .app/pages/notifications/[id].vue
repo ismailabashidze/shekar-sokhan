@@ -2,11 +2,11 @@
 definePageMeta({
   title: 'جزئیات اعلان',
   layout: 'sidebar',
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const notificationId = route.params.id as string
+const route = useRoute();
+const router = useRouter();
+const notificationId = route.params.id as string;
 
 const {
   notifications,
@@ -18,75 +18,75 @@ const {
   getTypeColor,
   getPriorityColor,
   fetchNotifications,
-} = useNotifications()
+} = useNotifications();
 
 // Find notification by ID
 const notification = computed(() => {
-  return notifications.value.find(n => n.id === notificationId)
-})
+  return notifications.value.find(n => n.id === notificationId);
+});
 
-const isLoading = ref(true)
-const error = ref<string | null>(null)
+const isLoading = ref(true);
+const error = ref<string | null>(null);
 
 // Fetch notification if not found in current list
 onMounted(async () => {
   try {
     if (!notification.value) {
       // If notification not found in current list, fetch all notifications
-      await fetchNotifications()
+      await fetchNotifications();
     }
 
     if (!notification.value) {
-      error.value = 'اعلان یافت نشد'
-      return
+      error.value = 'اعلان یافت نشد';
+      return;
     }
 
     // Mark as read if unread
     if (!notification.value.isRead) {
-      await markAsRead(notificationId)
+      await markAsRead(notificationId);
     }
   }
   catch (err: any) {
-    error.value = err.message || 'خطا در بارگذاری اعلان'
+    error.value = err.message || 'خطا در بارگذاری اعلان';
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-})
+});
 
 useHead(() => ({
   htmlAttrs: { dir: 'rtl' },
   title: notification.value?.title ? `${notification.value.title} - جزئیات اعلان - ذهنا` : 'جزئیات اعلان - ذهنا',
-}))
+}));
 
 const handleMarkAsRead = async () => {
   if (notification.value && !notification.value.isRead) {
-    await markAsRead(notification.value.id)
+    await markAsRead(notification.value.id);
   }
-}
+};
 
 const handleMarkAsUnread = async () => {
   if (notification.value && notification.value.isRead) {
-    await markAsUnread(notification.value.id)
+    await markAsUnread(notification.value.id);
   }
-}
+};
 
 const handleDelete = async () => {
   if (notification.value) {
-    await deleteNotification(notification.value.id)
-    await router.push('/notifications')
+    await deleteNotification(notification.value.id);
+    await router.push('/notifications');
   }
-}
+};
 
 const handleBack = () => {
-  router.back()
-}
+  router.back();
+};
 
 const handleAction = () => {
   if (notification.value?.actionUrl) {
-    navigateTo(notification.value.actionUrl)
+    navigateTo(notification.value.actionUrl);
   }
-}
+};
 </script>
 
 <template>

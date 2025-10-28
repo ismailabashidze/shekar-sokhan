@@ -23,8 +23,8 @@
 </template>
 
 <script setup lang="ts">
-const first = ref('')
-const second = ref('')
+const first = ref('');
+const second = ref('');
 
-const frameworks = ref(['Javascript', 'Nuxt', 'Vue.js', 'React.js', 'Angular', 'Alpine.js'])
+const frameworks = ref(['Javascript', 'Nuxt', 'Vue.js', 'React.js', 'Angular', 'Alpine.js']);
 </script>

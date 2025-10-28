@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useSidebar } from '../composables/sidebar'
+import { useSidebar } from '../composables/sidebar';
 
-const { isOpen, toggle } = useSidebar()
+const { isOpen, toggle } = useSidebar();
 </script>
 
 <template>

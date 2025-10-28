@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    title?: string
-    text?: string
-    image: string
-    badgeSmall?: string
-    badgeMedium?: string
+    title?: string;
+    text?: string;
+    image: string;
+    badgeSmall?: string;
+    badgeMedium?: string;
   }>(),
   {
     title: undefined,
@@ -13,7 +13,7 @@ const props = withDefaults(
     badgeSmall: undefined,
     badgeMedium: undefined,
   },
-)
+);
 </script>
 
 <template>

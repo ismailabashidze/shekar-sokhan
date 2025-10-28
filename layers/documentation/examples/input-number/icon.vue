@@ -28,5 +28,5 @@
 const fields = reactive({
   first: undefined as number | undefined,
   second: undefined as number | undefined,
-})
+});
 </script>

@@ -7,14 +7,14 @@ const props = withDefaults(
       | 'expanded-sm'
       | 'expanded-md'
       | 'expanded-lg'
-      | 'expanded-xl'
+      | 'expanded-xl';
   }>(),
   {
     display: 'expanded-lg',
   },
-)
-const config = useAppConfig().tairo.iconnav?.footer
-const year = new Date().getFullYear()
+);
+const config = useAppConfig().tairo.iconnav?.footer;
+const year = new Date().getFullYear();
 </script>
 
 <template>

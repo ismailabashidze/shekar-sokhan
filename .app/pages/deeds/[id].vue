@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { definePageMeta } from '#imports'
-import { useClipboard } from '@vueuse/core'
-import type { Deed } from '~/composables/useDeed'
+import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { definePageMeta } from '#imports';
+import { useClipboard } from '@vueuse/core';
+import type { Deed } from '~/composables/useDeed';
 
 definePageMeta({
   title: 'جزئیات عمل نیک',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const id = route.params.id as string
-const { getDeed, updateDeed } = useDeed()
-const { generateCoupon } = useDiscountCopoun()
-const { copy } = useClipboard()
-const toaster = useToaster()
+const route = useRoute();
+const id = route.params.id as string;
+const { getDeed, updateDeed } = useDeed();
+const { generateCoupon } = useDiscountCopoun();
+const { copy } = useClipboard();
+const toaster = useToaster();
 
 // Initialize deed with default values
 const deed = ref<Deed>({
@@ -38,31 +38,31 @@ const deed = ref<Deed>({
   tags: [],
   difficulty: 'simple',
   timeRequired: 'below_15',
-})
+});
 
-const loading = ref(true)
-const error = ref<Error | null>(null)
-const showDiscountModal = ref(false)
-const discountCode = ref<string | null>(null)
-const discountError = ref<string | null>(null)
-const showSuccessModal = ref(false)
+const loading = ref(true);
+const error = ref<Error | null>(null);
+const showDiscountModal = ref(false);
+const discountCode = ref<string | null>(null);
+const discountError = ref<string | null>(null);
+const showSuccessModal = ref(false);
 
 interface Deed {
-  emoji: string
-  title: string
-  shortDescription: string
-  description: string
-  longDescription: string
-  type: 'family' | 'society' | 'spiritual'
-  status: 'draft' | 'pending' | 'approved' | 'reject'
-  author: string
-  approvedBy: string
-  approvedAt: string
-  views: number
-  completions: number
-  tags: string[]
-  difficulty: 'simple' | 'moderate' | 'hard'
-  timeRequired: 'below_15' | 'between_15_60' | 'more_60'
+  emoji: string;
+  title: string;
+  shortDescription: string;
+  description: string;
+  longDescription: string;
+  type: 'family' | 'society' | 'spiritual';
+  status: 'draft' | 'pending' | 'approved' | 'reject';
+  author: string;
+  approvedBy: string;
+  approvedAt: string;
+  views: number;
+  completions: number;
+  tags: string[];
+  difficulty: 'simple' | 'moderate' | 'hard';
+  timeRequired: 'below_15' | 'between_15_60' | 'more_60';
 }
 
 const statusMap = {
@@ -70,53 +70,53 @@ const statusMap = {
   pending: 'در انتظار تایید',
   approved: 'تایید شده',
   reject: 'رد شده',
-}
+};
 
 const typeMap = {
   family: 'خانواده',
   society: 'اجتماعی',
   spiritual: 'معنوی',
-}
+};
 
 const difficultyMap = {
   simple: 'ساده',
   moderate: 'متوسط',
   hard: 'چالش‌برانگیز',
-}
+};
 
 const timeMap = {
   below_15: 'کمتر از ۱۵ دقیقه',
   between_15_60: '۱۵ تا ۶۰ دقیقه',
   more_60: 'بیش از ۶۰ دقیقه',
-}
+};
 
 // Add duration map based on timeRequired
 const durationMap = {
   below_15: 15,
   between_15_60: 60,
   more_60: 120,
-}
+};
 
 const formattedDate = computed(() => {
-  return new Date(deed.value.approvedAt).toLocaleDateString('fa-IR')
-})
+  return new Date(deed.value.approvedAt).toLocaleDateString('fa-IR');
+});
 
 const statusColor = computed(() => {
   switch (deed.value.status) {
     case 'approved':
-      return 'success'
+      return 'success';
     case 'pending':
-      return 'warning'
+      return 'warning';
     case 'reject':
-      return 'danger'
+      return 'danger';
     default:
-      return 'info'
+      return 'info';
   }
-})
+});
 
 onMounted(async () => {
   try {
-    const data = await getDeed(id)
+    const data = await getDeed(id);
     if (data) {
       // Update all properties
       deed.value = {
@@ -125,27 +125,27 @@ onMounted(async () => {
         // Ensure these are always numbers
         views: Number(data.views) || 0,
         completions: Number(data.completions) || 0,
-      }
+      };
       // Increment views
-      updateDeed(id, { views: deed.value.views + 1 })
+      updateDeed(id, { views: deed.value.views + 1 });
     }
     else {
-      error.value = 'کار نیک مورد نظر یافت نشد'
+      error.value = 'کار نیک مورد نظر یافت نشد';
     }
   }
   catch (e: any) {
-    error.value = e.message || 'خطا در بارگذاری اطلاعات'
+    error.value = e.message || 'خطا در بارگذاری اطلاعات';
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 const handleDiscountRequest = async () => {
   try {
     // Generate code
-    const code = 'DEED-' + Math.random().toString(36).substring(2, 8).toUpperCase()
-    discountCode.value = code
+    const code = 'DEED-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    discountCode.value = code;
     // Create coupon
     await generateCoupon({
       code,
@@ -154,24 +154,24 @@ const handleDiscountRequest = async () => {
       duration: durationMap[deed.value.timeRequired] || 60,
       type: 'deed',
       deed: id,
-    })
+    });
 
     // Update deed completions
-    await updateDeed(id, { completions: (deed.value.completions || 0) + 1 })
-    deed.value.completions++
+    await updateDeed(id, { completions: (deed.value.completions || 0) + 1 });
+    deed.value.completions++;
 
-    showDiscountModal.value = false
-    showSuccessModal.value = true
+    showDiscountModal.value = false;
+    showSuccessModal.value = true;
   }
   catch (e: any) {
-    discountError.value = e.message || 'خطا در درخواست کد تخفیف'
+    discountError.value = e.message || 'خطا در درخواست کد تخفیف';
   }
-}
+};
 
 const copyCode = async () => {
   if (discountCode.value) {
-    await copy(discountCode.value)
-    toaster.clearAll()
+    await copy(discountCode.value);
+    toaster.clearAll();
     toaster.show({
       title: 'کپی شد',
       message: 'کد تخفیف با موفقیت کپی شد',
@@ -179,13 +179,13 @@ const copyCode = async () => {
       icon: 'ph:copy',
       closable: true,
       classes: 'z-[60]', // Higher than modal overlay which is usually z-50
-    })
+    });
   }
-}
+};
 
 // Convert HTML content to markdown
 const convertHtmlToMarkdown = (html: string) => {
-  if (!html) return ''
+  if (!html) return '';
 
   return html
     // Convert divs with # to headings
@@ -209,12 +209,12 @@ const convertHtmlToMarkdown = (html: string) => {
     .replace(/\n\s*\n/g, `
 
 `)
-    .trim()
-}
+    .trim();
+};
 
 const formatLongDescription = (html: string) => {
-  return convertHtmlToMarkdown(html)
-}
+  return convertHtmlToMarkdown(html);
+};
 </script>
 
 <template>

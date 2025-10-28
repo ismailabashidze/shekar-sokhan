@@ -1,118 +1,118 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { Deed } from '~/composables/useDeed'
+import { ref, computed } from 'vue';
+import type { Deed } from '~/composables/useDeed';
 
 definePageMeta({
   title: 'کارهای نیک',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { user } = useUser()
-const route = useRoute()
-const router = useRouter()
+const { user } = useUser();
+const route = useRoute();
+const router = useRouter();
 
-const { getMyCoupons } = useDiscountCopoun()
+const { getMyCoupons } = useDiscountCopoun();
 
 // Pagination
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
-const perPage = ref(10)
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
+const perPage = ref(10);
 
 // Filters
-const filter = ref('')
-const typeFilter = ref('all')
-const difficultyFilter = ref('all')
+const filter = ref('');
+const typeFilter = ref('all');
+const difficultyFilter = ref('all');
 
 // Filter deeds
 const filteredDeeds = computed(() => {
   return deeds.value
     .filter((deed) => {
       if (typeFilter.value !== 'all' && deed.type !== typeFilter.value) {
-        return false
+        return false;
       }
       if (difficultyFilter.value !== 'all' && deed.difficulty !== difficultyFilter.value) {
-        return false
+        return false;
       }
       if (filter.value && !deed.title.includes(filter.value)) {
-        return false
+        return false;
       }
-      return true
-    })
-})
+      return true;
+    });
+});
 
 // Helper functions
 const getTypeLabel = (type: string) => {
   switch (type) {
     case 'family':
-      return 'خانواده'
+      return 'خانواده';
     case 'society':
-      return 'اجتماعی'
+      return 'اجتماعی';
     case 'spiritual':
-      return 'معنوی'
+      return 'معنوی';
     default:
-      return type
+      return type;
   }
-}
+};
 
 const getDifficultyLabel = (difficulty: string) => {
   switch (difficulty) {
     case 'simple':
-      return 'ساده'
+      return 'ساده';
     case 'moderate':
-      return 'متوسط'
+      return 'متوسط';
     case 'hard':
-      return 'سخت'
+      return 'سخت';
     default:
-      return difficulty
+      return difficulty;
   }
-}
+};
 
 const getTimeLabel = (time: string) => {
   switch (time) {
     case 'below_15':
-      return 'کمتر از ۱۵ دقیقه'
+      return 'کمتر از ۱۵ دقیقه';
     case 'between_15_60':
-      return '۱۵ تا ۶۰ دقیقه'
+      return '۱۵ تا ۶۰ دقیقه';
     case 'more_60':
-      return 'بیش از ۶۰ دقیقه'
+      return 'بیش از ۶۰ دقیقه';
     default:
-      return time
+      return time;
   }
-}
+};
 
 // Reset filters
 const resetFilters = () => {
-  filter.value = ''
-  typeFilter.value = 'all'
-  difficultyFilter.value = 'all'
-  router.push({ query: { page: '1' } })
-}
+  filter.value = '';
+  typeFilter.value = 'all';
+  difficultyFilter.value = 'all';
+  router.push({ query: { page: '1' } });
+};
 
 watch([filter, typeFilter, difficultyFilter], () => {
   router.push({
     query: {
       page: '1',
     },
-  })
-})
-const deeds = ref<Deed[]>([])
+  });
+});
+const deeds = ref<Deed[]>([]);
 onMounted(async () => {
-  const coupons = await getMyCoupons()
-  deeds.value = extractDeeds(coupons)
-  console.log('deeds', deeds.value)
-})
+  const coupons = await getMyCoupons();
+  deeds.value = extractDeeds(coupons);
+  console.log('deeds', deeds.value);
+});
 const extractDeeds = (coupons: discountCopoun[]) => {
   // Filter out empty expands and create a map of deed counts
-  const deedCounts = new Map<string, number>()
+  const deedCounts = new Map<string, number>();
 
   // Count occurrences of each deed
   coupons
     .filter(coupon => coupon.expand?.deed && Object.keys(coupon.expand.deed).length > 0)
     .forEach((coupon) => {
-      const deedId = coupon.expand.deed.id
-      deedCounts.set(deedId, (deedCounts.get(deedId) || 0) + 1)
-    })
+      const deedId = coupon.expand.deed.id;
+      deedCounts.set(deedId, (deedCounts.get(deedId) || 0) + 1);
+    });
 
   // Create unique deeds with completion counts
   return Array.from(
@@ -127,8 +127,8 @@ const extractDeeds = (coupons: discountCopoun[]) => {
           },
         ]),
     ).values(),
-  )
-}
+  );
+};
 </script>
 
 <template>

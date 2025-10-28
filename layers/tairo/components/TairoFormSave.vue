@@ -1,18 +1,18 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
-    disabled?: boolean
-    loading?: boolean
+    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+    disabled?: boolean;
+    loading?: boolean;
   }>(),
   {
     rounded: 'sm',
   },
-)
+);
 const emits = defineEmits<{
-  reset: []
-}>()
-const { x, y } = useNinjaWindowScroll()
+  reset: [];
+}>();
+const { x, y } = useNinjaWindowScroll();
 </script>
 
 <template>

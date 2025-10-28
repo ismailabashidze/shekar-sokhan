@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { useCollapse } from '../composables/collapse'
+import { useCollapse } from '../composables/collapse';
 
-const { isOpen, isMobileOpen, menuItems } = useCollapse()
-const app = useAppConfig()
+const { isOpen, isMobileOpen, menuItems } = useCollapse();
+const app = useAppConfig();
 
 const startMenuItems = computed(
   () =>
     menuItems.value?.filter(
       sidebar => !sidebar.position || sidebar.position === 'start',
     ),
-)
+);
 const endMenuItems = computed(
   () => menuItems.value?.filter(sidebar => sidebar.position === 'end'),
-)
+);
 </script>
 
 <template>

@@ -44,7 +44,7 @@ const tickets = [
       src: '/img/avatars/8.svg',
     },
   },
-]
+];
 </script>
 
 <template>

@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { persianDateTimeToISO, isoToPersianDateTime, getRelativeTimeToAnnounce, formatPersianDate } from '~/utils/persian-date'
-import PersianCalendar from '~/components/PersianCalendar.vue'
+import { persianDateTimeToISO, isoToPersianDateTime, getRelativeTimeToAnnounce, formatPersianDate } from '~/utils/persian-date';
+import PersianCalendar from '~/components/PersianCalendar.vue';
 
 definePageMeta({
   title: 'اعلان‌های ارسال شده',
   layout: 'sidebar',
   // Using global middlewares only
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'اعلان‌های ارسال شده - پنل ادمین - ذهنا',
-})
+});
 
 // Types
-type NotificationFilter = 'all' | 'sent' | 'scheduled-pending' | 'scheduled-sent'
+type NotificationFilter = 'all' | 'sent' | 'scheduled-pending' | 'scheduled-sent';
 
 interface StatusOption {
-  label: string
-  value: string
+  label: string;
+  value: string;
 }
 
 interface UserOption {
-  label: string
-  value: string
+  label: string;
+  value: string;
 }
 
 const {
@@ -37,41 +37,41 @@ const {
   isAdminRealtimeConnected,
   allNotifications,
   users,
-} = useAdminNotifications()
+} = useAdminNotifications();
 
-const { getUserAvatarUrl } = useAvatarManager()
-const route = useRoute()
+const { getUserAvatarUrl } = useAvatarManager();
+const route = useRoute();
 
 // Local state
-const notificationFilter = ref<NotificationFilter>('all')
-const userFilter = ref('')
-const searchQuery = ref('')
-const statusFilter = ref('')
-const dateFilter = ref('')
-const selectedUser = ref<any>(null)
+const notificationFilter = ref<NotificationFilter>('all');
+const userFilter = ref('');
+const searchQuery = ref('');
+const statusFilter = ref('');
+const dateFilter = ref('');
+const selectedUser = ref<any>(null);
 
 // Date range filter
-const fromDate = ref('')
-const toDate = ref('')
+const fromDate = ref('');
+const toDate = ref('');
 
 // Options for dropdowns
 const statusOptions: StatusOption[] = [
   { label: 'همه', value: '' },
   { label: 'خوانده شده', value: 'read' },
   { label: 'خوانده نشده', value: 'unread' },
-]
+];
 
 // Initialize user filter from query params
 const initializeUserFilter = () => {
   if (route.query.userId) {
-    userFilter.value = route.query.userId as string
+    userFilter.value = route.query.userId as string;
     // Find user in users list
-    const user = users.value.find((u: any) => u.id === route.query.userId)
+    const user = users.value.find((u: any) => u.id === route.query.userId);
     if (user) {
-      selectedUser.value = user
+      selectedUser.value = user;
     }
   }
-}
+};
 
 // Watch for changes in userFilter and update URL
 watch(userFilter, (newUserId) => {
@@ -79,123 +79,123 @@ watch(userFilter, (newUserId) => {
     navigateTo({
       path: '/admin/sent',
       query: { userId: newUserId },
-    })
+    });
   }
   else {
-    navigateTo('/admin/sent')
+    navigateTo('/admin/sent');
   }
-})
+});
 
 // Computed
 const userOptions = computed((): UserOption[] => {
   return users.value.map((user: any) => ({
     label: user.meta?.name || user.username || 'کاربر بدون نام',
     value: user.id,
-  }))
-})
+  }));
+});
 
 const filteredNotifications = computed(() => {
-  let filtered = allNotifications.value
+  let filtered = allNotifications.value;
 
   // Filter by notification status
   if (notificationFilter.value !== 'all') {
     filtered = filtered.filter((notification: any) => {
-      const scheduleStatus = getNotificationScheduleStatus(notification)
+      const scheduleStatus = getNotificationScheduleStatus(notification);
 
       switch (notificationFilter.value) {
         case 'sent':
-          return !scheduleStatus.isScheduled
+          return !scheduleStatus.isScheduled;
         case 'scheduled-pending':
-          return scheduleStatus.isScheduled && scheduleStatus.isPending
+          return scheduleStatus.isScheduled && scheduleStatus.isPending;
         case 'scheduled-sent':
-          return scheduleStatus.isScheduled && !scheduleStatus.isPending
+          return scheduleStatus.isScheduled && !scheduleStatus.isPending;
         default:
-          return true
+          return true;
       }
-    })
+    });
   }
 
   // Filter by user
   if (userFilter.value) {
     filtered = filtered.filter((notification: any) => {
-      return notification.expand?.recipient_user_id?.id === userFilter.value
-    })
+      return notification.expand?.recipient_user_id?.id === userFilter.value;
+    });
   }
 
   // Filter by search query (title or message)
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter((notification: any) => {
       return notification.title?.toLowerCase().includes(query)
-        || notification.message?.toLowerCase().includes(query)
-    })
+        || notification.message?.toLowerCase().includes(query);
+    });
   }
 
   // Filter by status (read/unread)
   if (statusFilter.value) {
     filtered = filtered.filter((notification: any) => {
-      return statusFilter.value === 'read' ? notification.is_read : !notification.is_read
-    })
+      return statusFilter.value === 'read' ? notification.is_read : !notification.is_read;
+    });
   }
 
   // Filter by date range
   if (fromDate.value || toDate.value) {
     filtered = filtered.filter((notification: any) => {
-      const notificationDate = new Date(notification.created)
-      const from = fromDate.value ? new Date(fromDate.value) : null
-      const to = toDate.value ? new Date(toDate.value) : null
+      const notificationDate = new Date(notification.created);
+      const from = fromDate.value ? new Date(fromDate.value) : null;
+      const to = toDate.value ? new Date(toDate.value) : null;
 
       if (from && to) {
-        return notificationDate >= from && notificationDate <= to
+        return notificationDate >= from && notificationDate <= to;
       }
       else if (from) {
-        return notificationDate >= from
+        return notificationDate >= from;
       }
       else if (to) {
-        return notificationDate <= to
+        return notificationDate <= to;
       }
-      return true
-    })
+      return true;
+    });
   }
 
-  return filtered
-})
+  return filtered;
+});
 
 const getNotificationFilterStats = computed(() => {
-  const all = allNotifications.value.length
-  const sent = allNotifications.value.filter((n: any) => !getNotificationScheduleStatus(n).isScheduled).length
+  const all = allNotifications.value.length;
+  const sent = allNotifications.value.filter((n: any) => !getNotificationScheduleStatus(n).isScheduled).length;
   const scheduledPending = allNotifications.value.filter((n: any) => {
-    const status = getNotificationScheduleStatus(n)
-    return status.isScheduled && status.isPending
-  }).length
+    const status = getNotificationScheduleStatus(n);
+    return status.isScheduled && status.isPending;
+  }).length;
   const scheduledSent = allNotifications.value.filter((n: any) => {
-    const status = getNotificationScheduleStatus(n)
-    return status.isScheduled && !status.isPending
-  }).length
+    const status = getNotificationScheduleStatus(n);
+    return status.isScheduled && !status.isPending;
+  }).length;
 
   return {
     all,
     sent,
     scheduledPending,
     scheduledSent,
-  }
-})
+  };
+});
 
 // Methods
 const getNotificationScheduleStatus = (notification: any) => {
-  const hasSchedule = notification.announce_time
+  const hasSchedule = notification.announce_time;
 
   if (!hasSchedule) {
     return {
       isScheduled: false,
       isPending: false,
       statusText: '',
-    }
+    };
   }
 
-  const scheduleTime = new Date(notification.announce_time)
-  const now = new Date()
-  const isPending = scheduleTime > now
+  const scheduleTime = new Date(notification.announce_time);
+  const now = new Date();
+  const isPending = scheduleTime > now;
 
   return {
     isScheduled: true,
@@ -203,41 +203,41 @@ const getNotificationScheduleStatus = (notification: any) => {
     statusText: isPending
       ? `ارسال در ${scheduleTime.toLocaleDateString('fa-IR')} ساعت ${scheduleTime.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}`
       : `ارسال شده در ${scheduleTime.toLocaleDateString('fa-IR')} ساعت ${scheduleTime.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}`,
-  }
-}
+  };
+};
 
 const deleteNotification = async (notificationId: string) => {
   if (confirm('آیا از حذف این اعلان اطمینان دارید؟')) {
     try {
-      await deleteNotificationAdmin(notificationId)
-      console.log('اعلان با موفقیت حذف شد')
+      await deleteNotificationAdmin(notificationId);
+      console.log('اعلان با موفقیت حذف شد');
     }
     catch (error) {
-      console.error('خطا در حذف اعلان:', error)
+      console.error('خطا در حذف اعلان:', error);
     }
   }
-}
+};
 
 const clearFilters = () => {
-  notificationFilter.value = 'all'
-  userFilter.value = ''
-  searchQuery.value = ''
-  statusFilter.value = ''
-  dateFilter.value = ''
-  fromDate.value = ''
-  toDate.value = ''
-  selectedUser.value = null
-}
+  notificationFilter.value = 'all';
+  userFilter.value = '';
+  searchQuery.value = '';
+  statusFilter.value = '';
+  dateFilter.value = '';
+  fromDate.value = '';
+  toDate.value = '';
+  selectedUser.value = null;
+};
 
 const selectUser = (user: any) => {
-  selectedUser.value = user
-  userFilter.value = user.id
-}
+  selectedUser.value = user;
+  userFilter.value = user.id;
+};
 
 const clearUserFilter = () => {
-  selectedUser.value = null
-  userFilter.value = ''
-}
+  selectedUser.value = null;
+  userFilter.value = '';
+};
 
 // Initialize
 onMounted(async () => {
@@ -246,20 +246,20 @@ onMounted(async () => {
       fetchAllNotifications(),
       fetchUsers(1, 100, '', true), // Load more users for filter
       subscribeToAllNotifications(),
-    ])
+    ]);
 
     // Initialize user filter after data is loaded
-    initializeUserFilter()
+    initializeUserFilter();
   }
   catch (error) {
-    console.error('خطا در بارگذاری داده‌ها:', error)
+    console.error('خطا در بارگذاری داده‌ها:', error);
   }
-})
+});
 
 // Cleanup
 onBeforeUnmount(() => {
-  unsubscribeFromAllNotifications()
-})
+  unsubscribeFromAllNotifications();
+});
 </script>
 
 <template>

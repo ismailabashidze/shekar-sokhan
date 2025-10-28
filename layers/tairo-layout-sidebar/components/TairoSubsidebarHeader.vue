@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { current, isOpen } = useSidebar()
+const { current, isOpen } = useSidebar();
 </script>
 
 <template>

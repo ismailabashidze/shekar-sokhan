@@ -1,9 +1,9 @@
 <script setup lang="ts">
 const props = defineProps<{
-  title?: string
-  description?: string
-  transparent?: boolean
-}>()
+  title?: string;
+  description?: string;
+  transparent?: boolean;
+}>();
 </script>
 
 <template>

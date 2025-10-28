@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { useBugReportApi, type BugReport } from '~/composables/useBugReportApi'
+import { useBugReportApi, type BugReport } from '~/composables/useBugReportApi';
 
-const route = useRoute()
-const id = route.params.id as string
-const router = useRouter()
-const toaster = useToaster()
+const route = useRoute();
+const id = route.params.id as string;
+const router = useRouter();
+const toaster = useToaster();
 
 definePageMeta({
   title: 'جزئیات گزارش خطا',
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { getBugReportById, markAsSeen, markAsResolved, markAsUnresolved } = useBugReportApi()
-const bugReport = ref<BugReport | null>(null)
-const isLoading = ref(true)
+const { getBugReportById, markAsSeen, markAsResolved, markAsUnresolved } = useBugReportApi();
+const bugReport = ref<BugReport | null>(null);
+const isLoading = ref(true);
 
 // Priority colors
 const priorityColors = {
@@ -22,7 +22,7 @@ const priorityColors = {
   high: 'warning',
   medium: 'info',
   low: 'success',
-}
+};
 
 // Category labels
 const categoryLabels = {
@@ -31,84 +31,84 @@ const categoryLabels = {
   efficiency: 'کارایی',
   security: 'امنیت',
   other: 'سایر',
-}
+};
 
 // Format date
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('fa-IR') + ' ' + date.toLocaleTimeString('fa-IR')
-}
+  const date = new Date(dateString);
+  return date.toLocaleDateString('fa-IR') + ' ' + date.toLocaleTimeString('fa-IR');
+};
 
 // Load bug report details
 const loadBugReport = async () => {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const report = await getBugReportById(id)
-    bugReport.value = report
+    const report = await getBugReportById(id);
+    bugReport.value = report;
 
     // Mark as seen automatically when viewed
     if (!report.seen) {
-      await markAsSeen(id)
+      await markAsSeen(id);
     }
   }
   catch (error) {
-    console.error('Error loading bug report:', error)
+    console.error('Error loading bug report:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در بارگذاری جزئیات گزارش',
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
-    router.push('/bug-reports')
+    });
+    router.push('/bug-reports');
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // Update bug report status
 const updateStatus = async (action: 'resolved' | 'unresolved') => {
   try {
     if (action === 'resolved') {
-      await markAsResolved(id)
-      bugReport.value!.resolved = true
+      await markAsResolved(id);
+      bugReport.value!.resolved = true;
       toaster.show({
         title: 'موفق',
         message: 'گزارش به عنوان حل شده علامت‌گذاری شد',
         color: 'success',
         icon: 'lucide:check-circle',
         closable: true,
-      })
+      });
     }
     else {
-      await markAsUnresolved(id)
-      bugReport.value!.resolved = false
+      await markAsUnresolved(id);
+      bugReport.value!.resolved = false;
       toaster.show({
         title: 'موفق',
         message: 'گزارش به عنوان حل نشده علامت‌گذاری شد',
         color: 'success',
         icon: 'lucide:check-circle',
         closable: true,
-      })
+      });
     }
   }
   catch (error) {
-    console.error(`Error updating bug report status:`, error)
+    console.error(`Error updating bug report status:`, error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در بروزرسانی وضعیت گزارش',
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   }
-}
+};
 
 // Load data on component mount
 onMounted(() => {
-  loadBugReport()
-})
+  loadBugReport();
+});
 </script>
 
 <template>

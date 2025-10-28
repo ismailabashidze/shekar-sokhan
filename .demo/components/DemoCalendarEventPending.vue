@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { type CalendarEvent, categoryTheme } from '~/utils/bundles/calendar'
+import { type CalendarEvent, categoryTheme } from '~/utils/bundles/calendar';
 
 const props = defineProps<{
-  event: Omit<CalendarEvent, 'startDate' | 'endDate'>
-}>()
+  event: Omit<CalendarEvent, 'startDate' | 'endDate'>;
+}>();
 </script>
 
 <template>

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    label: string
-    id?: string
-    level?: number | string
-    prefix?: string
-    prefixClasses?: string
-    suffix?: string
-    suffixClasses?: string
+    label: string;
+    id?: string;
+    level?: number | string;
+    prefix?: string;
+    prefixClasses?: string;
+    suffix?: string;
+    suffixClasses?: string;
   }>(),
   {
     id: undefined,
@@ -20,16 +20,16 @@ const props = withDefaults(
     suffixClasses:
       'opacity-0 group-hover/toc:opacity-100 group-focus/toc:opacity-100 group-visible/toc:opacity-100 leading-6 text-primary-300 absolute -end-5 -top-1',
   },
-)
+);
 
 const slug = computed(() =>
   props.label
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^\w-]+/g, ''),
-)
+);
 
-const anchor = computed(() => props.id || slug.value)
+const anchor = computed(() => props.id || slug.value);
 </script>
 
 <template>

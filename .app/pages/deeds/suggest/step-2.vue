@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { DeedCategory } from '~/composables/useDeedCategory'
-import type { Deed } from '~/composables/useDeed'
+import type { DeedCategory } from '~/composables/useDeedCategory';
+import type { Deed } from '~/composables/useDeed';
 
 definePageMeta({
   title: 'پیشنهاد کار نیک - مرحله ۲',
@@ -12,25 +12,25 @@ definePageMeta({
     srcDark: '/img/screens/wizard-2-dark.png',
     order: 31,
   },
-})
+});
 useHead({
   title: 'انتخاب دسته‌بندی',
   htmlAttrs: { dir: 'rtl' },
-})
+});
 
-const { deed } = useDeed()
-const { getCategories } = useDeedCategory()
+const { deed } = useDeed();
+const { getCategories } = useDeedCategory();
 
-const categories = ref<DeedCategory[]>([])
-const selectedCategory = ref('')
+const categories = ref<DeedCategory[]>([]);
+const selectedCategory = ref('');
 
 onMounted(async () => {
-  categories.value = await getCategories()
-})
+  categories.value = await getCategories();
+});
 
 function onSubmit() {
-  deed.value.category_deed = selectedCategory.value
-  navigateTo('/deeds/suggest/step-3')
+  deed.value.category_deed = selectedCategory.value;
+  navigateTo('/deeds/suggest/step-3');
 }
 </script>
 

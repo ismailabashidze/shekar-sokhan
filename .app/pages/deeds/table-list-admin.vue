@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import type { Deed } from '~/composables/useDeed'
+import { ref, computed, watch } from 'vue';
+import type { Deed } from '~/composables/useDeed';
 
 definePageMeta({
   title: 'مدیریت عمل های نیک',
@@ -13,73 +13,73 @@ definePageMeta({
     order: 44,
   },
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
-const toaster = useToaster()
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
+const toaster = useToaster();
 
 // Add role check
-const { role } = useUser()
-const isAdmin = computed(() => role.value === 'admin')
+const { role } = useUser();
+const isAdmin = computed(() => role.value === 'admin');
 
-const filter = ref('')
-const perPage = ref(10)
-const loading = ref(false)
-const deeds = ref<Deed[]>([])
-const totalDeeds = ref(0)
+const filter = ref('');
+const perPage = ref(10);
+const loading = ref(false);
+const deeds = ref<Deed[]>([]);
+const totalDeeds = ref(0);
 
-const { getDeeds, approveDeed, rejectDeed } = useDeed()
+const { getDeeds, approveDeed, rejectDeed } = useDeed();
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const fetchDeeds = async () => {
   try {
-    loading.value = true
+    loading.value = true;
     const result = await getDeeds({
       search: filter.value || undefined,
       page: page.value,
       perPage: perPage.value,
-    })
-    deeds.value = result.items
-    totalDeeds.value = result.total
+    });
+    deeds.value = result.items;
+    totalDeeds.value = result.total;
   }
   catch (error: any) {
-    console.error('Error fetching deeds:', error)
+    console.error('Error fetching deeds:', error);
     toaster.show({
       title: 'خطا',
       message: error.message || 'خطا در دریافت اطلاعات',
       color: 'danger',
       icon: 'ph:x-circle',
       closable: true,
-    })
+    });
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleApprove = async (deed: Deed) => {
   try {
-    loading.value = true
-    await approveDeed(deed.id)
+    loading.value = true;
+    await approveDeed(deed.id);
     toaster.show({
       title: 'موفقیت‌آمیز',
       message: 'عمل نیک با موفقیت تایید شد',
       color: 'success',
       icon: 'ph:check-circle',
       closable: true,
-    })
-    await fetchDeeds()
+    });
+    await fetchDeeds();
   }
   catch (error: any) {
     toaster.show({
@@ -88,19 +88,19 @@ const handleApprove = async (deed: Deed) => {
       color: 'danger',
       icon: 'ph:x-circle',
       closable: true,
-    })
+    });
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleReject = async (deed: Deed) => {
   try {
-    loading.value = true
-    const result = await rejectDeed(deed.id)
+    loading.value = true;
+    const result = await rejectDeed(deed.id);
     if (!result) {
-      throw new Error('خطا در تغییر وضعیت عمل نیک')
+      throw new Error('خطا در تغییر وضعیت عمل نیک');
     }
 
     toaster.show({
@@ -109,28 +109,28 @@ const handleReject = async (deed: Deed) => {
       color: 'success',
       icon: 'ph:check-circle',
       closable: true,
-    })
-    await fetchDeeds()
+    });
+    await fetchDeeds();
   }
   catch (error: any) {
-    console.error('Error rejecting deed:', error)
+    console.error('Error rejecting deed:', error);
     toaster.show({
       title: 'خطا',
       message: error.message || 'خطا در تغییر وضعیت عمل نیک',
       color: 'danger',
       icon: 'ph:x-circle',
       closable: true,
-    })
+    });
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // Initialize data
 onMounted(() => {
-  fetchDeeds()
-})
+  fetchDeeds();
+});
 
 // Status color mapping
 const statusColors = {
@@ -138,7 +138,7 @@ const statusColors = {
   pending: 'warning',
   approved: 'success',
   rejected: 'danger',
-} as const
+} as const;
 
 // Status text mapping
 const statusText = {
@@ -146,7 +146,7 @@ const statusText = {
   pending: 'در انتظار بررسی',
   approved: 'تایید شده',
   rejected: 'رد شده',
-} as const
+} as const;
 </script>
 
 <template>

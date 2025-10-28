@@ -2,13 +2,13 @@
 definePageMeta({
   title: 'ویرایش مقاله',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
-const toaster = useToaster()
+const route = useRoute();
+const router = useRouter();
+const toaster = useToaster();
 
 const {
   currentPost,
@@ -16,9 +16,9 @@ const {
   error,
   getPost,
   updatePost,
-} = usePosts()
+} = usePosts();
 
-const { user } = useUser()
+const { user } = useUser();
 
 // Form data
 const formData = ref({
@@ -39,11 +39,11 @@ const formData = ref({
   contentLengthTarget: 5000,
   seoTitle: '',
   seoDescription: '',
-})
+});
 
-const uploadedFiles = ref<FileList | null>(null)
-const newTag = ref('')
-const submitting = ref(false)
+const uploadedFiles = ref<FileList | null>(null);
+const newTag = ref('');
+const submitting = ref(false);
 
 // Categories
 const categories = [
@@ -55,7 +55,7 @@ const categories = [
   { value: 'relationship', label: 'روابط', icon: 'ph:users-duotone' },
   { value: 'stress-management', label: 'مدیریت استرس', icon: 'ph:heart-duotone' },
   { value: 'mindfulness', label: 'ذهن‌آگاهی', icon: 'ph:brain-duotone' },
-]
+];
 
 // Status options
 const statusOptions = [
@@ -63,16 +63,16 @@ const statusOptions = [
   { value: 'published', label: 'منتشر شده', color: 'success' },
   { value: 'archived', label: 'بایگانی شده', color: 'warning' },
   { value: 'scheduled', label: 'زمان‌بندی شده', color: 'info' },
-]
+];
 
 // Load post data
 const loadPost = async () => {
   try {
-    const postId = route.params.id as string
-    await getPost(postId)
+    const postId = route.params.id as string;
+    await getPost(postId);
 
     if (currentPost.value) {
-      const post = currentPost.value
+      const post = currentPost.value;
 
       // Populate form data
       formData.value = {
@@ -93,39 +93,39 @@ const loadPost = async () => {
         contentLengthTarget: post.contentLengthTarget || 5000,
         seoTitle: post.seoTitle || '',
         seoDescription: post.seoDescription || '',
-      }
+      };
     }
   }
   catch (err) {
-    console.error('Error loading post:', err)
+    console.error('Error loading post:', err);
     toaster.show({
       title: 'خطا',
       message: 'خطا در بارگیری مقاله',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
-}
+};
 
 // Validation
 const validate = () => {
-  const errors: Record<string, string> = {}
+  const errors: Record<string, string> = {};
 
   if (!formData.value.title.trim()) {
-    errors.title = 'عنوان الزامی است'
+    errors.title = 'عنوان الزامی است';
   }
 
   if (!formData.value.description.trim()) {
-    errors.description = 'توضیحات الزامی است'
+    errors.description = 'توضیحات الزامی است';
   }
 
   if (!formData.value.contentLong.trim()) {
-    errors.contentLong = 'متن کامل الزامی است'
+    errors.contentLong = 'متن کامل الزامی است';
   }
 
   if (!formData.value.category) {
-    errors.category = 'دسته‌بندی الزامی است'
+    errors.category = 'دسته‌بندی الزامی است';
   }
 
   if (Object.keys(errors).length > 0) {
@@ -135,21 +135,21 @@ const validate = () => {
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
-    return false
+    });
+    return false;
   }
 
-  return true
-}
+  return true;
+};
 
 // Submit form
 const submit = async () => {
-  if (!validate()) return
+  if (!validate()) return;
 
-  submitting.value = true
+  submitting.value = true;
 
   try {
-    const postId = route.params.id as string
+    const postId = route.params.id as string;
 
     // Prepare update data
     const updateData = {
@@ -172,9 +172,9 @@ const submit = async () => {
       contentLengthTarget: formData.value.contentLengthTarget || undefined,
       seoTitle: formData.value.seoTitle.trim() || undefined,
       seoDescription: formData.value.seoDescription.trim() || undefined,
-    }
+    };
 
-    await updatePost(updateData)
+    await updatePost(updateData);
 
     toaster.show({
       title: 'موفقیت',
@@ -182,11 +182,11 @@ const submit = async () => {
       color: 'success',
       icon: 'ph:check-circle',
       closable: true,
-    })
+    });
 
     setTimeout(() => {
-      router.push('/posts/list')
-    }, 1000)
+      router.push('/posts/list');
+    }, 1000);
   }
   catch (error: any) {
     toaster.show({
@@ -195,29 +195,29 @@ const submit = async () => {
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
   finally {
-    submitting.value = false
+    submitting.value = false;
   }
-}
+};
 
 // Tag management
 const addTag = () => {
   if (newTag.value && !formData.value.tags.includes(newTag.value.trim())) {
-    formData.value.tags.push(newTag.value.trim())
-    newTag.value = ''
+    formData.value.tags.push(newTag.value.trim());
+    newTag.value = '';
   }
-}
+};
 
 const removeTag = (tag: string) => {
-  formData.value.tags = formData.value.tags.filter(t => t !== tag)
-}
+  formData.value.tags = formData.value.tags.filter(t => t !== tag);
+};
 
 // Load post on mount
 onMounted(() => {
-  loadPost()
-})
+  loadPost();
+});
 </script>
 
 <template>

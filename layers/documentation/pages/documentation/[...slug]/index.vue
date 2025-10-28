@@ -2,18 +2,18 @@
 definePageMeta({
   pageTransition: false,
   layoutTransition: false,
-})
+});
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
 const contentPath = computed(() => {
-  const slug = route.params?.slug as string[]
+  const slug = route.params?.slug as string[];
   if (!slug || slug.length === 0) {
-    return '/documentation'
+    return '/documentation';
   }
-  return `/documentation/${slug.join('/')}`
-})
+  return `/documentation/${slug.join('/')}`;
+});
 
 const [{ data, pending }, { data: tree }] = await Promise.all([
   useAsyncData(
@@ -31,94 +31,94 @@ const [{ data, pending }, { data: tree }] = await Promise.all([
   useAsyncData(
     'page-tree',
     () => {
-      const path = contentPath.value.split('/')
-      path.shift() // remove /documentation
-      path.pop() // remove current page
+      const path = contentPath.value.split('/');
+      path.shift(); // remove /documentation
+      path.pop(); // remove current page
 
       // build all parent paths
-      const paths = []
+      const paths = [];
 
       for (let i = 0; i < path.length; i++) {
-        const parentPath = `/${path.slice(0, i + 1).join('/')}`
-        paths.push(parentPath)
-        paths.push(`${parentPath}/_dir`)
+        const parentPath = `/${path.slice(0, i + 1).join('/')}`;
+        paths.push(parentPath);
+        paths.push(`${parentPath}/_dir`);
       }
 
-      paths.push(`${contentPath.value}/_dir`)
+      paths.push(`${contentPath.value}/_dir`);
 
       return queryContent()
         .where({
           _path: { $in: paths },
         })
         .without(['body'])
-        .find() as Promise<any[]>
+        .find() as Promise<any[]>;
     },
     {
       watch: [contentPath],
     },
   ),
-])
+]);
 
 if (!data.value) {
-  await navigateTo('/documentation')
+  await navigateTo('/documentation');
 }
 else if (data.value.redirect) {
-  await navigateTo(data.value?.redirect)
+  await navigateTo(data.value?.redirect);
 }
 
 watchEffect(() => {
-  const title = data.value?.title
-  if (pending.value) return
+  const title = data.value?.title;
+  if (pending.value) return;
 
   // setting the title in the route meta will update the page title
-  route.meta.title = title || 'Page not found'
-})
+  route.meta.title = title || 'Page not found';
+});
 
-useContentHead(data as any)
+useContentHead(data as any);
 
 const breadcrumb = computed(() => {
-  const items: any[] = []
-  const indexRoute = router.resolve('/')
+  const items: any[] = [];
+  const indexRoute = router.resolve('/');
 
   if (indexRoute.meta.breadcrumb === false) {
     // skip breadcrumb item
   }
   else if (indexRoute.meta.breadcrumb) {
-    const breadcrumbItem = indexRoute.meta.breadcrumb
+    const breadcrumbItem = indexRoute.meta.breadcrumb;
     items.push({
       to: indexRoute.path,
       ...breadcrumbItem,
-    })
+    });
   }
   else if (indexRoute.meta.title) {
     items.push({
       label: indexRoute.meta.title as string,
       to: indexRoute.path,
-    })
+    });
   }
 
   for (const item of tree.value || []) {
     if (items.find(i => i.to === item._path)) {
-      continue
+      continue;
     }
     items.push({
       label: item.title,
       to: item._path.endsWith('_dir')
         ? item._path.replace('/_dir', '')
         : item._path,
-    })
+    });
   }
 
   if (data.value?.title) {
     items.push({
       label: data.value?.title,
-    })
+    });
   }
-  return items
-})
+  return items;
+});
 
-const isSearchOpen = useState('search-open', () => false)
-const metaKey = useMetaKey()
+const isSearchOpen = useState('search-open', () => false);
+const metaKey = useMetaKey();
 </script>
 
 <template>

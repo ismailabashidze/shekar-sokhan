@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useAssessment } from '~/composables/useAssessment'
+import { ref, computed, onMounted, watch } from 'vue';
+import { useAssessment } from '~/composables/useAssessment';
 
 definePageMeta({
   title: 'سفر درمانی - ارزیابی اولیه',
@@ -13,7 +13,7 @@ definePageMeta({
     srcDark: '/img/logo.svg',
     order: 2,
   },
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -21,21 +21,21 @@ useHead({
   meta: [
     { name: 'description', content: 'ارزیابی اولیه برای شناخت بهتر نیازهای درمانی شما توسط هوش مصنوعی' },
   ],
-})
+});
 
-const router = useRouter()
-const { createAssessment, getUserAssessments, updateAssessment } = useAssessment()
-const isVisible = ref(false)
+const router = useRouter();
+const { createAssessment, getUserAssessments, updateAssessment } = useAssessment();
+const isVisible = ref(false);
 const isDevelopment = computed(() => {
-  if (typeof window === 'undefined') return false
-  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-})
-const currentStep = ref(0)
-const isProcessing = ref(false)
-const isLoading = ref(true)
-const existingAssessmentId = ref<string | null>(null)
-const autoSaveTimeout = ref<NodeJS.Timeout | null>(null)
-const isAutoSaving = ref(false)
+  if (typeof window === 'undefined') return false;
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+});
+const currentStep = ref(0);
+const isProcessing = ref(false);
+const isLoading = ref(true);
+const existingAssessmentId = ref<string | null>(null);
+const autoSaveTimeout = ref<NodeJS.Timeout | null>(null);
+const isAutoSaving = ref(false);
 const formData = ref({
   // Status
   status: 'draft' as const,
@@ -89,7 +89,7 @@ const formData = ref({
   language: '',
   familySize: '',
   parentalStatus: '',
-})
+});
 
 const steps = [
   {
@@ -134,7 +134,7 @@ const steps = [
     icon: 'ph:gear-six',
     color: 'purple',
   },
-]
+];
 
 const moodOptions = [
   { value: 'excellent', label: 'عالی - احساس انرژی و شادی می‌کنم', color: 'success' },
@@ -142,19 +142,19 @@ const moodOptions = [
   { value: 'neutral', label: 'متوسط - نه خوب نه بد', color: 'warning' },
   { value: 'low', label: 'پایین - احساس غم یا ناامیدی می‌کنم', color: 'danger' },
   { value: 'very-low', label: 'بسیار پایین - خیلی سخت می‌گذرد', color: 'danger' },
-]
+];
 
 const emotionalStateOptions = [
   'احساس غمگینی', 'نگرانی مداوم', 'عصبانیت', 'احساس تنهایی',
   'بی‌حوصلگی', 'احساس گناه', 'ترس از آینده', 'کم اعتمادی به نفس',
   'احساس خالی بودن', 'تحریک‌پذیری', 'احساس ناامیدی', 'اضطراب اجتماعی',
-]
+];
 
 const physicalSymptomsOptions = [
   'سردرد مکرر', 'درد قفسه سینه', 'تنگی نفس', 'دل درد یا تهوع',
   'درد عضلانی', 'خستگی مداوم', 'لرزش', 'سرگیجه',
   'مشکلات گوارشی', 'تپش قلب', 'عرق کردن بی‌دلیل', 'تغییر اشتها',
-]
+];
 
 const relationshipOptions = [
   { value: 'single', label: 'مجرد' },
@@ -164,7 +164,7 @@ const relationshipOptions = [
   { value: 'divorced', label: 'مطلقه/مطلق' },
   { value: 'widowed', label: 'بیوه' },
   { value: 'complicated', label: 'پیچیده' },
-]
+];
 
 const livingStatusOptions = [
   { value: 'alone', label: 'تنها زندگی می‌کنم' },
@@ -173,7 +173,7 @@ const livingStatusOptions = [
   { value: 'roommates', label: 'با هم‌خانه' },
   { value: 'parents', label: 'با والدین' },
   { value: 'others', label: 'سایر' },
-]
+];
 
 const workStatusOptions = [
   { value: 'employed', label: 'شاغل تمام وقت' },
@@ -183,7 +183,7 @@ const workStatusOptions = [
   { value: 'retired', label: 'بازنشسته' },
   { value: 'freelance', label: 'آزاد/فریلنسر' },
   { value: 'homemaker', label: 'خانه‌دار' },
-]
+];
 
 const ageRanges = [
   { value: '18-25', label: '۱۸-۲۵ سال' },
@@ -192,20 +192,20 @@ const ageRanges = [
   { value: '46-55', label: '۴۶-۵۵ سال' },
   { value: '56-65', label: '۵۶-۶۵ سال' },
   { value: '65+', label: '۶۵+ سال' },
-]
+];
 
 const genderOptions = [
   { value: 'female', label: 'زن' },
   { value: 'male', label: 'مرد' },
   { value: 'non-binary', label: 'غیربایناری' },
   { value: 'prefer-not-say', label: 'ترجیح می‌دهم نگویم' },
-]
+];
 
 const statusOptions = [
   { value: 'draft', label: 'پیش‌نویس', color: 'warning' },
   { value: 'completed', label: 'تکمیل شده', color: 'success' },
   { value: 'reviewed', label: 'بررسی شده', color: 'info' },
-]
+];
 
 const communicationStyles = [
   {
@@ -238,7 +238,7 @@ const communicationStyles = [
     description: 'هنوز نمی‌دانم چه سبک ارتباطی برایم مناسب است',
     example: 'هوش مصنوعی در طول زمان یاد می‌گیرد چطور بهتر با شما ارتباط برقرار کند',
   },
-]
+];
 
 const therapyApproaches = [
   {
@@ -271,7 +271,7 @@ const therapyApproaches = [
     description: 'هوش مصنوعی بر اساس نیازهای شما بهترین روش را انتخاب می‌کند',
     example: 'اگر با این مفاهیم آشنا نیستید، ما کمکتان می‌کنیم بهترین روش را پیدا کنید',
   },
-]
+];
 
 const specificIssuesOptions = [
   'اضطراب و نگرانی', 'افسردگی و غمگینی', 'حملات پانیک', 'اضطراب اجتماعی',
@@ -280,7 +280,7 @@ const specificIssuesOptions = [
   'کم اعتمادی به نفس', 'مشکلات خواب', 'اختلالات تغذیه', 'اعتیاد و سوء مصرف',
   'مدیریت خشم', 'کنترل تکانه', 'مشکلات مالی', 'بحران هویت',
   'سوگ و از دست دادن', 'تروما و PTSD', 'تصمیم‌گیری‌های مهم', 'تغییرات زندگی',
-]
+];
 
 const copingMethodsOptions = {
   healthy: [
@@ -293,7 +293,7 @@ const copingMethodsOptions = {
     'بازی‌های ویدئویی بیش از حد', 'خشونت و عصبانیت', 'خودآزاری', 'خرید بیش از حد',
     'اجتناب از مسئولیت‌ها', 'بی‌خوابی عمدی', 'منزوی شدن', 'سرزنش خود',
   ],
-}
+};
 
 const educationOptions = [
   { value: 'elementary', label: 'ابتدایی' },
@@ -305,7 +305,7 @@ const educationOptions = [
   { value: 'master', label: 'کارشناسی ارشد' },
   { value: 'phd', label: 'دکتری' },
   { value: 'other', label: 'سایر' },
-]
+];
 
 const incomeOptions = [
   { value: 'very-low', label: 'خیلی کم - زیر ۵ میلیون تومان' },
@@ -315,7 +315,7 @@ const incomeOptions = [
   { value: 'middle-high', label: 'متوسط رو به بالا - ۴۰ تا ۸۰ میلیون تومان' },
   { value: 'high', label: 'بالا - بیش از ۸۰ میلیون تومان' },
   { value: 'prefer-not-say', label: 'ترجیح می‌دهم نگویم' },
-]
+];
 
 const locationOptions = [
   { value: 'tehran', label: 'تهران' },
@@ -330,7 +330,7 @@ const locationOptions = [
   { value: 'small-city', label: 'شهر کوچک' },
   { value: 'rural', label: 'روستایی' },
   { value: 'abroad', label: 'خارج از ایران' },
-]
+];
 
 const ethnicityOptions = [
   { value: 'persian', label: 'فارس' },
@@ -343,7 +343,7 @@ const ethnicityOptions = [
   { value: 'mixed', label: 'مختلط' },
   { value: 'other', label: 'سایر' },
   { value: 'prefer-not-say', label: 'ترجیح می‌دهم نگویم' },
-]
+];
 
 const religionOptions = [
   { value: 'shia', label: 'شیعه' },
@@ -357,7 +357,7 @@ const religionOptions = [
   { value: 'agnostic', label: 'آگنوستیک' },
   { value: 'other', label: 'سایر' },
   { value: 'prefer-not-say', label: 'ترجیح می‌دهم نگویم' },
-]
+];
 
 const languageOptions = [
   { value: 'persian-only', label: 'فقط فارسی' },
@@ -366,7 +366,7 @@ const languageOptions = [
   { value: 'persian-local', label: 'فارسی و زبان محلی' },
   { value: 'multilingual', label: 'چند زبانه' },
   { value: 'other', label: 'سایر' },
-]
+];
 
 const familySizeOptions = [
   { value: 'alone', label: 'تنها زندگی می‌کنم' },
@@ -375,7 +375,7 @@ const familySizeOptions = [
   { value: '4', label: '۴ نفر' },
   { value: '5', label: '۵ نفر' },
   { value: '6+', label: '۶ نفر یا بیشتر' },
-]
+];
 
 const parentalStatusOptions = [
   { value: 'no-children', label: 'فرزندی ندارم' },
@@ -386,7 +386,7 @@ const parentalStatusOptions = [
   { value: 'teenagers', label: 'فرزندان نوجوان دارم' },
   { value: 'adult-children', label: 'فرزندان بزرگسال دارم' },
   { value: 'mixed-ages', label: 'فرزندان در سنین مختلف' },
-]
+];
 
 const providerPreferenceOptions = [
   {
@@ -417,145 +417,145 @@ const providerPreferenceOptions = [
     example: 'درمان سنتی با جلسات حضوری یا آنلاین با متخصص',
     icon: 'ph:user',
   },
-]
+];
 
 // Validation helpers
 const getFieldValidation = (fieldName: string) => {
-  const value = formData.value[fieldName as keyof typeof formData.value] as string
-  const trimmedLength = value?.trim().length || 0
+  const value = formData.value[fieldName as keyof typeof formData.value] as string;
+  const trimmedLength = value?.trim().length || 0;
 
   const requirements = {
     mainConcerns: { min: 15, message: 'لطفاً حداقل ۱۵ کاراکتر وارد کنید تا بتوانیم شما را بهتر درک کنیم' },
     impactOnLife: { min: 10, message: 'لطفاً حداقل ۱۰ کاراکتر وارد کنید تا تأثیر مسائل بر زندگی‌تان را بفهمیم' },
     lifeGoals: { min: 3, message: 'لطفاً حداقل ۳ کاراکتر وارد کنید' },
-  }
+  };
 
-  const requirement = requirements[fieldName as keyof typeof requirements]
-  if (!requirement) return { isValid: true, remaining: 0, message: '' }
+  const requirement = requirements[fieldName as keyof typeof requirements];
+  if (!requirement) return { isValid: true, remaining: 0, message: '' };
 
-  const isValid = trimmedLength >= requirement.min
-  const remaining = Math.max(0, requirement.min - trimmedLength)
+  const isValid = trimmedLength >= requirement.min;
+  const remaining = Math.max(0, requirement.min - trimmedLength);
 
   return {
     isValid,
     remaining,
     message: isValid ? '' : requirement.message,
     currentLength: trimmedLength,
-  }
-}
+  };
+};
 
 const getValidationErrors = computed(() => {
-  const step = steps[currentStep.value]
-  const errors: string[] = []
+  const step = steps[currentStep.value];
+  const errors: string[] = [];
 
   switch (step.id) {
     case 'demographics':
       // Optional step - all fields are optional
-      break
+      break;
     case 'concerns':
       if (!getFieldValidation('mainConcerns').isValid) {
-        errors.push('لطفاً مشکل اصلی خود را شرح دهید (حداقل ۱۵ کاراکتر)')
+        errors.push('لطفاً مشکل اصلی خود را شرح دهید (حداقل ۱۵ کاراکتر)');
       }
       if (formData.value.symptomsStarted === '') {
-        errors.push('لطفاً زمان شروع مشکلات را انتخاب کنید')
+        errors.push('لطفاً زمان شروع مشکلات را انتخاب کنید');
       }
       if (!getFieldValidation('impactOnLife').isValid) {
-        errors.push('لطفاً تأثیر مسائل بر زندگی‌تان را شرح دهید (حداقل ۱۰ کاراکتر)')
+        errors.push('لطفاً تأثیر مسائل بر زندگی‌تان را شرح دهید (حداقل ۱۰ کاراکتر)');
       }
-      break
+      break;
     case 'emotional':
       if (formData.value.mood === '') {
-        errors.push('لطفاً حال کلی خود را انتخاب کنید')
+        errors.push('لطفاً حال کلی خود را انتخاب کنید');
       }
       if (formData.value.emotionalState.length === 0) {
-        errors.push('لطفاً حداقل یک احساس را انتخاب کنید')
+        errors.push('لطفاً حداقل یک احساس را انتخاب کنید');
       }
-      break
+      break;
     case 'physical':
       // Always valid as sliders have default values
-      break
+      break;
     case 'background':
       if (formData.value.age === '') {
-        errors.push('لطفاً محدوده سنی خود را انتخاب کنید')
+        errors.push('لطفاً محدوده سنی خود را انتخاب کنید');
       }
       if (formData.value.relationshipStatus === '') {
-        errors.push('لطفاً وضعیت ارتباطی خود را انتخاب کنید')
+        errors.push('لطفاً وضعیت ارتباطی خود را انتخاب کنید');
       }
       if (!getFieldValidation('lifeGoals').isValid) {
-        errors.push('لطفاً اهداف و انتظارات خود را شرح دهید (حداقل ۳ کاراکتر)')
+        errors.push('لطفاً اهداف و انتظارات خود را شرح دهید (حداقل ۳ کاراکتر)');
       }
-      break
+      break;
     case 'preferences':
       if (formData.value.preferredApproach === '') {
-        errors.push('لطفاً نوع کمک مورد انتظار خود را انتخاب کنید')
+        errors.push('لطفاً نوع کمک مورد انتظار خود را انتخاب کنید');
       }
       if (formData.value.communicationStyle === '') {
-        errors.push('لطفاً سبک ارتباطی مورد نظر خود را انتخاب کنید')
+        errors.push('لطفاً سبک ارتباطی مورد نظر خود را انتخاب کنید');
       }
       if (formData.value.providerPreference === '') {
-        errors.push('لطفاً نوع ارائه‌دهنده درمان مورد نظر خود را انتخاب کنید')
+        errors.push('لطفاً نوع ارائه‌دهنده درمان مورد نظر خود را انتخاب کنید');
       }
       if (formData.value.timeAvailability === '') {
-        errors.push('لطفاً میزان وقت در دسترس خود را انتخاب کنید')
+        errors.push('لطفاً میزان وقت در دسترس خود را انتخاب کنید');
       }
-      break
+      break;
   }
 
-  return errors
-})
+  return errors;
+});
 
 const isCurrentStepValid = computed(() => {
-  return getValidationErrors.value.length === 0
-})
+  return getValidationErrors.value.length === 0;
+});
 
 const autoSaveAssessment = async () => {
   try {
-    isAutoSaving.value = true
+    isAutoSaving.value = true;
     if (!existingAssessmentId.value) {
       // Create a draft assessment for auto-save
       const draftData = {
         ...formData.value,
         status: 'draft' as const,
-      }
-      const newAssessment = await createAssessment(draftData)
-      existingAssessmentId.value = newAssessment.id
+      };
+      const newAssessment = await createAssessment(draftData);
+      existingAssessmentId.value = newAssessment.id;
     }
     else {
       // Update existing assessment
       const draftData = {
         ...formData.value,
         status: formData.value.status, // Keep existing status
-      }
-      await updateAssessment(existingAssessmentId.value, draftData)
+      };
+      await updateAssessment(existingAssessmentId.value, draftData);
     }
   }
   catch (error) {
-    console.error('Auto-save failed:', error)
+    console.error('Auto-save failed:', error);
   }
   finally {
-    isAutoSaving.value = false
+    isAutoSaving.value = false;
   }
-}
+};
 
 const debouncedAutoSave = () => {
   if (autoSaveTimeout.value) {
-    clearTimeout(autoSaveTimeout.value)
+    clearTimeout(autoSaveTimeout.value);
   }
 
   autoSaveTimeout.value = setTimeout(() => {
-    autoSaveAssessment()
-  }, 2000) // Save after 2 seconds of inactivity
-}
+    autoSaveAssessment();
+  }, 2000); // Save after 2 seconds of inactivity
+};
 
 const loadExistingAssessment = async () => {
   try {
-    isLoading.value = true
-    const assessments = await getUserAssessments()
+    isLoading.value = true;
+    const assessments = await getUserAssessments();
 
     if (assessments && assessments.length > 0) {
       // Get the most recent assessment (could be draft or completed)
-      const latestAssessment = assessments[0]
-      existingAssessmentId.value = latestAssessment.id
+      const latestAssessment = assessments[0];
+      existingAssessmentId.value = latestAssessment.id;
 
       // Populate form with existing data
       formData.value = {
@@ -598,48 +598,48 @@ const loadExistingAssessment = async () => {
         language: latestAssessment.language || '',
         familySize: latestAssessment.familySize || '',
         parentalStatus: latestAssessment.parentalStatus || '',
-      }
+      };
 
       // If assessment is completed, start from the last step
       if (latestAssessment.status === 'completed') {
-        currentStep.value = steps.length - 1
+        currentStep.value = steps.length - 1;
       }
     }
   }
   catch (error) {
-    console.error('Error loading existing assessment:', error)
+    console.error('Error loading existing assessment:', error);
     // Continue with empty form if loading fails
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 onMounted(async () => {
-  await loadExistingAssessment()
+  await loadExistingAssessment();
   setTimeout(() => {
-    isVisible.value = true
-  }, 100)
-})
+    isVisible.value = true;
+  }, 100);
+});
 
 // Watch for form data changes and auto-save
 watch(formData, () => {
   if (!isLoading.value) {
-    debouncedAutoSave()
+    debouncedAutoSave();
   }
-}, { deep: true })
+}, { deep: true });
 
 const nextStep = () => {
   if (currentStep.value < steps.length - 1) {
-    currentStep.value++
+    currentStep.value++;
   }
-}
+};
 
 const prevStep = () => {
   if (currentStep.value > 0) {
-    currentStep.value--
+    currentStep.value--;
   }
-}
+};
 
 const fillTestData = () => {
   formData.value = {
@@ -695,14 +695,14 @@ const fillTestData = () => {
     language: 'persian-english',
     familySize: 'alone',
     parentalStatus: 'no-children',
-  }
+  };
 
   // Navigate to the last step
-  currentStep.value = steps.length - 1
-}
+  currentStep.value = steps.length - 1;
+};
 
 const submitAssessment = async () => {
-  isProcessing.value = true
+  isProcessing.value = true;
 
   try {
     // Save assessment data to PocketBase
@@ -710,71 +710,71 @@ const submitAssessment = async () => {
       ...formData.value,
       status: 'completed' as const, // Set status to completed when submitting
       completionTime: Math.round((Date.now() - new Date().getTime()) / 1000 / 60), // rough estimate
-    }
+    };
 
     if (existingAssessmentId.value) {
       // Update existing assessment
-      await updateAssessment(existingAssessmentId.value, assessmentData)
+      await updateAssessment(existingAssessmentId.value, assessmentData);
     }
     else {
       // Create new assessment
-      const newAssessment = await createAssessment(assessmentData)
-      existingAssessmentId.value = newAssessment.id
+      const newAssessment = await createAssessment(assessmentData);
+      existingAssessmentId.value = newAssessment.id;
     }
 
     // Navigate directly to wait page for background processing
-    router.push('/therapy-journey/wait')
+    router.push('/therapy-journey/wait');
   }
   catch (error) {
-    console.error('Error saving assessment:', error)
+    console.error('Error saving assessment:', error);
     // You might want to show an error message to the user here
     // For now, still navigate to avoid blocking the user
-    router.push('/therapy-journey/wait')
+    router.push('/therapy-journey/wait');
   }
   finally {
-    isProcessing.value = false
+    isProcessing.value = false;
   }
-}
+};
 
 const toggleSpecificIssue = (issue: string) => {
-  const index = formData.value.specificIssues.indexOf(issue)
+  const index = formData.value.specificIssues.indexOf(issue);
   if (index === -1) {
-    formData.value.specificIssues.push(issue)
+    formData.value.specificIssues.push(issue);
   }
   else {
-    formData.value.specificIssues.splice(index, 1)
+    formData.value.specificIssues.splice(index, 1);
   }
-}
+};
 
 const toggleEmotionalState = (emotion: string) => {
-  const index = formData.value.emotionalState.indexOf(emotion)
+  const index = formData.value.emotionalState.indexOf(emotion);
   if (index === -1) {
-    formData.value.emotionalState.push(emotion)
+    formData.value.emotionalState.push(emotion);
   }
   else {
-    formData.value.emotionalState.splice(index, 1)
+    formData.value.emotionalState.splice(index, 1);
   }
-}
+};
 
 const togglePhysicalSymptom = (symptom: string) => {
-  const index = formData.value.physicalSymptoms.indexOf(symptom)
+  const index = formData.value.physicalSymptoms.indexOf(symptom);
   if (index === -1) {
-    formData.value.physicalSymptoms.push(symptom)
+    formData.value.physicalSymptoms.push(symptom);
   }
   else {
-    formData.value.physicalSymptoms.splice(index, 1)
+    formData.value.physicalSymptoms.splice(index, 1);
   }
-}
+};
 
 const toggleCopingMethod = (method: string) => {
-  const index = formData.value.copingMethods.indexOf(method)
+  const index = formData.value.copingMethods.indexOf(method);
   if (index === -1) {
-    formData.value.copingMethods.push(method)
+    formData.value.copingMethods.push(method);
   }
   else {
-    formData.value.copingMethods.splice(index, 1)
+    formData.value.copingMethods.splice(index, 1);
   }
-}
+};
 </script>
 
 <template>

@@ -1,4 +1,4 @@
-import plugin from 'tailwindcss/plugin'
+import plugin from 'tailwindcss/plugin';
 
 /**
  * This plugin expose all colors from the tailwind config and adds them as CSS variables
@@ -9,25 +9,25 @@ import plugin from 'tailwindcss/plugin'
 export default plugin(({ addBase, theme }: any) => {
   addBase({
     ':root': extractColors(theme('colors')),
-  })
-})
+  });
+});
 
 function extractColors(colors: any, prefix = '') {
-  let cssVariables: any = {}
+  let cssVariables: any = {};
 
   for (const shade in colors) {
-    const value = colors[shade]
+    const value = colors[shade];
 
     if (typeof value === 'string') {
-      cssVariables[`--color${prefix}-${shade}`] = value
+      cssVariables[`--color${prefix}-${shade}`] = value;
     }
     else {
       cssVariables = {
         ...cssVariables,
         ...extractColors(value, `-${shade}`),
-      }
+      };
     }
   }
 
-  return cssVariables
+  return cssVariables;
 }

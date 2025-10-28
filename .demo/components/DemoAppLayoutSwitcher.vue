@@ -4,22 +4,22 @@
  * We also load colors from Tailwind and Shuriken UI.
  * We use the switchColorShades() function to dynamically change the colors.
  */
-import { switchColorShades } from '~/utils/bundles/colors-switcher'
-import colors from 'tailwindcss/colors'
+import { switchColorShades } from '~/utils/bundles/colors-switcher';
+import colors from 'tailwindcss/colors';
 
-const { layouts, activeLayoutName } = useLayoutSwitcher()
-const route = useRoute()
-const isSwitcherOpen = useState('switcher-open', () => false)
-const currentPrimary = ref('violet')
-const currentMuted = ref('slate')
+const { layouts, activeLayoutName } = useLayoutSwitcher();
+const route = useRoute();
+const isSwitcherOpen = useState('switcher-open', () => false);
+const currentPrimary = ref('violet');
+const currentMuted = ref('slate');
 
 // Close the modal when the primary or muted color changes
-watch([currentPrimary, currentMuted], closeModal)
+watch([currentPrimary, currentMuted], closeModal);
 
 // We can only change layout dynamically on the default layout
 const canChangeLayout = computed(
   () => !route.meta.layout || route.meta.layout === 'default',
-)
+);
 
 const primaryPresets = [
   {
@@ -106,7 +106,7 @@ const primaryPresets = [
     },
     class: 'bg-mauve-500',
   },
-] as const
+] as const;
 
 const mutedPresets = [
   {
@@ -139,22 +139,22 @@ const mutedPresets = [
     shades: colors.neutral,
     class: 'bg-neutral-300 dark:bg-neutral-900',
   },
-] as const
+] as const;
 
 function closeModal() {
-  isSwitcherOpen.value = false
+  isSwitcherOpen.value = false;
 }
 function switchLayout(layout: string) {
-  activeLayoutName.value = layout
-  closeModal()
+  activeLayoutName.value = layout;
+  closeModal();
 }
 function switchPrimary(color: (typeof primaryPresets)[number]) {
-  currentPrimary.value = color.name
-  switchColorShades('primary', color.shades)
+  currentPrimary.value = color.name;
+  switchColorShades('primary', color.shades);
 }
 function switchMuted(color: (typeof mutedPresets)[number]) {
-  currentMuted.value = color.name
-  switchColorShades('muted', color.shades)
+  currentMuted.value = color.name;
+  switchColorShades('muted', color.shades);
 }
 </script>
 

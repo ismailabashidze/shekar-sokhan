@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useFieldError, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useFieldError, useForm } from 'vee-validate';
+import { z } from 'zod';
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 definePageMeta({
   title: 'ویرایش درمانگر',
   layout: 'sidebar',
-})
+});
 
-const route = useRoute()
-const therapistId = route.query.userId as string
-const role = useLocalStorage('role', '')
-const isAdmin = computed(() => role.value === 'admin')
+const route = useRoute();
+const therapistId = route.query.userId as string;
+const role = useLocalStorage('role', '');
+const isAdmin = computed(() => role.value === 'admin');
 
 const VALIDATION_TEXT = {
   NAME_REQUIRED: 'نام درمانگر نمی‌تواند خالی باشد',
@@ -27,9 +27,9 @@ const VALIDATION_TEXT = {
   APPROACH_REQUIRED: 'رویکرد نمی‌تواند خالی باشد',
   EXPERTISE_REQUIRED: 'تخصص نمی‌تواند خالی باشد',
   AVATAR_TOO_BIG: 'اندازه تصویر آواتار باید کمتر از ۱ مگابایت باشد',
-}
+};
 
-const ONE_MB = 1000000
+const ONE_MB = 1000000;
 
 const zodSchema = z.object({
   avatar: z
@@ -51,11 +51,11 @@ const zodSchema = z.object({
     expertise: z.string().min(1, VALIDATION_TEXT.EXPERTISE_REQUIRED),
     isActive: z.boolean().default(true),
   }),
-})
+});
 
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 
 const initialValues: FormInput = {
   avatar: null,
@@ -72,15 +72,15 @@ const initialValues: FormInput = {
     expertise: '',
     isActive: true,
   },
-}
+};
 
-const nuxtApp = useNuxtApp()
-const { updateTherapist } = useTherapist()
+const nuxtApp = useNuxtApp();
+const { updateTherapist } = useTherapist();
 
 // Fetch therapist data
 const fetchTherapistData = async () => {
   try {
-    const record = await nuxtApp.$pb.collection('therapists').getOne(therapistId)
+    const record = await nuxtApp.$pb.collection('therapists').getOne(therapistId);
     if (record) {
       // Then set other fields
       setFieldValue('therapist', {
@@ -95,42 +95,42 @@ const fetchTherapistData = async () => {
         approach: record.approach,
         expertise: record.expertise,
         isActive: record.isActive ?? true,
-      })
+      });
 
       // If avatar exists, create a File object from the URL
       if (record.avatar) {
-        const avatarUrl = `https://pocket.zehna.ir/api/files/therapists/${therapistId}/${record.avatar}`
-        const response = await fetch(avatarUrl)
-        const blob = await response.blob()
-        const file = new File([blob], record.avatar, { type: blob.type })
-        setFieldValue('avatar', file)
+        const avatarUrl = `https://pocket.zehna.ir/api/files/therapists/${therapistId}/${record.avatar}`;
+        const response = await fetch(avatarUrl);
+        const blob = await response.blob();
+        const file = new File([blob], record.avatar, { type: blob.type });
+        setFieldValue('avatar', file);
       }
     }
   }
   catch (error) {
-    console.error('Error fetching therapist:', error)
+    console.error('Error fetching therapist:', error);
     toaster.show({
       title: 'خطا',
       message: 'مشکلی در دریافت اطلاعات درمانگر پیش آمد.',
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   }
-}
+};
 
 const currentAvatar = computed(() => {
   if (!therapistId)
-    return '/img/avatars/default-male.jpg'
+    return '/img/avatars/default-male.jpg';
 
   if (values.avatar instanceof File)
-    return URL.createObjectURL(values.avatar)
+    return URL.createObjectURL(values.avatar);
 
   if (values.avatar)
-    return `https://pocket.zehna.ir/api/files/therapists/${therapistId}/${values.avatar}`
+    return `https://pocket.zehna.ir/api/files/therapists/${therapistId}/${values.avatar}`;
 
-  return '/img/avatars/default-male.jpg'
-})
+  return '/img/avatars/default-male.jpg';
+});
 
 const {
   handleSubmit,
@@ -144,38 +144,38 @@ const {
 } = useForm<FormInput>({
   validationSchema,
   initialValues,
-})
+});
 
-const success = ref(false)
+const success = ref(false);
 
-const inputFile = ref<FileList | null>(null)
-const fileError = useFieldError('avatar')
+const inputFile = ref<FileList | null>(null);
+const fileError = useFieldError('avatar');
 watch(inputFile, (value) => {
-  const file = value?.item(0) || null
-  setFieldValue('avatar', file)
-})
+  const file = value?.item(0) || null;
+  setFieldValue('avatar', file);
+});
 
 const beforeRouteLeave = (to: any, from: any) => {
   // Only show warning for admin users and if there are unsaved changes
   if (isAdmin.value && meta.value.dirty) {
-    const answer = window.confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟')
+    const answer = window.confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟');
     if (!answer) {
-      return false
+      return false;
     }
   }
-  return true
-}
+  return true;
+};
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     try {
-      const formData = new FormData()
+      const formData = new FormData();
       if (values.avatar instanceof File)
-        formData.append('avatar', values.avatar)
+        formData.append('avatar', values.avatar);
 
       const therapistData = {
         name: values.therapist.name,
@@ -189,124 +189,124 @@ const onSubmit = handleSubmit(
         approach: values.therapist.approach,
         expertise: values.therapist.expertise,
         isActive: values.therapist.isActive,
-      }
+      };
 
       // Add all therapist data fields to FormData
       Object.entries(therapistData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           // Convert boolean to string 'true'/'false' for FormData
-          const formValue = typeof value === 'boolean' ? value.toString() : value
-          formData.append(key, formValue)
+          const formValue = typeof value === 'boolean' ? value.toString() : value;
+          formData.append(key, formValue);
         }
-      })
+      });
 
-      const { updateTherapist } = useTherapist()
-      const record = await updateTherapist(therapistId, formData)
+      const { updateTherapist } = useTherapist();
+      const record = await updateTherapist(therapistId, formData);
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'موفقیت',
         message: 'اطلاعات درمانگر با موفقیت به‌روزرسانی شد!',
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
 
       document.documentElement.scrollTo({
         top: 0,
         behavior: 'smooth',
-      })
+      });
 
-      success.value = true
+      success.value = true;
       setTimeout(() => {
-        success.value = false
-      }, 3000)
+        success.value = false;
+      }, 3000);
     }
     catch (error: any) {
-      console.error('therapist-update-error', error)
+      console.error('therapist-update-error', error);
 
       if (error.data && error.data.data) {
-        const backendErrors = error.data.data
+        const backendErrors = error.data.data;
         for (const key in backendErrors) {
-          setFieldError(`therapist.${key}`, backendErrors[key].message)
+          setFieldError(`therapist.${key}`, backendErrors[key].message);
         }
       }
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'خطا',
         message: 'مشکلی در به‌روزرسانی درمانگر پیش آمد. لطفاً دوباره تلاش کنید.',
         color: 'danger',
         icon: 'lucide:alert-triangle',
         closable: true,
-      })
+      });
 
       document.documentElement.scrollTo({
         top: 0,
         behavior: 'smooth',
-      })
+      });
     }
   },
   () => {
-    success.value = false
+    success.value = false;
 
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 
 // Add loading state
-const isLoading = ref(true)
+const isLoading = ref(true);
 
 onMounted(() => {
   // Add 2 second delay for skeleton loading
   setTimeout(() => {
-    isLoading.value = false
-  }, 2000)
+    isLoading.value = false;
+  }, 2000);
 
   if (therapistId) {
-    fetchTherapistData()
+    fetchTherapistData();
   }
-})
+});
 
-const isDeleteModalOpen = ref(false)
+const isDeleteModalOpen = ref(false);
 
 const openDeleteModal = () => {
-  isDeleteModalOpen.value = true
-}
+  isDeleteModalOpen.value = true;
+};
 
 const closeDeleteModal = () => {
-  isDeleteModalOpen.value = false
-}
+  isDeleteModalOpen.value = false;
+};
 
 const confirmDelete = async () => {
   try {
-    await nuxtApp.$pb.collection('therapists').delete(therapistId)
+    await nuxtApp.$pb.collection('therapists').delete(therapistId);
     toaster.show({
       title: 'موفقیت',
       message: 'درمانگر با موفقیت حذف شد.',
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
-    navigateTo('/darmana/therapists/chooseTherapist')
+    });
+    navigateTo('/darmana/therapists/chooseTherapist');
   }
   catch (error) {
-    console.error('Error deleting therapist:', error)
+    console.error('Error deleting therapist:', error);
     toaster.show({
       title: 'خطا',
       message: 'مشکلی در حذف درمانگر پیش آمد.',
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   }
   finally {
-    closeDeleteModal()
+    closeDeleteModal();
   }
-}
+};
 </script>
 
 <template>

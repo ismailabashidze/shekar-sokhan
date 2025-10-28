@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -37,39 +37,39 @@ const props = defineProps({
     default: 'en',
     validator: (v: string) => ['en', 'pes'].includes(v),
   },
-})
+});
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue']);
 
-const localSelected = ref(new Set(props.modelValue))
+const localSelected = ref(new Set(props.modelValue));
 watch(() => props.modelValue, (val) => {
-  localSelected.value = new Set(val)
-})
+  localSelected.value = new Set(val);
+});
 
-const emotionKey = (category: string, variant: string) => `${category}|${variant}`
-const isSelected = (category: string, variant: string) => localSelected.value.has(emotionKey(category, variant))
-const isPrimary = (_emotion: any, vIdx: number) => vIdx === 1
+const emotionKey = (category: string, variant: string) => `${category}|${variant}`;
+const isSelected = (category: string, variant: string) => localSelected.value.has(emotionKey(category, variant));
+const isPrimary = (_emotion: any, vIdx: number) => vIdx === 1;
 
 const handleEmotionClick = (category: string, variant: string) => {
-  const key = emotionKey(category, variant)
-  const next = new Set(localSelected.value)
+  const key = emotionKey(category, variant);
+  const next = new Set(localSelected.value);
   if (next.has(key)) {
-    next.delete(key)
+    next.delete(key);
   }
   else {
-    next.add(key)
+    next.add(key);
   }
-  localSelected.value = next
-  emit('update:modelValue', Array.from(next))
-}
+  localSelected.value = next;
+  emit('update:modelValue', Array.from(next));
+};
 
 const getPosition = (angle: number, radius: number) => {
-  const radians = (angle - 90) * Math.PI / 180
+  const radians = (angle - 90) * Math.PI / 180;
   return {
     x: 250 + radius * Math.cos(radians),
     y: 250 + radius * Math.sin(radians),
-  }
-}
+  };
+};
 
 // Persian translations for emotion variants and dyads
 const pesLabels = {
@@ -87,16 +87,16 @@ const pesLabels = {
     optimism: 'خوش‌بینی', love: 'عشق', submission: 'تسلیم', awe: 'شگفت‌زدگی',
     disapproval: 'عدم تایید', remorse: 'پشیمانی', contempt: 'تحقیر', aggressiveness: 'پرخاشگری',
   },
-}
+};
 
 // Get label in correct language
 const getLabel = (key: string, type: 'variant' | 'dyad') => {
   if (props.lang === 'pes') {
-    if (type === 'variant') return pesLabels.variants[key as keyof typeof pesLabels.variants] || key
-    if (type === 'dyad') return pesLabels.dyads[key as keyof typeof pesLabels.dyads] || key
+    if (type === 'variant') return pesLabels.variants[key as keyof typeof pesLabels.variants] || key;
+    if (type === 'dyad') return pesLabels.dyads[key as keyof typeof pesLabels.dyads] || key;
   }
-  return key
-}
+  return key;
+};
 </script>
 
 <template>
@@ -243,30 +243,30 @@ const getLabel = (key: string, type: 'variant' | 'dyad') => {
 <script lang="ts">
 // Helper for SVG arc path
 export function createPetalPath(startAngle: number, endAngle: number, innerRadius: number, outerRadius: number) {
-  const toRadians = (deg: number) => (deg - 90) * Math.PI / 180
+  const toRadians = (deg: number) => (deg - 90) * Math.PI / 180;
   const startOuter = {
     x: 250 + outerRadius * Math.cos(toRadians(startAngle)),
     y: 250 + outerRadius * Math.sin(toRadians(startAngle)),
-  }
+  };
   const endOuter = {
     x: 250 + outerRadius * Math.cos(toRadians(endAngle)),
     y: 250 + outerRadius * Math.sin(toRadians(endAngle)),
-  }
+  };
   const startInner = {
     x: 250 + innerRadius * Math.cos(toRadians(endAngle)),
     y: 250 + innerRadius * Math.sin(toRadians(endAngle)),
-  }
+  };
   const endInner = {
     x: 250 + innerRadius * Math.cos(toRadians(startAngle)),
     y: 250 + innerRadius * Math.sin(toRadians(startAngle)),
-  }
-  const largeArc = endAngle - startAngle <= 180 ? 0 : 1
+  };
+  const largeArc = endAngle - startAngle <= 180 ? 0 : 1;
   return [
     `M ${startOuter.x} ${startOuter.y}`,
     `A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${endOuter.x} ${endOuter.y}`,
     `L ${startInner.x} ${startInner.y}`,
     `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${endInner.x} ${endInner.y}`,
     'Z',
-  ].join(' ')
+  ].join(' ');
 }
 </script>

@@ -11,7 +11,7 @@ definePageMeta({
     order: 26,
     new: true,
   },
-})
+});
 
 const conversations = ref([
   {
@@ -491,26 +491,26 @@ const conversations = ref([
       },
     ],
   },
-])
+]);
 
-const searchMessages = ref('')
-const selectedOption = ref('chat')
-const mobileOpen = ref(false)
+const searchMessages = ref('');
+const selectedOption = ref('chat');
+const mobileOpen = ref(false);
 
-const chatEl = ref<HTMLElement>()
-const expanded = ref(false)
-const loading = ref(false)
-const search = ref('')
-const message = ref('')
-const messageLoading = ref(false)
-const activeConversation = ref(1)
+const chatEl = ref<HTMLElement>();
+const expanded = ref(false);
+const loading = ref(false);
+const search = ref('');
+const message = ref('');
+const messageLoading = ref(false);
+const activeConversation = ref(1);
 
 const selectedConversation = computed(() => {
-  mobileOpen.value = false
+  mobileOpen.value = false;
   return conversations.value.find(
     conversation => conversation.id === activeConversation.value,
-  )
-})
+  );
+});
 
 onMounted(() => {
   setTimeout(() => {
@@ -518,63 +518,63 @@ onMounted(() => {
       chatEl.value.scrollTo({
         top: chatEl.value.scrollHeight,
         behavior: 'smooth',
-      })
+      });
     }
-  }, 300)
-})
+  }, 300);
+});
 
 function selectConversation(id: number) {
-  if (messageLoading.value) return
+  if (messageLoading.value) return;
 
-  loading.value = true
-  message.value = ''
+  loading.value = true;
+  message.value = '';
 
   setTimeout(() => {
-    activeConversation.value = id
-    loading.value = false
+    activeConversation.value = id;
+    loading.value = false;
     setTimeout(() => {
-      expanded.value = false
+      expanded.value = false;
 
       if (chatEl.value) {
         chatEl.value.scrollTo({
           top: chatEl.value.scrollHeight,
           behavior: 'smooth',
-        })
+        });
       }
-    }, 300)
-  }, 1000)
+    }, 300);
+  }, 1000);
 }
 
 async function submitMessage() {
-  if (!message.value) return
-  if (messageLoading.value) return
+  if (!message.value) return;
+  if (messageLoading.value) return;
 
-  messageLoading.value = true
+  messageLoading.value = true;
 
   const newMessage = {
     type: 'sent',
     text: message.value,
     time: 'Just now',
     attachments: [],
-  }
+  };
 
   const index = conversations.value.findIndex(
     conversation => conversation.id === activeConversation.value,
-  )
+  );
 
-  await new Promise(resolve => setTimeout(resolve, 200))
+  await new Promise(resolve => setTimeout(resolve, 200));
 
-  conversations.value[index].messages.push(newMessage)
-  message.value = ''
-  messageLoading.value = false
+  conversations.value[index].messages.push(newMessage);
+  message.value = '';
+  messageLoading.value = false;
 
-  await nextTick()
+  await nextTick();
 
   if (chatEl.value) {
     chatEl.value.scrollTo({
       top: chatEl.value.scrollHeight,
       behavior: 'smooth',
-    })
+    });
   }
 }
 </script>

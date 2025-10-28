@@ -111,62 +111,62 @@
 </template>
 
 <script setup lang="ts">
-import type { SystemAlert } from '~/composables/useNotificationMonitoring'
+import type { SystemAlert } from '~/composables/useNotificationMonitoring';
 
 interface Props {
-  alert: SystemAlert
+  alert: SystemAlert;
 }
 
 interface Emits {
-  acknowledge: [alertId: string]
-  resolve: [alertId: string]
+  acknowledge: [alertId: string];
+  resolve: [alertId: string];
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
 
-const showMenu = ref(false)
+const showMenu = ref(false);
 
 const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / (1000 * 60))
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
   if (diffMins < 1) {
-    return 'Just now'
+    return 'Just now';
   }
   else if (diffMins < 60) {
-    return `${diffMins}m ago`
+    return `${diffMins}m ago`;
   }
   else if (diffHours < 24) {
-    return `${diffHours}h ago`
+    return `${diffHours}h ago`;
   }
   else if (diffDays < 7) {
-    return `${diffDays}d ago`
+    return `${diffDays}d ago`;
   }
   else {
-    return date.toLocaleDateString()
+    return date.toLocaleDateString();
   }
-}
+};
 
 const formatMetricValue = (value: number, metricName?: string): string => {
-  if (!metricName) return value.toString()
+  if (!metricName) return value.toString();
 
   if (metricName.includes('rate') || metricName.includes('percentage')) {
-    return `${value.toFixed(1)}%`
+    return `${value.toFixed(1)}%`;
   }
   else if (metricName.includes('time') || metricName.includes('latency')) {
-    return `${Math.round(value)}ms`
+    return `${Math.round(value)}ms`;
   }
   else if (metricName.includes('memory') || metricName.includes('usage')) {
-    return `${Math.round(value)}MB`
+    return `${Math.round(value)}MB`;
   }
 
-  return value.toString()
-}
+  return value.toString();
+};
 
 const copyAlertDetails = async () => {
   try {
@@ -180,37 +180,37 @@ const copyAlertDetails = async () => {
       metric_name: props.alert.metric_name,
       metric_value: props.alert.metric_value,
       threshold: props.alert.threshold,
-    }
+    };
 
-    await navigator.clipboard.writeText(JSON.stringify(details, null, 2))
-    showMenu.value = false
+    await navigator.clipboard.writeText(JSON.stringify(details, null, 2));
+    showMenu.value = false;
 
     // You could add a toast notification here
-    console.log('Alert details copied to clipboard')
+    console.log('Alert details copied to clipboard');
   }
   catch (error) {
-    console.error('Failed to copy alert details:', error)
+    console.error('Failed to copy alert details:', error);
   }
-}
+};
 
 const viewAlertHistory = () => {
   // Navigate to alert history page or open modal
-  showMenu.value = false
-  console.log('View alert history for:', props.alert.id)
-}
+  showMenu.value = false;
+  console.log('View alert history for:', props.alert.id);
+};
 
 // Click outside directive
 const vClickOutside = {
   mounted(el: HTMLElement, binding: any) {
     el.clickOutsideEvent = (event: Event) => {
       if (!(el === event.target || el.contains(event.target as Node))) {
-        binding.value()
+        binding.value();
       }
-    }
-    document.addEventListener('click', el.clickOutsideEvent)
+    };
+    document.addEventListener('click', el.clickOutsideEvent);
   },
   unmounted(el: HTMLElement) {
-    document.removeEventListener('click', el.clickOutsideEvent)
+    document.removeEventListener('click', el.clickOutsideEvent);
   },
-}
+};
 </script>

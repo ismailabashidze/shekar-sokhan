@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { generatePassphrase as _generatePassphrase } from '~/utils/bundles/diceware'
-import Slider from '@vueform/slider'
-import '~/assets/css/slider.css'
+import { generatePassphrase as _generatePassphrase } from '~/utils/bundles/diceware';
+import Slider from '@vueform/slider';
+import '~/assets/css/slider.css';
 
 definePageMeta({
   title: 'Password',
@@ -13,24 +13,24 @@ definePageMeta({
     srcDark: '/img/screens/layouts-form-5-dark.png',
     order: 51,
   },
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
-const password = ref('')
+const password = ref('');
 
 // passphrase
 
-const phraseStrength = ref(4)
+const phraseStrength = ref(4);
 
 function generatePassphrase() {
-  const words = _generatePassphrase(phraseStrength.value)
-  password.value = words.join(' ')
+  const words = _generatePassphrase(phraseStrength.value);
+  password.value = words.join(' ');
 }
 
 watch(phraseStrength, () => {
-  generatePassphrase()
-})
+  generatePassphrase();
+});
 
 // password
 
@@ -39,69 +39,69 @@ const chars = ref({
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
   numeric: '0123456789',
   symbols: '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~',
-})
+});
 
-const charsLength = ref(24)
+const charsLength = ref(24);
 
-const charsLower = ref(true)
-const charsUpper = ref(true)
-const charsNumeric = ref(true)
-const charsSymbols = ref(false)
+const charsLower = ref(true);
+const charsUpper = ref(true);
+const charsNumeric = ref(true);
+const charsSymbols = ref(false);
 const hasChars = computed(() => {
   return (
     charsLower.value
     || charsUpper.value
     || charsNumeric.value
     || charsSymbols.value
-  )
-})
+  );
+});
 
 watch([charsLength, charsLower, charsUpper, charsNumeric, charsSymbols], () => {
-  if (!hasChars.value) return
+  if (!hasChars.value) return;
 
-  generatePassword()
-})
+  generatePassword();
+});
 
 function generatePassword() {
-  const dict: string[] = []
+  const dict: string[] = [];
 
-  if (charsLower.value) dict.push(chars.value.lower)
-  if (charsUpper.value) dict.push(chars.value.upper)
-  if (charsNumeric.value) dict.push(chars.value.numeric)
-  if (charsSymbols.value) dict.push(chars.value.symbols)
+  if (charsLower.value) dict.push(chars.value.lower);
+  if (charsUpper.value) dict.push(chars.value.upper);
+  if (charsNumeric.value) dict.push(chars.value.numeric);
+  if (charsSymbols.value) dict.push(chars.value.symbols);
 
   password.value = shuffleArray(dict.join('').split(''))
     .join('')
-    .substring(0, charsLength.value)
+    .substring(0, charsLength.value);
 }
 
 function shuffleArray(array: any[]) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
+    ;[array[i], array[j]] = [array[j], array[i]];
   }
-  return array
+  return array;
 }
 
 onMounted(() => {
-  generatePassphrase()
-})
+  generatePassphrase();
+});
 
-const { text, copy, copied, isSupported } = useClipboard({ source: password })
+const { text, copy, copied, isSupported } = useClipboard({ source: password });
 const handleClipboard = () => {
-  copy(password.value)
+  copy(password.value);
   if (copied) {
-    console.log('Text was copied to clipboard!')
-    toaster.clearAll()
+    console.log('Text was copied to clipboard!');
+    toaster.clearAll();
     toaster.show({
       title: 'Success',
       message: `Password was copied to clipboard!`,
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
+    });
   }
-}
+};
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Invite, StepData } from '../../../types'
+import type { Invite, StepData } from '../../../types';
 
 definePageMeta({
   preview: {
@@ -11,10 +11,10 @@ definePageMeta({
     order: 37,
     new: true,
   },
-})
+});
 useHead({
   title: 'انتخاب سوپروایزر',
-})
+});
 
 const {
   data: request,
@@ -24,9 +24,9 @@ const {
   getPrevStep,
   steps,
   checkPreviousSteps,
-} = useMultiStepForm<Invite, StepData>()
+} = useMultiStepForm<Invite, StepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 </script>
 
 <template>

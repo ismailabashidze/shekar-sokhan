@@ -1,32 +1,32 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    value?: string
-    minLength?: number
-    goodLength?: number
+    value?: string;
+    minLength?: number;
+    goodLength?: number;
   }>(),
   {
     value: '',
     minLength: 8,
     goodLength: 20,
   },
-)
+);
 
-const hasUpperChar = computed(() => /[A-Z]/.test(props.value) ?? false)
-const hasLowerChar = computed(() => /[a-z]/.test(props.value) ?? false)
+const hasUpperChar = computed(() => /[A-Z]/.test(props.value) ?? false);
+const hasLowerChar = computed(() => /[a-z]/.test(props.value) ?? false);
 const hasSpecialChar = computed(
   () => /[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/.test(props.value) ?? false,
-)
-const hasNumberChar = computed(() => /[0-9]/.test(props.value) ?? false)
+);
+const hasNumberChar = computed(() => /[0-9]/.test(props.value) ?? false);
 const hasMinLength = computed(
   () => props.value.length >= props.minLength ?? false,
-)
+);
 const hasGoodLength = computed(
   () => props.value.length >= props.goodLength ?? false,
-)
+);
 const strength = computed(() => {
   if (!hasMinLength.value) {
-    return 0
+    return 0;
   }
 
   return (
@@ -36,8 +36,8 @@ const strength = computed(() => {
     + Number(hasNumberChar.value)
     + Number(hasMinLength.value)
     + Number(hasGoodLength.value)
-  )
-})
+  );
+});
 
 const checks = computed(() => [
   {
@@ -64,7 +64,7 @@ const checks = computed(() => [
     label: 'Contains special characters',
     valid: hasSpecialChar.value,
   },
-])
+]);
 </script>
 
 <template>

@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { QuillEditor } from '@vueup/vue-quill'
-import '@vueup/vue-quill/dist/vue-quill.snow.css'
+import { QuillEditor } from '@vueup/vue-quill';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 interface Props {
-  modelValue?: string
-  label?: string
-  placeholder?: string
-  required?: boolean
-  disabled?: boolean
-  readonly?: boolean
-  height?: string
+  modelValue?: string;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  height?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   height: '200px',
   placeholder: 'متن خود را وارد کنید...',
-})
+});
 
 const emits = defineEmits<{
-  'update:modelValue': [value: string]
-}>()
+  'update:modelValue': [value: string];
+}>();
 
 // Generate unique ID for accessibility
-const id = `rich-editor-${Math.random().toString(36).substr(2, 9)}`
+const id = `rich-editor-${Math.random().toString(36).substr(2, 9)}`;
 
 // Quill toolbar options with RTL support
 const toolbarOptions = [
@@ -38,7 +38,7 @@ const toolbarOptions = [
   ['blockquote', 'code-block'],
   ['link', 'image', 'video'],
   ['clean'],
-]
+];
 
 const editorOptions = {
   theme: 'snow',
@@ -47,12 +47,12 @@ const editorOptions = {
   },
   placeholder: props.placeholder,
   readOnly: props.readonly || props.disabled,
-}
+};
 
 // Handle content change
 const handleTextChange = (content: string) => {
-  emits('update:modelValue', content)
-}
+  emits('update:modelValue', content);
+};
 </script>
 
 <template>

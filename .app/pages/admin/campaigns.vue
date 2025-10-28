@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { CampaignForm, CampaignSchedule } from '~/types/campaigns'
+import type { CampaignForm, CampaignSchedule } from '~/types/campaigns';
 
 definePageMeta({
   title: 'مدیریت کمپین‌ها',
   layout: 'sidebar',
   // Using global middlewares only
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'مدیریت کمپین‌ها - پنل ادمین - ذهنا',
-})
+});
 
 const {
   campaigns,
@@ -27,21 +27,21 @@ const {
   launchCampaign,
   pauseCampaign,
   resumeCampaign,
-} = useCampaignManager()
+} = useCampaignManager();
 
 const {
   userGroups,
   fetchUserGroups,
-} = useUserGroupManager()
+} = useUserGroupManager();
 
 const {
   activeTemplates,
   fetchTemplates,
-} = useTemplateManager()
+} = useTemplateManager();
 
 // Form state
-const showCreateForm = ref(false)
-const editingCampaign = ref<string | null>(null)
+const showCreateForm = ref(false);
+const editingCampaign = ref<string | null>(null);
 const formData = ref<CampaignForm>({
   name: '',
   description: '',
@@ -51,7 +51,7 @@ const formData = ref<CampaignForm>({
     type: 'immediate',
     timezone: 'Asia/Tehran',
   },
-})
+});
 
 // Initialize data
 onMounted(async () => {
@@ -60,12 +60,12 @@ onMounted(async () => {
       fetchCampaigns(),
       fetchUserGroups(),
       fetchTemplates(),
-    ])
+    ]);
   }
   catch (error) {
-    console.error('خطا در بارگذاری داده‌ها:', error)
+    console.error('خطا در بارگذاری داده‌ها:', error);
   }
-})
+});
 
 // Form methods
 const resetForm = () => {
@@ -78,77 +78,77 @@ const resetForm = () => {
       type: 'immediate',
       timezone: 'Asia/Tehran',
     },
-  }
-  editingCampaign.value = null
-}
+  };
+  editingCampaign.value = null;
+};
 
 const handleCreateCampaign = async () => {
   try {
-    await createCampaign(formData.value)
-    showCreateForm.value = false
-    resetForm()
+    await createCampaign(formData.value);
+    showCreateForm.value = false;
+    resetForm();
   }
   catch (error) {
-    console.error('خطا در ایجاد کمپین:', error)
+    console.error('خطا در ایجاد کمپین:', error);
   }
-}
+};
 
 const handleLaunchCampaign = async (campaignId: string) => {
   try {
-    await launchCampaign(campaignId)
+    await launchCampaign(campaignId);
   }
   catch (error) {
-    console.error('خطا در راه‌اندازی کمپین:', error)
+    console.error('خطا در راه‌اندازی کمپین:', error);
   }
-}
+};
 
 const handlePauseCampaign = async (campaignId: string) => {
   try {
-    await pauseCampaign(campaignId)
+    await pauseCampaign(campaignId);
   }
   catch (error) {
-    console.error('خطا در متوقف کردن کمپین:', error)
+    console.error('خطا در متوقف کردن کمپین:', error);
   }
-}
+};
 
 const handleResumeCampaign = async (campaignId: string) => {
   try {
-    await resumeCampaign(campaignId)
+    await resumeCampaign(campaignId);
   }
   catch (error) {
-    console.error('خطا در ادامه کمپین:', error)
+    console.error('خطا در ادامه کمپین:', error);
   }
-}
+};
 
 const handleDeleteCampaign = async (campaignId: string) => {
   if (confirm('آیا از حذف این کمپین اطمینان دارید؟')) {
     try {
-      await deleteCampaign(campaignId)
+      await deleteCampaign(campaignId);
     }
     catch (error) {
-      console.error('خطا در حذف کمپین:', error)
+      console.error('خطا در حذف کمپین:', error);
     }
   }
-}
+};
 
 // Computed
 const canSubmit = computed(() => {
   return formData.value.name.trim()
     && formData.value.template_id
-    && formData.value.target_groups.length > 0
-})
+    && formData.value.target_groups.length > 0;
+});
 
 const scheduleTypeOptions = [
   { label: 'فوری', value: 'immediate' },
   { label: 'زمان‌بندی شده', value: 'scheduled' },
   { label: 'تکراری', value: 'recurring' },
-]
+];
 
 const frequencyOptions = [
   { label: 'روزانه', value: 'daily' },
   { label: 'هفتگی', value: 'weekly' },
   { label: 'ماهانه', value: 'monthly' },
-]
+];
 </script>
 
 <template>

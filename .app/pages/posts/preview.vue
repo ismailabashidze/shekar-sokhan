@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import AddonMarkdownRemark from '~/components/AddonMarkdownRemark.vue'
-import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router';
+import AddonMarkdownRemark from '~/components/AddonMarkdownRemark.vue';
+import { ref, onMounted, computed } from 'vue';
 
-const router = useRouter()
-const previewData = ref<any>({})
+const router = useRouter();
+const previewData = ref<any>({});
 
 onMounted(() => {
-  const raw = localStorage.getItem('postPreview')
+  const raw = localStorage.getItem('postPreview');
   if (raw) {
     try {
-      previewData.value = JSON.parse(raw)
+      previewData.value = JSON.parse(raw);
     }
     catch (e) {
-      console.error('Error parsing preview data from localStorage:', e)
-      previewData.value = {}
+      console.error('Error parsing preview data from localStorage:', e);
+      previewData.value = {};
     }
   }
-})
+});
 
-const title = computed(() => previewData.value.title || 'بدون عنوان')
-const description = computed(() => previewData.value.description || '')
-const contentLong = computed(() => previewData.value.contentLong || 'محتوایی برای نمایش وجود ندارد.')
-const excerpt = computed(() => previewData.value.excerpt || '')
-const slug = computed(() => previewData.value.slug || '')
-const category = computed(() => previewData.value.category || '')
-const tags = computed(() => previewData.value.tags || [])
-const publishDate = computed(() => previewData.value.publishDate || 'تاریخ نامشخص')
-const readTime = computed(() => previewData.value.readTime || 'نامشخص')
-const isFeatured = computed(() => previewData.value.isFeatured === true || String(previewData.value.isFeatured).toLowerCase() === 'true')
-const allowComments = computed(() => previewData.value.allowComments === true || String(previewData.value.allowComments).toLowerCase() === 'true')
-const secretMessage = computed(() => previewData.value.secretMessage || '')
-const imageUrl = computed(() => previewData.value.imageUrl || '')
+const title = computed(() => previewData.value.title || 'بدون عنوان');
+const description = computed(() => previewData.value.description || '');
+const contentLong = computed(() => previewData.value.contentLong || 'محتوایی برای نمایش وجود ندارد.');
+const excerpt = computed(() => previewData.value.excerpt || '');
+const slug = computed(() => previewData.value.slug || '');
+const category = computed(() => previewData.value.category || '');
+const tags = computed(() => previewData.value.tags || []);
+const publishDate = computed(() => previewData.value.publishDate || 'تاریخ نامشخص');
+const readTime = computed(() => previewData.value.readTime || 'نامشخص');
+const isFeatured = computed(() => previewData.value.isFeatured === true || String(previewData.value.isFeatured).toLowerCase() === 'true');
+const allowComments = computed(() => previewData.value.allowComments === true || String(previewData.value.allowComments).toLowerCase() === 'true');
+const secretMessage = computed(() => previewData.value.secretMessage || '');
+const imageUrl = computed(() => previewData.value.imageUrl || '');
 
 const categoryIcon = computed(() => {
   const icons = {
@@ -55,12 +55,12 @@ const categoryIcon = computed(() => {
     'خواب و استراحت': 'ph:bed-duotone',
     'تغذیه و سبک زندگی': 'ph:leaf-duotone',
     'ذهن‌آگاهی': 'ph:eye-duotone',
-  }
-  return icons[category.value] || 'ph:question-duotone'
-})
+  };
+  return icons[category.value] || 'ph:question-duotone';
+});
 
 function goBack() {
-  router.back()
+  router.back();
 }
 </script>
 

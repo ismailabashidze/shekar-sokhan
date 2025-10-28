@@ -18,5 +18,5 @@ const markdown = ref([
   '```js',
   'const hello = "world"',
   '```',
-].join('\n'))
+].join('\n'));
 </script>

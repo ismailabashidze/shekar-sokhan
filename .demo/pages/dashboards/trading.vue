@@ -10,7 +10,7 @@ definePageMeta({
     order: 5,
     new: true,
   },
-})
+});
 
 const banks = ref([
   {
@@ -55,32 +55,32 @@ const banks = ref([
       },
     ],
   },
-])
+]);
 
-const activePeriod = ref('year')
-const orderShares = ref()
-const selectedBank = ref(banks.value[0])
-const target = ref(null)
-const open = ref(false)
+const activePeriod = ref('year');
+const orderShares = ref();
+const selectedBank = ref(banks.value[0]);
+const target = ref(null);
+const open = ref(false);
 
 function openDropdown() {
-  open.value = true
+  open.value = true;
 }
 
-onClickOutside(target, () => (open.value = false))
+onClickOutside(target, () => (open.value = false));
 
 function setAccount(account: any) {
-  selectedBank.value = account
-  open.value = false
+  selectedBank.value = account;
+  open.value = false;
 }
 
-const areaBtcPrice = reactive(useStockPrice())
+const areaBtcPrice = reactive(useStockPrice());
 
 function useStockPrice() {
-  const { primary } = useTailwindColors()
+  const { primary } = useTailwindColors();
 
-  const type = 'area'
-  const height = 390
+  const type = 'area';
+  const height = 390;
 
   const options = {
     chart: {
@@ -148,16 +148,16 @@ function useStockPrice() {
         formatter: (val: number) => `$${val}`,
       },
     },
-  }
+  };
 
-  const series = ref(selectedBank.value.series)
+  const series = ref(selectedBank.value.series);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

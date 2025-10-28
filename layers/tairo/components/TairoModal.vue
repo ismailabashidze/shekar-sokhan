@@ -4,41 +4,41 @@ import {
   DialogPanel,
   TransitionChild,
   TransitionRoot,
-} from '@headlessui/vue'
+} from '@headlessui/vue';
 
 const props = withDefaults(
   defineProps<{
     /**
      * Whether the modal is open.
      */
-    open?: boolean
+    open?: boolean;
 
     /**
      * The HTML tag to use as modal wrapper (e.g. `div`, `form`, etc.).
      *
      * @default 'div'
      */
-    as?: string
+    as?: string;
 
     /**
      * The size of the modal.
      */
-    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
 
     /**
      * The radius of the modal.
      */
-    rounded?: 'none' | 'sm' | 'md' | 'lg'
+    rounded?: 'none' | 'sm' | 'md' | 'lg';
 
     /**
      * The alignment of the footer content.
      */
-    footerAlign?: 'start' | 'end' | 'center' | 'between'
+    footerAlign?: 'start' | 'end' | 'center' | 'between';
 
     classes?: {
-      wrapper?: string | string[]
-      dialog?: string | string[]
-    }
+      wrapper?: string | string[];
+      dialog?: string | string[];
+    };
   }>(),
   {
     as: 'div',
@@ -50,66 +50,66 @@ const props = withDefaults(
       dialog: '',
     }),
   },
-)
+);
 
 const emit = defineEmits<{
-  close: []
-}>()
+  close: [];
+}>();
 
 defineOptions({
   inheritAttrs: false,
-})
+});
 
 const dialogClasses = computed(() => {
-  const classes = []
+  const classes = [];
 
   if (props.classes.dialog) {
     if (Array.isArray(props.classes.dialog)) {
-      classes.push(...props.classes.dialog)
+      classes.push(...props.classes.dialog);
     }
     else {
-      classes.push(props.classes.dialog)
+      classes.push(props.classes.dialog);
     }
   }
 
   switch (props.rounded) {
     case 'none':
-      classes.push('rounded-none')
-      break
+      classes.push('rounded-none');
+      break;
     case 'sm':
-      classes.push('rounded-md')
-      break
+      classes.push('rounded-md');
+      break;
     case 'md':
-      classes.push('rounded-lg')
-      break
+      classes.push('rounded-lg');
+      break;
     case 'lg':
-      classes.push('rounded-xl')
-      break
+      classes.push('rounded-xl');
+      break;
   }
 
   switch (props.size) {
     case 'sm':
-      classes.push('max-w-sm')
-      break
+      classes.push('max-w-sm');
+      break;
     case 'md':
-      classes.push('max-w-md')
-      break
+      classes.push('max-w-md');
+      break;
     case 'lg':
-      classes.push('max-w-xl')
-      break
+      classes.push('max-w-xl');
+      break;
     case 'xl':
-      classes.push('max-w-2xl')
-      break
+      classes.push('max-w-2xl');
+      break;
     case '2xl':
-      classes.push('max-w-3xl')
-      break
+      classes.push('max-w-3xl');
+      break;
     case '3xl':
-      classes.push('max-w-5xl')
-      break
+      classes.push('max-w-5xl');
+      break;
   }
 
-  return classes
-})
+  return classes;
+});
 </script>
 
 <template>

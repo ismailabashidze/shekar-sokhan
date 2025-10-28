@@ -10,9 +10,9 @@ definePageMeta({
     order: 15,
   },
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 // Sample investors data based on the image
 const investors = [
@@ -61,27 +61,27 @@ const investors = [
     message: 'جستجوی فرصت‌های سرمایه‌گذاری در استارتاپ‌های مرحله رشد',
     created: '2025-05-10',
   },
-]
+];
 
 // Search query
-const searchQuery = ref('')
+const searchQuery = ref('');
 
 // Sorting options
-const sortBy = ref('newest')
+const sortBy = ref('newest');
 const sortOptions = [
   { value: 'newest', label: 'جدیدترین' },
   { value: 'oldest', label: 'قدیمی‌ترین' },
   { value: 'name', label: 'نام' },
   { value: 'company', label: 'شرکت' },
-]
+];
 
 // Computed properties for filtering and sorting
 const filteredInvestors = computed(() => {
-  let result = [...investors]
+  let result = [...investors];
 
   // Apply search filter
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.toLowerCase();
     result = result.filter(
       investor =>
         investor.name.toLowerCase().includes(query)
@@ -89,32 +89,32 @@ const filteredInvestors = computed(() => {
         || investor.email.toLowerCase().includes(query)
         || investor.phone.includes(query)
         || investor.message.toLowerCase().includes(query),
-    )
+    );
   }
 
   // Apply sorting
   switch (sortBy.value) {
     case 'newest':
-      result.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
-      break
+      result.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+      break;
     case 'oldest':
-      result.sort((a, b) => new Date(a.created).getTime() - new Date(b.created).getTime())
-      break
+      result.sort((a, b) => new Date(a.created).getTime() - new Date(b.created).getTime());
+      break;
     case 'name':
-      result.sort((a, b) => a.name.localeCompare(b.name))
-      break
+      result.sort((a, b) => a.name.localeCompare(b.name));
+      break;
     case 'company':
-      result.sort((a, b) => a.company.localeCompare(b.company))
-      break
+      result.sort((a, b) => a.company.localeCompare(b.company));
+      break;
     default:
-      result.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
+      result.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
   }
 
-  return result
-})
+  return result;
+});
 
 // View mode (grid or list)
-const viewMode = ref('list')
+const viewMode = ref('list');
 </script>
 
 <template>

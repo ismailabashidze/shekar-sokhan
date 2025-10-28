@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    reverse?: boolean
+    reverse?: boolean;
   }>(),
   {
     reverse: false,
   },
-)
+);
 </script>
 
 <template>

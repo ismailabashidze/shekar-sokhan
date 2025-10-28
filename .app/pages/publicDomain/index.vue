@@ -79,5 +79,5 @@
 // Public pages don't require authentication
 definePageMeta({
   layout: false, // Use default layout or create a public layout
-})
+});
 </script>

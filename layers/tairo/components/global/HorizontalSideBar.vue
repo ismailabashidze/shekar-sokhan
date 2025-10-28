@@ -133,25 +133,25 @@
 </template>
 
 <script setup>
-import { useRoute } from '#app'
-import { computed } from 'vue'
+import { useRoute } from '#app';
+import { computed } from 'vue';
 
-const route = useRoute()
-const isAuthPage = computed(() => route.path.startsWith('/auth'))
+const route = useRoute();
+const isAuthPage = computed(() => route.path.startsWith('/auth'));
 
-const { user } = useUser()
-const { getUserAvatarUrl } = useAvatarManager()
-const { unreadCount } = useNotifications()
+const { user } = useUser();
+const { getUserAvatarUrl } = useAvatarManager();
+const { unreadCount } = useNotifications();
 
 // Computed avatar and name from user
-const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png')
-const displayName = computed(() => user.value.meta?.name || 'کاربر جدید')
+const avatarUrl = computed(() => getUserAvatarUrl(user.value) || '/img/avatars/1.png');
+const displayName = computed(() => user.value.meta?.name || 'کاربر جدید');
 
 // Bug report handler
 const canDelete = () => {
   // Add your bug report functionality here
-  console.log('Bug report clicked')
-}
+  console.log('Bug report clicked');
+};
 </script>
 
 <style scoped>

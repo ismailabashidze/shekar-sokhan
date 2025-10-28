@@ -1,17 +1,17 @@
 <script setup lang="ts">
-const route = useRoute()
+const route = useRoute();
 
 const isOutgoing = computed(() => {
-  return route.path.match('^/layouts/payments$')
-})
+  return route.path.match('^/layouts/payments$');
+});
 
 const isIncoming = computed(() => {
-  return route.path.startsWith('/layouts/payments/incoming')
-})
+  return route.path.startsWith('/layouts/payments/incoming');
+});
 
 const isRecipients = computed(() => {
-  return route.path.startsWith('/layouts/payments/recipients')
-})
+  return route.path.startsWith('/layouts/payments/recipients');
+});
 </script>
 
 <template>

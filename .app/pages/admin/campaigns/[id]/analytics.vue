@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import type { NotificationCampaign, CampaignAnalytics } from '~/types/campaigns'
+import type { NotificationCampaign, CampaignAnalytics } from '~/types/campaigns';
 
 definePageMeta({
   title: 'آنالیتیک کمپین',
   layout: 'sidebar',
   // Using global middlewares only
-})
+});
 
-const route = useRoute()
-const campaignId = route.params.id as string
+const route = useRoute();
+const campaignId = route.params.id as string;
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'آنالیتیک کمپین - پنل ادمین - ذهنا',
-})
+});
 
 const {
   getCampaignAnalytics,
   getCampaignMetrics,
-} = useCampaignManager()
+} = useCampaignManager();
 
 // State
-const campaign = ref<NotificationCampaign | null>(null)
-const analytics = ref<CampaignAnalytics | null>(null)
-const isLoading = ref(true)
-const selectedTimeRange = ref<'7d' | '30d' | '90d' | 'all'>('30d')
+const campaign = ref<NotificationCampaign | null>(null);
+const analytics = ref<CampaignAnalytics | null>(null);
+const isLoading = ref(true);
+const selectedTimeRange = ref<'7d' | '30d' | '90d' | 'all'>('30d');
 
 // Mock performance data for demonstration
 const performanceData = ref([
@@ -35,26 +35,26 @@ const performanceData = ref([
   { date: '2024-01-05', sent: 180, delivered: 175, opened: 78, clicked: 20 },
   { date: '2024-01-06', sent: 160, delivered: 152, opened: 71, clicked: 19 },
   { date: '2024-01-07', sent: 140, delivered: 135, opened: 62, clicked: 16 },
-])
+]);
 
 // Initialize data
 onMounted(async () => {
   try {
-    analytics.value = await getCampaignAnalytics(campaignId)
-    campaign.value = analytics.value.campaign
+    analytics.value = await getCampaignAnalytics(campaignId);
+    campaign.value = analytics.value.campaign;
   }
   catch (error) {
-    console.error('خطا در بارگذاری آنالیتیک:', error)
+    console.error('خطا در بارگذاری آنالیتیک:', error);
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-})
+});
 
 // Computed
 const metrics = computed(() => {
-  return campaign.value ? getCampaignMetrics(campaign.value) : null
-})
+  return campaign.value ? getCampaignMetrics(campaign.value) : null;
+});
 
 const chartData = computed(() => {
   return {
@@ -89,8 +89,8 @@ const chartData = computed(() => {
         tension: 0.4,
       },
     ],
-  }
-})
+  };
+});
 
 const chartOptions = {
   responsive: true,
@@ -109,10 +109,10 @@ const chartOptions = {
       beginAtZero: true,
     },
   },
-}
+};
 
 const engagementData = computed(() => {
-  if (!metrics.value) return null
+  if (!metrics.value) return null;
 
   return {
     labels: ['تحویل شده', 'بازدید شده', 'کلیک شده'],
@@ -134,8 +134,8 @@ const engagementData = computed(() => {
       ],
       borderWidth: 2,
     }],
-  }
-})
+  };
+});
 
 const engagementOptions = {
   responsive: true,
@@ -149,49 +149,49 @@ const engagementOptions = {
       text: 'نرخ‌های تعامل (%)',
     },
   },
-}
+};
 
 // Methods
 const exportAnalytics = () => {
   // Implementation for exporting analytics data
-  console.log('Exporting analytics data...')
-}
+  console.log('Exporting analytics data...');
+};
 
 const refreshData = async () => {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    analytics.value = await getCampaignAnalytics(campaignId)
-    campaign.value = analytics.value.campaign
+    analytics.value = await getCampaignAnalytics(campaignId);
+    campaign.value = analytics.value.campaign;
   }
   catch (error) {
-    console.error('خطا در بروزرسانی داده‌ها:', error)
+    console.error('خطا در بروزرسانی داده‌ها:', error);
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'active': return 'success'
-    case 'draft': return 'warning'
-    case 'scheduled': return 'info'
-    case 'paused': return 'muted'
-    case 'completed': return 'primary'
-    default: return 'muted'
+    case 'active': return 'success';
+    case 'draft': return 'warning';
+    case 'scheduled': return 'info';
+    case 'paused': return 'muted';
+    case 'completed': return 'primary';
+    default: return 'muted';
   }
-}
+};
 
 const getStatusLabel = (status: string) => {
   switch (status) {
-    case 'active': return 'فعال'
-    case 'draft': return 'پیش‌نویس'
-    case 'scheduled': return 'زمان‌بندی شده'
-    case 'paused': return 'متوقف'
-    case 'completed': return 'تکمیل شده'
-    default: return 'نامشخص'
+    case 'active': return 'فعال';
+    case 'draft': return 'پیش‌نویس';
+    case 'scheduled': return 'زمان‌بندی شده';
+    case 'paused': return 'متوقف';
+    case 'completed': return 'تکمیل شده';
+    default: return 'نامشخص';
   }
-}
+};
 </script>
 
 <template>

@@ -2,32 +2,32 @@
 definePageMeta({
   title: 'جزئیات درس',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
-const { data: lessonData, error } = await useFetch(`/api/darmana/lessons/${route.params.slug}`)
+const route = useRoute();
+const router = useRouter();
+const { data: lessonData, error } = await useFetch(`/api/darmana/lessons/${route.params.slug}`);
 
 // If there's an error or no lesson data, show error and redirect
 if (error.value || !lessonData.value?.lesson) {
-  const errorMessage = error.value?.message || 'درس مورد نظر یافت نشد'
+  const errorMessage = error.value?.message || 'درس مورد نظر یافت نشد';
   useToast().error(errorMessage, {
     title: 'خطا',
     duration: 3000,
-  })
-  router.push('/darmana/patients/chooseLesson')
+  });
+  router.push('/darmana/patients/chooseLesson');
 }
 
-const lesson = computed(() => lessonData.value?.lesson)
+const lesson = computed(() => lessonData.value?.lesson);
 
-const { open } = usePanels()
-const currentTask = ref()
+const { open } = usePanels();
+const currentTask = ref();
 
 function openTaskPanel(id: number, tasks: any) {
-  currentTask.value = tasks.find((task: any) => task.id === id)
-  open('task', { task: currentTask })
+  currentTask.value = tasks.find((task: any) => task.id === id);
+  open('task', { task: currentTask });
 }
 </script>
 

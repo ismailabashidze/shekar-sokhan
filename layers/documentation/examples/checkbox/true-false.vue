@@ -11,5 +11,5 @@
 </template>
 
 <script setup lang="ts">
-const value = ref('not-checked')
+const value = ref('not-checked');
 </script>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue';
 
 definePageMeta({
   title: 'سفر درمانی - تعرفه‌ها',
@@ -12,7 +12,7 @@ definePageMeta({
     srcDark: '/img/logo.svg',
     order: 3,
   },
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -20,12 +20,12 @@ useHead({
   meta: [
     { name: 'description', content: 'انتخاب بسته مناسب درمان با هوش مصنوعی. تعرفه‌های متنوع برای همه نیازها' },
   ],
-})
+});
 
-const router = useRouter()
-const isVisible = ref(false)
-const selectedPlan = ref('premium')
-const isProcessing = ref(false)
+const router = useRouter();
+const isVisible = ref(false);
+const selectedPlan = ref('premium');
+const isProcessing = ref(false);
 
 const plans = [
   {
@@ -95,7 +95,7 @@ const plans = [
     ],
     limitations: [],
   },
-]
+];
 
 const benefits = [
   {
@@ -118,29 +118,29 @@ const benefits = [
     title: 'بدون قضاوت',
     description: 'محیطی امن و پذیرنده برای بیان احساسات و تجربیات شما',
   },
-]
+];
 
 onMounted(() => {
   setTimeout(() => {
-    isVisible.value = true
-  }, 100)
-})
+    isVisible.value = true;
+  }, 100);
+});
 
 const selectPlan = (planId: string) => {
-  selectedPlan.value = planId
-}
+  selectedPlan.value = planId;
+};
 
 const proceedWithPlan = async () => {
-  if (!selectedPlan.value) return
+  if (!selectedPlan.value) return;
 
-  isProcessing.value = true
+  isProcessing.value = true;
 
   // Simulate processing
-  await new Promise(resolve => setTimeout(resolve, 1500))
+  await new Promise(resolve => setTimeout(resolve, 1500));
 
   // Navigate to payment or next step
-  router.push(`/therapy-journey/payment?plan=${selectedPlan.value}`)
-}
+  router.push(`/therapy-journey/payment?plan=${selectedPlan.value}`);
+};
 </script>
 
 <template>

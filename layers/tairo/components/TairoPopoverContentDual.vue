@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router';
 
 const props = defineProps<{
   /**
@@ -9,59 +9,59 @@ const props = defineProps<{
     /**
      * The title of the stat.
      */
-    title: string
+    title: string;
 
     /**
      * The subtitle of the stat.
      */
-    subtitle: string
+    subtitle: string;
 
     /**
      * The name of the icon to display.
      */
-    icon?: string | undefined
+    icon?: string | undefined;
 
     /**
      * The URL of the image to display.
      */
-    image?: string | undefined
-  }[]
+    image?: string | undefined;
+  }[];
 
   /**
    * The URL of the main image to display.
    */
-  image?: string
+  image?: string;
 
   /**
    * The main title to display.
    */
-  title?: string
+  title?: string;
 
   /**
    * The main subtitle to display.
    */
-  subtitle?: string
+  subtitle?: string;
 
   /**
    * The title of the footer.
    */
-  footerTitle?: string
+  footerTitle?: string;
 
   /**
    * The text of the footer.
    */
-  footerText?: string
+  footerText?: string;
 
   /**
    * The label for the link.
    */
-  linkLabel?: string
+  linkLabel?: string;
 
   /**
    * The URL for the link.
    */
-  to?: RouteLocationRaw
-}>()
+  to?: RouteLocationRaw;
+}>();
 </script>
 
 <template>

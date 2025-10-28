@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PaymentSend, StepData } from '../../../types'
+import type { PaymentSend, StepData } from '../../../types';
 
 definePageMeta({
   preview: {
@@ -11,10 +11,10 @@ definePageMeta({
     order: 22,
     new: true,
   },
-})
+});
 useHead({
   title: 'Amount',
-})
+});
 
 const {
   data: request,
@@ -25,9 +25,9 @@ const {
   steps,
   resetFieldError,
   checkPreviousSteps,
-} = useMultiStepForm<PaymentSend, StepData>()
+} = useMultiStepForm<PaymentSend, StepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 
 const accounts = ref([
   {
@@ -51,11 +51,11 @@ const accounts = ref([
     number: '3524 65456 3245 6279',
     balance: 4653.97,
   },
-])
+]);
 
 function setAccount(account: any) {
-  request.value.account = account
-  resetFieldError('account')
+  request.value.account = account;
+  resetFieldError('account');
 }
 </script>
 

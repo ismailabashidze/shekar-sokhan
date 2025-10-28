@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const areaSubscriptions = reactive(useAreaSubscriptions())
+const areaSubscriptions = reactive(useAreaSubscriptions());
 
 function useAreaSubscriptions() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 180
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 180;
 
   const options = {
     chart: {
@@ -62,7 +62,7 @@ function useAreaSubscriptions() {
         format: 'dd/MM/yy HH:mm',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -77,9 +77,9 @@ function useAreaSubscriptions() {
       name: 'Resigns',
       data: [35, 41, 36, 26, 45, 48, 52, 53, 41],
     },
-  ])
+  ]);
 
-  return { type, height, options, series }
+  return { type, height, options, series };
 }
 </script>
 

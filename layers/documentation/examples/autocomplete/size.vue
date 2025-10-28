@@ -40,7 +40,7 @@ const fields = reactive({
   first: '',
   second: '',
   third: '',
-})
+});
 
-const frameworks = ref(['Javascript', 'Nuxt', 'Vue.js', 'React.js', 'Angular', 'Alpine.js'])
+const frameworks = ref(['Javascript', 'Nuxt', 'Vue.js', 'React.js', 'Angular', 'Alpine.js']);
 </script>

@@ -1,116 +1,116 @@
 // Type definitions for session reports
 export interface SessionReport {
-  id: string
-  session_id: string
-  user_id: string
-  therapist_id: string
-  type: 'technical' | 'patient'
-  created_at: string
+  id: string;
+  session_id: string;
+  user_id: string;
+  therapist_id: string;
+  type: 'technical' | 'patient';
+  created_at: string;
 }
 
 export interface TechnicalReport extends SessionReport {
-  type: 'technical'
-  diagnostic_summary: string
-  dsm5_assessments: DSM5Assessment[]
-  risk_assessment: RiskAssessment
-  goal_progress: GoalProgress[]
-  emotional_patterns: EmotionalPattern[]
-  communication_style: string
-  therapeutic_alliance: string
-  cultural_considerations: string
-  next_session_focus: string[]
-  intervention_recommendations: string[]
-  referral_needed: boolean
-  session_duration: number
-  message_count: number
-  raw_ai_analysis: string
+  type: 'technical';
+  diagnostic_summary: string;
+  dsm5_assessments: DSM5Assessment[];
+  risk_assessment: RiskAssessment;
+  goal_progress: GoalProgress[];
+  emotional_patterns: EmotionalPattern[];
+  communication_style: string;
+  therapeutic_alliance: string;
+  cultural_considerations: string;
+  next_session_focus: string[];
+  intervention_recommendations: string[];
+  referral_needed: boolean;
+  session_duration: number;
+  message_count: number;
+  raw_ai_analysis: string;
 }
 
 export interface PatientReport extends SessionReport {
-  type: 'patient'
-  session_summary: string
-  key_insights: string[]
-  emotional_journey: string
-  progress_made: string
-  areas_explored: AreaExplored[]
-  strengths_identified: string[]
-  homework_suggestions: string[]
-  next_session_preview: string
-  self_care_tips: string[]
-  coping_strategies: string[]
-  session_duration_friendly: string
-  raw_content: string
+  type: 'patient';
+  session_summary: string;
+  key_insights: string[];
+  emotional_journey: string;
+  progress_made: string;
+  areas_explored: AreaExplored[];
+  strengths_identified: string[];
+  homework_suggestions: string[];
+  next_session_preview: string;
+  self_care_tips: string[];
+  coping_strategies: string[];
+  session_duration_friendly: string;
+  raw_content: string;
 }
 
 export interface DSM5Assessment {
-  category: string
-  confidence: number
-  evidence: string
-  assessment: string
+  category: string;
+  confidence: number;
+  evidence: string;
+  assessment: string;
 }
 
 export interface RiskAssessment {
-  level: 'low' | 'moderate' | 'high'
-  factors: string[]
-  suicide_risk: 'low' | 'moderate' | 'high'
-  intervention_needed: boolean
+  level: 'low' | 'moderate' | 'high';
+  factors: string[];
+  suicide_risk: 'low' | 'moderate' | 'high';
+  intervention_needed: boolean;
 }
 
 export interface GoalProgress {
-  goal_id: string
-  title: string
-  category: string
-  confidence_before: number
-  confidence_after: number
-  evidence_collected: string
-  progress_notes: string
+  goal_id: string;
+  title: string;
+  category: string;
+  confidence_before: number;
+  confidence_after: number;
+  evidence_collected: string;
+  progress_notes: string;
 }
 
 export interface EmotionalPattern {
-  timestamp: string
-  primary_emotions: string[]
-  intensity: string
-  context: string
+  timestamp: string;
+  primary_emotions: string[];
+  intensity: string;
+  context: string;
 }
 
 export interface AreaExplored {
-  area: string
-  description: string
-  progress: number
-  next_steps: string
+  area: string;
+  description: string;
+  progress: number;
+  next_steps: string;
 }
 
 export interface TherapyGoal {
-  id: string
-  title: string
-  progress_percentage: number
-  status: string
+  id: string;
+  title: string;
+  progress_percentage: number;
+  status: string;
   dsm5_aspects?: {
-    dsm5_category?: string
-    diagnostic_confidence?: number
-    criteria_evidence?: string
-  }
+    dsm5_category?: string;
+    diagnostic_confidence?: number;
+    criteria_evidence?: string;
+  };
 }
 
 export interface SessionReportData {
-  sessionId: string
-  userId: string
-  therapistId: string
-  sessionDuration: number
-  messageCount: number
-  goals: TherapyGoal[]
-  conversationSummary: string
-  emotionalProgression: any[]
-  riskAssessment: 'low' | 'moderate' | 'high'
-  interventionNeeded: boolean
-  keyInsights: string[]
-  nextSessionRecommendations: string[]
+  sessionId: string;
+  userId: string;
+  therapistId: string;
+  sessionDuration: number;
+  messageCount: number;
+  goals: TherapyGoal[];
+  conversationSummary: string;
+  emotionalProgression: any[];
+  riskAssessment: 'low' | 'moderate' | 'high';
+  interventionNeeded: boolean;
+  keyInsights: string[];
+  nextSessionRecommendations: string[];
 }
 
 export function useSessionReports() {
-  const nuxtApp = useNuxtApp()
-  const { streamChat } = useOpenRouter()
-  const config = useRuntimeConfig()
+  const nuxtApp = useNuxtApp();
+  const { streamChat } = useOpenRouter();
+  const config = useRuntimeConfig();
 
   // Structured JSON generation functions
   const generateStructuredTechnicalReport = async (prompt: string, sessionData: SessionReportData): Promise<any> => {
@@ -203,16 +203,16 @@ export function useSessionReports() {
         temperature: 0.7,
         max_tokens: 2000,
       }),
-    })
+    });
 
     if (!response.ok) {
-      throw new Error(`Technical report API error: ${response.status}`)
+      throw new Error(`Technical report API error: ${response.status}`);
     }
 
-    const data = await response.json()
-    const content = data.choices[0].message.content
-    return typeof content === 'string' ? JSON.parse(content) : content
-  }
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+    return typeof content === 'string' ? JSON.parse(content) : content;
+  };
 
   const generateStructuredPatientReport = async (prompt: string, sessionData: SessionReportData, technicalReport: TechnicalReport): Promise<any> => {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -264,21 +264,21 @@ export function useSessionReports() {
         temperature: 0.7,
         max_tokens: 1500,
       }),
-    })
+    });
 
     if (!response.ok) {
-      throw new Error(`Patient report API error: ${response.status}`)
+      throw new Error(`Patient report API error: ${response.status}`);
     }
 
-    const data = await response.json()
-    const content = data.choices[0].message.content
-    return typeof content === 'string' ? JSON.parse(content) : content
-  }
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+    return typeof content === 'string' ? JSON.parse(content) : content;
+  };
 
   const generateTechnicalReport = async (sessionData: SessionReportData): Promise<TechnicalReport> => {
     // Use structured JSON for reliable technical report generation
-    const prompt = createTechnicalReportPrompt(sessionData)
-    const technicalReportContent = await generateStructuredTechnicalReport(prompt, sessionData)
+    const prompt = createTechnicalReportPrompt(sessionData);
+    const technicalReportContent = await generateStructuredTechnicalReport(prompt, sessionData);
 
     const report: TechnicalReport = {
       id: crypto.randomUUID(),
@@ -324,15 +324,15 @@ export function useSessionReports() {
       session_duration: sessionData.sessionDuration,
       message_count: sessionData.messageCount,
       raw_ai_analysis: JSON.stringify(technicalReportContent),
-    }
+    };
 
-    return report
-  }
+    return report;
+  };
 
   const generatePatientReport = async (sessionData: SessionReportData, technicalReport: TechnicalReport): Promise<PatientReport> => {
     // Use structured JSON for reliable patient report generation
-    const prompt = createPatientReportPrompt(sessionData, technicalReport)
-    const patientReportContent = await generateStructuredPatientReport(prompt, sessionData, technicalReport)
+    const prompt = createPatientReportPrompt(sessionData, technicalReport);
+    const patientReportContent = await generateStructuredPatientReport(prompt, sessionData, technicalReport);
 
     const report: PatientReport = {
       id: crypto.randomUUID(),
@@ -368,51 +368,51 @@ export function useSessionReports() {
       // Metadata
       session_duration_friendly: formatDurationFriendly(sessionData.sessionDuration),
       raw_content: JSON.stringify(patientReportContent),
-    }
+    };
 
-    return report
-  }
+    return report;
+  };
 
   const saveTechnicalReport = async (report: TechnicalReport): Promise<TechnicalReport> => {
     try {
-      return await nuxtApp.$pb.collection('technical_reports').create(report)
+      return await nuxtApp.$pb.collection('technical_reports').create(report);
     }
     catch (error) {
-      console.error('Error saving technical report:', error)
-      throw error
+      console.error('Error saving technical report:', error);
+      throw error;
     }
-  }
+  };
 
   const savePatientReport = async (report: PatientReport): Promise<PatientReport> => {
     try {
-      return await nuxtApp.$pb.collection('patient_reports').create(report)
+      return await nuxtApp.$pb.collection('patient_reports').create(report);
     }
     catch (error) {
-      console.error('Error saving patient report:', error)
-      throw error
+      console.error('Error saving patient report:', error);
+      throw error;
     }
-  }
+  };
 
-  const generateDualReports = async (sessionData: SessionReportData): Promise<{ technical: TechnicalReport, patient: PatientReport }> => {
+  const generateDualReports = async (sessionData: SessionReportData): Promise<{ technical: TechnicalReport; patient: PatientReport }> => {
     try {
-      console.log('Generating technical report...')
-      const technicalReport = await generateTechnicalReport(sessionData)
-      const savedTechnical = await saveTechnicalReport(technicalReport)
+      console.log('Generating technical report...');
+      const technicalReport = await generateTechnicalReport(sessionData);
+      const savedTechnical = await saveTechnicalReport(technicalReport);
 
-      console.log('Generating patient report...')
-      const patientReport = await generatePatientReport(sessionData, technicalReport)
-      const savedPatient = await savePatientReport(patientReport)
+      console.log('Generating patient report...');
+      const patientReport = await generatePatientReport(sessionData, technicalReport);
+      const savedPatient = await savePatientReport(patientReport);
 
       return {
         technical: savedTechnical,
         patient: savedPatient,
-      }
+      };
     }
     catch (error) {
-      console.error('Error generating dual reports:', error)
-      throw error
+      console.error('Error generating dual reports:', error);
+      throw error;
     }
-  }
+  };
 
   // Helper Functions
   const createTechnicalReportPrompt = (sessionData: SessionReportData): string => {
@@ -458,8 +458,8 @@ Generate a structured technical report with these sections:
 
 Use clinical terminology and DSM-5 criteria. Be thorough and objective.
 Write in Persian (Farsi) for cultural relevance.
-`
-  }
+`;
+  };
 
   const createPatientReportPrompt = (sessionData: SessionReportData, technicalReport: TechnicalReport): string => {
     return `
@@ -509,17 +509,17 @@ Generate a warm, supportive report with these sections:
 Use warm, non-clinical language. Be encouraging and hopeful.
 Write in Persian (Farsi) with cultural sensitivity.
 Avoid diagnostic labels - focus on growth and healing.
-`
-  }
+`;
+  };
 
   const extractSection = (content: string, sectionTitle: string): string | null => {
-    const regex = new RegExp(`##\\s*${sectionTitle}[\\s\\S]*?(?=##|$)`, 'i')
-    const match = content.match(regex)
+    const regex = new RegExp(`##\\s*${sectionTitle}[\\s\\S]*?(?=##|$)`, 'i');
+    const match = content.match(regex);
     if (match) {
-      return match[0].replace(`## ${sectionTitle}`, '').trim()
+      return match[0].replace(`## ${sectionTitle}`, '').trim();
     }
-    return null
-  }
+    return null;
+  };
 
   const extractDSM5Assessments = (content: string, goals: TherapyGoal[]) => {
     return goals.map(goal => ({
@@ -527,22 +527,22 @@ Avoid diagnostic labels - focus on growth and healing.
       confidence: goal.dsm5_aspects?.diagnostic_confidence || 0,
       evidence: goal.dsm5_aspects?.criteria_evidence || '',
       assessment: extractSection(content, `${goal.title} ASSESSMENT`) || '',
-    }))
-  }
+    }));
+  };
 
   const assessSuicideRisk = (sessionData: SessionReportData): 'low' | 'moderate' | 'high' => {
     // Simple risk assessment based on available data
     if (sessionData.riskAssessment === 'high' || sessionData.interventionNeeded) {
-      return 'high'
+      return 'high';
     }
 
-    const riskKeywords = ['خودکشی', 'مرگ', 'تمام کردن', 'فایده ندارد']
+    const riskKeywords = ['خودکشی', 'مرگ', 'تمام کردن', 'فایده ندارد'];
     const hasRiskKeywords = riskKeywords.some(keyword =>
       sessionData.conversationSummary.includes(keyword),
-    )
+    );
 
-    return hasRiskKeywords ? 'moderate' : 'low'
-  }
+    return hasRiskKeywords ? 'moderate' : 'low';
+  };
 
   const extractEmotionalPatterns = (emotionalProgression: any[]) => {
     return emotionalProgression.map(emotion => ({
@@ -550,45 +550,45 @@ Avoid diagnostic labels - focus on growth and healing.
       primary_emotions: emotion.primaryEmotions || [],
       intensity: emotion.intensity || 'medium',
       context: emotion.context || '',
-    }))
-  }
+    }));
+  };
 
   const assessTherapeuticAlliance = (sessionData: SessionReportData): string => {
-    if (sessionData.messageCount > 20) return 'Strong engagement and communication'
-    if (sessionData.messageCount > 10) return 'Moderate engagement'
-    return 'Building rapport'
-  }
+    if (sessionData.messageCount > 20) return 'Strong engagement and communication';
+    if (sessionData.messageCount > 10) return 'Moderate engagement';
+    return 'Building rapport';
+  };
 
   const simplifyGoalDescription = (goal: TherapyGoal): string => {
     // Convert clinical goal to patient-friendly description
-    const category = goal.dsm5_aspects?.dsm5_category || ''
+    const category = goal.dsm5_aspects?.dsm5_category || '';
 
-    if (category.includes('Depressive')) return 'بررسی احساسات و خلق'
-    if (category.includes('Anxiety')) return 'مدیریت اضطراب و نگرانی'
-    if (category.includes('Sleep')) return 'بهبود کیفیت خواب'
-    if (category.includes('Trauma')) return 'پردازش تجربیات دشوار'
+    if (category.includes('Depressive')) return 'بررسی احساسات و خلق';
+    if (category.includes('Anxiety')) return 'مدیریت اضطراب و نگرانی';
+    if (category.includes('Sleep')) return 'بهبود کیفیت خواب';
+    if (category.includes('Trauma')) return 'پردازش تجربیات دشوار';
 
-    return goal.title
-  }
+    return goal.title;
+  };
 
   const calculateProgressPercentage = (goal: TherapyGoal): number => {
-    return goal.progress_percentage || goal.dsm5_aspects?.diagnostic_confidence || 0
-  }
+    return goal.progress_percentage || goal.dsm5_aspects?.diagnostic_confidence || 0;
+  };
 
   const extractGoalProgress = (content: string, goalTitle: string): string => {
-    return extractSection(content, `${goalTitle} PROGRESS`) || 'در حال بررسی'
-  }
+    return extractSection(content, `${goalTitle} PROGRESS`) || 'در حال بررسی';
+  };
 
   const extractGoalNextSteps = (content: string, goalTitle: string): string => {
-    return extractSection(content, `${goalTitle} NEXT STEPS`) || 'ادامه کاوش در جلسات آینده'
-  }
+    return extractSection(content, `${goalTitle} NEXT STEPS`) || 'ادامه کاوش در جلسات آینده';
+  };
 
   const formatDurationFriendly = (minutes: number): string => {
-    if (minutes < 60) return `${minutes} دقیقه`
-    const hours = Math.floor(minutes / 60)
-    const remainingMinutes = minutes % 60
-    return `${hours} ساعت و ${remainingMinutes} دقیقه`
-  }
+    if (minutes < 60) return `${minutes} دقیقه`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours} ساعت و ${remainingMinutes} دقیقه`;
+  };
 
   return {
     generateTechnicalReport,
@@ -596,5 +596,5 @@ Avoid diagnostic labels - focus on growth and healing.
     generateDualReports,
     saveTechnicalReport,
     savePatientReport,
-  }
+  };
 }

@@ -20,7 +20,7 @@ const links = [
     url: '#',
     image: '/img/avatars/5.svg',
   },
-]
+];
 </script>
 
 <template>

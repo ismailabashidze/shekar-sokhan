@@ -11,9 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import Slider from '@vueform/slider'
-import '~/assets/css/slider.css'
+import Slider from '@vueform/slider';
+import '~/assets/css/slider.css';
 
-const mergeValue = ref([20, 50, 80])
-const merge = ref(10)
+const mergeValue = ref([20, 50, 80]);
+const merge = ref(10);
 </script>

@@ -1,6 +1,6 @@
-import { setHours, setMinutes, isSameDay, differenceInMinutes } from 'date-fns'
+import { setHours, setMinutes, isSameDay, differenceInMinutes } from 'date-fns';
 
-import type { CalendarSettings } from './types'
+import type { CalendarSettings } from './types';
 
 export function dateToTop(
   settings: CalendarSettings,
@@ -8,16 +8,16 @@ export function dateToTop(
   currentDay = new Date(),
 ) {
   if (!isSameDay(currentDay, date)) {
-    return settings.dayOffsetY
+    return settings.dayOffsetY;
   }
 
-  const hour = Math.max(date.getHours() - (settings.hourOpen || 0), 0)
-  const minutes = date.getMinutes()
+  const hour = Math.max(date.getHours() - (settings.hourOpen || 0), 0);
+  const minutes = date.getMinutes();
   return (
     hour * settings.hourHeight
     + (settings.hourHeight / 60) * minutes
     + settings.dayOffsetY
-  )
+  );
 }
 
 export function topToDate(
@@ -27,25 +27,25 @@ export function topToDate(
 ) {
   const hour
     = Math.floor((top - settings.dayOffsetY) / settings.hourHeight)
-    + (settings.hourOpen || 0)
+    + (settings.hourOpen || 0);
   const minutes = Math.floor(
     ((top - settings.dayOffsetY) % settings.hourHeight)
     / (settings.hourHeight / 60),
-  )
+  );
 
   if (hour < (settings.hourOpen || 0) || minutes < 0) {
-    return null
+    return null;
   }
 
-  const date = setMinutes(setHours(currentDay, hour), minutes)
-  date.setMilliseconds(0)
-  date.setSeconds(0)
+  const date = setMinutes(setHours(currentDay, hour), minutes);
+  date.setMilliseconds(0);
+  date.setSeconds(0);
 
-  return date
+  return date;
 }
 
 export function minutesToHeight(settings: CalendarSettings, minutes: number) {
-  return (settings.hourHeight / 60) * minutes
+  return (settings.hourHeight / 60) * minutes;
 }
 
 export function datesToHeight(
@@ -64,7 +64,7 @@ export function datesToHeight(
           start,
         ),
       ),
-    )
+    );
   }
 
   if (isSameDay(currentDay, start)) {
@@ -74,7 +74,7 @@ export function datesToHeight(
         setMinutes(setHours(start, settings.hourClose || 0), 0),
         start,
       ),
-    )
+    );
   }
 
   if (isSameDay(currentDay, end)) {
@@ -84,9 +84,9 @@ export function datesToHeight(
         end,
         setMinutes(setHours(end, settings.hourOpen || 0), 0),
       ),
-    )
+    );
   }
 
-  console.error('Unexpected dates')
-  return 0
+  console.error('Unexpected dates');
+  return 0;
 }

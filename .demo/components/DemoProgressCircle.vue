@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    title?: string
-    text?: string
-    image: string
-    value?: number
-    shape?: 'straight' | 'rounded' | 'curved'
+    title?: string;
+    text?: string;
+    image: string;
+    value?: number;
+    shape?: 'straight' | 'rounded' | 'curved';
   }>(),
   {
     value: 0,
@@ -13,7 +13,7 @@ const props = withDefaults(
     text: undefined,
     shape: 'rounded',
   },
-)
+);
 </script>
 
 <template>

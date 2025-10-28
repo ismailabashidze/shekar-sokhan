@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 definePageMeta({
   layout: 'empty',
@@ -14,12 +14,12 @@ definePageMeta({
     srcDark: '/img/screens/auth-login-3-dark.png',
     order: 153,
   },
-})
+});
 
 const VALIDATION_TEXT = {
   EMAIL_REQUIRED: 'A valid email is required',
   PASSWORD_REQUIRED: 'A password is required',
-}
+};
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -27,18 +27,18 @@ const zodSchema = z.object({
   email: z.string().email(VALIDATION_TEXT.EMAIL_REQUIRED),
   password: z.string().min(1, VALIDATION_TEXT.PASSWORD_REQUIRED),
   trustDevice: z.boolean(),
-})
+});
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   email: '',
   password: '',
   trustDevice: false,
-} satisfies FormInput
+} satisfies FormInput;
 
 const {
   handleSubmit,
@@ -53,15 +53,15 @@ const {
 } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
-const router = useRouter()
-const toaster = useToaster()
+const router = useRouter();
+const toaster = useToaster();
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(async (values) => {
   // here you have access to the validated form values
-  console.log('auth-success', values)
+  console.log('auth-success', values);
 
   try {
     // fake delay, this will make isSubmitting value to be true
@@ -71,30 +71,30 @@ const onSubmit = handleSubmit(async (values) => {
         setTimeout(
           () => reject(new Error('Fake backend validation error')),
           2000,
-        )
+        );
       }
-      setTimeout(resolve, 4000)
-    })
+      setTimeout(resolve, 4000);
+    });
 
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Success',
       message: `Welcome back!`,
       color: 'success',
       icon: 'ph:user-circle-fill',
       closable: true,
-    })
+    });
   }
   catch (error: any) {
     // this will set the error on the form
     if (error.message === 'Fake backend validation error') {
-      setFieldError('password', 'Invalid credentials (use "password")')
+      setFieldError('password', 'Invalid credentials (use "password")');
     }
-    return
+    return;
   }
 
-  router.push('/dashboards')
-})
+  router.push('/dashboards');
+});
 </script>
 
 <template>

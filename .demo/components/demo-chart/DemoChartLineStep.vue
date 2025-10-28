@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoLineStep = reactive(useDemoLineStep())
+const demoLineStep = reactive(useDemoLineStep());
 
 function useDemoLineStep() {
-  const { primary } = useTailwindColors()
-  const type = 'line'
-  const height = 280
+  const { primary } = useTailwindColors();
+  const type = 'line';
+  const height = 280;
 
   const options = {
     chart: {
@@ -45,21 +45,21 @@ function useDemoLineStep() {
         'Dec',
       ],
     },
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'New members',
       data: [34, 44, 54, 21, 12, 43, 33, 23, 66, 66, 58, 79],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

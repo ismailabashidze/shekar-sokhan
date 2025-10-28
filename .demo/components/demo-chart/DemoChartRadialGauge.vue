@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoRadialGauge = reactive(useDemoRadialGauge())
+const demoRadialGauge = reactive(useDemoRadialGauge());
 
 function useDemoRadialGauge() {
-  const { primary } = useTailwindColors()
-  const height = 370
-  const type = 'radialBar'
+  const { primary } = useTailwindColors();
+  const height = 370;
+  const type = 'radialBar';
 
   const options = {
     title: {
@@ -50,16 +50,16 @@ function useDemoRadialGauge() {
       dashArray: 4,
     },
     labels: ['Median Ratio'],
-  }
+  };
 
-  const series = shallowRef([67])
+  const series = shallowRef([67]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

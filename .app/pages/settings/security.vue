@@ -2,26 +2,26 @@
 definePageMeta({
   title: 'تنظیمات امنیت',
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { user } = useUser()
-const { getUserAvatarUrl } = useAvatarManager()
-const { hasPin, autoLockTimer, setAutoLockTimer } = useLockSystem()
+const { user } = useUser();
+const { getUserAvatarUrl } = useAvatarManager();
+const { hasPin, autoLockTimer, setAutoLockTimer } = useLockSystem();
 
-const router = useRouter()
-const toaster = useToaster()
+const router = useRouter();
+const toaster = useToaster();
 
 const navigateToLockSetup = () => {
-  router.push('/settings/lock-setup')
-}
+  router.push('/settings/lock-setup');
+};
 
 const navigateToRemoveLock = () => {
-  router.push('/settings/remove-lock')
-}
+  router.push('/settings/remove-lock');
+};
 
 // Auto-lock timer settings
-const showTimerModal = ref(false)
+const showTimerModal = ref(false);
 
 const timerOptions = [
   { value: null, label: 'بدون قفل خودکار', icon: 'ph:x-circle', description: 'غیرفعال' },
@@ -31,17 +31,17 @@ const timerOptions = [
   { value: 120, label: '۲ دقیقه', icon: 'ph:clock', description: 'متوسط' },
   { value: 180, label: '۳ دقیقه', icon: 'ph:clock', description: 'معمولی' },
   { value: 300, label: '۵ دقیقه', icon: 'ph:hourglass', description: 'کند' },
-]
+];
 
 const formatTimerLabel = (seconds: number | null) => {
-  if (!seconds) return 'غیرفعال'
-  if (seconds < 60) return `${seconds} ثانیه`
-  return `${seconds / 60} دقیقه`
-}
+  if (!seconds) return 'غیرفعال';
+  if (seconds < 60) return `${seconds} ثانیه`;
+  return `${seconds / 60} دقیقه`;
+};
 
 const selectTimer = (value: number | null) => {
-  setAutoLockTimer(value)
-  showTimerModal.value = false
+  setAutoLockTimer(value);
+  showTimerModal.value = false;
 
   toaster.show({
     title: 'تنظیمات ذخیره شد',
@@ -49,8 +49,8 @@ const selectTimer = (value: number | null) => {
     color: 'success',
     icon: 'ph:check-circle',
     closable: true,
-  })
-}
+  });
+};
 </script>
 
 <template>

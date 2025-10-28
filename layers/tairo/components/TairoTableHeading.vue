@@ -1,14 +1,14 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    uppercase?: boolean
-    spaced?: boolean
+    uppercase?: boolean;
+    spaced?: boolean;
   }>(),
   {
     uppercase: false,
     spaced: false,
   },
-)
+);
 </script>
 
 <template>

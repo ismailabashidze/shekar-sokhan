@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import Slider from '@vueform/slider'
-import '~/assets/css/slider.css'
-const smooth = ref(20)
+import Slider from '@vueform/slider';
+import '~/assets/css/slider.css';
+const smooth = ref(20);
 </script>

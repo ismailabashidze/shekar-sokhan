@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router';
 
 const props = withDefaults(
   defineProps<{
-    limit?: number
-    cta?: boolean
+    limit?: number;
+    cta?: boolean;
   }>(),
   {
     limit: undefined,
     cta: true,
   },
-)
+);
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
 const onlyNew = computed({
   get() {
-    return Boolean(route.query.new)
+    return Boolean(route.query.new);
   },
   set(value) {
     router.push({
@@ -25,12 +25,12 @@ const onlyNew = computed({
         ...route.query,
         new: value ? '1' : undefined,
       },
-    })
+    });
   },
-})
+});
 const selectedCategory = computed({
   get() {
-    return route.query.category as string || ''
+    return route.query.category as string || '';
   },
   set(value) {
     router.push({
@@ -38,119 +38,119 @@ const selectedCategory = computed({
         ...route.query,
         category: value ? value : undefined,
       },
-    })
+    });
   },
-})
+});
 
 const demoPages = computed(() => {
-  const match: RouteRecordRaw[] = []
+  const match: RouteRecordRaw[] = [];
 
   function traverseRoutes(routes: Readonly<RouteRecordRaw[]>) {
     for (const route of routes) {
       if (route.children) {
         // recurse
-        traverseRoutes(route.children)
+        traverseRoutes(route.children);
       }
       else if (
         route.path.includes(':')
         && Array.isArray(route.meta?.preview)
       ) {
-        match.push(route)
+        match.push(route);
       }
       else if (!route.path.includes(':') && route.meta?.preview) {
         // has preview data
-        match.push(route)
+        match.push(route);
       }
     }
   }
 
   // start on top route
-  traverseRoutes(router.options.routes)
+  traverseRoutes(router.options.routes);
 
   return match.sort((a, b) => {
-    if (a.meta?.preview?.order === undefined) return 0
-    if (b.meta?.preview?.order === undefined) return 0
-    if (a.meta.preview?.order < b.meta.preview?.order) return -1
-    if (a.meta.preview?.order > b.meta.preview?.order) return 1
-    return 0
-  })
-})
+    if (a.meta?.preview?.order === undefined) return 0;
+    if (b.meta?.preview?.order === undefined) return 0;
+    if (a.meta.preview?.order < b.meta.preview?.order) return -1;
+    if (a.meta.preview?.order > b.meta.preview?.order) return 1;
+    return 0;
+  });
+});
 
 const categories = computed(() => {
-  const categories = new Set<string>()
-  let _demos = demoPages.value
+  const categories = new Set<string>();
+  let _demos = demoPages.value;
 
   if (onlyNew.value) {
-    _demos = _demos.filter(page => page.meta?.preview?.new)
+    _demos = _demos.filter(page => page.meta?.preview?.new);
   }
 
   function extractPreview(preview: any) {
     if (!preview) {
-      return
+      return;
     }
     if (Array.isArray(preview)) {
       for (const item of preview) {
-        extractPreview(item)
+        extractPreview(item);
       }
-      return
+      return;
     }
     if (!preview.categories) {
-      return
+      return;
     }
     if (!Array.isArray(preview.categories)) {
-      return
+      return;
     }
     for (const category of preview.categories) {
-      categories.add(category)
+      categories.add(category);
     }
   }
 
   for (const route of _demos) {
-    extractPreview(route.meta?.preview)
+    extractPreview(route.meta?.preview);
   }
   return Array.from(categories).sort((a, b) => {
-    return a.localeCompare(b)
-  })
-})
+    return a.localeCompare(b);
+  });
+});
 
 const filteredDemos = computed(() => {
-  let _demos = demoPages.value
+  let _demos = demoPages.value;
 
   if (onlyNew.value) {
-    _demos = _demos.filter(page => page.meta?.preview?.new)
+    _demos = _demos.filter(page => page.meta?.preview?.new);
   }
 
   if (selectedCategory.value.length === 0) {
-    return _demos
+    return _demos;
   }
 
   function filterPreview(preview: any) {
     if (!preview) {
-      return false
+      return false;
     }
     if (Array.isArray(preview)) {
       for (const item of preview) {
         if (filterPreview(item)) {
-          return true
+          return true;
         }
       }
-      return false
+      return false;
     }
     if (!preview.categories) {
-      return false
+      return false;
     }
     if (!Array.isArray(preview.categories)) {
-      return false
+      return false;
     }
     return preview.categories.some((category: string) =>
       selectedCategory.value.includes(category),
-    )
+    );
   }
 
   return _demos.filter((page) => {
-    return filterPreview(page.meta?.preview)
-  })
-})
+    return filterPreview(page.meta?.preview);
+  });
+});
 </script>
 
 <template>

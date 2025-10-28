@@ -1,24 +1,24 @@
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router';
 
 export interface TairoCollapseResolvedConfig {
-  name: string
-  divider?: boolean
+  name: string;
+  divider?: boolean;
   icon: {
-    name: string
-    class?: string
-  }
-  children?: any[]
+    name: string;
+    class?: string;
+  };
+  children?: any[];
   component?: {
-    name: string
-    props?: any
-  }
-  to?: RouteLocationRaw
-  click?: () => void | Promise<void>
-  activePath?: string
+    name: string;
+    props?: any;
+  };
+  to?: RouteLocationRaw;
+  click?: () => void | Promise<void>;
+  activePath?: string;
   /**
    * @default 'start'
    */
-  position?: 'start' | 'end'
+  position?: 'start' | 'end';
 }
 
 /**
@@ -63,14 +63,14 @@ export interface TairoCollapseResolvedConfig {
  * ```
  */
 export function useCollapse() {
-  const app = useAppConfig()
+  const app = useAppConfig();
 
   const menuItems = computed(() => {
     if (
       (app.tairo?.collapse?.navigation?.enabled as boolean) === false
       || app.tairo?.collapse?.navigation?.items?.length === 0
     ) {
-      return []
+      return [];
     }
     return app.tairo?.collapse?.navigation?.items?.map(
       navigation =>
@@ -78,47 +78,47 @@ export function useCollapse() {
           ...navigation,
           position: navigation.position ?? 'start',
         },
-    )
-  })
+    );
+  });
 
-  const isOpen = useState('collapse-open', () => true)
-  const isMobileOpen = useState('collapse-mobile-open', () => false)
+  const isOpen = useState('collapse-open', () => true);
+  const isMobileOpen = useState('collapse-mobile-open', () => false);
 
   const header = computed(() => {
-    return app.tairo?.collapse?.navigation?.header
-  })
+    return app.tairo?.collapse?.navigation?.header;
+  });
 
   const footer = computed(() => {
-    return app.tairo?.collapse?.navigation?.footer
-  })
+    return app.tairo?.collapse?.navigation?.footer;
+  });
 
   function toggle() {
     // If no sidebar item is selected, open the first one
-    const { lg } = useTailwindBreakpoints()
+    const { lg } = useTailwindBreakpoints();
     if (lg.value) {
-      isOpen.value = !isOpen.value
+      isOpen.value = !isOpen.value;
     }
     else {
-      isMobileOpen.value = !isMobileOpen.value
+      isMobileOpen.value = !isMobileOpen.value;
     }
   }
 
   if (import.meta.client) {
-    const route = useRoute()
-    const { lg, xl } = useTailwindBreakpoints()
+    const route = useRoute();
+    const { lg, xl } = useTailwindBreakpoints();
     watch(lg, (isLg) => {
       if (isLg) {
-        isMobileOpen.value = false
+        isMobileOpen.value = false;
       }
-    })
+    });
     watch(
       () => route.fullPath,
       () => {
         if (!lg.value) {
-          isMobileOpen.value = false
+          isMobileOpen.value = false;
         }
       },
-    )
+    );
   }
 
   return {
@@ -128,5 +128,5 @@ export function useCollapse() {
     isMobileOpen,
     header,
     footer,
-  }
+  };
 }

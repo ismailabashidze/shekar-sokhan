@@ -1,24 +1,24 @@
 <script setup lang="ts">
 interface Props {
-  showLabel?: boolean
-  variant?: 'button' | 'link' | 'icon'
-  size?: 'sm' | 'md' | 'lg'
+  showLabel?: boolean;
+  variant?: 'button' | 'link' | 'icon';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showLabel: true,
   variant: 'button',
   size: 'md',
-})
+});
 
-const { getNotificationStats } = useAdminNotifications()
-const stats = computed(() => getNotificationStats.value)
+const { getNotificationStats } = useAdminNotifications();
+const stats = computed(() => getNotificationStats.value);
 
 // Check if user has admin role (you might want to adjust this logic)
-const { $pb } = useNuxtApp()
+const { $pb } = useNuxtApp();
 const isAdmin = computed(() => {
-  return $pb.authStore.model?.role === 'admin' || $pb.authStore.model?.role === 'super_admin'
-})
+  return $pb.authStore.model?.role === 'admin' || $pb.authStore.model?.role === 'super_admin';
+});
 </script>
 
 <template>

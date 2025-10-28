@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-const value = ref()
+const value = ref();
 
-const frameworks = ['Javascript', 'Vue.js', 'React.js', 'Angular', 'Alpine.js']
+const frameworks = ['Javascript', 'Vue.js', 'React.js', 'Angular', 'Alpine.js'];
 </script>

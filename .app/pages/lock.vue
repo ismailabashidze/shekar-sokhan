@@ -3,113 +3,113 @@
 definePageMeta({
   layout: 'blank', // Use a blank layout for lock screen
   title: 'قفل برنامه',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 const VALIDATION_TEXT = {
   PIN_LENGTH: 'پین باید ۴ رقمی باشد',
   PIN_INVALID: 'پین نامعتبر است',
-}
+};
 
-const router = useRouter()
-const toaster = useToaster()
-const { unlockApp, isAppLocked } = useLockSystem()
-const { user } = useUser()
+const router = useRouter();
+const toaster = useToaster();
+const { unlockApp, isAppLocked } = useLockSystem();
+const { user } = useUser();
 
-const isVerifying = ref(false)
-const showSupportModal = ref(false)
+const isVerifying = ref(false);
+const showSupportModal = ref(false);
 
 // OTP Input variables
-const pinInputRefs = ref<HTMLInputElement[]>([])
-const pinDigits = ref<string[]>(['', '', '', ''])
-const pinError = ref('')
+const pinInputRefs = ref<HTMLInputElement[]>([]);
+const pinDigits = ref<string[]>(['', '', '', '']);
+const pinError = ref('');
 
 const lastFilledIndex = computed(() => {
   for (let i = pinDigits.value.length - 1; i >= 0; i--) {
     if (pinDigits.value[i] !== '') {
-      return i
+      return i;
     }
   }
-  return -1
-})
+  return -1;
+});
 
 const setPinInputRef = (el: HTMLInputElement | null, index: number) => {
   if (el) {
-    pinInputRefs.value[index] = el
+    pinInputRefs.value[index] = el;
   }
-}
+};
 
 // Prevent navigation away from lock page while app is locked
 // This is an additional safety guard
 onBeforeRouteLeave((to, from) => {
   // Allow navigation to auth pages (for logout)
   if (to.path.startsWith('/auth')) {
-    return true
+    return true;
   }
 
   // Block navigation if still locked
   if (isAppLocked.value) {
-    console.log('🔒 [Lock Page] Navigation blocked - App is still locked')
+    console.log('🔒 [Lock Page] Navigation blocked - App is still locked');
     toaster.show({
       title: 'برنامه قفل است',
       message: 'برای دسترسی به برنامه، پین خود را وارد کنید یا خارج شوید',
       color: 'warning',
       icon: 'ph:lock',
       closable: true,
-    })
-    return false
+    });
+    return false;
   }
 
-  return true
-})
+  return true;
+});
 
 const sanitizeDigit = (value: string | undefined) => {
-  if (!value) return ''
+  if (!value) return '';
 
   // Convert Arabic-Indic digits (٠-٩) to English
-  let sanitized = value.replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660))
+  let sanitized = value.replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660));
   // Convert Persian digits (۰-۹) to English
-  sanitized = sanitized.replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0))
+  sanitized = sanitized.replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0));
   // Remove all non-digit characters
-  sanitized = sanitized.replace(/\D/g, '')
+  sanitized = sanitized.replace(/\D/g, '');
   // Return only the last digit
-  return sanitized.slice(-1)
-}
+  return sanitized.slice(-1);
+};
 
 const clearPinInputs = () => {
-  pinDigits.value = ['', '', '', '']
+  pinDigits.value = ['', '', '', ''];
   nextTick(() => {
-    const firstInput = pinInputRefs.value[0]
-    firstInput?.focus()
-  })
-}
+    const firstInput = pinInputRefs.value[0];
+    firstInput?.focus();
+  });
+};
 
 const validatePinDigits = () => {
   if (pinDigits.value.some(digit => digit === '')) {
-    pinError.value = VALIDATION_TEXT.PIN_LENGTH
-    return null
+    pinError.value = VALIDATION_TEXT.PIN_LENGTH;
+    return null;
   }
 
   if (!pinDigits.value.every(digit => /^\d$/.test(digit))) {
-    pinError.value = VALIDATION_TEXT.PIN_INVALID
-    return null
+    pinError.value = VALIDATION_TEXT.PIN_INVALID;
+    return null;
   }
 
-  return pinDigits.value.join('')
-}
+  return pinDigits.value.join('');
+};
 
 const submitPin = async () => {
-  if (isVerifying.value) return
+  if (isVerifying.value) return;
 
-  pinError.value = ''
-  const pin = validatePinDigits()
-  if (!pin) return
+  pinError.value = '';
+  const pin = validatePinDigits();
+  if (!pin) return;
 
-  isVerifying.value = true
+  isVerifying.value = true;
 
   try {
-    const unlocked = unlockApp(pin)
+    const unlocked = unlockApp(pin);
 
     if (unlocked) {
       toaster.show({
@@ -118,43 +118,43 @@ const submitPin = async () => {
         color: 'success',
         icon: 'ph:lock-open',
         closable: true,
-      })
+      });
 
       setTimeout(() => {
-        router.push('/dashboard')
-      }, 300)
+        router.push('/dashboard');
+      }, 300);
     }
     else {
-      pinError.value = 'پین صحیح نیست'
-      clearPinInputs()
+      pinError.value = 'پین صحیح نیست';
+      clearPinInputs();
       toaster.show({
         title: 'پین نادرست',
         message: 'پین وارد شده صحیح نیست',
         color: 'danger',
         icon: 'ph:warning',
         closable: true,
-      })
+      });
     }
   }
   catch (error) {
-    console.error('Unlock error:', error)
+    console.error('Unlock error:', error);
     toaster.show({
       title: 'خطا',
       message: 'مشکلی در باز کردن قفل پیش آمد',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
   finally {
-    isVerifying.value = false
+    isVerifying.value = false;
   }
-}
+};
 
 const logout = async () => {
   try {
-    const { logout: logoutUser } = useUser()
-    await logoutUser()
+    const { logout: logoutUser } = useUser();
+    await logoutUser();
 
     toaster.show({
       title: 'خروج موفق',
@@ -162,136 +162,136 @@ const logout = async () => {
       color: 'success',
       icon: 'ph:sign-out',
       closable: true,
-    })
+    });
 
-    router.push('/auth/login')
+    router.push('/auth/login');
   }
   catch (error) {
-    console.error('Logout error:', error)
+    console.error('Logout error:', error);
     toaster.show({
       title: 'خطا',
       message: 'مشکلی در خروج پیش آمد',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
-}
+};
 
 // Redirect if not locked - check on mount
 onMounted(() => {
   if (!isAppLocked.value) {
-    console.log('🔓 [Lock Page] Not locked - Redirecting to dashboard')
-    router.replace('/dashboard')
-    return
+    console.log('🔓 [Lock Page] Not locked - Redirecting to dashboard');
+    router.replace('/dashboard');
+    return;
   }
 
   nextTick(() => {
-    pinInputRefs.value[0]?.focus()
-  })
-})
+    pinInputRefs.value[0]?.focus();
+  });
+});
 
 // Methods for OTP input handling
 const handlePinInput = (index: number, event?: Event) => {
   // Get the raw input value
-  const rawValue = (event?.target as HTMLInputElement)?.value || pinDigits.value[index]
+  const rawValue = (event?.target as HTMLInputElement)?.value || pinDigits.value[index];
 
   // Sanitize and convert any Farsi/Arabic numerals to English
-  const sanitized = sanitizeDigit(rawValue)
+  const sanitized = sanitizeDigit(rawValue);
 
   // Update the model with sanitized value
-  pinDigits.value[index] = sanitized
+  pinDigits.value[index] = sanitized;
 
   // Also update the input element directly to ensure display is correct
   if (event?.target) {
-    (event.target as HTMLInputElement).value = sanitized
+    (event.target as HTMLInputElement).value = sanitized;
   }
 
   if (pinError.value) {
-    pinError.value = ''
+    pinError.value = '';
   }
 
   if (sanitized && index < 3) {
     nextTick(() => {
-      const nextInput = pinInputRefs.value[index + 1]
-      nextInput?.focus()
-    })
+      const nextInput = pinInputRefs.value[index + 1];
+      nextInput?.focus();
+    });
   }
 
   if (pinDigits.value.every(digit => digit !== '')) {
-    submitPin()
+    submitPin();
   }
-}
+};
 
 const handleKeyDown = (event: KeyboardEvent, index: number) => {
   if (event.key === 'Backspace' && !pinDigits.value[index] && index > 0) {
     // Move to previous input on backspace if current is empty
     nextTick(() => {
-      const prevInput = pinInputRefs.value[index - 1]
-      prevInput?.focus()
-    })
+      const prevInput = pinInputRefs.value[index - 1];
+      prevInput?.focus();
+    });
   }
   else if (event.key === 'ArrowLeft' && index > 0) {
     nextTick(() => {
-      const prevInput = pinInputRefs.value[index - 1]
-      prevInput?.focus()
-    })
+      const prevInput = pinInputRefs.value[index - 1];
+      prevInput?.focus();
+    });
   }
   else if (event.key === 'ArrowRight' && index < 3) {
     nextTick(() => {
-      const nextInput = pinInputRefs.value[index + 1]
-      nextInput?.focus()
-    })
+      const nextInput = pinInputRefs.value[index + 1];
+      nextInput?.focus();
+    });
   }
   else if (event.key.length === 1) {
     // Allow English digits (0-9), Arabic-Indic digits (٠-٩), and Persian digits (۰-۹)
-    const isValidDigit = /[0-9٠-٩۰-۹]/.test(event.key)
+    const isValidDigit = /[0-9٠-٩۰-۹]/.test(event.key);
     if (!isValidDigit) {
-      event.preventDefault()
+      event.preventDefault();
     }
   }
-}
+};
 
 const handleFocus = (index: number) => {
   // Select all text when focusing on an input for easier replacement
   nextTick(() => {
-    const target = pinInputRefs.value[index]
-    target?.select()
-  })
-}
+    const target = pinInputRefs.value[index];
+    target?.select();
+  });
+};
 
 const handlePaste = (event: ClipboardEvent) => {
-  event.preventDefault()
-  const paste = event.clipboardData?.getData('text') ?? ''
-  const numericPaste = paste.replace(/[^0-9\u0660-\u0669\u06F0-\u06F9]/g, '')
+  event.preventDefault();
+  const paste = event.clipboardData?.getData('text') ?? '';
+  const numericPaste = paste.replace(/[^0-9\u0660-\u0669\u06F0-\u06F9]/g, '');
 
-  if (!numericPaste) return
+  if (!numericPaste) return;
 
-  const focusedIndex = pinInputRefs.value.findIndex(input => input === document.activeElement)
-  const startIndex = focusedIndex >= 0 ? focusedIndex : 0
+  const focusedIndex = pinInputRefs.value.findIndex(input => input === document.activeElement);
+  const startIndex = focusedIndex >= 0 ? focusedIndex : 0;
 
   for (let i = 0; i < Math.min(4 - startIndex, numericPaste.length); i++) {
-    pinDigits.value[startIndex + i] = sanitizeDigit(numericPaste[i])
+    pinDigits.value[startIndex + i] = sanitizeDigit(numericPaste[i]);
   }
 
-  const nextFocusIndex = Math.min(startIndex + numericPaste.length, 3)
+  const nextFocusIndex = Math.min(startIndex + numericPaste.length, 3);
   nextTick(() => {
-    const target = pinInputRefs.value[nextFocusIndex]
-    target?.focus()
-  })
+    const target = pinInputRefs.value[nextFocusIndex];
+    target?.focus();
+  });
 
   if (pinDigits.value.every(digit => digit !== '')) {
-    submitPin()
+    submitPin();
   }
-}
+};
 
 const getInputType = (index: number) => {
   if (!pinDigits.value[index]) {
-    return 'text'
+    return 'text';
   }
 
-  return index === lastFilledIndex.value ? 'text' : 'password'
-}
+  return index === lastFilledIndex.value ? 'text' : 'password';
+};
 </script>
 
 <template>

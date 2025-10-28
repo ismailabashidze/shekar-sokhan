@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   }>(),
   {
     rounded: 'sm',
   },
-)
+);
 
 const topics = [
   {
@@ -37,7 +37,7 @@ const topics = [
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliter autem vobis placet. Quae duo sunt, unum facit.',
   },
-]
+];
 </script>
 
 <template>

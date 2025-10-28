@@ -7,5 +7,5 @@
 </template>
 
 <script setup lang="ts">
-const { open } = usePanels()
+const { open } = usePanels();
 </script>

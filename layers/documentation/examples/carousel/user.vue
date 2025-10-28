@@ -142,5 +142,5 @@ const team = [
     ],
     to: '#',
   },
-]
+];
 </script>

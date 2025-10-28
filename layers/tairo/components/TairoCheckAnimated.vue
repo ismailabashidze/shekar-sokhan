@@ -4,27 +4,27 @@ const props = withDefaults(
     /**
      * The color of the icon.
      */
-    color?: 'primary' | 'info' | 'success' | 'warning' | 'danger'
+    color?: 'primary' | 'info' | 'success' | 'warning' | 'danger';
 
     /**
      * The size of the icon.
      */
-    size?: 'xs' | 'sm' | 'md' | 'lg'
+    size?: 'xs' | 'sm' | 'md' | 'lg';
   }>(),
   {
     color: 'success',
     size: 'md',
   },
-)
+);
 
 const strokeWidth = computed(() => {
   if (props.size === 'xs' || props.size === 'sm') {
-    return '4'
+    return '4';
   }
   else {
-    return '2'
+    return '2';
   }
-})
+});
 </script>
 
 <template>

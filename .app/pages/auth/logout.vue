@@ -1,20 +1,20 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'empty',
-})
+});
 
-const nuxtApp = useNuxtApp()
-const toaster = useToaster()
-const router = useRouter()
-const { logout: logoutUser } = useUser()
-const { setPremiumStatus } = useAIResponseSettings()
+const nuxtApp = useNuxtApp();
+const toaster = useToaster();
+const router = useRouter();
+const { logout: logoutUser } = useUser();
+const { setPremiumStatus } = useAIResponseSettings();
 
 onMounted(async () => {
   // Clear the auth store and reset user data
-  await logoutUser()
+  await logoutUser();
 
   // Reset premium status to false on logout
-  setPremiumStatus(false)
+  setPremiumStatus(false);
 
   // Show success toast
   toaster.show({
@@ -22,13 +22,13 @@ onMounted(async () => {
     message: 'با موفقیت از حساب کاربری خود خارج شدید',
     color: 'success',
     timeout: 2000,
-  })
+  });
   setTimeout(() => {
   // Redirect to login page
-    router.push('/auth/login')
-  }, 2000)
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+    router.push('/auth/login');
+  }, 2000);
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 </script>
 
 <template>

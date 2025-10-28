@@ -24,7 +24,7 @@ const currencies = [
     fullName: 'Xtrabytes',
     icon: 'cryptocurrency:xby',
   },
-]
+];
 </script>
 
 <template>

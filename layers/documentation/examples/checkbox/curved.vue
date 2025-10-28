@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-const first = ref(false)
+const first = ref(false);
 const options = reactive({
   first: true,
   second: true,
@@ -62,5 +62,5 @@ const options = reactive({
   fifth: true,
   sixth: true,
   seventh: true,
-})
+});
 </script>

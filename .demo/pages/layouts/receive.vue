@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import type { PaymentReceive, StepData } from '../../types'
+import type { PaymentReceive, StepData } from '../../types';
 
 definePageMeta({
   layout: 'empty',
-})
+});
 useHead({
   titleTemplate: title => `${title} | Receive money - Step ${currentStepId.value + 1}`,
-})
+});
 
 const initialState = ref<PaymentReceive>({
   amount: 0,
   account: null,
   method: null,
   email: '',
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 const { handleSubmit, currentStepId, progress, complete, steps, goToStep } = provideMultiStepForm({
   initialState,
@@ -29,9 +29,9 @@ const { handleSubmit, currentStepId, progress, complete, steps, goToStep } = pro
           'Select on of the available payment methods to proceed with payment',
       },
       validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['method'])
+        resetFieldError(['method']);
         if (!data.value?.method) {
-          setFieldError('method', 'Please select a payment method')
+          setFieldError('method', 'Please select a payment method');
         }
       },
     },
@@ -43,16 +43,16 @@ const { handleSubmit, currentStepId, progress, complete, steps, goToStep } = pro
         subtitle: 'Enter the amount that needs to be transferred to your account',
       },
       validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['account', 'amount', 'email'])
+        resetFieldError(['account', 'amount', 'email']);
 
         if (!data.value?.account) {
-          setFieldError('account', 'Please select an account to transfer to')
+          setFieldError('account', 'Please select an account to transfer to');
         }
         if (data.value?.amount === 0) {
-          setFieldError('amount', 'Please enter an amount')
+          setFieldError('amount', 'Please enter an amount');
         }
         if (data.value.method === 'payment_link' && !data.value.email) {
-          setFieldError('email', 'Please enter an email address')
+          setFieldError('email', 'Please enter an email address');
         }
       },
     },
@@ -68,28 +68,28 @@ const { handleSubmit, currentStepId, progress, complete, steps, goToStep } = pro
   ],
   onSubmit: async (state, ctx) => {
     // Simulate async request
-    await new Promise(resolve => setTimeout(resolve, 4000))
+    await new Promise(resolve => setTimeout(resolve, 4000));
 
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Success',
       message: `Payment request sent!`,
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
+    });
   },
   onError: (error) => {
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Oops!',
       message: error.message,
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   },
-})
+});
 </script>
 
 <template>

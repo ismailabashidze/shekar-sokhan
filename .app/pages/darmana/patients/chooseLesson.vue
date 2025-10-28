@@ -10,8 +10,8 @@ definePageMeta({
     order: 13,
   },
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 const lessons = [
   {
@@ -74,7 +74,7 @@ const lessons = [
       },
     ],
   },
-]
+];
 
 const resources = [
   {
@@ -95,7 +95,7 @@ const resources = [
     uploaded: '۲ هفته پیش',
     icon: '/img/icons/files/doc-2.svg',
   },
-]
+];
 
 const progress = [
   {
@@ -116,7 +116,7 @@ const progress = [
     status: 'تازه شروع شده',
     nextLesson: 'مفاهیم پایه',
   },
-]
+];
 </script>
 
 <template>

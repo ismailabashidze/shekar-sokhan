@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Stocks',
@@ -14,14 +14,14 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-stocks-dark.png',
     order: 5,
   },
-})
+});
 
-const barProfit = reactive(useBarProfit())
+const barProfit = reactive(useBarProfit());
 
 function useBarProfit() {
-  const { primary } = useTailwindColors()
-  const type = 'bar'
-  const height = 255
+  const { primary } = useTailwindColors();
+  const type = 'bar';
+  const height = 255;
 
   const options = {
     chart: {
@@ -39,7 +39,7 @@ function useBarProfit() {
     dataLabels: {
       enabled: true,
       formatter: function (val: string) {
-        return val + '%'
+        return val + '%';
       },
       offsetY: -20,
       style: {
@@ -82,7 +82,7 @@ function useBarProfit() {
       labels: {
         show: false,
         formatter: function (val: string) {
-          return val + '%'
+          return val + '%';
         },
       },
     },
@@ -91,21 +91,21 @@ function useBarProfit() {
       text: undefined,
       align: 'left',
     },
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'Ratio',
       data: [2.3, 3.1, 4.0, 10.1, 4.0],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

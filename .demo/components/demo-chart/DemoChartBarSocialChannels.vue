@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const barSocialChannels = reactive(useBarSocialChannels())
+const barSocialChannels = reactive(useBarSocialChannels());
 
 function useBarSocialChannels() {
-  const { primary, subtitle, success } = useTailwindColors()
-  const type = 'bar'
-  const height = 235
+  const { primary, subtitle, success } = useTailwindColors();
+  const type = 'bar';
+  const height = 235;
 
   const options = {
     chart: {
@@ -40,7 +40,7 @@ function useBarSocialChannels() {
         rotateAlways: true,
       },
     },
-  } as const
+  } as const;
 
   const series = shallowRef([
     {
@@ -51,9 +51,9 @@ function useBarSocialChannels() {
       name: 'Renewals',
       data: [76, 85, 101, 98, 87, 105, 91, 114, 94],
     },
-  ])
+  ]);
 
-  return { type, height, options, series }
+  return { type, height, options, series };
 }
 </script>
 

@@ -1,119 +1,119 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import type { PaymentStatus } from '~/composables/payment'
+import { ref, computed, onMounted } from 'vue';
+import type { PaymentStatus } from '~/composables/payment';
 
 definePageMeta({
   title: 'پرداختی ها',
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { user, role } = useUser()
-const route = useRoute()
-const router = useRouter()
-const nuxtApp = useNuxtApp()
-const { getPayments } = usePayment()
+const { user, role } = useUser();
+const route = useRoute();
+const router = useRouter();
+const nuxtApp = useNuxtApp();
+const { getPayments } = usePayment();
 
 // Check if user is admin
-const isAdmin = computed(() => role.value === 'admin')
+const isAdmin = computed(() => role.value === 'admin');
 
 // Get target user ID from query params or use current user
 const targetUserId = computed(() => {
   const queryUserId = Array.isArray(route.query.userId)
     ? route.query.userId[0]
-    : route.query.userId
+    : route.query.userId;
 
-  return queryUserId || nuxtApp.$pb.authStore.model?.id
-})
+  return queryUserId || nuxtApp.$pb.authStore.model?.id;
+});
 
 // States
-const isLoading = ref(false)
-const error = ref<string | null>(null)
-const payments = ref<Array<any>>([])
+const isLoading = ref(false);
+const error = ref<string | null>(null);
+const payments = ref<Array<any>>([]);
 
 // Pagination
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
-const perPage = ref(10)
-const totalItems = ref(0)
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
+const perPage = ref(10);
+const totalItems = ref(0);
 
 // Filters
-const filter = ref('')
-const statusFilter = ref<PaymentStatus | 'all'>('all')
+const filter = ref('');
+const statusFilter = ref<PaymentStatus | 'all'>('all');
 
 // Fetch payments
 const fetchPayments = async () => {
-  isLoading.value = true
-  error.value = null
+  isLoading.value = true;
+  error.value = null;
 
   try {
     // Check if user is trying to access another user's payments without admin rights
     const queryUserId = Array.isArray(route.query.userId)
       ? route.query.userId[0]
-      : route.query.userId
+      : route.query.userId;
 
     if (queryUserId && !isAdmin.value) {
       // Non-admin trying to access another user's payments - redirect to their own payments
-      router.push('/payments')
-      return
+      router.push('/payments');
+      return;
     }
 
-    const filterObj: any = {}
+    const filterObj: any = {};
 
     // Apply status filter if not 'all'
     if (statusFilter.value !== 'all') {
-      filterObj.status = statusFilter.value
+      filterObj.status = statusFilter.value;
     }
 
     // Apply user filter for admin
     if (isAdmin.value && route.query.userId) {
-      filterObj.userId = targetUserId.value
+      filterObj.userId = targetUserId.value;
     }
 
-    const result = await getPayments(filterObj)
-    payments.value = result
-    totalItems.value = result.length
+    const result = await getPayments(filterObj);
+    payments.value = result;
+    totalItems.value = result.length;
   }
   catch (err: any) {
-    console.error('Error fetching payments:', err)
-    error.value = 'خطا در دریافت لیست پرداختی‌ها. لطفاً دوباره تلاش کنید.'
-    payments.value = []
+    console.error('Error fetching payments:', err);
+    error.value = 'خطا در دریافت لیست پرداختی‌ها. لطفاً دوباره تلاش کنید.';
+    payments.value = [];
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // Filter payments locally
 const filteredPayments = computed(() => {
   return payments.value
     .filter((payment) => {
       if (statusFilter.value !== 'all' && payment.status !== statusFilter.value) {
-        return false
+        return false;
       }
       if (filter.value && !payment.description?.toLowerCase().includes(filter.value.toLowerCase())) {
-        return false
+        return false;
       }
-      return true
-    })
-})
+      return true;
+    });
+});
 
 // Paginated payments
 const paginatedPayments = computed(() => {
-  const start = (page.value - 1) * perPage.value
-  const end = start + perPage.value
-  return filteredPayments.value.slice(start, end)
-})
+  const start = (page.value - 1) * perPage.value;
+  const end = start + perPage.value;
+  return filteredPayments.value.slice(start, end);
+});
 
 // Format price
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('fa-IR').format(price)
-}
+  return new Intl.NumberFormat('fa-IR').format(price);
+};
 
 // Format date
 const formatDate = (dateString: string) => {
-  if (!dateString) return '—'
-  return new Date(dateString).toLocaleDateString('fa-IR')
-}
+  if (!dateString) return '—';
+  return new Date(dateString).toLocaleDateString('fa-IR');
+};
 
 // Get status badge class
 const getStatusBadgeClass = (status: PaymentStatus) => {
@@ -123,9 +123,9 @@ const getStatusBadgeClass = (status: PaymentStatus) => {
     failed: 'bg-danger-100 text-danger-800 dark:bg-danger-900/20 dark:text-danger-100',
     refunded: 'bg-info-100 text-info-800 dark:bg-info-900/20 dark:text-info-100',
     cancelled: 'bg-muted-100 text-muted-800 dark:bg-muted-900/20 dark:text-muted-100',
-  }
-  return classes[status] || 'bg-muted-100 text-muted-800'
-}
+  };
+  return classes[status] || 'bg-muted-100 text-muted-800';
+};
 
 // Get status icon
 const getStatusIcon = (status: PaymentStatus) => {
@@ -135,9 +135,9 @@ const getStatusIcon = (status: PaymentStatus) => {
     failed: 'ph:x-circle-duotone',
     refunded: 'ph:arrows-counter-clockwise-duotone',
     cancelled: 'ph:prohibit-duotone',
-  }
-  return icons[status] || 'ph:warning-duotone'
-}
+  };
+  return icons[status] || 'ph:warning-duotone';
+};
 
 // Get status text in Persian
 const getStatusText = (status: PaymentStatus) => {
@@ -147,20 +147,20 @@ const getStatusText = (status: PaymentStatus) => {
     failed: 'ناموفق',
     refunded: 'مسترد شده',
     cancelled: 'لغو شده',
-  }
-  return texts[status] || status
-}
+  };
+  return texts[status] || status;
+};
 // Reset filters
 const resetFilters = () => {
-  filter.value = ''
-  statusFilter.value = 'all'
+  filter.value = '';
+  statusFilter.value = 'all';
   router.push({
     query: {
       ...route.query,
       page: '1',
     },
-  })
-}
+  });
+};
 
 // Handle page change
 const onPageChange = (newPage: number) => {
@@ -169,8 +169,8 @@ const onPageChange = (newPage: number) => {
       ...route.query,
       page: newPage.toString(),
     },
-  })
-}
+  });
+};
 
 // Watch for filter changes
 watch([filter, statusFilter], () => {
@@ -179,18 +179,18 @@ watch([filter, statusFilter], () => {
       ...route.query,
       page: '1',
     },
-  })
-})
+  });
+});
 
 // Watch for route query changes to refresh data
 watch([() => route.query.userId, () => route.query.page], () => {
-  fetchPayments()
-}, { immediate: true })
+  fetchPayments();
+}, { immediate: true });
 
 // Initial fetch
 onMounted(() => {
-  fetchPayments()
-})
+  fetchPayments();
+});
 </script>
 
 <template>

@@ -1,51 +1,51 @@
-import { ref, computed } from 'vue'
+import { ref, computed } from 'vue';
 
 // Define feedback interface based on actual PocketBase structure
 interface MessageFeedback {
-  id: string
-  message_id: string
-  user_id: string
-  session_id: string
-  therapist_id: string
-  rating?: number
-  message_content?: string
-  general_text?: string
-  general_other?: string
-  problems_categories?: Record<string, any>
-  problems_other?: string
-  quality_categories?: Record<string, any>
-  quality_other?: string
-  improvements_categories?: Record<string, any>
-  improvements_other?: string
-  created: string
-  updated?: string
+  id: string;
+  message_id: string;
+  user_id: string;
+  session_id: string;
+  therapist_id: string;
+  rating?: number;
+  message_content?: string;
+  general_text?: string;
+  general_other?: string;
+  problems_categories?: Record<string, any>;
+  problems_other?: string;
+  quality_categories?: Record<string, any>;
+  quality_other?: string;
+  improvements_categories?: Record<string, any>;
+  improvements_other?: string;
+  created: string;
+  updated?: string;
   expand?: {
     user_id?: {
-      id: string
-      name: string
-      email: string
-      avatar: string
-    }
+      id: string;
+      name: string;
+      email: string;
+      avatar: string;
+    };
     therapist_id?: {
-      id: string
-      name: string
-      email: string
-      avatar: string
-      specialty?: string
-    }
+      id: string;
+      name: string;
+      email: string;
+      avatar: string;
+      specialty?: string;
+    };
     session_id?: {
-      id: string
-      session_type: string
-      status: string
-      created: string
-    }
+      id: string;
+      session_type: string;
+      status: string;
+      created: string;
+    };
     message_id?: {
-      id: string
-      text: string
-      sender: string
-      created: string
-    }
-  }
+      id: string;
+      text: string;
+      sender: string;
+      created: string;
+    };
+  };
 }
 
 // Mock data function
@@ -185,64 +185,64 @@ const getMockFeedbacks = (): MessageFeedback[] => [
     problems_other: 'لحن درمانگر قضاوت‌گرانه بود',
     created: new Date(Date.now() - 518400000).toISOString(),
   },
-]
+];
 
 export const useAdminFeedbacks = () => {
-  const nuxtApp = useNuxtApp()
-  const toaster = useToaster()
+  const nuxtApp = useNuxtApp();
+  const toaster = useToaster();
 
   // State
-  const allFeedbacksData = ref<MessageFeedback[]>([])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
-  const currentPage = ref(1)
-  const perPage = ref(5)
-  const searchQuery = ref('')
-  const ratingFilter = ref('all')
-  const totalPages = ref(0)
-  const totalItems = ref(0)
+  const allFeedbacksData = ref<MessageFeedback[]>([]);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+  const currentPage = ref(1);
+  const perPage = ref(5);
+  const searchQuery = ref('');
+  const ratingFilter = ref('all');
+  const totalPages = ref(0);
+  const totalItems = ref(0);
 
   // Helper function to build filter string
   const buildFilterString = () => {
-    const conditions: string[] = []
+    const conditions: string[] = [];
 
     if (ratingFilter.value !== 'all') {
-      conditions.push(`rating = ${ratingFilter.value}`)
+      conditions.push(`rating = ${ratingFilter.value}`);
     }
 
     // Note: feedback_type filter removed as it's not part of the actual schema
 
     if (searchQuery.value.trim()) {
-      const searchTerm = searchQuery.value.replace(/"/g, '\\"')
-      conditions.push(`(message_content ~ "${searchTerm}" || general_text ~ "${searchTerm}" || problems_other ~ "${searchTerm}" || quality_other ~ "${searchTerm}" || improvements_other ~ "${searchTerm}" || user_id.name ~ "${searchTerm}" || user_id.email ~ "${searchTerm}" || therapist_id.name ~ "${searchTerm}")`)
+      const searchTerm = searchQuery.value.replace(/"/g, '\\"');
+      conditions.push(`(message_content ~ "${searchTerm}" || general_text ~ "${searchTerm}" || problems_other ~ "${searchTerm}" || quality_other ~ "${searchTerm}" || improvements_other ~ "${searchTerm}" || user_id.name ~ "${searchTerm}" || user_id.email ~ "${searchTerm}" || therapist_id.name ~ "${searchTerm}")`);
     }
 
-    return conditions.join(' && ')
-  }
+    return conditions.join(' && ');
+  };
 
   // Data fetching
   const fetchFeedbacks = async () => {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
 
     try {
-      const filterString = buildFilterString()
+      const filterString = buildFilterString();
 
       const result = await nuxtApp.$pb.collection('message_feedback').getList(currentPage.value, perPage.value, {
         ...(filterString && { filter: filterString }),
         sort: '-created',
         expand: 'user_id,therapist_id,session_id,message_id',
-      })
+      });
 
-      allFeedbacksData.value = result.items as MessageFeedback[]
-      totalPages.value = result.totalPages
-      totalItems.value = result.totalItems
+      allFeedbacksData.value = result.items as MessageFeedback[];
+      totalPages.value = result.totalPages;
+      totalItems.value = result.totalItems;
 
-      return result
+      return result;
     }
     catch (e: any) {
-      error.value = e.message || 'خطا در دریافت بازخوردها'
-      console.error('Error fetching feedbacks:', e)
+      error.value = e.message || 'خطا در دریافت بازخوردها';
+      console.error('Error fetching feedbacks:', e);
 
       toaster.show({
         title: 'خطا',
@@ -250,58 +250,58 @@ export const useAdminFeedbacks = () => {
         color: 'danger',
         icon: 'ph:warning-circle-fill',
         closable: true,
-      })
+      });
 
       // Fallback to mock data in case of error
-      allFeedbacksData.value = getMockFeedbacks()
-      totalItems.value = allFeedbacksData.value.length
-      totalPages.value = Math.ceil(totalItems.value / perPage.value)
+      allFeedbacksData.value = getMockFeedbacks();
+      totalItems.value = allFeedbacksData.value.length;
+      totalPages.value = Math.ceil(totalItems.value / perPage.value);
     }
     finally {
-      loading.value = false
+      loading.value = false;
     }
-  }
+  };
 
   // Computed properties - now using server-side pagination
-  const paginatedFeedbacks = computed(() => allFeedbacksData.value)
+  const paginatedFeedbacks = computed(() => allFeedbacksData.value);
 
   // Methods
   const setPage = async (page: number) => {
     if (page >= 1 && page <= totalPages.value) {
-      currentPage.value = page
-      await fetchFeedbacks()
+      currentPage.value = page;
+      await fetchFeedbacks();
     }
-  }
+  };
 
   const setPerPage = async (count: number) => {
-    perPage.value = count
-    currentPage.value = 1 // Reset to first page
-    await fetchFeedbacks()
-  }
+    perPage.value = count;
+    currentPage.value = 1; // Reset to first page
+    await fetchFeedbacks();
+  };
 
   const setSearch = async (query: string) => {
-    searchQuery.value = query
-    currentPage.value = 1 // Reset to first page
-    await fetchFeedbacks()
-  }
+    searchQuery.value = query;
+    currentPage.value = 1; // Reset to first page
+    await fetchFeedbacks();
+  };
 
   const setRatingFilter = async (rating: string) => {
-    ratingFilter.value = rating
-    currentPage.value = 1 // Reset to first page
-    await fetchFeedbacks()
-  }
+    ratingFilter.value = rating;
+    currentPage.value = 1; // Reset to first page
+    await fetchFeedbacks();
+  };
 
   const resetFilters = async () => {
-    searchQuery.value = ''
-    ratingFilter.value = 'all'
-    currentPage.value = 1
-    await fetchFeedbacks()
-  }
+    searchQuery.value = '';
+    ratingFilter.value = 'all';
+    currentPage.value = 1;
+    await fetchFeedbacks();
+  };
 
   const refreshFeedbacks = async () => {
     // Refetch data with current filters
-    await fetchFeedbacks()
-  }
+    await fetchFeedbacks();
+  };
 
   return {
     // State
@@ -323,5 +323,5 @@ export const useAdminFeedbacks = () => {
     setRatingFilter,
     resetFilters,
     refreshFeedbacks,
-  }
-}
+  };
+};

@@ -235,262 +235,262 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { SessionSummaryWithImportance } from '@/composables/useDataImportance'
+import { ref, computed } from 'vue';
+import type { SessionSummaryWithImportance } from '@/composables/useDataImportance';
 
 interface Props {
-  summary: SessionSummaryWithImportance
+  summary: SessionSummaryWithImportance;
 }
 
 interface Emits {
-  (e: 'delete'): void
+  (e: 'delete'): void;
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
 
-const showDetails = ref(false)
+const showDetails = ref(false);
 
 // Computed properties for importance display
 const importanceScore = computed(() => {
-  return Math.round(props.summary.importance?.overallImportance || 0)
-})
+  return Math.round(props.summary.importance?.overallImportance || 0);
+});
 
 const importanceLevel = computed(() => {
-  const score = importanceScore.value
-  if (score >= 80) return 'بحرانی'
-  if (score >= 60) return 'مهم'
-  if (score >= 40) return 'متوسط'
-  return 'کم'
-})
+  const score = importanceScore.value;
+  if (score >= 80) return 'بحرانی';
+  if (score >= 60) return 'مهم';
+  if (score >= 40) return 'متوسط';
+  return 'کم';
+});
 
 const importanceIcon = computed(() => {
-  const score = importanceScore.value
-  if (score >= 80) return 'ph:warning-duotone'
-  if (score >= 60) return 'ph:star-duotone'
-  if (score >= 40) return 'ph:circle-duotone'
-  return 'ph:minus-circle-duotone'
-})
+  const score = importanceScore.value;
+  if (score >= 80) return 'ph:warning-duotone';
+  if (score >= 60) return 'ph:star-duotone';
+  if (score >= 40) return 'ph:circle-duotone';
+  return 'ph:minus-circle-duotone';
+});
 
 const importanceColorClass = computed(() => {
-  const score = importanceScore.value
-  if (score >= 80) return 'border-red-200 dark:border-red-500/20 border-2'
-  if (score >= 60) return 'border-orange-200 dark:border-orange-500/20 border-2'
-  if (score >= 40) return 'border-yellow-200 dark:border-yellow-500/20 border-2'
-  return 'border-gray-200 dark:border-gray-500/20 border-2'
-})
+  const score = importanceScore.value;
+  if (score >= 80) return 'border-red-200 dark:border-red-500/20 border-2';
+  if (score >= 60) return 'border-orange-200 dark:border-orange-500/20 border-2';
+  if (score >= 40) return 'border-yellow-200 dark:border-yellow-500/20 border-2';
+  return 'border-gray-200 dark:border-gray-500/20 border-2';
+});
 
 const importanceBadgeClass = computed(() => {
-  const score = importanceScore.value
-  if (score >= 80) return 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-  if (score >= 60) return 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300'
-  if (score >= 40) return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
-  return 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
-})
+  const score = importanceScore.value;
+  if (score >= 80) return 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300';
+  if (score >= 60) return 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300';
+  if (score >= 40) return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300';
+  return 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300';
+});
 
 const importanceTitleClass = computed(() => {
-  const score = importanceScore.value
-  if (score >= 80) return 'text-red-600 dark:text-red-400'
-  if (score >= 60) return 'text-orange-600 dark:text-orange-400'
-  if (score >= 40) return 'text-yellow-600 dark:text-yellow-400'
-  return 'text-gray-600 dark:text-gray-400'
-})
+  const score = importanceScore.value;
+  if (score >= 80) return 'text-red-600 dark:text-red-400';
+  if (score >= 60) return 'text-orange-600 dark:text-orange-400';
+  if (score >= 40) return 'text-yellow-600 dark:text-yellow-400';
+  return 'text-gray-600 dark:text-gray-400';
+});
 
 // Recency calculation
 const recencyDays = computed(() => {
-  if (!props.summary.date) return null
-  const sessionDate = new Date(props.summary.date)
-  const now = new Date()
-  return Math.floor((now.getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24))
-})
+  if (!props.summary.date) return null;
+  const sessionDate = new Date(props.summary.date);
+  const now = new Date();
+  return Math.floor((now.getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24));
+});
 
 const recencyText = computed(() => {
-  const days = recencyDays.value
-  if (days === null) return ''
+  const days = recencyDays.value;
+  if (days === null) return '';
 
-  if (days === 0) return 'امروز'
-  if (days === 1) return 'دیروز'
-  if (days <= 7) return `${days} روز پیش`
-  if (days <= 30) return `${Math.floor(days / 7)} هفته پیش`
-  if (days <= 365) return `${Math.floor(days / 30)} ماه پیش`
-  return `${Math.floor(days / 365)} سال پیش`
-})
+  if (days === 0) return 'امروز';
+  if (days === 1) return 'دیروز';
+  if (days <= 7) return `${days} روز پیش`;
+  if (days <= 30) return `${Math.floor(days / 7)} هفته پیش`;
+  if (days <= 365) return `${Math.floor(days / 30)} ماه پیش`;
+  return `${Math.floor(days / 365)} سال پیش`;
+});
 
 // Compression ratio calculation
 const compressionRatio = computed(() => {
-  if (!props.summary.isCompressed || !props.summary.originalLength) return 0
-  const ratio = ((props.summary.originalLength - props.summary.summary.length) / props.summary.originalLength) * 100
-  return Math.round(ratio)
-})
+  if (!props.summary.isCompressed || !props.summary.originalLength) return 0;
+  const ratio = ((props.summary.originalLength - props.summary.summary.length) / props.summary.originalLength) * 100;
+  return Math.round(ratio);
+});
 
 // Detailed explanations for importance scores
 const recencyExplanation = computed(() => {
-  const days = recencyDays.value
-  if (days === null) return 'تاریخ جلسه مشخص نیست'
+  const days = recencyDays.value;
+  if (days === null) return 'تاریخ جلسه مشخص نیست';
 
-  if (days <= 7) return `جلسه جدید (${days} روز پیش) - امتیاز کامل`
-  if (days <= 30) return `جلسه اخیر (${days} روز پیش) - امتیاز بالا`
-  if (days <= 90) return `جلسه متوسط (${days} روز پیش) - امتیاز متوسط`
-  if (days <= 180) return `جلسه قدیمی (${days} روز پیش) - امتیاز کم`
-  return `جلسه خیلی قدیمی (${days} روز پیش) - امتیاز پایین`
-})
+  if (days <= 7) return `جلسه جدید (${days} روز پیش) - امتیاز کامل`;
+  if (days <= 30) return `جلسه اخیر (${days} روز پیش) - امتیاز بالا`;
+  if (days <= 90) return `جلسه متوسط (${days} روز پیش) - امتیاز متوسط`;
+  if (days <= 180) return `جلسه قدیمی (${days} روز پیش) - امتیاز کم`;
+  return `جلسه خیلی قدیمی (${days} روز پیش) - امتیاز پایین`;
+});
 
 const contentExplanation = computed(() => {
-  const score = props.summary.importance?.contentScore || 0
-  const text = props.summary.summary.toLowerCase()
+  const score = props.summary.importance?.contentScore || 0;
+  const text = props.summary.summary.toLowerCase();
 
   // Count important keywords
-  const importantKeywords = ['افسردگی', 'اضطراب', 'استرس', 'ترس', 'خشم', 'نگرانی', 'خانواده', 'ازدواج', 'طلاق', 'فرزند']
-  const keywordCount = importantKeywords.filter(keyword => text.includes(keyword)).length
+  const importantKeywords = ['افسردگی', 'اضطراب', 'استرس', 'ترس', 'خشم', 'نگرانی', 'خانواده', 'ازدواج', 'طلاق', 'فرزند'];
+  const keywordCount = importantKeywords.filter(keyword => text.includes(keyword)).length;
 
-  if (score >= 80) return `محتوای غنی با ${keywordCount} کلمه کلیدی مهم`
-  if (score >= 60) return `محتوای خوب با ${keywordCount} کلمه کلیدی`
-  if (score >= 40) return `محتوای متوسط با ${keywordCount} کلمه کلیدی`
-  return `محتوای محدود - ${keywordCount} کلمه کلیدی یافت شد`
-})
+  if (score >= 80) return `محتوای غنی با ${keywordCount} کلمه کلیدی مهم`;
+  if (score >= 60) return `محتوای خوب با ${keywordCount} کلمه کلیدی`;
+  if (score >= 40) return `محتوای متوسط با ${keywordCount} کلمه کلیدی`;
+  return `محتوای محدود - ${keywordCount} کلمه کلیدی یافت شد`;
+});
 
 const lengthExplanation = computed(() => {
-  const length = props.summary.summary.length
-  const score = props.summary.importance?.lengthScore || 0
+  const length = props.summary.summary.length;
+  const score = props.summary.importance?.lengthScore || 0;
 
-  if (length < 50) return `متن کوتاه (${length} کاراکتر) - جزئیات محدود`
-  if (length <= 200) return `متن متوسط (${length} کاراکتر) - اطلاعات مناسب`
-  if (length <= 500) return `متن مفصل (${length} کاراکتر) - اطلاعات کامل`
-  return `متن جامع (${length} کاراکتر) - اطلاعات کامل`
-})
+  if (length < 50) return `متن کوتاه (${length} کاراکتر) - جزئیات محدود`;
+  if (length <= 200) return `متن متوسط (${length} کاراکتر) - اطلاعات مناسب`;
+  if (length <= 500) return `متن مفصل (${length} کاراکتر) - اطلاعات کامل`;
+  return `متن جامع (${length} کاراکتر) - اطلاعات کامل`;
+});
 
 const keywordExplanation = computed(() => {
-  const score = props.summary.importance?.keywordScore || 0
-  const text = props.summary.summary.toLowerCase()
+  const score = props.summary.importance?.keywordScore || 0;
+  const text = props.summary.summary.toLowerCase();
 
   // Check for critical keywords
-  const criticalKeywords = ['خودکشی', 'آسیب', 'خشونت', 'بحران', 'فوری']
-  const criticalFound = criticalKeywords.filter(keyword => text.includes(keyword))
+  const criticalKeywords = ['خودکشی', 'آسیب', 'خشونت', 'بحران', 'فوری'];
+  const criticalFound = criticalKeywords.filter(keyword => text.includes(keyword));
 
   // Check for important keywords
-  const importantKeywords = ['افسردگی', 'اضطراب', 'اعتیاد', 'خانواده']
-  const importantFound = importantKeywords.filter(keyword => text.includes(keyword))
+  const importantKeywords = ['افسردگی', 'اضطراب', 'اعتیاد', 'خانواده'];
+  const importantFound = importantKeywords.filter(keyword => text.includes(keyword));
 
   if (criticalFound.length > 0) {
-    return `کلمات بحرانی یافت شد: ${criticalFound.join('، ')}`
+    return `کلمات بحرانی یافت شد: ${criticalFound.join('، ')}`;
   }
   if (importantFound.length > 0) {
-    return `کلمات مهم یافت شد: ${importantFound.join('، ')}`
+    return `کلمات مهم یافت شد: ${importantFound.join('، ')}`;
   }
   if (score > 0) {
-    return 'کلمات کلیدی عمومی مشاوره یافت شد'
+    return 'کلمات کلیدی عمومی مشاوره یافت شد';
   }
-  return 'هیچ کلمه کلیدی خاصی یافت نشد'
-})
+  return 'هیچ کلمه کلیدی خاصی یافت نشد';
+});
 
 // Actionable insights
 const actionableInsights = computed(() => {
-  const insights: string[] = []
-  const score = importanceScore.value
+  const insights: string[] = [];
+  const score = importanceScore.value;
 
   if (score >= 80) {
-    insights.push('این جلسه بسیار مهم و بحرانی است. باید به سراغ جلسات آینده بروید.')
+    insights.push('این جلسه بسیار مهم و بحرانی است. باید به سراغ جلسات آینده بروید.');
   }
   else if (score >= 60) {
-    insights.push('این جلسه مهم است. باید به سراغ جلسات آینده بروید.')
+    insights.push('این جلسه مهم است. باید به سراغ جلسات آینده بروید.');
   }
   else if (score >= 40) {
-    insights.push('این جلسه متوسط است. باید به سراغ جلسات آینده بروید.')
+    insights.push('این جلسه متوسط است. باید به سراغ جلسات آینده بروید.');
   }
   else {
-    insights.push('این جلسه کم اهمیت است. باید به سراغ جلسات آینده بروید.')
+    insights.push('این جلسه کم اهمیت است. باید به سراغ جلسات آینده بروید.');
   }
 
   if (summary.isCompressed) {
-    insights.push('این خلاصه فشرده شده است. برای بهبود حافظه، می‌توانید محتوای جلسه را کاهش دهید.')
+    insights.push('این خلاصه فشرده شده است. برای بهبود حافظه، می‌توانید محتوای جلسه را کاهش دهید.');
   }
 
   if (recencyDays.value === 0) {
-    insights.push('این جلسه امروز رخ داده است. باید به سراغ جلسات آینده بروید.')
+    insights.push('این جلسه امروز رخ داده است. باید به سراغ جلسات آینده بروید.');
   }
   else if (recencyDays.value === 1) {
-    insights.push('این جلسه دیروز رخ داده است. باید به سراغ جلسات آینده بروید.')
+    insights.push('این جلسه دیروز رخ داده است. باید به سراغ جلسات آینده بروید.');
   }
   else if (recencyDays.value > 7) {
-    insights.push('این جلسه چند روز پیش رخ داده است. باید به سراغ جلسات آینده بروید.')
+    insights.push('این جلسه چند روز پیش رخ داده است. باید به سراغ جلسات آینده بروید.');
   }
 
   if (keywordExplanation.value.includes('بحرانی')) {
-    insights.push('این جلسه شامل کلمات بحرانی یافت. باید به سراغ جلسات آینده بروید.')
+    insights.push('این جلسه شامل کلمات بحرانی یافت. باید به سراغ جلسات آینده بروید.');
   }
 
-  return insights
-})
+  return insights;
+});
 
 // Detailed explanations for importance scores (expanded)
 const recencyDetailsExplanation = computed(() => {
-  const days = recencyDays.value
-  if (days === null) return 'تاریخ جلسه مشخص نیست'
+  const days = recencyDays.value;
+  if (days === null) return 'تاریخ جلسه مشخص نیست';
 
-  if (days <= 7) return 'جلسه جدید - امتیاز کامل'
-  if (days <= 30) return 'جلسه اخیر - امتیاز بالا'
-  if (days <= 90) return 'جلسه متوسط - امتیاز متوسط'
-  if (days <= 180) return 'جلسه قدیمی - امتیاز کم'
-  return 'جلسه خیلی قدیمی - امتیاز پایین'
-})
+  if (days <= 7) return 'جلسه جدید - امتیاز کامل';
+  if (days <= 30) return 'جلسه اخیر - امتیاز بالا';
+  if (days <= 90) return 'جلسه متوسط - امتیاز متوسط';
+  if (days <= 180) return 'جلسه قدیمی - امتیاز کم';
+  return 'جلسه خیلی قدیمی - امتیاز پایین';
+});
 
 const contentDetailsExplanation = computed(() => {
-  const score = props.summary.importance?.contentScore || 0
-  const text = props.summary.summary.toLowerCase()
+  const score = props.summary.importance?.contentScore || 0;
+  const text = props.summary.summary.toLowerCase();
 
   // Count important keywords
-  const importantKeywords = ['افسردگی', 'اضطراب', 'استرس', 'ترس', 'خشم', 'نگرانی', 'خانواده', 'ازدواج', 'طلاق', 'فرزند']
-  const keywordCount = importantKeywords.filter(keyword => text.includes(keyword)).length
+  const importantKeywords = ['افسردگی', 'اضطراب', 'استرس', 'ترس', 'خشم', 'نگرانی', 'خانواده', 'ازدواج', 'طلاق', 'فرزند'];
+  const keywordCount = importantKeywords.filter(keyword => text.includes(keyword)).length;
 
-  if (score >= 80) return `محتوای غنی با ${keywordCount} کلمه کلیدی مهم`
-  if (score >= 60) return `محتوای خوب با ${keywordCount} کلمه کلیدی`
-  if (score >= 40) return `محتوای متوسط با ${keywordCount} کلمه کلیدی`
-  return `محتوای محدود - ${keywordCount} کلمه کلیدی یافت شد`
-})
+  if (score >= 80) return `محتوای غنی با ${keywordCount} کلمه کلیدی مهم`;
+  if (score >= 60) return `محتوای خوب با ${keywordCount} کلمه کلیدی`;
+  if (score >= 40) return `محتوای متوسط با ${keywordCount} کلمه کلیدی`;
+  return `محتوای محدود - ${keywordCount} کلمه کلیدی یافت شد`;
+});
 
 const lengthDetailsExplanation = computed(() => {
-  const length = props.summary.summary.length
-  const score = props.summary.importance?.lengthScore || 0
+  const length = props.summary.summary.length;
+  const score = props.summary.importance?.lengthScore || 0;
 
-  if (length < 50) return 'متن کوتاه - جزئیات محدود'
-  if (length <= 200) return 'متن متوسط - اطلاعات مناسب'
-  if (length <= 500) return 'متن مفصل - اطلاعات کامل'
-  return 'متن جامع - اطلاعات کامل'
-})
+  if (length < 50) return 'متن کوتاه - جزئیات محدود';
+  if (length <= 200) return 'متن متوسط - اطلاعات مناسب';
+  if (length <= 500) return 'متن مفصل - اطلاعات کامل';
+  return 'متن جامع - اطلاعات کامل';
+});
 
 const keywordDetailsExplanation = computed(() => {
-  const score = props.summary.importance?.keywordScore || 0
-  const text = props.summary.summary.toLowerCase()
+  const score = props.summary.importance?.keywordScore || 0;
+  const text = props.summary.summary.toLowerCase();
 
   // Check for critical keywords
-  const criticalKeywords = ['خودکشی', 'آسیب', 'خشونت', 'بحران', 'فوری']
-  const criticalFound = criticalKeywords.filter(keyword => text.includes(keyword))
+  const criticalKeywords = ['خودکشی', 'آسیب', 'خشونت', 'بحران', 'فوری'];
+  const criticalFound = criticalKeywords.filter(keyword => text.includes(keyword));
 
   // Check for important keywords
-  const importantKeywords = ['افسردگی', 'اضطراب', 'اعتیاد', 'خانواده']
-  const importantFound = importantKeywords.filter(keyword => text.includes(keyword))
+  const importantKeywords = ['افسردگی', 'اضطراب', 'اعتیاد', 'خانواده'];
+  const importantFound = importantKeywords.filter(keyword => text.includes(keyword));
 
   if (criticalFound.length > 0) {
-    return `کلمات بحرانی یافت شد: ${criticalFound.join('، ')}`
+    return `کلمات بحرانی یافت شد: ${criticalFound.join('، ')}`;
   }
   if (importantFound.length > 0) {
-    return `کلمات مهم یافت شد: ${importantFound.join('، ')}`
+    return `کلمات مهم یافت شد: ${importantFound.join('، ')}`;
   }
   if (score > 0) {
-    return 'کلمات کلیدی عمومی مشاوره یافت شد'
+    return 'کلمات کلیدی عمومی مشاوره یافت شد';
   }
-  return 'هیچ کلمه کلیدی خاصی یافت نشد'
-})
+  return 'هیچ کلمه کلیدی خاصی یافت نشد';
+});
 
 // Format date function
 function formatDate(dateStr: string) {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr)
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
   return d.toLocaleDateString('fa-IR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  })
+  });
 }
 </script>
 

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoBar = reactive(useDemoBar())
+const demoBar = reactive(useDemoBar());
 
 function useDemoBar() {
-  const { primary, info, success, warning } = useTailwindColors()
-  const type = 'bar'
-  const height = 280
+  const { primary, info, success, warning } = useTailwindColors();
+  const type = 'bar';
+  const height = 280;
 
   const options = {
     chart: {
@@ -83,21 +83,21 @@ function useDemoBar() {
       text: '',
       align: 'left',
     },
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'Inflation',
       data: [2.3, 3.1, 4.0, 10.1, 4.0, 3.6, 3.2, 2.3, 1.4, 0.8, 0.5, 0.2],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

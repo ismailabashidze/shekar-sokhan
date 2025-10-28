@@ -1,92 +1,92 @@
-import { useNuxtApp } from '#app'
-import { ref } from 'vue'
+import { useNuxtApp } from '#app';
+import { ref } from 'vue';
 import type {
   EmotionalJourney,
   PersonalGrowth,
   SessionProgress,
   SessionAnalysisForPatient,
-} from '~/types'
+} from '~/types';
 
 // PocketBase specific interfaces (extend base types with DB fields)
 export interface PBEmotionalJourney extends EmotionalJourney {
-  id: string
-  created: string
-  updated: string
-  expand?: any
+  id: string;
+  created: string;
+  updated: string;
+  expand?: any;
 }
 
 export interface PBMainPoints {
-  id: string
-  session: string
-  title: string
-  description: string
-  importance: 'high' | 'medium' | 'low'
-  actionItems: string[]
-  created: string
-  updated: string
-  expand?: any
+  id: string;
+  session: string;
+  title: string;
+  description: string;
+  importance: 'high' | 'medium' | 'low';
+  actionItems: string[];
+  created: string;
+  updated: string;
+  expand?: any;
 }
 
 export interface PBPersonalGrowth extends Omit<PersonalGrowth, 'insights' | 'achievements' | 'challenges' | 'recommendations'> {
-  id: string
-  insights: string[]
-  learnings: string[]
-  toolsAndTechniques: string[]
-  created: string
-  updated: string
-  expand?: any
+  id: string;
+  insights: string[];
+  learnings: string[];
+  toolsAndTechniques: string[];
+  created: string;
+  updated: string;
+  expand?: any;
 }
 
 export interface PBSessionProgress extends Omit<SessionProgress, 'goals' | 'achievements' | 'challenges' | 'nextSteps'> {
-  id: string
-  strengthsIdentified: string[]
-  areasForGrowth: string[]
-  achievements: string[]
-  nextSteps: string[]
-  created: string
-  updated: string
-  expand?: any
+  id: string;
+  strengthsIdentified: string[];
+  areasForGrowth: string[];
+  achievements: string[];
+  nextSteps: string[];
+  created: string;
+  updated: string;
+  expand?: any;
 }
 
 export interface PBSessionAnalysisForPatient extends Omit<SessionAnalysisForPatient, 'emotionalJourney' | 'personalGrowth' | 'sessionProgress'> {
-  id: string
-  mainPoints: PBMainPoints[]
-  sessionProgress: PBSessionProgress
-  emotionalJourney: PBEmotionalJourney
-  personalGrowth: PBPersonalGrowth
-  therapeuticRelationship: string
-  created: string
-  updated: string
-  expand?: any
+  id: string;
+  mainPoints: PBMainPoints[];
+  sessionProgress: PBSessionProgress;
+  emotionalJourney: PBEmotionalJourney;
+  personalGrowth: PBPersonalGrowth;
+  therapeuticRelationship: string;
+  created: string;
+  updated: string;
+  expand?: any;
 }
 
 export const useSessionPatientAnalysis = () => {
-  const nuxtApp = useNuxtApp()
-  const pb = nuxtApp.$pb
-  const error = ref<string | null>(null)
-  const processing = ref(false)
+  const nuxtApp = useNuxtApp();
+  const pb = nuxtApp.$pb;
+  const error = ref<string | null>(null);
+  const processing = ref(false);
 
   const createAnalysis = async (data: Partial<PBSessionAnalysisForPatient>) => {
     try {
-      return await pb.collection('session_analysis_for_patient').create(data)
+      return await pb.collection('session_analysis_for_patient').create(data);
     }
     catch (error: any) {
-      console.error('Error creating session analysis for patient:', error)
-      throw error
+      console.error('Error creating session analysis for patient:', error);
+      throw error;
     }
-  }
+  };
 
   const getAnalysisById = async (id: string) => {
     try {
       return await pb.collection('session_analysis_for_patient').getOne(id, {
         expand: 'session,mainPoints,sessionProgress,emotionalJourney,personalGrowth',
-      })
+      });
     }
     catch (error: any) {
-      console.error('Error getting session analysis for patient:', error)
-      throw error
+      console.error('Error getting session analysis for patient:', error);
+      throw error;
     }
-  }
+  };
 
   const listAnalysis = async (filter = '', sort = '-created') => {
     try {
@@ -94,33 +94,33 @@ export const useSessionPatientAnalysis = () => {
         filter,
         sort,
         expand: 'session,mainPoints,sessionProgress,emotionalJourney,personalGrowth',
-      })
+      });
     }
     catch (error: any) {
-      console.error('Error listing session analysis for patient:', error)
-      throw error
+      console.error('Error listing session analysis for patient:', error);
+      throw error;
     }
-  }
+  };
 
   const updateAnalysis = async (id: string, data: Partial<PBSessionAnalysisForPatient>) => {
     try {
-      return await pb.collection('session_analysis_for_patient').update(id, data)
+      return await pb.collection('session_analysis_for_patient').update(id, data);
     }
     catch (error: any) {
-      console.error('Error updating session analysis for patient:', error)
-      throw error
+      console.error('Error updating session analysis for patient:', error);
+      throw error;
     }
-  }
+  };
 
   const deleteAnalysis = async (id: string) => {
     try {
-      return await pb.collection('session_analysis_for_patient').delete(id)
+      return await pb.collection('session_analysis_for_patient').delete(id);
     }
     catch (error: any) {
-      console.error('Error deleting session analysis for patient:', error)
-      throw error
+      console.error('Error deleting session analysis for patient:', error);
+      throw error;
     }
-  }
+  };
 
   const getAnalysisForSession = async (sessionId: string): Promise<PBSessionAnalysisForPatient | null> => {
     try {
@@ -128,62 +128,62 @@ export const useSessionPatientAnalysis = () => {
         filter: `session="${sessionId}"`,
         sort: '-created',
         expand: 'session,mainPoints,sessionProgress,emotionalJourney,personalGrowth',
-      })
+      });
 
       if (records.items.length > 0) {
-        return records.items[0] as unknown as PBSessionAnalysisForPatient
+        return records.items[0] as unknown as PBSessionAnalysisForPatient;
       }
-      return null
+      return null;
     }
     catch (error) {
-      console.error('Error getting analysis for session:', error)
-      return null
+      console.error('Error getting analysis for session:', error);
+      return null;
     }
-  }
+  };
 
   const createEmotionalJourney = async (data: Partial<PBEmotionalJourney>) => {
     try {
-      return await pb.collection('emotional_journey').create(data)
+      return await pb.collection('emotional_journey').create(data);
     }
     catch (error: any) {
-      console.error('Error creating emotional journey:', error)
-      throw error
+      console.error('Error creating emotional journey:', error);
+      throw error;
     }
-  }
+  };
 
   const createMainPoints = async (data: Partial<PBMainPoints>) => {
     try {
-      return await pb.collection('main_points').create(data)
+      return await pb.collection('main_points').create(data);
     }
     catch (error: any) {
-      console.error('Error creating main points:', error)
-      throw error
+      console.error('Error creating main points:', error);
+      throw error;
     }
-  }
+  };
 
   const createPersonalGrowth = async (data: Partial<PBPersonalGrowth>) => {
     try {
-      return await pb.collection('personal_growth').create(data)
+      return await pb.collection('personal_growth').create(data);
     }
     catch (error: any) {
-      console.error('Error creating personal growth:', error)
-      throw error
+      console.error('Error creating personal growth:', error);
+      throw error;
     }
-  }
+  };
 
   const createSessionProgress = async (data: Partial<PBSessionProgress>) => {
     try {
-      return await pb.collection('session_progress').create(data)
+      return await pb.collection('session_progress').create(data);
     }
     catch (error: any) {
-      console.error('Error creating session progress:', error)
-      throw error
+      console.error('Error creating session progress:', error);
+      throw error;
     }
-  }
+  };
 
-  const generateAnalysis = async ({ sessionId, messages }: { sessionId: string, messages: any[] }) => {
-    processing.value = true
-    error.value = null
+  const generateAnalysis = async ({ sessionId, messages }: { sessionId: string; messages: any[] }) => {
+    processing.value = true;
+    error.value = null;
 
     try {
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -310,21 +310,21 @@ ${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`,
           plugins: [],
           transforms: ['middle-out'],
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        throw new Error(await response.text());
       }
 
-      const data = await response.json()
-      const content = data.choices[0].message.content
-      const analysis = typeof content === 'string' ? JSON.parse(content) : content
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      const analysis = typeof content === 'string' ? JSON.parse(content) : content;
 
       // Create all related records
       const emotionalJourney = await createEmotionalJourney({
         session: sessionId,
         ...analysis.emotionalJourney,
-      })
+      });
 
       const mainPointsRecords = await Promise.all(
         analysis.mainPoints.map((point: any) =>
@@ -333,17 +333,17 @@ ${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`,
             ...point,
           }),
         ),
-      )
+      );
 
       const personalGrowth = await createPersonalGrowth({
         session: sessionId,
         ...analysis.personalGrowth,
-      })
+      });
 
       const sessionProgress = await createSessionProgress({
         session: sessionId,
         ...analysis.sessionProgress,
-      })
+      });
 
       // Create the main analysis record
       return await createAnalysis({
@@ -353,16 +353,16 @@ ${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`,
         personalGrowth: personalGrowth.id,
         sessionProgress: sessionProgress.id,
         therapeuticRelationship: analysis.therapeuticRelationship,
-      })
+      });
     }
     catch (e: any) {
-      error.value = e.message
-      throw e
+      error.value = e.message;
+      throw e;
     }
     finally {
-      processing.value = false
+      processing.value = false;
     }
-  }
+  };
 
   return {
     error,
@@ -378,5 +378,5 @@ ${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`,
     createMainPoints,
     createPersonalGrowth,
     createSessionProgress,
-  }
-}
+  };
+};

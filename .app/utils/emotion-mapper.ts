@@ -1,8 +1,8 @@
 // Utility to convert emotion analysis data to EmotionWheel format
 
 interface EmotionData {
-  emotionName: string
-  severity: 'خالی' | 'کم' | 'متوسط' | 'زیاد'
+  emotionName: string;
+  severity: 'خالی' | 'کم' | 'متوسط' | 'زیاد';
 }
 
 // Mapping Persian emotion names to English categories
@@ -16,7 +16,7 @@ const emotionMapping: Record<string, string> = {
   خشم: 'anger',
   انتظار: 'anticipation',
   نامشخص: 'unknown',
-}
+};
 
 // Mapping severity to emotion variants (based on EmotionWheel structure)
 const severityToVariant: Record<string, Record<string, string>> = {
@@ -28,7 +28,7 @@ const severityToVariant: Record<string, Record<string, string>> = {
   disgust: { کم: 'boredom', متوسط: 'disgust', زیاد: 'loathing' },
   anger: { کم: 'annoyance', متوسط: 'anger', زیاد: 'rage' },
   anticipation: { کم: 'interest', متوسط: 'anticipation', زیاد: 'vigilance' },
-}
+};
 
 /**
  * Convert emotion analysis data to EmotionWheel selected format
@@ -36,31 +36,31 @@ const severityToVariant: Record<string, Record<string, string>> = {
  * @returns Array of strings in format "category|variant" for EmotionWheel
  */
 export function convertToEmotionWheel(emotionsData: EmotionData[]): string[] {
-  const selected: string[] = []
+  const selected: string[] = [];
 
   for (const emotion of emotionsData) {
     // Skip empty/unknown emotions
     if (emotion.severity === 'خالی' || emotion.emotionName === 'نامشخص') {
-      continue
+      continue;
     }
 
     // Get English category
-    const category = emotionMapping[emotion.emotionName]
+    const category = emotionMapping[emotion.emotionName];
     if (!category || !severityToVariant[category]) {
-      continue
+      continue;
     }
 
     // Get variant based on severity
-    const variant = severityToVariant[category][emotion.severity]
+    const variant = severityToVariant[category][emotion.severity];
     if (!variant) {
-      continue
+      continue;
     }
 
     // Add to selected in EmotionWheel format
-    selected.push(`${category}|${variant}`)
+    selected.push(`${category}|${variant}`);
   }
 
-  return selected
+  return selected;
 }
 
 /**
@@ -71,7 +71,7 @@ export function convertToEmotionWheel(emotionsData: EmotionData[]): string[] {
 export function getActiveEmotions(emotionsData: EmotionData[]): EmotionData[] {
   return emotionsData.filter(emotion =>
     emotion.severity !== 'خالی' && emotion.emotionName !== 'نامشخص',
-  )
+  );
 }
 
 /**
@@ -80,16 +80,16 @@ export function getActiveEmotions(emotionsData: EmotionData[]): EmotionData[] {
  * @returns The emotion with highest severity, or null if none
  */
 export function getDominantEmotion(emotionsData: EmotionData[]): EmotionData | null {
-  const activeEmotions = getActiveEmotions(emotionsData)
+  const activeEmotions = getActiveEmotions(emotionsData);
 
-  if (activeEmotions.length === 0) return null
+  if (activeEmotions.length === 0) return null;
 
   // Sort by severity priority: زیاد > متوسط > کم
-  const severityOrder = { زیاد: 3, متوسط: 2, کم: 1, خالی: 0 }
+  const severityOrder = { زیاد: 3, متوسط: 2, کم: 1, خالی: 0 };
 
   return activeEmotions.reduce((dominant, current) => {
     return severityOrder[current.severity] > severityOrder[dominant.severity]
       ? current
-      : dominant
-  })
+      : dominant;
+  });
 }

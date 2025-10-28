@@ -58,5 +58,5 @@
 </template>
 
 <script setup lang="ts">
-const value = ref('primary')
+const value = ref('primary');
 </script>

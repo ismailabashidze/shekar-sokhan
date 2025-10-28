@@ -247,7 +247,7 @@ const navigation = [
       },
     ],
   },
-]
+];
 </script>
 
 <template>

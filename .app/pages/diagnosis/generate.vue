@@ -712,8 +712,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useDSMInfoGenerator, type DisorderInfo } from '~/composables/useDSMInfoGenerator'
+import { ref, reactive } from 'vue';
+import { useDSMInfoGenerator, type DisorderInfo } from '~/composables/useDSMInfoGenerator';
 
 // SEO
 useHead({
@@ -722,7 +722,7 @@ useHead({
     { name: 'description', content: 'تولید کامل اطلاعات اختلالات روانشناختی بر اساس DSM-5' },
   ],
   htmlAttrs: { dir: 'rtl' },
-})
+});
 
 const {
   generateCompleteDisorderInfo,
@@ -731,27 +731,27 @@ const {
   disorderProgress,
   clearProgress,
   getAllProgress,
-} = useDSMInfoGenerator()
-const { DISORDER_SECTIONS } = await import('~/composables/useDSMInfoGenerator')
-const nuxtApp = useNuxtApp()
+} = useDSMInfoGenerator();
+const { DISORDER_SECTIONS } = await import('~/composables/useDSMInfoGenerator');
+const nuxtApp = useNuxtApp();
 
-const disorderEnglishName = ref('')
-const generatedInfo = ref<DisorderInfo | null>(null)
-const copied = ref(false)
-const showJson = ref(false)
-const saving = ref(false)
-const saved = ref(false)
-const saveError = ref<string | null>(null)
+const disorderEnglishName = ref('');
+const generatedInfo = ref<DisorderInfo | null>(null);
+const copied = ref(false);
+const showJson = ref(false);
+const saving = ref(false);
+const saved = ref(false);
+const saveError = ref<string | null>(null);
 
 // Bulk generation state
-const generationMode = ref<'single' | 'bulk'>('single')
-const bulkProcessing = ref(false)
-const bulkPaused = ref(false)
-const bulkStartTime = ref<number | null>(null)
-const currentBulkItem = ref<{ categoryTitle: string, disorderName: string } | null>(null)
-const existingDisorders = ref<string[]>([])
-const existingDisordersLoaded = ref(false)
-const concurrencyLevel = ref(5) // Default to 5 concurrent generations
+const generationMode = ref<'single' | 'bulk'>('single');
+const bulkProcessing = ref(false);
+const bulkPaused = ref(false);
+const bulkStartTime = ref<number | null>(null);
+const currentBulkItem = ref<{ categoryTitle: string; disorderName: string } | null>(null);
+const existingDisorders = ref<string[]>([]);
+const existingDisordersLoaded = ref(false);
+const concurrencyLevel = ref(5); // Default to 5 concurrent generations
 
 // Bulk statistics
 const bulkStats = reactive({
@@ -760,7 +760,7 @@ const bulkStats = reactive({
   processing: 0,
   failed: 0,
   remaining: 0,
-})
+});
 
 // DSM-5 Categories and Disorders
 const bulkCategories = ref([
@@ -1149,7 +1149,7 @@ const bulkCategories = ref([
       'Unspecified Disruptive, Impulse-Control, and Conduct Disorder',
     ],
   },
-])
+]);
 
 const generationSteps = reactive([
   { id: 1, title: 'اطلاعات کلی', description: 'تولید کد، عنوان، توضیحات و اطلاعات پایه', status: 'pending' },
@@ -1162,118 +1162,118 @@ const generationSteps = reactive([
   { id: 8, title: 'عوامل خطر', description: 'تولید عوامل خطر و پیش‌آگهی', status: 'pending' },
   { id: 9, title: 'مسائل فرهنگی', description: 'تولید ملاحظات فرهنگی', status: 'pending' },
   { id: 10, title: 'مسائل جنسیتی', description: 'تولید ملاحظات مرتبط با جنسیت', status: 'pending' },
-])
+]);
 
 // Computed properties for category selection
 const selectedCategoriesCount = computed(() => {
-  return bulkCategories.value.filter(cat => cat.selected).length
-})
+  return bulkCategories.value.filter(cat => cat.selected).length;
+});
 
 const selectedDisordersCount = computed(() => {
   return bulkCategories.value
     .filter(cat => cat.selected)
-    .reduce((total, cat) => total + (cat.disorders.length - cat.existingCount), 0)
-})
+    .reduce((total, cat) => total + (cat.disorders.length - cat.existingCount), 0);
+});
 
 // Load existing disorders from database
 const loadExistingDisorders = async () => {
   try {
-    const pb = nuxtApp.$pb
+    const pb = nuxtApp.$pb;
     const records = await pb.collection('DSM5_disorders').getFullList({
       fields: 'titleEn',
-    })
+    });
 
-    existingDisorders.value = records.map(record => record.titleEn)
+    existingDisorders.value = records.map(record => record.titleEn);
 
     // Update existing counts for each category
     bulkCategories.value.forEach((category) => {
       category.existingCount = category.disorders.filter(disorder =>
         existingDisorders.value.includes(disorder),
-      ).length
-    })
+      ).length;
+    });
 
-    existingDisordersLoaded.value = true
-    console.log(`Loaded ${existingDisorders.value.length} existing disorders`)
+    existingDisordersLoaded.value = true;
+    console.log(`Loaded ${existingDisorders.value.length} existing disorders`);
   }
   catch (error) {
-    console.error('Failed to load existing disorders:', error)
-    existingDisordersLoaded.value = true // Still mark as loaded to show UI
+    console.error('Failed to load existing disorders:', error);
+    existingDisordersLoaded.value = true; // Still mark as loaded to show UI
   }
-}
+};
 
 // Category selection functions
 const selectAllCategories = () => {
-  bulkCategories.value.forEach(cat => cat.selected = true)
-}
+  bulkCategories.value.forEach(cat => cat.selected = true);
+};
 
 const deselectAllCategories = () => {
-  bulkCategories.value.forEach(cat => cat.selected = false)
-}
+  bulkCategories.value.forEach(cat => cat.selected = false);
+};
 
 const selectIncompleteCategories = () => {
   bulkCategories.value.forEach((cat) => {
-    cat.selected = cat.existingCount < cat.disorders.length
-  })
-}
+    cat.selected = cat.existingCount < cat.disorders.length;
+  });
+};
 
 const updateStepStatus = (stepId: number, status: 'pending' | 'processing' | 'completed') => {
-  const step = generationSteps.find(s => s.id === stepId)
+  const step = generationSteps.find(s => s.id === stepId);
   if (step) {
-    step.status = status
+    step.status = status;
   }
-}
+};
 
 const generateDisorderInfo = async () => {
-  if (!disorderEnglishName.value.trim()) return
+  if (!disorderEnglishName.value.trim()) return;
 
   try {
     // Reset all steps
-    generationSteps.forEach(step => step.status = 'pending')
-    generatedInfo.value = null
+    generationSteps.forEach(step => step.status = 'pending');
+    generatedInfo.value = null;
 
     // Simulate step-by-step progress
     for (let i = 1; i <= 10; i++) {
-      updateStepStatus(i, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 200)) // Small delay for UX
+      updateStepStatus(i, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 200)); // Small delay for UX
     }
 
-    const result = await generateCompleteDisorderInfo(disorderEnglishName.value.trim())
-    generatedInfo.value = result
+    const result = await generateCompleteDisorderInfo(disorderEnglishName.value.trim());
+    generatedInfo.value = result;
 
     // Mark all steps as completed
-    generationSteps.forEach(step => step.status = 'completed')
+    generationSteps.forEach(step => step.status = 'completed');
   }
   catch (err: any) {
-    console.error('Generation failed:', err)
+    console.error('Generation failed:', err);
     // Reset step statuses on error
-    generationSteps.forEach(step => step.status = 'pending')
+    generationSteps.forEach(step => step.status = 'pending');
   }
-}
+};
 
 const copyToClipboard = async () => {
-  if (!generatedInfo.value) return
+  if (!generatedInfo.value) return;
 
   try {
-    await navigator.clipboard.writeText(JSON.stringify(generatedInfo.value, null, 2))
-    copied.value = true
+    await navigator.clipboard.writeText(JSON.stringify(generatedInfo.value, null, 2));
+    copied.value = true;
     setTimeout(() => {
-      copied.value = false
-    }, 3000)
+      copied.value = false;
+    }, 3000);
   }
   catch (err) {
-    console.error('Failed to copy:', err)
+    console.error('Failed to copy:', err);
   }
-}
+};
 
 const saveToDatabase = async () => {
-  if (!generatedInfo.value) return
+  if (!generatedInfo.value) return;
 
-  saving.value = true
-  saveError.value = null
-  saved.value = false
+  saving.value = true;
+  saveError.value = null;
+  saved.value = false;
 
   try {
-    const pb = nuxtApp.$pb
+    const pb = nuxtApp.$pb;
 
     const data = {
       code: generatedInfo.value.code,
@@ -1294,119 +1294,119 @@ const saveToDatabase = async () => {
       cultureRelatedDiagnosticIssues: JSON.stringify(generatedInfo.value.cultureRelatedDiagnosticIssues),
       genderRelatedDiagnosticIssues: JSON.stringify(generatedInfo.value.genderRelatedDiagnosticIssues),
       differentialDiagnosis: JSON.stringify(generatedInfo.value.differentialDiagnosis),
-    }
+    };
 
-    const record = await pb.collection('DSM5_disorders').create(data)
-    console.log('Disorder saved successfully:', record)
+    const record = await pb.collection('DSM5_disorders').create(data);
+    console.log('Disorder saved successfully:', record);
 
-    saved.value = true
+    saved.value = true;
     setTimeout(() => {
-      saved.value = false
-    }, 5000)
+      saved.value = false;
+    }, 5000);
   }
   catch (err: any) {
-    console.error('Failed to save to database:', err)
-    saveError.value = err.message || 'خطا در ذخیره اطلاعات'
+    console.error('Failed to save to database:', err);
+    saveError.value = err.message || 'خطا در ذخیره اطلاعات';
     setTimeout(() => {
-      saveError.value = null
-    }, 5000)
+      saveError.value = null;
+    }, 5000);
   }
   finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
 // Initialize bulk statistics
 const initializeBulkStats = () => {
-  let total = 0
+  let total = 0;
   bulkCategories.value.forEach((category) => {
-    total += category.disorders.length
-  })
+    total += category.disorders.length;
+  });
 
-  bulkStats.total = total
-  bulkStats.completed = 0
-  bulkStats.processing = 0
-  bulkStats.failed = 0
-  bulkStats.remaining = total
-}
+  bulkStats.total = total;
+  bulkStats.completed = 0;
+  bulkStats.processing = 0;
+  bulkStats.failed = 0;
+  bulkStats.remaining = total;
+};
 
 // Format elapsed time
 const formatElapsedTime = (milliseconds: number) => {
-  const seconds = Math.floor(milliseconds / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
 
   if (hours > 0) {
-    return `${hours}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`
+    return `${hours}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
   }
-  return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`
-}
+  return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`;
+};
 
 // Start bulk generation
 const startBulkGeneration = async () => {
-  bulkProcessing.value = true
-  bulkPaused.value = false
-  bulkStartTime.value = Date.now()
-  clearProgress() // Clear previous progress
-  initializeBulkStats()
+  bulkProcessing.value = true;
+  bulkPaused.value = false;
+  bulkStartTime.value = Date.now();
+  clearProgress(); // Clear previous progress
+  initializeBulkStats();
 
   try {
     // Create queue of disorders from selected categories, excluding existing ones
-    const allDisorders = []
+    const allDisorders = [];
     for (const category of bulkCategories.value) {
-      if (!category.selected) continue // Skip unselected categories
+      if (!category.selected) continue; // Skip unselected categories
 
       for (const disorderName of category.disorders) {
         // Skip if disorder already exists
         if (existingDisorders.value.includes(disorderName)) {
-          console.log(`Skipping existing disorder: ${disorderName}`)
-          continue
+          console.log(`Skipping existing disorder: ${disorderName}`);
+          continue;
         }
 
         allDisorders.push({
           categoryTitle: category.title,
           disorderName: disorderName,
           category: category,
-        })
+        });
       }
     }
 
     if (allDisorders.length === 0) {
-      console.log('No new disorders to generate')
-      return
+      console.log('No new disorders to generate');
+      return;
     }
 
-    console.log(`🚀 Starting bulk generation: ${allDisorders.length} disorders, ${concurrencyLevel.value} concurrent`)
-    bulkStats.total = allDisorders.length + existingDisorders.value.length
-    bulkStats.remaining = allDisorders.length
+    console.log(`🚀 Starting bulk generation: ${allDisorders.length} disorders, ${concurrencyLevel.value} concurrent`);
+    bulkStats.total = allDisorders.length + existingDisorders.value.length;
+    bulkStats.remaining = allDisorders.length;
 
     // Process disorders in batches based on concurrency level
-    const batchSize = concurrencyLevel.value
+    const batchSize = concurrencyLevel.value;
     for (let i = 0; i < allDisorders.length; i += batchSize) {
-      if (!bulkProcessing.value) break // Stop if cancelled
+      if (!bulkProcessing.value) break; // Stop if cancelled
 
       // Wait if paused
       while (bulkPaused.value && bulkProcessing.value) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      if (!bulkProcessing.value) break // Stop if cancelled
+      if (!bulkProcessing.value) break; // Stop if cancelled
 
-      const batch = allDisorders.slice(i, i + batchSize)
-      bulkStats.processing = batch.length
+      const batch = allDisorders.slice(i, i + batchSize);
+      bulkStats.processing = batch.length;
 
       // Process current batch in parallel
       const batchPromises = batch.map(async (item) => {
-        if (!bulkProcessing.value) return // Stop if cancelled
+        if (!bulkProcessing.value) return; // Stop if cancelled
 
         try {
           // Update current item (show first item of batch)
           if (batch.indexOf(item) === 0) {
-            const othersCount = batch.length - 1
+            const othersCount = batch.length - 1;
             currentBulkItem.value = {
               categoryTitle: item.categoryTitle,
               disorderName: othersCount > 0 ? `${item.disorderName} (+${othersCount} دیگر)` : item.disorderName,
-            }
+            };
           }
 
           // Generate disorder info with detailed progress tracking
@@ -1414,13 +1414,13 @@ const startBulkGeneration = async () => {
             item.disorderName,
             item.categoryTitle,
             true, // Enable detailed progress
-          )
+          );
 
           // Note: The createPartialSave function already saves to database when doing partial saves
           // For complete results, we still need to save manually
           if (!result.titleEn.includes('-need')) {
             // This is a complete result, save it to database
-            const pb = nuxtApp.$pb
+            const pb = nuxtApp.$pb;
             const data = {
               code: result.code,
               title: result.title,
@@ -1440,77 +1440,77 @@ const startBulkGeneration = async () => {
               cultureRelatedDiagnosticIssues: JSON.stringify(result.cultureRelatedDiagnosticIssues),
               genderRelatedDiagnosticIssues: JSON.stringify(result.genderRelatedDiagnosticIssues),
               differentialDiagnosis: JSON.stringify(result.differentialDiagnosis),
-            }
+            };
 
-            await pb.collection('DSM5_disorders').create(data)
-            console.log(`💾 Complete disorder saved: ${result.titleEn}`)
+            await pb.collection('DSM5_disorders').create(data);
+            console.log(`💾 Complete disorder saved: ${result.titleEn}`);
           }
           else {
-            console.log(`🔄 Partial disorder (auto-saved): ${result.titleEn}`)
+            console.log(`🔄 Partial disorder (auto-saved): ${result.titleEn}`);
           }
 
           // Update statistics
-          item.category.completed++
-          bulkStats.completed++
-          bulkStats.remaining--
+          item.category.completed++;
+          bulkStats.completed++;
+          bulkStats.remaining--;
 
-          const isPartial = result.titleEn.includes('-need')
-          console.log(`✅ Generated: ${item.disorderName}${isPartial ? ' (PARTIAL)' : ' (COMPLETE)'}`)
-          return { success: true, disorder: item.disorderName, isPartial }
+          const isPartial = result.titleEn.includes('-need');
+          console.log(`✅ Generated: ${item.disorderName}${isPartial ? ' (PARTIAL)' : ' (COMPLETE)'}`);
+          return { success: true, disorder: item.disorderName, isPartial };
         }
         catch (error: any) {
-          console.error(`❌ Failed: ${item.disorderName} -`, error.message)
-          bulkStats.failed++
-          bulkStats.remaining--
-          return { success: false, disorder: item.disorderName, error }
+          console.error(`❌ Failed: ${item.disorderName} -`, error.message);
+          bulkStats.failed++;
+          bulkStats.remaining--;
+          return { success: false, disorder: item.disorderName, error };
         }
-      })
+      });
 
       // Wait for current batch to complete
-      await Promise.allSettled(batchPromises)
+      await Promise.allSettled(batchPromises);
 
       // Update processing count after batch completion
-      bulkStats.processing = 0
+      bulkStats.processing = 0;
 
       // Small delay between batches to prevent overwhelming the API
       if (bulkProcessing.value && i + batchSize < allDisorders.length) {
-        await new Promise(resolve => setTimeout(resolve, 3000))
+        await new Promise(resolve => setTimeout(resolve, 3000));
       }
     }
 
     if (bulkProcessing.value) {
-      console.log('🎉 Bulk generation completed!')
+      console.log('🎉 Bulk generation completed!');
     }
   }
   catch (error: any) {
-    console.error('Bulk generation failed:', error)
+    console.error('Bulk generation failed:', error);
   }
   finally {
-    bulkProcessing.value = false
-    bulkPaused.value = false
-    currentBulkItem.value = null
-    bulkStats.processing = 0
+    bulkProcessing.value = false;
+    bulkPaused.value = false;
+    currentBulkItem.value = null;
+    bulkStats.processing = 0;
   }
-}
+};
 
 // Pause/Resume bulk generation
 const pauseBulkGeneration = () => {
-  bulkPaused.value = !bulkPaused.value
-}
+  bulkPaused.value = !bulkPaused.value;
+};
 
 // Stop bulk generation
 const stopBulkGeneration = () => {
-  bulkProcessing.value = false
-  bulkPaused.value = false
-  currentBulkItem.value = null
-  bulkStats.processing = 0
-}
+  bulkProcessing.value = false;
+  bulkPaused.value = false;
+  currentBulkItem.value = null;
+  bulkStats.processing = 0;
+};
 
 // Initialize stats on mount and load existing disorders
 onMounted(async () => {
-  initializeBulkStats()
-  await loadExistingDisorders()
-})
+  initializeBulkStats();
+  await loadExistingDisorders();
+});
 
 // Computed property to get current progress details
 const currentProgressDetails = computed(() => {
@@ -1518,46 +1518,46 @@ const currentProgressDetails = computed(() => {
     progress.status === 'processing'
     || progress.status === 'completed'
     || progress.status === 'failed',
-  )
-})
+  );
+});
 
 // Clear progress when switching modes or starting new generation
 watch(generationMode, () => {
   if (generationMode.value === 'bulk') {
-    clearProgress()
+    clearProgress();
   }
-})
+});
 
 // Clear progress when starting new bulk generation
 const clearProgressOnStart = () => {
-  clearProgress()
-}
+  clearProgress();
+};
 
 // Helper function to get section progress summary
 const getSectionProgressSummary = (progress) => {
-  const sections = Object.values(progress.sections)
-  const completed = sections.filter(s => s.status === 'completed').length
-  const failed = sections.filter(s => s.status === 'failed').length
-  const processing = sections.filter(s => s.status === 'processing').length
+  const sections = Object.values(progress.sections);
+  const completed = sections.filter(s => s.status === 'completed').length;
+  const failed = sections.filter(s => s.status === 'failed').length;
+  const processing = sections.filter(s => s.status === 'processing').length;
 
-  return `${completed}/${sections.length} تکمیل${failed > 0 ? ` (${failed} خطا)` : ''}${processing > 0 ? ` (${processing} در حال انجام)` : ''}`
-}
+  return `${completed}/${sections.length} تکمیل${failed > 0 ? ` (${failed} خطا)` : ''}${processing > 0 ? ` (${processing} در حال انجام)` : ''}`;
+};
 
 // Helper function to format duration
 const formatDuration = (milliseconds) => {
-  const seconds = Math.floor(milliseconds / 1000)
-  const minutes = Math.floor(seconds / 60)
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
 
   if (minutes > 0) {
-    return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`
+    return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`;
   }
-  return `${seconds}ث`
-}
+  return `${seconds}ث`;
+};
 
 // Watch for mode changes to reload data
 watch(generationMode, async (newMode) => {
   if (newMode === 'bulk' && !existingDisordersLoaded.value) {
-    await loadExistingDisorders()
+    await loadExistingDisorders();
   }
-})
+});
 </script>

@@ -470,26 +470,26 @@
 // Meta
 definePageMeta({
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 // Composables
-const monitoring = useNotificationMonitoring()
-const logger = useNotificationLogger()
-const collectionStatus = useCollectionStatus()
+const monitoring = useNotificationMonitoring();
+const logger = useNotificationLogger();
+const collectionStatus = useCollectionStatus();
 
 // Reactive state
-const isRefreshing = ref(false)
-const isTestingAlerts = ref(false)
-const showSetupGuide = ref(false)
-const healthStatus = ref<'healthy' | 'degraded' | 'unhealthy'>('healthy')
+const isRefreshing = ref(false);
+const isTestingAlerts = ref(false);
+const showSetupGuide = ref(false);
+const healthStatus = ref<'healthy' | 'degraded' | 'unhealthy'>('healthy');
 const componentHealth = ref({
   database: 'up' as 'up' | 'down' | 'slow',
   notification: 'up' as 'up' | 'down' | 'degraded',
   serviceWorker: 'active' as 'active' | 'inactive' | 'error',
   templates: 'operational' as 'operational' | 'degraded' | 'failed',
-})
-const historicalMetrics = ref<SystemMetrics[]>([])
+});
+const historicalMetrics = ref<SystemMetrics[]>([]);
 const performanceSummary = ref({
   avgDeliveryTime: 0,
   avgResponseTime: 0,
@@ -497,40 +497,40 @@ const performanceSummary = ref({
   errorCount: 0,
   throughput: 0,
   uptime: 0,
-})
-const recentLogs = ref<any[]>([])
+});
+const recentLogs = ref<any[]>([]);
 
 // Alerting system status
-const alertingSystemStatus = ref<'operational' | 'degraded' | 'failed'>('operational')
-const activeEscalations = ref(0)
-const recoveryActionsExecuted = ref(0)
-const enabledChannels = ref(3)
-const avgAlertResponseTime = ref(2.5)
+const alertingSystemStatus = ref<'operational' | 'degraded' | 'failed'>('operational');
+const activeEscalations = ref(0);
+const recoveryActionsExecuted = ref(0);
+const enabledChannels = ref(3);
+const avgAlertResponseTime = ref(2.5);
 
 // Computed trends (simplified for demo)
 const deliveryTrend = computed(() => {
-  if (historicalMetrics.value.length < 2) return 'neutral'
-  const recent = historicalMetrics.value.slice(-2)
-  return recent[1].notification_delivery_rate > recent[0].notification_delivery_rate ? 'up' : 'down'
-})
+  if (historicalMetrics.value.length < 2) return 'neutral';
+  const recent = historicalMetrics.value.slice(-2);
+  return recent[1].notification_delivery_rate > recent[0].notification_delivery_rate ? 'up' : 'down';
+});
 
 const errorTrend = computed(() => {
-  if (historicalMetrics.value.length < 2) return 'neutral'
-  const recent = historicalMetrics.value.slice(-2)
-  return recent[1].error_rate < recent[0].error_rate ? 'up' : 'down'
-})
+  if (historicalMetrics.value.length < 2) return 'neutral';
+  const recent = historicalMetrics.value.slice(-2);
+  return recent[1].error_rate < recent[0].error_rate ? 'up' : 'down';
+});
 
 const responseTrend = computed(() => {
-  if (historicalMetrics.value.length < 2) return 'neutral'
-  const recent = historicalMetrics.value.slice(-2)
-  return recent[1].database_response_time < recent[0].database_response_time ? 'up' : 'down'
-})
+  if (historicalMetrics.value.length < 2) return 'neutral';
+  const recent = historicalMetrics.value.slice(-2);
+  return recent[1].database_response_time < recent[0].database_response_time ? 'up' : 'down';
+});
 
 const campaignTrend = computed(() => {
-  if (historicalMetrics.value.length < 2) return 'neutral'
-  const recent = historicalMetrics.value.slice(-2)
-  return recent[1].active_campaigns > recent[0].active_campaigns ? 'up' : 'down'
-})
+  if (historicalMetrics.value.length < 2) return 'neutral';
+  const recent = historicalMetrics.value.slice(-2);
+  return recent[1].active_campaigns > recent[0].active_campaigns ? 'up' : 'down';
+});
 
 // Destructure monitoring composable
 const {
@@ -544,173 +544,173 @@ const {
   getPerformanceSummary,
   acknowledgeAlert: ackAlert,
   resolveAlert: resolveAlertById,
-} = monitoring
+} = monitoring;
 
 // Methods
 const toggleMonitoring = async () => {
   try {
     if (isMonitoring.value) {
-      stopMonitoring()
+      stopMonitoring();
     }
     else {
-      await startMonitoring()
+      await startMonitoring();
     }
   }
   catch (error) {
-    console.error('Failed to toggle monitoring:', error)
+    console.error('Failed to toggle monitoring:', error);
   }
-}
+};
 
 const refreshData = async () => {
-  if (isRefreshing.value) return
+  if (isRefreshing.value) return;
 
-  isRefreshing.value = true
+  isRefreshing.value = true;
   try {
     // Perform health check
-    const healthResult = await performHealthCheck()
-    healthStatus.value = healthResult.status
-    componentHealth.value = healthResult.components
+    const healthResult = await performHealthCheck();
+    healthStatus.value = healthResult.status;
+    componentHealth.value = healthResult.components;
 
     // Get historical metrics
-    historicalMetrics.value = await getHistoricalMetrics(7, 'hour')
+    historicalMetrics.value = await getHistoricalMetrics(7, 'hour');
 
     // Get performance summary
-    performanceSummary.value = await getPerformanceSummary(7)
+    performanceSummary.value = await getPerformanceSummary(7);
 
     // Get recent logs
     const logs = await logger.getLogs({
       limit: 20,
-    })
-    recentLogs.value = logs
+    });
+    recentLogs.value = logs;
 
     // Update alerting system metrics
-    await updateAlertingMetrics()
+    await updateAlertingMetrics();
   }
   catch (error) {
     // Handle different types of errors gracefully
     if (error instanceof Error && error.message.includes('404')) {
-      console.warn('⚠️ Some monitoring collections are not set up yet. Please ensure notification_logs and system_metrics collections exist.')
+      console.warn('⚠️ Some monitoring collections are not set up yet. Please ensure notification_logs and system_metrics collections exist.');
     }
     else if (error instanceof Error && error.message.includes('autocancelled')) {
-      console.debug('Request was auto-cancelled, this is normal during rapid refreshes')
+      console.debug('Request was auto-cancelled, this is normal during rapid refreshes');
     }
     else {
-      console.error('Failed to refresh data:', error)
+      console.error('Failed to refresh data:', error);
     }
   }
   finally {
-    isRefreshing.value = false
+    isRefreshing.value = false;
   }
-}
+};
 
 const updateAlertingMetrics = async () => {
   try {
     // Get active escalations count
-    const { $pb } = useNuxtApp()
-    const pb = $pb as any
+    const { $pb } = useNuxtApp();
+    const pb = $pb as any;
 
     // Count active alerts with escalation levels
     const escalatedAlerts = await pb.collection('system_alerts').getList(1, 1, {
       filter: 'resolved_at = "" && escalation_level > 0',
       fields: 'id',
-    })
-    activeEscalations.value = escalatedAlerts.totalItems
+    });
+    activeEscalations.value = escalatedAlerts.totalItems;
 
     // Count recovery actions in last 24 hours
-    const yesterday = new Date()
-    yesterday.setDate(yesterday.getDate() - 1)
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
 
     const recoveryAlerts = await pb.collection('system_alerts').getList(1, 1, {
       filter: `recovery_attempted = true && triggered_at >= "${yesterday.toISOString()}"`,
       fields: 'id',
-    })
-    recoveryActionsExecuted.value = recoveryAlerts.totalItems
+    });
+    recoveryActionsExecuted.value = recoveryAlerts.totalItems;
 
     // Determine alerting system status
     if (activeEscalations.value > 5) {
-      alertingSystemStatus.value = 'degraded'
+      alertingSystemStatus.value = 'degraded';
     }
     else if (activeEscalations.value > 10) {
-      alertingSystemStatus.value = 'failed'
+      alertingSystemStatus.value = 'failed';
     }
     else {
-      alertingSystemStatus.value = 'operational'
+      alertingSystemStatus.value = 'operational';
     }
 
     // Calculate average alert response time (mock for now)
-    avgAlertResponseTime.value = Math.random() * 5 + 1
+    avgAlertResponseTime.value = Math.random() * 5 + 1;
   }
   catch (error) {
-    console.error('Failed to update alerting metrics:', error)
-    alertingSystemStatus.value = 'degraded'
+    console.error('Failed to update alerting metrics:', error);
+    alertingSystemStatus.value = 'degraded';
   }
-}
+};
 
 const getAlertingStatusText = (status: string) => {
   switch (status) {
-    case 'operational': return 'عملیاتی'
-    case 'degraded': return 'کاهش عملکرد'
-    case 'failed': return 'خراب'
-    default: return status
+    case 'operational': return 'عملیاتی';
+    case 'degraded': return 'کاهش عملکرد';
+    case 'failed': return 'خراب';
+    default: return status;
   }
-}
+};
 
 const getMetricStatus = (type: string, value: number): 'good' | 'warning' | 'critical' | 'neutral' => {
   switch (type) {
     case 'delivery':
-      if (value >= 95) return 'good'
-      if (value >= 85) return 'warning'
-      return 'critical'
+      if (value >= 95) return 'good';
+      if (value >= 85) return 'warning';
+      return 'critical';
     case 'error':
-      if (value <= 1) return 'good'
-      if (value <= 5) return 'warning'
-      return 'critical'
+      if (value <= 1) return 'good';
+      if (value <= 5) return 'warning';
+      return 'critical';
     case 'response':
-      if (value <= 500) return 'good'
-      if (value <= 1000) return 'warning'
-      return 'critical'
+      if (value <= 500) return 'good';
+      if (value <= 1000) return 'warning';
+      return 'critical';
     default:
-      return 'neutral'
+      return 'neutral';
   }
-}
+};
 
 const acknowledgeAlert = async (alertId: string) => {
   try {
-    await ackAlert(alertId)
-    await refreshData()
+    await ackAlert(alertId);
+    await refreshData();
   }
   catch (error) {
-    console.error('Failed to acknowledge alert:', error)
+    console.error('Failed to acknowledge alert:', error);
   }
-}
+};
 
 const resolveAlert = async (alertId: string) => {
   try {
-    await resolveAlertById(alertId)
-    await refreshData()
+    await resolveAlertById(alertId);
+    await refreshData();
   }
   catch (error) {
-    console.error('Failed to resolve alert:', error)
+    console.error('Failed to resolve alert:', error);
   }
-}
+};
 
 const acknowledgeAllAlerts = async () => {
   try {
     const promises = activeAlerts.value.map((alert: any) =>
       alert.id ? ackAlert(alert.id) : Promise.resolve(),
-    )
-    await Promise.all(promises)
-    await refreshData()
+    );
+    await Promise.all(promises);
+    await refreshData();
   }
   catch (error) {
-    console.error('Failed to acknowledge all alerts:', error)
+    console.error('Failed to acknowledge all alerts:', error);
   }
-}
+};
 
 const testAlertingSystem = async () => {
-  if (isTestingAlerts.value) return
+  if (isTestingAlerts.value) return;
 
-  isTestingAlerts.value = true
+  isTestingAlerts.value = true;
   try {
     // Run a quick test
     const testAlert = {
@@ -724,76 +724,76 @@ const testAlertingSystem = async () => {
       threshold: 80,
       triggered_at: new Date().toISOString(),
       auto_resolved: false,
-    }
+    };
 
-    const createdAlert = await monitoring.createAlert(testAlert)
+    const createdAlert = await monitoring.createAlert(testAlert);
     if (createdAlert) {
       // Import and use system alerting
-      const { useSystemAlerting } = await import('~/composables/useSystemAlerting')
-      const systemAlerting = useSystemAlerting()
-      await systemAlerting.processAlert(createdAlert)
+      const { useSystemAlerting } = await import('~/composables/useSystemAlerting');
+      const systemAlerting = useSystemAlerting();
+      await systemAlerting.processAlert(createdAlert);
 
       // Refresh data to show the new alert
-      await refreshData()
+      await refreshData();
 
-      console.log('✅ Test alert created and processed successfully')
+      console.log('✅ Test alert created and processed successfully');
     }
   }
   catch (error) {
-    console.error('❌ Failed to test alerting system:', error)
+    console.error('❌ Failed to test alerting system:', error);
   }
   finally {
-    isTestingAlerts.value = false
+    isTestingAlerts.value = false;
   }
-}
+};
 
 // Component details
 const getDatabaseDetails = () => {
   return {
     'زمان پاسخ': `${currentMetrics.value?.database_response_time || 0}ms`,
     'وضعیت': componentHealth.value.database === 'up' ? 'فعال' : componentHealth.value.database === 'slow' ? 'کند' : 'غیرفعال',
-  }
-}
+  };
+};
 
 const getNotificationDetails = () => {
   return {
     'نرخ موفقیت توکن': `${currentMetrics.value?.notification_success_rate || 0}%`,
     'وضعیت': componentHealth.value.notification === 'up' ? 'فعال' : componentHealth.value.notification === 'degraded' ? 'کاهش عملکرد' : 'غیرفعال',
-  }
-}
+  };
+};
 
 const getServiceWorkerDetails = () => {
   return {
     'وضعیت': componentHealth.value.serviceWorker === 'active' ? 'فعال' : componentHealth.value.serviceWorker === 'inactive' ? 'غیرفعال' : 'خطا',
     'استفاده از حافظه': `${currentMetrics.value?.memory_usage || 0}MB`,
-  }
-}
+  };
+};
 
 const getTemplateDetails = () => {
   return {
     'نرخ موفقیت رندر': `${currentMetrics.value?.template_render_success_rate || 0}%`,
     'وضعیت': componentHealth.value.templates === 'operational' ? 'عملیاتی' : componentHealth.value.templates === 'degraded' ? 'کاهش عملکرد' : 'خراب',
-  }
-}
+  };
+};
 
 // Initialize
 onMounted(async () => {
   // Check collection status first
-  await collectionStatus.checkAllCollections()
+  await collectionStatus.checkAllCollections();
 
   // Only proceed with monitoring if collections are ready
   if (collectionStatus.areMonitoringCollectionsReady.value) {
-    await refreshData()
+    await refreshData();
 
     // Auto-refresh every 30 seconds
-    const refreshInterval = setInterval(refreshData, 30000)
+    const refreshInterval = setInterval(refreshData, 30000);
 
     onUnmounted(() => {
-      clearInterval(refreshInterval)
-    })
+      clearInterval(refreshInterval);
+    });
   }
   else {
-    console.warn('⚠️ Monitoring collections not ready. Missing:', collectionStatus.getMissingCollections.value)
+    console.warn('⚠️ Monitoring collections not ready. Missing:', collectionStatus.getMissingCollections.value);
   }
-})
+});
 </script>

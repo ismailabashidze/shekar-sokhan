@@ -2,13 +2,13 @@
 definePageMeta({
   title: 'ویرایش مقاله',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
-const toaster = useToaster()
+const route = useRoute();
+const router = useRouter();
+const toaster = useToaster();
 
 const {
   currentPost,
@@ -16,9 +16,9 @@ const {
   error,
   getPost,
   updatePost,
-} = usePosts()
+} = usePosts();
 
-const { user } = useUser()
+const { user } = useUser();
 
 // Form data
 const formData = ref({
@@ -39,11 +39,11 @@ const formData = ref({
   contentLengthTarget: 5000,
   seoTitle: '',
   seoDescription: '',
-})
+});
 
-const uploadedFiles = ref<FileList | null>(null)
-const newTag = ref('')
-const submitting = ref(false)
+const uploadedFiles = ref<FileList | null>(null);
+const newTag = ref('');
+const submitting = ref(false);
 
 // Categories
 const categories = [
@@ -53,7 +53,7 @@ const categories = [
   { value: 'self-help', label: 'خودیاری' },
   { value: 'motivation', label: 'انگیزشی' },
   { value: 'relationship', label: 'روابط' },
-]
+];
 
 // Status options
 const statusOptions = [
@@ -61,21 +61,21 @@ const statusOptions = [
   { value: 'published', label: 'منتشر شده' },
   { value: 'archived', label: 'بایگانی شده' },
   { value: 'scheduled', label: 'زمان‌بندی شده' },
-]
+];
 
 // Load post data
 const loadPost = async () => {
   try {
-    const postId = route.query.id as string
+    const postId = route.query.id as string;
     if (!postId) {
-      router.push('/posts/list')
-      return
+      router.push('/posts/list');
+      return;
     }
 
-    await getPost(postId)
+    await getPost(postId);
 
     if (currentPost.value) {
-      const post = currentPost.value
+      const post = currentPost.value;
 
       formData.value = {
         title: post.title || '',
@@ -95,53 +95,53 @@ const loadPost = async () => {
         contentLengthTarget: post.contentLengthTarget || 5000,
         seoTitle: post.seoTitle || '',
         seoDescription: post.seoDescription || '',
-      }
+      };
     }
   }
   catch (err) {
-    console.error('Error loading post:', err)
+    console.error('Error loading post:', err);
   }
-}
+};
 
 // Submit form
 const submit = async () => {
-  submitting.value = true
+  submitting.value = true;
 
   try {
-    const postId = route.query.id as string
+    const postId = route.query.id as string;
 
     const updateData = {
       id: postId,
       ...formData.value,
       featuredImage: uploadedFiles.value?.[0] || null,
-    }
+    };
 
-    await updatePost(updateData)
-    router.push('/posts/list')
+    await updatePost(updateData);
+    router.push('/posts/list');
   }
   catch (error: any) {
-    console.error('Error updating post:', error)
+    console.error('Error updating post:', error);
   }
   finally {
-    submitting.value = false
+    submitting.value = false;
   }
-}
+};
 
 // Tag management
 const addTag = () => {
   if (newTag.value && !formData.value.tags.includes(newTag.value.trim())) {
-    formData.value.tags.push(newTag.value.trim())
-    newTag.value = ''
+    formData.value.tags.push(newTag.value.trim());
+    newTag.value = '';
   }
-}
+};
 
 const removeTag = (tag: string) => {
-  formData.value.tags = formData.value.tags.filter(t => t !== tag)
-}
+  formData.value.tags = formData.value.tags.filter(t => t !== tag);
+};
 
 onMounted(() => {
-  loadPost()
-})
+  loadPost();
+});
 </script>
 
 <template>

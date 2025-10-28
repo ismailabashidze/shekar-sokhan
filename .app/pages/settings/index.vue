@@ -10,67 +10,67 @@ definePageMeta({
     order: 81,
   },
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { user } = useUser()
-const { getUserAvatarUrl } = useAvatarManager()
-const { executeDataRemoval } = useDataRemoval()
-const { hasPin } = useLockSystem()
-const avatarUrl = computed(() => getUserAvatarUrl(user.value))
+const { user } = useUser();
+const { getUserAvatarUrl } = useAvatarManager();
+const { executeDataRemoval } = useDataRemoval();
+const { hasPin } = useLockSystem();
+const avatarUrl = computed(() => getUserAvatarUrl(user.value));
 
 // Modal state
-const showDataRemovalModal = ref(false)
-const confirmationStep = ref(1)
-const confirmationText = ref('')
-const isDeleting = ref(false)
-const errorMessage = ref('')
+const showDataRemovalModal = ref(false);
+const confirmationStep = ref(1);
+const confirmationText = ref('');
+const isDeleting = ref(false);
+const errorMessage = ref('');
 
 const handleDataRemoval = () => {
-  console.log('handleDataRemoval called')
-  showDataRemovalModal.value = true
-  confirmationStep.value = 1
-  confirmationText.value = ''
-  errorMessage.value = ''
-  console.log('Modal should be open:', showDataRemovalModal.value)
-}
+  console.log('handleDataRemoval called');
+  showDataRemovalModal.value = true;
+  confirmationStep.value = 1;
+  confirmationText.value = '';
+  errorMessage.value = '';
+  console.log('Modal should be open:', showDataRemovalModal.value);
+};
 
 const closeModal = () => {
-  showDataRemovalModal.value = false
-  confirmationStep.value = 1
-  confirmationText.value = ''
-  isDeleting.value = false
-  errorMessage.value = ''
-}
+  showDataRemovalModal.value = false;
+  confirmationStep.value = 1;
+  confirmationText.value = '';
+  isDeleting.value = false;
+  errorMessage.value = '';
+};
 
 const nextStep = () => {
   if (confirmationStep.value < 2) {
-    confirmationStep.value++
+    confirmationStep.value++;
   }
-}
+};
 
 const previousStep = () => {
   if (confirmationStep.value > 1) {
-    confirmationStep.value--
+    confirmationStep.value--;
   }
-}
+};
 
 const confirmDeletion = async () => {
   if (confirmationText.value !== 'DELETE MY DATA') {
-    errorMessage.value = 'متن تایید اشتباه است. لطفاً دقیقاً "DELETE MY DATA" تایپ کنید.'
-    return
+    errorMessage.value = 'متن تایید اشتباه است. لطفاً دقیقاً "DELETE MY DATA" تایپ کنید.';
+    return;
   }
 
   try {
-    isDeleting.value = true
-    errorMessage.value = ''
-    await executeDataRemoval()
+    isDeleting.value = true;
+    errorMessage.value = '';
+    await executeDataRemoval();
   }
   catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'خطای نامشخص رخ داد'
-    isDeleting.value = false
+    errorMessage.value = error instanceof Error ? error.message : 'خطای نامشخص رخ داد';
+    isDeleting.value = false;
   }
-}
+};
 
 </script>
 

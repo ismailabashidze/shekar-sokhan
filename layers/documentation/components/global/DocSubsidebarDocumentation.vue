@@ -1,28 +1,28 @@
 <script setup lang="ts">
 defineEmits<{
-  close: []
-}>()
+  close: [];
+}>();
 
-const route = useRoute()
+const route = useRoute();
 
-const { toggle } = useSidebar()
-const { xl } = useTailwindBreakpoints()
+const { toggle } = useSidebar();
+const { xl } = useTailwindBreakpoints();
 
 function onLinkClick() {
   if (xl.value) {
-    return
+    return;
   }
 
-  toggle()
+  toggle();
 }
 
 const { data: navigation } = await useAsyncData('navigation', () =>
   fetchContentNavigation(queryContent('/documentation')),
-)
+);
 
 const docNav = computed(
   () => navigation.value?.find(n => n._path === '/documentation')?.children,
-)
+);
 </script>
 
 <template>

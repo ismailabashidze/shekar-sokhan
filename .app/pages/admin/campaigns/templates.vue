@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { TemplateForm, TemplateVariable } from '~/types/campaigns'
+import type { TemplateForm, TemplateVariable } from '~/types/campaigns';
 
 definePageMeta({
   title: 'مدیریت قالب‌ها',
   layout: 'sidebar',
   // Using global middlewares only
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'مدیریت قالب‌ها - پنل ادمین - ذهنا',
-})
+});
 
 const {
   templates,
@@ -28,15 +28,15 @@ const {
   previewTemplate,
   validateTemplate,
   getAvailableVariables,
-} = useTemplateManager()
+} = useTemplateManager();
 
 // State
-const showCreateForm = ref(false)
-const editingTemplate = ref<string | null>(null)
-const selectedCategory = ref<'all' | 'session' | 'admin' | 'system'>('all')
-const searchQuery = ref('')
-const showPreview = ref(false)
-const previewData = ref<any>(null)
+const showCreateForm = ref(false);
+const editingTemplate = ref<string | null>(null);
+const selectedCategory = ref<'all' | 'session' | 'admin' | 'system'>('all');
+const searchQuery = ref('');
+const showPreview = ref(false);
+const previewData = ref<any>(null);
 
 const formData = ref<TemplateForm>({
   name: '',
@@ -48,17 +48,17 @@ const formData = ref<TemplateForm>({
   action_text_template: '',
   action_url_template: '',
   variables: [],
-})
+});
 
 // Initialize data
 onMounted(async () => {
   try {
-    await fetchTemplates()
+    await fetchTemplates();
   }
   catch (error) {
-    console.error('خطا در بارگذاری قالب‌ها:', error)
+    console.error('خطا در بارگذاری قالب‌ها:', error);
   }
-})
+});
 
 // Form methods
 const resetForm = () => {
@@ -72,26 +72,26 @@ const resetForm = () => {
     action_text_template: '',
     action_url_template: '',
     variables: [],
-  }
-  editingTemplate.value = null
-}
+  };
+  editingTemplate.value = null;
+};
 
 const handleCreateTemplate = async () => {
   try {
-    const errors = validateTemplate(formData.value)
+    const errors = validateTemplate(formData.value);
     if (errors.length > 0) {
-      alert(errors.join('\n'))
-      return
+      alert(errors.join('\n'));
+      return;
     }
 
-    await createTemplate(formData.value)
-    showCreateForm.value = false
-    resetForm()
+    await createTemplate(formData.value);
+    showCreateForm.value = false;
+    resetForm();
   }
   catch (error) {
-    console.error('خطا در ایجاد قالب:', error)
+    console.error('خطا در ایجاد قالب:', error);
   }
-}
+};
 
 const handleEditTemplate = (template: any) => {
   formData.value = {
@@ -104,40 +104,40 @@ const handleEditTemplate = (template: any) => {
     action_text_template: template.action_text_template || '',
     action_url_template: template.action_url_template || '',
     variables: template.variables || [],
-  }
-  editingTemplate.value = template.id
-  showCreateForm.value = true
-}
+  };
+  editingTemplate.value = template.id;
+  showCreateForm.value = true;
+};
 
 const handleUpdateTemplate = async () => {
-  if (!editingTemplate.value) return
+  if (!editingTemplate.value) return;
 
   try {
-    const errors = validateTemplate(formData.value)
+    const errors = validateTemplate(formData.value);
     if (errors.length > 0) {
-      alert(errors.join('\n'))
-      return
+      alert(errors.join('\n'));
+      return;
     }
 
-    await updateTemplate(editingTemplate.value, formData.value)
-    showCreateForm.value = false
-    resetForm()
+    await updateTemplate(editingTemplate.value, formData.value);
+    showCreateForm.value = false;
+    resetForm();
   }
   catch (error) {
-    console.error('خطا در بروزرسانی قالب:', error)
+    console.error('خطا در بروزرسانی قالب:', error);
   }
-}
+};
 
 const handleDeleteTemplate = async (templateId: string) => {
   if (confirm('آیا از حذف این قالب اطمینان دارید؟')) {
     try {
-      await deleteTemplate(templateId)
+      await deleteTemplate(templateId);
     }
     catch (error) {
-      console.error('خطا در حذف قالب:', error)
+      console.error('خطا در حذف قالب:', error);
     }
   }
-}
+};
 
 const handlePreviewTemplate = (template: any) => {
   const sampleData = {
@@ -147,14 +147,14 @@ const handlePreviewTemplate = (template: any) => {
     session_date: 'دوشنبه ۱۵ آبان',
     session_time: '۱۰:۳۰',
     therapist_name: 'دکتر مریم رضایی',
-  }
+  };
 
   previewData.value = {
     template,
     preview: previewTemplate(template, sampleData),
-  }
-  showPreview.value = true
-}
+  };
+  showPreview.value = true;
+};
 
 const addVariable = () => {
   formData.value.variables.push({
@@ -163,68 +163,68 @@ const addVariable = () => {
     source: 'user',
     fallback: '',
     description: '',
-  })
-}
+  });
+};
 
 const removeVariable = (index: number) => {
-  formData.value.variables.splice(index, 1)
-}
+  formData.value.variables.splice(index, 1);
+};
 
 const loadAvailableVariables = () => {
-  const availableVars = getAvailableVariables(formData.value.category)
-  formData.value.variables = [...availableVars]
-}
+  const availableVars = getAvailableVariables(formData.value.category);
+  formData.value.variables = [...availableVars];
+};
 
 // Computed
 const filteredTemplates = computed(() => {
-  let filtered = templates.value
+  let filtered = templates.value;
 
   // Filter by category
   if (selectedCategory.value !== 'all') {
-    filtered = filtered.filter(t => t.category === selectedCategory.value)
+    filtered = filtered.filter(t => t.category === selectedCategory.value);
   }
 
   // Filter by search query
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(t =>
       t.name.toLowerCase().includes(query)
       || t.description.toLowerCase().includes(query),
-    )
+    );
   }
 
-  return filtered
-})
+  return filtered;
+});
 
 const canSubmit = computed(() => {
   return formData.value.name.trim()
     && formData.value.title_template.trim()
-    && formData.value.body_template.trim()
-})
+    && formData.value.body_template.trim();
+});
 
 const categoryOptions = [
   { label: 'جلسه', value: 'session' },
   { label: 'ادمین', value: 'admin' },
   { label: 'سیستم', value: 'system' },
-]
+];
 
 const languageOptions = [
   { label: 'فارسی', value: 'fa' },
   { label: 'انگلیسی', value: 'en' },
-]
+];
 
 const variableTypeOptions = [
   { label: 'متن', value: 'string' },
   { label: 'عدد', value: 'number' },
   { label: 'تاریخ', value: 'date' },
   { label: 'بولین', value: 'boolean' },
-]
+];
 
 const variableSourceOptions = [
   { label: 'کاربر', value: 'user' },
   { label: 'جلسه', value: 'session' },
   { label: 'سیستم', value: 'system' },
-]
+];
 </script>
 
 <template>

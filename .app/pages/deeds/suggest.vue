@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { Deed, DeedStepData } from '../types'
+import type { Deed, DeedStepData } from '../types';
 
 definePageMeta({
   layout: 'empty',
-})
+});
 useHead({
   titleTemplate: title => `${title} | پیشنهاد کار نیک - مرحله ${currentStepId.value + 1}`,
   htmlAttrs: { dir: 'rtl' },
-})
+});
 
 const initialState = ref<Deed>({
   type: undefined,
@@ -25,9 +25,9 @@ const initialState = ref<Deed>({
   beneficiaries: [],
   requirements: [],
   reward: 'کم',
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 const { handleSubmit, currentStepId } = provideMultiStepForm({
   initialState,
@@ -40,9 +40,9 @@ const { handleSubmit, currentStepId } = provideMultiStepForm({
         subtitle: 'نوع کار نیکی که می‌خواهید پیشنهاد دهید را انتخاب کنید',
       },
       validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['type'])
+        resetFieldError(['type']);
         if (!data.value.type) {
-          setFieldError('type', 'لطفا یک نوع را انتخاب کنید')
+          setFieldError('type', 'لطفا یک نوع را انتخاب کنید');
         }
       },
     },
@@ -54,9 +54,9 @@ const { handleSubmit, currentStepId } = provideMultiStepForm({
         subtitle: 'با افزودن تمام اطلاعات مرتبط، کار نیک را بهتر مدیریت کنید',
       },
       validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['title'])
+        resetFieldError(['title']);
         if (!data.value.title) {
-          setFieldError('title', 'لطفا یک عنوان وارد کنید')
+          setFieldError('title', 'لطفا یک عنوان وارد کنید');
         }
       },
     },
@@ -103,28 +103,28 @@ const { handleSubmit, currentStepId } = provideMultiStepForm({
     },
   ],
   onSubmit: async (state, ctx) => {
-    await new Promise(resolve => setTimeout(resolve, 4000))
+    await new Promise(resolve => setTimeout(resolve, 4000));
 
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'موفقیت',
       message: `کار نیک ${state.title} ایجاد شد!`,
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
+    });
   },
   onError: (error) => {
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'خطا!',
       message: error.message,
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   },
-})
+});
 </script>
 
 <template>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   }>(),
   {
     rounded: 'sm',
   },
-)
+);
 
 const products = [
   {
@@ -30,7 +30,7 @@ const products = [
     price: 799,
     quantity: 1,
   },
-]
+];
 </script>
 
 <template>

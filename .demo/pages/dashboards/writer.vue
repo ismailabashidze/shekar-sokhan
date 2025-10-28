@@ -9,9 +9,9 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-writer-dark.png',
     order: 18,
   },
-})
+});
 
-const activePosts = ref('recent')
+const activePosts = ref('recent');
 </script>
 
 <template>

@@ -9,20 +9,20 @@
 </template>
 
 <script setup lang="ts">
-const { isAppLocked } = useLockSystem()
-const route = useRoute()
-const router = useRouter()
+const { isAppLocked } = useLockSystem();
+const route = useRoute();
+const router = useRouter();
 
 const goBack = () => {
   // If app is locked and we're not on lock page, go to lock page
   if (isAppLocked.value && route.path !== '/lock') {
-    router.push('/lock')
-    return
+    router.push('/lock');
+    return;
   }
 
   // Otherwise, go back in history
-  window.history.back()
-}
+  window.history.back();
+};
 </script>
 
 <style scoped>

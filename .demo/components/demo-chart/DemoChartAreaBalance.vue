@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoAreaBalance = reactive(useDemoAreaBalance())
+const demoAreaBalance = reactive(useDemoAreaBalance());
 
 function useDemoAreaBalance() {
-  const { primary } = useTailwindColors()
-  const type = 'area'
-  const height = 250
+  const { primary } = useTailwindColors();
+  const type = 'area';
+  const height = 250;
 
   const options = {
     chart: {
@@ -67,21 +67,21 @@ function useDemoAreaBalance() {
         formatter: (val: number) => `$${val}`,
       },
     },
-  }
+  };
 
   const series = ref([
     {
       name: 'Balance',
       data: [3143.16, 4298.49, 2876.54, 5183.76, 4232.87, 10876.56, 9543.12],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { z } from 'zod'
+import { z } from 'zod';
 
 definePageMeta({
   title: 'ورود به ذهنا',
@@ -12,75 +12,75 @@ definePageMeta({
     srcDark: '/img/screens/layouts-onboarding-1-dark.png',
     order: 93,
   },
-})
+});
 
 const persianToEnglishNumbers = (str) => {
-  const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
-  const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   for (let i = 0; i < 10; i++) {
-    str = str.replace(new RegExp(persianNumbers[i], 'g'), englishNumbers[i])
+    str = str.replace(new RegExp(persianNumbers[i], 'g'), englishNumbers[i]);
   }
-  return str
-}
-const isValid = ref(false)
+  return str;
+};
+const isValid = ref(false);
 
 const phoneNumberSchema = z
   .string()
   .length(11, 'شماره تماس باید یازده رقم باشد')
-  .regex(/^09\d{9}$/, 'شماره باید با ۰۹ شروع شود')
+  .regex(/^09\d{9}$/, 'شماره باید با ۰۹ شروع شود');
 
 const validatePhoneNumber = debounce((value) => {
-  const sanitizedValue = persianToEnglishNumbers(value).replace(/\D/g, '')
-  tel.value = sanitizedValue
-  const result = phoneNumberSchema.safeParse(sanitizedValue)
+  const sanitizedValue = persianToEnglishNumbers(value).replace(/\D/g, '');
+  tel.value = sanitizedValue;
+  const result = phoneNumberSchema.safeParse(sanitizedValue);
   telError.value = result.success
     ? null
-    : result.error.issues.map(issue => issue.message).join(', ')
-  isValid.value = result.success
-}, 500)
+    : result.error.issues.map(issue => issue.message).join(', ');
+  isValid.value = result.success;
+}, 500);
 
-const loading = ref(false)
-const twoFaMode = ref('phoneNumber')
-const currentStep = ref(2)
-const codeLength = ref(4)
-const input = ref<number[]>([])
-const inputElements = ref<any[]>([])
+const loading = ref(false);
+const twoFaMode = ref('phoneNumber');
+const currentStep = ref(2);
+const codeLength = ref(4);
+const input = ref<number[]>([]);
+const inputElements = ref<any[]>([]);
 
-const onlyCheckOnLastFieldInput = ref(true)
+const onlyCheckOnLastFieldInput = ref(true);
 
-const email = ref('')
-const tel = ref('')
-const telError = ref<string | null>(null)
-const code = ref('')
+const email = ref('');
+const tel = ref('');
+const telError = ref<string | null>(null);
+const code = ref('');
 
 function goToStep(n: number) {
-  loading.value = true
+  loading.value = true;
   const timer = setTimeout(() => {
-    loading.value = false
+    loading.value = false;
     if (n < 1) {
-      currentStep.value = 1
+      currentStep.value = 1;
     }
     else if (n > 3) {
-      currentStep.value = 3
+      currentStep.value = 3;
     }
     else {
-      currentStep.value = n
+      currentStep.value = n;
     }
-    clearTimeout(timer)
-  }, 1000)
+    clearTimeout(timer);
+  }, 1000);
 }
 
 function paste(event: any) {
-  let pasted = event.clipboardData.getData('text')
-  pasted = pasted.replace(/\D/g, '')
-  pasted = pasted.substring(0, codeLength.value)
+  let pasted = event.clipboardData.getData('text');
+  pasted = pasted.replace(/\D/g, '');
+  pasted = pasted.substring(0, codeLength.value);
   if (pasted) {
-    input.value = pasted.split('')
+    input.value = pasted.split('');
     if (input.value.length === codeLength.value) {
-      validatePin.value = true
-      verifyCodes()
+      validatePin.value = true;
+      verifyCodes();
     }
-    return validatePin.value
+    return validatePin.value;
   }
 }
 function type(event: any, index: any) {
@@ -88,30 +88,30 @@ function type(event: any, index: any) {
     // Handle paste
   }
   else if (event.key == 'Backspace') {
-    event.stopPropagation()
-    event.preventDefault()
+    event.stopPropagation();
+    event.preventDefault();
     if (index > 1) {
-      input.value[index - 1] = 0
+      input.value[index - 1] = 0;
       nextTick(() => {
-        goto(index - 1)
-      })
+        goto(index - 1);
+      });
     }
     else {
-      input.value[0] = 0
+      input.value[0] = 0;
     }
   }
   else {
-    let key = persianToEnglishNumbers(event.key)
+    let key = persianToEnglishNumbers(event.key);
     if (key) {
-      input.value[index - 1] = key
+      input.value[index - 1] = key;
       if (index == codeLength.value) {
-        validatePin.value = true
-        verifyCodes()
+        validatePin.value = true;
+        verifyCodes();
       }
       else {
         nextTick(() => {
-          goto(index + 1)
-        })
+          goto(index + 1);
+        });
       }
     }
   }
@@ -120,68 +120,68 @@ function type(event: any, index: any) {
 function goto(n: number) {
   nextTick(() => {
     if (n >= 0 && n < inputElements.value.length) {
-      inputElements.value[n]?.focus()
+      inputElements.value[n]?.focus();
     }
-  })
+  });
 }
 
-const validatePin = ref(false)
+const validatePin = ref(false);
 
-const router = useRouter()
-const toaster = useToaster()
-const { user, generateAndSetCode } = useUser()
+const router = useRouter();
+const toaster = useToaster();
+const { user, generateAndSetCode } = useUser();
 const sendVerifyCodeSms = async () => {
   if (!user.value.anonymousCode) {
-    user.value.anonymousCode = Math.ceil(Math.random() * 1000000000)
-    user.value.lastMessageTime = new Date()
+    user.value.anonymousCode = Math.ceil(Math.random() * 1000000000);
+    user.value.lastMessageTime = new Date();
   }
-  user.value.phoneNumber = tel.value
-  user.value.password = tel.value + user.value.anonymousCode
-  user.value.passwordConfirm = tel.value + user.value.anonymousCode
+  user.value.phoneNumber = tel.value;
+  user.value.password = tel.value + user.value.anonymousCode;
+  user.value.passwordConfirm = tel.value + user.value.anonymousCode;
   const { data, error } = await useAsyncData(async (nuxtApp) => {
     const record = await nuxtApp.$pb.send(`/upsertUser`, {
       body: user.value,
       method: 'POST',
-    })
-    return structuredClone(record)
-  })
+    });
+    return structuredClone(record);
+  });
   if (data) {
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'کد تایید',
       message: 'کد تایید به شماره شما پیامک شد',
       color: 'success',
       icon: 'ph:chat-text',
       closable: true,
-    })
+    });
     const { data, error } = await useAsyncData(async (nuxtApp) => {
       const record = await nuxtApp.$pb.send(
         `/verifyBySms/${user.value.phoneNumber}`,
-      )
-      return structuredClone(record)
-    })
-    goToStep(3)
+      );
+      return structuredClone(record);
+    });
+    goToStep(3);
   }
   else {
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'کد تایید',
       message: error.value?.message,
       color: 'danger',
       icon: 'ph:chat-text',
       closable: true,
-    })
+    });
   }
-}
+};
 const verifyCodes = async () => {
   const { data, error } = await useAsyncData(async (nuxtApp) => {
     const record = await nuxtApp.$pb.send(
       `/verifyBySms/${tel.value}/${input.value.join('')}`,
-    )
-    return structuredClone(record)
-  })
-  user.value = data.value.user
-  toaster.clearAll()
+    );
+    return structuredClone(record);
+  });
+  user.value = data.value.user;
+  toaster.clearAll();
   if (error.value) {
     toaster.show({
       title: 'خطا',
@@ -189,12 +189,12 @@ const verifyCodes = async () => {
       color: 'danger',
       icon: 'ph:chat-text',
       closable: true,
-    })
-    validatePin.value = false
-    input.value = Array(codeLength.value).fill(0)
+    });
+    validatePin.value = false;
+    input.value = Array(codeLength.value).fill(0);
     nextTick(() => {
-      goto(1)
-    })
+      goto(1);
+    });
   }
   else {
     const { data, error } = await useAsyncData(async (nuxtApp) => {
@@ -203,14 +203,14 @@ const verifyCodes = async () => {
         .authWithPassword(
           user.value.phoneNumber,
           user.value.phoneNumber + user.value.anonymousCode,
-        )
-      return structuredClone(record)
-    })
+        );
+      return structuredClone(record);
+    });
 
     // Update premium status based on user's charge status
-    const { setPremiumStatus } = useAIResponseSettings()
+    const { setPremiumStatus } = useAIResponseSettings();
     if (user.value.hasCharge) {
-      setPremiumStatus(true)
+      setPremiumStatus(true);
     }
 
     // setToken(recor)
@@ -220,14 +220,14 @@ const verifyCodes = async () => {
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
-    router.push('/darmana/patients/choosePatient')
+    });
+    router.push('/darmana/patients/choosePatient');
   }
-}
+};
 watch(tel, (newValue) => {
-  isValid.value = false // Reset the valid state on new input
-  validatePhoneNumber(newValue)
-})
+  isValid.value = false; // Reset the valid state on new input
+  validatePhoneNumber(newValue);
+});
 </script>
 
 <template>

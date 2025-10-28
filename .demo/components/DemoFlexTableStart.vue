@@ -1,15 +1,15 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    title: string
-    subtitle?: string
-    icon?: string
-    picture?: string
-    avatar?: string
-    badge?: string
-    initials?: string
-    label?: string
-    hideLabel?: boolean
+    title: string;
+    subtitle?: string;
+    icon?: string;
+    picture?: string;
+    avatar?: string;
+    badge?: string;
+    initials?: string;
+    label?: string;
+    hideLabel?: boolean;
   }>(),
   {
     subtitle: undefined,
@@ -20,7 +20,7 @@ const props = withDefaults(
     initials: undefined,
     label: undefined,
   },
-)
+);
 </script>
 
 <template>

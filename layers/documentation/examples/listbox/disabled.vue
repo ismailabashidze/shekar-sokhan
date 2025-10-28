@@ -58,7 +58,7 @@ const value = ref({
   id: 3,
   name: 'Mike Miller',
   text: 'UI/UX Designer',
-})
+});
 
 const peopleNames = [
   {
@@ -86,5 +86,5 @@ const peopleNames = [
     name: 'Maya Rosselini',
     text: 'Product Manager',
   },
-]
+];
 </script>

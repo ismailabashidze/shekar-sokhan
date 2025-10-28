@@ -24,17 +24,17 @@
 </template>
 
 <script setup lang="ts">
-const value = ref<any[]>([])
-const treeSelectRef = ref<any>(null)
+const value = ref<any[]>([]);
+const treeSelectRef = ref<any>(null);
 
 function toggleAll() {
-  treeSelectRef.value?.toggleChildrenSelection()
+  treeSelectRef.value?.toggleChildrenSelection();
 }
 function unselectAll() {
-  treeSelectRef.value?.unselectAllChildren()
+  treeSelectRef.value?.unselectAllChildren();
 }
 function selectAll() {
-  treeSelectRef.value?.selectAllChildren()
+  treeSelectRef.value?.selectAllChildren();
 }
 
 const tree = ref([
@@ -88,5 +88,5 @@ const tree = ref([
   {
     item: 'Item 4',
   },
-])
+]);
 </script>

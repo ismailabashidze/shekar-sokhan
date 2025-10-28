@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { watch, ref, onMounted, nextTick } from 'vue'
-import { useTherapistsMessages } from '@/composables/therapistsMessages'
-import { convertToEmotionWheel } from '@/utils/emotion-mapper'
-import type { Message } from '@/types'
+import { useRoute } from 'vue-router';
+import { watch, ref, onMounted, nextTick } from 'vue';
+import { useTherapistsMessages } from '@/composables/therapistsMessages';
+import { convertToEmotionWheel } from '@/utils/emotion-mapper';
+import type { Message } from '@/types';
 
 definePageMeta({
   title: 'تاریخچه گفتگو',
@@ -16,65 +16,65 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-messaging-dark.png',
     order: 26,
   },
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
-const { getMessages, getMessagesForAdmin } = useTherapistsMessages()
-const { getMessageAnalysis } = useMessageAnalysis()
-const route = useRoute()
+useHead({ htmlAttrs: { dir: 'rtl' } });
+const { getMessages, getMessagesForAdmin } = useTherapistsMessages();
+const { getMessageAnalysis } = useMessageAnalysis();
+const route = useRoute();
 
 // Reactive references
-const messages = ref<Message[]>([])
-const loading = ref(false)
-const chatEl = ref<HTMLElement>()
-const expanded = ref(false)
-const activeTherapistId = ref<string | null>(null)
-const activeSession = ref<any>(null)
-const search = ref('')
-const sessionId = ref<string | null>(null)
+const messages = ref<Message[]>([]);
+const loading = ref(false);
+const chatEl = ref<HTMLElement>();
+const expanded = ref(false);
+const activeTherapistId = ref<string | null>(null);
+const activeSession = ref<any>(null);
+const search = ref('');
+const sessionId = ref<string | null>(null);
 
 // Message detail modal
-const isMessageDetailModalOpen = ref(false)
-const selectedMessage = ref<any>(null)
+const isMessageDetailModalOpen = ref(false);
+const selectedMessage = ref<any>(null);
 
 const openMessageDetailModal = (message: any) => {
-  selectedMessage.value = message
-  isMessageDetailModalOpen.value = true
-}
+  selectedMessage.value = message;
+  isMessageDetailModalOpen.value = true;
+};
 
 const closeMessageDetailModal = () => {
-  isMessageDetailModalOpen.value = false
-  selectedMessage.value = null
-}
+  isMessageDetailModalOpen.value = false;
+  selectedMessage.value = null;
+};
 
 // Convert analysis result to EmotionWheel format
 const selectedMessageEmotions = computed(() => {
   if (!selectedMessage.value?.analysisResult?.lastMessage_emotions) {
-    return []
+    return [];
   }
 
   try {
-    return convertToEmotionWheel(selectedMessage.value.analysisResult.lastMessage_emotions)
+    return convertToEmotionWheel(selectedMessage.value.analysisResult.lastMessage_emotions);
   }
   catch (error) {
-    console.error('Error converting emotions:', error)
-    return []
+    console.error('Error converting emotions:', error);
+    return [];
   }
-})
+});
 
 const formatTime = (timestamp: string | Date) => {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp
-  return date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
-}
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+  return date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+};
 
 const formatDate = (timestamp: string | Date) => {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
   return date.toLocaleDateString('fa-IR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  })
-}
+  });
+};
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -82,61 +82,61 @@ const scrollToBottom = () => {
       chatEl.value.scrollTo({
         top: chatEl.value.scrollHeight,
         behavior: 'smooth',
-      })
+      });
     }
-  })
-}
+  });
+};
 
 const loadSessionMessages = async (sessionId: string) => {
-  if (!sessionId) return
+  if (!sessionId) return;
 
-  loading.value = true
+  loading.value = true;
 
   try {
     // Get session details directly from PocketBase
     try {
       const session = await nuxtApp.$pb.collection('sessions').getOne(sessionId, {
         expand: 'therapist',
-      })
+      });
 
       if (session) {
-        activeSession.value = session
+        activeSession.value = session;
 
         // Get therapist info if available
         if (session.expand?.therapist) {
-          activeTherapistId.value = session.expand.therapist.id
+          activeTherapistId.value = session.expand.therapist.id;
         }
 
         // Load messages for this session using the appropriate method based on user role
         try {
-          const { role } = useUser()
-          const isAdmin = role.value === 'admin'
+          const { role } = useUser();
+          const isAdmin = role.value === 'admin';
 
           const loadedMessages = isAdmin
             ? await getMessagesForAdmin(sessionId)
-            : await getMessages(sessionId)
+            : await getMessages(sessionId);
 
-          console.log('Loaded messages:', loadedMessages)
+          console.log('Loaded messages:', loadedMessages);
 
           // Load analysis data for messages that have message_analysis
           const messagesWithAnalysis = await Promise.all(
             loadedMessages.map(async (msg) => {
-              let analysisResult = null
+              let analysisResult = null;
 
               // Only try to load analysis for user messages (sent) that have message_analysis field
               if (msg.type === 'sent' && msg.message_analysis) {
                 try {
-                  const analysisData = await getMessageAnalysis(msg.message_analysis)
+                  const analysisData = await getMessageAnalysis(msg.message_analysis);
                   // Convert database format to the format expected by the UI
                   analysisResult = {
                     lastMessage_emotions: analysisData.emotions || [],
                     correspondingEmojis: analysisData.emojis || '',
                     // Note: emotionalResponse is not stored in message_analysis collection
                     // It's part of the full analysis result generated dynamically
-                  }
+                  };
                 }
                 catch (analysisError) {
-                  console.error('Error loading analysis for message:', msg.id, analysisError)
+                  console.error('Error loading analysis for message:', msg.id, analysisError);
                   // Continue without analysis if loading fails
                 }
               }
@@ -145,95 +145,95 @@ const loadSessionMessages = async (sessionId: string) => {
                 ...msg,
                 timestamp: msg.time,
                 analysisResult,
-              }
+              };
             }),
-          )
+          );
 
-          messages.value = messagesWithAnalysis
-          scrollToBottom()
+          messages.value = messagesWithAnalysis;
+          scrollToBottom();
         }
         catch (messageError) {
-          console.error('Error loading messages:', messageError)
-          messages.value = []
+          console.error('Error loading messages:', messageError);
+          messages.value = [];
         }
       }
     }
     catch (sessionError) {
-      console.error('Error loading session:', sessionError)
-      activeSession.value = null
+      console.error('Error loading session:', sessionError);
+      activeSession.value = null;
     }
   }
   catch (error) {
-    console.error('Error loading session messages:', error)
-    messages.value = []
-    activeSession.value = null
+    console.error('Error loading session messages:', error);
+    messages.value = [];
+    activeSession.value = null;
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 watch(messages, () => {
-  scrollToBottom()
-}, { deep: true })
+  scrollToBottom();
+}, { deep: true });
 
 onMounted(async () => {
-  loading.value = true
+  loading.value = true;
   try {
     // Get session ID from URL query parameter
-    const urlSessionId = route.query.sessionId as string
+    const urlSessionId = route.query.sessionId as string;
     if (urlSessionId) {
-      sessionId.value = urlSessionId
-      await loadSessionMessages(urlSessionId)
+      sessionId.value = urlSessionId;
+      await loadSessionMessages(urlSessionId);
     }
   }
   catch (error) {
-    console.error('Error initializing:', error)
+    console.error('Error initializing:', error);
   }
   finally {
-    loading.value = false
+    loading.value = false;
     setTimeout(() => {
       if (chatEl.value) {
         chatEl.value.scrollTo({
           top: chatEl.value.scrollHeight,
           behavior: 'smooth',
-        })
+        });
       }
-    }, 300)
+    }, 300);
   }
-})
+});
 
 const gotoList = () => {
-  navigateTo('/darmana/therapists/sessions')
-}
+  navigateTo('/darmana/therapists/sessions');
+};
 
-const nuxtApp = useNuxtApp()
-const toaster = useToaster()
+const nuxtApp = useNuxtApp();
+const toaster = useToaster();
 const logout = () => {
-  nuxtApp.$pb.authStore.clear()
+  nuxtApp.$pb.authStore.clear();
   toaster.show({
     title: 'خروج از سیستم',
     message: `خروج موفقیت آمیز بود`,
     color: 'success',
     icon: 'ph:check',
     closable: true,
-  })
-  navigateTo('/auth/login')
-}
+  });
+  navigateTo('/auth/login');
+};
 
 const changeExpanded = () => {
-  expanded.value = !expanded.value
-  localStorage.setItem('expanded', expanded.value + '')
-}
+  expanded.value = !expanded.value;
+  localStorage.setItem('expanded', expanded.value + '');
+};
 
 const filteredMessages = computed(() => {
-  if (!search.value.trim()) return messages.value
+  if (!search.value.trim()) return messages.value;
 
-  const searchTerm = search.value.toLowerCase()
+  const searchTerm = search.value.toLowerCase();
   return messages.value.filter(message =>
     message.text.toLowerCase().includes(searchTerm),
-  )
-})
+  );
+});
 </script>
 
 <template>

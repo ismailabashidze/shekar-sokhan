@@ -7,7 +7,7 @@ definePageMeta({
     label: 'Tairo',
   },
   layout: 'landing',
-})
+});
 </script>
 
 <template>

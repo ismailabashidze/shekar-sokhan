@@ -28,31 +28,31 @@ definePageMeta({
     },
   ],
   layout: 'sidebar',
-})
+});
 
-const { open } = usePanels()
-const route = useRoute()
-const slug = computed(() => route.params.slug)
+const { open } = usePanels();
+const route = useRoute();
+const slug = computed(() => route.params.slug);
 
 const query = computed(() => {
   return {
     slug: slug.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch('/api/members', {
   query,
-})
+});
 
 if (!data.value?.member) {
-  await navigateTo('/layouts/members/kendra-wilson')
+  await navigateTo('/layouts/members/kendra-wilson');
 }
-const showTimeModal = ref(false)
-const isLoading = ref(false)
-const startHour = ref(8)
+const showTimeModal = ref(false);
+const isLoading = ref(false);
+const startHour = ref(8);
 const addNewTime = async () => {
 
-}
+};
 </script>
 
 <template>

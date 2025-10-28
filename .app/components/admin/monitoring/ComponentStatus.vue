@@ -57,32 +57,32 @@
 
 <script setup lang="ts">
 interface Props {
-  name: string
-  status: string
-  icon: string
-  details?: Record<string, string>
+  name: string;
+  status: string;
+  icon: string;
+  details?: Record<string, string>;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const isHealthy = computed(() => {
-  const healthyStatuses = ['up', 'active', 'operational']
-  return healthyStatuses.includes(props.status.toLowerCase())
-})
+  const healthyStatuses = ['up', 'active', 'operational'];
+  return healthyStatuses.includes(props.status.toLowerCase());
+});
 
 const isWarning = computed(() => {
-  const warningStatuses = ['slow', 'degraded', 'inactive']
-  return warningStatuses.includes(props.status.toLowerCase())
-})
+  const warningStatuses = ['slow', 'degraded', 'inactive'];
+  return warningStatuses.includes(props.status.toLowerCase());
+});
 
 const isCritical = computed(() => {
-  const criticalStatuses = ['down', 'error', 'failed']
-  return criticalStatuses.includes(props.status.toLowerCase())
-})
+  const criticalStatuses = ['down', 'error', 'failed'];
+  return criticalStatuses.includes(props.status.toLowerCase());
+});
 
 const formatLastCheck = (): string => {
   // For now, return "Just now" since we're checking in real-time
   // In a real implementation, you might track actual check times
-  return 'Just now'
-}
+  return 'Just now';
+};
 </script>

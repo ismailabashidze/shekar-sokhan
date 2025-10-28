@@ -5,7 +5,7 @@
  * We use the vue :is="" feature to render the layout component dynamically.
  */
 
-const { activeLayoutComponent } = useLayoutSwitcher()
+const { activeLayoutComponent } = useLayoutSwitcher();
 </script>
 
 <template>

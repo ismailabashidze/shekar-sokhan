@@ -6,23 +6,23 @@ export default defineNuxtPlugin(async (nuxtApp) => {
    */
   nuxtApp.vueApp.directive<HTMLElement, boolean | undefined>('focus', {
     mounted(el, { value }) {
-      console.log('v-focus?', value)
+      console.log('v-focus?', value);
       if (value === false) {
-        return
+        return;
       }
 
       // If the element is not focusable, find the first focusable child
       if (el && el.tabIndex === -1) {
         const focusable = el.querySelector<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-        )
+        );
         if (focusable) {
-          focusable.focus()
+          focusable.focus();
         }
-        return
+        return;
       }
 
-      el.focus()
+      el.focus();
     },
-  })
-})
+  });
+});

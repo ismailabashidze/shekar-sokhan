@@ -36,9 +36,9 @@ const layouts = [
     imgDark: '/img/illustrations/ui/iconnav-layout-master-dark.png',
     icon: 'ph:app-window-duotone',
   },
-]
+];
 
-const activeLayout = ref('sidebar')
+const activeLayout = ref('sidebar');
 </script>
 
 <template>

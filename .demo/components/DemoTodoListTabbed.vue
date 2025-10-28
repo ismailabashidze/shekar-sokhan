@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
     color?:
       | 'success'
       | 'info'
@@ -9,13 +9,13 @@ const props = withDefaults(
       | 'danger'
       | 'primary'
       | 'lime'
-      | 'sky'
+      | 'sky';
   }>(),
   {
     rounded: 'sm',
     color: 'success',
   },
-)
+);
 
 const todos = [
   {
@@ -48,9 +48,9 @@ const todos = [
     description: 'Review complete design system',
     completed: true,
   },
-]
+];
 
-const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2'])
+const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2']);
 </script>
 
 <template>

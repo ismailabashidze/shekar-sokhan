@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import type { RouteRecordRaw } from 'vue-router'
-import { onKeyStroke } from '@vueuse/core'
+import type { RouteRecordRaw } from 'vue-router';
+import { onKeyStroke } from '@vueuse/core';
 
-const isMacLike = useIsMacLike()
-const isOpen = useState('search-open', () => false)
-const search = ref('')
+const isMacLike = useIsMacLike();
+const isOpen = useState('search-open', () => false);
+const search = ref('');
 
 onKeyStroke('k', (event) => {
-  const modifier = isMacLike.value ? event.metaKey : event.ctrlKey
+  const modifier = isMacLike.value ? event.metaKey : event.ctrlKey;
   if (modifier) {
-    event.preventDefault()
+    event.preventDefault();
 
-    isOpen.value = !isOpen.value
+    isOpen.value = !isOpen.value;
   }
-})
+});
 
 const { data: contentDocs } = useAsyncData(
   () => {
-    if (!search.value) return Promise.resolve([] as any[])
+    if (!search.value) return Promise.resolve([] as any[]);
 
     // @ts-ignore This may be undefined if documentation is disabled
     return queryContent()
@@ -45,67 +45,67 @@ const { data: contentDocs } = useAsyncData(
       })
       .limit(6)
       .find()
-      .catch(() => []) as Promise<any[]>
+      .catch(() => []) as Promise<any[]>;
   },
   {
     watch: [search],
   },
-)
+);
 
-const router = useRouter()
+const router = useRouter();
 const demoPages = computed(() => {
-  if (!search.value) return []
+  if (!search.value) return [];
 
-  const match: RouteRecordRaw[] = []
-  const searchRe = new RegExp(search.value, 'i')
+  const match: RouteRecordRaw[] = [];
+  const searchRe = new RegExp(search.value, 'i');
 
   function traverseRoutes(routes: Readonly<RouteRecordRaw[]>) {
     for (const route of routes) {
       if (route.children) {
-        traverseRoutes(route.children)
+        traverseRoutes(route.children);
       }
       else if (route.path.includes(':')) {
         // skip dynamic route
-        continue
+        continue;
       }
       else if (
         route.meta?.preview?.title
         && searchRe.test(route.meta?.preview?.title)
       ) {
-        match.push(route)
+        match.push(route);
       }
       else if (
         route.meta?.preview?.description
         && searchRe.test(route.meta?.preview?.description)
       ) {
-        match.push(route)
+        match.push(route);
       }
     }
   }
 
-  traverseRoutes(router.options.routes)
+  traverseRoutes(router.options.routes);
 
-  return match.slice(0, 6)
-})
+  return match.slice(0, 6);
+});
 
 const contentDocsResults = computed(() => {
-  const max = 6 - Math.min(demoPages.value.length, 3)
-  return contentDocs.value?.slice(0, max)
-})
+  const max = 6 - Math.min(demoPages.value.length, 3);
+  return contentDocs.value?.slice(0, max);
+});
 const demoPagesResults = computed(() => {
-  const max = 6 - Math.min(contentDocs.value?.length || 0, 3)
-  return demoPages.value?.slice(0, max)
-})
+  const max = 6 - Math.min(contentDocs.value?.length || 0, 3);
+  return demoPages.value?.slice(0, max);
+});
 
 const hasResult = computed(() =>
   Boolean(contentDocsResults.value?.length || demoPagesResults.value?.length),
-)
+);
 
 function onClick() {
-  isOpen.value = false
+  isOpen.value = false;
 }
 
-const metaKey = useMetaKey()
+const metaKey = useMetaKey();
 </script>
 
 <template>

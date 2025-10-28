@@ -7,12 +7,12 @@
 </template>
 
 <script setup lang="ts">
-const route = useRoute()
+const route = useRoute();
 
 // Check if current route is an auth page
 const isAuthPage = computed(() => {
-  return route.path.startsWith('/auth')
-})
+  return route.path.startsWith('/auth');
+});
 
 // This component wraps both the back button and tour button
 // Positioned at bottom left for desktop sizes

@@ -17,8 +17,8 @@ definePageMeta({
     leaveFromClass: 'translate-y-0 opacity-100',
     leaveToClass: 'translate-y-20 opacity-0',
   },
-})
-const { data, pending, error, refresh } = await useFetch('/api/profile')
+});
+const { data, pending, error, refresh } = await useFetch('/api/profile');
 </script>
 
 <template>

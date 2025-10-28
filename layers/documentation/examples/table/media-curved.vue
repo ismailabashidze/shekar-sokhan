@@ -111,8 +111,8 @@
 </template>
 
 <script setup lang="ts">
-const selected = ref([])
-const selectAll = ref(false)
+const selected = ref([]);
+const selectAll = ref(false);
 
 const team = [
   {
@@ -151,5 +151,5 @@ const team = [
     rate: 69,
     status: 'New',
   },
-]
+];
 </script>

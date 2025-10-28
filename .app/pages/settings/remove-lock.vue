@@ -1,13 +1,13 @@
 <script setup lang="ts">
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const router = useRouter()
-const toaster = useToaster()
-const { hasPin, removePin } = useLockSystem()
-const { user } = useUser()
+const router = useRouter();
+const toaster = useToaster();
+const { hasPin, removePin } = useLockSystem();
+const { user } = useUser();
 
-const isRemovingPin = ref(false)
-const showConfirmModal = ref(false)
+const isRemovingPin = ref(false);
+const showConfirmModal = ref(false);
 
 const handleRemovePin = async () => {
   if (!user.value?.id) {
@@ -17,18 +17,18 @@ const handleRemovePin = async () => {
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
-    return
+    });
+    return;
   }
 
-  isRemovingPin.value = true
+  isRemovingPin.value = true;
 
   try {
     // Remove PIN from both PocketBase and localStorage
-    const success = await removePin(user.value.id)
+    const success = await removePin(user.value.id);
 
     if (!success) {
-      throw new Error('Failed to remove PIN from server')
+      throw new Error('Failed to remove PIN from server');
     }
 
     toaster.show({
@@ -37,33 +37,33 @@ const handleRemovePin = async () => {
       color: 'success',
       icon: 'ph:trash',
       closable: true,
-    })
+    });
 
-    showConfirmModal.value = false
+    showConfirmModal.value = false;
 
     // Redirect to settings
     setTimeout(() => {
-      router.push('/settings')
-    }, 1500)
+      router.push('/settings');
+    }, 1500);
   }
   catch (error) {
-    console.error('Remove PIN error:', error)
+    console.error('Remove PIN error:', error);
     toaster.show({
       title: 'خطا',
       message: 'مشکلی در حذف پین پیش آمد',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
   finally {
-    isRemovingPin.value = false
+    isRemovingPin.value = false;
   }
-}
+};
 
 // Redirect if user doesn't have PIN
 if (!hasPin.value) {
-  router.push('/settings')
+  router.push('/settings');
 }
 </script>
 

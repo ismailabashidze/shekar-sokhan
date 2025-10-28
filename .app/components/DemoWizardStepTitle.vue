@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Project, ProjectStepData } from '../types'
+import type { Project, ProjectStepData } from '../types';
 
-const { currentStep } = useMultiStepForm<Project, ProjectStepData>()
+const { currentStep } = useMultiStepForm<Project, ProjectStepData>();
 </script>
 
 <template>

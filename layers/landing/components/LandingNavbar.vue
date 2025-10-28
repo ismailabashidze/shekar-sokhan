@@ -1,9 +1,9 @@
 <script setup lang="ts">
-const isSearchOpen = useState('search-open', () => false)
-const isMobileOpen = ref(false)
+const isSearchOpen = useState('search-open', () => false);
+const isMobileOpen = ref(false);
 
-const metaKey = useMetaKey()
-const { open } = usePanels()
+const metaKey = useMetaKey();
+const { open } = usePanels();
 </script>
 
 <template>

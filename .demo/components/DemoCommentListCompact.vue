@@ -36,7 +36,7 @@ const comments = [
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliter autem vobis placet. Quae duo sunt, unum facit.',
   },
-]
+];
 </script>
 
 <template>

@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import { FocusTrap } from '@headlessui/vue'
+import { FocusTrap } from '@headlessui/vue';
 
 const props = withDefaults(
   defineProps<{
-    account?: any
+    account?: any;
   }>(),
   {
     account: undefined,
   },
-)
+);
 
-const { close } = usePanels()
-onKeyStroke('Escape', close)
+const { close } = usePanels();
+onKeyStroke('Escape', close);
 
-const demoAreaBalance = reactive(useDemoAreaBalance())
+const demoAreaBalance = reactive(useDemoAreaBalance());
 
 function useDemoAreaBalance() {
-  const { primary } = useTailwindColors()
-  const type = 'area'
-  const height = 250
+  const { primary } = useTailwindColors();
+  const type = 'area';
+  const height = 250;
 
   const options = {
     chart: {
@@ -81,16 +81,16 @@ function useDemoAreaBalance() {
         formatter: (val: number) => `$${val}`,
       },
     },
-  }
+  };
 
-  const series = ref(props.account.history)
+  const series = ref(props.account.history);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

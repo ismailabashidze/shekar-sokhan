@@ -24,6 +24,6 @@
 </template>
 
 <script lang="ts" setup>
-const phone = ref('+33612345678')
-const country = ref('FR')
+const phone = ref('+33612345678');
+const country = ref('FR');
 </script>

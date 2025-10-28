@@ -9,14 +9,14 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-banking-1-dark.png',
     order: 7,
   },
-})
+});
 
-const incomeHistory = reactive(useIncomeHistory())
+const incomeHistory = reactive(useIncomeHistory());
 
 function useIncomeHistory() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 315
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 315;
 
   const options = {
     chart: {
@@ -61,11 +61,11 @@ function useIncomeHistory() {
       },
       y: {
         formatter: function (val: number) {
-          return '$' + val
+          return '$' + val;
         },
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -76,9 +76,9 @@ function useIncomeHistory() {
       name: 'Earnings',
       data: [192, 263, 459, 312, 349, 527, 397, 351, 618, 511],
     },
-  ])
+  ]);
 
-  return { type, height, options, series }
+  return { type, height, options, series };
 }
 
 const banks = [
@@ -100,12 +100,12 @@ const banks = [
     text: 'checking **** **** 8448',
     media: '/img/icons/banking/bank-3.svg',
   },
-]
+];
 
-const selectedBankTransfert = shallowRef(banks[0])
-const selectedBankSendTo = shallowRef(banks[0])
-const selectedCurrency = ref('usd')
-const amount = ref<number>(0)
+const selectedBankTransfert = shallowRef(banks[0]);
+const selectedBankSendTo = shallowRef(banks[0]);
+const selectedCurrency = ref('usd');
+const amount = ref<number>(0);
 </script>
 
 <template>

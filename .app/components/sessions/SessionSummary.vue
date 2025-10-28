@@ -1,9 +1,9 @@
 <script setup lang="ts">
 defineProps<{
-  summary: string
-  goals: Array<string>
-  progress: Array<string>
-}>()
+  summary: string;
+  goals: Array<string>;
+  progress: Array<string>;
+}>();
 </script>
 
 <template>

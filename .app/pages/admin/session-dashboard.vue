@@ -8,10 +8,10 @@ definePageMeta({
     order: 1,
   },
   layout: 'sidebar',
-})
+});
 useHead({
   htmlAttrs: { dir: 'rtl' },
-})
+});
 // Mock data for development - this will be replaced with real API data
 const sessions = ref([
   {
@@ -374,13 +374,13 @@ const sessions = ref([
     status: 'new',
     lastUpdated: '2024-01-07 14:15',
   },
-])
+]);
 
-const activeFilter = ref('all')
-const searchQuery = ref('')
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-const itemsPerPageOptions = [5, 10, 25, 50]
+const activeFilter = ref('all');
+const searchQuery = ref('');
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const itemsPerPageOptions = [5, 10, 25, 50];
 
 // Statistics
 const stats = computed(() => ({
@@ -390,122 +390,122 @@ const stats = computed(() => ({
   suicideRisk: sessions.value.filter(s => s.risk.suicideIndicator).length,
   flagged: sessions.value.filter(s => s.status === 'flagged').length,
   newSessions: sessions.value.filter(s => s.status === 'new').length,
-}))
+}));
 
 // Filter sessions based on active filter and search
 const filteredSessions = computed(() => {
-  let filtered = sessions.value
+  let filtered = sessions.value;
 
   // Apply filter
   if (activeFilter.value !== 'all') {
     switch (activeFilter.value) {
       case 'critical':
-        filtered = filtered.filter(s => s.risk.level === 'critical')
-        break
+        filtered = filtered.filter(s => s.risk.level === 'critical');
+        break;
       case 'high':
-        filtered = filtered.filter(s => s.risk.level === 'high')
-        break
+        filtered = filtered.filter(s => s.risk.level === 'high');
+        break;
       case 'suicide':
-        filtered = filtered.filter(s => s.risk.suicideIndicator)
-        break
+        filtered = filtered.filter(s => s.risk.suicideIndicator);
+        break;
       case 'flagged':
-        filtered = filtered.filter(s => s.status === 'flagged')
-        break
+        filtered = filtered.filter(s => s.status === 'flagged');
+        break;
       case 'new':
-        filtered = filtered.filter(s => s.status === 'new')
-        break
+        filtered = filtered.filter(s => s.status === 'new');
+        break;
     }
   }
 
   // Apply search
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(s =>
       s.user.name.toLowerCase().includes(query)
       || s.user.email.toLowerCase().includes(query)
       || s.session.summary.toLowerCase().includes(query),
-    )
+    );
   }
 
-  return filtered
-})
+  return filtered;
+});
 
 // Pagination
-const totalPages = computed(() => Math.ceil(filteredSessions.value.length / itemsPerPage.value))
+const totalPages = computed(() => Math.ceil(filteredSessions.value.length / itemsPerPage.value));
 const paginatedSessions = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredSessions.value.slice(start, end)
-})
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredSessions.value.slice(start, end);
+});
 
 // Enhanced date formatting functions
 function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffTime = now.getTime() - date.getTime()
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = now.getTime() - date.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   const formattedDate = new Intl.DateTimeFormat('fa-IR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  }).format(date)
+  }).format(date);
 
   // Add relative time for recent dates
   if (diffDays === 0) {
-    return `${formattedDate} (امروز)`
+    return `${formattedDate} (امروز)`;
   }
   else if (diffDays === 1) {
-    return `${formattedDate} (دیروز)`
+    return `${formattedDate} (دیروز)`;
   }
   else if (diffDays <= 7) {
-    return `${formattedDate} (${diffDays} روز پیش)`
+    return `${formattedDate} (${diffDays} روز پیش)`;
   }
 
-  return formattedDate
+  return formattedDate;
 }
 
 function formatTime(timeString: string) {
   // Handle both date+time format and time-only format
-  const timeOnly = timeString.includes(' ') ? timeString.split(' ')[1] : timeString
-  const [hours, minutes] = timeOnly.split(':')
-  const hour = parseInt(hours)
-  const minute = parseInt(minutes)
+  const timeOnly = timeString.includes(' ') ? timeString.split(' ')[1] : timeString;
+  const [hours, minutes] = timeOnly.split(':');
+  const hour = parseInt(hours);
+  const minute = parseInt(minutes);
 
   // Format in Persian style with AM/PM
-  const period = hour >= 12 ? 'بعد از ظهر' : 'صبح'
-  const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour
+  const period = hour >= 12 ? 'بعد از ظهر' : 'صبح';
+  const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
 
-  return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`
+  return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
 }
 
 function formatDuration(minutes: number) {
   if (minutes < 60) {
-    return `${minutes} دقیقه`
+    return `${minutes} دقیقه`;
   }
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-  return remainingMinutes > 0 ? `${hours} ساعت و ${remainingMinutes} دقیقه` : `${hours} ساعت`
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return remainingMinutes > 0 ? `${hours} ساعت و ${remainingMinutes} دقیقه` : `${hours} ساعت`;
 }
 
 function getRelativeTime(dateString: string) {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffTime = now.getTime() - date.getTime()
-  const diffHours = Math.floor(diffTime / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffHours < 1) {
-    return 'چند لحظه پیش'
+    return 'چند لحظه پیش';
   }
   else if (diffHours < 24) {
-    return `${diffHours} ساعت پیش`
+    return `${diffHours} ساعت پیش`;
   }
   else if (diffDays <= 7) {
-    return `${diffDays} روز پیش`
+    return `${diffDays} روز پیش`;
   }
   else {
-    return formatDate(dateString)
+    return formatDate(dateString);
   }
 }
 
@@ -513,56 +513,56 @@ function getRelativeTime(dateString: string) {
 function getRiskColor(level: string) {
   switch (level) {
     case 'critical':
-      return 'danger'
+      return 'danger';
     case 'high':
-      return 'warning'
+      return 'warning';
     case 'medium':
-      return 'warning'
+      return 'warning';
     case 'low':
-      return 'success'
+      return 'success';
     default:
-      return 'muted'
+      return 'muted';
   }
 }
 
 function getStatusColor(status: string) {
   switch (status) {
     case 'flagged':
-      return 'danger'
+      return 'danger';
     case 'reviewed':
-      return 'success'
+      return 'success';
     case 'new':
-      return 'info'
+      return 'info';
     default:
-      return 'muted'
+      return 'muted';
   }
 }
 
 function getRiskLabel(level: string) {
   switch (level) {
     case 'critical':
-      return 'بحرانی'
+      return 'بحرانی';
     case 'high':
-      return 'پرریسک'
+      return 'پرریسک';
     case 'medium':
-      return 'متوسط'
+      return 'متوسط';
     case 'low':
-      return 'کم'
+      return 'کم';
     default:
-      return level
+      return level;
   }
 }
 
 function getStatusLabel(status: string) {
   switch (status) {
     case 'flagged':
-      return 'علامت‌گذاری شده'
+      return 'علامت‌گذاری شده';
     case 'reviewed':
-      return 'بررسی شده'
+      return 'بررسی شده';
     case 'new':
-      return 'جدید'
+      return 'جدید';
     default:
-      return status
+      return status;
   }
 }
 
@@ -570,28 +570,28 @@ function getStatusLabel(status: string) {
 function getRiskIcon(level: string) {
   switch (level) {
     case 'critical':
-      return 'ph:warning-octagon-duotone'
+      return 'ph:warning-octagon-duotone';
     case 'high':
-      return 'ph:warning-duotone'
+      return 'ph:warning-duotone';
     case 'medium':
-      return 'ph:info-duotone'
+      return 'ph:info-duotone';
     case 'low':
-      return 'ph:check-circle-duotone'
+      return 'ph:check-circle-duotone';
     default:
-      return 'ph:circle-duotone'
+      return 'ph:circle-duotone';
   }
 }
 
 function getStatusIcon(status: string) {
   switch (status) {
     case 'flagged':
-      return 'ph:flag-duotone'
+      return 'ph:flag-duotone';
     case 'reviewed':
-      return 'ph:check-circle-duotone'
+      return 'ph:check-circle-duotone';
     case 'new':
-      return 'ph:sparkle-duotone'
+      return 'ph:sparkle-duotone';
     default:
-      return 'ph:circle-duotone'
+      return 'ph:circle-duotone';
   }
 }
 </script>

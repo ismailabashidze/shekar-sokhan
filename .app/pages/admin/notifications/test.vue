@@ -90,15 +90,15 @@
 definePageMeta({
   title: 'تست اعلان‌های پیشرفته',
   layout: 'default',
-})
+});
 
 // Use service worker composable
-const { isSupported, isRegistered } = useServiceWorkerNotifications()
+const { isSupported, isRegistered } = useServiceWorkerNotifications();
 
 // Set page title
 useHead({
   title: 'تست اعلان‌های پیشرفته - ذهنا',
-})
+});
 </script>
 
 <style scoped>

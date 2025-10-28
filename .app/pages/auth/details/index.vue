@@ -9,38 +9,38 @@ definePageMeta({
     srcDark: '/img/screens/layouts-projects-details-hub-dark.png',
     order: 71,
   },
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(25)
+const filter = ref('');
+const perPage = ref(25);
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch(
   '/api/company/projects',
   {
     query,
   },
-)
-const selectedProject = ref<NonNullable<typeof data.value>['data'][0]>()
+);
+const selectedProject = ref<NonNullable<typeof data.value>['data'][0]>();
 </script>
 
 <template>

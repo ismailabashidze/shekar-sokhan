@@ -15,21 +15,21 @@ const workspaces = ref([
     name: 'Flashlite LLC',
     logo: '/img/icons/logos/flashlite.svg',
   },
-])
+]);
 
-const selectedWorkspace = ref(workspaces.value[0])
-const target = ref(null)
-const open = ref(false)
+const selectedWorkspace = ref(workspaces.value[0]);
+const target = ref(null);
+const open = ref(false);
 
 function openDropdown() {
-  open.value = true
+  open.value = true;
 }
 
-onClickOutside(target, () => (open.value = false))
+onClickOutside(target, () => (open.value = false));
 
 function setWorkspace(workspace: any) {
-  selectedWorkspace.value = workspace
-  open.value = false
+  selectedWorkspace.value = workspace;
+  open.value = false;
 }
 </script>
 

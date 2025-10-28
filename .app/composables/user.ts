@@ -38,7 +38,8 @@ export function useUser() {
         };
         user.value = updatedUser;
         return updatedUser;
-      } catch (error) {
+      }
+ catch (error) {
         console.error(error);
       }
     }
@@ -64,6 +65,20 @@ export function useUser() {
     return result;
   };
 
+  const getUserById = async (id: string) => {
+    if (role.value !== 'admin') {
+      throw new Error('Admin access required');
+    }
+    return await nuxtApp.$pb.collection('users').getOne(id);
+  };
+
+  const updateUserZonesById = async (id: string, zones: string[]) => {
+    if (role.value !== 'admin') {
+      throw new Error('Admin access required');
+    }
+    return await nuxtApp.$pb.collection('users').update(id, { zones });
+  };
+
   const logout = async () => {
     user.value = {} as User;
     role.value = '';
@@ -76,6 +91,8 @@ export function useUser() {
     getAllUsers,
     setUser,
     updateUser,
+    getUserById,
+    updateUserZonesById,
     updateEmptyZonesInDatabase,
     logout,
   };

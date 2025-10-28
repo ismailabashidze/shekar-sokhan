@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoRadial = reactive(useDemoRadial())
+const demoRadial = reactive(useDemoRadial());
 
 function useDemoRadial() {
-  const { primary } = useTailwindColors()
-  const height = 265
-  const type = 'radialBar'
+  const { primary } = useTailwindColors();
+  const height = 265;
+  const type = 'radialBar';
 
   const options = {
     title: {
@@ -30,16 +30,16 @@ function useDemoRadial() {
       },
     },
     labels: ['Power'],
-  }
+  };
 
-  const series = shallowRef([70])
+  const series = shallowRef([70]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

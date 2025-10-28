@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoDonut = reactive(useDemoDonut())
+const demoDonut = reactive(useDemoDonut());
 
 function useDemoDonut() {
-  const { primary, info, success, danger } = useTailwindColors()
-  const height = 290
-  const type = 'donut'
+  const { primary, info, success, danger } = useTailwindColors();
+  const height = 290;
+  const type = 'donut';
 
   const options = {
     title: {
@@ -32,16 +32,16 @@ function useDemoDonut() {
       position: 'right',
       horizontalAlign: 'center',
     },
-  }
+  };
 
-  const series = shallowRef([44, 55, 41, 17, 15])
+  const series = shallowRef([44, 55, 41, 17, 15]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

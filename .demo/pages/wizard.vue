@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { Project, ProjectStepData } from '../types'
+import type { Project, ProjectStepData } from '../types';
 
 definePageMeta({
   layout: 'empty',
-})
+});
 useHead({
   titleTemplate: title => `${title} | Wizard - Step ${currentStepId.value + 1}`,
-})
+});
 
 const initialState = ref<Project>({
   type: undefined,
@@ -24,9 +24,9 @@ const initialState = ref<Project>({
   team: [],
   tools: [],
   budget: '< 5K',
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 const { handleSubmit, currentStepId } = provideMultiStepForm({
   initialState,
@@ -39,9 +39,9 @@ const { handleSubmit, currentStepId } = provideMultiStepForm({
         subtitle: 'Select the type of project you want to create',
       },
       validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['type'])
+        resetFieldError(['type']);
         if (!data.value.type) {
-          setFieldError('type', 'Please select a type')
+          setFieldError('type', 'Please select a type');
         }
       },
     },
@@ -53,9 +53,9 @@ const { handleSubmit, currentStepId } = provideMultiStepForm({
         subtitle: 'Manage better by adding all relevant project information',
       },
       validate({ data, setFieldError, resetFieldError }) {
-        resetFieldError(['name'])
+        resetFieldError(['name']);
         if (!data.value.name) {
-          setFieldError('name', 'Please enter a project name')
+          setFieldError('name', 'Please enter a project name');
         }
       },
     },
@@ -105,28 +105,28 @@ const { handleSubmit, currentStepId } = provideMultiStepForm({
   ],
   onSubmit: async (state, ctx) => {
     // Simulate async request
-    await new Promise(resolve => setTimeout(resolve, 4000))
+    await new Promise(resolve => setTimeout(resolve, 4000));
 
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Success',
       message: `Project ${state.name} created!`,
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
+    });
   },
   onError: (error) => {
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Oops!',
       message: error.message,
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   },
-})
+});
 </script>
 
 <template>

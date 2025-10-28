@@ -92,125 +92,125 @@
 
 <script setup lang="ts">
 // PWA Debug component for development
-const showDebug = ref(false)
-const swStatus = ref<'unknown' | 'installing' | 'active' | 'error'>('unknown')
-const isSupported = ref(false)
-const notificationPermission = ref<NotificationPermission>('default')
-const isStandalone = ref(false)
-const cacheInfo = ref<any>(null)
+const showDebug = ref(false);
+const swStatus = ref<'unknown' | 'installing' | 'active' | 'error'>('unknown');
+const isSupported = ref(false);
+const notificationPermission = ref<NotificationPermission>('default');
+const isStandalone = ref(false);
+const cacheInfo = ref<any>(null);
 
 // دریافت ورژن app
-const { version: appVersion } = useAppVersion()
+const { version: appVersion } = useAppVersion();
 
 // Check PWA status
 const checkPWAStatus = async () => {
-  if (!process.client) return
+  if (!process.client) return;
 
   // Check if PWA is supported
-  isSupported.value = 'serviceWorker' in navigator && 'PushManager' in window
+  isSupported.value = 'serviceWorker' in navigator && 'PushManager' in window;
 
   // Check notification permission
   if ('Notification' in window) {
-    notificationPermission.value = Notification.permission
+    notificationPermission.value = Notification.permission;
   }
 
   // Check if app is installed (standalone mode)
-  isStandalone.value = window.matchMedia('(display-mode: standalone)').matches
+  isStandalone.value = window.matchMedia('(display-mode: standalone)').matches;
 
   // Check service worker status
   if ('serviceWorker' in navigator) {
     try {
-      const registration = await navigator.serviceWorker.getRegistration()
+      const registration = await navigator.serviceWorker.getRegistration();
       if (registration) {
         if (registration.active) {
-          swStatus.value = 'active'
+          swStatus.value = 'active';
         }
         else if (registration.installing) {
-          swStatus.value = 'installing'
+          swStatus.value = 'installing';
         }
       }
     }
     catch (error) {
-      swStatus.value = 'error'
-      console.error('Error checking service worker:', error)
+      swStatus.value = 'error';
+      console.error('Error checking service worker:', error);
     }
   }
 
   // Get cache info
   if ('caches' in window) {
     try {
-      const { getCacheStatus } = usePwaCache()
-      cacheInfo.value = await getCacheStatus()
+      const { getCacheStatus } = usePwaCache();
+      cacheInfo.value = await getCacheStatus();
     }
     catch (error) {
-      console.error('Error getting cache status:', error)
+      console.error('Error getting cache status:', error);
     }
   }
-}
+};
 
 // Helper functions
 const getStatusText = (status: string) => {
   switch (status) {
-    case 'active': return 'فعال'
-    case 'installing': return 'در حال نصب'
-    case 'error': return 'خطا'
-    default: return 'نامشخص'
+    case 'active': return 'فعال';
+    case 'installing': return 'در حال نصب';
+    case 'error': return 'خطا';
+    default: return 'نامشخص';
   }
-}
+};
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'active': return 'text-green-600'
-    case 'installing': return 'text-yellow-600'
-    case 'error': return 'text-red-600'
-    default: return 'text-gray-600'
+    case 'active': return 'text-green-600';
+    case 'installing': return 'text-yellow-600';
+    case 'error': return 'text-red-600';
+    default: return 'text-gray-600';
   }
-}
+};
 
 const getPermissionText = (permission: NotificationPermission) => {
   switch (permission) {
-    case 'granted': return 'مجاز'
-    case 'denied': return 'رد شده'
-    default: return 'سوال نشده'
+    case 'granted': return 'مجاز';
+    case 'denied': return 'رد شده';
+    default: return 'سوال نشده';
   }
-}
+};
 
 const getPermissionColor = (permission: NotificationPermission) => {
   switch (permission) {
-    case 'granted': return 'text-green-600'
-    case 'denied': return 'text-red-600'
-    default: return 'text-gray-600'
+    case 'granted': return 'text-green-600';
+    case 'denied': return 'text-red-600';
+    default: return 'text-gray-600';
   }
-}
+};
 
 // Actions
 const refreshServiceWorker = async () => {
   if ('serviceWorker' in navigator) {
     try {
-      const registration = await navigator.serviceWorker.getRegistration()
+      const registration = await navigator.serviceWorker.getRegistration();
       if (registration) {
-        await registration.update()
-        console.log('Service worker updated')
+        await registration.update();
+        console.log('Service worker updated');
       }
     }
     catch (error) {
-      console.error('Error updating service worker:', error)
+      console.error('Error updating service worker:', error);
     }
   }
-  await checkPWAStatus()
-}
+  await checkPWAStatus();
+};
 
 const clearCaches = async () => {
   try {
-    const { clearAllCaches } = usePwaCache()
-    await clearAllCaches()
-    console.log('All caches cleared')
+    const { clearAllCaches } = usePwaCache();
+    await clearAllCaches();
+    console.log('All caches cleared');
   }
   catch (error) {
-    console.error('Error clearing caches:', error)
+    console.error('Error clearing caches:', error);
   }
-  await checkPWAStatus()
-}
+  await checkPWAStatus();
+};
 
 // Show debug panel on key combination (Ctrl+Shift+P)
 onMounted(() => {
@@ -218,25 +218,25 @@ onMounted(() => {
   if (process.env.NODE_ENV === 'development') {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.shiftKey && event.key === 'P') {
-        showDebug.value = !showDebug.value
+        showDebug.value = !showDebug.value;
         if (showDebug.value) {
-          checkPWAStatus()
+          checkPWAStatus();
         }
       }
-    }
+    };
 
-    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleKeyDown);
 
     onBeforeUnmount(() => {
-      window.removeEventListener('keydown', handleKeyDown)
-    })
+      window.removeEventListener('keydown', handleKeyDown);
+    });
   }
-})
+});
 
 // Watch for changes
 watch(showDebug, (isShown) => {
   if (isShown) {
-    checkPWAStatus()
+    checkPWAStatus();
   }
-})
+});
 </script>

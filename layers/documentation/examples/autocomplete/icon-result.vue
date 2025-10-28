@@ -22,13 +22,13 @@
 
 <script setup lang="ts">
 interface Hobby {
-  id: number
-  name: string
-  text: string
-  icon: string
+  id: number;
+  name: string;
+  text: string;
+  icon: string;
 }
 
-const value = ref<Hobby>()
+const value = ref<Hobby>();
 const hobbies = ref<Hobby[]>([
   {
     id: 1,
@@ -60,18 +60,18 @@ const hobbies = ref<Hobby[]>([
     text: 'singing with friends',
     icon: 'ph:microphone-stage-duotone',
   },
-])
+]);
 
 function filterItems(query?: string, items?: any[]) {
   if (!query || !items) {
-    return items ?? []
+    return items ?? [];
   }
 
   // search by name or text
   return items.filter((item) => {
-    const nameMatches = item?.name?.toLowerCase().includes(query.toLowerCase())
-    const textMatches = item?.text?.toLowerCase().includes(query.toLowerCase())
-    return nameMatches || textMatches
-  })
+    const nameMatches = item?.name?.toLowerCase().includes(query.toLowerCase());
+    const textMatches = item?.text?.toLowerCase().includes(query.toLowerCase());
+    return nameMatches || textMatches;
+  });
 }
 </script>

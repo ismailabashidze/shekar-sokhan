@@ -24,7 +24,7 @@ const skills = [
     count: 82,
     icon: 'logos:tailwindcss-icon',
   },
-]
+];
 </script>
 
 <template>

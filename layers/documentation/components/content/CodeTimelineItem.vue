@@ -1,8 +1,8 @@
 <script setup lang="ts">
 const props = defineProps<{
-  step?: number
-  vertical?: boolean
-}>()
+  step?: number;
+  vertical?: boolean;
+}>();
 </script>
 
 <template>

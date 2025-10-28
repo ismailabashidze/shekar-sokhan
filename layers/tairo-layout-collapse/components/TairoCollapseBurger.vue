@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useCollapse } from '../composables/collapse'
+import { useCollapse } from '../composables/collapse';
 
-const { isOpen, isMobileOpen, toggle } = useCollapse()
-const { lg } = useTailwindBreakpoints()
+const { isOpen, isMobileOpen, toggle } = useCollapse();
+const { lg } = useTailwindBreakpoints();
 </script>
 
 <template>

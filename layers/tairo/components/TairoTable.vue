@@ -1,14 +1,14 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg'
-    scrollable?: boolean
+    rounded?: 'none' | 'sm' | 'md' | 'lg';
+    scrollable?: boolean;
   }>(),
   {
     rounded: 'sm',
     scrollable: true,
   },
-)
+);
 </script>
 
 <template>

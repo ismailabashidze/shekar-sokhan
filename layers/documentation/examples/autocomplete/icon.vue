@@ -42,14 +42,14 @@ const fields = reactive({
   first: '',
   second: '',
   third: '',
-})
+});
 
-const frameworks = ref(['Javascript', 'Vue.js', 'React.js', 'Angular', 'Alpine.js'])
+const frameworks = ref(['Javascript', 'Vue.js', 'React.js', 'Angular', 'Alpine.js']);
 const people = ref([
   'Clarissa Perez',
   'Aaron Splatter',
   'Mike Miller',
   'Benedict Kessler',
   'Maya Rosselini',
-])
+]);
 </script>

@@ -169,51 +169,51 @@
 // Public page - no authentication required
 definePageMeta({
   layout: false,
-})
+});
 
 // Hide body overflow when this page is mounted
 onMounted(() => {
-  document.body.style.overflow = 'hidden'
-})
+  document.body.style.overflow = 'hidden';
+});
 
 onUnmounted(() => {
-  document.body.style.overflow = ''
-})
+  document.body.style.overflow = '';
+});
 
-const route = useRoute()
-const router = useRouter()
-const { user } = useUser()
-const { userZones, ZONE_CONFIGS } = useZones()
+const route = useRoute();
+const router = useRouter();
+const { user } = useUser();
+const { userZones, ZONE_CONFIGS } = useZones();
 
 // Get requested zone from query parameters
 const requestedZoneName = computed(() => {
-  return route.query.zone as string || ''
-})
+  return route.query.zone as string || '';
+});
 
 const accessReason = computed(() => {
-  return route.query.reason as string || ''
-})
+  return route.query.reason as string || '';
+});
 
 const requestedZone = computed(() => {
-  if (!requestedZoneName.value) return null
-  return ZONE_CONFIGS[requestedZoneName.value]
-})
+  if (!requestedZoneName.value) return null;
+  return ZONE_CONFIGS[requestedZoneName.value];
+});
 
 const getRequestedZoneLabel = () => {
-  return requestedZone.value?.label || requestedZoneName.value
-}
+  return requestedZone.value?.label || requestedZoneName.value;
+};
 
 const getRequestedZoneIcon = () => {
-  return requestedZone.value?.icon || 'ph:lock'
-}
+  return requestedZone.value?.icon || 'ph:lock';
+};
 
 const getRequestedZoneClass = () => {
-  const color = requestedZone.value?.color
-  return color ? `text-${color}-600` : 'text-gray-600'
-}
+  const color = requestedZone.value?.color;
+  return color ? `text-${color}-600` : 'text-gray-600';
+};
 
 const getZoneBadgeClass = (color?: string) => {
-  if (!color) return 'bg-gray-100 text-gray-800 border border-gray-200'
+  if (!color) return 'bg-gray-100 text-gray-800 border border-gray-200';
 
   const colorMap: Record<string, string> = {
     red: 'bg-red-100 text-red-800 border border-red-200 shadow-sm',
@@ -223,17 +223,18 @@ const getZoneBadgeClass = (color?: string) => {
     purple: 'bg-purple-100 text-purple-800 border border-purple-200 shadow-sm',
     pink: 'bg-pink-100 text-pink-800 border border-pink-200 shadow-sm',
     orange: 'bg-orange-100 text-orange-800 border border-orange-200 shadow-sm',
-  }
+  };
 
-  return colorMap[color] || 'bg-gray-100 text-gray-800 border border-gray-200 shadow-sm'
-}
+  return colorMap[color] || 'bg-gray-100 text-gray-800 border border-gray-200 shadow-sm';
+};
 
 const goBack = () => {
   // Try to go back, if no history, go to dashboard
   if (window.history.length > 1) {
-    router.back()
-  } else {
-    router.push('/dashboard')
+    router.back();
   }
-}
+ else {
+    router.push('/dashboard');
+  }
+};
 </script>

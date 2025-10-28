@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { useSidebar } from '../composables/sidebar'
+import { useSidebar } from '../composables/sidebar';
 
 const props = withDefaults(
   defineProps<{
-    subsidebar?: boolean
+    subsidebar?: boolean;
   }>(),
   {
     subsidebar: true,
   },
-)
+);
 
-const { isOpen, current } = useSidebar()
+const { isOpen, current } = useSidebar();
 
 const subsidebarEnabled = computed(() => {
   return Boolean(
     props.subsidebar !== false && current.value?.subsidebar?.component,
-  )
-})
+  );
+});
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue';
 
 definePageMeta({
   title: 'سفر درمانی - تعیین اهداف درمانی',
@@ -12,7 +12,7 @@ definePageMeta({
     srcDark: '/img/logo.svg',
     order: 3,
   },
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -20,13 +20,13 @@ useHead({
   meta: [
     { name: 'description', content: 'تنظیم اهداف درمانی شخصی‌سازی شده بر اساس ارزیابی اولیه' },
   ],
-})
+});
 
-const router = useRouter()
-const route = useRoute()
-const isVisible = ref(false)
-const isAnalyzing = ref(true)
-const analysisProgress = ref(0)
+const router = useRouter();
+const route = useRoute();
+const isVisible = ref(false);
+const isAnalyzing = ref(true);
+const analysisProgress = ref(0);
 
 // Comprehensive assessment data - in real app this would come from previous step
 const assessmentData = ref({
@@ -78,7 +78,7 @@ const assessmentData = ref({
     seekingHelp: true,
   },
   providerPreference: 'hybrid',
-})
+});
 
 // Clinical assessment and diagnostic formulation
 const clinicalAssessment = ref({
@@ -127,7 +127,7 @@ const clinicalAssessment = ref({
     insight: 'خوب - آگاهی از مشکل',
     judgment: 'سالم',
   },
-})
+});
 
 // Detailed diagnostic formulation
 const detectedConditions = ref({
@@ -207,7 +207,7 @@ const detectedConditions = ref({
       reason: 'شروع در بزرگسالی، قبلاً عملکرد اجتماعی طبیعی',
     },
   ],
-})
+});
 
 const chiefComplaint = ref({
   primary: 'اضطراب شدید و ناتوانی در تعامل اجتماعی طبیعی',
@@ -233,7 +233,7 @@ const chiefComplaint = ref({
     'افکار منفی درباره توانایی‌های خود',
     'کمبود مهارت‌های مقابله‌ای',
   ],
-})
+});
 
 // Risk assessment
 const riskAssessment = ref({
@@ -256,7 +256,7 @@ const riskAssessment = ref({
     'کاهش بیشتر عملکرد کاری',
     'افزایش انزوای اجتماعی',
   ],
-})
+});
 
 // Comprehensive therapeutic goals with detailed clinical protocols
 const therapeuticGoals = ref({
@@ -680,13 +680,13 @@ const therapeuticGoals = ref({
       ],
     },
   ],
-})
+});
 
 const priorityColors = {
   high: 'danger',
   medium: 'warning',
   low: 'info',
-}
+};
 
 const typeIcons = {
   'assessment': 'ph:clipboard-text',
@@ -704,7 +704,7 @@ const typeIcons = {
   'supervision': 'ph:eye',
   'outcome-assessment': 'ph:target',
   'professional-development': 'ph:graduation-cap',
-}
+};
 
 // Evidence-based treatment protocols
 const treatmentProtocols = ref({
@@ -725,7 +725,7 @@ const treatmentProtocols = ref({
     secondary: ['GAD-7', 'PHQ-9', 'WHODAS'],
     screening: ['Mini-SPIN', 'SPS'],
   },
-})
+});
 
 // Treatment milestones and benchmarks
 const treatmentMilestones = ref([
@@ -771,29 +771,29 @@ const treatmentMilestones = ref([
     criteria: 'SPIN <19, functional improvement, relapse plan',
     status: 'pending',
   },
-])
+]);
 
 // Simulate analysis progress
 onMounted(() => {
   const progressInterval = setInterval(() => {
-    analysisProgress.value += 10
+    analysisProgress.value += 10;
     if (analysisProgress.value >= 100) {
-      clearInterval(progressInterval)
+      clearInterval(progressInterval);
       setTimeout(() => {
-        isAnalyzing.value = false
-        isVisible.value = true
-      }, 500)
+        isAnalyzing.value = false;
+        isVisible.value = true;
+      }, 500);
     }
-  }, 200)
-})
+  }, 200);
+});
 
 const startTherapy = () => {
-  router.push('/therapy-journey/session-start')
-}
+  router.push('/therapy-journey/session-start');
+};
 
 const goBackToAssessment = () => {
-  router.push('/therapy-journey/assessment')
-}
+  router.push('/therapy-journey/assessment');
+};
 </script>
 
 <template>

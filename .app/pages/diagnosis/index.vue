@@ -366,7 +366,7 @@
 definePageMeta({
   layout: 'default',
   title: 'راهنمای تشخیصی DSM-5 | ذهنا',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -381,7 +381,7 @@ useHead({
       content: 'DSM-5, تشخیص اختلالات روانی, راهنمای تشخیصی, سلامت روان, روانپزشکی, روانشناسی, اختلالات روانی',
     },
   ],
-})
+});
 </script>
 
 <style scoped>

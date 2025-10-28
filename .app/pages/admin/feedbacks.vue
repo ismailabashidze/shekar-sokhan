@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted } from 'vue';
 
 definePageMeta({
   title: 'بازخوردهای کاربران',
   layout: 'sidebar',
   // Using global middlewares only
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'بازخوردهای کاربران - پنل ادمین - ذهنا',
-})
+});
 
 // Use composable
 const {
@@ -28,15 +28,15 @@ const {
   setRatingFilter,
   resetFilters,
   refreshFeedbacks,
-} = useAdminFeedbacks()
+} = useAdminFeedbacks();
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 // Fetch data on mount
 onMounted(async () => {
-  await fetchFeedbacks()
-  console.log(feedbacks.value)
-})
+  await fetchFeedbacks();
+  console.log(feedbacks.value);
+});
 
 // Problem categories mapping with icons
 const problemCategories = {
@@ -52,7 +52,7 @@ const problemCategories = {
   irrelevant: { text: 'نامرتبط', icon: 'ph:x-circle-duotone' },
   generic: { text: 'عمومی', icon: 'ph:circle-duotone' },
   confusing: { text: 'گیج‌کننده', icon: 'ph:question-duotone' },
-}
+};
 
 // Quality categories mapping with icons
 const qualityCategories = {
@@ -68,7 +68,7 @@ const qualityCategories = {
   more_examples: { text: 'مثال‌های بیشتر', icon: 'ph:list-bullets-duotone' },
   more_detail: { text: 'جزئیات بیشتر', icon: 'ph:magnifying-glass-plus-duotone' },
   practical: { text: 'عملی', icon: 'ph:wrench-duotone' },
-}
+};
 
 // Improvement categories mapping with icons
 const improvementCategories = {
@@ -83,47 +83,47 @@ const improvementCategories = {
   empathy: { text: 'همدلی', icon: 'ph:heart-duotone' },
   content_quality: { text: 'کیفیت محتوا', icon: 'ph:star-duotone' },
   professional_approach: { text: 'رویکرد حرفه‌ای', icon: 'ph:briefcase-duotone' },
-}
+};
 
 // Format date to Persian
 const formatDate = (dateString: string): string => {
-  if (!dateString) return 'تاریخ نامشخص'
-  const date = new Date(dateString)
+  if (!dateString) return 'تاریخ نامشخص';
+  const date = new Date(dateString);
   return new Intl.DateTimeFormat('fa-IR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(date)
-}
+  }).format(date);
+};
 
 // Get rating color
 const getRatingColor = (rating: number) => {
-  if (rating >= 4) return 'success'
-  if (rating >= 3) return 'warning'
-  return 'danger'
-}
+  if (rating >= 4) return 'success';
+  if (rating >= 3) return 'warning';
+  return 'danger';
+};
 
 // Format categories for display with icons
-const formatCategories = (categories: Record<string, boolean> | undefined, categoryMap: Record<string, { text: string, icon: string }>): Array<{ text: string, icon: string }> => {
-  if (!categories) return []
+const formatCategories = (categories: Record<string, boolean> | undefined, categoryMap: Record<string, { text: string; icon: string }>): Array<{ text: string; icon: string }> => {
+  if (!categories) return [];
   return Object.entries(categories)
     .filter(([_, selected]) => selected)
-    .map(([key, _]) => categoryMap[key] || { text: key, icon: 'ph:circle-duotone' })
-}
+    .map(([key, _]) => categoryMap[key] || { text: key, icon: 'ph:circle-duotone' });
+};
 
 // Handle refresh with toast
 const handleRefresh = async () => {
   try {
-    await refreshFeedbacks()
+    await refreshFeedbacks();
     toaster.show({
       title: 'بروزرسانی',
       message: 'لیست بازخوردها بروزرسانی شد',
       color: 'success',
       icon: 'ph:check-circle-fill',
       closable: true,
-    })
+    });
   }
   catch (error) {
     toaster.show({
@@ -132,21 +132,21 @@ const handleRefresh = async () => {
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
-}
+};
 
 // Handle reset filters
 const handleResetFilters = () => {
-  resetFilters()
+  resetFilters();
   toaster.show({
     title: 'تنظیم مجدد',
     message: 'فیلترها پاک شدند',
     color: 'info',
     icon: 'ph:funnel-duotone',
     closable: true,
-  })
-}
+  });
+};
 </script>
 
 <template>

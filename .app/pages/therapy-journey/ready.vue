@@ -161,171 +161,171 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'empty',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'آماده برای شروع | ذهنا',
-})
+});
 
-const router = useRouter()
-const { user } = useUser()
-const { getGoalsByUser } = useGoals()
-const { getTherapists } = usePsychotherapist()
+const router = useRouter();
+const { user } = useUser();
+const { getGoalsByUser } = useGoals();
+const { getTherapists } = usePsychotherapist();
 
 // Reactive state
-const isStarting = ref(false)
-const userGoals = ref<any[]>([])
-const selectedTherapist = ref<any>(null)
-const estimatedDuration = ref(30)
+const isStarting = ref(false);
+const userGoals = ref<any[]>([]);
+const selectedTherapist = ref<any>(null);
+const estimatedDuration = ref(30);
 
 // Computed messages
 const readyTitle = computed(() => {
   if (userGoals.value.length === 0) {
-    return 'آماده‌سازی جلسه'
+    return 'آماده‌سازی جلسه';
   }
-  return 'تحلیل تشخیصی تکمیل شد!'
-})
+  return 'تحلیل تشخیصی تکمیل شد!';
+});
 
 const readyMessage = computed(() => {
   if (userGoals.value.length === 0) {
-    return 'در حال آماده‌سازی جلسه درمانی شما...'
+    return 'در حال آماده‌سازی جلسه درمانی شما...';
   }
 
   // Count total disorders across all goals
   const totalDisorders = userGoals.value.reduce((total, goal) => {
-    const goalData = goal?.goals || goal
-    const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || []
+    const goalData = goal?.goals || goal;
+    const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || [];
     if (Array.isArray(disorders)) {
       return total + disorders.reduce((count, category) => {
-        return count + (category?.disorders?.length || 0)
-      }, 0)
+        return count + (category?.disorders?.length || 0);
+      }, 0);
     }
-    return total + 1
-  }, 0)
+    return total + 1;
+  }, 0);
 
-  return `بر اساس ارزیابی شما، ${userGoals.value.length} دسته‌بندی DSM-5 با ${totalDisorders} اختلال محتمل شناسایی شده است. اکنون آماده آغاز جلسه تشخیصی هستیم.`
-})
+  return `بر اساس ارزیابی شما، ${userGoals.value.length} دسته‌بندی DSM-5 با ${totalDisorders} اختلال محتمل شناسایی شده است. اکنون آماده آغاز جلسه تشخیصی هستیم.`;
+});
 
 // Load user goals and therapist info
 const loadSessionData = async () => {
   try {
     if (user.value?.id) {
       // Load user goals
-      const goals = await getGoalsByUser(user.value.id)
-      userGoals.value = goals || []
+      const goals = await getGoalsByUser(user.value.id);
+      userGoals.value = goals || [];
 
       // Load therapists and select default
-      const therapists = await getTherapists()
-      selectedTherapist.value = therapists.find(t => t.isActive) || therapists[0]
+      const therapists = await getTherapists();
+      selectedTherapist.value = therapists.find(t => t.isActive) || therapists[0];
 
       // Estimate session duration based on number of goals
-      estimatedDuration.value = Math.max(30, Math.min(60, userGoals.value.length * 8))
+      estimatedDuration.value = Math.max(30, Math.min(60, userGoals.value.length * 8));
     }
   }
   catch (error) {
-    console.error('Error loading session data:', error)
+    console.error('Error loading session data:', error);
   }
-}
+};
 
 // Start therapy session
 const startTherapySession = async () => {
-  if (isStarting.value) return
+  if (isStarting.value) return;
 
-  isStarting.value = true
+  isStarting.value = true;
 
   try {
     // Small delay for UX
-    await new Promise(resolve => setTimeout(resolve, 800))
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     // Navigate to chat with therapist
     if (selectedTherapist.value) {
-      await router.push(`/therapy-journey/chat?therapistId=${selectedTherapist.value.id}`)
+      await router.push(`/therapy-journey/chat?therapistId=${selectedTherapist.value.id}`);
     }
     else {
-      await router.push('/therapy-journey/chat')
+      await router.push('/therapy-journey/chat');
     }
   }
   catch (error) {
-    console.error('Error starting therapy session:', error)
-    isStarting.value = false
+    console.error('Error starting therapy session:', error);
+    isStarting.value = false;
 
     // Fallback navigation
-    await router.push('/therapy-journey/chat')
+    await router.push('/therapy-journey/chat');
   }
-}
+};
 
 // Review goals
 const reviewGoals = async () => {
-  await router.push('/therapy-journey/suggested-disorders-to-investigate')
-}
+  await router.push('/therapy-journey/suggested-disorders-to-investigate');
+};
 
 // Helper functions for displaying new goal structure
 const getCategoryTitle = (goal: any) => {
   // Check for new structure first
-  const goalData = goal?.goals || goal
-  const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || []
+  const goalData = goal?.goals || goal;
+  const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || [];
 
   if (Array.isArray(disorders) && disorders.length > 0) {
-    return disorders[0]?.categoryTitleFa || disorders[0]?.categoryTitle || goalData?.categoryTitle || 'دسته‌بندی DSM-5'
+    return disorders[0]?.categoryTitleFa || disorders[0]?.categoryTitle || goalData?.categoryTitle || 'دسته‌بندی DSM-5';
   }
 
   // Fallback to old structure
-  return goal?.title || goalData?.title || 'هدف تشخیصی'
-}
+  return goal?.title || goalData?.title || 'هدف تشخیصی';
+};
 
 const getDisorderCount = (goal: any) => {
-  const goalData = goal?.goals || goal
-  const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || []
+  const goalData = goal?.goals || goal;
+  const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || [];
 
   if (Array.isArray(disorders) && disorders.length > 0) {
     return disorders.reduce((count, category) => {
-      return count + (category?.disorders?.length || 0)
-    }, 0)
+      return count + (category?.disorders?.length || 0);
+    }, 0);
   }
 
-  return 1
-}
+  return 1;
+};
 
 const getTopDisorders = (goal: any) => {
-  const goalData = goal?.goals || goal
-  const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || []
+  const goalData = goal?.goals || goal;
+  const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || [];
 
   if (Array.isArray(disorders) && disorders.length > 0) {
-    const allDisorders = []
+    const allDisorders = [];
     disorders.forEach((category) => {
       if (category?.disorders) {
-        allDisorders.push(...category.disorders.slice(0, 2).map(d => d.title))
+        allDisorders.push(...category.disorders.slice(0, 2).map(d => d.title));
       }
-    })
+    });
 
     if (allDisorders.length > 0) {
-      return allDisorders.slice(0, 2).join('، ') + (allDisorders.length > 2 ? '...' : '')
+      return allDisorders.slice(0, 2).join('، ') + (allDisorders.length > 2 ? '...' : '');
     }
   }
 
-  return 'اختلالات پیشنهادی'
-}
+  return 'اختلالات پیشنهادی';
+};
 
 const getGoalStatus = (goal: any) => {
-  const goalData = goal?.goals || goal
-  const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || []
+  const goalData = goal?.goals || goal;
+  const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || [];
 
   if (Array.isArray(disorders) && disorders.length > 0) {
     const totalDisorders = disorders.reduce((count, category) => {
-      return count + (category?.disorders?.length || 0)
-    }, 0)
+      return count + (category?.disorders?.length || 0);
+    }, 0);
 
-    if (totalDisorders >= 5) return 'بررسی جامع مورد نیاز'
-    if (totalDisorders >= 3) return 'ارزیابی دقیق پیشنهادی'
-    if (totalDisorders >= 1) return 'بررسی اولیه'
+    if (totalDisorders >= 5) return 'بررسی جامع مورد نیاز';
+    if (totalDisorders >= 3) return 'ارزیابی دقیق پیشنهادی';
+    if (totalDisorders >= 1) return 'بررسی اولیه';
   }
 
-  return 'آماده برای بررسی'
-}
+  return 'آماده برای بررسی';
+};
 
 // Load data on mount
 onMounted(() => {
-  loadSessionData()
-})
+  loadSessionData();
+});
 </script>

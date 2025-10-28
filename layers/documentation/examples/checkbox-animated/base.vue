@@ -55,5 +55,5 @@ const options = ref([
   'Option 17',
   'Option 18',
   'Option 19',
-])
+]);
 </script>

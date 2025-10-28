@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-influencer-dark.png',
     order: 15,
   },
-})
+});
 
 const companies = [
   {
@@ -284,9 +284,9 @@ const companies = [
       },
     ],
   },
-]
+];
 
-const activeTab = ref('tab-1')
+const activeTab = ref('tab-1');
 </script>
 
 <template>

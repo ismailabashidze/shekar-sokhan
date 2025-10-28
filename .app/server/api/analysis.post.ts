@@ -1,17 +1,17 @@
-const LLM_ADDRESS = 'http://127.0.0.1:8000/query'
+const LLM_ADDRESS = 'http://127.0.0.1:8000/query';
 // const LLM_ADDRESS = 'http://193.163.201.12:8000/query'
 
 export type LLMMessage = {
-  role: 'system' | 'assistant' | 'user'
-  content: string
-}
+  role: 'system' | 'assistant' | 'user';
+  content: string;
+};
 
 async function fetchLLM(body: any) {
   setTimeout(async () => {
     const headers = {
       'Content-Type': 'application/json',
-    }
-    const userDetails = `DETAILS => we have previous knowledge from user which, name is: ${body.userDetails.name}, and age is : ${body.userDetails.age} years old, gender is: ${body.userDetails.gender}, and jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}. `
+    };
+    const userDetails = `DETAILS => we have previous knowledge from user which, name is: ${body.userDetails.name}, and age is : ${body.userDetails.age} years old, gender is: ${body.userDetails.gender}, and jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}. `;
     const sysPrompt = await $fetch(LLM_ADDRESS, {
       method: 'POST',
       headers,
@@ -107,9 +107,9 @@ Use simple and understandable grammer and vocabulary. Please limit sentence stru
 final answer should be a valid JSON. Never say "Here is the JSON response," just return a valid JSON response. Try not to repeat same sentences in your new messages. Responses from models: {responses}`),
       },
 
-    })
-    console.log('---SYS PROMPT---')
-    console.log(sysPrompt.final_response)
+    });
+    console.log('---SYS PROMPT---');
+    console.log(sysPrompt.final_response);
     // const data = {
     //   userId: body.userId,
     //   currentDivision: body.currentDivision,
@@ -130,7 +130,7 @@ final answer should be a valid JSON. Never say "Here is the JSON response," just
     // method: 'POST',
     // body: data,
     // })
-    return sysPrompt.final_response
+    return sysPrompt.final_response;
     // if (isValidJSON(response.final_response).valid) {
     //   if (checkJSONStructure(JSON.parse(response.final_response), ['choosenFactor', 'questionNumbers', 'analysis', 'message', 'estimate']))
     //     return response.final_response
@@ -139,13 +139,13 @@ final answer should be a valid JSON. Never say "Here is the JSON response," just
     //   console.log('here')
     //   await fetchLLM(body)
     // }
-  }, 0)
-  return { message: 'Success', status: 200 }
+  }, 0);
+  return { message: 'Success', status: 200 };
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = await readBody(event);
   return await fetchLLM(
     body,
-  )
-})
+  );
+});

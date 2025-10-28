@@ -7,19 +7,19 @@ const {
   showOverlay,
   open,
   close,
-} = usePanels()
+} = usePanels();
 
 watch(
   [current, showOverlay],
   ([panel, value]) => {
     if (panel?.component && value) {
-      document.documentElement.style.overflow = 'hidden'
+      document.documentElement.style.overflow = 'hidden';
     }
     else {
-      document.documentElement.style.overflow = ''
+      document.documentElement.style.overflow = '';
     }
   },
-)
+);
 
 </script>
 

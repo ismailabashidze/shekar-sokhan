@@ -123,7 +123,7 @@ ___
 - جدول‌های مقایسه‌ای بسازید
 - از تأکیدات متنی برای نکات کلیدی استفاده کنید
 - بخش‌ها را با خط افقی از هم جدا کنید
-`
+`;
 
 definePageMeta({
   title: 'ایجاد مقاله جدید',
@@ -136,62 +136,62 @@ definePageMeta({
     order: 15,
   },
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-import PersianCalendar from '~/components/PersianCalendar.vue'
-import AddonMarkdownRemark from '~/components/AddonMarkdownRemark.vue'
+import PersianCalendar from '~/components/PersianCalendar.vue';
+import AddonMarkdownRemark from '~/components/AddonMarkdownRemark.vue';
 
-const router = useRouter()
-const toaster = useToaster()
-const { streamChat, processing } = useOpenRouter()
-const { createPost, loading: postsLoading, error: postsError } = usePosts()
-const { user } = useUser()
+const router = useRouter();
+const toaster = useToaster();
+const { streamChat, processing } = useOpenRouter();
+const { createPost, loading: postsLoading, error: postsError } = usePosts();
+const { user } = useUser();
 
-const title = ref('')
-const description = ref('')
-const uploadedFiles = ref<FileList | null>(null)
-const category = ref('')
-const tags = ref<string[]>([])
-const newTag = ref('')
-const readTime = ref('')
-const publishDate = ref('')
-const contentLong = ref('')
-const excerpt = ref('')
-const slug = ref('')
-const allowComments = ref(true)
-const isFeatured = ref(false)
-const secretMessage = ref('')
-const goals = ref('')
+const title = ref('');
+const description = ref('');
+const uploadedFiles = ref<FileList | null>(null);
+const category = ref('');
+const tags = ref<string[]>([]);
+const newTag = ref('');
+const readTime = ref('');
+const publishDate = ref('');
+const contentLong = ref('');
+const excerpt = ref('');
+const slug = ref('');
+const allowComments = ref(true);
+const isFeatured = ref(false);
+const secretMessage = ref('');
+const goals = ref('');
 
 // Loading state for AI suggestion buttons
-const titleAiLoading = ref(false)
-const secretMessageAiLoading = ref(false)
-const goalsAiLoading = ref(false)
-const categoryAiLoading = ref(false)
-const tagsAiLoading = ref(false)
-const excerptAiLoading = ref(false)
-const slugAiLoading = ref(false)
-const contentLongAiLoading = ref(false)
-const generateGoalsAiLoading = ref(false)
-const syncAllFieldsLoading = ref(false)
+const titleAiLoading = ref(false);
+const secretMessageAiLoading = ref(false);
+const goalsAiLoading = ref(false);
+const categoryAiLoading = ref(false);
+const tagsAiLoading = ref(false);
+const excerptAiLoading = ref(false);
+const slugAiLoading = ref(false);
+const contentLongAiLoading = ref(false);
+const generateGoalsAiLoading = ref(false);
+const syncAllFieldsLoading = ref(false);
 
 // کنترل طول متن
-const contentLengthTarget = ref(5000) // طول پیش‌فرض ۵۰۰۰ کلمه
-const minContentLength = 1000
-const maxContentLength = 15000
+const contentLengthTarget = ref(5000); // طول پیش‌فرض ۵۰۰۰ کلمه
+const minContentLength = 1000;
+const maxContentLength = 15000;
 
 // تولید و افزودن تصویر
-const imageGenerationLoading = ref(false)
-const showImageModal = ref(false)
-const selectedTextForImage = ref('')
-const imageCaption = ref('')
-const imagePrompt = ref('')
+const imageGenerationLoading = ref(false);
+const showImageModal = ref(false);
+const selectedTextForImage = ref('');
+const imageCaption = ref('');
+const imagePrompt = ref('');
 
-const errors = ref({})
-const loading = ref(false)
-const success = ref(false)
+const errors = ref({});
+const loading = ref(false);
+const success = ref(false);
 
 const categories = [
   { value: 'meditation', label: 'مدیتیشن', icon: 'ph:person-simple-duotone' },
@@ -220,7 +220,7 @@ const categories = [
     icon: 'ph:apple-logo-duotone',
   },
   { value: 'mindfulness', label: 'ذهن‌آگاهی', icon: 'ph:eye-duotone' },
-]
+];
 const availableTags = [
   'خودآگاهی',
   'رشد فردی',
@@ -229,32 +229,32 @@ const availableTags = [
   'آرامش',
   'مدیتیشن',
   'یوگا',
-]
+];
 
 const previewImage = computed(() => {
   if (uploadedFiles.value && uploadedFiles.value.length) {
-    const file = uploadedFiles.value[0]
-    return URL.createObjectURL(file)
+    const file = uploadedFiles.value[0];
+    return URL.createObjectURL(file);
   }
-  return ''
-})
+  return '';
+});
 
 function formatFileSize(size: number) {
-  if (size < 1024) return size + ' bytes'
-  if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB'
-  return (size / 1024 / 1024).toFixed(1) + ' MB'
+  if (size < 1024) return size + ' bytes';
+  if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB';
+  return (size / 1024 / 1024).toFixed(1) + ' MB';
 }
 
 function validate() {
-  errors.value = {}
-  if (!title.value.trim()) errors.value.title = 'عنوان مقاله الزامی است.'
+  errors.value = {};
+  if (!title.value.trim()) errors.value.title = 'عنوان مقاله الزامی است.';
   if (!description.value.trim())
-    errors.value.description = 'توضیحات مقاله الزامی است.'
-  if (!category.value) errors.value.category = 'دسته‌بندی الزامی است.'
+    errors.value.description = 'توضیحات مقاله الزامی است.';
+  if (!category.value) errors.value.category = 'دسته‌بندی الزامی است.';
   if (!contentLong.value.trim())
-    errors.value.content = 'متن کامل مقاله الزامی است.'
-  if (!publishDate.value) errors.value.publishDate = 'تاریخ انتشار الزامی است.'
-  return Object.keys(errors.value).length === 0
+    errors.value.content = 'متن کامل مقاله الزامی است.';
+  if (!publishDate.value) errors.value.publishDate = 'تاریخ انتشار الزامی است.';
+  return Object.keys(errors.value).length === 0;
 }
 
 function formatLongContent(html: string) {
@@ -277,17 +277,17 @@ function formatLongContent(html: string) {
       .replace(/&nbsp;/g, ' ')
       .replace(/\n\s*\n/g, '\n\n')
       .trim()
-  )
+  );
 }
 
 async function submit() {
-  if (!validate()) return
+  if (!validate()) return;
 
-  loading.value = true
+  loading.value = true;
 
   try {
     // تبدیل tags از رشته به آرایه اگر ضروری باشد
-    const tagsArray = Array.isArray(tags.value) ? tags.value : []
+    const tagsArray = Array.isArray(tags.value) ? tags.value : [];
 
     // داده‌های مقاله برای ایجاد
     const postData = {
@@ -310,12 +310,12 @@ async function submit() {
       author: user.value?.id || '',
       viewCount: 0,
       likeCount: 0,
-    }
+    };
 
     // ایجاد مقاله با استفاده از کامپوزبل
-    const newPost = await createPost(postData)
+    const newPost = await createPost(postData);
 
-    success.value = true
+    success.value = true;
 
     // نمایش پیام موفقیت
     toaster.show({
@@ -324,12 +324,12 @@ async function submit() {
       color: 'success',
       icon: 'ph:check-circle',
       closable: true,
-    })
+    });
 
     // انتقال به صفحه لیست پس از تأخیر کوتاه
     setTimeout(() => {
-      router.push('/posts/list')
-    }, 1000)
+      router.push('/posts/list');
+    }, 1000);
   }
   catch (error: any) {
     // مدیریت خطا
@@ -339,28 +339,28 @@ async function submit() {
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
 
-    console.error('Error creating post:', error)
+    console.error('Error creating post:', error);
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 function addTag() {
   if (newTag.value && !tags.value.includes(newTag.value.trim())) {
-    tags.value.push(newTag.value.trim())
-    newTag.value = ''
+    tags.value.push(newTag.value.trim());
+    newTag.value = '';
   }
 }
 
 function removeTag(tag: string) {
-  tags.value = tags.value.filter(t => t !== tag)
+  tags.value = tags.value.filter(t => t !== tag);
 }
 
 function removeAllTags() {
-  tags.value = []
+  tags.value = [];
 }
 
 function savePreviewToLocalStorage() {
@@ -380,13 +380,13 @@ function savePreviewToLocalStorage() {
     goals: goals.value,
     contentLengthTarget: contentLengthTarget.value,
     // image: skip for now
-  }
-  localStorage.setItem('postPreview', JSON.stringify(data))
+  };
+  localStorage.setItem('postPreview', JSON.stringify(data));
 }
 
 function goToPreview() {
-  savePreviewToLocalStorage()
-  router.push('/posts/preview')
+  savePreviewToLocalStorage();
+  router.push('/posts/preview');
 }
 
 const isPreviewDisabled = computed(() => {
@@ -394,11 +394,11 @@ const isPreviewDisabled = computed(() => {
     !title.value.trim()
     && !contentLong.value.trim()
     && !description.value.trim()
-  )
-})
+  );
+});
 
 // Optional: auto-save on change
-import { watch } from 'vue'
+import { watch } from 'vue';
 watch(
   [
     title,
@@ -417,10 +417,10 @@ watch(
     contentLengthTarget,
   ],
   savePreviewToLocalStorage,
-)
+);
 
 // پیشنهاد همگام‌سازی هنگام تغییر فیلدهای کلیدی
-const syncSuggestionShown = ref(false)
+const syncSuggestionShown = ref(false);
 
 watch([title, secretMessage, category], () => {
   // فقط اگر حداقل عنوان و یکی از فیلدهای دیگر پر باشد
@@ -436,43 +436,43 @@ watch([title, secretMessage, category], () => {
           icon: 'ph:lightbulb',
           timeout: 5000,
           closable: true,
-        })
-        syncSuggestionShown.value = true
+        });
+        syncSuggestionShown.value = true;
       }
-    }, 2000) // تأخیر ۲ ثانیه‌ای
+    }, 2000); // تأخیر ۲ ثانیه‌ای
   }
-}, { debounce: 1000 }) // debounce برای جلوگیری از فراخوانی مکرر
+}, { debounce: 1000 }); // debounce برای جلوگیری از فراخوانی مکرر
 
 function backToPosts() {
-  router.push('/posts/list')
+  router.push('/posts/list');
 }
 
 async function suggestAIField(field: string) {
   switch (field) {
     case 'title':
-      titleAiLoading.value = true
-      break
+      titleAiLoading.value = true;
+      break;
     case 'secretMessage':
-      secretMessageAiLoading.value = true
-      break
+      secretMessageAiLoading.value = true;
+      break;
     case 'goals':
-      goalsAiLoading.value = true
-      break
+      goalsAiLoading.value = true;
+      break;
     case 'category':
-      categoryAiLoading.value = true
-      break
+      categoryAiLoading.value = true;
+      break;
     case 'tags':
-      tagsAiLoading.value = true
-      break
+      tagsAiLoading.value = true;
+      break;
     case 'excerpt':
-      excerptAiLoading.value = true
-      break
+      excerptAiLoading.value = true;
+      break;
     case 'slug':
-      slugAiLoading.value = true
-      break
+      slugAiLoading.value = true;
+      break;
     case 'contentLong':
-      contentLongAiLoading.value = true
-      break
+      contentLongAiLoading.value = true;
+      break;
   }
 
   try {
@@ -480,17 +480,17 @@ async function suggestAIField(field: string) {
     if (field === 'category') {
       const prompt = `با توجه به متن زیر، مناسب‌ترین دسته‌بندی را از بین گزینه‌های زیر انتخاب کن. فقط نام دسته‌بندی را برگردان و هیچ چیز دیگری ننویس.\n\nمتن: ${
         title.value || description.value || 'بدون عنوان'
-      }\n\nدسته‌بندی‌های موجود: ${categories.map(c => c.value).join('، ')}`
-      const messages = [{ role: 'user', content: prompt }]
+      }\n\nدسته‌بندی‌های موجود: ${categories.map(c => c.value).join('، ')}`;
+      const messages = [{ role: 'user', content: prompt }];
 
-      let suggestion = ''
-      categoryAiLoading.value = true
+      let suggestion = '';
+      categoryAiLoading.value = true;
 
       try {
         await streamChat(messages, {}, (chunk) => {
-          const content = chunk
+          const content = chunk;
           if (content) {
-            suggestion += content
+            suggestion += content;
             // Find the best matching category from our predefined list
             const matchedCategory = categories.find(
               cat =>
@@ -501,13 +501,13 @@ async function suggestAIField(field: string) {
                     .trim()
                     .toLowerCase()
                     .includes(cat.value.toLowerCase()),
-            )
+            );
             if (matchedCategory) {
-              category.value = matchedCategory.value
+              category.value = matchedCategory.value;
             }
-            console.log(category.value)
+            console.log(category.value);
           }
-        })
+        });
 
         // Show success toast
         toaster.show({
@@ -516,9 +516,9 @@ async function suggestAIField(field: string) {
           color: 'success',
           icon: 'ph:check-circle',
           closable: true,
-        })
+        });
 
-        return // Exit early after handling category
+        return; // Exit early after handling category
       }
       catch (e: any) {
         toaster.show({
@@ -529,11 +529,11 @@ async function suggestAIField(field: string) {
           color: 'danger',
           icon: 'ph:warning',
           closable: true,
-        })
-        throw e
+        });
+        throw e;
       }
       finally {
-        categoryAiLoading.value = false
+        categoryAiLoading.value = false;
       }
     }
 
@@ -541,23 +541,23 @@ async function suggestAIField(field: string) {
     if (field === 'tags') {
       const prompt = `چند برچسب مرتبط با این مقاله پیشنهاد بده. فقط برچسب‌ها را با کاما (،) جدا کن و چیز دیگری ننویس.\n\nعنوان: ${
         title.value || 'بدون عنوان'
-      }\nتوضیحات: ${description.value || 'بدون توضیحات'}`
-      const messages = [{ role: 'user', content: prompt }]
+      }\nتوضیحات: ${description.value || 'بدون توضیحات'}`;
+      const messages = [{ role: 'user', content: prompt }];
 
-      let suggestion = ''
-      tagsAiLoading.value = true
+      let suggestion = '';
+      tagsAiLoading.value = true;
 
       try {
         // First, collect the complete suggestion
         await new Promise<void>((resolve, reject) => {
           streamChat(messages, {}, (chunk) => {
             if (chunk) {
-              suggestion += chunk
+              suggestion += chunk;
             }
           })
             .then(resolve)
-            .catch(reject)
-        })
+            .catch(reject);
+        });
 
         // After complete message is received, process tags
         if (suggestion) {
@@ -565,11 +565,11 @@ async function suggestAIField(field: string) {
           const newTags = suggestion
             .split(/[،,]/)
             .map(tag => tag.trim())
-            .filter(tag => tag.length > 0)
+            .filter(tag => tag.length > 0);
 
           // Update tags with new unique values
           if (newTags.length > 0) {
-            tags.value = [...new Set(newTags)]
+            tags.value = [...new Set(newTags)];
           }
         }
 
@@ -580,9 +580,9 @@ async function suggestAIField(field: string) {
           color: 'success',
           icon: 'ph:check-circle',
           closable: true,
-        })
+        });
 
-        return // Exit early after handling tags
+        return; // Exit early after handling tags
       }
       catch (e: any) {
         toaster.show({
@@ -593,11 +593,11 @@ async function suggestAIField(field: string) {
           color: 'danger',
           icon: 'ph:warning',
           closable: true,
-        })
-        throw e
+        });
+        throw e;
       }
       finally {
-        tagsAiLoading.value = false
+        tagsAiLoading.value = false;
       }
     }
 
@@ -613,7 +613,7 @@ async function suggestAIField(field: string) {
       contentLong: contentLong.value,
       goals: goals.value,
       category: category.value,
-    }
+    };
     // Compose context string (exclude the current field)
     const contextMapping = {
       title: 'عنوان مقاله',
@@ -626,21 +626,21 @@ async function suggestAIField(field: string) {
       contentLong: 'متن کامل',
       goals: 'اهداف آموزشی',
       category: 'دسته‌بندی',
-    }
+    };
 
     // Add category label if selected
-    let enrichedContext = { ...context }
+    let enrichedContext = { ...context };
     if (enrichedContext.category) {
-      const selectedCategory = categories.find(c => c.value === enrichedContext.category)
+      const selectedCategory = categories.find(c => c.value === enrichedContext.category);
       if (selectedCategory) {
-        enrichedContext.category = `${selectedCategory.label} (${enrichedContext.category})`
+        enrichedContext.category = `${selectedCategory.label} (${enrichedContext.category})`;
       }
     }
 
     const contextString = Object.entries(enrichedContext)
       .filter(([key]) => key !== field && enrichedContext[key])
       .map(([key, val]) => `${contextMapping[key] || key}: ${val}`)
-      .join('\n')
+      .join('\n');
 
     const prompts = {
       title:
@@ -717,9 +717,9 @@ ${markdownGuide}
         - شامل جنبه‌های عاطفی، شناختی و رفتاری باشند
         - تحول مثبت در زندگی خواننده ایجاد کنند
         هر هدف را در یک خط مجزا بنویس.`,
-    }
-    const prompt = prompts[field] || 'یک مقدار مناسب پیشنهاد بده.'
-    const userContent = context[field]
+    };
+    const prompt = prompts[field] || 'یک مقدار مناسب پیشنهاد بده.';
+    const userContent = context[field];
     const messages = [
       {
         role: 'user',
@@ -727,59 +727,59 @@ ${markdownGuide}
           ? `${prompt}\nمقدار فعلی: ${userContent}\nاطلاعات دیگر مقاله:\n${contextString}`
           : `${prompt}\nاطلاعات دیگر مقاله:\n${contextString}`,
       },
-    ]
+    ];
     try {
-      let suggestion = ''
+      let suggestion = '';
       // For all fields, update in real-time as chunks arrive
-      const initialContent = getFieldValue(field)
+      const initialContent = getFieldValue(field);
 
       // Create a promise that resolves when streaming is complete
       await new Promise((resolve, reject) => {
         streamChat(messages, {}, (chunk) => {
-          const content = chunk
+          const content = chunk;
           if (content) {
-            suggestion += content
+            suggestion += content;
 
             // Update the field in real-time
             switch (field) {
               case 'title':
-                title.value = (initialContent + ' ' + suggestion).trim()
-                break
+                title.value = (initialContent + ' ' + suggestion).trim();
+                break;
               case 'description':
-                description.value = (initialContent + ' ' + suggestion).trim()
-                break
+                description.value = (initialContent + ' ' + suggestion).trim();
+                break;
               case 'excerpt':
-                excerpt.value = (initialContent + ' ' + suggestion).trim()
-                break
+                excerpt.value = (initialContent + ' ' + suggestion).trim();
+                break;
               case 'slug':
-                slug.value = (initialContent + ' ' + suggestion).trim()
-                break
+                slug.value = (initialContent + ' ' + suggestion).trim();
+                break;
               // case 'category':
               //   category.value = (initialContent + ' ' + suggestion).trim()
               //   break
               case 'secretMessage':
-                secretMessage.value = (initialContent + ' ' + suggestion).trim()
-                break
+                secretMessage.value = (initialContent + ' ' + suggestion).trim();
+                break;
               case 'goals':
-                goals.value = (initialContent + '\n' + suggestion).trim()
-                break
+                goals.value = (initialContent + '\n' + suggestion).trim();
+                break;
               case 'contentLong':
-                contentLong.value = (initialContent + '\n' + suggestion).trim()
-                break
+                contentLong.value = (initialContent + '\n' + suggestion).trim();
+                break;
               case 'tags':
                 const newTags
-                  = (initialContent ? initialContent + ', ' : '') + suggestion
+                  = (initialContent ? initialContent + ', ' : '') + suggestion;
                 tags.value = newTags
                   .split(',')
                   .map(t => t.trim())
-                  .filter(Boolean)
-                break
+                  .filter(Boolean);
+                break;
             }
           }
         })
           .then(resolve)
-          .catch(reject)
-      })
+          .catch(reject);
+      });
 
       // Show success toast
       toaster.show({
@@ -788,7 +788,7 @@ ${markdownGuide}
         color: 'success',
         icon: 'ph:check-circle',
         closable: true,
-      })
+      });
     }
     catch (e: any) {
       toaster.show({
@@ -799,63 +799,63 @@ ${markdownGuide}
         color: 'danger',
         icon: 'ph:warning',
         closable: true,
-      })
-      throw e // Re-throw to be caught by outer try-catch
+      });
+      throw e; // Re-throw to be caught by outer try-catch
     }
   }
   finally {
     // Ensure loading state is always reset
     switch (field) {
       case 'title':
-        titleAiLoading.value = false
-        break
+        titleAiLoading.value = false;
+        break;
       case 'secretMessage':
-        secretMessageAiLoading.value = false
-        break
+        secretMessageAiLoading.value = false;
+        break;
       case 'goals':
-        goalsAiLoading.value = false
-        break
+        goalsAiLoading.value = false;
+        break;
       case 'category':
-        categoryAiLoading.value = false
-        break
+        categoryAiLoading.value = false;
+        break;
       case 'tags':
-        tagsAiLoading.value = false
-        break
+        tagsAiLoading.value = false;
+        break;
       case 'excerpt':
-        excerptAiLoading.value = false
-        break
+        excerptAiLoading.value = false;
+        break;
       case 'slug':
-        slugAiLoading.value = false
-        break
+        slugAiLoading.value = false;
+        break;
       case 'contentLong':
-        contentLongAiLoading.value = false
-        break
+        contentLongAiLoading.value = false;
+        break;
     }
   }
 }
 function getFieldValue(field) {
   switch (field) {
     case 'title':
-      return title.value
+      return title.value;
     case 'description':
-      return description.value
+      return description.value;
     case 'excerpt':
-      return excerpt.value
+      return excerpt.value;
     case 'slug':
-      return slug.value
+      return slug.value;
     case 'category':
-      return category.value
+      return category.value;
     case 'tags':
-      return tags.value.join('، ')
+      return tags.value.join('، ');
     case 'secretMessage':
-      return secretMessage.value
+      return secretMessage.value;
     case 'contentLong':
-      return contentLong.value
+      return contentLong.value;
     case 'goals':
-      return goals.value
+      return goals.value;
     // ...other fields
     default:
-      return ''
+      return '';
   }
 }
 function setFieldValue(field, value) {
@@ -866,54 +866,54 @@ function setFieldValue(field, value) {
         tags.value = value
           .split('،')
           .map(t => t.trim())
-          .filter(Boolean)
+          .filter(Boolean);
       }
       else if (Array.isArray(value)) {
-        tags.value = value
+        tags.value = value;
       }
       else {
-        tags.value = []
+        tags.value = [];
       }
-      break
+      break;
     case 'title':
-      title.value = value
-      break
+      title.value = value;
+      break;
     case 'description':
-      description.value = value
-      break
+      description.value = value;
+      break;
     case 'excerpt':
-      excerpt.value = value
-      break
+      excerpt.value = value;
+      break;
     case 'slug':
-      slug.value = value
-      break
+      slug.value = value;
+      break;
     case 'category':
-      category.value = value
-      break
+      category.value = value;
+      break;
     case 'secretMessage':
-      secretMessage.value = value
-      break
+      secretMessage.value = value;
+      break;
     case 'contentLong':
-      contentLong.value = value
-      break
+      contentLong.value = value;
+      break;
     case 'goals':
-      goals.value = value
-      break
+      goals.value = value;
+      break;
     // ...other fields
   }
 }
-const showMarkdownAiEdit = ref(false)
-const selectedMarkdownText = ref('')
-const markdownAiEditDesc = ref('')
-const markdownTextarea = ref<HTMLTextAreaElement | null>(null)
+const showMarkdownAiEdit = ref(false);
+const selectedMarkdownText = ref('');
+const markdownAiEditDesc = ref('');
+const markdownTextarea = ref<HTMLTextAreaElement | null>(null);
 
 // Floating menu state
-const showFloatingMenu = ref(false)
-const floatingMenuPosition = ref({ x: 0, y: 0 })
-const selectedTextRange = ref({ start: 0, end: 0 })
+const showFloatingMenu = ref(false);
+const floatingMenuPosition = ref({ x: 0, y: 0 });
+const selectedTextRange = ref({ start: 0, end: 0 });
 
 // Track which AI action is currently active
-const activeAction = ref('')
+const activeAction = ref('');
 
 // Custom AI actions configuration
 const aiActions = ref([
@@ -949,38 +949,38 @@ const aiActions = ref([
     prompt:
       'متن زیر را به صورت خلاصه و مختصر بازنویسی کن. فقط نکات کلیدی و مهم را حفظ کن:\n\n{text}',
   },
-])
+]);
 
 // ویرایشگر عملیات هوش مصنوعی
-const showActionEditor = ref(false)
-const editingActionIndex = ref(null)
-const editingAction = ref({})
+const showActionEditor = ref(false);
+const editingActionIndex = ref(null);
+const editingAction = ref({});
 
 // تابع ذخیره تغییرات عملیات
 const saveActionEdit = () => {
   if (editingActionIndex.value !== null) {
-    aiActions.value[editingActionIndex.value] = { ...editingAction.value }
-    cancelActionEdit()
+    aiActions.value[editingActionIndex.value] = { ...editingAction.value };
+    cancelActionEdit();
   }
-}
+};
 
 // تابع لغو ویرایش عملیات
 const cancelActionEdit = () => {
-  editingActionIndex.value = null
-  editingAction.value = {}
-  showActionEditor.value = false
-}
+  editingActionIndex.value = null;
+  editingAction.value = {};
+  showActionEditor.value = false;
+};
 
 function openActionEditor() {
-  showActionEditor.value = true
-  editingActionIndex.value = -1
+  showActionEditor.value = true;
+  editingActionIndex.value = -1;
   editingAction.value = {
     icon: '',
     action: '',
     title: '',
     prompt: '',
     loading: false,
-  }
+  };
 }
 const newAction = ref({
   icon: '',
@@ -988,24 +988,24 @@ const newAction = ref({
   title: '',
   prompt: '',
   loading: false,
-})
+});
 
 function openMarkdownAiEditPopup() {
-  showMarkdownAiEdit.value = true
+  showMarkdownAiEdit.value = true;
 }
 
 // Delete an AI action button
 function deleteAction(index) {
-  aiActions.value.splice(index, 1)
+  aiActions.value.splice(index, 1);
   // Reset editing state if we're editing the deleted action
   if (editingActionIndex.value === index) {
-    cancelEdit()
+    cancelEdit();
   }
 }
 
 // Save a new or edited AI action button
 function saveAction() {
-  if (!editingAction.value) return
+  if (!editingAction.value) return;
 
   // Validate required fields
   if (
@@ -1014,16 +1014,16 @@ function saveAction() {
     || !editingAction.value.icon
     || !editingAction.value.prompt
   ) {
-    return
+    return;
   }
 
   if (editingActionIndex.value > -1) {
     // Update existing action
-    aiActions.value[editingActionIndex.value] = { ...editingAction.value }
+    aiActions.value[editingActionIndex.value] = { ...editingAction.value };
   }
   else {
     // Add new action
-    aiActions.value.push({ ...editingAction.value })
+    aiActions.value.push({ ...editingAction.value });
   }
 
   // Show success toast
@@ -1036,10 +1036,10 @@ function saveAction() {
     color: 'success',
     icon: 'ph:check-circle',
     timeout: 3000,
-  })
+  });
 
   // Reset editing state
-  cancelEdit()
+  cancelEdit();
 }
 
 // Cancel editing and reset form
@@ -1050,82 +1050,82 @@ function cancelEdit() {
     title: '',
     prompt: '',
     loading: false,
-  }
-  editingActionIndex.value = -1
+  };
+  editingActionIndex.value = -1;
 }
 function applyMarkdownAiEdit() {
   // Call AI API with selectedMarkdownText and markdownAiEditDesc
-  const prompt = `یک پاراگراف مارک‌داون برای این متن پیشنهاد بده.\nمتن فعلی:\n${selectedMarkdownText.value}\nتوضیحات:\n${markdownAiEditDesc.value}`
-  const messages = [{ role: 'user', content: prompt }]
+  const prompt = `یک پاراگراف مارک‌داون برای این متن پیشنهاد بده.\nمتن فعلی:\n${selectedMarkdownText.value}\nتوضیحات:\n${markdownAiEditDesc.value}`;
+  const messages = [{ role: 'user', content: prompt }];
   streamChat(messages, {}, (chunk) => {
-    const suggestion = chunk
+    const suggestion = chunk;
     contentLong.value = contentLong.value.replace(
       selectedMarkdownText.value,
       suggestion,
-    )
-    showMarkdownAiEdit.value = false
-    markdownAiEditDesc.value = ''
-    selectedMarkdownText.value = ''
-  })
+    );
+    showMarkdownAiEdit.value = false;
+    markdownAiEditDesc.value = '';
+    selectedMarkdownText.value = '';
+  });
 }
 // Handle text selection in markdown textarea
 function handleMarkdownSelection(event: Event) {
   // We need to use setTimeout to ensure the selection is stable
   setTimeout(() => {
-    const textarea = markdownTextarea.value?.$el?.querySelector('textarea')
+    const textarea = markdownTextarea.value?.$el?.querySelector('textarea');
     if (!textarea) {
-      selectedMarkdownText.value = ''
-      showFloatingMenu.value = false
-      return
+      selectedMarkdownText.value = '';
+      showFloatingMenu.value = false;
+      return;
     }
 
-    const start = textarea.selectionStart
-    const end = textarea.selectionEnd
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
 
     if (start !== end) {
-      const selectedText = textarea.value.substring(start, end).trim()
+      const selectedText = textarea.value.substring(start, end).trim();
       if (selectedText) {
-        console.log('Selected text:', selectedText) // Debug log
-        selectedMarkdownText.value = selectedText
-        selectedTextForImage.value = selectedText // برای تولید تصویر
-        selectedTextRange.value = { start, end }
+        console.log('Selected text:', selectedText); // Debug log
+        selectedMarkdownText.value = selectedText;
+        selectedTextForImage.value = selectedText; // برای تولید تصویر
+        selectedTextRange.value = { start, end };
 
         // Show the inline buttons when text is selected
-        showFloatingMenu.value = true
-        return
+        showFloatingMenu.value = true;
+        return;
       }
     }
 
     // No valid selection
-    selectedMarkdownText.value = ''
-    showFloatingMenu.value = false
-  }, 10) // Small delay to ensure selection is available
+    selectedMarkdownText.value = '';
+    showFloatingMenu.value = false;
+  }, 10); // Small delay to ensure selection is available
 }
 
 // Handle AI rewrite actions
 async function handleAIAction(action: string) {
   // Set active action for highlighting
-  activeAction.value = action
-  const textarea = markdownTextarea.value?.$el?.querySelector('textarea')
-  if (!textarea) return
+  activeAction.value = action;
+  const textarea = markdownTextarea.value?.$el?.querySelector('textarea');
+  if (!textarea) return;
 
-  const { start, end } = selectedTextRange.value
-  const selectedText = textarea.value.substring(start, end)
+  const { start, end } = selectedTextRange.value;
+  const selectedText = textarea.value.substring(start, end);
 
   // Create a local loading state for this action
-  const actionLoading = ref(true)
+  const actionLoading = ref(true);
 
   try {
     // Find the action configuration
-    const actionConfig = aiActions.value.find(a => a.action === action)
-    if (!actionConfig) return
+    const actionConfig = aiActions.value.find(a => a.action === action);
+    if (!actionConfig) return;
 
     // Use the prompt from the action configuration
-    let prompt = actionConfig.prompt.replace('{text}', selectedText)
+    let prompt = actionConfig.prompt.replace('{text}', selectedText);
 
-    const messages = [{ role: 'user', content: prompt }]
+    const messages = [{ role: 'user', content: prompt }];
 
-    let result = ''
+    let result = '';
 
     // Show loading state in toast notification
     const toastId = toaster.show({
@@ -1143,19 +1143,19 @@ async function handleAIAction(action: string) {
       icon: 'svg-spinners:90-ring-with-bg',
       closable: true,
       timeout: 0,
-    }).id
+    }).id;
 
     // Call AI API
     await streamChat(messages, {}, (chunk) => {
-      result += chunk // Accumulate chunks instead of replacing
-    })
+      result += chunk; // Accumulate chunks instead of replacing
+    });
 
     // Update the textarea with the AI result
     if (result) {
-      const currentValue = textarea.value
-      const beforeText = currentValue.substring(0, start)
-      const afterText = currentValue.substring(end)
-      contentLong.value = beforeText + result + afterText
+      const currentValue = textarea.value;
+      const beforeText = currentValue.substring(0, start);
+      const afterText = currentValue.substring(end);
+      contentLong.value = beforeText + result + afterText;
 
       // Show success toast (skip clearing previous toast as it causes errors)
       toaster.show({
@@ -1165,47 +1165,47 @@ async function handleAIAction(action: string) {
         icon: 'ph:check-circle',
         closable: true,
         timeout: 3000,
-      })
+      });
     }
   }
   catch (error) {
-    console.error('AI rewrite error:', error)
+    console.error('AI rewrite error:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در پردازش متن. لطفاً دوباره امتحان کنید.',
       color: 'danger',
       icon: 'ph:warning-circle',
       closable: true,
-    })
+    });
   }
   finally {
     // Hide buttons after action completes
-    showFloatingMenu.value = false
-    textarea.focus()
+    showFloatingMenu.value = false;
+    textarea.focus();
     // Reset active action
-    activeAction.value = ''
+    activeAction.value = '';
   }
 }
 // Show/hide clear confirmation modal
-const showClearConfirm = ref(false)
+const showClearConfirm = ref(false);
 
 // Reset all form fields
 function resetForm() {
-  title.value = ''
-  description.value = ''
-  excerpt.value = ''
-  slug.value = ''
-  readTime.value = ''
-  category.value = ''
-  secretMessage.value = ''
-  contentLong.value = ''
-  goals.value = ''
-  tags.value = []
-  uploadedFiles.value = null
-  contentLengthTarget.value = 5000
+  title.value = '';
+  description.value = '';
+  excerpt.value = '';
+  slug.value = '';
+  readTime.value = '';
+  category.value = '';
+  secretMessage.value = '';
+  contentLong.value = '';
+  goals.value = '';
+  tags.value = [];
+  uploadedFiles.value = null;
+  contentLengthTarget.value = 5000;
 
   // Close the modal after resetting
-  showClearConfirm.value = false
+  showClearConfirm.value = false;
 
   // Show success message
   toaster.show({
@@ -1214,56 +1214,56 @@ function resetForm() {
     icon: 'ph:check-circle',
     color: 'success',
     timeout: 3000,
-  })
+  });
 }
 
 // Load preview data from localStorage
 const loadPreviewFromLocalStorage = () => {
-  const savedData = localStorage.getItem('postPreview')
+  const savedData = localStorage.getItem('postPreview');
   if (savedData) {
-    const data = JSON.parse(savedData)
-    title.value = data.title || ''
-    description.value = data.description || ''
-    contentLong.value = data.contentLong || ''
-    excerpt.value = data.excerpt || ''
-    slug.value = data.slug || ''
-    category.value = data.category || ''
-    tags.value = data.tags || []
-    publishDate.value = data.publishDate || ''
-    readTime.value = data.readTime || ''
-    isFeatured.value = data.isFeatured || false
-    allowComments.value = data.allowComments ?? true
-    secretMessage.value = data.secretMessage || ''
-    goals.value = data.goals || ''
-    contentLengthTarget.value = data.contentLengthTarget || 5000
-    uploadedFiles.value = data.uploadedFiles || null
+    const data = JSON.parse(savedData);
+    title.value = data.title || '';
+    description.value = data.description || '';
+    contentLong.value = data.contentLong || '';
+    excerpt.value = data.excerpt || '';
+    slug.value = data.slug || '';
+    category.value = data.category || '';
+    tags.value = data.tags || [];
+    publishDate.value = data.publishDate || '';
+    readTime.value = data.readTime || '';
+    isFeatured.value = data.isFeatured || false;
+    allowComments.value = data.allowComments ?? true;
+    secretMessage.value = data.secretMessage || '';
+    goals.value = data.goals || '';
+    contentLengthTarget.value = data.contentLengthTarget || 5000;
+    uploadedFiles.value = data.uploadedFiles || null;
   }
-}
+};
 
 // Attach selection handler and load saved data
 onMounted(() => {
   // Need to wait until the DOM is fully loaded
   setTimeout(() => {
-    const textarea = markdownTextarea.value?.$el?.querySelector('textarea')
+    const textarea = markdownTextarea.value?.$el?.querySelector('textarea');
     if (textarea) {
-      console.log('Adding event listeners to textarea')
-      textarea.addEventListener('mouseup', handleMarkdownSelection)
-      textarea.addEventListener('keyup', handleMarkdownSelection)
-      textarea.addEventListener('click', handleMarkdownSelection)
-      textarea.addEventListener('select', handleMarkdownSelection)
+      console.log('Adding event listeners to textarea');
+      textarea.addEventListener('mouseup', handleMarkdownSelection);
+      textarea.addEventListener('keyup', handleMarkdownSelection);
+      textarea.addEventListener('click', handleMarkdownSelection);
+      textarea.addEventListener('select', handleMarkdownSelection);
     }
     else {
-      console.warn('Textarea element not found')
+      console.warn('Textarea element not found');
     }
-  }, 500) // Give it some time to render
+  }, 500); // Give it some time to render
 
   // Load saved data when component mounts
-  loadPreviewFromLocalStorage()
-})
+  loadPreviewFromLocalStorage();
+});
 
 // همگام‌سازی هوشمند تمام فیلدها
 const syncAllFieldsAI = async () => {
-  syncAllFieldsLoading.value = true
+  syncAllFieldsLoading.value = true;
 
   try {
     if (!title.value.trim()) {
@@ -1273,8 +1273,8 @@ const syncAllFieldsAI = async () => {
         color: 'warning',
         icon: 'ph:warning',
         closable: true,
-      })
-      return
+      });
+      return;
     }
 
     // توضیح برای کاربر
@@ -1284,7 +1284,7 @@ const syncAllFieldsAI = async () => {
       color: 'info',
       icon: 'svg-spinners:90-ring-with-bg',
       timeout: 0,
-    })
+    });
 
     // ترتیب بهینه برای همگام‌سازی
     const syncOrder = [
@@ -1296,17 +1296,17 @@ const syncAllFieldsAI = async () => {
       'excerpt',
       'slug',
       'contentLong',
-    ]
+    ];
 
     // همگام‌سازی با تأخیر برای جلوگیری از بارگذاری زیاد سرور
     for (const fieldName of syncOrder) {
       try {
-        await suggestAIField(fieldName)
+        await suggestAIField(fieldName);
         // تأخیر کوتاه بین درخواست‌ها
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
       catch (error) {
-        console.warn(`خطا در همگام‌سازی ${fieldName}:`, error)
+        console.warn(`خطا در همگام‌سازی ${fieldName}:`, error);
         // ادامه با فیلد بعدی حتی در صورت خطا
       }
     }
@@ -1318,22 +1318,22 @@ const syncAllFieldsAI = async () => {
       icon: 'ph:check-circle',
       closable: true,
       timeout: 5000,
-    })
+    });
   }
   catch (error) {
-    console.error('خطا در همگام‌سازی:', error)
+    console.error('خطا در همگام‌سازی:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در همگام‌سازی فیلدها. لطفاً دوباره امتحان کنید.',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
   finally {
-    syncAllFieldsLoading.value = false
+    syncAllFieldsLoading.value = false;
   }
-}
+};
 
 // تولید تصویر متناسب با متن انتخابی
 const generateImageForText = async () => {
@@ -1344,11 +1344,11 @@ const generateImageForText = async () => {
       color: 'warning',
       icon: 'ph:warning',
       closable: true,
-    })
-    return
+    });
+    return;
   }
 
-  imageGenerationLoading.value = true
+  imageGenerationLoading.value = true;
 
   try {
     // تولید prompt برای تصویر
@@ -1360,44 +1360,44 @@ ${selectedTextForImage.value}
 
 فرمت پاسخ:
 PROMPT: [توضیح تصویر]
-CAPTION: [زیرنویس تصویر]`
+CAPTION: [زیرنویس تصویر]`;
 
-    const messages = [{ role: 'user', content: prompt }]
+    const messages = [{ role: 'user', content: prompt }];
 
-    let result = ''
+    let result = '';
     await streamChat(messages, {}, (chunk) => {
-      result += chunk
-    })
+      result += chunk;
+    });
 
     if (result) {
       // استخراج prompt و caption از پاسخ
-      const promptMatch = result.match(/PROMPT:\s*(.+?)(?=CAPTION:|$)/s)
-      const captionMatch = result.match(/CAPTION:\s*(.+)$/s)
+      const promptMatch = result.match(/PROMPT:\s*(.+?)(?=CAPTION:|$)/s);
+      const captionMatch = result.match(/CAPTION:\s*(.+)$/s);
 
       if (promptMatch) {
-        imagePrompt.value = promptMatch[1].trim()
+        imagePrompt.value = promptMatch[1].trim();
       }
       if (captionMatch) {
-        imageCaption.value = captionMatch[1].trim()
+        imageCaption.value = captionMatch[1].trim();
       }
 
-      showImageModal.value = true
+      showImageModal.value = true;
     }
   }
   catch (error) {
-    console.error('خطا در تولید prompt تصویر:', error)
+    console.error('خطا در تولید prompt تصویر:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در تولید اطلاعات تصویر. لطفاً دوباره امتحان کنید.',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
   finally {
-    imageGenerationLoading.value = false
+    imageGenerationLoading.value = false;
   }
-}
+};
 
 // افزودن markdown تصویر به متن
 const insertImageMarkdown = () => {
@@ -1408,32 +1408,32 @@ const insertImageMarkdown = () => {
       color: 'warning',
       icon: 'ph:warning',
       closable: true,
-    })
-    return
+    });
+    return;
   }
 
   // تولید URL ساختگی برای نمونه - در عمل باید از API تولید تصویر استفاده شود
-  const imageUrl = `https://picsum.photos/600/400?random=${Date.now()}`
+  const imageUrl = `https://picsum.photos/600/400?random=${Date.now()}`;
 
-  const imageMarkdown = `\n\n![${imageCaption.value}](${imageUrl})\n*${imageCaption.value}*\n\n`
+  const imageMarkdown = `\n\n![${imageCaption.value}](${imageUrl})\n*${imageCaption.value}*\n\n`;
 
   // افزودن به محل انتخاب یا انتهای متن
-  const textarea = markdownTextarea.value?.$el?.querySelector('textarea')
+  const textarea = markdownTextarea.value?.$el?.querySelector('textarea');
   if (textarea && selectedTextRange.value.end > 0) {
-    const currentValue = textarea.value
-    const beforeText = currentValue.substring(0, selectedTextRange.value.end)
-    const afterText = currentValue.substring(selectedTextRange.value.end)
-    contentLong.value = beforeText + imageMarkdown + afterText
+    const currentValue = textarea.value;
+    const beforeText = currentValue.substring(0, selectedTextRange.value.end);
+    const afterText = currentValue.substring(selectedTextRange.value.end);
+    contentLong.value = beforeText + imageMarkdown + afterText;
   }
   else {
-    contentLong.value += imageMarkdown
+    contentLong.value += imageMarkdown;
   }
 
   // بستن modal و پاک کردن فیلدها
-  showImageModal.value = false
-  selectedTextForImage.value = ''
-  imagePrompt.value = ''
-  imageCaption.value = ''
+  showImageModal.value = false;
+  selectedTextForImage.value = '';
+  imagePrompt.value = '';
+  imageCaption.value = '';
 
   toaster.show({
     title: 'موفقیت',
@@ -1441,14 +1441,14 @@ const insertImageMarkdown = () => {
     color: 'success',
     icon: 'ph:check-circle',
     closable: true,
-  })
-}
+  });
+};
 
 const generateGoalsListAI = async () => {
-  generateGoalsAiLoading.value = true
+  generateGoalsAiLoading.value = true;
 
   try {
-    const topic = title.value.trim()
+    const topic = title.value.trim();
     if (!topic) {
       toaster.show({
         title: 'هشدار',
@@ -1456,24 +1456,24 @@ const generateGoalsListAI = async () => {
         color: 'warning',
         icon: 'ph:warning',
         closable: true,
-      })
-      return
+      });
+      return;
     }
 
-    goals.value = ''
+    goals.value = '';
 
     // جمع‌آوری اطلاعات موجود برای ایجاد زمینه بهتر
-    const contextInfo = []
-    if (title.value.trim()) contextInfo.push(`عنوان: ${title.value}`)
-    if (secretMessage.value.trim()) contextInfo.push(`پیام مخفی: ${secretMessage.value}`)
+    const contextInfo = [];
+    if (title.value.trim()) contextInfo.push(`عنوان: ${title.value}`);
+    if (secretMessage.value.trim()) contextInfo.push(`پیام مخفی: ${secretMessage.value}`);
     if (category.value) {
-      const selectedCategory = categories.find(c => c.value === category.value)
-      if (selectedCategory) contextInfo.push(`دسته‌بندی: ${selectedCategory.label}`)
+      const selectedCategory = categories.find(c => c.value === category.value);
+      if (selectedCategory) contextInfo.push(`دسته‌بندی: ${selectedCategory.label}`);
     }
-    if (tags.value.length > 0) contextInfo.push(`برچسب‌ها: ${tags.value.join('، ')}`)
-    if (description.value.trim()) contextInfo.push(`توضیحات: ${description.value}`)
+    if (tags.value.length > 0) contextInfo.push(`برچسب‌ها: ${tags.value.join('، ')}`);
+    if (description.value.trim()) contextInfo.push(`توضیحات: ${description.value}`);
 
-    const contextString = contextInfo.join('\n')
+    const contextString = contextInfo.join('\n');
 
     const prompt = `بر اساس اطلاعات زیر، اهداف آموزشی و روانشناختی دقیق و قابل اندازه‌گیری بنویس که خواننده پس از مطالعه این مقاله به دست خواهد آورد:
 
@@ -1486,7 +1486,7 @@ ${contextString}
 - عملی و قابل دستیابی باشند
 - تحول مثبت در زندگی خواننده ایجاد کنند
 
-هر هدف را در یک خط مجزا و به صورت مشخص بنویس. حداقل ۵ و حداکثر ۱۰ هدف ارائه دهید.`
+هر هدف را در یک خط مجزا و به صورت مشخص بنویس. حداقل ۵ و حداکثر ۱۰ هدف ارائه دهید.`;
 
     const messages = [
       {
@@ -1494,16 +1494,16 @@ ${contextString}
         content: 'شما یک دستیار متخصص تولید محتوای روانشناسی هستید.',
       },
       { role: 'user', content: prompt },
-    ]
+    ];
 
-    const { streamChat } = useOpenRouter()
-    let result = ''
+    const { streamChat } = useOpenRouter();
+    let result = '';
 
     await streamChat(messages, {}, (chunk) => {
-      const content = chunk
-      result += content
-      goals.value = result // Update in real-time
-    })
+      const content = chunk;
+      result += content;
+      goals.value = result; // Update in real-time
+    });
 
     toaster.show({
       title: 'موفقیت',
@@ -1511,7 +1511,7 @@ ${contextString}
       color: 'success',
       icon: 'ph:check-circle',
       closable: true,
-    })
+    });
   }
   catch (e: any) {
     toaster.show({
@@ -1520,14 +1520,14 @@ ${contextString}
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
-    goals.value = 'خطا در دریافت اهداف از هوش مصنوعی.'
-    throw e
+    });
+    goals.value = 'خطا در دریافت اهداف از هوش مصنوعی.';
+    throw e;
   }
   finally {
-    generateGoalsAiLoading.value = false
+    generateGoalsAiLoading.value = false;
   }
-}
+};
 </script>
 
 <template>

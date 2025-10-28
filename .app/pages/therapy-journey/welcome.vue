@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue';
 
 definePageMeta({
   title: 'سفر درمانی - خوش آمدید',
@@ -12,7 +12,7 @@ definePageMeta({
     srcDark: '/img/logo.svg',
     order: 1,
   },
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -20,12 +20,12 @@ useHead({
   meta: [
     { name: 'description', content: 'آغاز سفر بهبود و رشد شخصی با کمک هوش مصنوعی. محرمانه، امن و حرفه‌ای.' },
   ],
-})
+});
 
-const router = useRouter()
-const isVisible = ref(false)
-const currentStep = ref(0)
-const isStarting = ref(false)
+const router = useRouter();
+const isVisible = ref(false);
+const currentStep = ref(0);
+const isStarting = ref(false);
 
 const steps = [
   {
@@ -55,33 +55,33 @@ const steps = [
     iconColor: 'text-info-500',
     titleColor: 'text-info-700 dark:text-info-300',
   },
-]
+];
 
 onMounted(() => {
   setTimeout(() => {
-    isVisible.value = true
-  }, 100)
+    isVisible.value = true;
+  }, 100);
 
   // Progressive reveal of steps
   const interval = setInterval(() => {
     if (currentStep.value < steps.length - 1) {
-      currentStep.value++
+      currentStep.value++;
     }
     else {
-      clearInterval(interval)
+      clearInterval(interval);
     }
-  }, 800)
-})
+  }, 800);
+});
 
 const startJourney = async () => {
-  isStarting.value = true
+  isStarting.value = true;
 
   // Add a nice loading effect
-  await new Promise(resolve => setTimeout(resolve, 1500))
+  await new Promise(resolve => setTimeout(resolve, 1500));
 
   // Navigate to the next step of the therapy journey
-  router.push('/therapy-journey/assessment')
-}
+  router.push('/therapy-journey/assessment');
+};
 </script>
 
 <template>

@@ -66,6 +66,6 @@
 </template>
 
 <script setup lang="ts">
-const first = ref('')
-const second = ref('')
+const first = ref('');
+const second = ref('');
 </script>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    shape?: 'rounded' | 'curved' | 'full'
+    shape?: 'rounded' | 'curved' | 'full';
   }>(),
   {
     shape: 'rounded',
   },
-)
+);
 
 const items = [
   {
@@ -51,7 +51,7 @@ const items = [
     title: 'Write proposal for Andy',
     description: 'Today - 06:30pm',
   },
-]
+];
 </script>
 
 <template>

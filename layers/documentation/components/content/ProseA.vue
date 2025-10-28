@@ -9,11 +9,11 @@ const props = defineProps({
     default: undefined,
     required: false,
   },
-})
+});
 
 const isExternal = computed(() => {
-  return props.href.startsWith('http')
-})
+  return props.href.startsWith('http');
+});
 </script>
 
 <template>

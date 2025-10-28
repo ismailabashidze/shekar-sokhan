@@ -10,45 +10,45 @@ definePageMeta({
     order: 80,
     new: true,
   },
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(10)
+const filter = ref('');
+const perPage = ref(10);
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch(
   '/api/payments/outgoing',
   {
     query,
   },
-)
+);
 
 const toApprove = computed(() => {
-  return data?.value?.data.filter((item: any) => item.status === 'pending')
-})
+  return data?.value?.data.filter((item: any) => item.status === 'pending');
+});
 
 const scheduled = computed(() => {
-  return data?.value?.data.filter((item: any) => item.status === 'scheduled')
-})
+  return data?.value?.data.filter((item: any) => item.status === 'scheduled');
+});
 </script>
 
 <template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import HorizontalSideBar from '../../.app/components/global/HorizontalSideBar.vue'
+import HorizontalSideBar from '../../.app/components/global/HorizontalSideBar.vue';
 
-const route = useRoute()
-const app = useAppConfig()
+const route = useRoute();
+const app = useAppConfig();
 
 /**
  * Global head configuration
@@ -14,9 +14,9 @@ useHead({
   titleTemplate: (titleChunk) => {
     return titleChunk
       ? `${app.tairo.title} - ${titleChunk}`
-      : `${app.tairo.title || 'Tairo'}`
+      : `${app.tairo.title || 'Tairo'}`;
   },
-})
+});
 </script>
 
 <template>

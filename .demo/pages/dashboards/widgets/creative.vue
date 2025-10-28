@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-widgets-creative-dark.png',
     order: 28,
   },
-})
+});
 </script>
 
 <template>

@@ -78,7 +78,7 @@
 definePageMeta({
   title: 'سیستم نظارت',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 </script>

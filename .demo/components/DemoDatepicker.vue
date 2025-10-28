@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
-  expanded?: boolean
-}>()
+  expanded?: boolean;
+}>();
 
 const MONTH_NAMES = [
   'January',
@@ -16,7 +16,7 @@ const MONTH_NAMES = [
   'October',
   'November',
   'December',
-]
+];
 
 const MONTH_SHORT_NAMES = [
   'Jan',
@@ -31,110 +31,110 @@ const MONTH_SHORT_NAMES = [
   'Oct',
   'Nov',
   'Dec',
-]
+];
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const showDatepicker = ref(false)
-const datepickerValue = ref('')
-const selectedDate = ref('2022-12-29')
-const dateFormat = ref('DD-MM-YYYY')
-const month = ref()
-const year = ref()
-const numberOfDays = ref<number[]>([])
-const blankDays = ref<number[]>([])
+const showDatepicker = ref(false);
+const datepickerValue = ref('');
+const selectedDate = ref('2022-12-29');
+const dateFormat = ref('DD-MM-YYYY');
+const month = ref();
+const year = ref();
+const numberOfDays = ref<number[]>([]);
+const blankDays = ref<number[]>([]);
 
 function initDate() {
-  let today
+  let today;
   if (selectedDate.value) {
-    today = new Date(Date.parse(selectedDate.value))
+    today = new Date(Date.parse(selectedDate.value));
   }
   else {
-    today = new Date()
+    today = new Date();
   }
-  month.value = today.getMonth()
-  year.value = today.getFullYear()
-  datepickerValue.value = formatDateForDisplay(today)
+  month.value = today.getMonth();
+  year.value = today.getFullYear();
+  datepickerValue.value = formatDateForDisplay(today);
 }
 
 function formatDateForDisplay(date: any) {
-  let formattedDay = DAYS[date.getDay()]
-  let formattedDate = ('0' + date.getDate()).slice(-2) // appends 0 (zero) in single digit date
-  let formattedMonth = MONTH_NAMES[date.getMonth()]
-  let formattedMonthShortName = MONTH_SHORT_NAMES[date.getMonth()]
-  let formattedMonthInNumber = ('0' + (parseInt(date.getMonth()) + 1)).slice(-2)
-  let formattedYear = date.getFullYear()
+  let formattedDay = DAYS[date.getDay()];
+  let formattedDate = ('0' + date.getDate()).slice(-2); // appends 0 (zero) in single digit date
+  let formattedMonth = MONTH_NAMES[date.getMonth()];
+  let formattedMonthShortName = MONTH_SHORT_NAMES[date.getMonth()];
+  let formattedMonthInNumber = ('0' + (parseInt(date.getMonth()) + 1)).slice(-2);
+  let formattedYear = date.getFullYear();
   if (dateFormat.value === 'DD-MM-YYYY') {
-    return `${formattedDate}-${formattedMonthInNumber}-${formattedYear}` // 02-04-2022
+    return `${formattedDate}-${formattedMonthInNumber}-${formattedYear}`; // 02-04-2022
   }
   if (dateFormat.value === 'YYYY-MM-DD') {
-    return `${formattedYear}-${formattedMonthInNumber}-${formattedDate}` // 2022-04-02
+    return `${formattedYear}-${formattedMonthInNumber}-${formattedDate}`; // 2022-04-02
   }
   if (dateFormat.value === 'D d M, Y') {
-    return `${formattedDay} ${formattedDate} ${formattedMonthShortName} ${formattedYear}` // Tue 02 Mar 2022
+    return `${formattedDay} ${formattedDate} ${formattedMonthShortName} ${formattedYear}`; // Tue 02 Mar 2022
   }
-  return `${formattedDay} ${formattedDate} ${formattedMonth} ${formattedYear}`
+  return `${formattedDay} ${formattedDate} ${formattedMonth} ${formattedYear}`;
 }
 
 function isSelectedDate(date: any) {
-  const d = new Date(year.value, month.value, date)
-  return datepickerValue.value === formatDateForDisplay(d) ? true : false
+  const d = new Date(year.value, month.value, date);
+  return datepickerValue.value === formatDateForDisplay(d) ? true : false;
 }
 
 function isToday(date: any) {
-  const today = new Date()
-  const d = new Date(year.value, month.value, date)
-  return today.toDateString() === d.toDateString() ? true : false
+  const today = new Date();
+  const d = new Date(year.value, month.value, date);
+  return today.toDateString() === d.toDateString() ? true : false;
 }
 
 function getDateValue(date: any) {
-  let selectedDate = new Date(year.value, month.value, date)
-  datepickerValue.value = formatDateForDisplay(selectedDate)
-  isSelectedDate(date)
+  let selectedDate = new Date(year.value, month.value, date);
+  datepickerValue.value = formatDateForDisplay(selectedDate);
+  isSelectedDate(date);
 }
 
 function getNoOfDays() {
-  let daysInMonth = new Date(year.value, month.value + 1, 0).getDate()
+  let daysInMonth = new Date(year.value, month.value + 1, 0).getDate();
   // find where to start calendar day of week
-  let dayOfWeek = new Date(year.value, month.value).getDay()
-  let blankdaysArray = []
+  let dayOfWeek = new Date(year.value, month.value).getDay();
+  let blankdaysArray = [];
   for (let i = 1; i <= dayOfWeek; i++) {
-    blankdaysArray.push(i)
+    blankdaysArray.push(i);
   }
-  let daysArray = []
+  let daysArray = [];
   for (let i = 1; i <= daysInMonth; i++) {
-    daysArray.push(i)
+    daysArray.push(i);
   }
-  blankDays.value = blankdaysArray
-  numberOfDays.value = daysArray
+  blankDays.value = blankdaysArray;
+  numberOfDays.value = daysArray;
 }
 
 function incrementDays() {
   if (month.value == 0) {
-    year.value--
-    month.value = 12
+    year.value--;
+    month.value = 12;
   }
   else {
-    month.value--
+    month.value--;
   }
-  getNoOfDays()
+  getNoOfDays();
 }
 
 function decrementDays() {
   if (month.value == 11) {
-    month.value = 0
-    year.value++
+    month.value = 0;
+    year.value++;
   }
   else {
-    month.value++
+    month.value++;
   }
-  getNoOfDays()
+  getNoOfDays();
 }
 
 onMounted(() => {
-  initDate()
-  getNoOfDays()
-})
+  initDate();
+  getNoOfDays();
+});
 </script>
 
 <template>

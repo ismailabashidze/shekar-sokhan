@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
-import { useDebounceFn } from '@vueuse/core'
-import { useRoute, useRouter } from 'vue-router'
+import { onMounted, watch } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
+import { useRoute, useRouter } from 'vue-router';
 
 definePageMeta({
   title: 'پیشنهادات نیک',
@@ -14,80 +14,80 @@ definePageMeta({
     order: 14,
   },
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
 // Type mapping for display
 const typeMapping = {
   family: 'خانواده',
   society: 'جامعه',
   spiritual: 'معنویت',
-} as const
+} as const;
 
 // Difficulty mapping for display
 const difficultyMapping = {
   simple: 'ساده',
   moderate: 'متوسط',
   hard: 'چالش‌برانگیز',
-} as const
+} as const;
 
 // Reverse mappings for converting display text to DB values
 const reverseTypeMapping = Object.entries(typeMapping).reduce((acc, [key, value]) => {
-  acc[value] = key
-  return acc
-}, {} as Record<string, string>)
+  acc[value] = key;
+  return acc;
+}, {} as Record<string, string>);
 
 const reverseDifficultyMapping = Object.entries(difficultyMapping).reduce((acc, [key, value]) => {
-  acc[value] = key
-  return acc
-}, {} as Record<string, string>)
+  acc[value] = key;
+  return acc;
+}, {} as Record<string, string>);
 
 // Initialize state from query params
-const search = ref(route.query.search?.toString() || '')
-const selectedType = ref(route.query.type?.toString() || 'all')
-const selectedDifficulty = ref(route.query.difficulty?.toString() || 'all')
+const search = ref(route.query.search?.toString() || '');
+const selectedType = ref(route.query.type?.toString() || 'all');
+const selectedDifficulty = ref(route.query.difficulty?.toString() || 'all');
 const selectedTypes = ref<string[]>(
   route.query.types
     ? Array.isArray(route.query.types)
       ? route.query.types
       : [route.query.types.toString()]
     : Object.keys(typeMapping),
-)
+);
 const selectedDifficulties = ref<string[]>(
   route.query.difficulties
     ? Array.isArray(route.query.difficulties)
       ? route.query.difficulties
       : [route.query.difficulties.toString()]
     : Object.keys(difficultyMapping),
-)
+);
 
-const currentPage = ref(Number(route.query.page) || 1)
-const itemsPerPage = ref(10)
-const totalDeeds = ref(0)
+const currentPage = ref(Number(route.query.page) || 1);
+const itemsPerPage = ref(10);
+const totalDeeds = ref(0);
 
-const loading = ref(true)
-const error = ref<Error | null>(null)
+const loading = ref(true);
+const error = ref<Error | null>(null);
 
-const typeCounts = ref<Record<string, number>>({})
-const difficultyCounts = ref<Record<string, number>>({})
+const typeCounts = ref<Record<string, number>>({});
+const difficultyCounts = ref<Record<string, number>>({});
 
-const { getApprovedDeeds } = useDeed()
-const deeds = ref([])
+const { getApprovedDeeds } = useDeed();
+const deeds = ref([]);
 
 // Initialize with all types and difficulties selected
 onMounted(() => {
-  fetchDeeds()
-})
+  fetchDeeds();
+});
 
 // Fetch deeds with filters
 const fetchDeeds = async () => {
   try {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
 
     // Get paginated deeds
     const result = await getApprovedDeeds({
@@ -98,251 +98,251 @@ const fetchDeeds = async () => {
       selectedDifficulties: selectedDifficulties.value.length > 0 ? selectedDifficulties.value : undefined,
       page: currentPage.value,
       perPage: itemsPerPage.value,
-    })
+    });
 
-    const items = result?.items || []
-    deeds.value = items.slice().reverse()
-    totalDeeds.value = result?.total || 0
+    const items = result?.items || [];
+    deeds.value = items.slice().reverse();
+    totalDeeds.value = result?.total || 0;
 
     // Get total counts for types and difficulties
     const totalResult = await getApprovedDeeds({
       perPage: 1,
       page: 1,
-    })
+    });
 
     // Reset counts
     typeCounts.value = Object.keys(typeMapping).reduce((acc, type) => {
-      acc[type] = 0
-      return acc
-    }, {} as Record<string, number>)
+      acc[type] = 0;
+      return acc;
+    }, {} as Record<string, number>);
 
     difficultyCounts.value = Object.keys(difficultyMapping).reduce((acc, difficulty) => {
-      acc[difficulty] = 0
-      return acc
-    }, {} as Record<string, number>)
+      acc[difficulty] = 0;
+      return acc;
+    }, {} as Record<string, number>);
 
     // Count all items
     totalResult.items.forEach((deed: any) => {
-      if (deed.type) typeCounts.value[deed.type] = (typeCounts.value[deed.type] || 0) + 1
-      if (deed.difficulty) difficultyCounts.value[deed.difficulty] = (difficultyCounts.value[deed.difficulty] || 0) + 1
-    })
+      if (deed.type) typeCounts.value[deed.type] = (typeCounts.value[deed.type] || 0) + 1;
+      if (deed.difficulty) difficultyCounts.value[deed.difficulty] = (difficultyCounts.value[deed.difficulty] || 0) + 1;
+    });
   }
   catch (err: any) {
-    console.error('Error fetching deeds:', err)
-    error.value = err
+    console.error('Error fetching deeds:', err);
+    error.value = err;
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // Update URL when filters change
 const updateQueryParams = () => {
   const query: Record<string, any> = {
     page: currentPage.value,
-  }
+  };
 
-  if (search.value) query.search = search.value
-  if (selectedType.value !== 'all') query.type = selectedType.value
-  if (selectedDifficulty.value !== 'all') query.difficulty = selectedDifficulty.value
-  if (selectedTypes.value.length < Object.keys(typeMapping).length) query.types = selectedTypes.value
-  if (selectedDifficulties.value.length < Object.keys(difficultyMapping).length) query.difficulties = selectedDifficulties.value
+  if (search.value) query.search = search.value;
+  if (selectedType.value !== 'all') query.type = selectedType.value;
+  if (selectedDifficulty.value !== 'all') query.difficulty = selectedDifficulty.value;
+  if (selectedTypes.value.length < Object.keys(typeMapping).length) query.types = selectedTypes.value;
+  if (selectedDifficulties.value.length < Object.keys(difficultyMapping).length) query.difficulties = selectedDifficulties.value;
 
-  router.push({ query })
-}
+  router.push({ query });
+};
 
 // Handle page change
 const handlePageChange = (page: number) => {
-  if (page < 1 || page > Math.ceil(totalDeeds.value / itemsPerPage.value)) return
-  currentPage.value = page
-  updateQueryParams()
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
+  if (page < 1 || page > Math.ceil(totalDeeds.value / itemsPerPage.value)) return;
+  currentPage.value = page;
+  updateQueryParams();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 // Watch for filter changes with debounce
 const debouncedFetch = useDebounceFn(() => {
-  currentPage.value = 1
-  updateQueryParams()
-}, 300)
+  currentPage.value = 1;
+  updateQueryParams();
+}, 300);
 
 watch([search], () => {
   if (search.value.length >= 2 || search.value === '') {
-    debouncedFetch()
+    debouncedFetch();
   }
-})
+});
 
 // Watch dropdown changes and update checkboxes
 watch(selectedType, (newType) => {
   if (newType === 'all') {
-    selectedTypes.value = Object.keys(typeMapping)
+    selectedTypes.value = Object.keys(typeMapping);
   }
   else if (newType) {
-    selectedTypes.value = [newType]
+    selectedTypes.value = [newType];
   }
-  currentPage.value = 1
-  updateQueryParams()
-})
+  currentPage.value = 1;
+  updateQueryParams();
+});
 
 watch(selectedDifficulty, (newDifficulty) => {
   if (newDifficulty === 'all') {
-    selectedDifficulties.value = Object.keys(difficultyMapping)
+    selectedDifficulties.value = Object.keys(difficultyMapping);
   }
   else if (newDifficulty) {
-    selectedDifficulties.value = [newDifficulty]
+    selectedDifficulties.value = [newDifficulty];
   }
-  currentPage.value = 1
-  updateQueryParams()
-})
+  currentPage.value = 1;
+  updateQueryParams();
+});
 
 // Watch checkbox changes and update dropdowns
 watch(selectedTypes, (newTypes) => {
   if (newTypes.length === Object.keys(typeMapping).length) {
-    selectedType.value = 'all'
+    selectedType.value = 'all';
   }
   else if (newTypes.length === 1) {
-    selectedType.value = newTypes[0]
+    selectedType.value = newTypes[0];
   }
   else {
-    selectedType.value = ''
+    selectedType.value = '';
   }
-  currentPage.value = 1
-  updateQueryParams()
-}, { deep: true })
+  currentPage.value = 1;
+  updateQueryParams();
+}, { deep: true });
 
 watch(selectedDifficulties, (newDifficulties) => {
   if (newDifficulties.length === Object.keys(difficultyMapping).length) {
-    selectedDifficulty.value = 'all'
+    selectedDifficulty.value = 'all';
   }
   else if (newDifficulties.length === 1) {
-    selectedDifficulty.value = newDifficulties[0]
+    selectedDifficulty.value = newDifficulties[0];
   }
   else {
-    selectedDifficulty.value = ''
+    selectedDifficulty.value = '';
   }
-  currentPage.value = 1
-  updateQueryParams()
-}, { deep: true })
+  currentPage.value = 1;
+  updateQueryParams();
+}, { deep: true });
 
 // Update toggleType and toggleDifficulty functions
 const toggleType = (displayType: string) => {
-  const dbType = reverseTypeMapping[displayType]
-  const index = selectedTypes.value.indexOf(dbType)
+  const dbType = reverseTypeMapping[displayType];
+  const index = selectedTypes.value.indexOf(dbType);
   if (index === -1) {
     // If not selected, only select this one
-    selectedTypes.value = [dbType]
+    selectedTypes.value = [dbType];
   }
   else if (selectedTypes.value.length === 1) {
     // If this was the only one selected, select all
-    selectedTypes.value = Object.keys(typeMapping)
+    selectedTypes.value = Object.keys(typeMapping);
   }
   else {
     // If multiple were selected, only select this one
-    selectedTypes.value = [dbType]
+    selectedTypes.value = [dbType];
   }
-}
+};
 
 const toggleDifficulty = (displayDifficulty: string) => {
-  const dbDifficulty = reverseDifficultyMapping[displayDifficulty]
-  const index = selectedDifficulties.value.indexOf(dbDifficulty)
+  const dbDifficulty = reverseDifficultyMapping[displayDifficulty];
+  const index = selectedDifficulties.value.indexOf(dbDifficulty);
   if (index === -1) {
     // If not selected, only select this one
-    selectedDifficulties.value = [dbDifficulty]
+    selectedDifficulties.value = [dbDifficulty];
   }
   else if (selectedDifficulties.value.length === 1) {
     // If this was the only one selected, select all
-    selectedDifficulties.value = Object.keys(difficultyMapping)
+    selectedDifficulties.value = Object.keys(difficultyMapping);
   }
   else {
     // If multiple were selected, only select this one
-    selectedDifficulties.value = [dbDifficulty]
+    selectedDifficulties.value = [dbDifficulty];
   }
-}
+};
 
 // Handle search button click
 const handleSearch = () => {
-  fetchDeeds()
-}
+  fetchDeeds();
+};
 
 const getTagColor = (tag: string) => {
   switch (tag) {
     case 'خانواده':
     case 'والدین':
     case 'همسر':
-      return 'primary'
+      return 'primary';
     case 'معنوی':
-      return 'info'
+      return 'info';
     case 'جامعه':
     case 'همسایه':
     case 'دوستان':
-      return 'success'
+      return 'success';
     case 'تشیع':
-      return 'warning'
+      return 'warning';
     default:
-      return 'default'
+      return 'default';
   }
-}
+};
 
 const formatTime = (time: string) => {
   switch (time) {
     case 'below_15':
-      return 'کمتر از ۱۵ دقیقه'
+      return 'کمتر از ۱۵ دقیقه';
     case 'between_15_60':
-      return '۱۵ تا ۶۰ دقیقه'
+      return '۱۵ تا ۶۰ دقیقه';
     case 'more_60':
-      return 'بیش از ۶۰ دقیقه'
+      return 'بیش از ۶۰ دقیقه';
     default:
-      return time
+      return time;
   }
-}
+};
 
 // Get type count with proper mapping
 const getTypeCount = (displayType: string) => {
-  const dbType = reverseTypeMapping[displayType]
-  return typeCounts.value[dbType] || 0
-}
+  const dbType = reverseTypeMapping[displayType];
+  return typeCounts.value[dbType] || 0;
+};
 
 // Get difficulty count with proper mapping
 const getDifficultyCount = (displayDifficulty: string) => {
-  const dbDifficulty = reverseDifficultyMapping[displayDifficulty]
-  return difficultyCounts.value[dbDifficulty] || 0
-}
+  const dbDifficulty = reverseDifficultyMapping[displayDifficulty];
+  return difficultyCounts.value[dbDifficulty] || 0;
+};
 
-const totalPages = computed(() => Math.ceil(totalDeeds.value / itemsPerPage.value))
+const totalPages = computed(() => Math.ceil(totalDeeds.value / itemsPerPage.value));
 
 const pageNumbers = computed(() => {
-  const pages = []
-  const total = Math.ceil(totalDeeds.value / itemsPerPage.value)
+  const pages = [];
+  const total = Math.ceil(totalDeeds.value / itemsPerPage.value);
   for (let i = 1; i <= total; i++) {
-    pages.push(i)
+    pages.push(i);
   }
-  return pages
-})
+  return pages;
+});
 
 // Reset pagination when filters change
 watch([search, selectedType, selectedDifficulty, selectedTypes, selectedDifficulties], () => {
-  currentPage.value = 1
-})
+  currentPage.value = 1;
+});
 
 // Watch query params for changes
 watch(() => route.query, () => {
-  fetchDeeds()
-}, { deep: true })
+  fetchDeeds();
+}, { deep: true });
 
 // Retry button handler
 const handleRetry = () => {
-  fetchDeeds()
-}
+  fetchDeeds();
+};
 
 // Reset filters
 const resetFilters = () => {
-  search.value = ''
-  selectedType.value = 'all'
-  selectedDifficulty.value = 'all'
-  selectedTypes.value = Object.keys(typeMapping)
-  selectedDifficulties.value = Object.keys(difficultyMapping)
-  currentPage.value = 1
-  updateQueryParams()
-}
+  search.value = '';
+  selectedType.value = 'all';
+  selectedDifficulty.value = 'all';
+  selectedTypes.value = Object.keys(typeMapping);
+  selectedDifficulties.value = Object.keys(difficultyMapping);
+  currentPage.value = 1;
+  updateQueryParams();
+};
 
 // Toggle type filter
 // const toggleType = (displayType: string) => {

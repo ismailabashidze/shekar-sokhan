@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoAreasMultiple = reactive(useDemoAreasMultiple())
+const demoAreasMultiple = reactive(useDemoAreasMultiple());
 
 function useDemoAreasMultiple() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 280
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 280;
 
   const dataSeries = [
     [
@@ -1453,28 +1453,28 @@ function useDemoAreasMultiple() {
         value: 67956992,
       },
     ],
-  ]
+  ];
 
-  let ts1 = 1388534400000
-  let ts2 = 1388620800000
-  let ts3 = 1389052800000
+  let ts1 = 1388534400000;
+  let ts2 = 1388620800000;
+  let ts3 = 1389052800000;
 
-  const dataSet: any[] = [[], [], []]
+  const dataSet: any[] = [[], [], []];
 
   for (let i = 0; i < 12; i++) {
-    ts1 = ts1 + 86400000
-    const innerArr: any[] = [ts1, dataSeries[2][i].value]
-    dataSet[0].push(innerArr)
+    ts1 = ts1 + 86400000;
+    const innerArr: any[] = [ts1, dataSeries[2][i].value];
+    dataSet[0].push(innerArr);
   }
   for (let i = 0; i < 18; i++) {
-    ts2 = ts2 + 86400000
-    const innerArr: any[] = [ts2, dataSeries[1][i].value]
-    dataSet[1].push(innerArr)
+    ts2 = ts2 + 86400000;
+    const innerArr: any[] = [ts2, dataSeries[1][i].value];
+    dataSet[1].push(innerArr);
   }
   for (let i = 0; i < 12; i++) {
-    ts3 = ts3 + 86400000
-    const innerArr: any[] = [ts3, dataSeries[0][i].value]
-    dataSet[2].push(innerArr)
+    ts3 = ts3 + 86400000;
+    const innerArr: any[] = [ts3, dataSeries[0][i].value];
+    dataSet[2].push(innerArr);
   }
 
   const options = {
@@ -1544,7 +1544,7 @@ function useDemoAreasMultiple() {
       position: 'top',
       horizontalAlign: 'center',
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -1559,14 +1559,14 @@ function useDemoAreasMultiple() {
       name: 'Tablets',
       data: dataSet[2],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

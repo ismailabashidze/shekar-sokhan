@@ -9,9 +9,9 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-billing-dark.png',
     order: 84,
   },
-})
+});
 
-const customRadio = ref('enterprise')
+const customRadio = ref('enterprise');
 
 const plans = [
   {
@@ -62,24 +62,24 @@ const plans = [
     features: ['40 seats', 'Unlimited projects', 'Unlimited storage'],
     benefits: ['1 year support', '1 year updates', '1 year hosting'],
   },
-]
+];
 
 const selectedPlan = computed(() => {
-  return plans.find(plan => plan.name === customRadio.value)
-})
+  return plans.find(plan => plan.name === customRadio.value);
+});
 
 const planColor = computed(() => {
   switch (customRadio.value) {
     case 'starter':
-      return 'text-success-500'
+      return 'text-success-500';
     case 'freelancer':
-      return 'text-yellow-400'
+      return 'text-yellow-400';
     case 'business':
-      return 'text-indigo-500'
+      return 'text-indigo-500';
     case 'enterprise':
-      return 'text-primary-500'
+      return 'text-primary-500';
   }
-})
+});
 
 const cardInfo = ref({
   name: undefined,
@@ -87,9 +87,9 @@ const cardInfo = ref({
   expiryYear: undefined,
   expiryMonth: undefined,
   cvc: undefined,
-})
+});
 
-const billingCycles = ref('monthly')
+const billingCycles = ref('monthly');
 </script>
 
 <template>

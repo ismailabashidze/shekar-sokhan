@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-const { open } = usePanels()
+const { open } = usePanels();
 
 const task = {
   id: 0,
@@ -100,5 +100,5 @@ const task = {
       },
     },
   ],
-}
+};
 </script>

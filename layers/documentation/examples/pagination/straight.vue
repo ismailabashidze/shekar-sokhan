@@ -9,13 +9,13 @@
 </template>
 
 <script setup lang="ts">
-const route = useRoute()
+const route = useRoute();
 const currentPage = computed(() => {
   try {
-    return Number.parseInt(route.query.page as string) || 1
+    return Number.parseInt(route.query.page as string) || 1;
   }
   catch {
-    return 1
+    return 1;
   }
-})
+});
 </script>

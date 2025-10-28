@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import type { Deed } from '~/composables/useDeed'
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import type { Deed } from '~/composables/useDeed';
 
 definePageMeta({
   title: 'ویرایش عمل نیک',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
-const { getDeed, updateDeed } = useDeed()
-const { role } = useUser()
-const toaster = useToaster()
-const loading = ref(false)
-const error = ref('')
+const route = useRoute();
+const router = useRouter();
+const { getDeed, updateDeed } = useDeed();
+const { role } = useUser();
+const toaster = useToaster();
+const loading = ref(false);
+const error = ref('');
 
 // Form data
 const deed = ref<Deed>({
@@ -36,10 +36,10 @@ const deed = ref<Deed>({
   tags: [],
   difficulty: 'simple',
   timeRequired: 'below_15',
-})
+});
 
 // Check if user is admin
-const isAdmin = computed(() => role.value === 'admin')
+const isAdmin = computed(() => role.value === 'admin');
 
 onMounted(async () => {
   if (!isAdmin.value) {
@@ -49,35 +49,35 @@ onMounted(async () => {
       color: 'danger',
       icon: 'ph:x-circle',
       closable: true,
-    })
-    router.push('/deeds/list')
-    return
+    });
+    router.push('/deeds/list');
+    return;
   }
 
-  const id = route.params.id as string
+  const id = route.params.id as string;
   try {
-    loading.value = true
-    const result = await getDeed(id)
+    loading.value = true;
+    const result = await getDeed(id);
     if (result) {
-      deed.value = result
+      deed.value = result;
     }
     else {
-      error.value = 'عمل نیک مورد نظر یافت نشد'
+      error.value = 'عمل نیک مورد نظر یافت نشد';
     }
   }
   catch (err: any) {
-    error.value = err.message || 'خطا در دریافت اطلاعات'
+    error.value = err.message || 'خطا در دریافت اطلاعات';
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 const handleSubmit = async () => {
   try {
-    loading.value = true
-    deed.value.status = 'draft' // Reset status to draft after edit
-    const result = await updateDeed(deed.value.id, deed.value)
+    loading.value = true;
+    deed.value.status = 'draft'; // Reset status to draft after edit
+    const result = await updateDeed(deed.value.id, deed.value);
     if (result) {
       toaster.show({
         title: 'موفقیت‌آمیز',
@@ -85,8 +85,8 @@ const handleSubmit = async () => {
         color: 'success',
         icon: 'ph:check-circle',
         closable: true,
-      })
-      router.push('/deeds/table-list-admin')
+      });
+      router.push('/deeds/table-list-admin');
     }
   }
   catch (err: any) {
@@ -96,12 +96,12 @@ const handleSubmit = async () => {
       color: 'danger',
       icon: 'ph:x-circle',
       closable: true,
-    })
+    });
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
 <template>

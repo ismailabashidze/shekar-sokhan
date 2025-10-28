@@ -1,77 +1,77 @@
-import type { MaybeRefOrGetter } from 'vue'
-import { kebabCase, upperFirst } from 'scule'
-import type { ComponentMeta } from 'vue-component-meta'
+import type { MaybeRefOrGetter } from 'vue';
+import { kebabCase, upperFirst } from 'scule';
+import type { ComponentMeta } from 'vue-component-meta';
 // @ts-ignore - might be not defined if documentation is disabled
-import type { NuxtComponentMetaNames } from '#nuxt-component-meta/types'
+import type { NuxtComponentMetaNames } from '#nuxt-component-meta/types';
 
-const excludedProps = ['modelValue', 'modelModifiers']
+const excludedProps = ['modelValue', 'modelModifiers'];
 
 export async function useDocumentationMeta(
   _name: MaybeRefOrGetter<NuxtComponentMetaNames>,
 ) {
-  const name = toRef(_name)
+  const name = toRef(_name);
 
-  const meta = await useComponentMeta(name)
+  const meta = await useComponentMeta(name);
 
   const model = computed(
     () => meta.value?.meta?.props?.find((prop: any) => prop.name === 'modelValue'),
-  )
+  );
   const modelModifiers = computed(
     () => {
-      const prop = meta.value?.meta?.props?.find((prop: any) => prop.name === 'modelModifiers')
+      const prop = meta.value?.meta?.props?.find((prop: any) => prop.name === 'modelModifiers');
 
       // input: 'Record<"number" | "trim" | "lazy", true> | undefined'
       // out: ['number', 'trim', 'lazy']
-      const modifierRe = /"([^"]+)"/gm
+      const modifierRe = /"([^"]+)"/gm;
 
-      return prop?.type.match(modifierRe)?.map((m: string) => m.replace(/"/g, '')) ?? []
+      return prop?.type.match(modifierRe)?.map((m: string) => m.replace(/"/g, '')) ?? [];
     },
-  )
+  );
   const props = computed(
     () => {
       const props = meta.value?.meta?.props?.filter(
         (prop: any) => !excludedProps.includes(prop.name) && !prop.tags.some((tag: any) => tag.name === 'default'),
-      )
+      );
 
       props.sort((a: any, b: any) => {
-        return a.name.localeCompare(b.name)
-      })
+        return a.name.localeCompare(b.name);
+      });
       props.sort((a: any, b: any) => {
-        return a.required === b.required ? 0 : a.required ? -1 : 1
-      })
+        return a.required === b.required ? 0 : a.required ? -1 : 1;
+      });
 
-      return props
+      return props;
     },
-  )
+  );
   const configurableProps = computed(
     () =>
       meta.value?.meta?.props?.filter(
         (prop: any) => !excludedProps.includes(prop.name) && prop.tags.some((tag: any) => tag.name === 'default'),
       ),
-  )
+  );
   const events = computed(
     () =>
       meta.value?.meta?.events?.filter(
         (prop: any) => prop.name !== 'update:modelValue',
       ),
-  )
-  const slots = computed(() => meta.value?.meta?.slots)
+  );
+  const slots = computed(() => meta.value?.meta?.slots);
   const exposed = computed(
     () =>
       meta.value?.meta?.exposed?.filter((item: any) => {
         const isProps
-          = props.value?.findIndex((prop: any) => prop.name === item.name) >= 0
+          = props.value?.findIndex((prop: any) => prop.name === item.name) >= 0;
         const isEvent
           = meta.value?.meta?.events?.findIndex(
             (event: any) =>
               `on${event.name}`.toLowerCase() === item.name?.toLowerCase(),
-          ) >= 0
-        const isExcluded = item.name?.startsWith('$')
-        const isModel = item.name === 'modelValue' || item.name === 'modelModifiers'
+          ) >= 0;
+        const isExcluded = item.name?.startsWith('$');
+        const isModel = item.name === 'modelValue' || item.name === 'modelModifiers';
 
-        return !(isProps || isEvent || isExcluded || isModel)
+        return !(isProps || isEvent || isExcluded || isModel);
       }),
-  )
+  );
 
   const noOptions = computed(() => {
     return (
@@ -81,12 +81,12 @@ export async function useDocumentationMeta(
         || slots.value?.length
         || exposed.value?.length
       ) && model.value === undefined
-    )
-  })
+    );
+  });
 
   function formatPropType(type: string) {
-    const bracketsRe = /^{ (.*) }$/gm
-    const parenthesisRe = /^\((.*)\)/gm
+    const bracketsRe = /^{ (.*) }$/gm;
+    const parenthesisRe = /^\((.*)\)/gm;
 
     return type
       .replaceAll('{ ', '{\n  ')
@@ -95,27 +95,27 @@ export async function useDocumentationMeta(
       .replaceAll('" | ', '"\n  | ')
       .replaceAll('unknown', 'T')
       .replace(bracketsRe, '(\n  $1\n)')
-      .replace(parenthesisRe, '(\n  $1\n)')
+      .replace(parenthesisRe, '(\n  $1\n)');
   }
 
   function renderNoOptions() {
-    const code: string[] = ['```vue']
+    const code: string[] = ['```vue'];
 
-    code.push(`<template>`)
+    code.push(`<template>`);
 
-    const oneline = [`  <${name.value} `, `/>`].join('')
+    const oneline = [`  <${name.value} `, `/>`].join('');
 
-    code.push(oneline)
-    code.push(`</template>`)
+    code.push(oneline);
+    code.push(`</template>`);
 
-    return code.join('\n')
+    return code.join('\n');
   }
 
   function renderModel(prop: ComponentMeta['props'][0]) {
-    const code: string[] = ['```vue']
-    const type = prop.type.replaceAll('unknown', 'T')
+    const code: string[] = ['```vue'];
+    const type = prop.type.replaceAll('unknown', 'T');
 
-    code.push(`<script setup lang="ts">`)
+    code.push(`<script setup lang="ts">`);
     if (type.length > 45) {
       code.push(
         [
@@ -127,19 +127,19 @@ export async function useDocumentationMeta(
             prop.name,
           )}Data>(${prop.default || ''})`,
         ].join('\n'),
-      )
+      );
     }
     else {
       code.push(
         [`const value = ref<${type}>(${prop.default || ''})`].join('\n'),
-      )
+      );
     }
 
-    code.push(`</script>`)
-    code.push(``)
-    code.push(`<template>`)
+    code.push(`</script>`);
+    code.push(``);
+    code.push(`<template>`);
 
-    const oneline = [`  <${name.value} `, `v-model="value" `, `/>`].join('')
+    const oneline = [`  <${name.value} `, `v-model="value" `, `/>`].join('');
 
     if (oneline.length > 55) {
       code.push(
@@ -152,24 +152,24 @@ export async function useDocumentationMeta(
           `</template>`,
           '```',
         ].join('\n'),
-      )
+      );
     }
     else {
-      code.push(oneline)
+      code.push(oneline);
     }
 
-    code.push(`</template>`)
+    code.push(`</template>`);
 
-    return code.join('\n')
+    return code.join('\n');
   }
 
   function renderProperty(prop: ComponentMeta['props'][0]) {
-    const code: string[] = ['```vue']
+    const code: string[] = ['```vue'];
 
     const defaultValue
-      = !prop.default || prop.default === 'undefined' ? '' : prop.default
+      = !prop.default || prop.default === 'undefined' ? '' : prop.default;
 
-    code.push(`<script setup lang="ts">`)
+    code.push(`<script setup lang="ts">`);
     if (prop.type.length > 45) {
       code.push(
         [
@@ -181,23 +181,23 @@ export async function useDocumentationMeta(
             prop.name,
           )}Data>(${defaultValue})`,
         ].join('\n'),
-      )
+      );
     }
     else {
       code.push(
         [`const ${prop.name} = ref<${prop.type}>(${defaultValue})`].join('\n'),
-      )
+      );
     }
 
-    code.push(`</script>`)
-    code.push(``)
-    code.push(`<template>`)
+    code.push(`</script>`);
+    code.push(``);
+    code.push(`<template>`);
 
     const oneline = [
       `  <${name.value} `,
       `:${kebabCase(prop.name)}="${prop.name}" `,
       `/>`,
-    ].join('')
+    ].join('');
 
     if (oneline.length > 55) {
       code.push(
@@ -210,97 +210,97 @@ export async function useDocumentationMeta(
           `</template>`,
           '```',
         ].join('\n'),
-      )
+      );
     }
     else {
-      code.push(oneline)
+      code.push(oneline);
     }
 
-    code.push(`</template>`)
+    code.push(`</template>`);
 
-    return code.join('\n')
+    return code.join('\n');
   }
 
   function renderSlot(slot: ComponentMeta['slots'][0]) {
-    const code: string[] = []
-    code.push('```vue')
-    code.push(`<template>`)
+    const code: string[] = [];
+    code.push('```vue');
+    code.push(`<template>`);
 
     if (slot.type !== '{}' && slot.type !== 'Record<string, never>') {
-      code.push(`  <${name.value}>`)
-      code.push(`    <template #${slot.name}="value">`)
-      code.push(`      <!-- Your content -->`)
-      code.push(`      <pre>{{ value }}</pre>`)
-      code.push(`    </template>`)
+      code.push(`  <${name.value}>`);
+      code.push(`    <template #${slot.name}="value">`);
+      code.push(`      <!-- Your content -->`);
+      code.push(`      <pre>{{ value }}</pre>`);
+      code.push(`    </template>`);
     }
     else {
-      code.push(`  <${name.value}>`)
+      code.push(`  <${name.value}>`);
 
       if (slot.name === 'default') {
-        code.push(`    <!-- Your content -->`)
+        code.push(`    <!-- Your content -->`);
       }
       else {
-        code.push(`    <template #${slot.name}>`)
-        code.push(`      <!-- Your content -->`)
-        code.push(`    </template>`)
+        code.push(`    <template #${slot.name}>`);
+        code.push(`      <!-- Your content -->`);
+        code.push(`    </template>`);
       }
     }
 
-    code.push(`  </${name.value}>`)
-    code.push(`</template>`)
-    code.push('```')
+    code.push(`  </${name.value}>`);
+    code.push(`</template>`);
+    code.push('```');
 
-    return code.join('\n')
+    return code.join('\n');
   }
 
   function renderEvents(event: ComponentMeta['events'][0]) {
-    const code: string[] = []
+    const code: string[] = [];
 
     const handlerName = upperFirst(event.name).replace(/:([a-z])/g, v =>
       v.replace(':', '').toUpperCase(),
-    )
+    );
     const handlerProps = event.type.startsWith('[')
       ? event.type.slice(1, -1)
-      : event.type
+      : event.type;
 
-    code.push('```vue')
-    code.push(`<script setup lang="ts">`)
+    code.push('```vue');
+    code.push(`<script setup lang="ts">`);
 
-    code.push(`function on${handlerName} (${handlerProps}) {`)
-    code.push(`  // ...`)
-    code.push(`}`)
+    code.push(`function on${handlerName} (${handlerProps}) {`);
+    code.push(`  // ...`);
+    code.push(`}`);
 
-    code.push(`</script>`)
+    code.push(`</script>`);
 
-    code.push(``)
+    code.push(``);
 
-    code.push(`<template>`)
+    code.push(`<template>`);
 
     const oneline = [
       `  <${name.value} `,
       `@${event.name}="on${handlerName}" `,
       `/>`,
-    ].join('')
+    ].join('');
     if (oneline.length > 55) {
-      code.push(`  <${name.value}`)
-      code.push(`    @${event.name}="on${handlerName}"`)
-      code.push(`  />`)
+      code.push(`  <${name.value}`);
+      code.push(`    @${event.name}="on${handlerName}"`);
+      code.push(`  />`);
     }
     else {
-      code.push(oneline)
+      code.push(oneline);
     }
 
-    code.push(`</template>`)
+    code.push(`</template>`);
 
-    code.push('```')
+    code.push('```');
 
-    return code.join('\n')
+    return code.join('\n');
   }
 
   function renderExposed(prop: ComponentMeta['exposed'][0]) {
-    const code: string[] = ['```vue']
+    const code: string[] = ['```vue'];
 
-    code.push(`<script setup lang="ts">`)
+    code.push(`<script setup lang="ts">`);
 
     code.push(
       [
@@ -313,13 +313,13 @@ export async function useDocumentationMeta(
         `  console.log(comp.value.${prop.name})`,
         '})',
       ].join('\n'),
-    )
+    );
 
-    code.push(`</script>`)
-    code.push(``)
-    code.push(`<template>`)
+    code.push(`</script>`);
+    code.push(``);
+    code.push(`<template>`);
 
-    const oneline = [`  <${name.value} `, `ref="comp" `, `/>`].join('')
+    const oneline = [`  <${name.value} `, `ref="comp" `, `/>`].join('');
 
     if (oneline.length > 55) {
       code.push(
@@ -332,15 +332,15 @@ export async function useDocumentationMeta(
           `</template>`,
           '```',
         ].join('\n'),
-      )
+      );
     }
     else {
-      code.push(oneline)
+      code.push(oneline);
     }
 
-    code.push(`</template>`)
+    code.push(`</template>`);
 
-    return code.join('\n')
+    return code.join('\n');
   }
 
   return reactive({
@@ -361,5 +361,5 @@ export async function useDocumentationMeta(
     renderEvents,
     renderExposed,
     renderNoOptions,
-  })
+  });
 }

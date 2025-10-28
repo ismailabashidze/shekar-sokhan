@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoBarHorizontalMulti = reactive(useDemoBarHorizontalMulti())
+const demoBarHorizontalMulti = reactive(useDemoBarHorizontalMulti());
 
 function useDemoBarHorizontalMulti() {
-  const { primary, info } = useTailwindColors()
-  const type = 'bar'
-  const height = 280
+  const { primary, info } = useTailwindColors();
+  const type = 'bar';
+  const height = 280;
 
   const options = {
     chart: {
@@ -45,7 +45,7 @@ function useDemoBarHorizontalMulti() {
       position: 'top',
       horizontalAlign: 'center',
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -56,14 +56,14 @@ function useDemoBarHorizontalMulti() {
       name: 'Pending',
       data: [53, 32, 33, 52, 13, 44, 32],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

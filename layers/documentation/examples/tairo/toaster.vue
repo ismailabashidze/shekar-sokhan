@@ -119,8 +119,8 @@ const toast = reactive({
   color: 'success' as 'primary' | 'success' | 'info' | 'warning' | 'danger' | 'muted',
   icon: 'lucide:check',
   closable: true,
-})
-const position = ref<keyof typeof themes>('bottom-center')
+});
+const position = ref<keyof typeof themes>('bottom-center');
 
 const themes = {
   'top-start': {
@@ -339,16 +339,16 @@ const themes = {
       leaveToClass: 'transform translate-x-full opacity-0',
     },
   },
-}
+};
 
-let toaster: any
+let toaster: any;
 
 const showToast = () => {
-  toaster?.clearAll()
+  toaster?.clearAll();
 
   toaster = createNinjaToaster({
     theme: themes[position.value],
-  })
+  });
   toaster.showComponent('TairoToaster', {
     props: {
       title: toast.title,
@@ -357,6 +357,6 @@ const showToast = () => {
       icon: toast.icon,
       closable: toast.closable,
     },
-  })
-}
+  });
+};
 </script>

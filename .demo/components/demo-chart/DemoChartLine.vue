@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoLine = reactive(useDemoLine())
+const demoLine = reactive(useDemoLine());
 
 function useDemoLine() {
-  const { primary } = useTailwindColors()
-  const type = 'line'
-  const height = 280
+  const { primary } = useTailwindColors();
+  const type = 'line';
+  const height = 280;
 
   const options = {
     chart: {
@@ -46,21 +46,21 @@ function useDemoLine() {
         'Sep',
       ],
     },
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'Sales',
       data: [105, 414, 357, 511, 497, 621, 695, 912, 748],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

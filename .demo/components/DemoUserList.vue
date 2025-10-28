@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   }>(),
   {
     rounded: 'sm',
   },
-)
+);
 
 const users = [
   {
@@ -51,7 +51,7 @@ const users = [
     position: 'UI/UX Designer',
     progress: 32,
   },
-]
+];
 </script>
 
 <template>

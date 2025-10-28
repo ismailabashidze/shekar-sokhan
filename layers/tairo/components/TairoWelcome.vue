@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const app = useAppConfig()
+const app = useAppConfig();
 
-const command = 'pnpm dev'
+const command = 'pnpm dev';
 
 const nuxtConfig = [
   `export default defineNuxtConfig({`,
@@ -10,7 +10,7 @@ const nuxtConfig = [
   `    '../layers/tairo',`,
   `  ]`,
   `})`,
-].join('\n')
+].join('\n');
 
 const codeLayout = [
   `<template>`,
@@ -18,7 +18,7 @@ const codeLayout = [
   `    <slot />`,
   `  </TairoSidebarLayout>`,
   `</template>`,
-].join('\n')
+].join('\n');
 
 const codePage = [
   `<script setup lang="ts">`,
@@ -30,7 +30,7 @@ const codePage = [
   `<template>`,
   `  <div>Hello Tairo!</div>`,
   `</template>`,
-].join('\n')
+].join('\n');
 
 const codeTailwind = [
   `import { withShurikenUI } from '@shuriken-ui/tailwind'`,
@@ -47,7 +47,7 @@ const codeTailwind = [
   `    }`,
   `  }`,
   `})`,
-].join('\n')
+].join('\n');
 </script>
 
 <template>

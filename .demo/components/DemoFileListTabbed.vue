@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   }>(),
   {
     rounded: 'sm',
   },
-)
+);
 
 const recentFiles = [
   {
@@ -45,7 +45,7 @@ const recentFiles = [
     name: 'invoice_recap.xsls',
     type: 'MS Excel file',
   },
-]
+];
 
 const savedFiles = [
   {
@@ -84,7 +84,7 @@ const savedFiles = [
     name: 'meeting_notes.doc',
     type: 'MS Word file',
   },
-]
+];
 </script>
 
 <template>

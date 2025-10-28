@@ -11,45 +11,45 @@ definePageMeta({
     order: 80,
     new: true,
   },
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(100)
+const filter = ref('');
+const perPage = ref(100);
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch(
   '/api/payments/recipients',
   {
     query,
   },
-)
+);
 
 const people = computed(() => {
-  return data?.value?.data.filter((item: any) => item.type === 'person')
-})
+  return data?.value?.data.filter((item: any) => item.type === 'person');
+});
 
 const companies = computed(() => {
-  return data?.value?.data.filter((item: any) => item.type === 'company')
-})
+  return data?.value?.data.filter((item: any) => item.type === 'company');
+});
 </script>
 
 <template>

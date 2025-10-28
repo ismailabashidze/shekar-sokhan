@@ -3,5 +3,5 @@ export default defineEventHandler(async () => {
     {
       id: 0,
     },
-  ]
-})
+  ];
+});

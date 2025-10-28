@@ -7,8 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import Slider from '@vueform/slider'
-import '~/assets/css/slider.css'
+import Slider from '@vueform/slider';
+import '~/assets/css/slider.css';
 
-const circle = ref(20)
+const circle = ref(20);
 </script>

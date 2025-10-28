@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoRadialMulti = reactive(useDemoRadialMulti())
+const demoRadialMulti = reactive(useDemoRadialMulti());
 
 function useDemoRadialMulti() {
-  const { primary, info, success, danger } = useTailwindColors()
-  const height = 295
-  const type = 'radialBar'
+  const { primary, info, success, danger } = useTailwindColors();
+  const height = 295;
+  const type = 'radialBar';
 
   const options = {
     title: {
@@ -31,23 +31,23 @@ function useDemoRadialMulti() {
             label: 'Total',
             formatter: function (/* value: string */) {
               // By default this function returns the average of all series. The below is just an example to show the use of custom formatter function
-              return 249
+              return 249;
             },
           },
         },
       },
     },
     labels: ['Apples', 'Oranges', 'Bananas', 'Berries'],
-  }
+  };
 
-  const series = shallowRef([44, 55, 67, 83])
+  const series = shallowRef([44, 55, 67, 83]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

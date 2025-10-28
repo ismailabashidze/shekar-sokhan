@@ -10,9 +10,9 @@ definePageMeta({
     srcDark: '/img/screens/layouts-onboarding-2-dark.png',
     order: 94,
   },
-})
+});
 
-const pricingMode = ref('free')
+const pricingMode = ref('free');
 </script>
 
 <template>

@@ -1,32 +1,32 @@
 <script setup lang="ts">
 export interface FlexTableSection {
-  title: string
-  type?: 'grow' | 'shrink' | 'stable'
-  width?: string
+  title: string;
+  type?: 'grow' | 'shrink' | 'stable';
+  width?: string;
 }
 
 const props = defineProps<{
   /**
    * The radius of the row.
    */
-  rounded?: 'none' | 'sm' | 'md' | 'lg'
+  rounded?: 'none' | 'sm' | 'md' | 'lg';
   /**
    * Whether to show a header with section titles.
    */
-  showHeader?: boolean
+  showHeader?: boolean;
   /**
    * Array of section definitions for the header.
    */
-  sections?: FlexTableSection[]
+  sections?: FlexTableSection[];
   /**
    * Whether to hide the header on mobile devices.
    */
-  hideHeaderOnMobile?: boolean
-}>()
+  hideHeaderOnMobile?: boolean;
+}>();
 
 const hasSections = computed(() => {
-  return props.showHeader && props.sections && props.sections.length > 0
-})
+  return props.showHeader && props.sections && props.sections.length > 0;
+});
 </script>
 
 <template>

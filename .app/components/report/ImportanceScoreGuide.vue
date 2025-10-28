@@ -382,14 +382,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 
-const isExpanded = ref(false)
+const isExpanded = ref(false);
 
 // Keywords categorized by importance
-const criticalKeywords = ['خودکشی', 'آسیب', 'خشونت', 'بحران', 'فوری', 'اورژانس', 'خطر', 'تهدید']
-const importantKeywords = ['افسردگی', 'اضطراب', 'اعتیاد', 'خانواده', 'ازدواج', 'طلاق', 'فرزند', 'والدین', 'همسر']
-const regularKeywords = ['استرس', 'ترس', 'خشم', 'نگرانی', 'غم', 'مشکل', 'چالش', 'هدف', 'پیشرفت', 'بهبود']
+const criticalKeywords = ['خودکشی', 'آسیب', 'خشونت', 'بحران', 'فوری', 'اورژانس', 'خطر', 'تهدید'];
+const importantKeywords = ['افسردگی', 'اضطراب', 'اعتیاد', 'خانواده', 'ازدواج', 'طلاق', 'فرزند', 'والدین', 'همسر'];
+const regularKeywords = ['استرس', 'ترس', 'خشم', 'نگرانی', 'غم', 'مشکل', 'چالش', 'هدف', 'پیشرفت', 'بهبود'];
 </script>
 
 <style scoped>

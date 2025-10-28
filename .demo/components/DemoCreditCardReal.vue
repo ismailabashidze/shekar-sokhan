@@ -1,13 +1,13 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    name?: string
-    number?: number | string
-    expiryYear?: number | string
-    expiryMonth?: number | string
-    cvc?: number | string
-    centered?: boolean
-    contrast?: 'low' | 'high'
+    name?: string;
+    number?: number | string;
+    expiryYear?: number | string;
+    expiryMonth?: number | string;
+    cvc?: number | string;
+    centered?: boolean;
+    contrast?: 'low' | 'high';
   }>(),
   {
     name: '•••••• ••••••',
@@ -18,7 +18,7 @@ const props = withDefaults(
     centered: true,
     contrast: 'low',
   },
-)
+);
 </script>
 
 <template>

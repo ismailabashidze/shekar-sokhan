@@ -11,7 +11,7 @@ const props = defineProps({
     required: false,
     default: 'height',
     validator: (value: string) => {
-      return ['height', 'width'].includes(value)
+      return ['height', 'width'].includes(value);
     },
   },
   duration: {
@@ -24,7 +24,7 @@ const props = defineProps({
     required: false,
     default: 'ease-in-out',
   },
-})
+});
 const emits = defineEmits([
   'before-appear',
   'appear',
@@ -38,57 +38,57 @@ const emits = defineEmits([
   'leave',
   'after-leave',
   'leave-cancelled',
-])
+]);
 
-const cachedStyles = ref<Record<string, string | undefined> | null>(null)
+const cachedStyles = ref<Record<string, string | undefined> | null>(null);
 
 const transition = computed(() => {
-  const transitions: string[] = []
+  const transitions: string[] = [];
 
   if (!cachedStyles.value) {
-    return ''
+    return '';
   }
 
   Object.keys(cachedStyles.value).forEach((key) => {
     transitions.push(
       `${convertToCssProperty(key)} ${props.duration}ms ${props.easing}`,
-    )
-  })
+    );
+  });
 
-  return transitions.join(', ')
-})
+  return transitions.join(', ');
+});
 
-watch(() => props.dimension, () => clearCachedDimensions())
+watch(() => props.dimension, () => clearCachedDimensions());
 
 function beforeAppear(el: HTMLElement) {
   // Emit the event to the parent
-  emits('before-appear', el)
+  emits('before-appear', el);
 }
 
 function appear(el: HTMLElement, done: () => void) {
   // Emit the event to the parent
-  emits('appear', el, done)
+  emits('appear', el, done);
 }
 
 function afterAppear(el: HTMLElement) {
   // Emit the event to the parent
-  emits('after-appear', el)
+  emits('after-appear', el);
 }
 
 function appearCancelled(el: HTMLElement) {
   // Emit the event to the parent
-  emits('appear-cancelled', el)
+  emits('appear-cancelled', el);
 }
 
 function beforeEnter(el: HTMLElement) {
   // Emit the event to the parent
-  emits('before-enter', el)
+  emits('before-enter', el);
 }
 
 function enter(el: HTMLElement, done: () => void) {
   // Because width and height may be 'auto',
   // first detect and cache the dimensions
-  detectAndCacheDimensions(el)
+  detectAndCacheDimensions(el);
 
   // The order of applying styles is important:
   // - 1. Set styles for state before transition
@@ -97,107 +97,107 @@ function enter(el: HTMLElement, done: () => void) {
   // - 4. Set styles for state after transition
   // If the order is not right and you open any 2nd level submenu
   // for the first time, the transition will not work.
-  setClosedDimensions(el)
-  hideOverflow(el)
-  forceRepaint(el)
-  setTransition(el)
-  setOpenedDimensions(el)
+  setClosedDimensions(el);
+  hideOverflow(el);
+  forceRepaint(el);
+  setTransition(el);
+  setOpenedDimensions(el);
 
   // Emit the event to the parent
-  emits('enter', el, done)
+  emits('enter', el, done);
 
   // Call done() when the transition ends
   // to trigger the @after-enter event.
-  setTimeout(done, props.duration)
+  setTimeout(done, props.duration);
 }
 
 function afterEnter(el: HTMLElement) {
   // Clean up inline styles
-  unsetOverflow(el)
-  unsetTransition(el)
-  unsetDimensions(el)
-  clearCachedDimensions()
+  unsetOverflow(el);
+  unsetTransition(el);
+  unsetDimensions(el);
+  clearCachedDimensions();
 
   // Emit the event to the parent
-  emits('after-enter', el)
+  emits('after-enter', el);
 }
 
 function enterCancelled(el: HTMLElement) {
   // Emit the event to the parent
-  emits('enter-cancelled', el)
+  emits('enter-cancelled', el);
 }
 
 function beforeLeave(el: HTMLElement) {
   // Emit the event to the parent
-  emits('before-leave', el)
+  emits('before-leave', el);
 }
 
 function leave(el: HTMLElement, done: () => void) {
   // For some reason, @leave triggered when starting
   // from open state on page load. So for safety,
   // check if the dimensions have been cached.
-  detectAndCacheDimensions(el)
+  detectAndCacheDimensions(el);
 
   // The order of applying styles is less important
   // than in the enter phase, as long as we repaint
   // before setting the closed dimensions.
   // But it is probably best to use the same
   // order as the enter phase.
-  setOpenedDimensions(el)
-  hideOverflow(el)
-  forceRepaint(el)
-  setTransition(el)
-  setClosedDimensions(el)
+  setOpenedDimensions(el);
+  hideOverflow(el);
+  forceRepaint(el);
+  setTransition(el);
+  setClosedDimensions(el);
 
   // Emit the event to the parent
-  emits('leave', el, done)
+  emits('leave', el, done);
 
   // Call done() when the transition ends
   // to trigger the @after-leave event.
   // This will also cause v-show
   // to reapply 'display: none'.
-  setTimeout(done, props.duration)
+  setTimeout(done, props.duration);
 }
 
 function afterLeave(el: HTMLElement) {
   // Clean up inline styles
-  unsetOverflow(el)
-  unsetTransition(el)
-  unsetDimensions(el)
-  clearCachedDimensions()
+  unsetOverflow(el);
+  unsetTransition(el);
+  unsetDimensions(el);
+  clearCachedDimensions();
 
   // Emit the event to the parent
-  emits('after-leave', el)
+  emits('after-leave', el);
 }
 
 function leaveCancelled(el: HTMLElement) {
   // Emit the event to the parent
-  emits('leave-cancelled', el)
+  emits('leave-cancelled', el);
 }
 
 function detectAndCacheDimensions(el: HTMLElement) {
   // Cache actual dimensions
   // only once to void invalid values when
   // triggering during a transition
-  if (cachedStyles.value) return
+  if (cachedStyles.value) return;
 
-  const visibility = el.style.visibility
-  const display = el.style.display
+  const visibility = el.style.visibility;
+  const display = el.style.display;
 
   // Trick to get the width and
   // height of a hidden element
-  el.style.visibility = 'hidden'
-  el.style.display = ''
+  el.style.visibility = 'hidden';
+  el.style.display = '';
 
-  cachedStyles.value = detectRelevantDimensions(el)
+  cachedStyles.value = detectRelevantDimensions(el);
 
   // Restore any original styling
-  el.style.visibility = visibility
-  el.style.display = display
+  el.style.visibility = visibility;
+  el.style.display = display;
 }
 
 function clearCachedDimensions() {
-  cachedStyles.value = null
+  cachedStyles.value = null;
 }
 
 function detectRelevantDimensions(el: HTMLElement) {
@@ -209,7 +209,7 @@ function detectRelevantDimensions(el: HTMLElement) {
         el.style.paddingTop || getCssValue(el, 'padding-top'),
       paddingBottom:
         el.style.paddingBottom || getCssValue(el, 'padding-bottom'),
-    }
+    };
   }
 
   if (props.dimension === 'width') {
@@ -219,83 +219,83 @@ function detectRelevantDimensions(el: HTMLElement) {
         el.style.paddingLeft || getCssValue(el, 'padding-left'),
       paddingRight:
         el.style.paddingRight || getCssValue(el, 'padding-right'),
-    }
+    };
   }
 
-  return {}
+  return {};
 }
 
 function setTransition(el: HTMLElement) {
-  el.style.transition = transition.value
+  el.style.transition = transition.value;
 }
 
 function unsetTransition(el: HTMLElement) {
-  el.style.transition = ''
+  el.style.transition = '';
 }
 
 function hideOverflow(el: HTMLElement) {
-  el.style.overflow = 'hidden'
+  el.style.overflow = 'hidden';
 }
 
 function unsetOverflow(el: HTMLElement) {
-  el.style.overflow = ''
+  el.style.overflow = '';
 }
 
 function setClosedDimensions(el: HTMLElement) {
-  if (!cachedStyles.value) return
+  if (!cachedStyles.value) return;
   Object.keys(cachedStyles.value).forEach((key) => {
     // @ts-expect-error
-    el.style[key] = '0'
-  })
+    el.style[key] = '0';
+  });
 }
 
 function setOpenedDimensions(el: HTMLElement) {
-  if (!cachedStyles.value) return
+  if (!cachedStyles.value) return;
   Object.keys(cachedStyles.value).forEach((key) => {
     // @ts-expect-error
-    el.style[key] = cachedStyles.value![key]
-  })
+    el.style[key] = cachedStyles.value![key];
+  });
 }
 
 function unsetDimensions(el: HTMLElement) {
-  if (!cachedStyles.value) return
+  if (!cachedStyles.value) return;
   Object.keys(cachedStyles.value).forEach((key) => {
     // @ts-expect-error
-    el.style[key] = ''
-  })
+    el.style[key] = '';
+  });
 }
 
 function forceRepaint(el: HTMLElement) {
   // Force repaint to make sure the animation is triggered correctly.
   // Thanks: https://markus.oberlehner.net/blog/transition-to-height-auto-with-vue/
-  getComputedStyle(el)[props.dimension as 'height' | 'width']
+  getComputedStyle(el)[props.dimension as 'height' | 'width'];
 }
 
 function getCssValue(el: HTMLElement, style: string) {
-  return getComputedStyle(el, null).getPropertyValue(style)
+  return getComputedStyle(el, null).getPropertyValue(style);
 }
 
 function convertToCssProperty(style: string) {
   // Example: convert 'paddingTop' to 'padding-top'
   // Thanks: https://gist.github.com/tan-yuki/3450323
-  const upperChars = style.match(/([A-Z])/g)
+  const upperChars = style.match(/([A-Z])/g);
 
   if (!upperChars) {
-    return style
+    return style;
   }
 
   for (let i = 0, n = upperChars.length; i < n; i++) {
     style = style.replace(
       new RegExp(upperChars[i]),
       '-' + upperChars[i].toLowerCase(),
-    )
+    );
   }
 
   if (style.slice(0, 1) === '-') {
-    style = style.slice(1)
+    style = style.slice(1);
   }
 
-  return style
+  return style;
 }
 </script>
 

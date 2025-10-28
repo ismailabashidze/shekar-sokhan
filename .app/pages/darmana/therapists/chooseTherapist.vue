@@ -1,71 +1,71 @@
 <script setup lang="ts">
 interface TherapistData {
-  id: string
-  username: string
-  position: string
-  src: string
-  badge: string
-  location: string
-  industry: string
-  status: string
+  id: string;
+  username: string;
+  position: string;
+  src: string;
+  badge: string;
+  location: string;
+  industry: string;
+  status: string;
   tasks: {
-    pending: number
-    done: number
-    status: number
-  }
-  description: string
+    pending: number;
+    done: number;
+    status: number;
+  };
+  description: string;
 }
 
 definePageMeta({
   title: 'انتخاب عامل هوش مصنوعی',
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(18)
+const filter = ref('');
+const perPage = ref(18);
 
 // Add role from useUser composable
-const { role } = useUser()
-const isAdmin = computed(() => role.value === 'admin')
+const { role } = useUser();
+const isAdmin = computed(() => role.value === 'admin');
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const data = ref<{ data: TherapistData[] }>({
   data: [],
-})
+});
 
-const pending = ref()
-const error = ref()
-const refresh = ref()
+const pending = ref();
+const error = ref();
+const refresh = ref();
 
 // Import therapist composable
-const { getTherapists } = useTherapist()
+const { getTherapists } = useTherapist();
 
 // Fetch therapists from the composable
 const fetchTherapists = async () => {
-  pending.value = true
+  pending.value = true;
   try {
-    const therapists = await getTherapists()
-    const activeTherapists = therapists.filter(therapist => therapist.isActive)
+    const therapists = await getTherapists();
+    const activeTherapists = therapists.filter(therapist => therapist.isActive);
 
     // Map therapists to the format expected by the template
     const mappedTherapists = activeTherapists.map(therapist => ({
@@ -83,26 +83,26 @@ const fetchTherapists = async () => {
         status: therapist.isActive ? 0 : 1,
       },
       description: therapist.definingTraits || therapist.longDescription || '',
-    }))
+    }));
 
-    data.value = { data: mappedTherapists }
+    data.value = { data: mappedTherapists };
   }
   catch (err) {
-    console.error('Error fetching therapists:', err)
-    error.value = 'خطا در دریافت اطلاعات روانشناسان'
+    console.error('Error fetching therapists:', err);
+    error.value = 'خطا در دریافت اطلاعات روانشناسان';
   }
   finally {
-    pending.value = false
+    pending.value = false;
   }
-}
+};
 
 // Fetch therapists on component mount
 onMounted(() => {
-  fetchTherapists()
-})
+  fetchTherapists();
+});
 
 // Refresh function for manual refresh
-refresh.value = fetchTherapists
+refresh.value = fetchTherapists;
 
 // Function to get random color for avatars
 function getRandomColor() {
@@ -115,8 +115,8 @@ function getRandomColor() {
     'bg-purple-500',
     'bg-yellow-500',
     'bg-green-500',
-  ]
-  return colors[Math.floor(Math.random() * colors.length)]
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
 }
 </script>
 

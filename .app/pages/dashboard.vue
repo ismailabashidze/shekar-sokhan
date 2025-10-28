@@ -10,18 +10,18 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-writer-dark.png',
     order: 18,
   },
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 // Import user composable
-const { user, role } = useUser()
-const { getUserAvatarUrl } = useAvatarManager()
-const { ZONE_CONFIGS } = useZones()
-const toaster = useToaster()
+const { user, role } = useUser();
+const { getUserAvatarUrl } = useAvatarManager();
+const { ZONE_CONFIGS } = useZones();
+const toaster = useToaster();
 
-const showFeatures = ref(true)
-const showAlphaModal = ref(false)
+const showFeatures = ref(true);
+const showAlphaModal = ref(false);
 
 // Zone landing page URLs mapping
 const zoneLandingPages: Record<string, string> = {
@@ -29,47 +29,47 @@ const zoneLandingPages: Record<string, string> = {
   hammasir: 'https://hammasir.zehna.ir/',
   darmana: 'https://darmana.zehna.ir/pes/',
   togetherMama: 'https://hampa.zehna.ir/fa/',
-}
+};
 
 // Filter zones to hide admin if user is not admin
 const visibleZones = computed(() => {
-  const zones = { ...ZONE_CONFIGS }
+  const zones = { ...ZONE_CONFIGS };
   // Hide admin zone if user role is not admin
   if (role.value !== 'admin') {
-    delete zones.admin
+    delete zones.admin;
   }
-  return zones
-})
+  return zones;
+});
 
 onMounted(() => {
   // Check if the alpha modal has been shown before
-  const alphaModalShown = localStorage.getItem('alphaModalShown')
+  const alphaModalShown = localStorage.getItem('alphaModalShown');
   if (!alphaModalShown) {
     // Show the modal after a short delay
     setTimeout(() => {
-      showAlphaModal.value = true
-    }, 1000)
+      showAlphaModal.value = true;
+    }, 1000);
   }
-})
+});
 
 // Close the modal and save to localStorage
 const closeAlphaModal = () => {
-  showAlphaModal.value = false
-  localStorage.setItem('alphaModalShown', 'true')
-}
+  showAlphaModal.value = false;
+  localStorage.setItem('alphaModalShown', 'true');
+};
 
 // Convert to computed to ensure reactivity with user.zones changes
 const zoneColor = computed(() => {
   return (zone: string) => {
     if (!user.value || !user.value.zones || !Array.isArray(user.value.zones)) {
-      return 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'
+      return 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50';
     }
     if (user.value.zones.includes(zone)) {
-      return 'border-green-200 bg-green-50 dark:border-green-700 dark:bg-green-800/50'
+      return 'border-green-200 bg-green-50 dark:border-green-700 dark:bg-green-800/50';
     }
-    return 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'
-  }
-})
+    return 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50';
+  };
+});
 
 // Icon container and icon colors based on zone access
 const zoneIconColor = computed(() => {
@@ -78,37 +78,38 @@ const zoneIconColor = computed(() => {
       return {
         container: 'bg-gray-300 dark:bg-gray-600',
         icon: 'text-gray-600 dark:text-gray-300',
-        text: 'text-gray-600 dark:text-gray-400'
-      }
+        text: 'text-gray-600 dark:text-gray-400',
+      };
     }
     if (user.value.zones.includes(zone)) {
       return {
         container: 'bg-green-200 dark:bg-green-700',
         icon: 'text-green-700 dark:text-green-200',
-        text: 'text-green-700 dark:text-green-200'
-      }
+        text: 'text-green-700 dark:text-green-200',
+      };
     }
     return {
       container: 'bg-gray-300 dark:bg-gray-600',
       icon: 'text-gray-600 dark:text-gray-300',
-      text: 'text-gray-600 dark:text-gray-400'
-    }
-  }
-})
+      text: 'text-gray-600 dark:text-gray-400',
+    };
+  };
+});
 
 // Check if zone has landing page
 const hasLandingPage = (zoneName: string) => {
-  return !!zoneLandingPages[zoneName]
-}
+  return !!zoneLandingPages[zoneName];
+};
 
 // Handle zone info button click
 const handleZoneInfo = (zoneName: string) => {
-  const landingPageUrl = zoneLandingPages[zoneName]
-  
+  const landingPageUrl = zoneLandingPages[zoneName];
+
   if (landingPageUrl) {
     // Open landing page in new tab
-    window.open(landingPageUrl, '_blank')
-  } else {
+    window.open(landingPageUrl, '_blank');
+  }
+ else {
     // Show toast notification
     toaster.show({
       title: 'به زودی',
@@ -116,15 +117,19 @@ const handleZoneInfo = (zoneName: string) => {
       color: 'info',
       icon: 'ph:info',
       closable: true,
-    })
+    });
   }
-}
+};
 </script>
 
 <template>
   <div class="relative">
     <!-- Alpha State Modal -->
-    <TairoModal :open="showAlphaModal" size="lg" @close="closeAlphaModal">
+    <TairoModal
+      :open="showAlphaModal"
+      size="lg"
+      @close="closeAlphaModal"
+    >
       <template #header>
         <div class="flex w-full items-center justify-between p-4 sm:p-5">
           <div class="flex items-center gap-2">
@@ -159,7 +164,8 @@ const handleZoneInfo = (zoneName: string) => {
         <div class="mb-6 flex items-center justify-center">
           <div class="border-muted-200 dark:border-muted-700 flex items-center gap-4 rounded-xl border p-4">
             <div
-              class="flex size-12 cursor-pointer items-center justify-center rounded-2xl bg-yellow-500/20 text-yellow-500 transition-colors duration-300 hover:bg-yellow-500/30 hover:text-yellow-500">
+              class="flex size-12 cursor-pointer items-center justify-center rounded-2xl bg-yellow-500/20 text-yellow-500 transition-colors duration-300 hover:bg-yellow-500/30 hover:text-yellow-500"
+            >
               <Icon name="ph:bug" class="size-5" />
             </div>
             <div class="flex flex-col items-start">
@@ -195,25 +201,33 @@ const handleZoneInfo = (zoneName: string) => {
       <!-- Grid -->
       <div class="grid grid-cols-12 gap-6">
         <!-- Main Content Column -->
-        <div :class="showFeatures ? 'ltablet:col-span-8 lg:col-span-8' : 'ltablet:col-span-12 lg:col-span-12'"
-          class="col-span-12 mb-3">
+        <div
+          :class="showFeatures ? 'ltablet:col-span-8 lg:col-span-8' : 'ltablet:col-span-12 lg:col-span-12'"
+          class="col-span-12 mb-3"
+        >
           <!-- Inner grid -->
           <div class="grid grid-cols-12 gap-6">
             <!-- Header -->
             <div class="col-span-12" data-tour="welcome-section">
               <div class="bg-primary-800 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
                 <div class="relative h-[150px] w-[320px] shrink-0 sm:h-[175px]">
-                  <img class="pointer-events-none absolute start-0 top-0 sm:-start-10"
-                    src="/img/illustrations/dashboards/writer/readers.png" alt="Readers illustration">
+                  <img
+                    class="pointer-events-none absolute start-0 top-0 sm:-start-10"
+                    src="/img/illustrations/dashboards/writer/readers.png"
+                    alt="Readers illustration"
+                  >
                 </div>
                 <div class="mt-[80px] grow sm:mt-0">
                   <div class="pb-4 text-center sm:pb-0 sm:text-right">
                     <BaseHeading tag="h1" class="text-white opacity-90">
                       <span class="flex items-center justify-center gap-2 sm:justify-start">
                         سلام،
-                        <BaseAvatar :src="getUserAvatarUrl(user) || '/img/avatars/default-male.jpg'"
-                          :text="user?.meta?.name?.substring(0, 2) || 'کا'" size="xs"
-                          class="inline-block align-middle" />
+                        <BaseAvatar
+                          :src="getUserAvatarUrl(user) || '/img/avatars/default-male.jpg'"
+                          :text="user?.meta?.name?.substring(0, 2) || 'کا'"
+                          size="xs"
+                          class="inline-block align-middle"
+                        />
                         <span>{{ user?.meta?.name || 'کاربر عزیز' }} ! 👋</span>
                       </span>
                     </BaseHeading>
@@ -235,13 +249,25 @@ const handleZoneInfo = (zoneName: string) => {
                         <Icon name="lucide:users" class="ml-2 size-4" />
                         <span>مراجعین</span>
                       </BaseButton> -->
-                      <BaseButton size="sm" color="light" variant="outline" class="w-full sm:w-auto"
-                        to="/hamdel/sessions" data-tour="therapists-button">
+                      <BaseButton
+                        size="sm"
+                        color="light"
+                        variant="outline"
+                        class="w-full sm:w-auto"
+                        to="/hamdel/sessions"
+                        data-tour="therapists-button"
+                      >
                         <Icon name="ph:chat-circle-text-duotone" class="ml-2 size-4" />
                         <span>گفت و گوی آزاد</span>
                       </BaseButton>
-                      <BaseButton size="sm" color="light" variant="outline" class="w-full sm:w-auto" to="/coming-soon"
-                        data-tour="therapists-button">
+                      <BaseButton
+                        size="sm"
+                        color="light"
+                        variant="outline"
+                        class="w-full sm:w-auto"
+                        to="/coming-soon"
+                        data-tour="therapists-button"
+                      >
                         <Icon name="ph:stethoscope" class="ml-2 size-4" />
                         <span>گفت و گوی درمانی</span>
                       </BaseButton>
@@ -255,7 +281,13 @@ const handleZoneInfo = (zoneName: string) => {
             <div class="col-span-12">
               <BaseCard rounded="lg" class="p-4">
                 <div class="mb-4">
-                  <BaseHeading as="h3" size="sm" weight="semibold" lead="tight" class="text-muted-800 dark:text-white">
+                  <BaseHeading
+                    as="h3"
+                    size="sm"
+                    weight="semibold"
+                    lead="tight"
+                    class="text-muted-800 dark:text-white"
+                  >
                     تمام محصولات
                   </BaseHeading>
                   <BaseParagraph size="xs" class="text-muted-500 dark:text-muted-400 mt-1">
@@ -269,20 +301,30 @@ const handleZoneInfo = (zoneName: string) => {
                   <ClientOnly>
                     <div v-for="(zone, key) in visibleZones" :key="key">
                       <div class="flex items-center gap-2 rounded-lg border p-3" :class="zoneColor(zone.name)">
-                        <div class="flex size-8 items-center justify-center rounded-lg"
-                          :class="zoneIconColor(zone.name).container">
-                          <Icon :name="zone.icon" class="size-4" :class="zoneIconColor(zone.name).icon" />
+                        <div
+                          class="flex size-8 items-center justify-center rounded-lg"
+                          :class="zoneIconColor(zone.name).container"
+                        >
+                          <Icon
+                            :name="zone.icon"
+                            class="size-4"
+                            :class="zoneIconColor(zone.name).icon"
+                          />
                         </div>
                         <div class="flex flex-1 flex-col gap-1">
-                          <BaseText size="xs" weight="semibold" :class="zoneIconColor(zone.name).text">
+                          <BaseText
+                            size="xs"
+                            weight="semibold"
+                            :class="zoneIconColor(zone.name).text"
+                          >
                             {{ zone.label }}
                           </BaseText>
                         </div>
                         <button
-                          @click="handleZoneInfo(zone.name)"
-                          class="flex size-6 items-center justify-center rounded-full transition-colors hover:bg-muted-100 dark:hover:bg-muted-700"
+                          class="hover:bg-muted-100 dark:hover:bg-muted-700 flex size-6 items-center justify-center rounded-full transition-colors"
                           :class="hasLandingPage(zone.name) ? 'text-info-500 dark:text-info-400' : zoneIconColor(zone.name).text"
                           :title="'اطلاعات ' + zone.label"
+                          @click="handleZoneInfo(zone.name)"
                         >
                           <Icon name="ph:info" class="size-4" />
                         </button>
@@ -299,20 +341,32 @@ const handleZoneInfo = (zoneName: string) => {
               <div class="grid grid-cols-12 gap-6">
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
-                    <InfoImage rounded="lg" image="/img/illustrations/widgets/5.svg" title="استفاده آسان"
-                      text="پیشنهادات هوشمندانه را برای شما ارسال می کند" />
+                    <InfoImage
+                      rounded="lg"
+                      image="/img/illustrations/widgets/5.svg"
+                      title="استفاده آسان"
+                      text="پیشنهادات هوشمندانه را برای شما ارسال می کند"
+                    />
                   </BaseCard>
                 </div>
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
-                    <InfoImage rounded="lg" image="/img/illustrations/widgets/6.svg" title="مشاور روان"
-                      text="می توانید به آسانی با یک مشاور صحبت کنید" />
+                    <InfoImage
+                      rounded="lg"
+                      image="/img/illustrations/widgets/6.svg"
+                      title="مشاور روان"
+                      text="می توانید به آسانی با یک مشاور صحبت کنید"
+                    />
                   </BaseCard>
                 </div>
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
-                    <InfoImage rounded="lg" image="/img/illustrations/widgets/1.png" title="برنامه ریزی و اجرا"
-                      text="برای کارتان برنامه ریزی کنید" />
+                    <InfoImage
+                      rounded="lg"
+                      image="/img/illustrations/widgets/1.png"
+                      title="برنامه ریزی و اجرا"
+                      text="برای کارتان برنامه ریزی کنید"
+                    />
                   </BaseCard>
                 </div>
                 <!-- <div class="col-span-4">
@@ -344,13 +398,26 @@ const handleZoneInfo = (zoneName: string) => {
         <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
           <!-- New Features Section -->
           <div class="col-span-12">
-            <Transition name="features" leave-active-class="transition origin-top duration-75 ease-in"
-              leave-from-class="transform scale-y-100 opacity-100" leave-to-class="transform scale-y-0 opacity-0">
-              <div v-if="showFeatures" class="w-full" data-tour="new-features">
+            <Transition
+              name="features"
+              leave-active-class="transition origin-top duration-75 ease-in"
+              leave-from-class="transform scale-y-100 opacity-100"
+              leave-to-class="transform scale-y-0 opacity-0"
+            >
+              <div
+                v-if="showFeatures"
+                class="w-full"
+                data-tour="new-features"
+              >
                 <!--Features widget-->
                 <NewFeatures>
                   <template #actions>
-                    <BaseButtonClose size="sm" color="muted" data-nui-tooltip="بستن" @click="showFeatures = false" />
+                    <BaseButtonClose
+                      size="sm"
+                      color="muted"
+                      data-nui-tooltip="بستن"
+                      @click="showFeatures = false"
+                    />
                   </template>
                 </NewFeatures>
               </div>

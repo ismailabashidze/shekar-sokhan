@@ -33,6 +33,6 @@
 </template>
 
 <script setup lang="ts">
-const password = ref('c-a_a"r"fafzf')
-const showPasswordField = ref(false)
+const password = ref('c-a_a"r"fafzf');
+const showPasswordField = ref(false);
 </script>

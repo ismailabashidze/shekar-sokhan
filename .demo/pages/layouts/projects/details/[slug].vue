@@ -25,35 +25,35 @@ definePageMeta({
       },
     },
   ],
-})
+});
 
-const { open } = usePanels()
+const { open } = usePanels();
 
-const route = useRoute()
-const slug = computed(() => route.params.slug)
+const route = useRoute();
+const slug = computed(() => route.params.slug);
 
 const query = computed(() => {
   return {
     slug: slug.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch(
   '/api/company/projects',
   {
     query,
   },
-)
+);
 
 if (!data.value?.project) {
-  await navigateTo('/layouts/projects')
+  await navigateTo('/layouts/projects');
 }
 
-const currentTask = ref()
+const currentTask = ref();
 
 function openTaskPanel(id: number, tasks: any) {
-  currentTask.value = tasks.find((task: any) => task.id === id)
-  open('task', { task: currentTask })
+  currentTask.value = tasks.find((task: any) => task.id === id);
+  open('task', { task: currentTask });
 }
 </script>
 

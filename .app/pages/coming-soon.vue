@@ -2,18 +2,18 @@
 definePageMeta({
   title: 'به زودی',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 // Animation states
-const isVisible = ref(false)
+const isVisible = ref(false);
 
 onMounted(() => {
   setTimeout(() => {
-    isVisible.value = true
-  }, 100)
-})
+    isVisible.value = true;
+  }, 100);
+});
 </script>
 
 <template>

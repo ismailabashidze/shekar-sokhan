@@ -9,7 +9,7 @@ import {
   TairoSidebarLayout,
   TairoTopnavLayout,
   TairoIconnavLayout,
-} from '#components'
+} from '#components';
 
 export function useLayoutSwitcher() {
   const layouts = [
@@ -33,20 +33,20 @@ export function useLayoutSwitcher() {
       label: 'Icon top navigation',
       component: TairoIconnavLayout,
     },
-  ] as const
+  ] as const;
 
-  const activeLayoutName = useState('layout-switcher-active', () => 'sidebar')
+  const activeLayoutName = useState('layout-switcher-active', () => 'sidebar');
   const activeLayout = computed(() => {
-    return layouts.find(layout => layout.name === activeLayoutName.value)
-  })
+    return layouts.find(layout => layout.name === activeLayoutName.value);
+  });
   const activeLayoutComponent = computed(() => {
-    return activeLayout.value?.component || TairoSidebarLayout
-  })
+    return activeLayout.value?.component || TairoSidebarLayout;
+  });
 
   return {
     layouts,
     activeLayout,
     activeLayoutName,
     activeLayoutComponent,
-  }
+  };
 }

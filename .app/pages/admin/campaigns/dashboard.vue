@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import type { NotificationCampaign } from '~/types/campaigns'
+import type { NotificationCampaign } from '~/types/campaigns';
 
 definePageMeta({
   title: 'داشبورد کمپین‌ها',
   layout: 'sidebar',
   // Using global middlewares only
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'داشبورد کمپین‌ها - پنل ادمین - ذهنا',
-})
+});
 
 const {
   campaigns,
@@ -24,149 +24,149 @@ const {
   launchCampaign,
   pauseCampaign,
   resumeCampaign,
-} = useCampaignManager()
+} = useCampaignManager();
 
 // State
-const selectedTab = ref<'all' | 'active' | 'draft' | 'scheduled' | 'paused' | 'completed'>('all')
-const searchQuery = ref('')
-const selectedCampaign = ref<NotificationCampaign | null>(null)
-const showScheduleModal = ref(false)
-const scheduleDate = ref('')
-const scheduleTime = ref('')
+const selectedTab = ref<'all' | 'active' | 'draft' | 'scheduled' | 'paused' | 'completed'>('all');
+const searchQuery = ref('');
+const selectedCampaign = ref<NotificationCampaign | null>(null);
+const showScheduleModal = ref(false);
+const scheduleDate = ref('');
+const scheduleTime = ref('');
 
 // Initialize data
 onMounted(async () => {
   try {
-    await fetchCampaigns()
+    await fetchCampaigns();
   }
   catch (error) {
-    console.error('خطا در بارگذاری کمپین‌ها:', error)
+    console.error('خطا در بارگذاری کمپین‌ها:', error);
   }
-})
+});
 
 // Computed
 const filteredCampaigns = computed(() => {
-  let filtered = campaigns.value
+  let filtered = campaigns.value;
 
   // Filter by tab
   if (selectedTab.value !== 'all') {
-    filtered = filtered.filter(c => c.status === selectedTab.value)
+    filtered = filtered.filter(c => c.status === selectedTab.value);
   }
 
   // Filter by search query
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(c =>
       c.name.toLowerCase().includes(query)
       || c.description.toLowerCase().includes(query),
-    )
+    );
   }
 
-  return filtered
-})
+  return filtered;
+});
 
 const totalMetrics = computed(() => {
   return campaigns.value.reduce((acc, campaign) => {
-    const metrics = getCampaignMetrics(campaign)
+    const metrics = getCampaignMetrics(campaign);
     return {
       sent_count: acc.sent_count + metrics.sent_count,
       delivered_count: acc.delivered_count + metrics.delivered_count,
       opened_count: acc.opened_count + metrics.opened_count,
       clicked_count: acc.clicked_count + metrics.clicked_count,
-    }
-  }, { sent_count: 0, delivered_count: 0, opened_count: 0, clicked_count: 0 })
-})
+    };
+  }, { sent_count: 0, delivered_count: 0, opened_count: 0, clicked_count: 0 });
+});
 
 const overallDeliveryRate = computed(() => {
   return totalMetrics.value.sent_count > 0
     ? Math.round((totalMetrics.value.delivered_count / totalMetrics.value.sent_count) * 100)
-    : 0
-})
+    : 0;
+});
 
 const overallOpenRate = computed(() => {
   return totalMetrics.value.delivered_count > 0
     ? Math.round((totalMetrics.value.opened_count / totalMetrics.value.delivered_count) * 100)
-    : 0
-})
+    : 0;
+});
 
 // Methods
 const handleQuickAction = async (campaign: NotificationCampaign, action: string) => {
   try {
     switch (action) {
       case 'launch':
-        await launchCampaign(campaign.id)
-        break
+        await launchCampaign(campaign.id);
+        break;
       case 'pause':
-        await pauseCampaign(campaign.id)
-        break
+        await pauseCampaign(campaign.id);
+        break;
       case 'resume':
-        await resumeCampaign(campaign.id)
-        break
+        await resumeCampaign(campaign.id);
+        break;
       case 'schedule':
-        selectedCampaign.value = campaign
-        showScheduleModal.value = true
-        break
+        selectedCampaign.value = campaign;
+        showScheduleModal.value = true;
+        break;
     }
   }
   catch (error) {
-    console.error('خطا در انجام عملیات:', error)
+    console.error('خطا در انجام عملیات:', error);
   }
-}
+};
 
 const handleScheduleCampaign = async () => {
-  if (!selectedCampaign.value || !scheduleDate.value || !scheduleTime.value) return
+  if (!selectedCampaign.value || !scheduleDate.value || !scheduleTime.value) return;
 
   try {
-    const scheduleDateTime = `${scheduleDate.value}T${scheduleTime.value}`
+    const scheduleDateTime = `${scheduleDate.value}T${scheduleTime.value}`;
 
     // Update campaign with schedule
-    await updateCampaignStatus(selectedCampaign.value.id, 'scheduled')
+    await updateCampaignStatus(selectedCampaign.value.id, 'scheduled');
 
     // Here you would also update the schedule field in the campaign
     // This would require extending the updateCampaign method
 
-    showScheduleModal.value = false
-    scheduleDate.value = ''
-    scheduleTime.value = ''
-    selectedCampaign.value = null
+    showScheduleModal.value = false;
+    scheduleDate.value = '';
+    scheduleTime.value = '';
+    selectedCampaign.value = null;
   }
   catch (error) {
-    console.error('خطا در زمان‌بندی کمپین:', error)
+    console.error('خطا در زمان‌بندی کمپین:', error);
   }
-}
+};
 
 const getStatusColor = (status: NotificationCampaign['status']) => {
   switch (status) {
-    case 'active': return 'success'
-    case 'draft': return 'warning'
-    case 'scheduled': return 'info'
-    case 'paused': return 'muted'
-    case 'completed': return 'primary'
-    default: return 'muted'
+    case 'active': return 'success';
+    case 'draft': return 'warning';
+    case 'scheduled': return 'info';
+    case 'paused': return 'muted';
+    case 'completed': return 'primary';
+    default: return 'muted';
   }
-}
+};
 
 const getStatusIcon = (status: NotificationCampaign['status']) => {
   switch (status) {
-    case 'active': return 'ph:play'
-    case 'draft': return 'ph:file-text'
-    case 'scheduled': return 'ph:clock'
-    case 'paused': return 'ph:pause'
-    case 'completed': return 'ph:check-circle'
-    default: return 'ph:circle'
+    case 'active': return 'ph:play';
+    case 'draft': return 'ph:file-text';
+    case 'scheduled': return 'ph:clock';
+    case 'paused': return 'ph:pause';
+    case 'completed': return 'ph:check-circle';
+    default: return 'ph:circle';
   }
-}
+};
 
 const getStatusLabel = (status: NotificationCampaign['status']) => {
   switch (status) {
-    case 'active': return 'فعال'
-    case 'draft': return 'پیش‌نویس'
-    case 'scheduled': return 'زمان‌بندی شده'
-    case 'paused': return 'متوقف'
-    case 'completed': return 'تکمیل شده'
-    default: return 'نامشخص'
+    case 'active': return 'فعال';
+    case 'draft': return 'پیش‌نویس';
+    case 'scheduled': return 'زمان‌بندی شده';
+    case 'paused': return 'متوقف';
+    case 'completed': return 'تکمیل شده';
+    default: return 'نامشخص';
   }
-}
+};
 
 const tabCounts = computed(() => ({
   all: campaigns.value.length,
@@ -175,7 +175,7 @@ const tabCounts = computed(() => ({
   scheduled: campaigns.value.filter(c => c.status === 'scheduled').length,
   paused: campaigns.value.filter(c => c.status === 'paused').length,
   completed: completedCampaigns.value.length,
-}))
+}));
 </script>
 
 <template>

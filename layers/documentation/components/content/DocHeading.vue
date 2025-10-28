@@ -1,14 +1,14 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    label: string
-    level?: number | string
+    label: string;
+    level?: number | string;
   }>(),
   {
     label: '',
     level: 3,
   },
-)
+);
 </script>
 
 <template>

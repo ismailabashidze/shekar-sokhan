@@ -10,7 +10,7 @@ definePageMeta({
     order: 10,
     new: true,
   },
-})
+});
 
 const accounts = ref([
   {
@@ -34,24 +34,24 @@ const accounts = ref([
     number: '3524 65456 3245 6279',
     balance: 4653.97,
   },
-])
+]);
 
-const selectedPerson = ref('Amber Wilson')
-const selectedAccount = ref(accounts.value[0])
-const amount = ref()
+const selectedPerson = ref('Amber Wilson');
+const selectedAccount = ref(accounts.value[0]);
+const amount = ref();
 
-const target = ref(null)
-const open = ref(false)
+const target = ref(null);
+const open = ref(false);
 
 function openDropdown() {
-  open.value = true
+  open.value = true;
 }
 
-onClickOutside(target, () => (open.value = false))
+onClickOutside(target, () => (open.value = false));
 
 function setAccount(account: any) {
-  selectedAccount.value = account
-  open.value = false
+  selectedAccount.value = account;
+  open.value = false;
 }
 </script>
 

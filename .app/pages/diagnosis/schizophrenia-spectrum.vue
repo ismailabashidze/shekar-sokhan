@@ -415,12 +415,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 
 definePageMeta({
   layout: 'default',
   title: 'طیف اسکیزوفرنی - DSM-5 | ذهنا',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -435,10 +435,10 @@ useHead({
       content: 'اسکیزوفرنی, اختلالات روان‌پریشی, توهمات, هذیان, DSM-5, تشخیص روانپزشکی',
     },
   ],
-})
+});
 
 // State
-const expandedItems = ref(new Set())
+const expandedItems = ref(new Set());
 
 // Complete list of Schizophrenia Spectrum Disorders from DSM-5
 const disorders = [
@@ -612,22 +612,22 @@ const disorders = [
     associatedFeatures: ['عدم قطعیت تشخیصی', 'نیاز به پیگیری', 'علائم ابهام‌آمیز'],
     treatmentApproaches: ['ارزیابی جامع', 'درمان علامتی', 'نظارت مداوم'],
   },
-]
+];
 
 // Helper functions
 const toggleDisorder = (index: number) => {
   if (expandedItems.value.has(index)) {
-    expandedItems.value.delete(index)
+    expandedItems.value.delete(index);
   }
   else {
-    expandedItems.value.add(index)
+    expandedItems.value.add(index);
   }
-}
+};
 
 const viewDisorderDetails = (disorder: any) => {
   // For now, show detailed information in alert
-  alert(`جزئیات ${disorder.titleFa}:\n\nکد DSM-5: ${disorder.code}\nشیوع: ${disorder.prevalence}\nسن شروع: ${disorder.ageOfOnset}\n\nبرای اطلاعات تشخیصی کامل، لطفاً با متخصص مشورت کنید.\n\nصفحه تخصصی این اختلال به زودی اضافه خواهد شد.`)
-}
+  alert(`جزئیات ${disorder.titleFa}:\n\nکد DSM-5: ${disorder.code}\nشیوع: ${disorder.prevalence}\nسن شروع: ${disorder.ageOfOnset}\n\nبرای اطلاعات تشخیصی کامل، لطفاً با متخصص مشورت کنید.\n\nصفحه تخصصی این اختلال به زودی اضافه خواهد شد.`);
+};
 
 const getDisorderGradient = (index: number) => {
   const gradients = [
@@ -641,9 +641,9 @@ const getDisorderGradient = (index: number) => {
     'bg-gradient-to-br from-violet-400 via-violet-500 to-violet-600 relative',
     'bg-gradient-to-br from-pink-400 via-pink-500 to-pink-600 relative',
     'bg-gradient-to-br from-fuchsia-400 via-fuchsia-500 to-fuchsia-600 relative',
-  ]
-  return gradients[index % gradients.length]
-}
+  ];
+  return gradients[index % gradients.length];
+};
 </script>
 
 <style scoped>

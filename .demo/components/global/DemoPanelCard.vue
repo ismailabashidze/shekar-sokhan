@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { FocusTrap } from '@headlessui/vue'
+import { FocusTrap } from '@headlessui/vue';
 
 const props = withDefaults(
   defineProps<{
-    card?: any
+    card?: any;
   }>(),
   {
     card: undefined,
   },
-)
+);
 
-const { close } = usePanels()
-onKeyStroke('Escape', close)
+const { close } = usePanels();
+onKeyStroke('Escape', close);
 
-const detailsExpanded = ref(false)
+const detailsExpanded = ref(false);
 const daySpentProgress = computed(() => {
-  return (props.card?.daySpent / props.card?.limits.spend) * 100
-})
+  return (props.card?.daySpent / props.card?.limits.spend) * 100;
+});
 </script>
 
 <template>

@@ -7,5 +7,5 @@
 </template>
 
 <script setup lang="ts">
-const checked = ref(false)
+const checked = ref(false);
 </script>

@@ -12,5 +12,5 @@
 </template>
 
 <script setup lang="ts">
-const customValue = ref()
+const customValue = ref();
 </script>

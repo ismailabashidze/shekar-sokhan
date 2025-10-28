@@ -201,5 +201,5 @@
 </template>
 
 <script setup lang="ts">
-const model = ref(['value_1'])
+const model = ref(['value_1']);
 </script>

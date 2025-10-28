@@ -9,19 +9,19 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-banking-3-dark.png',
     order: 9,
   },
-})
+});
 
-const activePeriod = ref('week')
+const activePeriod = ref('week');
 
-const areaBtcPrice = reactive(useAreaBtcPrice())
-const radialEvolution = reactive(useRadialEvolution())
-const radialPopularity = reactive(useRadialPopularity())
+const areaBtcPrice = reactive(useAreaBtcPrice());
+const radialEvolution = reactive(useRadialEvolution());
+const radialPopularity = reactive(useRadialPopularity());
 
 function useAreaBtcPrice() {
-  const { primary, info, success } = useTailwindColors()
+  const { primary, info, success } = useTailwindColors();
 
-  const type = 'area'
-  const height = 350
+  const type = 'area';
+  const height = 350;
 
   const options = shallowRef({
     chart: {
@@ -92,7 +92,7 @@ function useAreaBtcPrice() {
       },
       y: {
         formatter: function (val: number) {
-          return val + '%'
+          return val + '%';
         },
       },
     },
@@ -104,7 +104,7 @@ function useAreaBtcPrice() {
       type: 'solid',
       fillOpacity: 0.7,
     },
-  })
+  });
 
   const series = shallowRef([
     {
@@ -115,7 +115,7 @@ function useAreaBtcPrice() {
       name: 'Real',
       data: generateDayWiseTimeSeries(1, 18),
     },
-  ])
+  ]);
 
   function generateDayWiseTimeSeries(s: number, count: number) {
     const values = [
@@ -127,16 +127,16 @@ function useAreaBtcPrice() {
         0.2, 0.3, 0.8, 0.7, 2.2, 1.6, 2.3, 0.7, 1.1, 0.5, 1.2, 0.5, 1, 0.4, 1.5,
         0.2, 0.6, 2,
       ],
-    ]
-    let i = 0
-    const series = []
-    let x = new Date('11 Nov 2022').getTime()
+    ];
+    let i = 0;
+    const series = [];
+    let x = new Date('11 Nov 2022').getTime();
     while (i < count) {
-      series.push([x, values[s][i]])
-      x += 86400000
-      i++
+      series.push([x, values[s][i]]);
+      x += 86400000;
+      i++;
     }
-    return series
+    return series;
   }
 
   return {
@@ -144,15 +144,15 @@ function useAreaBtcPrice() {
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialEvolution() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 220
+  const { primary, info, success } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 220;
 
-  const series = shallowRef([54])
+  const series = shallowRef([54]);
 
   const options = {
     colors: [primary.value, success.value, info.value],
@@ -169,7 +169,7 @@ function useRadialEvolution() {
             fontFamily: 'Roboto, sans-serif',
             color: 'var(--color-muted-400)',
             formatter: function () {
-              return ['(30 days)']
+              return ['(30 days)'];
             },
           },
           value: {
@@ -183,20 +183,20 @@ function useRadialEvolution() {
       },
     },
     labels: ['Median Ratio'],
-  }
+  };
 
   return {
     type,
     height,
     series,
     options,
-  }
+  };
 }
 
 function useRadialPopularity() {
-  const { primary, success } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 225
+  const { primary, success } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 225;
 
   const options = {
     title: {
@@ -226,7 +226,7 @@ function useRadialPopularity() {
             fontWeight: '500',
             color: undefined,
             formatter: function (val: number) {
-              return val + '%'
+              return val + '%';
             },
           },
         },
@@ -247,16 +247,16 @@ function useRadialPopularity() {
       dashArray: 4,
     },
     labels: ['(30 days)'],
-  }
+  };
 
-  const series = shallowRef([67])
+  const series = shallowRef([67]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

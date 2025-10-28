@@ -10,118 +10,118 @@ definePageMeta({
     srcDark: '/img/screens/layouts-onboarding-1-dark.png',
     order: 93,
   },
-})
+});
 
-const loading = ref(false)
-const twoFaMode = ref('email_address')
-const currentStep = ref(1)
-const codeLength = ref(4)
-const input = ref<Array<number | undefined>>([])
-const inputElements = ref<HTMLInputElement[]>([])
-const correctPin = ref('1234')
-const onlyCheckOnLastFieldInput = ref(true)
+const loading = ref(false);
+const twoFaMode = ref('email_address');
+const currentStep = ref(1);
+const codeLength = ref(4);
+const input = ref<Array<number | undefined>>([]);
+const inputElements = ref<HTMLInputElement[]>([]);
+const correctPin = ref('1234');
+const onlyCheckOnLastFieldInput = ref(true);
 
-const email = ref('')
-const tel = ref('')
-const code = ref('')
+const email = ref('');
+const tel = ref('');
+const code = ref('');
 
 function goToStep(n: number) {
-  loading.value = true
+  loading.value = true;
   const timer = setTimeout(() => {
-    loading.value = false
+    loading.value = false;
     if (n < 1) {
-      currentStep.value = 1
+      currentStep.value = 1;
     }
     else if (n > 3) {
-      currentStep.value = 3
+      currentStep.value = 3;
     }
     else {
-      currentStep.value = n
+      currentStep.value = n;
     }
-    clearTimeout(timer)
-  }, 1000)
+    clearTimeout(timer);
+  }, 1000);
 }
 
 function paste(event: ClipboardEvent) {
   const pasted = event.clipboardData
     ?.getData('text')
     ?.replace(/\D/g, '') // only get numbers
-    ?.substring(0, codeLength.value) // don't get more than the PIN codeLength
+    ?.substring(0, codeLength.value); // don't get more than the PIN codeLength
 
   // if after all that sanitazation the string is not empty
   if (pasted) {
     // split the pasted string into an array and load it
-    input.value = pasted.split('').map(Number)
+    input.value = pasted.split('').map(Number);
     // check if the PIN is correct
-    return validatePin.value
+    return validatePin.value;
   }
 }
 function type(event: KeyboardEvent, index: number) {
   if (event.code === 'ArrowRight') {
-    event.stopPropagation()
-    event.preventDefault()
+    event.stopPropagation();
+    event.preventDefault();
     nextTick(() => {
-      focusField(Math.min(codeLength.value, index + 1))
-    })
-    return
+      focusField(Math.min(codeLength.value, index + 1));
+    });
+    return;
   }
 
   if (event.code === 'ArrowLeft') {
-    event.stopPropagation()
-    event.preventDefault()
+    event.stopPropagation();
+    event.preventDefault();
     nextTick(() => {
-      focusField(Math.max(0, index - 1))
-    })
-    return
+      focusField(Math.max(0, index - 1));
+    });
+    return;
   }
 
   if (event.code === 'Backspace') {
-    event.stopPropagation()
-    event.preventDefault()
-    input.value[index - 1] = undefined
+    event.stopPropagation();
+    event.preventDefault();
+    input.value[index - 1] = undefined;
     nextTick(() => {
-      focusField(Math.max(0, index - 1))
-    })
-    return
+      focusField(Math.max(0, index - 1));
+    });
+    return;
   }
 
   if (event.code == 'a' && event.ctrlKey) {
-    event.stopPropagation()
-    event.preventDefault()
-    return
+    event.stopPropagation();
+    event.preventDefault();
+    return;
   }
 
   // only allow numbers
-  const key = event.key.replace(/\D/g, '')
+  const key = event.key.replace(/\D/g, '');
   if (key !== '') {
-    input.value[index - 1] = Number(key)
+    input.value[index - 1] = Number(key);
   }
   // check if the PIN is correct
   if (
     (onlyCheckOnLastFieldInput.value && index == codeLength.value)
     || !onlyCheckOnLastFieldInput.value
   ) {
-    event.stopPropagation()
-    event.preventDefault()
-    return
+    event.stopPropagation();
+    event.preventDefault();
+    return;
   }
   // go to the next field
   // must happen on nextTick cause the field can be disabled.
   nextTick(() => {
-    focusField(Math.min(codeLength.value, index + 1))
-  })
+    focusField(Math.min(codeLength.value, index + 1));
+  });
 }
 
 function focusField(n: any) {
   if (!n || n > codeLength.value) {
-    n = 1
+    n = 1;
   }
-  inputElements.value[n].focus()
+  inputElements.value[n].focus();
 }
 
 const validatePin = computed(() => {
-  return input.value.join('') == correctPin.value
-})
+  return input.value.join('') == correctPin.value;
+});
 </script>
 
 <template>

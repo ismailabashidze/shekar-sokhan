@@ -56,7 +56,7 @@ const value = ref({
   name: 'Aaron Splatter',
   text: 'Project Manager',
   media: '/img/avatars/16.svg',
-})
+});
 
 const people = [
   {
@@ -89,5 +89,5 @@ const people = [
     text: 'Product Manager',
     media: '/img/avatars/2.svg',
   },
-]
+];
 </script>

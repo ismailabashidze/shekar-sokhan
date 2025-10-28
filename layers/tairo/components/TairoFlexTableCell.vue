@@ -1,16 +1,16 @@
 <script setup lang="ts">
-export type FlexTableCellType = 'grow' | 'shrink' | 'stable'
+export type FlexTableCellType = 'grow' | 'shrink' | 'stable';
 
 export interface FlexTableCellProps {
-  type?: FlexTableCellType
-  light?: boolean
-  clamp?: false | 1 | 2 | 3 | 4 | 5 | 6
+  type?: FlexTableCellType;
+  light?: boolean;
+  clamp?: false | 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 const props = withDefaults(defineProps<FlexTableCellProps>(), {
   type: 'stable',
   clamp: 1,
-})
+});
 
 const clampMap = {
   1: 'line-clamp-1',
@@ -19,7 +19,7 @@ const clampMap = {
   4: 'line-clamp-4',
   5: 'line-clamp-5',
   6: 'line-clamp-6',
-}
+};
 </script>
 
 <template>

@@ -138,28 +138,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useAssessment } from '~/composables/useAssessment'
-import { useGoal } from '~/composables/goal'
-import { useGoals } from '~/composables/useGoals'
-import { useTherapist } from '~/composables/therapist'
+import { ref, computed, onMounted } from 'vue';
+import { useAssessment } from '~/composables/useAssessment';
+import { useGoal } from '~/composables/goal';
+import { useGoals } from '~/composables/useGoals';
+import { useTherapist } from '~/composables/therapist';
 
 definePageMeta({
   title: 'سفر درمانی - در حال پردازش',
   layout: 'empty',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'در حال پردازش | ذهنا',
-})
+});
 
-const router = useRouter()
-const { user } = useUser()
-const { getUserAssessments } = useAssessment()
-const { getTherapyGoals, createTherapyGoal } = useGoal()
-const { generateDiagnosisGoals, getGoalsByUser } = useGoals()
-const { getTherapists } = useTherapist()
+const router = useRouter();
+const { user } = useUser();
+const { getUserAssessments } = useAssessment();
+const { getTherapyGoals, createTherapyGoal } = useGoal();
+const { generateDiagnosisGoals, getGoalsByUser } = useGoals();
+const { getTherapists } = useTherapist();
 
 // Mapping functions for ethnicity and religion labels
 const getEthnicityLabel = (value: string) => {
@@ -174,9 +174,9 @@ const getEthnicityLabel = (value: string) => {
     'mixed': 'مختلط',
     'other': 'سایر',
     'prefer-not-say': 'ترجیح می‌دهم نگویم',
-  }
-  return ethnicityMap[value] || value
-}
+  };
+  return ethnicityMap[value] || value;
+};
 
 const getReligionLabel = (value: string) => {
   const religionMap = {
@@ -190,24 +190,24 @@ const getReligionLabel = (value: string) => {
     atheist: 'بی‌دین',
     agnostic: 'آگنوستیک',
     other: 'سایر',
-  }
-  return religionMap[value] || value
-}
+  };
+  return religionMap[value] || value;
+};
 
-const currentStep = ref(0)
-const progress = ref(0)
+const currentStep = ref(0);
+const progress = ref(0);
 
 // Dynamic processing steps and status messages
 const processingSteps = ref([
   { text: 'در حال بارگذاری...', status: 'pending' },
-])
+]);
 const statusMessages = ref([
   { title: 'در حال بارگذاری...', message: 'لطفاً صبر کنید...' },
-])
-const hasExistingGoals = ref(false)
+]);
+const hasExistingGoals = ref(false);
 
 const initializeSteps = (hasGoals: boolean) => {
-  hasExistingGoals.value = hasGoals
+  hasExistingGoals.value = hasGoals;
 
   if (hasGoals) {
     // Steps for when user already has goals
@@ -217,7 +217,7 @@ const initializeSteps = (hasGoals: boolean) => {
       { text: 'بررسی پیشرفت اهداف', status: 'pending' },
       { text: 'ارزیابی نیازهای فعلی', status: 'pending' },
       { text: 'آماده‌سازی جلسه درمانی', status: 'pending' },
-    ]
+    ];
 
     statusMessages.value = [
       {
@@ -240,7 +240,7 @@ const initializeSteps = (hasGoals: boolean) => {
         title: 'آماده‌سازی جلسه',
         message: 'در حال آماده‌سازی جلسه بر اساس اهداف موجود شما...',
       },
-    ]
+    ];
   }
   else {
     // Steps for new goal generation
@@ -250,7 +250,7 @@ const initializeSteps = (hasGoals: boolean) => {
       { text: 'تولید اهداف تشخیصی جامع', status: 'pending' },
       { text: 'ارزیابی عوامل فرهنگی و محیطی', status: 'pending' },
       { text: 'تدوین برنامه مکالمه هوشمند', status: 'pending' },
-    ]
+    ];
 
     statusMessages.value = [
       {
@@ -273,16 +273,16 @@ const initializeSteps = (hasGoals: boolean) => {
         title: 'تدوین برنامه مکالمه',
         message: 'در حال تدوین برنامه مکالمه هوشمند با اولویت‌بندی سوالات و رویکرد درمانی...',
       },
-    ]
+    ];
   }
-}
+};
 
 const currentStatus = computed(() => {
   if (!statusMessages.value || statusMessages.value.length === 0) {
-    return { title: 'در حال بارگذاری...', message: 'لطفاً صبر کنید...' }
+    return { title: 'در حال بارگذاری...', message: 'لطفاً صبر کنید...' };
   }
-  return statusMessages.value[currentStep.value] || statusMessages.value[0] || { title: 'در حال بارگذاری...', message: 'لطفاً صبر کنید...' }
-})
+  return statusMessages.value[currentStep.value] || statusMessages.value[0] || { title: 'در حال بارگذاری...', message: 'لطفاً صبر کنید...' };
+});
 
 // State for displaying DSM-5 analysis results
 const dsm5Analysis = ref({
@@ -290,44 +290,44 @@ const dsm5Analysis = ref({
   primaryDiagnosis: null,
   culturalFactors: [],
   riskAssessment: null,
-})
+});
 
 const processAssessment = async () => {
   try {
     // Check if user already has goals - skip goal generation if they exist
-    let existingGoals = []
+    let existingGoals = [];
     if (user.value?.id) {
-      existingGoals = await getGoalsByUser(user.value.id)
+      existingGoals = await getGoalsByUser(user.value.id);
     }
 
     // Initialize steps based on whether goals exist
-    initializeSteps(existingGoals && existingGoals.length > 0)
+    initializeSteps(existingGoals && existingGoals.length > 0);
 
     if (existingGoals && existingGoals.length > 0) {
       // User already has goals - skip goal generation process
-      console.log(`Found ${existingGoals.length} existing goals, skipping goal generation`)
+      console.log(`Found ${existingGoals.length} existing goals, skipping goal generation`);
 
       // Step 1: Analyze existing goals
-      updateStep(0, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      updateStep(0, 'completed')
+      updateStep(0, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      updateStep(0, 'completed');
 
       // Step 2: Load DSM-5 analysis from existing goals
-      updateStep(1, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      updateStep(1, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Extract DSM-5 analysis from existing goals using new structure (with safety checks)
-      const categories = []
-      const culturalFactors = []
-      let primaryDiagnosis = null
+      const categories = [];
+      const culturalFactors = [];
+      let primaryDiagnosis = null;
       let riskAssessment = 'low'
 
       // Parse existing goals that may contain suggestedDisordersToInvestigate
       (existingGoals || []).forEach((goal) => {
         try {
           // Check if goal has the new structure
-          const goalData = goal?.goals || goal
-          const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || []
+          const goalData = goal?.goals || goal;
+          const disorders = goalData?.suggestedDisordersToInvestigate || goalData?.disorders || [];
 
           if (Array.isArray(disorders)) {
             disorders.forEach((category) => {
@@ -336,26 +336,26 @@ const processAssessment = async () => {
                   name: category.categoryTitleFa || category.categoryTitle, // Use Persian name if available
                   likelihood: Math.random() * 0.3 + 0.5, // Simulate likelihood 50-80%
                   evidence: category?.disorders?.slice(0, 2).map(d => d.title || 'شواهد موجود') || ['بر اساس اهداف قبلی'],
-                })
+                });
               }
 
               // Set primary diagnosis from first disorder
               if (!primaryDiagnosis && category?.disorders?.[0]?.title) {
-                primaryDiagnosis = category.disorders[0].title
+                primaryDiagnosis = category.disorders[0].title;
               }
 
               // Check for suicide risk in disorders
               if (category?.disorders) {
                 category.disorders.forEach((disorder) => {
                   if (disorder.suicideRisk && disorder.suicideRisk.includes('high')) {
-                    riskAssessment = 'high'
+                    riskAssessment = 'high';
                   }
                   else if (disorder.suicideRisk && disorder.suicideRisk.includes('moderate') && riskAssessment === 'low') {
-                    riskAssessment = 'moderate'
+                    riskAssessment = 'moderate';
                   }
-                })
+                });
               }
-            })
+            });
           }
 
           // Fallback to old structure if no new structure found
@@ -364,66 +364,66 @@ const processAssessment = async () => {
               name: goalData?.title || 'اهداف موجود',
               likelihood: 0.7,
               evidence: ['بر اساس اهداف قبلی'],
-            })
+            });
 
             if (!primaryDiagnosis) {
-              primaryDiagnosis = goalData?.title || 'تشخیص موجود'
+              primaryDiagnosis = goalData?.title || 'تشخیص موجود';
             }
           }
         }
         catch (error) {
-          console.warn('Error parsing goal data:', error)
+          console.warn('Error parsing goal data:', error);
         }
-      })
+      });
 
       dsm5Analysis.value = {
         categories: categories.slice(0, 3), // Show top 3
         primaryDiagnosis: primaryDiagnosis || 'بر اساس اهداف قبلی',
         culturalFactors: culturalFactors.length > 0 ? culturalFactors : ['در نظر گرفته شده'],
         riskAssessment: riskAssessment,
-      }
+      };
 
-      updateStep(1, 'completed')
+      updateStep(1, 'completed');
 
       // Step 3: Skip goal generation (already exist)
-      updateStep(2, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 800))
-      updateStep(2, 'completed')
+      updateStep(2, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 800));
+      updateStep(2, 'completed');
 
       // Step 4: Cultural assessment (quick review)
-      updateStep(3, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 800))
-      updateStep(3, 'completed')
+      updateStep(3, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 800));
+      updateStep(3, 'completed');
 
       // Step 5: Conversation planning
-      updateStep(4, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      updateStep(4, 'completed')
+      updateStep(4, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      updateStep(4, 'completed');
     }
     else {
       // No existing goals - run full goal generation process
-      console.log('No existing goals found, running full goal generation process')
+      console.log('No existing goals found, running full goal generation process');
 
       // Step 1: Analyze assessment results
-      updateStep(0, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      updateStep(0, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const assessments = await getUserAssessments()
+      const assessments = await getUserAssessments();
       if (assessments.length === 0) {
-        throw new Error('No assessment found')
+        throw new Error('No assessment found');
       }
 
-      const latestAssessment = assessments[0]
-      updateStep(0, 'completed')
+      const latestAssessment = assessments[0];
+      updateStep(0, 'completed');
 
       // Step 2: DSM-5 Category Analysis
-      updateStep(1, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      updateStep(1, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       // Simulate DSM-5 analysis based on assessment data (this will be enhanced by the AI in generateDiagnosisGoals)
-      const simulatedCategories = []
-      let simulatedPrimaryDiagnosis = null
-      let simulatedRiskAssessment = 'low'
+      const simulatedCategories = [];
+      let simulatedPrimaryDiagnosis = null;
+      let simulatedRiskAssessment = 'low';
 
       // Analyze assessment to simulate categories (using Persian names)
       if (latestAssessment.mood === 'low' || latestAssessment.mood === 'very-low') {
@@ -431,9 +431,9 @@ const processAssessment = async () => {
           name: 'اختلالات افسردگی',
           likelihood: 0.8,
           evidence: ['خلق پایین', 'کاهش انرژی', 'علائم افسردگی'],
-        })
-        simulatedPrimaryDiagnosis = 'اپیزود افسردگی اساسی'
-        simulatedRiskAssessment = latestAssessment.mood === 'very-low' ? 'moderate' : 'low'
+        });
+        simulatedPrimaryDiagnosis = 'اپیزود افسردگی اساسی';
+        simulatedRiskAssessment = latestAssessment.mood === 'very-low' ? 'moderate' : 'low';
       }
 
       if (latestAssessment.anxietyLevel >= 4) {
@@ -441,9 +441,9 @@ const processAssessment = async () => {
           name: 'اختلالات اضطرابی',
           likelihood: 0.6,
           evidence: ['اضطراب بالا', 'نگرانی مفرط', 'علائم جسمی'],
-        })
+        });
         if (!simulatedPrimaryDiagnosis) {
-          simulatedPrimaryDiagnosis = 'اختلال اضطراب عمومی'
+          simulatedPrimaryDiagnosis = 'اختلال اضطراب عمومی';
         }
       }
 
@@ -452,7 +452,7 @@ const processAssessment = async () => {
           name: 'اختلالات خواب-بیداری',
           likelihood: 0.4,
           evidence: ['کیفیت خواب ضعیف', 'اختلال در الگوی خواب'],
-        })
+        });
       }
 
       // Fallback if no categories identified
@@ -461,8 +461,8 @@ const processAssessment = async () => {
           name: 'سایر اختلالات روانی',
           likelihood: 0.5,
           evidence: ['علائم نیازمند بررسی بیشتر'],
-        })
-        simulatedPrimaryDiagnosis = 'شکایات روانشناختی'
+        });
+        simulatedPrimaryDiagnosis = 'شکایات روانشناختی';
       }
 
       dsm5Analysis.value = {
@@ -470,26 +470,26 @@ const processAssessment = async () => {
         primaryDiagnosis: simulatedPrimaryDiagnosis || 'نیازمند ارزیابی بیشتر',
         culturalFactors: [`فرهنگ ${getEthnicityLabel(latestAssessment.ethnicity)}`, `مذهب ${getReligionLabel(latestAssessment.religion)}`],
         riskAssessment: simulatedRiskAssessment,
-      }
+      };
 
-      updateStep(1, 'completed')
+      updateStep(1, 'completed');
 
       // Step 3: Generate comprehensive diagnostic goals
-      updateStep(2, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 4000))
+      updateStep(2, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 4000));
 
-      let diagnosisGoals = []
+      let diagnosisGoals = [];
       try {
-        console.log('Starting diagnosis goals generation...')
-        diagnosisGoals = await generateDiagnosisGoals(latestAssessment, 1)
-        console.log('Generated diagnosis goals:', diagnosisGoals)
+        console.log('Starting diagnosis goals generation...');
+        diagnosisGoals = await generateDiagnosisGoals(latestAssessment, 1);
+        console.log('Generated diagnosis goals:', diagnosisGoals);
 
         if (!diagnosisGoals || diagnosisGoals.length === 0) {
-          throw new Error('No diagnosis goals were generated')
+          throw new Error('No diagnosis goals were generated');
         }
       }
       catch (error) {
-        console.error('Error in diagnosis goals generation:', error)
+        console.error('Error in diagnosis goals generation:', error);
         // Create fallback goals to prevent complete failure
         diagnosisGoals = [{
           categoryTitle: 'Depressive Disorders',
@@ -505,70 +505,70 @@ const processAssessment = async () => {
             developmentAndCourse: 'معمولاً در سن جوانی شروع می‌شود.',
             suicideRisk: 'متوسط',
           }],
-        }]
-        console.warn('Using fallback diagnosis goals due to generation error')
+        }];
+        console.warn('Using fallback diagnosis goals due to generation error');
       }
 
-      updateStep(2, 'completed')
+      updateStep(2, 'completed');
 
       // Step 4: Cultural and environmental assessment
-      updateStep(3, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 2500))
-      updateStep(3, 'completed')
+      updateStep(3, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      updateStep(3, 'completed');
 
       // Step 5: Smart conversation planning
-      updateStep(4, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      updateStep(4, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Save the generated goals to the new collection
       if (diagnosisGoals && diagnosisGoals.length > 0) {
         // Save directly as JSON to suggestedDisordersToInvestigate field
-        const dataToSave = diagnosisGoals // This is already the array of categories
+        const dataToSave = diagnosisGoals; // This is already the array of categories
 
-        console.log('Saving to suggestedDisordersToInvestigate collection:', dataToSave)
-        await createTherapyGoal(dataToSave)
-        console.log('Successfully saved comprehensive DSM-5 goals:', diagnosisGoals.length, 'categories')
+        console.log('Saving to suggestedDisordersToInvestigate collection:', dataToSave);
+        await createTherapyGoal(dataToSave);
+        console.log('Successfully saved comprehensive DSM-5 goals:', diagnosisGoals.length, 'categories');
       }
       else {
-        console.warn('No diagnosis goals generated - nothing to save')
+        console.warn('No diagnosis goals generated - nothing to save');
       }
 
-      updateStep(4, 'completed')
+      updateStep(4, 'completed');
     }
 
     // Complete processing and redirect to ready page
     setTimeout(() => {
-      router.push('/therapy-journey/ready')
-    }, 1500)
+      router.push('/therapy-journey/ready');
+    }, 1500);
   }
   catch (error) {
-    console.error('Error processing assessment:', error)
+    console.error('Error processing assessment:', error);
     // Handle error - redirect with fallback goals
     setTimeout(() => {
-      router.push(`/therapy-journey/suggested-disorders-to-investigate`)
-    }, 1000)
+      router.push(`/therapy-journey/suggested-disorders-to-investigate`);
+    }, 1000);
   }
-}
+};
 
 const updateStep = (stepIndex: number, status: 'pending' | 'processing' | 'completed') => {
-  processingSteps.value[stepIndex].status = status
+  processingSteps.value[stepIndex].status = status;
   if (status === 'processing') {
-    currentStep.value = stepIndex
+    currentStep.value = stepIndex;
   }
 
   // Update progress
-  const completedSteps = processingSteps.value.filter(s => s.status === 'completed').length
-  const processingSteps_count = processingSteps.value.filter(s => s.status === 'processing').length
-  progress.value = (completedSteps + processingSteps_count * 0.5) / processingSteps.value.length * 100
-}
+  const completedSteps = processingSteps.value.filter(s => s.status === 'completed').length;
+  const processingSteps_count = processingSteps.value.filter(s => s.status === 'processing').length;
+  progress.value = (completedSteps + processingSteps_count * 0.5) / processingSteps.value.length * 100;
+};
 
 onMounted(() => {
   // Initialize with default steps (will be updated in processAssessment)
-  initializeSteps(false)
+  initializeSteps(false);
 
   // Start processing after component mounts
   setTimeout(() => {
-    processAssessment()
-  }, 1000)
-})
+    processAssessment();
+  }, 1000);
+});
 </script>

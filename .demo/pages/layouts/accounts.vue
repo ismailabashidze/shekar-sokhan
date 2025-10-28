@@ -1,17 +1,17 @@
 <script setup lang="ts">
-const route = useRoute()
+const route = useRoute();
 
 const isAccounts = computed(() => {
-  return route.path.match('^/layouts/accounts$')
-})
+  return route.path.match('^/layouts/accounts$');
+});
 
 const isLinked = computed(() => {
-  return route.path.startsWith('/layouts/accounts/linked')
-})
+  return route.path.startsWith('/layouts/accounts/linked');
+});
 
 const isRules = computed(() => {
-  return route.path.startsWith('/layouts/accounts/rules')
-})
+  return route.path.startsWith('/layouts/accounts/rules');
+});
 </script>
 
 <template>

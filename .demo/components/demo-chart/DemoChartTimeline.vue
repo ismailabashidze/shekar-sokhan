@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoTimeline = reactive(useDemoTimeline())
+const demoTimeline = reactive(useDemoTimeline());
 
 function useDemoTimeline() {
-  const { primary, info, success, warning, danger } = useTailwindColors()
-  const type = 'rangeBar'
-  const height = 280
+  const { primary, info, success, warning, danger } = useTailwindColors();
+  const type = 'rangeBar';
+  const height = 280;
 
   const options = {
     title: {
@@ -35,11 +35,11 @@ function useDemoTimeline() {
     dataLabels: {
       enabled: true,
       formatter: function (val: string, opts: any) {
-        const label = opts.w.globals.labels[opts.dataPointIndex]
-        const a = val[0]
-        const b = val[1]
-        const diff = 0
-        return label + ': ' + diff + (diff > 1 ? 'D' : 'd')
+        const label = opts.w.globals.labels[opts.dataPointIndex];
+        const a = val[0];
+        const b = val[1];
+        const diff = 0;
+        return label + ': ' + diff + (diff > 1 ? 'D' : 'd');
       },
       style: {
         colors: ['#f3f4f5', '#fff'],
@@ -58,7 +58,7 @@ function useDemoTimeline() {
         opacity: 1,
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -105,14 +105,14 @@ function useDemoTimeline() {
         },
       ],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

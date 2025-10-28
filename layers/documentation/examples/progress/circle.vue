@@ -63,5 +63,5 @@
 </template>
 
 <script setup lang="ts">
-const progressCircle = ref(25)
+const progressCircle = ref(25);
 </script>

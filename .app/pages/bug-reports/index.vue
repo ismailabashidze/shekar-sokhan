@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { useBugReportApi, type BugReport } from '~/composables/useBugReportApi'
+import { useBugReportApi, type BugReport } from '~/composables/useBugReportApi';
 
 definePageMeta({
   title: 'لیست گزارش‌های خطا',
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const router = useRouter()
-const toaster = useToaster()
-const { user } = useUser()
+const router = useRouter();
+const toaster = useToaster();
+const { user } = useUser();
 
 // Check for admin access
 onMounted(() => {
@@ -20,16 +20,16 @@ onMounted(() => {
       color: 'danger',
       icon: 'ph:lock-key',
       closable: true,
-    })
-    router.push('/dashboard')
-    return
+    });
+    router.push('/dashboard');
+    return;
   }
-  loadBugReports()
-})
+  loadBugReports();
+});
 
-const { getBugReports, markAsSeen, markAsResolved, markAsUnresolved } = useBugReportApi()
-const bugReports = ref<BugReport[]>([])
-const isLoading = ref(true)
+const { getBugReports, markAsSeen, markAsResolved, markAsUnresolved } = useBugReportApi();
+const bugReports = ref<BugReport[]>([]);
+const isLoading = ref(true);
 
 // Priority colors
 const priorityColors = {
@@ -37,7 +37,7 @@ const priorityColors = {
   high: 'warning',
   medium: 'info',
   low: 'success',
-}
+};
 
 // Category labels
 const categoryLabels = {
@@ -46,89 +46,89 @@ const categoryLabels = {
   efficiency: 'کارایی',
   security: 'امنیت',
   other: 'سایر',
-}
+};
 
 // Load bug reports
 const loadBugReports = async () => {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const response = await getBugReports()
-    bugReports.value = response.items
+    const response = await getBugReports();
+    bugReports.value = response.items;
   }
   catch (error) {
-    console.error('Error loading bug reports:', error)
+    console.error('Error loading bug reports:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در بارگذاری گزارش‌ها',
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // Update bug report status
 const updateStatus = async (id: string, action: 'seen' | 'resolved' | 'unresolved') => {
   try {
     if (action === 'seen') {
-      await markAsSeen(id)
+      await markAsSeen(id);
       toaster.show({
         title: 'موفقیت',
         message: 'گزارش به عنوان مشاهده شده علامت‌گذاری شد',
         color: 'success',
         icon: 'lucide:check-circle',
         closable: true,
-      })
+      });
     }
     else if (action === 'resolved') {
-      await markAsResolved(id)
+      await markAsResolved(id);
       toaster.show({
         title: 'موفقیت',
         message: 'گزارش به عنوان حل شده علامت‌گذاری شد',
         color: 'success',
         icon: 'lucide:check-circle',
         closable: true,
-      })
+      });
     }
     else if (action === 'unresolved') {
-      await markAsUnresolved(id)
+      await markAsUnresolved(id);
       toaster.show({
         title: 'موفقیت',
         message: 'گزارش به عنوان حل نشده علامت‌گذاری شد',
         color: 'success',
         icon: 'lucide:check-circle',
         closable: true,
-      })
+      });
     }
 
     // Refresh the list
-    await loadBugReports()
+    await loadBugReports();
   }
   catch (error) {
-    console.error(`Error updating bug report status:`, error)
+    console.error(`Error updating bug report status:`, error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در بروزرسانی وضعیت گزارش',
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   }
-}
+};
 
 // Format date
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('fa-IR') + ' ' + date.toLocaleTimeString('fa-IR')
-}
+  const date = new Date(dateString);
+  return date.toLocaleDateString('fa-IR') + ' ' + date.toLocaleTimeString('fa-IR');
+};
 
 // Navigate to bug report details
 const viewBugReport = (id: string) => {
-  router.push(`/bug-reports/${id}`)
-}
+  router.push(`/bug-reports/${id}`);
+};
 
 </script>
 

@@ -1,5 +1,5 @@
-import { addVitePlugin, defineNuxtModule } from '@nuxt/kit'
-import MagicString from 'magic-string'
+import { addVitePlugin, defineNuxtModule } from '@nuxt/kit';
+import MagicString from 'magic-string';
 
 /**
  * This module removes HTML comments from Vue files.
@@ -17,11 +17,11 @@ export default defineNuxtModule({
       enforce: 'pre',
       transform: (code, id) => {
         if (!id.endsWith('.vue') || !code.includes('<!--')) {
-          return
+          return;
         }
 
-        const s = new MagicString(code)
-        s.replace(/<!--.*?-->/g, '')
+        const s = new MagicString(code);
+        s.replace(/<!--.*?-->/g, '');
 
         if (s.hasChanged()) {
           return {
@@ -29,9 +29,9 @@ export default defineNuxtModule({
             map:
               nuxt.options.sourcemap
               && s.generateMap({ source: id, includeContent: true }),
-          }
+          };
         }
       },
-    })
+    });
   },
-})
+});

@@ -1,6 +1,6 @@
-import { withShurikenUI } from '@shuriken-ui/tailwind'
-import { join } from 'pathe'
-import defaultTheme from 'tailwindcss/defaultTheme'
+import { withShurikenUI } from '@shuriken-ui/tailwind';
+import { join } from 'pathe';
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 /**
  * This is the Tailwind config file for the demo.
@@ -90,4 +90,4 @@ export default withShurikenUI({
       },
     },
   },
-})
+});

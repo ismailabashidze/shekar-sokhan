@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
-import type { Map, Popup } from 'mapbox-gl'
-import type { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson'
-import 'mapbox-gl/src/css/mapbox-gl.css'
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import type { Map, Popup } from 'mapbox-gl';
+import type { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
+import 'mapbox-gl/src/css/mapbox-gl.css';
 
 const props = defineProps<{
-  reversed?: boolean
-}>()
-const { open } = usePanels()
-const { primary } = useTailwindColors()
+  reversed?: boolean;
+}>();
+const { open } = usePanels();
+const { primary } = useTailwindColors();
 
-const colorMode = useColorMode()
+const colorMode = useColorMode();
 
-const selectedFeature = ref()
-const selectedFeatureLatLng = ref()
-const selectedFeatureName = ref('')
-const mapElement = shallowRef<HTMLElement>()
-const popupElement = shallowRef<HTMLElement>()
-const map = shallowRef<Map>()
-const popup = shallowRef<Popup>()
-const geocoder = shallowRef<any>()
+const selectedFeature = ref();
+const selectedFeatureLatLng = ref();
+const selectedFeatureName = ref('');
+const mapElement = shallowRef<HTMLElement>();
+const popupElement = shallowRef<HTMLElement>();
+const map = shallowRef<Map>();
+const popup = shallowRef<Popup>();
+const geocoder = shallowRef<any>();
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-let mapboxgl: typeof import('mapbox-gl')
+let mapboxgl: typeof import('mapbox-gl');
 
 const locations = {
   type: 'FeatureCollection',
@@ -181,22 +181,22 @@ const locations = {
       },
     },
   ],
-} satisfies FeatureCollection<Geometry, GeoJsonProperties>
+} satisfies FeatureCollection<Geometry, GeoJsonProperties>;
 
 function loadLayers() {
   if (!map.value) {
-    return
+    return;
   }
 
   // Do nothing if source already added
   if (map.value.getSource('places')) {
-    return
+    return;
   }
 
   map.value.addSource('places', {
     type: 'geojson',
     data: locations,
-  })
+  });
 
   // Add a layer showing the places.
   map.value.addLayer({
@@ -209,46 +209,46 @@ function loadLayers() {
       'circle-stroke-width': 2,
       'circle-stroke-color': primary.value,
     },
-  })
+  });
 
   map.value.on('click', 'places', (e: any) => {
-    selectedFeature.value = e.features[0]
-    selectedFeatureLatLng.value = e.lngLat
-  })
+    selectedFeature.value = e.features[0];
+    selectedFeatureLatLng.value = e.lngLat;
+  });
 
   // Change the cursor to a pointer when the mouse is over the places layer.
   map.value.on('mouseenter', 'places', () => {
     if (!map.value) {
-      return
+      return;
     }
 
-    map.value.getCanvas().style.cursor = 'pointer'
-  })
+    map.value.getCanvas().style.cursor = 'pointer';
+  });
 
   // Change it back to a pointer when it leaves.
   map.value.on('mouseleave', 'places', () => {
     if (!map.value) {
-      return
+      return;
     }
 
-    map.value.getCanvas().style.cursor = ''
-  })
+    map.value.getCanvas().style.cursor = '';
+  });
 }
 
 function selectFeature(feature: any) {
-  selectedFeature.value = undefined
-  selectedFeature.value = feature
+  selectedFeature.value = undefined;
+  selectedFeature.value = feature;
 }
-const config = useRuntimeConfig()
+const config = useRuntimeConfig();
 if (import.meta.dev && !config.public.mapboxToken) {
   console.warn(
     'NUXT_PUBLIC_MAPBOX_TOKEN environment variable is not defined, mapbox features are disabled',
-  )
+  );
 }
 
 onMounted(() => {
   if (!config.public.mapboxToken) {
-    return
+    return;
   }
 
   Promise.all([
@@ -257,12 +257,12 @@ onMounted(() => {
       m => m.default,
     ),
   ]).then(([_mapboxgl, MapboxGeocoder]) => {
-    mapboxgl = _mapboxgl
+    mapboxgl = _mapboxgl;
     if (!mapElement.value) {
-      return
+      return;
     }
     // You can set the NUXT_PUBLIC_MAPBOX_TOKEN inside .env file
-    mapboxgl.accessToken = config.public.mapboxToken
+    mapboxgl.accessToken = config.public.mapboxToken;
 
     map.value = new mapboxgl.Map({
       container: mapElement.value,
@@ -272,42 +272,42 @@ onMounted(() => {
           : 'mapbox://styles/mapbox/light-v10',
       center: [-77.04, 38.907],
       zoom: 12,
-    })
+    });
 
     geocoder.value = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken,
       mapboxgl,
       marker: true,
-    })
+    });
 
     map.value.on('style.load', () => {
       function loadingStyles() {
         if (!map.value?.isStyleLoaded()) {
-          setTimeout(loadingStyles, 1500)
-          return
+          setTimeout(loadingStyles, 1500);
+          return;
         }
 
-        loadLayers()
+        loadLayers();
       }
-      loadingStyles()
-    })
+      loadingStyles();
+    });
 
-    map.value.addControl(geocoder.value, props.reversed ? 'top-left' : 'top-right')
-  })
-})
+    map.value.addControl(geocoder.value, props.reversed ? 'top-left' : 'top-right');
+  });
+});
 
 watchEffect(
   () => {
     if (!selectedFeature.value || !popupElement.value || !map.value) {
-      return
+      return;
     }
 
-    const feature = selectedFeature.value
-    const { geometry, properties } = feature
-    const { name } = properties
-    const coordinates = geometry.coordinates.slice()
+    const feature = selectedFeature.value;
+    const { geometry, properties } = feature;
+    const { name } = properties;
+    const coordinates = geometry.coordinates.slice();
 
-    console.log('zooming at: ', properties, coordinates)
+    console.log('zooming at: ', properties, coordinates);
 
     // Ensure that if the map is zoomed out such that multiple
     // copies of the feature are visible, the popup appears
@@ -315,7 +315,7 @@ watchEffect(
     if (selectedFeatureLatLng.value) {
       while (Math.abs(selectedFeatureLatLng.value.lng - coordinates[0]) > 180) {
         coordinates[0]
-          += selectedFeatureLatLng.value.lng > coordinates[0] ? 360 : -360
+          += selectedFeatureLatLng.value.lng > coordinates[0] ? 360 : -360;
       }
     }
 
@@ -324,41 +324,41 @@ watchEffect(
       zoom: 15,
       bearing: 0,
       essential: true, // this animation is considered essential with respect to prefers-reduced-motion
-    })
+    });
 
     if (popup.value) {
-      popup.value.remove()
+      popup.value.remove();
     }
 
     popup.value = new mapboxgl.Popup()
       .on('open', () => {
-        selectedFeatureName.value = name
+        selectedFeatureName.value = name;
       })
       .on('close', () => {
-        selectedFeatureName.value = ''
+        selectedFeatureName.value = '';
       })
       .setLngLat(coordinates)
       .setHTML(popupElement.value.innerHTML)
-      .addTo(map.value)
+      .addTo(map.value);
   },
   { flush: 'post' },
-)
+);
 
 watch(
   () => colorMode.value === 'dark',
   () => {
     if (!map.value) {
-      return
+      return;
     }
 
     if (colorMode.value === 'dark') {
-      map.value.setStyle('mapbox://styles/mapbox/dark-v11')
+      map.value.setStyle('mapbox://styles/mapbox/dark-v11');
     }
     else {
-      map.value.setStyle('mapbox://styles/mapbox/light-v11')
+      map.value.setStyle('mapbox://styles/mapbox/light-v11');
     }
   },
-)
+);
 </script>
 
 <template>

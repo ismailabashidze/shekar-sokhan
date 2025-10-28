@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PsychoReg, StepData } from '../../../types'
+import type { PsychoReg, StepData } from '../../../types';
 
 definePageMeta({
   preview: {
@@ -11,10 +11,10 @@ definePageMeta({
     order: 37,
     new: true,
   },
-})
+});
 useHead({
   title: 'ثبت نام مشاوران',
-})
+});
 
 const {
   data: request,
@@ -25,9 +25,9 @@ const {
   complete,
   steps,
   checkPreviousSteps,
-} = useMultiStepForm<PsychoReg, StepData>()
+} = useMultiStepForm<PsychoReg, StepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 </script>
 
 <template>

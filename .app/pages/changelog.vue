@@ -124,27 +124,27 @@
 </template>
 
 <script setup lang="ts">
-const { version: appVersion } = useAppVersion()
-const { releases, latestRelease, error } = await useReleaseNotes()
+const { version: appVersion } = useAppVersion();
+const { releases, latestRelease, error } = await useReleaseNotes();
 
 const pageTitle = computed(() => latestRelease.value
   ? `تاریخچه تغییرات - نسخه ${latestRelease.value.version}`
   : 'تاریخچه تغییرات',
-)
+);
 
-const metaDescription = computed(() => latestRelease.value?.product?.summary ?? 'نمایش کامل تغییرات محصول و نسخه‌های منتشر شده.')
+const metaDescription = computed(() => latestRelease.value?.product?.summary ?? 'نمایش کامل تغییرات محصول و نسخه‌های منتشر شده.');
 
 useHead(() => ({
   title: pageTitle.value,
   meta: [
     { name: 'description', content: metaDescription.value },
   ],
-}))
+}));
 
 const formatDate = (value?: string) => {
-  if (!value) return 'تاریخ نامشخص'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' })
-}
+  if (!value) return 'تاریخ نامشخص';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' });
+};
 </script>

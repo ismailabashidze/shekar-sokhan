@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar, DatePicker } from 'v-calendar'
+import { Calendar, DatePicker } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Flights',
@@ -14,19 +14,19 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-banking-3-dark.png',
     order: 10,
   },
-})
+});
 
 const dates = ref({
   start: new Date(),
   end: new Date(),
-})
+});
 
 const masks = ref({
   input: 'YYYY-MM-DD',
-})
+});
 
-const stops = ref([])
-const luggage = ref([])
+const stops = ref([]);
+const luggage = ref([]);
 
 const results = [
   {
@@ -119,7 +119,7 @@ const results = [
       airport: 'JFK',
     },
   },
-]
+];
 </script>
 
 <template>

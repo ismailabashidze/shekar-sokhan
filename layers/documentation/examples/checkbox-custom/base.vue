@@ -115,9 +115,9 @@
 </template>
 
 <script setup lang="ts">
-const value = ref([])
+const value = ref([]);
 
 function reset() {
-  value.value = []
+  value.value = [];
 }
 </script>

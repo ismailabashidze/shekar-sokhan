@@ -22,10 +22,10 @@
 
 <script setup lang="ts">
 interface Person {
-  id: number
-  name: string
-  text: string
-  media: string
+  id: number;
+  name: string;
+  text: string;
+  media: string;
 }
 
 const people = ref<Person[]>([
@@ -59,19 +59,19 @@ const people = ref<Person[]>([
     text: 'Product Manager',
     media: '/img/avatars/2.svg',
   },
-])
-const value = ref<Person>()
+]);
+const value = ref<Person>();
 
 function filterItems(query?: string, items?: any[]) {
   if (!query || !items) {
-    return items ?? []
+    return items ?? [];
   }
 
   // search by name or text
   return items.filter((item) => {
-    const nameMatches = item?.name?.toLowerCase().includes(query.toLowerCase())
-    const textMatches = item?.text?.toLowerCase().includes(query.toLowerCase())
-    return nameMatches || textMatches
-  })
+    const nameMatches = item?.name?.toLowerCase().includes(query.toLowerCase());
+    const textMatches = item?.text?.toLowerCase().includes(query.toLowerCase());
+    return nameMatches || textMatches;
+  });
 }
 </script>

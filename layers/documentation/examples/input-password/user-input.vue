@@ -35,15 +35,15 @@
 </template>
 
 <script lang="ts" setup>
-import { AddonInputPassword } from '#components'
+import { AddonInputPassword } from '#components';
 
-const passwordRef = ref<InstanceType<typeof AddonInputPassword>>()
-const hasError = computed(() => !!passwordRef.value?.validation?.feedback?.warning || !!passwordRef.value?.validation?.feedback?.suggestions?.length)
+const passwordRef = ref<InstanceType<typeof AddonInputPassword>>();
+const hasError = computed(() => !!passwordRef.value?.validation?.feedback?.warning || !!passwordRef.value?.validation?.feedback?.suggestions?.length);
 
-const username = ref('superuser')
-const email = ref('contact@acme.com')
-const password = ref('contact@acme.com')
-const useUserInputs = ref(true)
+const username = ref('superuser');
+const email = ref('contact@acme.com');
+const password = ref('contact@acme.com');
+const useUserInputs = ref(true);
 
-const userInputs = computed(() => useUserInputs.value ? [username.value, email.value] : [])
+const userInputs = computed(() => useUserInputs.value ? [username.value, email.value] : []);
 </script>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const isSwitcherOpen = useState('switcher-open', () => false)
+const isSwitcherOpen = useState('switcher-open', () => false);
 </script>
 
 <template>

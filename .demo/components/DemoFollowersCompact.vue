@@ -12,7 +12,7 @@ const followers = [
     'data-nui-tooltip': 'Maggie Pitts',
     'src': '/img/avatars/9.svg',
   },
-]
+];
 </script>
 
 <template>

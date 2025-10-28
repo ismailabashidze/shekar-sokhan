@@ -39,5 +39,5 @@ const values = reactive({
   success: true,
   warning: true,
   danger: true,
-})
+});
 </script>

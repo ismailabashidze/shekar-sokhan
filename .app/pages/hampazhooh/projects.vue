@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { ResearchProject } from '@/types'
+import type { ResearchProject } from '@/types';
 
 definePageMeta({
   title: 'پروژه‌های پژوهشی',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 // Sample data - replace with actual API call
 const projects = ref<ResearchProject[]>([
@@ -51,15 +51,15 @@ const projects = ref<ResearchProject[]>([
     category: 'سلامت روان',
     progress: 0,
   },
-])
+]);
 
-const router = useRouter()
-const toaster = useToaster()
+const router = useRouter();
+const toaster = useToaster();
 
 // Filter states
-const searchQuery = ref('')
-const selectedStatus = ref('همه')
-const selectedCategory = ref('همه')
+const searchQuery = ref('');
+const selectedStatus = ref('همه');
+const selectedCategory = ref('همه');
 
 // Filter options
 const statusOptions = [
@@ -68,7 +68,7 @@ const statusOptions = [
   'در حال انجام',
   'تکمیل شده',
   'متوقف شده',
-]
+];
 
 const categoryOptions = [
   'همه',
@@ -77,21 +77,21 @@ const categoryOptions = [
   'روانشناسی رشد',
   'سلامت روان',
   'روانشناسی شناختی',
-]
+];
 
 // Computed filtered projects
 const filteredProjects = computed(() => {
   return projects.value.filter((project) => {
     const matchesSearch = project.title.toLowerCase().includes(searchQuery.value.toLowerCase())
       || project.description.toLowerCase().includes(searchQuery.value.toLowerCase())
-      || project.researcher.toLowerCase().includes(searchQuery.value.toLowerCase())
+      || project.researcher.toLowerCase().includes(searchQuery.value.toLowerCase());
 
-    const matchesStatus = selectedStatus.value === 'همه' || project.status === selectedStatus.value
-    const matchesCategory = selectedCategory.value === 'همه' || project.category === selectedCategory.value
+    const matchesStatus = selectedStatus.value === 'همه' || project.status === selectedStatus.value;
+    const matchesCategory = selectedCategory.value === 'همه' || project.category === selectedCategory.value;
 
-    return matchesSearch && matchesStatus && matchesCategory
-  })
-})
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
+});
 
 const getStatusColor = (status: string) => {
   const colors: Record<string, string> = {
@@ -99,28 +99,28 @@ const getStatusColor = (status: string) => {
     'در حال انجام': 'warning',
     'تکمیل شده': 'success',
     'متوقف شده': 'danger',
-  }
-  return colors[status] || 'default'
-}
+  };
+  return colors[status] || 'default';
+};
 
 const getProgressColor = (progress: number) => {
-  if (progress === 100) return 'success'
-  if (progress >= 60) return 'warning'
-  if (progress > 0) return 'info'
-  return 'muted'
-}
+  if (progress === 100) return 'success';
+  if (progress >= 60) return 'warning';
+  if (progress > 0) return 'info';
+  return 'muted';
+};
 
 const createNewProject = () => {
-  router.push('/hampazhooh/create')
-}
+  router.push('/hampazhooh/create');
+};
 
 const viewProject = (projectId: string) => {
-  router.push(`/hampazhooh/project/${projectId}`)
-}
+  router.push(`/hampazhooh/project/${projectId}`);
+};
 
 const editProject = (projectId: string) => {
-  router.push(`/hampazhooh/project/${projectId}/edit`)
-}
+  router.push(`/hampazhooh/project/${projectId}/edit`);
+};
 
 const deleteProject = (projectId: string) => {
   // Implement delete functionality
@@ -135,19 +135,19 @@ const deleteProject = (projectId: string) => {
         label: 'بله، حذف کن',
         color: 'danger',
         action: () => {
-          projects.value = projects.value.filter(p => p.id !== projectId)
+          projects.value = projects.value.filter(p => p.id !== projectId);
           toaster.show({
             title: 'موفق',
             message: 'پروژه با موفقیت حذف شد',
             color: 'success',
             icon: 'ph:check-fill',
             closable: true,
-          })
+          });
         },
       },
     ],
-  })
-}
+  });
+};
 </script>
 
 <template>

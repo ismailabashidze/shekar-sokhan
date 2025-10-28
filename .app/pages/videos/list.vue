@@ -13,8 +13,8 @@ definePageMeta({
     srcDark: '/img/screens/videos-dark.png',
     order: 18,
   },
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 // Video data (in real app, this would come from an API)
 const videos = [
@@ -134,44 +134,44 @@ const videos = [
       followers: '8.1K',
     },
   },
-]
+];
 
 // Active filter
-const activeFilter = ref('all')
+const activeFilter = ref('all');
 const filters = [
   { value: 'all', label: 'همه' },
   { value: 'latest', label: 'جدیدترین' },
   { value: 'popular', label: 'محبوب‌ترین' },
   { value: 'educational', label: 'آموزشی' },
-]
+];
 
 // Search query
-const searchQuery = ref('')
+const searchQuery = ref('');
 
 // View mode and sorting
-const viewMode = ref('grid')
-const sortBy = ref('newest')
-const selectedCategory = ref('all')
+const viewMode = ref('grid');
+const sortBy = ref('newest');
+const selectedCategory = ref('all');
 
 // Watch Later and Playlist Management
-const watchLater = ref<number[]>([])
-const selectedVideos = ref<number[]>([])
-const showPlaylistModal = ref(false)
-const showShareModal = ref(false)
-const selectedVideoForShare = ref<number | null>(null)
+const watchLater = ref<number[]>([]);
+const selectedVideos = ref<number[]>([]);
+const showPlaylistModal = ref(false);
+const showShareModal = ref(false);
+const selectedVideoForShare = ref<number | null>(null);
 const playlists = ref([
   { id: 1, name: 'مراقبه و مدیتیشن', count: 5 },
   { id: 2, name: 'تمرینات تنفسی', count: 3 },
   { id: 3, name: 'یوگا', count: 7 },
-])
+]);
 
 // User History and Progress
-const viewHistory = ref<number[]>([1, 3, 5])
+const viewHistory = ref<number[]>([1, 3, 5]);
 const videoProgress = ref({
   1: 45, // 45% watched
   3: 20, // 20% watched
   5: 80, // 80% watched
-})
+});
 
 // Recommendations
 const recommendedVideos = ref([
@@ -205,7 +205,7 @@ const recommendedVideos = ref([
       avatar: '/img/avatars/16.svg',
     },
   },
-])
+]);
 
 // Video Comments Preview
 const videoComments = ref({
@@ -220,7 +220,7 @@ const videoComments = ref({
     { user: 'مهسا', avatar: '/img/avatars/13.svg', text: 'برای مبتدیان عالیه!', likes: 15 },
     { user: 'رضا', avatar: '/img/avatars/14.svg', text: 'من هر روز این تمرینات رو انجام میدم.', likes: 7 },
   ],
-})
+});
 
 // Video Analytics
 const videoAnalytics = ref({
@@ -228,12 +228,12 @@ const videoAnalytics = ref({
   favoriteCategory: 'مدیتیشن',
   completedVideos: 12,
   averageRating: 4.7,
-})
+});
 
 // Show/Hide Sections
-const showAnalytics = ref(true)
-const showRecommended = ref(false)
-const showHistory = ref(false)
+const showAnalytics = ref(true);
+const showRecommended = ref(false);
+const showHistory = ref(false);
 
 // Categories
 const categories = [
@@ -242,7 +242,7 @@ const categories = [
   { value: 'yoga', label: 'یوگا', icon: 'ph:person-simple-walk-duotone' },
   { value: 'breathing', label: 'تنفس', icon: 'ph:wind-duotone' },
   { value: 'psychology', label: 'روانشناسی', icon: 'ph:heartbeat-duotone' },
-]
+];
 
 // Sorting options
 const sortOptions = [
@@ -250,96 +250,96 @@ const sortOptions = [
   { value: 'oldest', label: 'قدیمی‌ترین' },
   { value: 'popular', label: 'محبوب‌ترین' },
   { value: 'views', label: 'پربازدیدترین' },
-]
+];
 
 // Computed properties
 const filteredVideos = computed(() => {
-  let result = [...videos]
+  let result = [...videos];
 
   // Apply category filter
   if (selectedCategory.value !== 'all') {
-    result = result.filter(v => v.category.toLowerCase() === selectedCategory.value)
+    result = result.filter(v => v.category.toLowerCase() === selectedCategory.value);
   }
 
   // Apply search filter
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.toLowerCase();
     result = result.filter(v =>
       v.title.toLowerCase().includes(query)
       || v.description.toLowerCase().includes(query)
       || v.tags.some(tag => tag.toLowerCase().includes(query)),
-    )
+    );
   }
 
   // Apply sorting
   switch (sortBy.value) {
     case 'oldest':
-      result.reverse()
-      break
+      result.reverse();
+      break;
     case 'popular':
-      result.sort((a, b) => parseInt(b.likes.replace('K', '000')) - parseInt(a.likes.replace('K', '000')))
-      break
+      result.sort((a, b) => parseInt(b.likes.replace('K', '000')) - parseInt(a.likes.replace('K', '000')));
+      break;
     case 'views':
-      result.sort((a, b) => parseInt(b.views.replace('K', '000')) - parseInt(a.views.replace('K', '000')))
-      break
+      result.sort((a, b) => parseInt(b.views.replace('K', '000')) - parseInt(a.views.replace('K', '000')));
+      break;
   }
 
-  return result
-})
+  return result;
+});
 
 // Methods
 const toggleWatchLater = (videoId: number) => {
-  const index = watchLater.value.indexOf(videoId)
+  const index = watchLater.value.indexOf(videoId);
   if (index === -1) {
-    watchLater.value.push(videoId)
+    watchLater.value.push(videoId);
   }
   else {
-    watchLater.value.splice(index, 1)
+    watchLater.value.splice(index, 1);
   }
-}
+};
 
 const toggleVideoSelection = (videoId: number) => {
-  const index = selectedVideos.value.indexOf(videoId)
+  const index = selectedVideos.value.indexOf(videoId);
   if (index === -1) {
-    selectedVideos.value.push(videoId)
+    selectedVideos.value.push(videoId);
   }
   else {
-    selectedVideos.value.splice(index, 1)
+    selectedVideos.value.splice(index, 1);
   }
-}
+};
 
 const shareVideo = (videoId: number) => {
-  selectedVideoForShare.value = videoId
-  showShareModal.value = true
-}
+  selectedVideoForShare.value = videoId;
+  showShareModal.value = true;
+};
 
 const downloadVideo = (videoId: number) => {
   // In a real app, this would trigger a download
-  alert(`دانلود ویدیو ${videoId} شروع شد.`)
-}
+  alert(`دانلود ویدیو ${videoId} شروع شد.`);
+};
 
 const toggleSection = (section: 'recommended' | 'history' | 'analytics') => {
   if (section === 'recommended') {
-    showRecommended.value = !showRecommended.value
-    showHistory.value = false
-    showAnalytics.value = false
+    showRecommended.value = !showRecommended.value;
+    showHistory.value = false;
+    showAnalytics.value = false;
   }
   else if (section === 'history') {
-    showHistory.value = !showHistory.value
-    showRecommended.value = false
-    showAnalytics.value = false
+    showHistory.value = !showHistory.value;
+    showRecommended.value = false;
+    showAnalytics.value = false;
   }
   else if (section === 'analytics') {
-    showAnalytics.value = !showAnalytics.value
-    showRecommended.value = false
-    showHistory.value = false
+    showAnalytics.value = !showAnalytics.value;
+    showRecommended.value = false;
+    showHistory.value = false;
   }
-}
+};
 
 const clearHistory = () => {
-  viewHistory.value = []
-  videoProgress.value = {}
-}
+  viewHistory.value = [];
+  videoProgress.value = {};
+};
 </script>
 
 <template>

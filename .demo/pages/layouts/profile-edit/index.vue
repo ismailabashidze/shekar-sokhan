@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useFieldError, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useFieldError, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 definePageMeta({
   title: 'Edit Profile',
@@ -21,16 +21,16 @@ definePageMeta({
     leaveFromClass: 'translate-y-0 opacity-100',
     leaveToClass: 'translate-y-20 opacity-0',
   },
-})
+});
 
 // This is the object that will contain the validation messages
-const ONE_MB = 1000000
+const ONE_MB = 1000000;
 const VALIDATION_TEXT = {
   FIRST_REQUIRED: 'Your first name can\'t be empty',
   LASTNAME_REQUIRED: 'Your last name can\'t be empty',
   OPTION_REQUIRED: 'Please select an option',
   AVATAR_TOO_BIG: `Avatar size must be less than 1MB`,
-}
+};
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -89,45 +89,45 @@ const zodSchema = z
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.OPTION_REQUIRED,
         path: ['info.experience'],
-      })
+      });
     }
     if (!data.info.firstJob) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.OPTION_REQUIRED,
         path: ['info.firstJob'],
-      })
+      });
     }
     if (!data.info.flexible) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.OPTION_REQUIRED,
         path: ['info.flexible'],
-      })
+      });
     }
     if (!data.info.remote) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.OPTION_REQUIRED,
         path: ['info.remote'],
-      })
+      });
     }
     if (data.avatar && data.avatar.size > ONE_MB) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.AVATAR_TOO_BIG,
         path: ['avatar'],
-      })
+      });
     }
-  })
+  });
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const { data, pending, error, refresh } = await useFetch('/api/profile')
+const { data, pending, error, refresh } = await useFetch('/api/profile');
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   avatar: null,
   profile: {
@@ -151,10 +151,10 @@ const initialValues = {
     github: '',
     gitlab: '',
   },
-} satisfies FormInput
+} satisfies FormInput;
 
 // This is the list of options for the select inputs
-const experience = ['0-2 years', '2-5 years', '5-10 years', '10+ years']
+const experience = ['0-2 years', '2-5 years', '5-10 years', '10+ years'];
 const answers = [
   {
     label: 'Yes',
@@ -164,10 +164,10 @@ const answers = [
     label: 'No',
     value: false,
   },
-]
+];
 
 // This is the computed value that will be used to display the current avatar
-const currentAvatar = computed(() => data.value?.personalInfo?.picture)
+const currentAvatar = computed(() => data.value?.personalInfo?.picture);
 
 const {
   handleSubmit,
@@ -182,36 +182,36 @@ const {
 } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
-const success = ref(false)
-const fieldsWithErrors = computed(() => Object.keys(errors.value).length)
+const success = ref(false);
+const fieldsWithErrors = computed(() => Object.keys(errors.value).length);
 
 // BaseInputFileHeadless gives us a listfile input, but we need to
 // extract the file from the list and set it to the form
-const inputFile = ref<FileList | null>(null)
-const fileError = useFieldError('avatar')
+const inputFile = ref<FileList | null>(null);
+const fileError = useFieldError('avatar');
 watch(inputFile, (value) => {
-  const file = value?.item(0) || null
-  setFieldValue('avatar', file)
-})
+  const file = value?.item(0) || null;
+  setFieldValue('avatar', file);
+});
 
 // Ask the user for confirmation before leaving the page if the form has unsaved changes
 onBeforeRouteLeave(() => {
   if (meta.value.dirty) {
-    return confirm('You have unsaved changes. Are you sure you want to leave?')
+    return confirm('You have unsaved changes. Are you sure you want to leave?');
   }
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     // here you have access to the validated form values
-    console.log('profile-edit-success', values)
+    console.log('profile-edit-success', values);
 
     try {
       // fake delay, this will make isSubmitting value to be true
@@ -221,72 +221,72 @@ const onSubmit = handleSubmit(
           setTimeout(
             () => reject(new Error('Fake backend validation error')),
             2000,
-          )
+          );
         }
-        setTimeout(resolve, 4000)
-      })
+        setTimeout(resolve, 4000);
+      });
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'Success',
         message: `Your profile has been updated!`,
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
     }
     catch (error: any) {
       // this will set the error on the form
       if (error.message === 'Fake backend validation error') {
-        setFieldError('profile.firstName', 'This first name is not allowed')
+        setFieldError('profile.firstName', 'This first name is not allowed');
 
         document.documentElement.scrollTo({
           top: 0,
           behavior: 'smooth',
-        })
+        });
 
-        toaster.clearAll()
+        toaster.clearAll();
         toaster.show({
           title: 'Oops!',
           message: 'Please review the errors in the form',
           color: 'danger',
           icon: 'lucide:alert-triangle',
           closable: true,
-        })
+        });
       }
-      return
+      return;
     }
 
     // we can refresh the data from the server
     // this will update the initial values and the current avatar
-    await refresh()
+    await refresh();
 
-    resetForm()
+    resetForm();
 
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
 
-    success.value = true
+    success.value = true;
     setTimeout(() => {
-      success.value = false
-    }, 3000)
+      success.value = false;
+    }, 3000);
   },
   (error) => {
     // this callback is optional and called only if the form has errors
-    success.value = false
+    success.value = false;
 
     // here you have access to the error
-    console.log('profile-edit-error', error)
+    console.log('profile-edit-error', error);
 
     // you can use it to scroll to the first error
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 </script>
 
 <template>

@@ -20,7 +20,7 @@ const links = [
     url: '#',
     icon: 'fa6-brands:github',
   },
-]
+];
 </script>
 
 <template>

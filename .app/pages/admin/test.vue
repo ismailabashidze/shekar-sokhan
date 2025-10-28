@@ -2,11 +2,11 @@
 definePageMeta({
   title: 'تست ادمین',
   layout: 'sidebar',
-})
+});
 
 useHead({
   title: 'تست - پنل ادمین',
-})
+});
 </script>
 
 <template>

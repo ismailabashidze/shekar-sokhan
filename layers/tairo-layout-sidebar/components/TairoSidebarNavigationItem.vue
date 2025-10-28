@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { useSidebar } from '../composables/sidebar'
-import type { SidebarNavigationItemConfig } from '../types'
+import { useSidebar } from '../composables/sidebar';
+import type { SidebarNavigationItemConfig } from '../types';
 
 const props = defineProps<{
-  sidebar: SidebarNavigationItemConfig
-}>()
+  sidebar: SidebarNavigationItemConfig;
+}>();
 
-const { currentName, isOpen } = useSidebar()
+const { currentName, isOpen } = useSidebar();
 
 function onSidebarItemClick() {
   if (typeof props.sidebar.click === 'function') {
-    return props.sidebar.click()
+    return props.sidebar.click();
   }
 
-  currentName.value = props.sidebar.title
-  isOpen.value = true
+  currentName.value = props.sidebar.title;
+  isOpen.value = true;
 }
 </script>
 

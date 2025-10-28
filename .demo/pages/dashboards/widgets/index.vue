@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'UI Widgets',
@@ -14,14 +14,14 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-widgets-ui-dark.png',
     order: 27,
   },
-})
+});
 
-const gaugePersonal = reactive(useGaugePersonal())
+const gaugePersonal = reactive(useGaugePersonal());
 
 function useGaugePersonal() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 220
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 220;
 
   const options = {
     title: {
@@ -80,16 +80,16 @@ function useGaugePersonal() {
       },
     },
     labels: ['Average Results'],
-  }
+  };
 
-  const series = shallowRef([76])
+  const series = shallowRef([76]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

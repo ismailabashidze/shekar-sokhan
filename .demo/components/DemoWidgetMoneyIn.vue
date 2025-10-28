@@ -1,46 +1,46 @@
 <script setup lang="ts">
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(10)
+const filter = ref('');
+const perPage = ref(10);
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch('/api/transactions', {
   query,
-})
+});
 
 const ingoing = computed(() => {
   if (data.value?.data.length && data.value?.data.length > 0) {
-    return data.value.data.filter(item => item.type === 'in')
+    return data.value.data.filter(item => item.type === 'in');
   }
-})
+});
 
 const total = computed(() => {
-  let amount = 0
+  let amount = 0;
   for (const item of data.value?.data ?? []) {
     if (item.type === 'in') {
-      amount = amount + item.amount
+      amount = amount + item.amount;
     }
   }
-  return amount
-})
+  return amount;
+});
 </script>
 
 <template>

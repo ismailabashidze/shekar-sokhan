@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useFieldError, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useFieldError, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 definePageMeta({
   title: 'Edit User',
@@ -14,14 +14,14 @@ definePageMeta({
     order: 31,
     new: true,
   },
-})
+});
 
 const masks = ref({
   input: 'YYYY-MM-DD',
-})
+});
 
 // This is the object that will contain the validation messages
-const ONE_MB = 1000000
+const ONE_MB = 1000000;
 const VALIDATION_TEXT = {
   FIRST_NAME_REQUIRED: 'First name can\'t be empty',
   LAST_NAME_REQUIRED: 'Last name can\'t be empty',
@@ -38,7 +38,7 @@ const VALIDATION_TEXT = {
   STATE_REQUIRED: 'Please enter a state',
   ZIPCODE_REQUIRED: 'Please enter a zipcode',
   AVATAR_TOO_BIG: `Avatar size must be less than 1MB`,
-}
+};
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -93,21 +93,21 @@ const zodSchema = z
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.AVATAR_TOO_BIG,
         path: ['avatar'],
-      })
+      });
     }
     if (data.profile.firstName === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.FIRST_NAME_REQUIRED,
         path: ['profile.firstName'],
-      })
+      });
     }
     if (data.profile.lastName === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.LAST_NAME_REQUIRED,
         path: ['profile.lastName'],
-      })
+      });
     }
     if (
       data.profile.preferredName
@@ -118,43 +118,43 @@ const zodSchema = z
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.PREFERRED_NAME_REQUIRED,
         path: ['profile.preferredName'],
-      })
+      });
     }
     if (data.profile.birthday.day === null) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.BIRTHDAY_REQUIRED,
         path: ['profile.birthday.day'],
-      })
+      });
     }
     if (data.profile.birthday.month === null) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.BIRTHMONTH_REQUIRED,
         path: ['profile.birthday.month'],
-      })
+      });
     }
     if (data.profile.birthday.year === null) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.BIRTHYEAR_REQUIRED,
         path: ['profile.birthday.year'],
-      })
+      });
     }
     if (!data.profile.status) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.STATUS_REQUIRED,
         path: ['profile.status'],
-      })
+      });
     }
-  })
+  });
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   avatar: null,
   profile: {
@@ -187,7 +187,7 @@ const initialValues = {
       country: 'United States',
     },
   },
-} satisfies FormInput
+} satisfies FormInput;
 
 const {
   handleSubmit,
@@ -202,41 +202,41 @@ const {
 } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
 // This is the computed value that will be used to display the current avatar
 const currentAvatar = computed(
   () => `/img/avatars/default-${values.profile?.gender}.jpg`,
-)
+);
 
-const success = ref(false)
-const fieldsWithErrors = computed(() => Object.keys(errors.value).length)
+const success = ref(false);
+const fieldsWithErrors = computed(() => Object.keys(errors.value).length);
 
 // BaseInputFileHeadless gives us a listfile input, but we need to
 // extract the file from the list and set it to the form
-const inputFile = ref<FileList | null>(null)
-const fileError = useFieldError('avatar')
+const inputFile = ref<FileList | null>(null);
+const fileError = useFieldError('avatar');
 watch(inputFile, (value) => {
-  const file = value?.item(0) || null
-  setFieldValue('avatar', file)
-})
+  const file = value?.item(0) || null;
+  setFieldValue('avatar', file);
+});
 
 // Ask the user for confirmation before leaving the page if the form has unsaved changes
 onBeforeRouteLeave(() => {
   if (meta.value.dirty) {
-    return confirm('You have unsaved changes. Are you sure you want to leave?')
+    return confirm('You have unsaved changes. Are you sure you want to leave?');
   }
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     // here you have access to the validated form values
-    console.log('profile-edit-success', values)
+    console.log('profile-edit-success', values);
 
     try {
       // fake delay, this will make isSubmitting value to be true
@@ -246,68 +246,68 @@ const onSubmit = handleSubmit(
           setTimeout(
             () => reject(new Error('Fake backend validation error')),
             2000,
-          )
+          );
         }
-        setTimeout(resolve, 4000)
-      })
+        setTimeout(resolve, 4000);
+      });
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'Success',
         message: `Changes have been saved!`,
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
     }
     catch (error: any) {
       // this will set the error on the form
       if (error.message === 'Fake backend validation error') {
-        setFieldError('profile.firstName', 'This name is not allowed')
+        setFieldError('profile.firstName', 'This name is not allowed');
 
         document.documentElement.scrollTo({
           top: 0,
           behavior: 'smooth',
-        })
+        });
 
-        toaster.clearAll()
+        toaster.clearAll();
         toaster.show({
           title: 'Oops!',
           message: 'Please review the errors in the form',
           color: 'danger',
           icon: 'lucide:alert-triangle',
           closable: true,
-        })
+        });
       }
-      return
+      return;
     }
 
-    resetForm()
+    resetForm();
 
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
 
-    success.value = true
+    success.value = true;
     setTimeout(() => {
-      success.value = false
-    }, 3000)
+      success.value = false;
+    }, 3000);
   },
   (error) => {
     // this callback is optional and called only if the form has errors
-    success.value = false
+    success.value = false;
 
     // here you have access to the error
-    console.log('profile-edit-error', error)
+    console.log('profile-edit-error', error);
 
     // you can use it to scroll to the first error
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 </script>
 
 <template>

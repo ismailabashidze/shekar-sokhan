@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Project, ProjectStepData } from '../../types'
+import type { Project, ProjectStepData } from '../../types';
 
 definePageMeta({
   title: 'Wizard — Step 4',
@@ -11,16 +11,16 @@ definePageMeta({
     srcDark: '/img/screens/wizard-4-dark.png',
     order: 33,
   },
-})
+});
 useHead({
   title: 'Project files',
-})
+});
 
-const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>()
+const { data: project, checkPreviousSteps } = useMultiStepForm<Project, ProjectStepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 
-const toggled = ref(Boolean(project.value.files?.length))
+const toggled = ref(Boolean(project.value.files?.length));
 </script>
 
 <template>

@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { definePageMeta } from '#imports'
-import type { Deed } from '~/composables/useDeed'
+import { ref } from 'vue';
+import { definePageMeta } from '#imports';
+import type { Deed } from '~/composables/useDeed';
 
 definePageMeta({
   title: 'ایجاد عمل نیک جدید',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { createDeed } = useDeed()
-const router = useRouter()
-const toaster = useToaster()
+const { createDeed } = useDeed();
+const router = useRouter();
+const toaster = useToaster();
 
 const backToDeeds = () => {
-  router.push('/deeds/list')
-}
+  router.push('/deeds/list');
+};
 
 // Initialize deed with default values
 const deed = ref<Deed>({
@@ -37,10 +37,10 @@ const deed = ref<Deed>({
   tags: [],
   difficulty: 'simple',
   timeRequired: 'below_15',
-})
+});
 
-const loading = ref(false)
-const error = ref<string | null>(null)
+const loading = ref(false);
+const error = ref<string | null>(null);
 
 // Maps for dropdown options
 const typeMap = {
@@ -50,19 +50,19 @@ const typeMap = {
   environment: 'محیط زیست',
   mindfulness: 'ذهن‌آگاهی',
   self: 'خودسازی',
-}
+};
 
 const difficultyMap = {
   simple: 'ساده',
   moderate: 'متوسط',
   hard: 'چالش‌برانگیز',
-}
+};
 
 const timeMap = {
   below_15: 'کمتر از ۱۵ دقیقه',
   between_15_60: '۱۵ تا ۶۰ دقیقه',
   more_60: 'بیش از ۶۰ دقیقه',
-}
+};
 
 // Common emojis for deeds, categorized
 const emojiCategories = {
@@ -72,53 +72,53 @@ const emojiCategories = {
   family: ['👨‍👩‍👧‍👦', '👨‍👩‍👦', '👩‍👦', '👨‍👧', '💑', '💖', '❤️', '💕', '💓', '💗', '💞', '👶', '🧒', '👧', '👦', '👩', '👨', '👵', '👴', '🧑‍🤝‍🧑', '💏', '👨‍👨‍👦', '👩‍👩‍👦', '👨‍👨‍👧‍👦', '👩‍👩‍👧‍👦', '🫂', '👨‍👩‍👧', '👨‍👩‍👧‍👧', '👨‍👩‍👦‍👦', '💘'],
   social: ['🤝', '👥', '💬', '🗣️', '💭', '💡', '🤗', '🎁', '💌', '💐', '🎈', '🫶', '🤜', '🤛', '✊', '👊', '🫱‍🫲', '💃', '🕺', '👯‍♀️', '👯‍♂️', '✌️', '🤞', '🤟', '🤘', '👌', '🫰', '🎭', '🎪', '🎨'],
   mindfulness: ['🧠', '⚖️', '💆‍♀️', '💆‍♂️', '🎐', '🪷', '🍃', '🌊', '🌄', '🎑', '🏔️', '⛰️', '🗻', '🌋', '🎋', '🎍', '🎎', '🏃‍♀️', '🏃‍♂️', '🚶‍♀️', '🚶‍♂️', '🧘', '🏊‍♀️', '🏊‍♂️', '🧗‍♀️', '🧗‍♂️', '🚴‍♀️', '🚴‍♂️', '🌇', '🌆'],
-}
+};
 
-const activeCategory = ref('positive')
+const activeCategory = ref('positive');
 
 const handleSubmit = async () => {
   try {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
 
     // Validate required fields
     if (!deed.value.title || !deed.value.description || !deed.value.shortDescription || !deed.value.emoji || !deed.value.type || !deed.value.difficulty || !deed.value.timeRequired) {
-      throw new Error('لطفا همه فیلدهای ضروری را پر کنید')
+      throw new Error('لطفا همه فیلدهای ضروری را پر کنید');
     }
 
     // Create new deed
-    const newDeed = await createDeed(deed.value)
+    const newDeed = await createDeed(deed.value);
 
     // Show success message
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'موفقیت‌آمیز',
       message: 'عمل نیک جدید با موفقیت ایجاد شد',
       color: 'success',
       icon: 'ph:check-circle',
       closable: true,
-    })
+    });
 
     // Redirect to deed detail page
-    router.push(`/deeds/${newDeed.id}`)
+    router.push(`/deeds/${newDeed.id}`);
   }
   catch (e: any) {
-    error.value = e.message || 'خطا در ایجاد عمل نیک'
-    toaster.clearAll()
+    error.value = e.message || 'خطا در ایجاد عمل نیک';
+    toaster.clearAll();
     toaster.show({
       title: 'خطا',
       message: error.value,
       color: 'danger',
       icon: 'ph:x-circle',
       closable: true,
-    })
+    });
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 const convertHtmlToMarkdown = (html: string) => {
-  if (!html) return ''
+  if (!html) return '';
 
   return html
     // Convert divs with # to headings
@@ -134,27 +134,27 @@ const convertHtmlToMarkdown = (html: string) => {
     .replace(/&zwnj;/g, '')
     .replace(/&nbsp;/g, ' ')
     .replace(/\n\s*\n/g, '\n\n')
-    .trim()
-}
+    .trim();
+};
 const formatLongDescription = (html: string) => {
-  return convertHtmlToMarkdown(html)
-}
+  return convertHtmlToMarkdown(html);
+};
 
-const newTag = ref('')
+const newTag = ref('');
 
 const addTag = () => {
-  if (!newTag.value) return
-  if (!deed.value.tags) deed.value.tags = []
+  if (!newTag.value) return;
+  if (!deed.value.tags) deed.value.tags = [];
   if (!deed.value.tags.includes(newTag.value)) {
-    deed.value.tags.push(newTag.value)
+    deed.value.tags.push(newTag.value);
   }
-  newTag.value = ''
-}
+  newTag.value = '';
+};
 
 const removeTag = (tag: string) => {
-  if (!deed.value.tags) return
-  deed.value.tags = deed.value.tags.filter(t => t !== tag)
-}
+  if (!deed.value.tags) return;
+  deed.value.tags = deed.value.tags.filter(t => t !== tag);
+};
 </script>
 
 <template>

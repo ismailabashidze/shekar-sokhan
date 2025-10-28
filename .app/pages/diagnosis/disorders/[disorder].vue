@@ -1006,42 +1006,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useDSMInfoGenerator } from '~/composables/useDSMInfoGenerator'
+import { ref, onMounted } from 'vue';
+import { useDSMInfoGenerator } from '~/composables/useDSMInfoGenerator';
 
 // Get route params
-const route = useRoute()
-const disorderSlug = route.params.disorder as string
+const route = useRoute();
+const disorderSlug = route.params.disorder as string;
 
 // Dynamic data fetching
-const { fetchDisorderBySlug } = useDSMInfoGenerator()
+const { fetchDisorderBySlug } = useDSMInfoGenerator();
 
 // State
-const disorderInfo = ref<any>(null)
-const loading = ref(true)
-const error = ref<string | null>(null)
+const disorderInfo = ref<any>(null);
+const loading = ref(true);
+const error = ref<string | null>(null);
 
 // Fetch data on mount
 onMounted(async () => {
   try {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
 
-    console.log(`🚀 Loading disorder page for slug: ${disorderSlug}`)
+    console.log(`🚀 Loading disorder page for slug: ${disorderSlug}`);
 
     // Add small delay to prevent PocketBase auto-cancellation
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Fetch disorder data from PocketBase
-    const disorderResult = await fetchDisorderBySlug(disorderSlug)
+    const disorderResult = await fetchDisorderBySlug(disorderSlug);
 
-    disorderInfo.value = disorderResult
+    disorderInfo.value = disorderResult;
 
-    console.log(`✅ Successfully loaded disorder: ${disorderResult.title || disorderResult.titleFa}`)
+    console.log(`✅ Successfully loaded disorder: ${disorderResult.title || disorderResult.titleFa}`);
 
     // Update page meta dynamically
-    const pageTitle = `${disorderResult.title || disorderResult.titleFa} - DSM-5 | ذهنا`
-    const pageDescription = `راهنمای جامع ${disorderResult.title || disorderResult.titleFa} (${disorderResult.titleEn}) بر اساس معیارهای DSM-5. شامل علائم، معیارهای تشخیصی، و اطلاعات کامل تشخیصی.`
+    const pageTitle = `${disorderResult.title || disorderResult.titleFa} - DSM-5 | ذهنا`;
+    const pageDescription = `راهنمای جامع ${disorderResult.title || disorderResult.titleFa} (${disorderResult.titleEn}) بر اساس معیارهای DSM-5. شامل علائم، معیارهای تشخیصی، و اطلاعات کامل تشخیصی.`;
 
     useHead({
       htmlAttrs: { dir: 'rtl' },
@@ -1056,16 +1056,16 @@ onMounted(async () => {
           content: `${disorderResult.title || disorderResult.titleFa}, ${disorderResult.titleEn}, DSM-5, ${disorderResult.code}, اختلالات روانی, تشخیص`,
         },
       ],
-    })
+    });
   }
   catch (err: any) {
-    console.error('Error loading disorder data:', err)
-    error.value = err.message || 'خطا در بارگذاری اطلاعات'
+    console.error('Error loading disorder data:', err);
+    error.value = err.message || 'خطا در بارگذاری اطلاعات';
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 // Backup static data in case dynamic loading fails (keeping original structure)
 const staticDisorderInfo = {
@@ -1428,13 +1428,13 @@ const staticDisorderInfo = {
       'مشکلات عصبی',
     ],
   },
-}
+};
 
 // Dynamic page meta
 definePageMeta({
   layout: 'default',
   title: 'DSM-5 Disorder | ذهنا',
-})
+});
 
 // Helper function for symptom category icons
 const getSymptomIcon = (category: string) => {
@@ -1447,9 +1447,9 @@ const getSymptomIcon = (category: string) => {
     social: 'ph:users',
     motor: 'ph:hand',
     sensory: 'ph:eye',
-  }
-  return iconMap[category.toLowerCase()] || 'ph:circle'
-}
+  };
+  return iconMap[category.toLowerCase()] || 'ph:circle';
+};
 
 // Helper functions for diagnostic markers
 const getCategoryIcon = (category: string) => {
@@ -1463,9 +1463,9 @@ const getCategoryIcon = (category: string) => {
     'ارزیابی‌های شناختی-رفتاری': 'ph:brain',
     'ابزارهای دیجیتال': 'ph:computer-tower',
     'سایر نشانگرها': 'ph:test-tube',
-  }
-  return iconMap[category] || 'ph:circle'
-}
+  };
+  return iconMap[category] || 'ph:circle';
+};
 
 const getCategoryDescription = (category: string) => {
   const descriptionMap = {
@@ -1478,49 +1478,49 @@ const getCategoryDescription = (category: string) => {
     'ارزیابی‌های شناختی-رفتاری': 'آزمون‌های استاندارد تکاملی، مشاهده رفتار، و ارزیابی مهارت‌های تطبیقی',
     'ابزارهای دیجیتال': 'نرم‌افزارهای ارزیابی، اپلیکیشن‌های نظارتی، و ابزارهای تشخیص کامپیوتری',
     'سایر نشانگرها': 'سایر روش‌های تشخیصی و ابزارهای کمکی مورد استفاده در ارزیابی',
-  }
-  return descriptionMap[category] || 'توضیحات اضافی برای این دسته از نشانگرها'
-}
+  };
+  return descriptionMap[category] || 'توضیحات اضافی برای این دسته از نشانگرها';
+};
 
 // Console log for structure verification
-console.log('=== COMPLETE STRUCTURE IMPLEMENTED ===')
-console.log('✓ All required fields from your goal structure are now included')
-console.log('✓ Fixed prevalence key name to "Prevalence"')
-console.log('✓ Fixed specifiers structure to {title, conditions}')
-console.log('✓ Implemented complete diagnosticFeatures with all subsections')
-console.log('✓ Added all missing sections: diagnosticMarkers, associated_features, etc.')
-console.log('Structure ready for DSM-5 compliant implementation!')
+console.log('=== COMPLETE STRUCTURE IMPLEMENTED ===');
+console.log('✓ All required fields from your goal structure are now included');
+console.log('✓ Fixed prevalence key name to "Prevalence"');
+console.log('✓ Fixed specifiers structure to {title, conditions}');
+console.log('✓ Implemented complete diagnosticFeatures with all subsections');
+console.log('✓ Added all missing sections: diagnosticMarkers, associated_features, etc.');
+console.log('Structure ready for DSM-5 compliant implementation!');
 
 // Empty section handlers - to be defined by user requirements
 const handleAddDiagnosticCriteria = () => {
-  console.log('Add Diagnostic Criteria clicked')
+  console.log('Add Diagnostic Criteria clicked');
   // User will specify action later
-}
+};
 
 const handleAddSpecifiers = () => {
-  console.log('Add Specifiers clicked')
+  console.log('Add Specifiers clicked');
   // User will specify action later
-}
+};
 
 const handleAddDiagnosticFeatures = () => {
-  console.log('Add Diagnostic Features clicked')
+  console.log('Add Diagnostic Features clicked');
   // User will specify action later
-}
+};
 
 const handleAddAssociatedFeatures = () => {
-  console.log('Add Associated Features clicked')
+  console.log('Add Associated Features clicked');
   // User will specify action later
-}
+};
 
 const handleAddDifferentialDiagnosis = () => {
-  console.log('Add Differential Diagnosis clicked')
+  console.log('Add Differential Diagnosis clicked');
   // User will specify action later
-}
+};
 
 const handleAddDiagnosticMarkers = () => {
-  console.log('Add Diagnostic Markers clicked')
+  console.log('Add Diagnostic Markers clicked');
   // User will specify action later
-}
+};
 </script>
 
 <style scoped>

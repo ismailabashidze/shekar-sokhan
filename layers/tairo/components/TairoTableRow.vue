@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    hoverable?: boolean
+    hoverable?: boolean;
   }>(),
   {
     hoverable: true,
   },
-)
+);
 </script>
 
 <template>

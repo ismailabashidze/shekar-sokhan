@@ -9,9 +9,9 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-profile-dark.png',
     order: 75,
   },
-})
+});
 
-const { data, pending, error, refresh } = await useFetch('/api/profile')
+const { data, pending, error, refresh } = await useFetch('/api/profile');
 </script>
 
 <template>

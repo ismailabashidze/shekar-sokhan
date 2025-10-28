@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useFieldError, useForm } from 'vee-validate'
-import { z } from 'zod'
-import { useOpenRouter } from '~/composables/useOpenRouter'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useFieldError, useForm } from 'vee-validate';
+import { z } from 'zod';
+import { useOpenRouter } from '~/composables/useOpenRouter';
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 definePageMeta({
   title: 'فرم بیمار جدید',
   layout: 'sidebar',
-})
+});
 
 const VALIDATION_TEXT = {
   NAME_REQUIRED: 'نام بیمار نمی‌تواند خالی باشد',
@@ -24,9 +24,9 @@ const VALIDATION_TEXT = {
   MOTIVATION_REQUIRED: 'انگیزه نمی‌تواند خالی باشد',
   MOOD_REQUIRED: 'حالت روحی و احساسات فعلی نمی‌تواند خالی باشد',
   AVATAR_TOO_BIG: 'اندازه تصویر آواتار باید کمتر از ۱ مگابایت باشد',
-}
+};
 
-const ONE_MB = 1000000
+const ONE_MB = 1000000;
 
 const zodSchema = z.object({
   avatar: z
@@ -38,8 +38,8 @@ const zodSchema = z.object({
   patient: z.object({
     name: z.string().min(1, VALIDATION_TEXT.NAME_REQUIRED),
     age: z.preprocess((val) => {
-      if (val === '') return undefined
-      return Number(val)
+      if (val === '') return undefined;
+      return Number(val);
     }, z.number({
       required_error: VALIDATION_TEXT.AGE_REQUIRED,
       invalid_type_error: VALIDATION_TEXT.AGE_INVALID,
@@ -54,11 +54,11 @@ const zodSchema = z.object({
     moodAndCurrentEmotions: z.string().min(1, VALIDATION_TEXT.MOOD_REQUIRED),
     isActive: z.boolean().default(true),
   }),
-})
+});
 
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 
 const initialValues: FormInput = {
   avatar: null,
@@ -75,9 +75,9 @@ const initialValues: FormInput = {
     moodAndCurrentEmotions: '',
     isActive: true,
   },
-}
+};
 
-const currentAvatar = computed(() => '/img/avatars/default-male.jpg')
+const currentAvatar = computed(() => '/img/avatars/default-male.jpg');
 
 const {
   handleSubmit,
@@ -91,20 +91,20 @@ const {
 } = useForm<FormInput>({
   validationSchema,
   initialValues,
-})
+});
 
-const success = ref(false)
-const generating = ref(false)
-const loadingFields = ref<string[]>([])
+const success = ref(false);
+const generating = ref(false);
+const loadingFields = ref<string[]>([]);
 
-const inputFile = ref<FileList | null>(null)
-const fileError = useFieldError('avatar')
+const inputFile = ref<FileList | null>(null);
+const fileError = useFieldError('avatar');
 watch(inputFile, (value) => {
-  const file = value?.item(0) || null
-  setFieldValue('avatar', file)
-})
+  const file = value?.item(0) || null;
+  setFieldValue('avatar', file);
+});
 
-const { generate } = useOpenRouter()
+const { generate } = useOpenRouter();
 
 const canGenerate = computed(() => {
   return Boolean(
@@ -112,102 +112,102 @@ const canGenerate = computed(() => {
     && values.patient.age
     && values.patient.shortDescription?.trim()
     && !generating.value,
-  )
-})
+  );
+});
 
 const generateDetails = async () => {
   // Prevent multiple simultaneous generations
   if (generating.value) {
-    return
+    return;
   }
 
   // Check if required fields are filled
   if (!values.patient.name || !values.patient.age || !values.patient.shortDescription) {
-    toaster.error('لطفا نام، سن و توضیح کوتاه را وارد کنید')
-    return
+    toaster.error('لطفا نام، سن و توضیح کوتاه را وارد کنید');
+    return;
   }
 
-  generating.value = true
+  generating.value = true;
   // Set loading state for fields that will be generated
-  loadingFields.value = ['longDescription', 'definingTraits', 'backStory', 'personality', 'appearance', 'motivation', 'moodAndCurrentEmotions']
+  loadingFields.value = ['longDescription', 'definingTraits', 'backStory', 'personality', 'appearance', 'motivation', 'moodAndCurrentEmotions'];
 
   try {
     const response = await generate({
       name: values.patient.name,
       age: values.patient.age,
       shortDescription: values.patient.shortDescription,
-    })
+    });
 
     // Parse the response if it's in JSON format
-    let parsedResponse
+    let parsedResponse;
     if (typeof response === 'string') {
       try {
-        const parsed = JSON.parse(response)
+        const parsed = JSON.parse(response);
         if (parsed.choices?.[0]?.message?.content) {
-          parsedResponse = JSON.parse(parsed.choices[0].message.content)
+          parsedResponse = JSON.parse(parsed.choices[0].message.content);
         }
       }
       catch (e) {
-        console.error('Error parsing response:', e)
-        throw new Error('خطا در پردازش پاسخ')
+        console.error('Error parsing response:', e);
+        throw new Error('خطا در پردازش پاسخ');
       }
     }
     else {
-      parsedResponse = response
+      parsedResponse = response;
     }
 
     // Update form fields with generated content
     if (parsedResponse) {
       Object.entries(parsedResponse).forEach(([key, value]) => {
         if (typeof value === 'string') {
-          setFieldValue(`patient.${key}`, value.trim())
+          setFieldValue(`patient.${key}`, value.trim());
         }
-      })
+      });
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'تولید موفق',
         message: 'اطلاعات بیمار با موفقیت تولید شد',
         color: 'success',
         icon: 'ph:user-circle-fill',
         closable: true,
-      })
+      });
     }
   }
   catch (error: any) {
-    console.error('Error generating details:', error)
+    console.error('Error generating details:', error);
     // Clear any partially generated content
     loadingFields.value.forEach((field) => {
-      setFieldValue(`patient.${field}`, '')
-    })
+      setFieldValue(`patient.${field}`, '');
+    });
 
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'خطا',
       message: error?.message || error?.data?.message || 'خطا در تولید اطلاعات',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
   finally {
-    generating.value = false
-    loadingFields.value = []
+    generating.value = false;
+    loadingFields.value = [];
   }
-}
+};
 
 onBeforeRouteLeave(() => {
   if (meta.value.dirty) {
-    return confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟')
+    return confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟');
   }
-})
+});
 
-const toaster = useToaster()
-const { createNewPatient } = usePatient()
+const toaster = useToaster();
+const { createNewPatient } = usePatient();
 
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     try {
       const patientData = {
@@ -222,83 +222,83 @@ const onSubmit = handleSubmit(
         motivation: values.patient.motivation,
         moodAndCurrentEmotions: values.patient.moodAndCurrentEmotions,
         isActive: values.patient.isActive,
-      }
+      };
 
-      let record
+      let record;
       if (values.avatar) {
-        const formData = new FormData()
-        formData.append('avatar', values.avatar)
+        const formData = new FormData();
+        formData.append('avatar', values.avatar);
 
         for (const key in patientData) {
-          formData.append(key, patientData[key as keyof typeof patientData] || '')
+          formData.append(key, patientData[key as keyof typeof patientData] || '');
         }
 
-        record = await createNewPatient(formData)
+        record = await createNewPatient(formData);
       }
       else {
-        record = await createNewPatient(patientData)
+        record = await createNewPatient(patientData);
       }
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'موفقیت',
         message: 'بیمار جدید با موفقیت ایجاد شد!',
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
 
-      resetForm()
+      resetForm();
       document.documentElement.scrollTo({
         top: 0,
         behavior: 'smooth',
-      })
+      });
 
-      success.value = true
+      success.value = true;
       setTimeout(() => {
-        success.value = false
-      }, 3000)
+        success.value = false;
+      }, 3000);
     }
     catch (error: any) {
-      console.error('patient-create-error', error)
+      console.error('patient-create-error', error);
 
       if (error.data && error.data.data) {
-        const backendErrors = error.data.data
+        const backendErrors = error.data.data;
         for (const key in backendErrors) {
-          setFieldError(`patient.${key}`, backendErrors[key].message)
+          setFieldError(`patient.${key}`, backendErrors[key].message);
         }
       }
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'خطا',
         message: 'مشکلی در ایجاد بیمار پیش آمد. لطفاً دوباره تلاش کنید.',
         color: 'danger',
         icon: 'lucide:alert-triangle',
         closable: true,
-      })
+      });
 
       document.documentElement.scrollTo({
         top: 0,
         behavior: 'smooth',
-      })
+      });
     }
   },
   () => {
-    success.value = false
+    success.value = false;
 
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 
-const patientStatus = computed(() => values.patient.isActive ? 'بیمار فعال است' : 'بیمار غیرفعال است')
+const patientStatus = computed(() => values.patient.isActive ? 'بیمار فعال است' : 'بیمار غیرفعال است');
 
 watch(() => values.patient.isActive, (newValue) => {
   // Removed this line as it's no longer needed
-}, { immediate: true })
+}, { immediate: true });
 </script>
 
 <template>

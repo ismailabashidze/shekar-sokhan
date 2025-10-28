@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { Invite, StepData } from '../../types'
+import type { Invite, StepData } from '../../types';
 
 definePageMeta({
   layout: 'empty',
-})
+});
 useHead({
   titleTemplate: title => `${title} | گام  ${currentStepId.value + 1}`,
   htmlAttrs: { dir: 'rtl' },
-})
+});
 
-const { newPsychoRegister } = usePsychotherapist()
+const { newPsychoRegister } = usePsychotherapist();
 const initialState = ref<Invite>({
   name: '',
   email: '',
@@ -19,10 +19,10 @@ const initialState = ref<Invite>({
   maritalStatus: '',
   jobStatus: '',
   description: '',
-})
+});
 
-const toaster = useToaster()
-const nuxtApp = useNuxtApp()
+const toaster = useToaster();
+const nuxtApp = useNuxtApp();
 
 // const res = await getUserDetails(nuxtApp.$pb.authStore.model.id)
 // if (res.length) {
@@ -41,48 +41,48 @@ function convertLabels(label) {
   const maritalStatus = {
     مجرد: 'single',
     متاهل: 'married',
-  }
+  };
 
   const gender = {
     مرد: 'male',
     زن: 'female',
-  }
+  };
   const licenseStatus = {
     'بدون پروانه - فعالیت داوطلبانه': 'notHaveVolunteer',
     'بدون پروانه - دانشجوی روانشناسی': 'notHavePsychologyStudent',
     'پروانه در دست اقدام': 'inProgress',
     'دارای پروانه': 'haveOne',
-  }
+  };
 
   if (maritalStatus[label]) {
-    return maritalStatus[label]
+    return maritalStatus[label];
   }
   else if (gender[label]) {
-    return gender[label]
+    return gender[label];
   }
   else if (licenseStatus[label]) {
-    return licenseStatus[label]
+    return licenseStatus[label];
   }
   else {
-    return 'Unknown label' // Return the label as is if no translation is found
+    return 'Unknown label'; // Return the label as is if no translation is found
   }
 }
 function convertPersianToEnglishAndRemoveNonDigits(input) {
   if (typeof input === 'number') {
-    input = input.toString()
+    input = input.toString();
   }
-  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
-  const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
   let converted = input.split('').map((char) => {
-    const index = persianDigits.indexOf(char)
-    return index !== -1 ? englishDigits[index] : char
-  }).join('')
+    const index = persianDigits.indexOf(char);
+    return index !== -1 ? englishDigits[index] : char;
+  }).join('');
 
   // Step 2: Remove all non-digit characters
-  converted = converted.replace(/\D/g, '')
+  converted = converted.replace(/\D/g, '');
 
-  return converted
+  return converted;
 }
 const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = provideMultiStepForm({
   initialState,
@@ -97,22 +97,22 @@ const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = pro
       },
       async validate({ data, setFieldError, resetFieldError }) {
         if (data.value.phoneNumber)
-          data.value.phoneNumber = convertPersianToEnglishAndRemoveNonDigits(data.value.phoneNumber)
+          data.value.phoneNumber = convertPersianToEnglishAndRemoveNonDigits(data.value.phoneNumber);
         if (data.value.age)
-          data.value.age = (convertPersianToEnglishAndRemoveNonDigits(data.value.age))
+          data.value.age = (convertPersianToEnglishAndRemoveNonDigits(data.value.age));
 
-        resetFieldError(['firstName', 'lastName', 'phoneNumber', 'email', 'age', 'gender', 'maritalStatus', 'licenseStatus'])
-        if (!data.value.firstName) setFieldError('firstName', 'نام خود را وارد نمایید')
-        if (!data.value.lastName) setFieldError('lastName', 'نام خانوادگی خود را وارد نمایید')
-        if (!data.value.phoneNumber) setFieldError('phoneNumber', 'شماره تماس خود را وارد نمایید')
-        if (!data.value.email) setFieldError('email', 'ایمیل خود را وارد نمایید')
-        if (!data.value.age) setFieldError('age', 'سن خود را وارد نمایید')
-        if (!data.value.gender) setFieldError('gender', 'جنسیت را به درستی انتخاب نمایید')
-        if (!data.value.maritalStatus) setFieldError('maritalStatus', 'وضعیت تاهل را به درستی وارد نمایید')
-        if (!data.value.licenseStatus) setFieldError('licenseStatus', 'وضعیت پروانه را به درستی وارد نمایید')
+        resetFieldError(['firstName', 'lastName', 'phoneNumber', 'email', 'age', 'gender', 'maritalStatus', 'licenseStatus']);
+        if (!data.value.firstName) setFieldError('firstName', 'نام خود را وارد نمایید');
+        if (!data.value.lastName) setFieldError('lastName', 'نام خانوادگی خود را وارد نمایید');
+        if (!data.value.phoneNumber) setFieldError('phoneNumber', 'شماره تماس خود را وارد نمایید');
+        if (!data.value.email) setFieldError('email', 'ایمیل خود را وارد نمایید');
+        if (!data.value.age) setFieldError('age', 'سن خود را وارد نمایید');
+        if (!data.value.gender) setFieldError('gender', 'جنسیت را به درستی انتخاب نمایید');
+        if (!data.value.maritalStatus) setFieldError('maritalStatus', 'وضعیت تاهل را به درستی وارد نمایید');
+        if (!data.value.licenseStatus) setFieldError('licenseStatus', 'وضعیت پروانه را به درستی وارد نمایید');
         if (data.value.phoneNumber) {
-          if (data.value.phoneNumber[0] != '0' && data.value.phoneNumber[1] != '9') setFieldError('phoneNumber', 'شماره باید با ۰۹ شروع شود')
-          if (data.value.phoneNumber.length != 11) setFieldError('phoneNumber', 'شماره باید یازده رقم باشد')
+          if (data.value.phoneNumber[0] != '0' && data.value.phoneNumber[1] != '9') setFieldError('phoneNumber', 'شماره باید با ۰۹ شروع شود');
+          if (data.value.phoneNumber.length != 11) setFieldError('phoneNumber', 'شماره باید یازده رقم باشد');
         }
       },
 
@@ -141,30 +141,30 @@ const { handleSubmit, currentStepId, goToStep, progress, complete, steps } = pro
     // },
   ],
   onSubmit: async (data, ctx) => {
-    data.gender = convertLabels(data.gender)
-    data.maritalStatus = convertLabels(data.maritalStatus)
-    data.jobStatus = convertLabels(data.jobStatus)
-    await newPsychoRegister(data)
-    toaster.clearAll()
+    data.gender = convertLabels(data.gender);
+    data.maritalStatus = convertLabels(data.maritalStatus);
+    data.jobStatus = convertLabels(data.jobStatus);
+    await newPsychoRegister(data);
+    toaster.clearAll();
     toaster.show({
       title: 'ثبت موفق',
       message: `اطلاعات با موفقیت ثبت شد`,
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
+    });
   },
   onError: (error) => {
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Error',
       message: error.message,
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   },
-})
+});
 </script>
 
 <template>

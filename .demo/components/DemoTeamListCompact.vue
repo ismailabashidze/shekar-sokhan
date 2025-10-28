@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
-  actions?: boolean
-}>()
+  actions?: boolean;
+}>();
 
 const members = [
   {
@@ -36,7 +36,7 @@ const members = [
     text: 'NL',
     role: 'UI/UX designer',
   },
-]
+];
 </script>
 
 <template>

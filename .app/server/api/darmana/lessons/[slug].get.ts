@@ -1,59 +1,59 @@
-import { defineEventHandler, createError } from 'h3'
+import { defineEventHandler, createError } from 'h3';
 
 interface Technique {
-  id: number
-  name: string
-  description: string
-  icon: string
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
 }
 
 interface Exercise {
-  id: number
-  name: string
-  description: string
-  duration: number
-  difficulty: string
-  status: 'completed' | 'in_progress' | 'not_started'
+  id: number;
+  name: string;
+  description: string;
+  duration: number;
+  difficulty: string;
+  status: 'completed' | 'in_progress' | 'not_started';
 }
 
 interface Resource {
-  name: string
-  size: string
-  type: string
-  icon: string
+  name: string;
+  size: string;
+  type: string;
+  icon: string;
 }
 
 interface Requirement {
-  name: string
-  description: string
-  icon: string
+  name: string;
+  description: string;
+  icon: string;
 }
 
 interface Lesson {
-  name: string
-  category: string
-  description: string
-  difficulty: string
-  duration: number
-  image: string
-  completed: number
-  techniques: Technique[]
-  exercises: Exercise[]
-  resources: Resource[]
-  requirements: Requirement[]
+  name: string;
+  category: string;
+  description: string;
+  difficulty: string;
+  duration: number;
+  image: string;
+  completed: number;
+  techniques: Technique[];
+  exercises: Exercise[];
+  resources: Resource[];
+  requirements: Requirement[];
 }
 
 type LessonsMap = {
   [key in 'resistance-management' | 'deep-emotions' | 'transference-management']: Lesson
-}
+};
 
 export default defineEventHandler(async (event) => {
-  const slug = event.context.params?.slug as keyof LessonsMap | undefined
+  const slug = event.context.params?.slug as keyof LessonsMap | undefined;
   if (!slug) {
     throw createError({
       statusCode: 400,
       message: 'شناسه درس مورد نیاز است',
-    })
+    });
   }
 
   // Mock data map for lessons
@@ -179,17 +179,17 @@ export default defineEventHandler(async (event) => {
       resources: [],
       requirements: [],
     },
-  }
+  };
 
-  const lesson = lessonsMap[slug]
+  const lesson = lessonsMap[slug];
   if (!lesson) {
     throw createError({
       statusCode: 404,
       message: 'درس مورد نظر یافت نشد',
-    })
+    });
   }
 
   return {
     lesson,
-  }
-})
+  };
+});

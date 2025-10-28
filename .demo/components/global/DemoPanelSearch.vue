@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FocusTrap } from '@headlessui/vue'
+import { FocusTrap } from '@headlessui/vue';
 
 import {
   Combobox,
@@ -7,10 +7,10 @@ import {
   ComboboxOption,
   ComboboxOptions,
   TransitionRoot,
-} from '@headlessui/vue'
+} from '@headlessui/vue';
 
-const { close } = usePanels()
-onKeyStroke('Escape', close)
+const { close } = usePanels();
+onKeyStroke('Escape', close);
 
 const people = [
   {
@@ -43,19 +43,19 @@ const people = [
     role: 'Product Manager',
     avatar: '/img/avatars/2.svg',
   },
-]
-const selectedPerson = ref('')
-const query = ref('')
+];
+const selectedPerson = ref('');
+const query = ref('');
 
 const filteredPeople = computed(() =>
   query.value === ''
     ? people
     : people.filter((person) => {
-      return person.name.toLowerCase().includes(query.value.toLowerCase())
+      return person.name.toLowerCase().includes(query.value.toLowerCase());
     }),
-)
+);
 
-const comboInput = ref(null)
+const comboInput = ref(null);
 </script>
 
 <template>

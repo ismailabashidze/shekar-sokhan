@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoBarMulti = reactive(useDemoBarMulti())
+const demoBarMulti = reactive(useDemoBarMulti());
 
 function useDemoBarMulti() {
-  const { primary, info, success, warning } = useTailwindColors()
-  const type = 'bar'
-  const height = 280
+  const { primary, info, success, warning } = useTailwindColors();
+  const type = 'bar';
+  const height = 280;
 
   const options = {
     chart: {
@@ -62,7 +62,7 @@ function useDemoBarMulti() {
         formatter: asDollar,
       },
     },
-  }
+  };
 
   const series = ref([
     {
@@ -77,14 +77,14 @@ function useDemoBarMulti() {
       name: 'Free Cash Flow',
       data: [1523, 932, 2189, 1732, 1632, 1874, 1947, 2420, 2312],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

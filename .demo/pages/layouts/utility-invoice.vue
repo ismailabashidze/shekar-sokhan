@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/layouts-utility-invoice-dark.png',
     order: 90,
   },
-})
+});
 
 const data = ref([
   {
@@ -30,15 +30,15 @@ const data = ref([
     quantity: 7,
     rate: 32,
   },
-])
+]);
 
-const vatRate = 0.1
+const vatRate = 0.1;
 const totalData = computed(() => {
   const subtotal = data.value.reduce((acc, item) => {
-    return acc + item.quantity * item.rate
-  }, 0)
-  const vatValue = subtotal * vatRate
-  const total = subtotal + vatValue
+    return acc + item.quantity * item.rate;
+  }, 0);
+  const vatValue = subtotal * vatRate;
+  const total = subtotal + vatValue;
 
   return [
     {
@@ -53,8 +53,8 @@ const totalData = computed(() => {
       label: 'Total',
       value: total,
     },
-  ]
-})
+  ];
+});
 </script>
 
 <template>

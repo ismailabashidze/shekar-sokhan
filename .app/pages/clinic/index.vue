@@ -10,54 +10,54 @@ definePageMeta({
     srcDark: '/img/screens/layouts-list-view-1-dark.png',
     order: 37,
   },
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(5)
+const filter = ref('');
+const perPage = ref(5);
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch('/api/psychotherapists', {
   query,
-})
+});
 function setFaLevel(level: string) {
   if (level == 'Listener') {
-    return 'شنونده'
+    return 'شنونده';
   }
   else if (level == 'Junior Therapist') {
-    return 'درمانگر تازه کار'
+    return 'درمانگر تازه کار';
   }
   else if (level == 'Mid Therapist') {
-    return 'درمانگر نیمه حرفه ای'
+    return 'درمانگر نیمه حرفه ای';
   }
   else if (level == 'Senior Therapist') {
-    return 'درمانگر حرفه ای'
+    return 'درمانگر حرفه ای';
   }
   else if (level == 'Supervisor') {
-    return 'سوپروایزور'
+    return 'سوپروایزور';
   }
-  return 'نامشخص'
+  return 'نامشخص';
 }
-data.value.data = data.value.data.map((d) => { return { ...d, faLevel: setFaLevel(d.level) } })
+data.value.data = data.value.data.map((d) => { return { ...d, faLevel: setFaLevel(d.level) }; });
 </script>
 
 <template>

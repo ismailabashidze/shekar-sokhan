@@ -38,68 +38,68 @@
 
 <script setup lang="ts">
 interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const showInstallPrompt = ref(false)
-const deferredPrompt = ref<BeforeInstallPromptEvent | null>(null)
+const showInstallPrompt = ref(false);
+const deferredPrompt = ref<BeforeInstallPromptEvent | null>(null);
 
 onMounted(() => {
   // Check if app is already installed
   if (process.client && window.matchMedia('(display-mode: standalone)').matches) {
-    return
+    return;
   }
 
   if (process.client) {
     // Listen for the beforeinstallprompt event
     window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault()
-      deferredPrompt.value = e as BeforeInstallPromptEvent
+      e.preventDefault();
+      deferredPrompt.value = e as BeforeInstallPromptEvent;
 
       // Show install prompt after a delay
       setTimeout(() => {
         if (!localStorage.getItem('pwa-install-dismissed')) {
-          showInstallPrompt.value = true
+          showInstallPrompt.value = true;
         }
-      }, 3000)
-    })
+      }, 3000);
+    });
 
     // Listen for app installation
     window.addEventListener('appinstalled', () => {
-      showInstallPrompt.value = false
-      deferredPrompt.value = null
-      localStorage.removeItem('pwa-install-dismissed')
-    })
+      showInstallPrompt.value = false;
+      deferredPrompt.value = null;
+      localStorage.removeItem('pwa-install-dismissed');
+    });
   }
-})
+});
 
 const installPwa = async () => {
-  if (!deferredPrompt.value) return
+  if (!deferredPrompt.value) return;
 
   try {
-    await deferredPrompt.value.prompt()
-    const { outcome } = await deferredPrompt.value.userChoice
+    await deferredPrompt.value.prompt();
+    const { outcome } = await deferredPrompt.value.userChoice;
 
     if (outcome === 'accepted') {
-      console.log('PWA installed successfully')
+      console.log('PWA installed successfully');
     }
 
-    showInstallPrompt.value = false
-    deferredPrompt.value = null
+    showInstallPrompt.value = false;
+    deferredPrompt.value = null;
   }
   catch (error) {
-    console.error('Error installing PWA:', error)
+    console.error('Error installing PWA:', error);
   }
-}
+};
 
 const dismissPrompt = () => {
-  showInstallPrompt.value = false
-  localStorage.setItem('pwa-install-dismissed', Date.now().toString())
+  showInstallPrompt.value = false;
+  localStorage.setItem('pwa-install-dismissed', Date.now().toString());
 
   // Show again after 7 days
   setTimeout(() => {
-    localStorage.removeItem('pwa-install-dismissed')
-  }, 7 * 24 * 60 * 60 * 1000)
-}
+    localStorage.removeItem('pwa-install-dismissed');
+  }, 7 * 24 * 60 * 60 * 1000);
+};
 </script>

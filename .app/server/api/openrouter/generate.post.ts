@@ -1,14 +1,14 @@
-import { defineEventHandler, readBody, createError } from 'h3'
+import { defineEventHandler, readBody, createError } from 'h3';
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-  const body = await readBody(event)
+  const config = useRuntimeConfig();
+  const body = await readBody(event);
 
   if (!body.name || !body.age || !body.shortDescription) {
     throw createError({
       statusCode: 400,
       message: 'Missing required fields',
-    })
+    });
   }
 
   try {
@@ -88,33 +88,33 @@ export default defineEventHandler(async (event) => {
         temperature: 0.7,
         max_tokens: 1000,
       },
-    })
+    });
 
     if (!response?.choices?.[0]?.message?.content) {
       throw createError({
         statusCode: 500,
         message: 'Invalid response from AI service',
-      })
+      });
     }
 
-    const content = response.choices[0].message.content
-    let result
+    const content = response.choices[0].message.content;
+    let result;
     try {
-      result = typeof content === 'string' ? JSON.parse(content) : content
-      return result
+      result = typeof content === 'string' ? JSON.parse(content) : content;
+      return result;
     }
     catch (e) {
       throw createError({
         statusCode: 500,
         message: `Invalid response format: ${e.message}`,
-      })
+      });
     }
   }
   catch (error: any) {
-    console.error('Generate API Error:', error)
+    console.error('Generate API Error:', error);
     throw createError({
       statusCode: error.statusCode || 500,
       message: error.message || 'An error occurred while generating patient details',
-    })
+    });
   }
-})
+});

@@ -1,24 +1,24 @@
 // const LLM_ADDRESS = 'http://127.0.0.1:8000/query'
-const LLM_ADDRESS = 'http://193.163.201.12:8000/query'
+const LLM_ADDRESS = 'http://193.163.201.12:8000/query';
 
 export type LLMMessage = {
-  role: 'system' | 'assistant' | 'user'
-  content: string
-}
+  role: 'system' | 'assistant' | 'user';
+  content: string;
+};
 
 async function fetchLLM(body: any) {
-  console.log('new request . . . ')
+  console.log('new request . . . ');
   const headers = {
     'Content-Type': 'application/json',
-  }
+  };
   const sendToLLM = body.llmMessages.map((msg) => {
     // TODO: MOVE THIS FROM HERE TO FRONT END
-    return { role: msg.role, content: JSON.parse(msg.content).message }
-  })
+    return { role: msg.role, content: JSON.parse(msg.content).message };
+  });
   try {
     const p = await $fetch(`https://pocket.zehna.ir/api/collections/patients/records/${body.pId}`, {
       method: 'GET',
-    })
+    });
     const sysPrompt = await $fetch(LLM_ADDRESS, {
       method: 'POST',
       headers,
@@ -47,20 +47,20 @@ async function fetchLLM(body: any) {
         },
         reference_system_prompt: JSON.stringify(p.longDescription),
       },
-    })
-    console.log('---SYS PROMPT---')
-    return JSON.stringify({ message: sysPrompt.final_response, img: p.avatar })
+    });
+    console.log('---SYS PROMPT---');
+    return JSON.stringify({ message: sysPrompt.final_response, img: p.avatar });
   }
   catch (e) {
-    console.log(e)
+    console.log(e);
 
-    return e
+    return e;
   }
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = await readBody(event);
   return await fetchLLM(
     body,
-  )
-})
+  );
+});

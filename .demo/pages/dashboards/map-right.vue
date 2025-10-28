@@ -10,7 +10,7 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-map-right-dark.png',
     order: 24,
   },
-})
+});
 </script>
 
 <template>

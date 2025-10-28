@@ -27,65 +27,65 @@ definePageMeta({
       new: true,
     },
   ],
-})
+});
 
-const notifications = ref(true)
-const route = useRoute()
-const slug = computed(() => route.params.slug)
+const notifications = ref(true);
+const route = useRoute();
+const slug = computed(() => route.params.slug);
 
 const query = computed(() => {
   return {
     slug: slug.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch(
   '/api/payments/recipients',
   {
     query,
   },
-)
+);
 
 if (!data.value?.recipient) {
-  await navigateTo('/layouts/payments/recipients')
+  await navigateTo('/layouts/payments/recipients');
 }
 
 const totalSent = computed(() => {
   return data.value?.recipient?.transactions.reduce(
     (acc: number, item: any) => {
       if (item.type === 'out') {
-        return acc + item.amount
+        return acc + item.amount;
       }
-      return acc
+      return acc;
     },
     0,
-  )
-})
+  );
+});
 
 const totalReceived = computed(() => {
   return data.value?.recipient?.transactions.reduce(
     (acc: number, item: any) => {
       if (item.type === 'in') {
-        return acc + item.amount
+        return acc + item.amount;
       }
-      return acc
+      return acc;
     },
     0,
-  )
-})
+  );
+});
 
 function statusColor(itemStatus: string) {
   switch (itemStatus) {
     case 'complete':
-      return 'muted'
+      return 'muted';
     case 'in progress':
-      return 'primary'
+      return 'primary';
     case 'processing':
-      return 'info'
+      return 'info';
     case 'cancelled':
-      return 'warning'
+      return 'warning';
     default:
-      break
+      break;
   }
 }
 </script>

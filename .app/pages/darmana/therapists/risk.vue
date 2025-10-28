@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { ref, computed, onMounted, watch } from 'vue'
-import { useTherapistsMessages } from '@/composables/therapistsMessages'
+import { useRoute } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useTherapistsMessages } from '@/composables/therapistsMessages';
 
 definePageMeta({
   title: 'گزارش خطر آسیب به خود',
   layout: 'empty',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const nuxtApp = useNuxtApp()
-const toaster = useToaster()
-const { role } = useUser()
-const { getMessages, getMessagesForAdmin } = useTherapistsMessages()
-const { getMessageAnalysis } = useMessageAnalysis()
+const route = useRoute();
+const nuxtApp = useNuxtApp();
+const toaster = useToaster();
+const { role } = useUser();
+const { getMessages, getMessagesForAdmin } = useTherapistsMessages();
+const { getMessageAnalysis } = useMessageAnalysis();
 
-const isAdmin = computed(() => role.value === 'admin')
+const isAdmin = computed(() => role.value === 'admin');
 
-const loading = ref(false)
-const error = ref<string | null>(null)
-const session = ref<any>(null)
-const analyzedMessages = ref<any[]>([])
+const loading = ref(false);
+const error = ref<string | null>(null);
+const session = ref<any>(null);
+const analyzedMessages = ref<any[]>([]);
 
-const NA_RISK_SCORE = -1
+const NA_RISK_SCORE = -1;
 
 const baseRiskLevels = {
   na: { key: 'na', score: NA_RISK_SCORE, label: 'نامشخص (N/A)', tag: 'warning' as const },
@@ -33,7 +33,7 @@ const baseRiskLevels = {
   medium: { key: 'medium', score: 2, label: 'ریسک متوسط', tag: 'warning' as const },
   high: { key: 'high', score: 3, label: 'ریسک بالا', tag: 'danger' as const },
   critical: { key: 'critical', score: 4, label: 'بحرانی', tag: 'danger' as const },
-}
+};
 
 const riskSynonyms: Record<string, keyof typeof baseRiskLevels> = {
   na: 'na',
@@ -50,46 +50,46 @@ const riskSynonyms: Record<string, keyof typeof baseRiskLevels> = {
   severe: 'critical',
   extreme: 'critical',
   crisis: 'critical',
-}
+};
 
 const normalizedRiskMap = computed(() => {
-  const map = new Map<string, typeof baseRiskLevels[keyof typeof baseRiskLevels]>()
+  const map = new Map<string, typeof baseRiskLevels[keyof typeof baseRiskLevels]>();
   Object.entries(baseRiskLevels).forEach(([key, value]) => {
-    map.set(key, value)
-  })
+    map.set(key, value);
+  });
   Object.entries(riskSynonyms).forEach(([alias, target]) => {
-    map.set(alias, baseRiskLevels[target])
-  })
-  return map
-})
+    map.set(alias, baseRiskLevels[target]);
+  });
+  return map;
+});
 
-const fallbackRisk = baseRiskLevels.na
+const fallbackRisk = baseRiskLevels.na;
 
 const mapRiskValue = (value?: string | null) => {
-  if (!value) return fallbackRisk
-  const normalized = value.toString().trim().toLowerCase().replace(/[^a-z]/g, '')
-  return normalizedRiskMap.value.get(normalized) || fallbackRisk
-}
+  if (!value) return fallbackRisk;
+  const normalized = value.toString().trim().toLowerCase().replace(/[^a-z]/g, '');
+  return normalizedRiskMap.value.get(normalized) || fallbackRisk;
+};
 
 const formatDate = (dateString: string | Date) => {
-  const date = typeof dateString === 'string' ? new Date(dateString) : dateString
+  const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
   return new Intl.DateTimeFormat('fa-IR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  }).format(date)
-}
+  }).format(date);
+};
 
 const formatTime = (dateString: string | Date) => {
-  const date = typeof dateString === 'string' ? new Date(dateString) : dateString
+  const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
   return new Intl.DateTimeFormat('fa-IR', {
     hour: '2-digit',
     minute: '2-digit',
-  }).format(date)
-}
+  }).format(date);
+};
 
 const translateIndicatorType = (type?: string | null) => {
-  if (!type) return 'شاخص'
+  if (!type) return 'شاخص';
 
   const translations: Record<string, string> = {
     suicidal_ideation: 'افکار خودکشی',
@@ -119,122 +119,122 @@ const translateIndicatorType = (type?: string | null) => {
     agitation: 'تحریک‌پذیری',
     withdrawal: 'کناره‌گیری',
     mood_changes: 'تغییرات خلقی',
-  }
+  };
 
-  const normalized = type.toLowerCase().trim().replace(/[\s_-]+/g, '_')
-  return translations[normalized] || type
-}
+  const normalized = type.toLowerCase().trim().replace(/[\s_-]+/g, '_');
+  return translations[normalized] || type;
+};
 
 const processedMessages = computed(() => {
   return analyzedMessages.value
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
     .map((message) => {
-      const risk = mapRiskValue(message.analysis?.suicideRiskEvaluation)
+      const risk = mapRiskValue(message.analysis?.suicideRiskEvaluation);
       return {
         ...message,
         risk,
         indicatorCount: message.analysis?.suicideIndicators?.length || 0,
-      }
-    })
-})
+      };
+    });
+});
 
 const overallRisk = computed(() => {
   return processedMessages.value.reduce((highest, message) => {
-    return message.risk.score > highest.score ? message.risk : highest
-  }, fallbackRisk)
-})
+    return message.risk.score > highest.score ? message.risk : highest;
+  }, fallbackRisk);
+});
 
 const totalIndicators = computed(() => {
   return processedMessages.value.reduce((sum, message) => {
-    return sum + (message.analysis?.suicideIndicators?.length || 0)
-  }, 0)
-})
+    return sum + (message.analysis?.suicideIndicators?.length || 0);
+  }, 0);
+});
 
 const riskCounts = computed(() => {
   return processedMessages.value.reduce<Record<string, number>>((acc, message) => {
-    const key = message.risk.label
-    acc[key] = (acc[key] || 0) + 1
-    return acc
-  }, {})
-})
+    const key = message.risk.label;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+});
 
 const latestRiskDescription = computed(() => {
-  const last = processedMessages.value.at(-1)
-  return last?.analysis?.suicideRiskDescription || 'توضیحی برای خطر ارائه نشده است.'
-})
+  const last = processedMessages.value.at(-1);
+  return last?.analysis?.suicideRiskDescription || 'توضیحی برای خطر ارائه نشده است.';
+});
 
 // Enhanced risk summary based on highest risk level and its occurrences
 const riskSummary = computed(() => {
-  const riskLevelCounts: Record<string, { risk: typeof baseRiskLevels[keyof typeof baseRiskLevels], count: number, descriptions: string[] }> = {}
+  const riskLevelCounts: Record<string, { risk: typeof baseRiskLevels[keyof typeof baseRiskLevels]; count: number; descriptions: string[] }> = {};
 
   processedMessages.value.forEach((message) => {
-    const riskKey = message.risk.key
+    const riskKey = message.risk.key;
     if (!riskLevelCounts[riskKey]) {
       riskLevelCounts[riskKey] = {
         risk: message.risk,
         count: 0,
         descriptions: [],
-      }
+      };
     }
-    riskLevelCounts[riskKey].count++
+    riskLevelCounts[riskKey].count++;
     if (message.analysis?.suicideRiskDescription) {
-      riskLevelCounts[riskKey].descriptions.push(message.analysis.suicideRiskDescription)
+      riskLevelCounts[riskKey].descriptions.push(message.analysis.suicideRiskDescription);
     }
-  })
+  });
 
   // Find highest risk level
-  const sortedRisks = Object.values(riskLevelCounts).sort((a, b) => b.risk.score - a.risk.score)
-  const highestRisk = sortedRisks[0] || { risk: fallbackRisk, count: 0, descriptions: [] }
+  const sortedRisks = Object.values(riskLevelCounts).sort((a, b) => b.risk.score - a.risk.score);
+  const highestRisk = sortedRisks[0] || { risk: fallbackRisk, count: 0, descriptions: [] };
 
   // Generate comprehensive summary
-  let summary = ''
+  let summary = '';
 
   if (highestRisk.risk.key === 'na') {
-    summary = `در طول این جلسه، ${highestRisk.count} پیام وجود دارد که سطح خطر آن‌ها قابل ارزیابی نبوده است. این می‌تواند به دلیل عدم وجود نشانه‌های واضح یا داده‌های ناکافی برای تحلیل باشد.`
+    summary = `در طول این جلسه، ${highestRisk.count} پیام وجود دارد که سطح خطر آن‌ها قابل ارزیابی نبوده است. این می‌تواند به دلیل عدم وجود نشانه‌های واضح یا داده‌های ناکافی برای تحلیل باشد.`;
   }
   else if (highestRisk.risk.key === 'none') {
-    summary = `بررسی این جلسه نشان می‌دهد که در ${highestRisk.count} پیام، هیچ نشانه خطری برای خودکشی یا آسیب به خود شناسایی نشده است. این یک نشانه مثبت است.`
+    summary = `بررسی این جلسه نشان می‌دهد که در ${highestRisk.count} پیام، هیچ نشانه خطری برای خودکشی یا آسیب به خود شناسایی نشده است. این یک نشانه مثبت است.`;
   }
   else {
-    const riskLevelText = highestRisk.risk.label
-    const percentage = Math.round((highestRisk.count / processedMessages.value.length) * 100)
+    const riskLevelText = highestRisk.risk.label;
+    const percentage = Math.round((highestRisk.count / processedMessages.value.length) * 100);
 
-    summary = `بالاترین سطح خطر شناسایی شده در این جلسه "${riskLevelText}" است که در ${highestRisk.count} پیام (${percentage}٪ از کل پیام‌ها) مشاهده شده است. `
+    summary = `بالاترین سطح خطر شناسایی شده در این جلسه "${riskLevelText}" است که در ${highestRisk.count} پیام (${percentage}٪ از کل پیام‌ها) مشاهده شده است. `;
 
     // Add critical indicator information
-    const criticalIndicatorTypes = new Set<string>()
+    const criticalIndicatorTypes = new Set<string>();
     processedMessages.value.forEach((msg) => {
       if (msg.risk.score >= highestRisk.risk.score) {
         (msg.analysis?.suicideIndicators || []).forEach((ind: any) => {
           if (ind?.indicatorType) {
-            criticalIndicatorTypes.add(translateIndicatorType(ind.indicatorType))
+            criticalIndicatorTypes.add(translateIndicatorType(ind.indicatorType));
           }
-        })
+        });
       }
-    })
+    });
 
     if (criticalIndicatorTypes.size > 0) {
-      const indicatorsList = Array.from(criticalIndicatorTypes).slice(0, 5).join('، ')
-      summary += `شاخص‌های شناسایی شده شامل: ${indicatorsList}${criticalIndicatorTypes.size > 5 ? ' و موارد دیگر' : ''} می‌باشد. `
+      const indicatorsList = Array.from(criticalIndicatorTypes).slice(0, 5).join('، ');
+      summary += `شاخص‌های شناسایی شده شامل: ${indicatorsList}${criticalIndicatorTypes.size > 5 ? ' و موارد دیگر' : ''} می‌باشد. `;
     }
 
     // Add latest description if available
     if (highestRisk.descriptions.length > 0) {
-      const latestDesc = highestRisk.descriptions[highestRisk.descriptions.length - 1]
-      summary += `\n\nآخرین توضیح تحلیل: ${latestDesc}`
+      const latestDesc = highestRisk.descriptions[highestRisk.descriptions.length - 1];
+      summary += `\n\nآخرین توضیح تحلیل: ${latestDesc}`;
     }
   }
 
-  return summary
-})
+  return summary;
+});
 
 const indicatorEntries = computed(() => {
-  const items: Array<{ level: string, levelLabel: string, message: string, text: string, reasoning: string, timestamp: string }> = []
+  const items: Array<{ level: string; levelLabel: string; message: string; text: string; reasoning: string; timestamp: string }> = [];
   processedMessages.value.forEach((message) => {
     (message.analysis?.suicideIndicators || []).forEach((indicator: any) => {
-      const level = indicator?.dangerousnessLevel?.toString().toLowerCase() || 'unknown'
-      console.log('level')
-      console.log(level)
+      const level = indicator?.dangerousnessLevel?.toString().toLowerCase() || 'unknown';
+      console.log('level');
+      console.log(level);
 
       const levelLabel = level === 'critical'
         ? 'بحرانی'
@@ -246,7 +246,7 @@ const indicatorEntries = computed(() => {
               ? 'متوسط'
               : level === 'low'
                 ? 'کم'
-                : 'نامشخص'
+                : 'نامشخص';
       items.push({
         level,
         levelLabel,
@@ -254,20 +254,20 @@ const indicatorEntries = computed(() => {
         text: indicator?.indicatorText || 'بدون متن',
         reasoning: indicator?.reasoning || 'بدون توضیح',
         timestamp: message.timestamp,
-      })
-    })
-  })
-  return items
-})
+      });
+    });
+  });
+  return items;
+});
 
 const indicatorsByPriority = computed(() => {
-  const priorityOrder = ['critical', 'high', 'medium', 'moderate', 'low', 'unknown']
+  const priorityOrder = ['critical', 'high', 'medium', 'moderate', 'low', 'unknown'];
   return [...indicatorEntries.value].sort((a, b) => {
-    return priorityOrder.indexOf(a.level) - priorityOrder.indexOf(b.level)
-  })
-})
+    return priorityOrder.indexOf(a.level) - priorityOrder.indexOf(b.level);
+  });
+});
 
-const { primary } = useTailwindColors()
+const { primary } = useTailwindColors();
 
 const riskColors = computed<Record<string, string>>(() => ({
   na: '#fbbf24',
@@ -277,24 +277,24 @@ const riskColors = computed<Record<string, string>>(() => ({
   high: '#ef4444',
   critical: '#9333ea',
   fallback: primary.value || '#2563eb',
-}))
+}));
 
-const chartScoreForRisk = (risk: { key: string, score: number }) => {
-  if (risk.key === 'na') return 0
-  if (risk.key === 'critical') return 3
-  if (risk.score === NA_RISK_SCORE) return 0
-  return Math.min(risk.score, 3)
-}
+const chartScoreForRisk = (risk: { key: string; score: number }) => {
+  if (risk.key === 'na') return 0;
+  if (risk.key === 'critical') return 3;
+  if (risk.score === NA_RISK_SCORE) return 0;
+  return Math.min(risk.score, 3);
+};
 
 const riskChartSeries = computed(() => {
-  const fallbackColor = riskColors.value.fallback
+  const fallbackColor = riskColors.value.fallback;
 
   return [
     {
       name: 'سطح خطر',
       data: processedMessages.value.map((message, index) => {
-        const risk = message.risk
-        const pointColor = colorForRisk(risk) || fallbackColor
+        const risk = message.risk;
+        const pointColor = colorForRisk(risk) || fallbackColor;
 
         return {
           x: index,
@@ -310,109 +310,109 @@ const riskChartSeries = computed(() => {
             strokeColor: '#111827',
             strokeWidth: 2,
           },
-        }
+        };
       }),
     },
-  ]
-})
+  ];
+});
 
 const riskChartCategories = computed(() => {
-  return processedMessages.value.map(message => formatTime(message.timestamp))
-})
+  return processedMessages.value.map(message => formatTime(message.timestamp));
+});
 
 const riskScoreLabel = (score: number, riskKey?: string) => {
-  if (riskKey === 'na' || score === NA_RISK_SCORE) return 'نامشخص'
-  if (riskKey === 'critical') return 'بحرانی'
-  if (score === 3) return 'ریسک بالا'
-  if (score === 2) return 'ریسک متوسط'
-  if (score === 1) return 'ریسک کم'
-  if (score <= 0) return 'بدون خطر'
-  return 'بدون خطر'
-}
+  if (riskKey === 'na' || score === NA_RISK_SCORE) return 'نامشخص';
+  if (riskKey === 'critical') return 'بحرانی';
+  if (score === 3) return 'ریسک بالا';
+  if (score === 2) return 'ریسک متوسط';
+  if (score === 1) return 'ریسک کم';
+  if (score <= 0) return 'بدون خطر';
+  return 'بدون خطر';
+};
 
-const colorForRisk = (risk: { key: string, score: number }) => {
-  const normalizedKey = risk.key || 'fallback'
-  const mapped = riskColors.value[normalizedKey]
-  if (mapped) return mapped
+const colorForRisk = (risk: { key: string; score: number }) => {
+  const normalizedKey = risk.key || 'fallback';
+  const mapped = riskColors.value[normalizedKey];
+  if (mapped) return mapped;
 
-  if (risk.score >= 4) return riskColors.value.critical
-  if (risk.score === 3) return riskColors.value.high
-  if (risk.score === 2) return riskColors.value.medium
-  if (risk.score === 1) return riskColors.value.low
-  return riskColors.value.none
-}
+  if (risk.score >= 4) return riskColors.value.critical;
+  if (risk.score === 3) return riskColors.value.high;
+  if (risk.score === 2) return riskColors.value.medium;
+  if (risk.score === 1) return riskColors.value.low;
+  return riskColors.value.none;
+};
 
-const getRiskIcon = (risk: { key: string, score: number }) => {
-  if (risk.key === 'na') return 'ph:warning-duotone'
-  return 'ph:heartbeat-duotone'
-}
+const getRiskIcon = (risk: { key: string; score: number }) => {
+  if (risk.key === 'na') return 'ph:warning-duotone';
+  return 'ph:heartbeat-duotone';
+};
 
-const getRiskBgColor = (risk: { key: string, score: number }) => {
-  if (risk.key === 'na') return 'bg-yellow-100 dark:bg-yellow-900/30'
-  return ''
-}
+const getRiskBgColor = (risk: { key: string; score: number }) => {
+  if (risk.key === 'na') return 'bg-yellow-100 dark:bg-yellow-900/30';
+  return '';
+};
 
-const getRiskTextColor = (risk: { key: string, score: number }) => {
-  if (risk.key === 'na') return 'text-yellow-700 dark:text-yellow-300'
-  return ''
-}
+const getRiskTextColor = (risk: { key: string; score: number }) => {
+  if (risk.key === 'na') return 'text-yellow-700 dark:text-yellow-300';
+  return '';
+};
 
-const chartRef = ref<any>(null)
+const chartRef = ref<any>(null);
 
 const applyRiskLabelStyles = (chartInstance: any) => {
-  const labels = chartInstance.el.querySelectorAll<HTMLElement>('.apexcharts-datalabel')
-  const seriesData = chartInstance?.w?.config?.series?.[0]?.data || []
+  const labels = chartInstance.el.querySelectorAll<HTMLElement>('.apexcharts-datalabel');
+  const seriesData = chartInstance?.w?.config?.series?.[0]?.data || [];
 
   labels.forEach((label) => {
-    const indexAttr = label.getAttribute('data:realIndex')
-    if (indexAttr == null) return
+    const indexAttr = label.getAttribute('data:realIndex');
+    if (indexAttr == null) return;
 
-    const point = seriesData[Number(indexAttr)]
+    const point = seriesData[Number(indexAttr)];
     const riskKey = point?.riskKey || 'none'
 
       ;['na', 'none', 'low', 'medium', 'high', 'critical'].forEach((key) => {
-      label.classList.remove(`${key}-risk-label`)
-    })
+      label.classList.remove(`${key}-risk-label`);
+    });
 
-    label.classList.add(`${riskKey}-risk-label`)
+    label.classList.add(`${riskKey}-risk-label`);
 
     if (riskKey === 'na') {
-      label.style.transform = 'translate(-50%, calc(-130% - 12px))'
+      label.style.transform = 'translate(-50%, calc(-130% - 12px))';
     }
     else {
-      label.style.transform = ''
+      label.style.transform = '';
     }
-  })
-}
+  });
+};
 
 const riskChartOptions = computed(() => {
-  const seriesData = riskChartSeries.value[0]?.data || []
+  const seriesData = riskChartSeries.value[0]?.data || [];
 
-  const fallbackColor = riskColors.value.fallback
+  const fallbackColor = riskColors.value.fallback;
   const markerColors = seriesData.map((point: any) =>
     colorForRisk(point?.risk || fallbackRisk) || fallbackColor,
-  )
+  );
 
   const bandWidths = seriesData.map((point: any, index: number) => {
-    const prev = seriesData[index - 1]
-    const next = seriesData[index + 1]
+    const prev = seriesData[index - 1];
+    const next = seriesData[index + 1];
 
-    const left = prev ? (point.x - prev.x) / 2 : next ? (next.x - point.x) / 2 : 0.5
-    const right = next ? (next.x - point.x) / 2 : prev ? (point.x - prev.x) / 2 : left
+    const left = prev ? (point.x - prev.x) / 2 : next ? (next.x - point.x) / 2 : 0.5;
+    const right = next ? (next.x - point.x) / 2 : prev ? (point.x - prev.x) / 2 : left;
 
     return {
       left: isFinite(left) && left > 0 ? left : 0.5,
       right: isFinite(right) && right > 0 ? right : 0.5,
-    }
-  })
+    };
+  });
 
   const unknownAnnotations = seriesData
     .map((point: any, index: number) => {
       if (point?.riskKey !== 'na') {
-        return null
+        return null;
       }
 
-      const { left, right } = bandWidths[index] || { left: 0.5, right: 0.5 }
+      const { left, right } = bandWidths[index] || { left: 0.5, right: 0.5 };
 
       return {
         x: point.x - left,
@@ -421,12 +421,12 @@ const riskChartOptions = computed(() => {
         opacity: 0.3,
         borderColor: 'transparent',
         label: { show: false },
-      }
+      };
     })
-    .filter(Boolean)
+    .filter(Boolean);
 
-  const minX = seriesData.length ? Math.min(...seriesData.map((point: any) => point.x)) : 0
-  const maxX = seriesData.length ? Math.max(...seriesData.map((point: any) => point.x)) : 0
+  const minX = seriesData.length ? Math.min(...seriesData.map((point: any) => point.x)) : 0;
+  const maxX = seriesData.length ? Math.max(...seriesData.map((point: any) => point.x)) : 0;
 
   return ({
     chart: {
@@ -437,13 +437,13 @@ const riskChartOptions = computed(() => {
       events: {
         mounted: (chart: any) => {
           setTimeout(() => {
-            applyRiskLabelStyles(chart)
-          }, 100)
+            applyRiskLabelStyles(chart);
+          }, 100);
         },
         updated: (chart: any) => {
           setTimeout(() => {
-            applyRiskLabelStyles(chart)
-          }, 100)
+            applyRiskLabelStyles(chart);
+          }, 100);
         },
       },
     },
@@ -480,11 +480,11 @@ const riskChartOptions = computed(() => {
       enabled: true,
       enabledOnSeries: [0],
       formatter: (val: number, opts?: any) => {
-        const point = opts?.w?.config?.series?.[opts?.seriesIndex]?.data?.[opts?.dataPointIndex]
+        const point = opts?.w?.config?.series?.[opts?.seriesIndex]?.data?.[opts?.dataPointIndex];
         if (point?.riskKey === 'na') {
-          return '⚠️ نامشخص'
+          return '⚠️ نامشخص';
         }
-        return riskScoreLabel(val, point?.riskKey)
+        return riskScoreLabel(val, point?.riskKey);
       },
       style: {
         fontSize: '12px',
@@ -517,8 +517,8 @@ const riskChartOptions = computed(() => {
       tickAmount: seriesData.length > 1 ? Math.min(seriesData.length - 1, 6) : 1,
       labels: {
         formatter: (val: number) => {
-          const index = Math.round(val)
-          return riskChartCategories.value[index] || ''
+          const index = Math.round(val);
+          return riskChartCategories.value[index] || '';
         },
         style: {
           fontFamily: 'IRANSansX, sans-serif',
@@ -537,11 +537,11 @@ const riskChartOptions = computed(() => {
       tickAmount: 3,
       labels: {
         formatter: (val: number) => {
-          if (val === 3) return 'ریسک بالا'
-          if (val === 2) return 'ریسک متوسط'
-          if (val === 1) return 'ریسک کم'
-          if (val === 0) return 'بدون خطر'
-          return ''
+          if (val === 3) return 'ریسک بالا';
+          if (val === 2) return 'ریسک متوسط';
+          if (val === 1) return 'ریسک کم';
+          if (val === 0) return 'بدون خطر';
+          return '';
         },
         style: {
           fontFamily: 'IRANSansX, sans-serif',
@@ -556,10 +556,10 @@ const riskChartOptions = computed(() => {
       followCursor: true,
       intersect: false,
       custom: ({ series, seriesIndex, dataPointIndex, w }: any) => {
-        const point = w?.config?.series?.[seriesIndex]?.data?.[dataPointIndex]
-        const val = point?.y ?? series[seriesIndex][dataPointIndex]
-        const label = riskScoreLabel(val, point?.riskKey)
-        const isNA = point?.riskKey === 'na'
+        const point = w?.config?.series?.[seriesIndex]?.data?.[dataPointIndex];
+        const val = point?.y ?? series[seriesIndex][dataPointIndex];
+        const label = riskScoreLabel(val, point?.riskKey);
+        const isNA = point?.riskKey === 'na';
 
         return `
         <div class="apexcharts-tooltip-custom ${isNA ? 'na-tooltip' : 'normal-tooltip'
@@ -605,33 +605,33 @@ const riskChartOptions = computed(() => {
             زمان: ${formatTime(point?.timestamp)}
           </div>
         </div>
-      `
+      `;
       },
     },
     annotations: {
       xaxis: unknownAnnotations as any,
     },
-  })
-})
+  });
+});
 
 const loadData = async (sessionId: string) => {
   if (!sessionId) {
-    error.value = 'شناسه جلسه معتبر نیست.'
-    return
+    error.value = 'شناسه جلسه معتبر نیست.';
+    return;
   }
 
-  loading.value = true
-  error.value = null
+  loading.value = true;
+  error.value = null;
 
   try {
     const sessionRecord = await nuxtApp.$pb.collection('sessions').getOne(sessionId, {
       expand: 'therapist',
-    })
-    session.value = sessionRecord
+    });
+    session.value = sessionRecord;
 
     const rawMessages = isAdmin.value
       ? await getMessagesForAdmin(sessionId)
-      : await getMessages(sessionId)
+      : await getMessages(sessionId);
 
     const enrichedMessages = await Promise.all(
       rawMessages.map(async (message: any) => {
@@ -640,11 +640,11 @@ const loadData = async (sessionId: string) => {
             ...message,
             analysis: null,
             timestamp: message.time || message.created,
-          }
+          };
         }
 
         try {
-          const analysisData = await getMessageAnalysis(message.message_analysis)
+          const analysisData = await getMessageAnalysis(message.message_analysis);
           return {
             ...message,
             analysis: {
@@ -653,135 +653,135 @@ const loadData = async (sessionId: string) => {
               suicideIndicators: analysisData?.suicideIndicators || [],
             },
             timestamp: message.time || message.created,
-          }
+          };
         }
         catch (analysisError) {
-          console.error('Error loading analysis', analysisError)
+          console.error('Error loading analysis', analysisError);
           return {
             ...message,
             analysis: null,
             timestamp: message.time || message.created,
-          }
+          };
         }
       }),
-    )
+    );
 
-    analyzedMessages.value = enrichedMessages.filter(message => message.analysis)
+    analyzedMessages.value = enrichedMessages.filter(message => message.analysis);
   }
   catch (err: any) {
-    console.error('Error loading risk data:', err)
-    error.value = 'امکان دریافت اطلاعات این جلسه وجود ندارد.'
+    console.error('Error loading risk data:', err);
+    error.value = 'امکان دریافت اطلاعات این جلسه وجود ندارد.';
     toaster.show({
       title: 'خطا',
       message: 'خطا در دریافت اطلاعات جلسه',
       color: 'danger',
       icon: 'ph:warning-circle-duotone',
       closable: true,
-    })
+    });
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 onMounted(() => {
-  const sessionId = route.query.sessionId as string
-  loadData(sessionId)
-})
+  const sessionId = route.query.sessionId as string;
+  loadData(sessionId);
+});
 
 watch(
   () => route.query.sessionId,
   (newId) => {
     if (typeof newId === 'string') {
-      loadData(newId)
+      loadData(newId);
     }
   },
-)
+);
 
 const goBack = () => {
-  navigateTo('/darmana/therapists/sessions')
-}
+  navigateTo('/darmana/therapists/sessions');
+};
 
-const hasData = computed(() => processedMessages.value.length > 0)
+const hasData = computed(() => processedMessages.value.length > 0);
 
 // Aggregate all unique indicator types across all messages
 const allIndicatorTags = computed(() => {
-  const tagsMap = new Map<string, { type: string, count: number, label: string }>()
+  const tagsMap = new Map<string, { type: string; count: number; label: string }>();
 
   processedMessages.value.forEach((message) => {
     (message.analysis?.suicideIndicators || []).forEach((indicator: any) => {
-      const type = indicator?.indicatorType
+      const type = indicator?.indicatorType;
       if (type) {
         if (tagsMap.has(type)) {
-          tagsMap.get(type)!.count++
+          tagsMap.get(type)!.count++;
         }
         else {
           tagsMap.set(type, {
             type,
             count: 1,
             label: translateIndicatorType(type),
-          })
+          });
         }
       }
-    })
-  })
+    });
+  });
 
   // Sort by count (descending) and then by label
   return Array.from(tagsMap.values()).sort((a, b) => {
-    if (b.count !== a.count) return b.count - a.count
-    return a.label.localeCompare(b.label, 'fa')
-  })
-})
+    if (b.count !== a.count) return b.count - a.count;
+    return a.label.localeCompare(b.label, 'fa');
+  });
+});
 
 // Most important indicators (high priority)
-const criticalIndicators = ['suicidal_ideation', 'previous_attempt', 'self_harm', 'plan', 'means', 'intent', 'recklessness', 'giving_away_possessions', 'saying_goodbye', 'substance_abuse']
+const criticalIndicators = ['suicidal_ideation', 'previous_attempt', 'self_harm', 'plan', 'means', 'intent', 'recklessness', 'giving_away_possessions', 'saying_goodbye', 'substance_abuse'];
 
 const priorityIndicatorTags = computed(() => {
-  return allIndicatorTags.value.filter(tag => criticalIndicators.includes(tag.type))
-})
+  return allIndicatorTags.value.filter(tag => criticalIndicators.includes(tag.type));
+});
 
 const otherIndicatorTags = computed(() => {
-  return allIndicatorTags.value.filter(tag => !criticalIndicators.includes(tag.type))
-})
+  return allIndicatorTags.value.filter(tag => !criticalIndicators.includes(tag.type));
+});
 
 const getIndicatorColor = (type: string) => {
   if (criticalIndicators.includes(type)) {
-    return 'danger'
+    return 'danger';
   }
-  return 'warning'
-}
+  return 'warning';
+};
 
 // Pie chart data for risk distribution
 const riskPieChartSeries = computed(() => {
-  const counts: number[] = []
-  const labels: string[] = []
+  const counts: number[] = [];
+  const labels: string[] = [];
 
   // Get risk counts sorted by severity (highest first)
   const sortedRisks = Object.entries(riskCounts.value)
     .map(([label, count]) => {
       // Find the risk level for this label
-      const riskLevel = Object.values(baseRiskLevels).find(r => r.label === label)
-      return { label, count, score: riskLevel?.score ?? -2 }
+      const riskLevel = Object.values(baseRiskLevels).find(r => r.label === label);
+      return { label, count, score: riskLevel?.score ?? -2 };
     })
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.score - a.score);
 
   sortedRisks.forEach(({ label, count }) => {
-    labels.push(label as string)
-    counts.push(count as number)
-  })
+    labels.push(label as string);
+    counts.push(count as number);
+  });
 
-  return { series: counts, labels }
-})
+  return { series: counts, labels };
+});
 
 const riskPieChartOptions = computed(() => {
-  const colors: string[] = []
+  const colors: string[] = [];
 
   riskPieChartSeries.value.labels.forEach((label) => {
-    const riskLevel = Object.values(baseRiskLevels).find(r => r.label === label)
+    const riskLevel = Object.values(baseRiskLevels).find(r => r.label === label);
     if (riskLevel) {
-      colors.push(riskColors.value[riskLevel.key] || riskColors.value.fallback)
+      colors.push(riskColors.value[riskLevel.key] || riskColors.value.fallback);
     }
-  })
+  });
 
   return {
     chart: {
@@ -875,8 +875,8 @@ const riskPieChartOptions = computed(() => {
         },
       },
     ],
-  }
-})
+  };
+});
 </script>
 
 <template>

@@ -11,8 +11,8 @@
 </template>
 
 <script setup lang="ts">
-import Slider from '@vueform/slider'
-import '~/assets/css/slider.css'
-const value = ref(20)
-const format = (value: any) => `${value}%`
+import Slider from '@vueform/slider';
+import '~/assets/css/slider.css';
+const value = ref(20);
+const format = (value: any) => `${value}%`;
 </script>

@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/layouts-utility-promotion-dark.png',
     order: 88,
   },
-})
+});
 </script>
 
 <template>

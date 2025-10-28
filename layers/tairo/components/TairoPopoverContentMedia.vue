@@ -1,47 +1,47 @@
 <script setup lang="ts">
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router';
 
 const props = defineProps<{
   /**
    * An array of image URLs to display.
    */
-  images: string[]
+  images: string[];
 
   /**
    * The main title to display.
    */
-  title: string
+  title: string;
 
   /**
    * The main subtitle to display.
    */
-  subtitle?: string
+  subtitle?: string;
 
   /**
    * The main text to display.
    */
-  text?: string
+  text?: string;
 
   /**
    * The title of the footer.
    */
-  footerTitle?: string
+  footerTitle?: string;
 
   /**
    * The text of the footer.
    */
-  footerText?: string
+  footerText?: string;
 
   /**
    * The label for the link.
    */
-  linkLabel: string
+  linkLabel: string;
 
   /**
    * The URL for the link.
    */
-  to: RouteLocationRaw
-}>()
+  to: RouteLocationRaw;
+}>();
 </script>
 
 <template>

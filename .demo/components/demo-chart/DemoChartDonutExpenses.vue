@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoDonut = reactive(useDemoDonut())
+const demoDonut = reactive(useDemoDonut());
 
 function useDemoDonut() {
-  const { primary, info, success, warning, danger } = useTailwindColors()
-  const height = 290
-  const type = 'donut'
+  const { primary, info, success, warning, danger } = useTailwindColors();
+  const height = 290;
+  const type = 'donut';
 
   const options = {
     title: {
@@ -43,16 +43,16 @@ function useDemoDonut() {
         formatter: (val: number) => `$${val.toFixed(2)}`,
       },
     },
-  }
+  };
 
-  const series = ref([1228, 423, 892, 629, 142])
+  const series = ref([1228, 423, 892, 629, 142]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

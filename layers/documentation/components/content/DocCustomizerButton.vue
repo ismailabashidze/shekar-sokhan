@@ -1,8 +1,8 @@
 <script setup lang="ts">
-const isOpen = useState('switcher-open', () => false)
+const isOpen = useState('switcher-open', () => false);
 
 function toggle() {
-  isOpen.value = !isOpen.value
+  isOpen.value = !isOpen.value;
 }
 </script>
 

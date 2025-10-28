@@ -1,32 +1,32 @@
 <script setup lang="ts">
 const props = defineProps<{
-  item: any
-  expanded?: boolean
-}>()
+  item: any;
+  expanded?: boolean;
+}>();
 
 const emit = defineEmits<{
-  clicked: []
-}>()
+  clicked: [];
+}>();
 
-const route = useRoute()
+const route = useRoute();
 
 const isActive = computed(() => {
   if (!props.item?.activePath) {
-    return false
+    return false;
   }
 
-  return route.path.startsWith(props.item.activePath)
-})
+  return route.path.startsWith(props.item.activePath);
+});
 
-const buttonRef = ref<HTMLElement>()
-const isOpen = ref(isActive.value)
+const buttonRef = ref<HTMLElement>();
+const isOpen = ref(isActive.value);
 
 function onDropClick() {
-  isOpen.value = !isOpen.value
+  isOpen.value = !isOpen.value;
   if (!isOpen.value) {
-    buttonRef.value?.blur()
+    buttonRef.value?.blur();
   }
-  emit('clicked')
+  emit('clicked');
 }
 </script>
 

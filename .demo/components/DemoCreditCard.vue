@@ -1,17 +1,17 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    type?: string
-    endingNumber?: number
-    balance?: number
-    active: boolean
+    type?: string;
+    endingNumber?: number;
+    balance?: number;
+    active: boolean;
   }>(),
   {
     type: '',
     endingNumber: 0,
     balance: 0,
   },
-)
+);
 </script>
 
 <template>

@@ -2,12 +2,12 @@
 definePageMeta({
   title: 'جزئیات سرمایه‌گذار',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const route = useRoute()
-const investorId = Number(route.params.id)
+const route = useRoute();
+const investorId = Number(route.params.id);
 
 // Sample investors data - same as in list.vue
 const investors = [
@@ -96,15 +96,15 @@ const investors = [
     status: 'مذاکره',
     notes: 'آقای رضایی علاقه‌مند به همکاری با تیم‌های دارای محصول و با رشد قابل توجه هستند. تخصص در بازاریابی و توسعه بازار دارند.',
   },
-]
+];
 
 // Find the investor by id
 const investor = computed(() => {
-  return investors.find(i => i.id === investorId) || null
-})
+  return investors.find(i => i.id === investorId) || null;
+});
 
 // For navigation
-const router = useRouter()
+const router = useRouter();
 
 // Status color mapping
 const statusColors = {
@@ -113,11 +113,11 @@ const statusColors = {
   'مذاکره': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   'در انتظار': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   'رد شده': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-}
+};
 
 // Handle 404
 if (!investor.value) {
-  router.push('/investors/list')
+  router.push('/investors/list');
 }
 </script>
 

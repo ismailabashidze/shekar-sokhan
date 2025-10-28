@@ -1,14 +1,14 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    light?: boolean
-    spaced?: boolean
+    light?: boolean;
+    spaced?: boolean;
   }>(),
   {
     light: false,
     spaced: false,
   },
-)
+);
 </script>
 
 <template>

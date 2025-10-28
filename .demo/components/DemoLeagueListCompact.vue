@@ -28,7 +28,7 @@ const leagues = [
     logo: '/img/icons/soccer/leagues/bundesliga.svg',
     matches: 5,
   },
-]
+];
 </script>
 
 <template>

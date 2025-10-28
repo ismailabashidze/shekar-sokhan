@@ -77,22 +77,22 @@
 </template>
 
 <script setup lang="ts">
-import type { DeedCategory } from '~/composables/useDeedCategory'
+import type { DeedCategory } from '~/composables/useDeedCategory';
 
 definePageMeta({
   title: 'دسته‌بندی‌های کار نیک',
   layout: 'sidebar',
-})
+});
 
 useHead({
   title: 'دسته‌بندی‌های کار نیک',
   htmlAttrs: { dir: 'rtl' },
-})
+});
 
-const { getCategories } = useDeedCategory()
-const categories = ref<DeedCategory[]>([])
+const { getCategories } = useDeedCategory();
+const categories = ref<DeedCategory[]>([]);
 
 onMounted(async () => {
-  categories.value = await getCategories()
-})
+  categories.value = await getCategories();
+});
 </script>

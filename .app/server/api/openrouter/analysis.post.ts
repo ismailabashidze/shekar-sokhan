@@ -1,25 +1,25 @@
-import { defineEventHandler, readBody, createError } from 'h3'
+import { defineEventHandler, readBody, createError } from 'h3';
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-  const body = await readBody(event)
+  const config = useRuntimeConfig();
+  const body = await readBody(event);
 
   if (!body.userDetails || !body.llmMessages) {
     throw createError({
       statusCode: 400,
       message: 'Missing required fields',
-    })
+    });
   }
 
   try {
-    const userDetails = `DETAILS => we have previous knowledge from user which, name is: ${body.userDetails.name}, and age is : ${body.userDetails.age} years old, gender is: ${body.userDetails.gender}, and jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}. `
+    const userDetails = `DETAILS => we have previous knowledge from user which, name is: ${body.userDetails.name}, and age is : ${body.userDetails.age} years old, gender is: ${body.userDetails.gender}, and jobStatus: ${body.userDetails.jobStatus}, also my maritalStatus: ${body.userDetails.maritalStatus}. `;
 
     const response = await $fetch<{
       choices?: Array<{
         message?: {
-          content?: string
-        }
-      }>
+          content?: string;
+        };
+      }>;
     }>('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -183,34 +183,34 @@ export default defineEventHandler(async (event) => {
         temperature: 0.7,
         max_tokens: 2000,
       },
-    })
+    });
 
     if (!response?.choices?.[0]?.message?.content) {
       throw createError({
         statusCode: 500,
         message: 'Invalid response from AI service',
-      })
+      });
     }
 
-    const content = response.choices[0].message.content
-    let result
+    const content = response.choices[0].message.content;
+    let result;
 
     try {
-      result = typeof content === 'string' ? JSON.parse(content) : content
-      return result
+      result = typeof content === 'string' ? JSON.parse(content) : content;
+      return result;
     }
     catch (e: unknown) {
       throw createError({
         statusCode: 500,
         message: `Invalid response format: ${(e as Error).message}`,
-      })
+      });
     }
   }
   catch (error: any) {
-    console.error('Analysis API Error:', error)
+    console.error('Analysis API Error:', error);
     throw createError({
       statusCode: error.statusCode || 500,
       message: error.message || 'An error occurred while analyzing the session',
-    })
+    });
   }
-})
+});

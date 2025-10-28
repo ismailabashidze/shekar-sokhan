@@ -251,228 +251,228 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useSmartFiltering, type TimeBasedGroup } from '@/composables/useSmartFiltering'
-import type { SessionSummaryWithImportance } from '@/composables/useDataImportance'
+import { ref, computed } from 'vue';
+import { useSmartFiltering, type TimeBasedGroup } from '@/composables/useSmartFiltering';
+import type { SessionSummaryWithImportance } from '@/composables/useDataImportance';
 
 interface Props {
-  summaries: SessionSummaryWithImportance[]
-  timeGroups?: TimeBasedGroup[]
+  summaries: SessionSummaryWithImportance[];
+  timeGroups?: TimeBasedGroup[];
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
-const { analyzeTemporalPatterns, getProtectedSummaries } = useSmartFiltering()
+const { analyzeTemporalPatterns, getProtectedSummaries } = useSmartFiltering();
 
-const showAdvanced = ref(false)
+const showAdvanced = ref(false);
 
 // Toggle advanced view
 function toggleAdvancedView() {
-  showAdvanced.value = !showAdvanced.value
+  showAdvanced.value = !showAdvanced.value;
 }
 
 // Analytics computation
 const analytics = computed(() => {
-  const patterns = analyzeTemporalPatterns(props.summaries)
+  const patterns = analyzeTemporalPatterns(props.summaries);
   return {
     totalSessions: props.summaries.length,
     averageImportance: patterns.averageImportance,
     importanceTrend: patterns.importanceTrend,
     criticalSessionsCount: patterns.criticalSessionsCount,
     compressionRate: patterns.compressionRate,
-  }
-})
+  };
+});
 
 // Importance distribution
 const importanceDistribution = computed(() => {
-  const distribution = { critical: 0, important: 0, medium: 0, low: 0 }
+  const distribution = { critical: 0, important: 0, medium: 0, low: 0 };
 
   props.summaries.forEach((summary) => {
-    const score = summary.importance?.overallImportance || 0
-    if (score >= 80) distribution.critical++
-    else if (score >= 60) distribution.important++
-    else if (score >= 40) distribution.medium++
-    else distribution.low++
-  })
+    const score = summary.importance?.overallImportance || 0;
+    if (score >= 80) distribution.critical++;
+    else if (score >= 60) distribution.important++;
+    else if (score >= 40) distribution.medium++;
+    else distribution.low++;
+  });
 
-  return distribution
-})
+  return distribution;
+});
 
 // Trend analysis
 const trendAnalysis = computed(() => {
   const recent = props.summaries.filter((s) => {
-    const days = Math.floor((new Date().getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24))
-    return days <= 30
-  })
+    const days = Math.floor((new Date().getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24));
+    return days <= 30;
+  });
 
   const older = props.summaries.filter((s) => {
-    const days = Math.floor((new Date().getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24))
-    return days > 30 && days <= 60
-  })
+    const days = Math.floor((new Date().getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24));
+    return days > 30 && days <= 60;
+  });
 
   if (recent.length === 0 || older.length === 0) {
-    return { direction: 'stable', change: 0 }
+    return { direction: 'stable', change: 0 };
   }
 
-  const recentAvg = recent.reduce((sum, s) => sum + (s.importance?.overallImportance || 0), 0) / recent.length
-  const olderAvg = older.reduce((sum, s) => sum + (s.importance?.overallImportance || 0), 0) / older.length
+  const recentAvg = recent.reduce((sum, s) => sum + (s.importance?.overallImportance || 0), 0) / recent.length;
+  const olderAvg = older.reduce((sum, s) => sum + (s.importance?.overallImportance || 0), 0) / older.length;
 
-  const change = recentAvg - olderAvg
+  const change = recentAvg - olderAvg;
 
-  if (Math.abs(change) < 5) return { direction: 'stable', change }
-  return { direction: change > 0 ? 'improving' : 'declining', change }
-})
+  if (Math.abs(change) < 5) return { direction: 'stable', change };
+  return { direction: change > 0 ? 'improving' : 'declining', change };
+});
 
 // Trend styling
 const trendClasses = computed(() => {
   switch (trendAnalysis.value.direction) {
     case 'improving':
-      return 'border-green-200 bg-green-50 dark:border-green-500/20 dark:bg-green-900/20'
+      return 'border-green-200 bg-green-50 dark:border-green-500/20 dark:bg-green-900/20';
     case 'declining':
-      return 'border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-900/20'
+      return 'border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-900/20';
     default:
-      return 'border-gray-200 bg-gray-50 dark:border-gray-500/20 dark:bg-gray-900/20'
+      return 'border-gray-200 bg-gray-50 dark:border-gray-500/20 dark:bg-gray-900/20';
   }
-})
+});
 
 const trendIcon = computed(() => {
   switch (trendAnalysis.value.direction) {
     case 'improving':
-      return 'ph:trend-up-duotone'
+      return 'ph:trend-up-duotone';
     case 'declining':
-      return 'ph:trend-down-duotone'
+      return 'ph:trend-down-duotone';
     default:
-      return 'ph:equals-duotone'
+      return 'ph:equals-duotone';
   }
-})
+});
 
 const trendIconColor = computed(() => {
   switch (trendAnalysis.value.direction) {
     case 'improving':
-      return 'text-green-500'
+      return 'text-green-500';
     case 'declining':
-      return 'text-red-500'
+      return 'text-red-500';
     default:
-      return 'text-gray-500'
+      return 'text-gray-500';
   }
-})
+});
 
 const trendTextColor = computed(() => {
   switch (trendAnalysis.value.direction) {
     case 'improving':
-      return 'text-green-700 dark:text-green-300'
+      return 'text-green-700 dark:text-green-300';
     case 'declining':
-      return 'text-red-700 dark:text-red-300'
+      return 'text-red-700 dark:text-red-300';
     default:
-      return 'text-gray-700 dark:text-gray-300'
+      return 'text-gray-700 dark:text-gray-300';
   }
-})
+});
 
 const trendMessage = computed(() => {
   switch (trendAnalysis.value.direction) {
     case 'improving':
-      return `روند بهبودی (${Math.round(trendAnalysis.value.change)}+ امتیاز)`
+      return `روند بهبودی (${Math.round(trendAnalysis.value.change)}+ امتیاز)`;
     case 'declining':
-      return `کاهش اهمیت جلسات (${Math.round(Math.abs(trendAnalysis.value.change))} امتیاز)`
+      return `کاهش اهمیت جلسات (${Math.round(Math.abs(trendAnalysis.value.change))} امتیاز)`;
     default:
-      return 'روند پایدار'
+      return 'روند پایدار';
   }
-})
+});
 
 const trendDescription = computed(() => {
   switch (trendAnalysis.value.direction) {
     case 'improving':
-      return 'جلسات اخیر اهمیت بیشتری نسبت به گذشته دارند'
+      return 'جلسات اخیر اهمیت بیشتری نسبت به گذشته دارند';
     case 'declining':
-      return 'جلسات اخیر اهمیت کمتری نسبت به گذشته دارند'
+      return 'جلسات اخیر اهمیت کمتری نسبت به گذشته دارند';
     default:
-      return 'تغییر قابل توجهی در اهمیت جلسات مشاهده نمی‌شود'
+      return 'تغییر قابل توجهی در اهمیت جلسات مشاهده نمی‌شود';
   }
-})
+});
 
 // Importance trend styling
 const averageImportanceColor = computed(() => {
-  const avg = analytics.value.averageImportance
-  if (avg >= 80) return 'text-red-500'
-  if (avg >= 60) return 'text-orange-500'
-  if (avg >= 40) return 'text-yellow-500'
-  return 'text-gray-500'
-})
+  const avg = analytics.value.averageImportance;
+  if (avg >= 80) return 'text-red-500';
+  if (avg >= 60) return 'text-orange-500';
+  if (avg >= 40) return 'text-yellow-500';
+  return 'text-gray-500';
+});
 
 // Compression statistics
 const compressionStats = computed(() => {
-  const compressed = props.summaries.filter(s => s.isCompressed)
-  const protectedSummaries = getProtectedSummaries(props.summaries)
+  const compressed = props.summaries.filter(s => s.isCompressed);
+  const protectedSummaries = getProtectedSummaries(props.summaries);
 
-  if (compressed.length === 0) return null
+  if (compressed.length === 0) return null;
 
-  const totalOriginalLength = compressed.reduce((sum, s) => sum + (s.originalLength || s.summary.length), 0)
-  const totalCurrentLength = compressed.reduce((sum, s) => sum + s.summary.length, 0)
+  const totalOriginalLength = compressed.reduce((sum, s) => sum + (s.originalLength || s.summary.length), 0);
+  const totalCurrentLength = compressed.reduce((sum, s) => sum + s.summary.length, 0);
 
   const averageCompression = compressed.length > 0
     ? Math.round(compressed.reduce((sum, s) => {
       if (s.originalLength) {
-        return sum + ((s.originalLength - s.summary.length) / s.originalLength) * 100
+        return sum + ((s.originalLength - s.summary.length) / s.originalLength) * 100;
       }
-      return sum
+      return sum;
     }, 0) / compressed.length)
-    : 0
+    : 0;
 
   const spaceSaved = totalOriginalLength > 0
     ? Math.round(((totalOriginalLength - totalCurrentLength) / totalOriginalLength) * 100)
-    : 0
+    : 0;
 
   return {
     compressedCount: compressed.length,
     protectedCount: protectedSummaries.length,
     averageCompression,
     spaceSaved,
-  }
-})
+  };
+});
 
 // Recommendations based on analysis
 const recommendations = computed(() => {
-  const recs: string[] = []
-  const { averageImportance, criticalSessionsCount, compressionRate, totalSessions } = analytics.value
+  const recs: string[] = [];
+  const { averageImportance, criticalSessionsCount, compressionRate, totalSessions } = analytics.value;
 
   if (criticalSessionsCount > totalSessions * 0.3) {
-    recs.push('🚨 تعداد جلسات بحرانی بالا است. پیگیری فوری و مداوم توصیه می‌شود.')
+    recs.push('🚨 تعداد جلسات بحرانی بالا است. پیگیری فوری و مداوم توصیه می‌شود.');
   }
 
   if (criticalSessionsCount > 0 && criticalSessionsCount <= 2) {
-    recs.push('⚠️ چند جلسه بحرانی شناسایی شده. بررسی دقیق این جلسات ضروری است.')
+    recs.push('⚠️ چند جلسه بحرانی شناسایی شده. بررسی دقیق این جلسات ضروری است.');
   }
 
   if (averageImportance < 30) {
-    recs.push('📊 میانگین اهمیت جلسات پایین است. بررسی کیفیت جلسات و روش‌های مشاوره توصیه می‌شود.')
+    recs.push('📊 میانگین اهمیت جلسات پایین است. بررسی کیفیت جلسات و روش‌های مشاوره توصیه می‌شود.');
   }
 
   if (averageImportance > 70) {
-    recs.push('✨ کیفیت بالای جلسات! ادامه روند فعلی و تمرکز بر مسائل مهم مثبت است.')
+    recs.push('✨ کیفیت بالای جلسات! ادامه روند فعلی و تمرکز بر مسائل مهم مثبت است.');
   }
 
   if (compressionRate < 20 && totalSessions > 20) {
-    recs.push('💾 فضای ذخیره‌سازی قابل بهینه‌سازی است. فشرده‌سازی جلسات قدیمی‌تر پیشنهاد می‌شود.')
+    recs.push('💾 فضای ذخیره‌سازی قابل بهینه‌سازی است. فشرده‌سازی جلسات قدیمی‌تر پیشنهاد می‌شود.');
   }
 
   if (compressionRate > 60) {
-    recs.push('⚡ نرخ فشرده‌سازی بالا است. اطمینان حاصل کنید اطلاعات مهم حفظ شده‌اند.')
+    recs.push('⚡ نرخ فشرده‌سازی بالا است. اطمینان حاصل کنید اطلاعات مهم حفظ شده‌اند.');
   }
 
   if (trendAnalysis.value.direction === 'declining') {
-    recs.push('📉 روند کاهشی در اهمیت جلسات مشاهده می‌شود. بررسی علل و بهبود کیفیت جلسات ضروری است.')
+    recs.push('📉 روند کاهشی در اهمیت جلسات مشاهده می‌شود. بررسی علل و بهبود کیفیت جلسات ضروری است.');
   }
 
   if (trendAnalysis.value.direction === 'improving') {
-    recs.push('📈 روند مثبت! جلسات اخیر کیفیت بهتری دارند. ادامه این روند توصیه می‌شود.')
+    recs.push('📈 روند مثبت! جلسات اخیر کیفیت بهتری دارند. ادامه این روند توصیه می‌شود.');
   }
 
   if (importanceDistribution.value.critical === 0 && totalSessions > 5) {
-    recs.push('🔍 هیچ جلسه بحرانی شناسایی نشده. این می‌تواند نشانه پیشرفت خوب یا نیاز به بررسی دقیق‌تر باشد.')
+    recs.push('🔍 هیچ جلسه بحرانی شناسایی نشده. این می‌تواند نشانه پیشرفت خوب یا نیاز به بررسی دقیق‌تر باشد.');
   }
 
-  return recs
-})
+  return recs;
+});
 </script>
 
 <style scoped>

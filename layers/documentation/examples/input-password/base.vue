@@ -8,5 +8,5 @@
 </template>
 
 <script lang="ts" setup>
-const password = ref('')
+const password = ref('');
 </script>

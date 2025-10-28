@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    logo?: string
-    name?: string
-    description?: string
-    openingCount?: string
+    logo?: string;
+    name?: string;
+    description?: string;
+    openingCount?: string;
   }>(),
   {
     logo: undefined,
@@ -12,7 +12,7 @@ const props = withDefaults(
     description: undefined,
     openingCount: undefined,
   },
-)
+);
 </script>
 
 <template>

@@ -130,51 +130,51 @@
 </template>
 
 <script setup lang="ts">
-import type { SidebarItem } from '@/composables/useZones'
+import type { SidebarItem } from '@/composables/useZones';
 
-const { user } = useUser()
-const route = useRoute()
+const { user } = useUser();
+const route = useRoute();
 const {
   currentZone,
   currentZoneConfig,
   userZones,
   sidebarItems,
   ZONE_CONFIGS,
-} = useZones()
+} = useZones();
 
-const expandedItems = ref<Set<string>>(new Set())
+const expandedItems = ref<Set<string>>(new Set());
 
 const isActive = (path: string) => {
-  return route.path === path || route.path.startsWith(path + '/')
-}
+  return route.path === path || route.path.startsWith(path + '/');
+};
 
 const isExpanded = (path: string) => {
-  return expandedItems.value.has(path)
-}
+  return expandedItems.value.has(path);
+};
 
 const toggleExpand = (path: string) => {
-  const newExpanded = new Set(expandedItems.value)
+  const newExpanded = new Set(expandedItems.value);
   if (newExpanded.has(path)) {
-    newExpanded.delete(path)
+    newExpanded.delete(path);
   }
   else {
-    newExpanded.add(path)
+    newExpanded.add(path);
   }
-  expandedItems.value = newExpanded
-}
+  expandedItems.value = newExpanded;
+};
 
 const navigateToZone = (path: string) => {
-  navigateTo(path)
-}
+  navigateTo(path);
+};
 
 // Auto-expand parent if child is active
 watchEffect(() => {
   if (sidebarItems.value) {
     sidebarItems.value.forEach((item) => {
       if (item.children && item.children.some(child => isActive(child.to))) {
-        expandedItems.value.add(item.to)
+        expandedItems.value.add(item.to);
       }
-    })
+    });
   }
-})
+});
 </script>

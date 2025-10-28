@@ -1697,7 +1697,7 @@
 definePageMeta({
   layout: 'default',
   title: 'اختلال تکاملی عمومی - DSM-5 | ذهنا',
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
@@ -1712,7 +1712,7 @@ useHead({
       content: 'اختلال تکاملی عمومی, Global Developmental Delay, DSM-5, تأخیر رشد, اختلالات نوروتکاملی, تشخیص کودکان',
     },
   ],
-})
+});
 
 // Complete disorder information based on your exact structure
 const disorderInfo = {
@@ -2054,7 +2054,7 @@ const disorderInfo = {
       'مشکلات عصبی',
     ],
   },
-}
+};
 
 // Helper function for symptom category icons
 const getSymptomIcon = (category: string) => {
@@ -2067,9 +2067,9 @@ const getSymptomIcon = (category: string) => {
     social: 'ph:users',
     motor: 'ph:hand',
     sensory: 'ph:eye',
-  }
-  return iconMap[category.toLowerCase()] || 'ph:circle'
-}
+  };
+  return iconMap[category.toLowerCase()] || 'ph:circle';
+};
 
 // Helper functions for diagnostic markers
 const getMarkerIcon = (markerName: string) => {
@@ -2079,9 +2079,9 @@ const getMarkerIcon = (markerName: string) => {
     cognitive_behavioral: 'ph:brain',
     digital: 'ph:computer-tower',
     other: 'ph:test-tube',
-  }
-  return iconMap[markerName] || 'ph:test-tube'
-}
+  };
+  return iconMap[markerName] || 'ph:test-tube';
+};
 
 const getMarkerTitle = (markerName: string) => {
   const titleMap = {
@@ -2090,9 +2090,9 @@ const getMarkerTitle = (markerName: string) => {
     cognitive_behavioral: 'ارزیابی‌های شناختی-رفتاری',
     digital: 'ابزارهای دیجیتال',
     other: 'سایر نشانگرها',
-  }
-  return titleMap[markerName] || markerName
-}
+  };
+  return titleMap[markerName] || markerName;
+};
 
 const getSubtypeLabel = (subtype: string) => {
   const labelMap = {
@@ -2110,9 +2110,9 @@ const getSubtypeLabel = (subtype: string) => {
     'genetic testing': 'آزمون‌های ژنتیکی',
     'metabolic screening': 'غربالگری متابولیک',
     'chromosomal analysis': 'تجزیه و تحلیل کروموزومی',
-  }
-  return labelMap[subtype] || subtype
-}
+  };
+  return labelMap[subtype] || subtype;
+};
 
 const getMarkerDescription = (markerName: string) => {
   const descriptionMap = {
@@ -2121,18 +2121,18 @@ const getMarkerDescription = (markerName: string) => {
     cognitive_behavioral: 'آزمون‌های استاندارد تکاملی، مشاهده رفتار، و ارزیابی مهارت‌های تطبیقی',
     digital: 'نرم‌افزارهای ارزیابی، اپلیکیشن‌های نظارتی، و ابزارهای تشخیص کامپیوتری',
     other: 'سایر روش‌های تشخیصی و ارزیابی که در موارد خاص استفاده می‌شوند',
-  }
-  return descriptionMap[markerName] || 'ابزارهای تشخیصی تخصصی'
-}
+  };
+  return descriptionMap[markerName] || 'ابزارهای تشخیصی تخصصی';
+};
 
 // Console log for structure verification
-console.log('=== COMPLETE STRUCTURE IMPLEMENTED ===')
-console.log('✓ All required fields from your goal structure are now included')
-console.log('✓ Fixed prevalence key name to "Prevalence"')
-console.log('✓ Fixed specifiers structure to {title, conditions}')
-console.log('✓ Implemented complete diagnosticFeatures with all subsections')
-console.log('✓ Added all missing sections: diagnosticMarkers, associated_features, etc.')
-console.log('Structure ready for DSM-5 compliant implementation!')
+console.log('=== COMPLETE STRUCTURE IMPLEMENTED ===');
+console.log('✓ All required fields from your goal structure are now included');
+console.log('✓ Fixed prevalence key name to "Prevalence"');
+console.log('✓ Fixed specifiers structure to {title, conditions}');
+console.log('✓ Implemented complete diagnosticFeatures with all subsections');
+console.log('✓ Added all missing sections: diagnosticMarkers, associated_features, etc.');
+console.log('Structure ready for DSM-5 compliant implementation!');
 </script>
 
 <style scoped>

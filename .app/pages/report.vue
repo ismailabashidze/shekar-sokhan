@@ -824,11 +824,11 @@
 definePageMeta({
   title: 'گزارش نهایی',
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const isLoading = ref(true)
-const hasData = ref(true)
+const isLoading = ref(true);
+const hasData = ref(true);
 const report = ref({
   collectionId: '',
   collectionName: '',
@@ -886,79 +886,79 @@ const report = ref({
   totalSessions: 0,
   updated: '',
   user: '',
-})
-const toaster = useToaster()
+});
+const toaster = useToaster();
 
-const router = useRouter()
-const route = useRoute()
-const { getReportByUserId, updateReport } = useReport()
-const nuxtApp = useNuxtApp()
-const { user, role } = useUser()
+const router = useRouter();
+const route = useRoute();
+const { getReportByUserId, updateReport } = useReport();
+const nuxtApp = useNuxtApp();
+const { user, role } = useUser();
 
 // Batching state
-const visibleCount = ref(5)
-const visibleDeeperGoalsCount = ref(5)
-const visibleRiskFactorsCount = ref(5)
+const visibleCount = ref(5);
+const visibleDeeperGoalsCount = ref(5);
+const visibleRiskFactorsCount = ref(5);
 
 // Computed property for visible deeper goals
 const visibleDeeperGoals = computed(() => {
-  const goals = report.value.possibleDeeperGoals || []
-  return goals.slice(0, visibleDeeperGoalsCount.value)
-})
+  const goals = report.value.possibleDeeperGoals || [];
+  return goals.slice(0, visibleDeeperGoalsCount.value);
+});
 
 // Computed property for visible risk factors (flat array for 12-column grid)
 const visibleRiskFactorsFlat = computed(() => {
-  const factors = report.value.possibleRiskFactors || []
-  return factors.slice(0, visibleRiskFactorsCount.value)
-})
+  const factors = report.value.possibleRiskFactors || [];
+  return factors.slice(0, visibleRiskFactorsCount.value);
+});
 
 // Show more items for deeper goals
 function showMoreDeeperGoals() {
-  visibleDeeperGoalsCount.value += 5
+  visibleDeeperGoalsCount.value += 5;
 }
 
 // Show more items for risk factors
 function showMoreRiskFactors() {
-  visibleRiskFactorsCount.value += 5
+  visibleRiskFactorsCount.value += 5;
 }
 
 // Delete modal state
-const isDeleteModalOpen = ref(false)
-const isDeleting = ref(false)
-const summaryToDelete = ref(null)
-const summaryIndexToDelete = ref(-1)
+const isDeleteModalOpen = ref(false);
+const isDeleting = ref(false);
+const summaryToDelete = ref(null);
+const summaryIndexToDelete = ref(-1);
 
 // Delete all deeper goals modal state
-const isDeleteAllDeeperGoalsModalOpen = ref(false)
-const isDeletingAllDeeperGoals = ref(false)
+const isDeleteAllDeeperGoalsModalOpen = ref(false);
+const isDeletingAllDeeperGoals = ref(false);
 
 // Delete all risk factors modal state
-const isDeleteAllRiskFactorsModalOpen = ref(false)
-const isDeletingAllRiskFactors = ref(false)
+const isDeleteAllRiskFactorsModalOpen = ref(false);
+const isDeletingAllRiskFactors = ref(false);
 
 // Computed property for visible summaries (reversed and limited)
 const visibleSummaries = computed(() => {
-  const summaries = report.value.summaries || []
-  if (!summaries.length) return []
+  const summaries = report.value.summaries || [];
+  if (!summaries.length) return [];
 
-  const count = Math.min(visibleCount.value, summaries.length)
-  return summaries.slice(-count).reverse()
-})
+  const count = Math.min(visibleCount.value, summaries.length);
+  return summaries.slice(-count).reverse();
+});
 
 // Show more items
 function showMore() {
-  visibleCount.value += 5
+  visibleCount.value += 5;
 }
 
 // Demographic profile edit state
-const isEditingDemographic = ref(false)
-const isSavingDemographic = ref(false)
+const isEditingDemographic = ref(false);
+const isSavingDemographic = ref(false);
 const editDemographicProfile = reactive({
   age: '',
   gender: '',
   educationLevel: '',
   maritalStatus: '',
-})
+});
 
 // watch(
 //   () => report.value.finalDemographicProfile,
@@ -974,40 +974,40 @@ const editDemographicProfile = reactive({
 // )
 
 function enableEditDemographic() {
-  isEditingDemographic.value = true
+  isEditingDemographic.value = true;
   // Initialize with existing data or empty strings
-  const profile = report.value.finalDemographicProfile || {}
-  editDemographicProfile.age = profile.age || ''
-  editDemographicProfile.gender = profile.gender || ''
-  editDemographicProfile.educationLevel = profile.educationLevel || ''
-  editDemographicProfile.maritalStatus = profile.maritalStatus || ''
+  const profile = report.value.finalDemographicProfile || {};
+  editDemographicProfile.age = profile.age || '';
+  editDemographicProfile.gender = profile.gender || '';
+  editDemographicProfile.educationLevel = profile.educationLevel || '';
+  editDemographicProfile.maritalStatus = profile.maritalStatus || '';
 }
 
 function cancelEditDemographic() {
-  isEditingDemographic.value = false
-  const profile = report.value.finalDemographicProfile || {}
-  editDemographicProfile.age = profile.age || ''
-  editDemographicProfile.gender = profile.gender || ''
-  editDemographicProfile.educationLevel = profile.educationLevel || ''
-  editDemographicProfile.maritalStatus = profile.maritalStatus || ''
+  isEditingDemographic.value = false;
+  const profile = report.value.finalDemographicProfile || {};
+  editDemographicProfile.age = profile.age || '';
+  editDemographicProfile.gender = profile.gender || '';
+  editDemographicProfile.educationLevel = profile.educationLevel || '';
+  editDemographicProfile.maritalStatus = profile.maritalStatus || '';
 }
 
 async function saveDemographicProfile() {
-  isSavingDemographic.value = true
+  isSavingDemographic.value = true;
   try {
     await updateReport(report.value.id, {
       finalDemographicProfile: { ...editDemographicProfile },
-    })
-    report.value.finalDemographicProfile = { ...editDemographicProfile }
-    isEditingDemographic.value = false
-    toaster.clearAll()
+    });
+    report.value.finalDemographicProfile = { ...editDemographicProfile };
+    isEditingDemographic.value = false;
+    toaster.clearAll();
     toaster.show({
       title: 'ذخیره موفق',
       message: 'اطلاعات دموگرافیک با موفقیت ذخیره شد',
       color: 'success',
       icon: 'ph:user-circle-fill',
       closable: true,
-    })
+    });
   }
   catch (error) {
     toaster.show({
@@ -1016,267 +1016,267 @@ async function saveDemographicProfile() {
       color: 'danger',
       icon: 'ph:warning-circle-duotone',
       closable: true,
-    })
+    });
   }
   finally {
-    isSavingDemographic.value = false
+    isSavingDemographic.value = false;
   }
 }
 
 // Check if current user is admin
-const isAdmin = computed(() => role.value === 'admin')
+const isAdmin = computed(() => role.value === 'admin');
 
 // Get target user ID from query params or use current user
 const targetUserId = computed(() => {
   const queryUserId = Array.isArray(route.query.userId)
     ? route.query.userId[0]
-    : route.query.userId
+    : route.query.userId;
 
-  return queryUserId || nuxtApp.$pb.authStore.model?.id
-})
+  return queryUserId || nuxtApp.$pb.authStore.model?.id;
+});
 // For demo, we'll simulate data fetching with a timeout
 
 // Function to fetch reports
 async function fetchReport() {
-  isLoading.value = true
+  isLoading.value = true;
 
   try {
     // Check if user is trying to access another user's report without admin rights
     const queryUserId = Array.isArray(route.query.userId)
       ? route.query.userId[0]
-      : route.query.userId
+      : route.query.userId;
 
     if (queryUserId && !isAdmin.value) {
       // Non-admin trying to access another user's report - redirect to their own report
-      router.push('/report')
-      return
+      router.push('/report');
+      return;
     }
 
     // If no user ID is available
     if (!targetUserId.value) {
-      hasData.value = false
-      return
+      hasData.value = false;
+      return;
     }
 
     // Get report for the target user
-    const userReport = await getReportByUserId(targetUserId.value)
+    const userReport = await getReportByUserId(targetUserId.value);
 
     if (userReport) {
-      report.value = userReport
-      hasData.value = true
+      report.value = userReport;
+      hasData.value = true;
     }
     else {
-      hasData.value = false
+      hasData.value = false;
     }
   }
   catch (error) {
-    console.error('Error fetching report:', error)
-    hasData.value = false
+    console.error('Error fetching report:', error);
+    hasData.value = false;
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 onMounted(() => {
-  fetchReport()
-})
+  fetchReport();
+});
 
 watch(() => user.value?.id, (newId, oldId) => {
   if (newId && newId !== oldId) {
-    fetchReport()
+    fetchReport();
   }
-})
+});
 
 watch(targetUserId, (newId, oldId) => {
   if (newId && newId !== oldId) {
-    fetchReport()
+    fetchReport();
   }
-})
+});
 
 // Reset visible counts when data changes
 watch(() => report.value.summaries, () => {
-  visibleCount.value = 5
-})
+  visibleCount.value = 5;
+});
 
 watch(() => report.value.possibleDeeperGoals, () => {
-  visibleDeeperGoalsCount.value = 5
-})
+  visibleDeeperGoalsCount.value = 5;
+});
 
 watch(() => report.value.possibleRiskFactors, () => {
-  visibleRiskFactorsCount.value = 5
-}, { immediate: false })
+  visibleRiskFactorsCount.value = 5;
+}, { immediate: false });
 
 function startNewSession() {
   // Navigate to the session creation page
-  router.push('/darmana/therapists/sessions')
+  router.push('/darmana/therapists/sessions');
 }
 
 function formatDate(dateStr: string) {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr)
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
 
   // Format date and time separately and combine with dash
-  const dateOnly = d.toLocaleDateString('fa-IR', { dateStyle: 'short' })
-  const timeOnly = d.toLocaleTimeString('fa-IR', { timeStyle: 'short' })
+  const dateOnly = d.toLocaleDateString('fa-IR', { dateStyle: 'short' });
+  const timeOnly = d.toLocaleTimeString('fa-IR', { timeStyle: 'short' });
 
-  return `${dateOnly}-${timeOnly}`
+  return `${dateOnly}-${timeOnly}`;
 }
 
 // Open the delete confirmation modal
 function openDeleteModal(index: number, summary: any) {
-  summaryIndexToDelete.value = index
-  summaryToDelete.value = summary
-  isDeleteModalOpen.value = true
+  summaryIndexToDelete.value = index;
+  summaryToDelete.value = summary;
+  isDeleteModalOpen.value = true;
 }
 
 // Open the delete all deeper goals confirmation modal
 function openDeleteAllDeeperGoalsModal() {
-  isDeleteAllDeeperGoalsModalOpen.value = true
+  isDeleteAllDeeperGoalsModalOpen.value = true;
 }
 
 // Open the delete all risk factors confirmation modal
 function openDeleteAllRiskFactorsModal() {
-  isDeleteAllRiskFactorsModalOpen.value = true
+  isDeleteAllRiskFactorsModalOpen.value = true;
 }
 
 // Confirm deletion of summary
 async function confirmDelete() {
-  if (!summaryToDelete.value) return
+  if (!summaryToDelete.value) return;
 
-  isDeleting.value = true
+  isDeleting.value = true;
 
   try {
     // Create a copy of summaries array
-    const updatedSummaries = [...report.value.summaries]
+    const updatedSummaries = [...report.value.summaries];
 
     const targetIndex = updatedSummaries.findIndex(item => item === summaryToDelete.value
-      || (item?.sessionId && item.sessionId === summaryToDelete.value?.sessionId))
+      || (item?.sessionId && item.sessionId === summaryToDelete.value?.sessionId));
 
     if (targetIndex === -1) {
-      throw new Error('Summary not found in report list')
+      throw new Error('Summary not found in report list');
     }
 
     // Remove the selected summary
-    updatedSummaries.splice(targetIndex, 1)
+    updatedSummaries.splice(targetIndex, 1);
 
     // Update the report with the new summaries array
     const updatedReport = {
       ...report.value,
       summaries: updatedSummaries,
-    }
+    };
 
     // Save to database
-    await updateReport(report.value.id, { summaries: updatedSummaries })
+    await updateReport(report.value.id, { summaries: updatedSummaries });
 
     // Update local state
-    report.value = updatedReport
+    report.value = updatedReport;
 
     // Close modal
-    isDeleteModalOpen.value = false
+    isDeleteModalOpen.value = false;
 
     // Show success notification
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'حذف موفق',
       message: 'خلاصه با موفقیت حذف شد',
       color: 'success',
       icon: 'ph:trash-duotone',
       closable: true,
-    })
+    });
   }
   catch (error) {
-    console.error('Error deleting summary:', error)
+    console.error('Error deleting summary:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در حذف خلاصه',
       color: 'danger',
       icon: 'ph:warning-circle-duotone',
       closable: true,
-    })
+    });
   }
   finally {
-    isDeleting.value = false
-    summaryIndexToDelete.value = -1
-    summaryToDelete.value = null
+    isDeleting.value = false;
+    summaryIndexToDelete.value = -1;
+    summaryToDelete.value = null;
   }
 }
 
 // Confirm deletion of all deeper goals
 async function confirmDeleteAllDeeperGoals() {
-  isDeletingAllDeeperGoals.value = true
+  isDeletingAllDeeperGoals.value = true;
 
   try {
     // Update the report with empty deeper goals array
-    await updateReport(report.value.id, { possibleDeeperGoals: [] })
+    await updateReport(report.value.id, { possibleDeeperGoals: [] });
 
     // Update local state
-    report.value.possibleDeeperGoals = []
+    report.value.possibleDeeperGoals = [];
 
     // Close modal
-    isDeleteAllDeeperGoalsModalOpen.value = false
+    isDeleteAllDeeperGoalsModalOpen.value = false;
 
     // Show success notification
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'حذف موفق',
       message: 'تمامی اهداف عمیق‌تر با موفقیت حذف شدند',
       color: 'success',
       icon: 'ph:trash-duotone',
       closable: true,
-    })
+    });
   }
   catch (error) {
-    console.error('Error deleting all deeper goals:', error)
+    console.error('Error deleting all deeper goals:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در حذف اهداف عمیق‌تر',
       color: 'danger',
       icon: 'ph:warning-circle-duotone',
       closable: true,
-    })
+    });
   }
   finally {
-    isDeletingAllDeeperGoals.value = false
+    isDeletingAllDeeperGoals.value = false;
   }
 }
 
 // Confirm deletion of all risk factors
 async function confirmDeleteAllRiskFactors() {
-  isDeletingAllRiskFactors.value = true
+  isDeletingAllRiskFactors.value = true;
 
   try {
     // Update the report with empty risk factors array
-    await updateReport(report.value.id, { possibleRiskFactors: [] })
+    await updateReport(report.value.id, { possibleRiskFactors: [] });
 
     // Update local state
-    report.value.possibleRiskFactors = []
+    report.value.possibleRiskFactors = [];
 
     // Close modal
-    isDeleteAllRiskFactorsModalOpen.value = false
+    isDeleteAllRiskFactorsModalOpen.value = false;
 
     // Show success notification
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'حذف موفق',
       message: 'تمامی عوامل خطر احتمالی با موفقیت حذف شدند',
       color: 'success',
       icon: 'ph:trash-duotone',
       closable: true,
-    })
+    });
   }
   catch (error) {
-    console.error('Error deleting all risk factors:', error)
+    console.error('Error deleting all risk factors:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در حذف عوامل خطر احتمالی',
       color: 'danger',
       icon: 'ph:warning-circle-duotone',
       closable: true,
-    })
+    });
   }
   finally {
-    isDeletingAllRiskFactors.value = false
+    isDeletingAllRiskFactors.value = false;
   }
 }
 </script>

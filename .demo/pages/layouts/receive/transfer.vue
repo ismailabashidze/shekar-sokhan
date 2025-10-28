@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PaymentReceive, StepData } from '../../../types'
+import type { PaymentReceive, StepData } from '../../../types';
 
 definePageMeta({
   preview: {
@@ -11,10 +11,10 @@ definePageMeta({
     order: 16,
     new: true,
   },
-})
+});
 useHead({
   title: 'Transfer details',
-})
+});
 
 const {
   data: request,
@@ -26,9 +26,9 @@ const {
   errors,
   steps,
   checkPreviousSteps,
-} = useMultiStepForm<PaymentReceive, StepData>()
+} = useMultiStepForm<PaymentReceive, StepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 
 const accounts = ref([
   {
@@ -52,14 +52,14 @@ const accounts = ref([
     number: '3524 65456 3245 6279',
     balance: 4653.97,
   },
-])
+]);
 
-const expandedRegular = ref(false)
-const expandedInternational = ref(false)
+const expandedRegular = ref(false);
+const expandedInternational = ref(false);
 
 function setAccount(account: any) {
-  request.value.account = account
-  resetFieldError('account')
+  request.value.account = account;
+  resetFieldError('account');
 }
 </script>
 

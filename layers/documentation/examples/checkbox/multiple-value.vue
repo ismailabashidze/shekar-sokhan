@@ -48,5 +48,5 @@
 </template>
 
 <script setup lang="ts">
-const value = ref(['Option 1', 'Option 2'])
+const value = ref(['Option 1', 'Option 2']);
 </script>

@@ -1,13 +1,13 @@
-import { addMinutes, roundToNearestMinutes } from 'date-fns'
+import { addMinutes, roundToNearestMinutes } from 'date-fns';
 
 import type {
   Awaitable,
   CalendarCustomAttribute,
   CalendarEvent,
   CalendarSettings,
-} from '../types'
+} from '../types';
 
-import { topToDate, minutesToHeight } from '../view'
+import { topToDate, minutesToHeight } from '../view';
 
 export function useDragEventPending(
   settings: CalendarSettings,
@@ -16,48 +16,48 @@ export function useDragEventPending(
     event: CalendarCustomAttribute<CalendarEvent>,
   ) => Awaitable<void> = () => {},
 ) {
-  const isPendingEventDragging = ref(false)
-  const pendingEventDraggingId = ref('')
+  const isPendingEventDragging = ref(false);
+  const pendingEventDraggingId = ref('');
 
   function onPendingEventDragStart({ payload }: { payload: CalendarEvent }) {
     if (isPendingEventDragging.value || !payload?.id) {
-      return
+      return;
     }
 
-    isPendingEventDragging.value = true
-    pendingEventDraggingId.value = payload.id
+    isPendingEventDragging.value = true;
+    pendingEventDraggingId.value = payload.id;
 
     // ghost event
     const ghostEvent: CalendarCustomAttribute<CalendarEvent> = {
       key: payload.id,
       customData: payload,
       dates: [payload.startDate, payload.endDate],
-    }
+    };
 
     const onPointerMove = (e: PointerEvent) => {
-      const targetDay = (e.target as HTMLElement)?.dataset?.day
+      const targetDay = (e.target as HTMLElement)?.dataset?.day;
       if (!targetDay) {
-        clearPendingEventDragging()
-        return
+        clearPendingEventDragging();
+        return;
       }
 
-      const y = e.offsetY - minutesToHeight(settings, 5)
+      const y = e.offsetY - minutesToHeight(settings, 5);
 
-      const dateClick = topToDate(settings, y, new Date(targetDay))
+      const dateClick = topToDate(settings, y, new Date(targetDay));
       if (!dateClick) {
-        return
+        return;
       }
       const date = roundToNearestMinutes(dateClick, {
         nearestTo: settings.hourPrecision,
-      })
+      });
       if (date !== ghostEvent.customData.startDate) {
-        const start = date
-        const end = addMinutes(start, ghostEvent.customData.duration)
+        const start = date;
+        const end = addMinutes(start, ghostEvent.customData.duration);
 
-        const calendarEventsValue = toValue(calendarEvents)
+        const calendarEventsValue = toValue(calendarEvents);
         const idx = calendarEventsValue.findIndex(
           item => item.customData.id === ghostEvent.customData.id,
-        )
+        );
         if (idx === -1) {
           calendarEventsValue.push({
             ...ghostEvent,
@@ -67,8 +67,8 @@ export function useDragEventPending(
               endDate: end,
             },
             dates: [start, end],
-          })
-          return
+          });
+          return;
         }
         calendarEventsValue[idx] = {
           ...calendarEventsValue[idx],
@@ -78,47 +78,47 @@ export function useDragEventPending(
             endDate: end,
           },
           dates: [start, end],
-        }
+        };
       }
-    }
+    };
 
     const onPointerUp = async (e: MouseEvent | TouchEvent) => {
-      document.documentElement.removeEventListener('pointerup', onPointerUp)
-      document.documentElement.removeEventListener('pointermove', onPointerMove)
+      document.documentElement.removeEventListener('pointerup', onPointerUp);
+      document.documentElement.removeEventListener('pointermove', onPointerMove);
 
-      const calendarEventsValue = toValue(calendarEvents)
+      const calendarEventsValue = toValue(calendarEvents);
       const idx = calendarEventsValue.findIndex(
         item => item.customData.id === ghostEvent.customData.id,
-      )
+      );
 
       if (idx !== -1) {
-        const event = calendarEventsValue[idx]
-        calendarEventsValue.splice(idx, 1)
-        await onDragEnd(event)
+        const event = calendarEventsValue[idx];
+        calendarEventsValue.splice(idx, 1);
+        await onDragEnd(event);
       }
 
       setTimeout(() => {
-        isPendingEventDragging.value = false
-      }, 100)
-    }
+        isPendingEventDragging.value = false;
+      }, 100);
+    };
 
-    document.documentElement.addEventListener('pointerup', onPointerUp, false)
+    document.documentElement.addEventListener('pointerup', onPointerUp, false);
     document.documentElement.addEventListener(
       'pointermove',
       onPointerMove,
       false,
-    )
+    );
   }
 
   function clearPendingEventDragging() {
     // clear unscheduled
-    const calendarEventsValue = toValue(calendarEvents)
+    const calendarEventsValue = toValue(calendarEvents);
     const idx = calendarEventsValue.findIndex(
       attr => attr.customData.id === pendingEventDraggingId.value,
-    )
+    );
 
     if (idx !== -1) {
-      calendarEventsValue.splice(idx, 1)
+      calendarEventsValue.splice(idx, 1);
     }
   }
 
@@ -127,5 +127,5 @@ export function useDragEventPending(
     pendingEventDraggingId: pendingEventDraggingId,
     onPendingEventDragStart,
     clearPendingEventDragging,
-  }
+  };
 }

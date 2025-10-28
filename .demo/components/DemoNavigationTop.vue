@@ -1,15 +1,15 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    title: string
-    closeLabel?: string
-    closeTo?: string
+    title: string;
+    closeLabel?: string;
+    closeTo?: string;
   }>(),
   {
     closeLabel: 'Back',
     closeTo: '/',
   },
-)
+);
 </script>
 
 <template>

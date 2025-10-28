@@ -1,12 +1,12 @@
 <script setup lang="ts">
 defineProps<{
   stages: Array<{
-    emoji: string
-    label: string
-    color?: string
-    highlighted?: boolean
-  }>
-}>()
+    emoji: string;
+    label: string;
+    color?: string;
+    highlighted?: boolean;
+  }>;
+}>();
 </script>
 
 <template>

@@ -427,53 +427,53 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useDSMInfoGenerator } from '~/composables/useDSMInfoGenerator'
-import AddonMarkdownRemark from '~/components/AddonMarkdownRemark.vue'
+import { ref, computed, onMounted } from 'vue';
+import { useDSMInfoGenerator } from '~/composables/useDSMInfoGenerator';
+import AddonMarkdownRemark from '~/components/AddonMarkdownRemark.vue';
 
 // Get route params
-const route = useRoute()
-const categorySlug = route.params.category as string
+const route = useRoute();
+const categorySlug = route.params.category as string;
 
 // Dynamic data fetching
-const { fetchCategoryData } = useDSMInfoGenerator()
+const { fetchCategoryData } = useDSMInfoGenerator();
 
 // State
-const categoryData = ref<any>(null)
-const categoryDisorders = ref<any[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
-const descriptionExpanded = ref(false)
-const expandedItems = ref(new Set<number>())
+const categoryData = ref<any>(null);
+const categoryDisorders = ref<any[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
+const descriptionExpanded = ref(false);
+const expandedItems = ref(new Set<number>());
 
 // Fetch data on mount
 onMounted(async () => {
   try {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
 
-    console.log(`🚀 Loading category page for slug: ${categorySlug}`)
+    console.log(`🚀 Loading category page for slug: ${categorySlug}`);
 
     // Add small delay to prevent PocketBase auto-cancellation
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Fetch category data (which includes disorders) from PocketBase
-    const categoryResult = await fetchCategoryData(categorySlug)
+    const categoryResult = await fetchCategoryData(categorySlug);
 
     // Extract disorders from the category data instead of separate fetch
-    const disordersResult = categoryResult.disorders || []
+    const disordersResult = categoryResult.disorders || [];
 
-    categoryData.value = categoryResult
-    categoryDisorders.value = disordersResult
+    categoryData.value = categoryResult;
+    categoryDisorders.value = disordersResult;
 
-    console.log(`✅ Successfully loaded category: ${categoryResult.titleEn} with ${disordersResult.length} disorders`)
-    console.log('🔍 Category description:', categoryResult.description)
-    console.log('🔍 Description type:', typeof categoryResult.description)
-    console.log('🔍 Description length:', categoryResult.description?.length)
+    console.log(`✅ Successfully loaded category: ${categoryResult.titleEn} with ${disordersResult.length} disorders`);
+    console.log('🔍 Category description:', categoryResult.description);
+    console.log('🔍 Description type:', typeof categoryResult.description);
+    console.log('🔍 Description length:', categoryResult.description?.length);
 
     // Update page meta dynamically
-    const pageTitle = `${categoryResult.titleFa} - DSM-5 | ذهنا`
-    const pageDescription = `راهنمای کامل ${categoryResult.titleFa} بر اساس DSM-5. ${categoryResult.description}`
+    const pageTitle = `${categoryResult.titleFa} - DSM-5 | ذهنا`;
+    const pageDescription = `راهنمای کامل ${categoryResult.titleFa} بر اساس DSM-5. ${categoryResult.description}`;
 
     useHead({
       htmlAttrs: { dir: 'rtl' },
@@ -488,18 +488,18 @@ onMounted(async () => {
           content: `${categoryResult.titleFa}, ${categoryResult.titleEn}, DSM-5, تشخیص, اختلالات روانی`,
         },
       ],
-    })
+    });
 
-    console.log(`✅ Loaded category: ${categoryResult.titleEn} with ${disordersResult.length} disorders`)
+    console.log(`✅ Loaded category: ${categoryResult.titleEn} with ${disordersResult.length} disorders`);
   }
   catch (err: any) {
-    console.error('Error loading category data:', err)
-    error.value = err.message || 'خطا در بارگذاری اطلاعات'
+    console.error('Error loading category data:', err);
+    error.value = err.message || 'خطا در بارگذاری اطلاعات';
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 // Helper function to create slug from text
 const createSlug = (text: string) => {
@@ -508,8 +508,8 @@ const createSlug = (text: string) => {
     .replace(/[\u0600-\u06FF\s]+/g, '-') // Replace Persian/Arabic chars and spaces with hyphens
     .replace(/[^\w\-]/g, '') // Remove non-word chars except hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single
-    .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-}
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+};
 
 // Get disorder slug
 const getDisorderSlug = (disorder: any) => {
@@ -519,52 +519,52 @@ const getDisorderSlug = (disorder: any) => {
     || createSlug(disorder.titleFa)
     || disorder.id
     || createSlug(disorder.code)
-    || 'unknown-disorder'
-}
+    || 'unknown-disorder';
+};
 
 // Navigation helper for disorder details
 const handleDisorderClick = (disorder: any) => {
-  const router = useRouter()
+  const router = useRouter();
 
-  console.log('🔍 Full disorder data:', disorder)
-  console.log('🔍 Available keys:', Object.keys(disorder))
+  console.log('🔍 Full disorder data:', disorder);
+  console.log('🔍 Available keys:', Object.keys(disorder));
 
-  const disorderSlug = getDisorderSlug(disorder)
+  const disorderSlug = getDisorderSlug(disorder);
 
-  console.log('🚀 Generated slug:', disorderSlug)
-  console.log('🚀 Navigating to:', `/diagnosis/disorders/${disorderSlug}`)
+  console.log('🚀 Generated slug:', disorderSlug);
+  console.log('🚀 Navigating to:', `/diagnosis/disorders/${disorderSlug}`);
 
-  router.push(`/diagnosis/disorders/${disorderSlug}`)
-}
+  router.push(`/diagnosis/disorders/${disorderSlug}`);
+};
 
 // Navigation helper for interview
 const handleInterviewClick = (disorder: any) => {
-  const router = useRouter()
+  const router = useRouter();
 
-  console.log('🎯 Starting interview for disorder:', disorder.title || disorder.titleFa)
+  console.log('🎯 Starting interview for disorder:', disorder.title || disorder.titleFa);
 
-  const disorderSlug = getDisorderSlug(disorder)
+  const disorderSlug = getDisorderSlug(disorder);
 
-  console.log('🚀 Generated slug for interview:', disorderSlug)
-  console.log('🚀 Navigating to interview:', `/diagnosis/interviewer/${disorderSlug}`)
+  console.log('🚀 Generated slug for interview:', disorderSlug);
+  console.log('🚀 Navigating to interview:', `/diagnosis/interviewer/${disorderSlug}`);
 
-  router.push(`/diagnosis/interviewer/${disorderSlug}`)
-}
+  router.push(`/diagnosis/interviewer/${disorderSlug}`);
+};
 
 // Description toggle helper
 const toggleDescription = () => {
-  descriptionExpanded.value = !descriptionExpanded.value
-}
+  descriptionExpanded.value = !descriptionExpanded.value;
+};
 
 // Disorders toggle helper
 const toggleDisorder = (index: number) => {
   if (expandedItems.value.has(index)) {
-    expandedItems.value.delete(index)
+    expandedItems.value.delete(index);
   }
   else {
-    expandedItems.value.add(index)
+    expandedItems.value.add(index);
   }
-}
+};
 
 // Styling helper
 const getDisorderGradient = (index: number) => {
@@ -579,15 +579,15 @@ const getDisorderGradient = (index: number) => {
     'bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700',
     'bg-gradient-to-br from-teal-500 via-teal-600 to-teal-700',
     'bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700',
-  ]
-  return gradients[index % gradients.length]
-}
+  ];
+  return gradients[index % gradients.length];
+};
 
 // Dynamic page meta
 definePageMeta({
   layout: 'default',
   title: 'DSM-5 Category | ذهنا',
-})
+});
 </script>
 
 <style scoped>

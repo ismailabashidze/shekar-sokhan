@@ -9,9 +9,9 @@ definePageMeta({
     srcDark: '/img/screens/layouts-placeload-3-dark.png',
     order: 55,
   },
-})
+});
 
-const input = ref('')
+const input = ref('');
 </script>
 
 <template>

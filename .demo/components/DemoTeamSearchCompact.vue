@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
+    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   }>(),
   {
     rounded: 'sm',
   },
-)
+);
 
 const members = shallowRef([
   {
@@ -49,21 +49,21 @@ const members = shallowRef([
     text: 'AS',
     role: 'HR manager',
   },
-])
+]);
 
-const filter = ref('')
+const filter = ref('');
 
 const filteredMembers = computed(() => {
   if (!filter.value) {
-    return members.value
+    return members.value;
   }
-  const filterRe = new RegExp(filter.value, 'i')
+  const filterRe = new RegExp(filter.value, 'i');
   return members.value.filter((item) => {
     return [item.firstName, item.lastName, item.role].some(item =>
       item.match(filterRe),
-    )
-  })
-})
+    );
+  });
+});
 </script>
 
 <template>

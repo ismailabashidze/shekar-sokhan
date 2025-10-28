@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /* eslint-disable sonarjs/no-identical-functions */
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Sales',
@@ -15,24 +15,24 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-sales-dark.png',
     order: 6,
   },
-})
+});
 
-const sparkSalesOne = reactive(useSparkSalesOne())
-const sparkSalesTwo = reactive(useSparkSalesTwo())
-const sparkSalesThree = reactive(useSparkSalesThree())
-const sparkSalesFour = reactive(useSparkSalesFour())
-const areaCustomers = reactive(useAreaCustomers())
-const radialSalesRevenue = reactive(useRadialSalesRevenue())
-const radialSmallOne = reactive(useRadialSmallOne())
-const radialSmallTwo = reactive(useRadialSmallTwo())
-const radialSmallThree = reactive(useRadialSmallThree())
-const gaugePersonal = reactive(useGaugePersonal())
-const barOrders = reactive(useBarOrders())
+const sparkSalesOne = reactive(useSparkSalesOne());
+const sparkSalesTwo = reactive(useSparkSalesTwo());
+const sparkSalesThree = reactive(useSparkSalesThree());
+const sparkSalesFour = reactive(useSparkSalesFour());
+const areaCustomers = reactive(useAreaCustomers());
+const radialSalesRevenue = reactive(useRadialSalesRevenue());
+const radialSmallOne = reactive(useRadialSmallOne());
+const radialSmallTwo = reactive(useRadialSmallTwo());
+const radialSmallThree = reactive(useRadialSmallThree());
+const gaugePersonal = reactive(useGaugePersonal());
+const barOrders = reactive(useBarOrders());
 
 function useSparkSalesOne() {
-  const { primary, title, subtitle } = useTailwindColors()
-  const type = 'area'
-  const height = 130
+  const { primary, title, subtitle } = useTailwindColors();
+  const type = 'area';
+  const height = 130;
 
   const options = {
     chart: {
@@ -83,7 +83,7 @@ function useSparkSalesOne() {
         cssClass: 'apexcharts-spark-subtitle',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -93,48 +93,48 @@ function useSparkSalesOne() {
         358, 271, 932, 534, 615, 278, 546, 435, 192, 465,
       ]),
     },
-  ])
+  ]);
 
-  let timeout: any
+  let timeout: any;
 
   onMounted(() => {
-    radomizeTimeout()
-  })
+    radomizeTimeout();
+  });
   onBeforeUnmount(() => {
-    clearTimeout(timeout)
-  })
+    clearTimeout(timeout);
+  });
 
   function radomizeTimeout() {
     if (timeout) {
-      clearTimeout(timeout)
+      clearTimeout(timeout);
     }
     timeout = setTimeout(() => {
-      series.value[0].data.push(randomNumber(200, 600))
-      series.value[0].data.shift()
-      radomizeTimeout()
-    }, 2000)
+      series.value[0].data.push(randomNumber(200, 600));
+      series.value[0].data.shift();
+      radomizeTimeout();
+    }, 2000);
   }
 
   function randomNumber(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min + 1) + min)
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
   function randomizeArray(arg: number[]) {
-    const array = arg.slice()
-    let currentIndex = array.length
-    let temporaryValue
-    let randomIndex
+    const array = arg.slice();
+    let currentIndex = array.length;
+    let temporaryValue;
+    let randomIndex;
 
     while (currentIndex !== 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex)
-      currentIndex -= 1
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
 
-      temporaryValue = array[currentIndex]
-      array[currentIndex] = array[randomIndex]
-      array[randomIndex] = temporaryValue
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
     }
 
-    return array
+    return array;
   }
 
   return {
@@ -142,14 +142,14 @@ function useSparkSalesOne() {
     height,
     options,
     series,
-  }
+  };
 }
 
 function useSparkSalesTwo() {
-  const { success, title, subtitle } = useTailwindColors()
+  const { success, title, subtitle } = useTailwindColors();
 
-  const type = 'area'
-  const height = 130
+  const type = 'area';
+  const height = 130;
 
   const options = {
     chart: {
@@ -200,7 +200,7 @@ function useSparkSalesTwo() {
         cssClass: 'apexcharts-spark-subtitle',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -210,48 +210,48 @@ function useSparkSalesTwo() {
         358, 271, 932, 534, 615, 278, 546, 435, 192, 465,
       ]),
     },
-  ])
+  ]);
 
-  let timeout: any
+  let timeout: any;
 
   onMounted(() => {
-    radomizeTimeout()
-  })
+    radomizeTimeout();
+  });
   onBeforeUnmount(() => {
-    clearTimeout(timeout)
-  })
+    clearTimeout(timeout);
+  });
 
   function radomizeTimeout() {
     if (timeout) {
-      clearTimeout(timeout)
+      clearTimeout(timeout);
     }
     timeout = setTimeout(() => {
-      series.value[0].data.push(randomNumber(200, 600))
-      series.value[0].data.shift()
-      radomizeTimeout()
-    }, 2000)
+      series.value[0].data.push(randomNumber(200, 600));
+      series.value[0].data.shift();
+      radomizeTimeout();
+    }, 2000);
   }
 
   function randomNumber(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min + 1) + min)
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
   function randomizeArray(arg: number[]) {
-    const array = arg.slice()
-    let currentIndex = array.length
-    let temporaryValue
-    let randomIndex
+    const array = arg.slice();
+    let currentIndex = array.length;
+    let temporaryValue;
+    let randomIndex;
 
     while (currentIndex !== 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex)
-      currentIndex -= 1
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
 
-      temporaryValue = array[currentIndex]
-      array[currentIndex] = array[randomIndex]
-      array[randomIndex] = temporaryValue
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
     }
 
-    return array
+    return array;
   }
 
   return {
@@ -259,13 +259,13 @@ function useSparkSalesTwo() {
     height,
     options,
     series,
-  }
+  };
 }
 
 function useSparkSalesThree() {
-  const { yellow, title, subtitle } = useTailwindColors()
-  const type = 'area'
-  const height = 130
+  const { yellow, title, subtitle } = useTailwindColors();
+  const type = 'area';
+  const height = 130;
 
   const options = {
     chart: {
@@ -316,7 +316,7 @@ function useSparkSalesThree() {
         cssClass: 'apexcharts-spark-subtitle',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -326,48 +326,48 @@ function useSparkSalesThree() {
         358, 271, 932, 534, 615, 278, 546, 435, 192, 465,
       ]),
     },
-  ])
+  ]);
 
-  let timeout: any
+  let timeout: any;
 
   onMounted(() => {
-    radomizeTimeout()
-  })
+    radomizeTimeout();
+  });
   onBeforeUnmount(() => {
-    clearTimeout(timeout)
-  })
+    clearTimeout(timeout);
+  });
 
   function radomizeTimeout() {
     if (timeout) {
-      clearTimeout(timeout)
+      clearTimeout(timeout);
     }
     timeout = setTimeout(() => {
-      series.value[0].data.push(randomNumber(200, 600))
-      series.value[0].data.shift()
-      radomizeTimeout()
-    }, 2000)
+      series.value[0].data.push(randomNumber(200, 600));
+      series.value[0].data.shift();
+      radomizeTimeout();
+    }, 2000);
   }
 
   function randomNumber(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min + 1) + min)
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
   function randomizeArray(arg: number[]) {
-    const array = arg.slice()
-    let currentIndex = array.length
-    let temporaryValue
-    let randomIndex
+    const array = arg.slice();
+    let currentIndex = array.length;
+    let temporaryValue;
+    let randomIndex;
 
     while (currentIndex !== 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex)
-      currentIndex -= 1
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
 
-      temporaryValue = array[currentIndex]
-      array[currentIndex] = array[randomIndex]
-      array[randomIndex] = temporaryValue
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
     }
 
-    return array
+    return array;
   }
 
   return {
@@ -375,14 +375,14 @@ function useSparkSalesThree() {
     height,
     options,
     series,
-  }
+  };
 }
 
 function useSparkSalesFour() {
-  const { info, title, subtitle } = useTailwindColors()
+  const { info, title, subtitle } = useTailwindColors();
 
-  const type = 'area'
-  const height = 130
+  const type = 'area';
+  const height = 130;
 
   const options = {
     chart: {
@@ -433,7 +433,7 @@ function useSparkSalesFour() {
         cssClass: 'apexcharts-spark-subtitle',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -443,48 +443,48 @@ function useSparkSalesFour() {
         358, 271, 932, 534, 615, 278, 546, 435, 192, 465,
       ]),
     },
-  ])
+  ]);
 
-  let timeout: any
+  let timeout: any;
 
   onMounted(() => {
-    radomizeTimeout()
-  })
+    radomizeTimeout();
+  });
   onBeforeUnmount(() => {
-    clearTimeout(timeout)
-  })
+    clearTimeout(timeout);
+  });
 
   function radomizeTimeout() {
     if (timeout) {
-      clearTimeout(timeout)
+      clearTimeout(timeout);
     }
     timeout = setTimeout(() => {
-      series.value[0].data.push(randomNumber(200, 600))
-      series.value[0].data.shift()
-      radomizeTimeout()
-    }, 2000)
+      series.value[0].data.push(randomNumber(200, 600));
+      series.value[0].data.shift();
+      radomizeTimeout();
+    }, 2000);
   }
 
   function randomNumber(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min + 1) + min)
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
   function randomizeArray(arg: number[]) {
-    const array = arg.slice()
-    let currentIndex = array.length
-    let temporaryValue
-    let randomIndex
+    const array = arg.slice();
+    let currentIndex = array.length;
+    let temporaryValue;
+    let randomIndex;
 
     while (currentIndex !== 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex)
-      currentIndex -= 1
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
 
-      temporaryValue = array[currentIndex]
-      array[currentIndex] = array[randomIndex]
-      array[randomIndex] = temporaryValue
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
     }
 
-    return array
+    return array;
   }
 
   return {
@@ -492,13 +492,13 @@ function useSparkSalesFour() {
     height,
     options,
     series,
-  }
+  };
 }
 
 function useAreaCustomers() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 258
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 258;
 
   const options = {
     chart: {
@@ -540,7 +540,7 @@ function useAreaCustomers() {
         format: 'dd/MM/yy HH:mm',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -555,20 +555,20 @@ function useAreaCustomers() {
       name: 'Abandonned',
       data: [78, 53, 36, 10, 14, 5, 2],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialSalesRevenue() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 155
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 155;
 
   const options = {
     chart: {
@@ -602,22 +602,22 @@ function useRadialSalesRevenue() {
       },
     },
     labels: ['Progress'],
-  }
+  };
 
-  const series = shallowRef([65])
+  const series = shallowRef([65]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialSmallOne() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 100
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 100;
 
   const options = {
     chart: {
@@ -640,22 +640,22 @@ function useRadialSmallOne() {
       },
     },
     labels: [''],
-  }
+  };
 
-  const series = shallowRef([31])
+  const series = shallowRef([31]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialSmallTwo() {
-  const { success } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 100
+  const { success } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 100;
 
   const options = {
     chart: {
@@ -678,22 +678,22 @@ function useRadialSmallTwo() {
       },
     },
     labels: [''],
-  }
+  };
 
-  const series = shallowRef([53])
+  const series = shallowRef([53]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialSmallThree() {
-  const { danger } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 100
+  const { danger } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 100;
 
   const options = {
     chart: {
@@ -716,22 +716,22 @@ function useRadialSmallThree() {
       },
     },
     labels: [''],
-  }
+  };
 
-  const series = shallowRef([84])
+  const series = shallowRef([84]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useGaugePersonal() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 220
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 220;
 
   const options = {
     title: {
@@ -790,24 +790,24 @@ function useGaugePersonal() {
       },
     },
     labels: ['Average Results'],
-  }
+  };
 
-  const series = shallowRef([76])
+  const series = shallowRef([76]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useBarOrders() {
-  const { primary, success } = useTailwindColors()
-  const type = 'bar'
-  const height = 210
+  const { primary, success } = useTailwindColors();
+  const type = 'bar';
+  const height = 210;
 
-  const series = shallowRef<any[]>([])
+  const series = shallowRef<any[]>([]);
 
   const options = {
     chart: {
@@ -830,14 +830,14 @@ function useBarOrders() {
         rotateAlways: true,
       },
     },
-  }
+  };
 
   // delay the data loading
-  let timeout: any
-  let timeout2: any
+  let timeout: any;
+  let timeout2: any;
 
   onMounted(() => {
-    const { series } = useBarOrders()
+    const { series } = useBarOrders();
 
     timeout = setTimeout(() => {
       series.value.push({
@@ -892,8 +892,8 @@ function useBarOrders() {
             y: 366,
           },
         ],
-      })
-    }, 1000)
+      });
+    }, 1000);
 
     timeout2 = setTimeout(() => {
       series.value.push({
@@ -948,21 +948,21 @@ function useBarOrders() {
             y: 8,
           },
         ],
-      })
-    }, 2500)
-  })
+      });
+    }, 2500);
+  });
 
   onBeforeUnmount(() => {
-    clearTimeout(timeout)
-    clearTimeout(timeout2)
-  })
+    clearTimeout(timeout);
+    clearTimeout(timeout2);
+  });
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

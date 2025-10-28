@@ -1,17 +1,17 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    title?: string
-    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
-    labels: string[]
+    title?: string;
+    rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+    labels: string[];
   }>(),
   {
     rounded: 'sm',
     title: undefined,
   },
-)
+);
 
-const activeTab = ref('tab-1')
+const activeTab = ref('tab-1');
 </script>
 
 <template>

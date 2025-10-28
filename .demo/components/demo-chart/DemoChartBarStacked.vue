@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoBarStacked = reactive(useDemoBarStacked())
+const demoBarStacked = reactive(useDemoBarStacked());
 
 function useDemoBarStacked() {
-  const { primary, info, success, danger } = useTailwindColors()
-  const type = 'bar'
-  const height = 280
+  const { primary, info, success, danger } = useTailwindColors();
+  const type = 'bar';
+  const height = 280;
 
   const options = {
     chart: {
@@ -60,7 +60,7 @@ function useDemoBarStacked() {
     fill: {
       opacity: 1,
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -79,14 +79,14 @@ function useDemoBarStacked() {
       name: 'Hybrid',
       data: [21, 7, 25, 13, 22, 8],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

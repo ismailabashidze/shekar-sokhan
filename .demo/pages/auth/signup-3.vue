@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useForm } from 'vee-validate';
+import { z } from 'zod';
 
-import { AddonInputPassword } from '#components'
+import { AddonInputPassword } from '#components';
 
 definePageMeta({
   layout: 'empty',
@@ -16,16 +16,16 @@ definePageMeta({
     srcDark: '/img/screens/auth-signup-3-dark.png',
     order: 159,
   },
-})
+});
 
 const VALIDATION_TEXT = {
   EMAIL_REQUIRED: 'A valid email is required',
   PASSWORD_LENGTH: 'Password must be at least 8 characters',
   PASSWORD_CONTAINS_EMAIL: 'Password cannot contain your email',
   PASSWORD_MATCH: 'Passwords do not match',
-}
+};
 
-const passwordRef = ref<InstanceType<typeof AddonInputPassword>>()
+const passwordRef = ref<InstanceType<typeof AddonInputPassword>>();
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -43,62 +43,62 @@ const zodSchema = z
         code: z.ZodIssueCode.custom,
         message: passwordRef.value?.validation?.feedback?.warning || passwordRef.value.validation.feedback?.suggestions?.[0],
         path: ['password'],
-      })
+      });
     }
     if (data.password !== data.confirmPassword) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: VALIDATION_TEXT.PASSWORD_MATCH,
         path: ['confirmPassword'],
-      })
+      });
     }
-  })
+  });
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   email: '',
   password: '',
   confirmPassword: '',
-} satisfies FormInput
+} satisfies FormInput;
 
 const { values, handleSubmit, isSubmitting } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
-const router = useRouter()
-const toaster = useToaster()
+const router = useRouter();
+const toaster = useToaster();
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(async (values) => {
   // here you have access to the validated form values
-  console.log('auth-success', values)
+  console.log('auth-success', values);
 
   try {
     // fake delay, this will make isSubmitting value to be true
-    await new Promise(resolve => setTimeout(resolve, 4000))
+    await new Promise(resolve => setTimeout(resolve, 4000));
 
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'Success',
       message: `Account created!`,
       color: 'success',
       icon: 'ph:user-circle-fill',
       closable: true,
-    })
+    });
   }
   catch (error: any) {
     // handle error
 
-    return
+    return;
   }
 
-  router.push('/layouts/onboarding-1')
-})
+  router.push('/layouts/onboarding-1');
+});
 </script>
 
 <template>

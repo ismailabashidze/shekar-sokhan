@@ -1,39 +1,39 @@
 export interface MessageFeedbackData {
-  message_id: string
-  session_id: string
-  user_id: string
-  therapist_id: string
-  rating?: number
-  message_content?: string
-  general_text?: string
-  general_other?: string
-  problems_categories?: Record<string, any>
-  problems_other?: string
-  quality_categories?: Record<string, any>
-  quality_other?: string
-  improvements_categories?: Record<string, any>
-  improvements_other?: string
+  message_id: string;
+  session_id: string;
+  user_id: string;
+  therapist_id: string;
+  rating?: number;
+  message_content?: string;
+  general_text?: string;
+  general_other?: string;
+  problems_categories?: Record<string, any>;
+  problems_other?: string;
+  quality_categories?: Record<string, any>;
+  quality_other?: string;
+  improvements_categories?: Record<string, any>;
+  improvements_other?: string;
 }
 
 export interface FeedbackCategory {
-  id: string
-  name: string
-  description?: string
-  subcategories?: FeedbackSubcategory[]
+  id: string;
+  name: string;
+  description?: string;
+  subcategories?: FeedbackSubcategory[];
 }
 
 export interface FeedbackSubcategory {
-  id: string
-  name: string
-  description?: string
+  id: string;
+  name: string;
+  description?: string;
 }
 
 export interface FeedbackAnalytics {
-  averageRating: number
-  totalFeedbacks: number
-  categoryBreakdown: Record<string, number>
-  recentFeedbacks: MessageFeedbackData[]
-  improvementSuggestions: string[]
+  averageRating: number;
+  totalFeedbacks: number;
+  categoryBreakdown: Record<string, number>;
+  recentFeedbacks: MessageFeedbackData[];
+  improvementSuggestions: string[];
 }
 
 export const FEEDBACK_CATEGORIES = {
@@ -272,63 +272,63 @@ export const FEEDBACK_CATEGORIES = {
       },
     ],
   },
-} as const
+} as const;
 
 export const useMessageFeedback = () => {
-  const nuxtApp = useNuxtApp()
+  const nuxtApp = useNuxtApp();
 
   const submitFeedback = async (feedbackData: MessageFeedbackData) => {
     try {
       return await nuxtApp.$pb
         .collection('message_feedback')
-        .create(feedbackData)
+        .create(feedbackData);
     }
     catch (error) {
-      console.error('Error submitting message feedback:', error)
-      throw error
+      console.error('Error submitting message feedback:', error);
+      throw error;
     }
-  }
+  };
 
   const getFeedbackForMessage = async (messageId: string) => {
     try {
       return await nuxtApp.$pb
         .collection('message_feedback')
-        .getFirstListItem(`message_id="${messageId}"`)
+        .getFirstListItem(`message_id="${messageId}"`);
     }
     catch (error) {
       if (error.status === 404) {
-        return null
+        return null;
       }
-      console.error('Error getting message feedback:', error)
-      throw error
+      console.error('Error getting message feedback:', error);
+      throw error;
     }
-  }
+  };
 
   const updateFeedback = async (id: string, feedbackData: Partial<MessageFeedbackData>) => {
     try {
       return await nuxtApp.$pb
         .collection('message_feedback')
-        .update(id, feedbackData)
+        .update(id, feedbackData);
     }
     catch (error) {
-      console.error('Error updating message feedback:', error)
-      throw error
+      console.error('Error updating message feedback:', error);
+      throw error;
     }
-  }
+  };
 
   const deleteFeedback = async (id: string) => {
     try {
       await nuxtApp.$pb
         .collection('message_feedback')
-        .delete(id)
+        .delete(id);
 
-      return true
+      return true;
     }
     catch (error) {
-      console.error('Error deleting message feedback:', error)
-      throw error
+      console.error('Error deleting message feedback:', error);
+      throw error;
     }
-  }
+  };
 
   const getFeedbacksBySession = async (sessionId: string) => {
     try {
@@ -337,15 +337,15 @@ export const useMessageFeedback = () => {
         .getList(1, 50, {
           filter: `session_id="${sessionId}"`,
           sort: '-created',
-        })
+        });
 
-      return records.items
+      return records.items;
     }
     catch (error) {
-      console.error('Error getting session feedbacks:', error)
-      return []
+      console.error('Error getting session feedbacks:', error);
+      return [];
     }
-  }
+  };
 
   const getFeedbacksByTherapist = async (therapistId: string, limit = 100) => {
     try {
@@ -354,47 +354,47 @@ export const useMessageFeedback = () => {
         .getList(1, limit, {
           filter: `therapist_id="${therapistId}"`,
           sort: '-created',
-        })
+        });
 
-      return records.items
+      return records.items;
     }
     catch (error) {
-      console.error('Error getting therapist feedbacks:', error)
-      return []
+      console.error('Error getting therapist feedbacks:', error);
+      return [];
     }
-  }
+  };
 
   const getFeedbackAnalytics = async (therapistId: string): Promise<FeedbackAnalytics> => {
     try {
-      const feedbacks = await getFeedbacksByTherapist(therapistId, 200)
+      const feedbacks = await getFeedbacksByTherapist(therapistId, 200);
 
       const averageRating = feedbacks.length > 0
         ? feedbacks.reduce((sum, f) => sum + (f.rating || 0), 0) / feedbacks.length
-        : 0
+        : 0;
 
-      const categoryBreakdown: Record<string, number> = {}
-      const improvementSuggestions: string[] = []
+      const categoryBreakdown: Record<string, number> = {};
+      const improvementSuggestions: string[] = [];
 
       feedbacks.forEach((feedback) => {
         // Count problems
         if (feedback.problems_categories) {
           Object.keys(feedback.problems_categories).forEach((key) => {
-            categoryBreakdown[`problem_${key}`] = (categoryBreakdown[`problem_${key}`] || 0) + 1
-          })
+            categoryBreakdown[`problem_${key}`] = (categoryBreakdown[`problem_${key}`] || 0) + 1;
+          });
         }
 
         // Count quality aspects
         if (feedback.quality_categories) {
           Object.keys(feedback.quality_categories).forEach((key) => {
-            categoryBreakdown[`quality_${key}`] = (categoryBreakdown[`quality_${key}`] || 0) + 1
-          })
+            categoryBreakdown[`quality_${key}`] = (categoryBreakdown[`quality_${key}`] || 0) + 1;
+          });
         }
 
         // Collect improvement suggestions
         if (feedback.improvements_other?.trim()) {
-          improvementSuggestions.push(feedback.improvements_other.trim())
+          improvementSuggestions.push(feedback.improvements_other.trim());
         }
-      })
+      });
 
       return {
         averageRating: Math.round(averageRating * 100) / 100,
@@ -402,37 +402,37 @@ export const useMessageFeedback = () => {
         categoryBreakdown,
         recentFeedbacks: feedbacks.slice(0, 10),
         improvementSuggestions: improvementSuggestions.slice(0, 20),
-      }
+      };
     }
     catch (error) {
-      console.error('Error getting feedback analytics:', error)
+      console.error('Error getting feedback analytics:', error);
       return {
         averageRating: 0,
         totalFeedbacks: 0,
         categoryBreakdown: {},
         recentFeedbacks: [],
         improvementSuggestions: [],
-      }
+      };
     }
-  }
+  };
 
   const validateFeedback = (feedback: Partial<MessageFeedbackData>): string[] => {
-    const errors: string[] = []
+    const errors: string[] = [];
 
     if (!feedback.rating || feedback.rating < 1 || feedback.rating > 5) {
-      errors.push('امتیاز باید بین 1 تا 5 باشد')
+      errors.push('امتیاز باید بین 1 تا 5 باشد');
     }
 
     if (!feedback.general_text?.trim()) {
-      errors.push('نظر کلی الزامی است')
+      errors.push('نظر کلی الزامی است');
     }
 
     if (feedback.general_text && feedback.general_text.length < 10) {
-      errors.push('نظر کلی باید حداقل 10 کاراکتر باشد')
+      errors.push('نظر کلی باید حداقل 10 کاراکتر باشد');
     }
 
-    return errors
-  }
+    return errors;
+  };
 
   return {
     submitFeedback,
@@ -444,5 +444,5 @@ export const useMessageFeedback = () => {
     getFeedbackAnalytics,
     validateFeedback,
     FEEDBACK_CATEGORIES,
-  }
-}
+  };
+};

@@ -64,5 +64,5 @@ const tree = [
   {
     item: 'tailwind.config.cjs',
   },
-]
+];
 </script>

@@ -20,7 +20,7 @@ const links = [
     url: '#',
     icon: 'lucide:home',
   },
-]
+];
 </script>
 
 <template>

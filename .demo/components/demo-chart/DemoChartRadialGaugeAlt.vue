@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoRadialGaugeAlt = reactive(useDemoRadialGaugeAlt())
+const demoRadialGaugeAlt = reactive(useDemoRadialGaugeAlt());
 
 function useDemoRadialGaugeAlt() {
-  const { primary } = useTailwindColors()
-  const height = 295
-  const type = 'radialBar'
+  const { primary } = useTailwindColors();
+  const height = 295;
+  const type = 'radialBar';
 
   const options = {
     title: {
@@ -61,16 +61,16 @@ function useDemoRadialGaugeAlt() {
       },
     },
     labels: ['Average Results'],
-  }
+  };
 
-  const series = shallowRef([76])
+  const series = shallowRef([76]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Human Resources',
@@ -14,9 +14,9 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-human-resources-dark.png',
     order: 12,
   },
-})
+});
 
-const activeSetting = ref('candidates')
+const activeSetting = ref('candidates');
 
 const items = [
   {
@@ -33,7 +33,7 @@ const items = [
     count: 2,
     status: 'pending',
   },
-]
+];
 </script>
 
 <template>

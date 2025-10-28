@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    icon?: string
-    text?: string
-    label?: string
-    to?: string
+    icon?: string;
+    text?: string;
+    label?: string;
+    to?: string;
   }>(),
   {
     icon: 'lucide:external-link',
@@ -12,7 +12,7 @@ const props = withDefaults(
     label: '',
     to: '',
   },
-)
+);
 </script>
 
 <template>

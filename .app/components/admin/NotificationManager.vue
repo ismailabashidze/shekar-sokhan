@@ -174,56 +174,56 @@ const {
   clearNotificationsByType,
   getNotificationStats,
   syncNotificationEvents,
-} = useServiceWorkerNotifications()
+} = useServiceWorkerNotifications();
 
-const currentNotifications = ref<Notification[]>([])
+const currentNotifications = ref<Notification[]>([]);
 const stats = ref({
   totalEvents: 0,
   currentNotifications: 0,
   eventsByType: {} as Record<string, number>,
   eventsByAction: {} as Record<string, number>,
   recentEvents: [] as any[],
-})
+});
 
 // Refresh current notifications
 const refreshNotifications = async () => {
   try {
-    currentNotifications.value = await getCurrentNotifications()
+    currentNotifications.value = await getCurrentNotifications();
   }
   catch (error) {
-    console.error('Error refreshing notifications:', error)
+    console.error('Error refreshing notifications:', error);
   }
-}
+};
 
 // Clear all notifications
 const clearAllNotifications = async () => {
   try {
-    await clearAll()
-    await refreshNotifications()
+    await clearAll();
+    await refreshNotifications();
   }
   catch (error) {
-    console.error('Error clearing notifications:', error)
+    console.error('Error clearing notifications:', error);
   }
-}
+};
 
 // Close specific notification
 const closeNotification = (notification: Notification) => {
-  notification.close()
-  setTimeout(refreshNotifications, 100)
-}
+  notification.close();
+  setTimeout(refreshNotifications, 100);
+};
 
 // Send test notification
 const sendTestNotification = async (type: string, priority: string) => {
   if (!('serviceWorker' in navigator) || !('Notification' in window)) {
-    alert('Notifications not supported')
-    return
+    alert('Notifications not supported');
+    return;
   }
 
   if (Notification.permission !== 'granted') {
-    const permission = await Notification.requestPermission()
+    const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      alert('Notification permission denied')
-      return
+      alert('Notification permission denied');
+      return;
     }
   }
 
@@ -231,13 +231,13 @@ const sendTestNotification = async (type: string, priority: string) => {
     session: 'جلسه درمانی شما تمام شد. چطور احساس می‌کنید؟',
     admin: 'پیام جدیدی از تیم پشتیبانی برای شما ارسال شده است.',
     system: 'سیستم به‌روزرسانی شده است. لطفاً برنامه را مجدداً راه‌اندازی کنید.',
-  }
+  };
 
   const titles = {
     session: 'یادآوری جلسه',
     admin: 'پیام مدیریت',
     system: 'اعلان سیستم',
-  }
+  };
 
   // Create test notification data
   const notificationData = {
@@ -250,14 +250,14 @@ const sendTestNotification = async (type: string, priority: string) => {
       actionUrl: type === 'session' ? '/sessions' : '/notifications',
       timestamp: Date.now(),
     },
-  }
+  };
 
   // Send via service worker
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({
       type: 'SHOW_NOTIFICATION',
       ...notificationData,
-    })
+    });
   }
   else {
     // Fallback to direct notification
@@ -265,15 +265,15 @@ const sendTestNotification = async (type: string, priority: string) => {
       body: notificationData.body,
       icon: '/pwa-192x192.png',
       data: notificationData.data,
-    })
+    });
   }
 
-  setTimeout(refreshNotifications, 500)
-}
+  setTimeout(refreshNotifications, 500);
+};
 
 // Send grouped notifications for testing
 const sendGroupedNotifications = async () => {
-  const campaignId = `test-campaign-${Date.now()}`
+  const campaignId = `test-campaign-${Date.now()}`;
 
   for (let i = 1; i <= 3; i++) {
     await sendTestNotificationWithData({
@@ -282,19 +282,19 @@ const sendGroupedNotifications = async () => {
       campaignId,
       title: `پیام گروهی ${i}`,
       body: `این پیام شماره ${i} از کمپین تست است.`,
-    })
+    });
 
     // Small delay between notifications
-    await new Promise(resolve => setTimeout(resolve, 200))
+    await new Promise(resolve => setTimeout(resolve, 200));
   }
 
-  setTimeout(refreshNotifications, 1000)
-}
+  setTimeout(refreshNotifications, 1000);
+};
 
 // Send test notification with custom data
 const sendTestNotificationWithData = async (data: any) => {
   if (Notification.permission !== 'granted') {
-    await Notification.requestPermission()
+    await Notification.requestPermission();
   }
 
   new Notification(data.title, {
@@ -305,48 +305,48 @@ const sendTestNotificationWithData = async (data: any) => {
       notificationId: `test-${Date.now()}-${Math.random()}`,
       timestamp: Date.now(),
     },
-  })
-}
+  });
+};
 
 // Refresh stats
 const refreshStats = async () => {
   try {
-    stats.value = await getNotificationStats()
+    stats.value = await getNotificationStats();
   }
   catch (error) {
-    console.error('Error refreshing stats:', error)
+    console.error('Error refreshing stats:', error);
   }
-}
+};
 
 // Sync events with server
 const syncEvents = async () => {
   try {
-    const result = await syncNotificationEvents()
-    alert(`همگام‌سازی انجام شد: ${result.synced} موفق، ${result.errors} خطا`)
-    await refreshStats()
+    const result = await syncNotificationEvents();
+    alert(`همگام‌سازی انجام شد: ${result.synced} موفق، ${result.errors} خطا`);
+    await refreshStats();
   }
   catch (error) {
-    console.error('Error syncing events:', error)
-    alert('خطا در همگام‌سازی')
+    console.error('Error syncing events:', error);
+    alert('خطا در همگام‌سازی');
   }
-}
+};
 
 // Format timestamp
 const formatTime = (timestamp: number) => {
-  return new Date(timestamp).toLocaleTimeString('fa-IR')
-}
+  return new Date(timestamp).toLocaleTimeString('fa-IR');
+};
 
 // Initialize
 onMounted(async () => {
-  await refreshNotifications()
-  await refreshStats()
+  await refreshNotifications();
+  await refreshStats();
 
   // Auto-refresh every 10 seconds
   setInterval(async () => {
-    await refreshNotifications()
-    await refreshStats()
-  }, 10000)
-})
+    await refreshNotifications();
+    await refreshStats();
+  }, 10000);
+});
 </script>
 
 <style scoped>

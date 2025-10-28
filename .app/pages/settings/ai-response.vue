@@ -8,45 +8,45 @@ definePageMeta({
     order: 82,
   },
   layout: 'sidebar',
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-import { computed, reactive, watch, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAIResponseSettings } from '@/composables/useAIResponseSettings'
+import { computed, reactive, watch, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAIResponseSettings } from '@/composables/useAIResponseSettings';
 
-type EmojiLevel = 'high' | 'medium' | 'low' | 'none'
-type Tone = 'formal' | 'neutral' | 'casual'
-type Kindness = 'very_kind' | 'kind' | 'neutral' | 'direct'
-type LengthPref = 'short' | 'medium' | 'long'
-type MultiMsgMode = 'single' | 'multi_short' | 'multi_medium'
+type EmojiLevel = 'high' | 'medium' | 'low' | 'none';
+type Tone = 'formal' | 'neutral' | 'casual';
+type Kindness = 'very_kind' | 'kind' | 'neutral' | 'direct';
+type LengthPref = 'short' | 'medium' | 'long';
+type MultiMsgMode = 'single' | 'multi_short' | 'multi_medium';
 
-type Creativity = '0' | '1' | '2'
-type DomainStrictness = 'strict' | 'balanced' | 'loose'
-type LanguageStyle = 'professional' | 'casual' | 'friendly'
-type Disclaimers = 'always' | 'when_needed' | 'rarely' | 'never'
-type Profanity = 'block' | 'soften' | 'warn' | 'allow'
-type Formatting = 'none' | 'bullets' | 'numbers' | 'markdown' | 'rich'
+type Creativity = '0' | '1' | '2';
+type DomainStrictness = 'strict' | 'balanced' | 'loose';
+type LanguageStyle = 'professional' | 'casual' | 'friendly';
+type Disclaimers = 'always' | 'when_needed' | 'rarely' | 'never';
+type Profanity = 'block' | 'soften' | 'warn' | 'allow';
+type Formatting = 'none' | 'bullets' | 'numbers' | 'markdown' | 'rich';
 
 // Persist key
-const STORAGE_KEY = 'aiResponseSettings.v2'
+const STORAGE_KEY = 'aiResponseSettings.v2';
 
 type AiResponseSettings = {
-  multiMsgMode: MultiMsgMode
-  lengthPref: LengthPref
-  emojiLevel: EmojiLevel
-  tone: Tone
-  kindness: Kindness
+  multiMsgMode: MultiMsgMode;
+  lengthPref: LengthPref;
+  emojiLevel: EmojiLevel;
+  tone: Tone;
+  kindness: Kindness;
 
   // Additional 6+ controls
-  replySpeedMs: string // simulate/guide streaming speed preference
-  creativity: Creativity
-  domainStrictness: DomainStrictness
-  languageStyle: LanguageStyle
-  disclaimers: Disclaimers
-  profanity: Profanity
-  formatting: Formatting
-}
+  replySpeedMs: string; // simulate/guide streaming speed preference
+  creativity: Creativity;
+  domainStrictness: DomainStrictness;
+  languageStyle: LanguageStyle;
+  disclaimers: Disclaimers;
+  profanity: Profanity;
+  formatting: Formatting;
+};
 
 const defaults: AiResponseSettings = {
   multiMsgMode: 'multi_short',
@@ -61,49 +61,49 @@ const defaults: AiResponseSettings = {
   disclaimers: 'when_needed',
   profanity: 'soften',
   formatting: 'bullets',
-}
+};
 
 function loadSettings(): AiResponseSettings {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { ...defaults }
-    const parsed = JSON.parse(raw)
-    return { ...defaults, ...parsed }
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { ...defaults };
+    const parsed = JSON.parse(raw);
+    return { ...defaults, ...parsed };
   }
   catch {
-    return { ...defaults }
+    return { ...defaults };
   }
 }
 
 function saveSettings(s: AiResponseSettings) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s))
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
 }
 
 // Reactive state (no Pinia to keep this page self-contained; can be swapped later)
-const state = reactive<AiResponseSettings>(loadSettings())
+const state = reactive<AiResponseSettings>(loadSettings());
 
 watch(
   () => ({ ...state }),
   val => saveSettings(val),
   { deep: true },
-)
+);
 
-const router = useRouter()
+const router = useRouter();
 
 // Premium features - integrated with our composable
-const { settings: aiResponseSettings, setPremiumStatus } = useAIResponseSettings()
-const isPremiumUser = computed(() => aiResponseSettings.value.isPremium)
-const showPremiumModal = ref(false)
+const { settings: aiResponseSettings, setPremiumStatus } = useAIResponseSettings();
+const isPremiumUser = computed(() => aiResponseSettings.value.isPremium);
+const showPremiumModal = ref(false);
 
 // Toggle premium status
 const togglePremiumStatus = () => {
-  setPremiumStatus(!isPremiumUser.value)
-}
+  setPremiumStatus(!isPremiumUser.value);
+};
 
 // Debug modal state changes
 watch(showPremiumModal, (newValue, oldValue) => {
-  console.log('🔔 showPremiumModal changed:', { from: oldValue, to: newValue })
-})
+  console.log('🔔 showPremiumModal changed:', { from: oldValue, to: newValue });
+});
 
 // Define which features require premium
 const premiumFeatures = {
@@ -115,31 +115,31 @@ const premiumFeatures = {
   replySpeedMs: ['150'], // Fast speed requires premium
   creativity: ['2'], // Max creativity requires premium
   formatting: ['markdown', 'rich'], // Advanced formatting requires premium
-}
+};
 
 function isPremiumFeature(category: keyof typeof premiumFeatures, value: string): boolean {
-  return premiumFeatures[category]?.includes(value) ?? false
+  return premiumFeatures[category]?.includes(value) ?? false;
 }
 
 function handlePremiumFeatureClick(category: keyof typeof premiumFeatures, value: string) {
-  console.log('🔒 handlePremiumFeatureClick called:', { category, value })
-  console.log('🔒 isPremiumFeature result:', isPremiumFeature(category, value))
-  console.log('🔒 isPremiumUser:', isPremiumUser.value)
-  console.log('🔒 showPremiumModal before:', showPremiumModal.value)
+  console.log('🔒 handlePremiumFeatureClick called:', { category, value });
+  console.log('🔒 isPremiumFeature result:', isPremiumFeature(category, value));
+  console.log('🔒 isPremiumUser:', isPremiumUser.value);
+  console.log('🔒 showPremiumModal before:', showPremiumModal.value);
 
   if (isPremiumFeature(category, value) && !isPremiumUser.value) {
-    console.log('🔒 Opening premium modal...')
-    showPremiumModal.value = true
-    console.log('🔒 showPremiumModal after:', showPremiumModal.value)
-    return
+    console.log('🔒 Opening premium modal...');
+    showPremiumModal.value = true;
+    console.log('🔒 showPremiumModal after:', showPremiumModal.value);
+    return;
   }
   console.log('🔒 Not a premium feature or user has premium, setting value')
   // If not premium feature or user has premium, allow selection
-  ;(state as any)[category] = value
+  ;(state as any)[category] = value;
 }
 
 function showPremiumUpgrade() {
-  showPremiumModal.value = true
+  showPremiumModal.value = true;
 }
 
 const previewSummary = computed(() => {
@@ -148,25 +148,25 @@ const previewSummary = computed(() => {
     medium: '🙂',
     low: '🙂 (کم)',
     none: '🚫',
-  }
+  };
 
   const lengthMap: Record<LengthPref, string> = {
     short: 'کوتاه',
     medium: 'متعادل',
     long: 'بلند',
-  }
+  };
 
   const toneMap: Record<Tone, string> = {
     formal: 'رسمی',
     neutral: 'خنثی',
     casual: 'راحت',
-  }
+  };
 
   const msgModeMap: Record<MultiMsgMode, string> = {
     single: 'تک پیام',
     multi_short: 'چند پیام کوتاه',
     multi_medium: 'چند پیام متوسط',
-  }
+  };
 
   return [
     `حالت: ${msgModeMap[state.multiMsgMode] || 'نامشخص'}`,
@@ -176,15 +176,15 @@ const previewSummary = computed(() => {
     `خلاقیت: ${state.creativity === '0' ? 'قطعی' : state.creativity === '1' ? 'متعادل' : 'بسیار خلاق'}`,
     `قالب‌بندی: ${state.formatting === 'none' ? 'بدون قالب' : state.formatting === 'bullets' ? 'گلوله‌ای' : state.formatting === 'numbers' ? 'شماره‌دار' : state.formatting === 'markdown' ? 'مارک‌داون' : 'غنی'}`,
     `سرعت پاسخ: ${state.replySpeedMs}ms`,
-  ].join(' • ')
-})
+  ].join(' • ');
+});
 
 function resetToDefaults() {
-  Object.assign(state, { ...defaults })
+  Object.assign(state, { ...defaults });
 }
 
 function goBack() {
-  router.back()
+  router.back();
 }
 
 /**

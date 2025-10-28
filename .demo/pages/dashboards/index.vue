@@ -9,16 +9,16 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-personal-1-dark.png',
     order: 1,
   },
-})
+});
 
-const areaCustomers = reactive(useAreaCustomers())
-const radialBarTeam = reactive(useRadialBarTeam())
-const barProfit = reactive(useBarProfit())
+const areaCustomers = reactive(useAreaCustomers());
+const radialBarTeam = reactive(useRadialBarTeam());
+const barProfit = reactive(useBarProfit());
 
 function useAreaCustomers() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 258
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 258;
 
   const options = {
     chart: {
@@ -60,7 +60,7 @@ function useAreaCustomers() {
         format: 'dd/MM/yy HH:mm',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -75,20 +75,20 @@ function useAreaCustomers() {
       name: 'Abandonned',
       data: [78, 53, 36, 10, 14, 5, 2],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialBarTeam() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 455
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 455;
 
   const options = {
     title: {
@@ -152,22 +152,22 @@ function useRadialBarTeam() {
       },
     },
     labels: ['Average Results'],
-  }
+  };
 
-  const series = shallowRef([76])
+  const series = shallowRef([76]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useBarProfit() {
-  const { primary } = useTailwindColors()
-  const type = 'bar'
-  const height = 255
+  const { primary } = useTailwindColors();
+  const type = 'bar';
+  const height = 255;
 
   const options = {
     chart: {
@@ -185,7 +185,7 @@ function useBarProfit() {
     dataLabels: {
       enabled: true,
       formatter: function (val: string) {
-        return val + '%'
+        return val + '%';
       },
       offsetY: -20,
       style: {
@@ -228,7 +228,7 @@ function useBarProfit() {
       labels: {
         show: false,
         formatter: function (val: string) {
-          return val + '%'
+          return val + '%';
         },
       },
     },
@@ -237,21 +237,21 @@ function useBarProfit() {
       text: undefined,
       align: 'left',
     },
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'Ratio',
       data: [2.3, 3.1, 4.0, 10.1, 4.0],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

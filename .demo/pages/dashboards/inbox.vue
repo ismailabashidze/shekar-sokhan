@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // @ts-ignore - splitpanes types exists only for vue2
-import { Pane, Splitpanes } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
+import { Pane, Splitpanes } from 'splitpanes';
+import 'splitpanes/dist/splitpanes.css';
 
 definePageMeta({
   title: 'Inbox',
@@ -14,26 +14,26 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-inbox-dark.png',
     order: 25,
   },
-})
+});
 
-const split = ref()
-const search = ref('')
-const { md } = useTailwindBreakpoints()
+const split = ref();
+const search = ref('');
+const { md } = useTailwindBreakpoints();
 
-const paneSize = ref(50)
+const paneSize = ref(50);
 watch(
   md,
   async (isMd) => {
-    await nextTick()
+    await nextTick();
     if (isMd) {
-      paneSize.value = 50
+      paneSize.value = 50;
     }
     else {
-      paneSize.value = 100
+      paneSize.value = 100;
     }
   },
   { immediate: true },
-)
+);
 
 const messages = [
   {
@@ -161,15 +161,15 @@ const messages = [
     ],
     time: 'Yesterday ago',
   },
-]
+];
 
-const activeMessage = ref(1)
+const activeMessage = ref(1);
 
 const selectedMessage = computed(() => {
-  return messages.find(message => message.id === activeMessage.value)
-})
+  return messages.find(message => message.id === activeMessage.value);
+});
 
-const panelActive = ref(false)
+const panelActive = ref(false);
 </script>
 
 <template>

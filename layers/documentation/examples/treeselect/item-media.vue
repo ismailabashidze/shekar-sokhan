@@ -131,5 +131,5 @@ const tree = [
       text: 'Marketing Associate',
     },
   },
-]
+];
 </script>

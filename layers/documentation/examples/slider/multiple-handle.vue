@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import Slider from '@vueform/slider'
-import '~/assets/css/slider.css'
-const multiple = ref([16, 84])
+import Slider from '@vueform/slider';
+import '~/assets/css/slider.css';
+const multiple = ref([16, 84]);
 </script>

@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-const value = ref<string[]>(['Nuxt', 'Vue.js'])
+const value = ref<string[]>(['Nuxt', 'Vue.js']);
 
-const frameworks = ref(['Javascript', 'Nuxt', 'Vue.js', 'React.js', 'Angular', 'Alpine.js'])
+const frameworks = ref(['Javascript', 'Nuxt', 'Vue.js', 'React.js', 'Angular', 'Alpine.js']);
 </script>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoLineMulti = reactive(useDemoLineMulti())
+const demoLineMulti = reactive(useDemoLineMulti());
 
 function useDemoLineMulti() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'line'
-  const height = 280
+  const { primary, info, success } = useTailwindColors();
+  const type = 'line';
+  const height = 280;
 
   const options = {
     chart: {
@@ -35,7 +35,7 @@ function useDemoLineMulti() {
           + ' - '
           + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex]
           + ''
-        )
+        );
       },
       position: 'top',
     },
@@ -83,7 +83,7 @@ function useDemoLineMulti() {
     grid: {
       borderColor: '#f1f1f1',
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -98,14 +98,14 @@ function useDemoLineMulti() {
       name: 'Total Visits',
       data: ref([87, 57, 74, 99, 75, 38, 62, 47, 82, 56, 45, 47]),
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

@@ -1,4 +1,4 @@
-import exposeColors from './tailwind/plugin-expose-colors'
+import exposeColors from './tailwind/plugin-expose-colors';
 
 export default defineNuxtConfig({
   $meta: {
@@ -28,4 +28,4 @@ export default defineNuxtConfig({
       plugins: [exposeColors],
     },
   },
-})
+});

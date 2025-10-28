@@ -10,23 +10,23 @@ const {
   getRelativeTime,
   getTypeIcon,
   getTypeColor,
-} = useNotifications()
+} = useNotifications();
 
-const { close } = usePanels()
+const { close } = usePanels();
 
 // Notifications are initialized globally via plugin
 // Just set filter to show unread notifications in sidebar
 onMounted(() => {
-  setFilter('unread')
-})
+  setFilter('unread');
+});
 
 const handleNotificationClick = async (notification: any) => {
-  await markAsRead(notification.id)
-  close('notifications')
+  await markAsRead(notification.id);
+  close('notifications');
 
   // Navigate to notification details page
-  await navigateTo(`/notifications/${notification.id}`)
-}
+  await navigateTo(`/notifications/${notification.id}`);
+};
 </script>
 
 <template>

@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import AddonCollapseTransition from './AddonCollapseTransition.vue'
+import AddonCollapseTransition from './AddonCollapseTransition.vue';
 
 const props = defineProps<{
-  slug: string
-  title: string
-  subtitle: string
-  icon: string
-  remaining: string
-}>()
+  slug: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+  remaining: string;
+}>();
 
-const target = ref(null)
-const open = ref(false)
-onClickOutside(target, event => (open.value = false))
+const target = ref(null);
+const open = ref(false);
+onClickOutside(target, event => (open.value = false));
 </script>
 
 <template>

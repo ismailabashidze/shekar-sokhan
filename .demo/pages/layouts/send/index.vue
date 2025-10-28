@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PaymentSend, StepData } from '../../../types'
+import type { PaymentSend, StepData } from '../../../types';
 
 definePageMeta({
   preview: {
@@ -11,10 +11,10 @@ definePageMeta({
     order: 18,
     new: true,
   },
-})
+});
 useHead({
   title: 'Recipient',
-})
+});
 
 const {
   data: request,
@@ -24,9 +24,9 @@ const {
   getPrevStep,
   steps,
   checkPreviousSteps,
-} = useMultiStepForm<PaymentSend, StepData>()
+} = useMultiStepForm<PaymentSend, StepData>();
 
-onBeforeMount(checkPreviousSteps)
+onBeforeMount(checkPreviousSteps);
 </script>
 
 <template>

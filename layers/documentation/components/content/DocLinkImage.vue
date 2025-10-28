@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const props = defineProps<{
-  alt: string
-  src: string
-  srcDark?: string
-  to?: string
-}>()
+  alt: string;
+  src: string;
+  srcDark?: string;
+  to?: string;
+}>();
 </script>
 
 <template>

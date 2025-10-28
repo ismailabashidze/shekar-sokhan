@@ -11,16 +11,16 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-messaging-dark.png',
     order: 26,
   },
-})
-const route = useRoute()
-const pId = (route.params.slug)
+});
+const route = useRoute();
+const pId = (route.params.slug);
 if (!pId) {
-  navigateTo('/darmana/patients/choosePatient')
+  navigateTo('/darmana/patients/choosePatient');
 }
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 const getVoice = async (item) => {
-  item.isVoiceDone = false
+  item.isVoiceDone = false;
   const v = await $fetch('https://seam.brro.ir/tts', {
     method: 'POST',
     body: {
@@ -31,42 +31,42 @@ const getVoice = async (item) => {
     },
   })
     .then((blob) => {
-      const url = URL.createObjectURL(blob)
-      new Audio(url).play()
-      item.isVoiceDone = true
-    })
-}
-const { user, incDivision, getUserDetails } = useUser()
-const userDetails = ref()
-const seamless = useSeamless()
+      const url = URL.createObjectURL(blob);
+      new Audio(url).play();
+      item.isVoiceDone = true;
+    });
+};
+const { user, incDivision, getUserDetails } = useUser();
+const userDetails = ref();
+const seamless = useSeamless();
 
-const { translate } = seamless
+const { translate } = seamless;
 const { getMessagesByPId, saveMessage, deleteAllMessages, deleteMessage, addEditToMessage }
-  = useMessage()
+  = useMessage();
 
 const { saveSuggest, getLastSuggestion }
-  = useSuggestion()
+  = useSuggestion();
 
-const search = ref('')
-const message = ref('')
-const messageLoading = ref(false)
-const chatEl = ref<HTMLElement>()
-const expanded = ref(false)
-const loading = ref(true)
-const isTyping = ref(false)
-const isNewMessagesDone = ref(true)
-const newMessagesIndex = ref(0)
-const showDoneModal = ref(false)
-const startChargeTime = ref()
-const suggestionLoading = ref(true)
-const avatar = ref('/img/avatars/user.png')
+const search = ref('');
+const message = ref('');
+const messageLoading = ref(false);
+const chatEl = ref<HTMLElement>();
+const expanded = ref(false);
+const loading = ref(true);
+const isTyping = ref(false);
+const isNewMessagesDone = ref(true);
+const newMessagesIndex = ref(0);
+const showDoneModal = ref(false);
+const startChargeTime = ref();
+const suggestionLoading = ref(true);
+const avatar = ref('/img/avatars/user.png');
 
 const askForPatient = async () => {
-  suggestionLoading.value = true
+  suggestionLoading.value = true;
   if (isNewMessagesDone.value) {
-    isTyping.value = true
+    isTyping.value = true;
     try {
-      let sendToLLM = combineMessages(conversation.value.messages, 'user')
+      let sendToLLM = combineMessages(conversation.value.messages, 'user');
       const answer = await $fetch('/api/user', {
         method: 'POST',
         body: {
@@ -77,7 +77,7 @@ const askForPatient = async () => {
                   return {
                     role: m.role,
                     content: JSON.stringify(m.content),
-                  }
+                  };
                 }
               })
               .filter(Boolean),
@@ -87,9 +87,9 @@ const askForPatient = async () => {
           userDetails: userDetails.value[0],
           pId,
         },
-      })
-      const res = await processResponse(JSON.parse(answer))
-      avatar.value = `https://pocket.zehna.ir/api/files/patients/${pId}/${JSON.parse(answer).img}`
+      });
+      const res = await processResponse(JSON.parse(answer));
+      avatar.value = `https://pocket.zehna.ir/api/files/patients/${pId}/${JSON.parse(answer).img}`;
 
       const newMsg = await saveMessage({
         role: 'user',
@@ -99,7 +99,7 @@ const askForPatient = async () => {
         contentFa: res,
         deletionDivider: user.value.currentDeletionDivider,
         patient: pId,
-      })
+      });
 
       conversation.value.messages.push({
         id: newMsg.id,
@@ -108,35 +108,35 @@ const askForPatient = async () => {
         contentFa: res,
         time: new Date().toLocaleTimeString('fa'),
         isVoiceDone: false,
-      })
+      });
 
-      await nextTick()
+      await nextTick();
 
       if (chatEl.value) {
         chatEl.value.scrollTo({
           top: chatEl.value.scrollHeight,
           behavior: 'smooth',
-        })
+        });
       }
-      isTyping.value = false
-      isNewMessagesDone.value = true
+      isTyping.value = false;
+      isNewMessagesDone.value = true;
       // getVoice(conversation.value.messages.at(-1))
-      await askForMana()
+      await askForMana();
     }
     catch (e) {
-      console.log('here')
-      console.log(e)
+      console.log('here');
+      console.log(e);
       toaster.show({
         title: 'دریافت پیام', // Authentication
         message: `مشکلی وجود دارد`, // Please log in again
         color: 'danger',
         icon: 'ph:envelope',
         closable: true,
-      })
-      await askForPatient()
+      });
+      await askForPatient();
     }
   }
-}
+};
 
 const conversation = ref({
   user: {
@@ -154,51 +154,51 @@ const conversation = ref({
       contentFa: { message: 'شروع گفت و گو' },
     },
   ],
-})
+});
 function combineMessages(dataArray, targetRole) {
   // Create a deep copy of dataArray
   let dataCopy = dataArray.map(item => ({
     ...item,
     content: { ...item.content },
-  }))
+  }));
 
-  let startIndex = null // Start index of the target role sequence
-  let combinedMessage = '' // Storage for combined message
+  let startIndex = null; // Start index of the target role sequence
+  let combinedMessage = ''; // Storage for combined message
 
   for (let i = 0; i < dataCopy.length; i++) {
-    const item = dataCopy[i]
+    const item = dataCopy[i];
 
     // Check if the current item's role matches the target
     if (item.role === targetRole) {
       if (startIndex === null) {
-        startIndex = i // Mark the start of a new sequence
-        combinedMessage = item.content.message // Initialize combined message
+        startIndex = i; // Mark the start of a new sequence
+        combinedMessage = item.content.message; // Initialize combined message
       }
       else {
-        combinedMessage += ' ' + item.content.message // Concatenate messages
+        combinedMessage += ' ' + item.content.message; // Concatenate messages
       }
     }
     else if (startIndex !== null) {
       // We've reached the end of a sequence of target roles
-      dataCopy[startIndex].content.message = combinedMessage // Set the combined message
+      dataCopy[startIndex].content.message = combinedMessage; // Set the combined message
       // Remove the subsequent items of the same role
-      dataCopy.splice(startIndex + 1, i - startIndex - 1)
-      i = startIndex + 1 // Adjust the loop index after modification
-      startIndex = null // Reset start index
-      combinedMessage = '' // Reset combined message
+      dataCopy.splice(startIndex + 1, i - startIndex - 1);
+      i = startIndex + 1; // Adjust the loop index after modification
+      startIndex = null; // Reset start index
+      combinedMessage = ''; // Reset combined message
     }
   }
 
   // Check if the array ended with target role items
   if (startIndex !== null) {
-    dataCopy[startIndex].content.message = combinedMessage // Set the combined message
-    dataCopy.splice(startIndex + 1, dataCopy.length - startIndex - 1)
+    dataCopy[startIndex].content.message = combinedMessage; // Set the combined message
+    dataCopy.splice(startIndex + 1, dataCopy.length - startIndex - 1);
   }
-  return dataCopy
+  return dataCopy;
 }
 function convertToInformal(text) {
-  if (typeof text != 'string') return text
-  text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+  if (typeof text != 'string') return text;
+  text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
   // text = text.replace(/می\s(.*?)ید/g, 'می $1ین') // General pattern for conjugations
   // text = text.replace(/\bرا\b/g, ' رو ')
   // text = text.replace(/\sرا\s/g, ' رو ')
@@ -396,14 +396,14 @@ function convertToInformal(text) {
   // text = text.replace(/بگویید/g, 'بگین')
 
   // Add more generalized patterns here
-  return text
+  return text;
 }
 
 const askForMana = async () => {
   if (isNewMessagesDone.value && !showNoCharge.value) {
     try {
-      selectedByTherapist.value = []
-      let sendToLLM = combineMessages(conversation.value.messages, 'user')
+      selectedByTherapist.value = [];
+      let sendToLLM = combineMessages(conversation.value.messages, 'user');
       const answer = await $fetch('/api/therapist', {
         method: 'POST',
         body: {
@@ -414,7 +414,7 @@ const askForMana = async () => {
                   return {
                     role: m.role,
                     content: JSON.stringify(m.content),
-                  }
+                  };
                 }
               })
               .filter(Boolean),
@@ -423,38 +423,38 @@ const askForMana = async () => {
           currentDivision: user.value.currentDeletionDivider,
           userDetails: userDetails.value[0],
         },
-      })
-      const res = await processArrayWithTranslatedTitlesAndValues(JSON.parse(answer))
-      const msgId = conversation.value.messages.at(-1).id
-      const uId = user.value.id
-      sgg.value = await saveSuggest({ message: msgId, user: uId, suggestions: JSON.parse(answer), suggestionsFa: res })
-      sggList.value = []
+      });
+      const res = await processArrayWithTranslatedTitlesAndValues(JSON.parse(answer));
+      const msgId = conversation.value.messages.at(-1).id;
+      const uId = user.value.id;
+      sgg.value = await saveSuggest({ message: msgId, user: uId, suggestions: JSON.parse(answer), suggestionsFa: res });
+      sggList.value = [];
       sgg.value.suggestionsFa.map((s, i) => {
         if (Array.isArray(s.value)) {
           s.value.forEach((element, index) => {
-            sggList.value.push ({ title: s.title, value: element })
-            sggList.value.at(-1).valueEn = sgg.value.suggestions[i].value[index]
-          })
+            sggList.value.push ({ title: s.title, value: element });
+            sggList.value.at(-1).valueEn = sgg.value.suggestions[i].value[index];
+          });
         }
         else {
-          sggList.value.push ({ title: s.title, value: s.value, valueEn: sgg.value.suggestions[i].value })
+          sggList.value.push ({ title: s.title, value: s.value, valueEn: sgg.value.suggestions[i].value });
         }
-      })
-      conversation.value.messages.push({ role: 'assistant', content: { message: '' }, contentFa: { message: 'از پنل پایین انتخاب نمایید' }, correctedContentFa: null })
-      await nextTick()
+      });
+      conversation.value.messages.push({ role: 'assistant', content: { message: '' }, contentFa: { message: 'از پنل پایین انتخاب نمایید' }, correctedContentFa: null });
+      await nextTick();
 
       if (chatEl.value) {
         chatEl.value.scrollTo({
           top: chatEl.value.scrollHeight,
           behavior: 'smooth',
-        })
+        });
       }
 
-      suggestionLoading.value = false
+      suggestionLoading.value = false;
     }
     catch (e) {
-      console.log('here')
-      console.log(e)
+      console.log('here');
+      console.log(e);
       // toaster.show({
       //   title: 'دریافت پیام', // Authentication
       //   message: `مشکلی وجود دارد`, // Please log in again
@@ -462,162 +462,162 @@ const askForMana = async () => {
       //   icon: 'ph:envelope',
       //   closable: true,
       // })
-      await askForMana()
+      await askForMana();
       // messageLoading.value = false
     }
   }
   else {
     setTimeout(() => {
       // askForMana()
-    }, 10000)
+    }, 10000);
   }
-}
+};
 
 const sleep = (time: number): Promise<void> => {
-  return new Promise(resolve => setTimeout(resolve, time))
-}
+  return new Promise(resolve => setTimeout(resolve, time));
+};
 async function processResponse(answer: Record<string, any>): Promise<Record<string, any>> {
   // Creating an array to hold promises for each key-value pair that needs processing
-  const promises = []
-  const result: Record<string, any> = {}
+  const promises = [];
+  const result: Record<string, any> = {};
   // Iterate over the keys in the answer object
   for (const key in answer) {
     if (typeof answer[key] === 'string') {
       // Create a promise to translate and assemble the string value
       const promise = translateAndAssemble(answer[key], 'English', 'Western Persian')
         .then((translatedValue) => {
-          result[key] = translatedValue
+          result[key] = translatedValue;
         })
         .catch((error) => {
-          console.error(`An error occurred during translation and assembly of ${key}:`, error)
-          throw error
-        })
+          console.error(`An error occurred during translation and assembly of ${key}:`, error);
+          throw error;
+        });
 
-      promises.push(promise)
+      promises.push(promise);
     }
     else {
     // Directly assign non-string values to the result object
-      result[key] = answer[key]
+      result[key] = answer[key];
     }
   }
 
   try {
     // Wait for all promises to be resolved
-    await Promise.all(promises)
+    await Promise.all(promises);
     // Return an object with all processed parts
-    return result
+    return result;
   }
   catch (error) {
     // Handle any errors that occur during the translation and assembly
-    console.error('An error occurred during translation and assembly:', error)
-    throw error
+    console.error('An error occurred during translation and assembly:', error);
+    throw error;
   }
 }
 async function processArrayWithTranslatedTitlesAndValues(inputArray: Array<Record<string, any>>): Promise<Array<Record<string, any>>> {
   // Create an array to hold promises for each item in the input array
   const promises = inputArray.map(async (item) => {
-    const translatedItem: Record<string, any> = {}
+    const translatedItem: Record<string, any> = {};
 
     // Translate the 'title'
     const translatedTitle = await translateAndAssemble(item.title, 'English', 'Western Persian')
       .catch((error) => {
-        console.error(`An error occurred during translation of title: ${item.title}`, error)
-        throw error
-      })
+        console.error(`An error occurred during translation of title: ${item.title}`, error);
+        throw error;
+      });
 
-    translatedItem.title = translatedTitle
+    translatedItem.title = translatedTitle;
 
     // Check if 'value' is a string or an array of strings, then translate accordingly
     if (typeof item.value === 'string') {
       // Translate a single string value
       translatedItem.value = await translateAndAssemble(item.value, 'English', 'Western Persian')
         .catch((error) => {
-          console.error(`An error occurred during translation of value: ${item.value}`, error)
-          throw error
-        })
+          console.error(`An error occurred during translation of value: ${item.value}`, error);
+          throw error;
+        });
     }
     else if (Array.isArray(item.value) && item.value.every(val => typeof val === 'string')) {
       // Translate an array of string values
       translatedItem.value = await Promise.all(
         item.value.map(val => translateAndAssemble(val, 'English', 'Western Persian')),
       ).catch((error) => {
-        console.error(`An error occurred during translation of value array: ${item.value}`, error)
-        throw error
-      })
+        console.error(`An error occurred during translation of value array: ${item.value}`, error);
+        throw error;
+      });
     }
     else {
       // Assign non-string or non-array-of-string values directly
-      translatedItem.value = item.value
+      translatedItem.value = item.value;
     }
 
-    return translatedItem
-  })
+    return translatedItem;
+  });
 
   try {
     // Wait for all promises to be resolved and return the array of translated items
-    return await Promise.all(promises)
+    return await Promise.all(promises);
   }
   catch (error) {
-    console.error('An error occurred during the translation process:', error)
-    throw error
+    console.error('An error occurred during the translation process:', error);
+    throw error;
   }
 }
 
-const nuxtApp = useNuxtApp()
-const toaster = useToaster()
+const nuxtApp = useNuxtApp();
+const toaster = useToaster();
 const signout = () => {
-  nuxtApp.$pb.authStore.clear()
+  nuxtApp.$pb.authStore.clear();
   toaster.show({
     title: 'خروج از سیستم', // Authentication
     message: `خروج موفقیت آمیز بود`, // Please log in again
     color: 'success',
     icon: 'ph:check',
     closable: true,
-  })
-  navigateTo('/auth/login')
-}
-const expandForm = ref(false)
-const showNoCharge = ref(false)
-const remainingTime = ref()
-const timeToShow = ref()
-let voice = ''
+  });
+  navigateTo('/auth/login');
+};
+const expandForm = ref(false);
+const showNoCharge = ref(false);
+const remainingTime = ref();
+const timeToShow = ref();
+let voice = '';
 
 onMounted(async () => {
-  voice = localStorage.getItem('voice') as string
-  const local = localStorage.getItem('expanded')
+  voice = localStorage.getItem('voice') as string;
+  const local = localStorage.getItem('expanded');
   if (local === null) {
-    localStorage.setItem('expanded', 'false')
-    expanded.value = false
+    localStorage.setItem('expanded', 'false');
+    expanded.value = false;
   }
   else {
-    expanded.value = localStorage.getItem('expanded') == 'true'
+    expanded.value = localStorage.getItem('expanded') == 'true';
   }
-  const msg = await getMessagesByPId(pId)
-  msg.map(m => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')))
-  msg.map(m => (m.isVoiceDone = true))
-  conversation.value.messages.push(...msg)
+  const msg = await getMessagesByPId(pId);
+  msg.map(m => (m.time = new Date(m.created ?? '').toLocaleTimeString('fa')));
+  msg.map(m => (m.isVoiceDone = true));
+  conversation.value.messages.push(...msg);
   conversation.value.messages.map((m) => {
-    m.contentFa.message = convertToInformal(m.contentFa.message)
-  })
-  loading.value = false
-  await sleep(200)
+    m.contentFa.message = convertToInformal(m.contentFa.message);
+  });
+  loading.value = false;
+  await sleep(200);
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
         top: chatEl.value.scrollHeight,
         behavior: 'smooth',
-      })
+      });
     }
-  }, 1000)
+  }, 1000);
   const u = await nuxtApp.$pb
     .collection('users')
-    .getOne(nuxtApp.$pb.authStore.model.id, {})
-  showNoCharge.value = !u.hasCharge
-  remainingTime.value = new Date(u.expireChargeTime)
-  startChargeTime.value = new Date(u.startChargeTime)
-  timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60))
+    .getOne(nuxtApp.$pb.authStore.model.id, {});
+  showNoCharge.value = !u.hasCharge;
+  remainingTime.value = new Date(u.expireChargeTime);
+  startChargeTime.value = new Date(u.startChargeTime);
+  timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60));
   setInterval(() => {
-    timeToShow.value = timeToShow.value - 1
+    timeToShow.value = timeToShow.value - 1;
     // if (timeToShow.value == 10) {
     //   showEditModal.value = true
     //   conversation.value.messages.push({
@@ -633,58 +633,58 @@ onMounted(async () => {
     //     deletionDivider: user.value.currentDeletionDivider,
     //   })
     // }
-  }, 60000)
+  }, 60000);
   if (nuxtApp.$pb.authStore.isValid) {
     nuxtApp.$pb.collection('users').subscribe(
       nuxtApp.$pb.authStore.model.id,
       (e) => {
-        timeToShow.value = Math.floor((new Date(e.record.expireChangeTime).getTime() - new Date().getTime()) / (1000 * 60))
+        timeToShow.value = Math.floor((new Date(e.record.expireChangeTime).getTime() - new Date().getTime()) / (1000 * 60));
         if (!e.record.hasCharge) {
-          showNoCharge.value = true
+          showNoCharge.value = true;
           setTimeout(() => {
             if (chatEl.value) {
               chatEl.value.scrollTo({
                 top: chatEl.value.scrollHeight,
                 behavior: 'smooth',
-              })
+              });
             }
-          }, 600)
+          }, 600);
           // pause()
         }
       },
       {},
-    )
+    );
   }
   // TODO: IMPLEMENT A SYSTEM FOR AI PATIENTS TO ROLE PLAY AND READ THEM FROM HERE
-  userDetails.value = await getUserDetails('dldw6y1ueeqmcft')
+  userDetails.value = await getUserDetails('dldw6y1ueeqmcft');
   if (conversation.value.messages.at(-1)?.role == 'assistant' || conversation.value.messages.length == 1 && showNoCharge.value == false) {
-    await askForPatient()
+    await askForPatient();
   }
   else {
-    sgg.value = await getLastSuggestion(conversation.value.messages.at(-1).id)
+    sgg.value = await getLastSuggestion(conversation.value.messages.at(-1).id);
 
     if (sgg.value) {
       sgg.value.suggestionsFa.map((s, i) => {
         if (Array.isArray(s.value)) {
           s.value.forEach((element, index) => {
-            sggList.value.push ({ title: s.title, value: element })
-            sggList.value.at(-1).valueEn = sgg.value.suggestions[i].value[index]
-          })
+            sggList.value.push ({ title: s.title, value: element });
+            sggList.value.at(-1).valueEn = sgg.value.suggestions[i].value[index];
+          });
         }
         else {
-          sggList.value.push ({ title: s.title, value: s.value, valueEn: sgg.value.suggestions[i].value })
+          sggList.value.push ({ title: s.title, value: s.value, valueEn: sgg.value.suggestions[i].value });
         }
-      })
-      conversation.value.messages.push({ role: 'assistant', content: { message: '' }, contentFa: { message: 'از پنل پایین انتخاب نمایید' }, correctedContentFa: null })
-      suggestionLoading.value = false
+      });
+      conversation.value.messages.push({ role: 'assistant', content: { message: '' }, contentFa: { message: 'از پنل پایین انتخاب نمایید' }, correctedContentFa: null });
+      suggestionLoading.value = false;
     }
     else {
-      await askForMana()
+      await askForMana();
     }
   }
-})
-const sgg = ref()
-const sggList = ref([])
+});
+const sgg = ref();
+const sggList = ref([]);
 async function translateAndAssemble(
   answer: string,
   from: string,
@@ -693,59 +693,59 @@ async function translateAndAssemble(
   // If more than 200 tokens, proceed with splitting into chunks by sentences
   const chunks = answer
     .split(/[\.\n]\s*/)
-    .filter(chunk => chunk.trim().length > 0)
+    .filter(chunk => chunk.trim().length > 0);
 
   const translatePromises = chunks.map((chunk, index) => {
     return translate(chunk, from, to).then(translatedChunk => ({
       index,
       translatedChunk,
-    }))
-  })
+    }));
+  });
 
   // Await all the translation promises
-  const translatedChunksWithIndex = await Promise.all(translatePromises)
+  const translatedChunksWithIndex = await Promise.all(translatePromises);
 
   // Sort the translated chunks by their original index to maintain order
-  translatedChunksWithIndex.sort((a, b) => a.index - b.index)
+  translatedChunksWithIndex.sort((a, b) => a.index - b.index);
 
   // Join the translated chunks with a new line, ensuring each ends with proper punctuation
   return translatedChunksWithIndex
     .map((item) => {
-      let { translatedChunk } = item
+      let { translatedChunk } = item;
       // Check if the translated chunk ends with ., ,, !, or ?
       if (!/[.,!?؟]$/.test(translatedChunk.trim())) {
-        translatedChunk += '.'
+        translatedChunk += '.';
       }
-      return translatedChunk
+      return translatedChunk;
     })
-    .join('\n')
+    .join('\n');
 }
 
 async function submitMessage() {
-  if (!message.value) return
-  if (messageLoading.value) return
-  const m = message.value
-  message.value = ''
+  if (!message.value) return;
+  if (messageLoading.value) return;
+  const m = message.value;
+  message.value = '';
   const newMessage = {
     role: 'user',
     contentFa: { message: m },
     content: { message: '' },
     time: new Date().toLocaleTimeString('fa'),
-  }
-  conversation.value.messages.push(newMessage)
+  };
+  conversation.value.messages.push(newMessage);
   setTimeout(() => {
     if (chatEl.value) {
       chatEl.value.scrollTo({
         top: chatEl.value.scrollHeight,
         behavior: 'smooth',
-      })
+      });
     }
-  }, 30)
-  isNewMessagesDone.value = false
-  const t = await translateAndAssemble(m, 'Western Persian', 'English')
+  }, 30);
+  isNewMessagesDone.value = false;
+  const t = await translateAndAssemble(m, 'Western Persian', 'English');
   conversation.value.messages[
     conversation.value.messages.length - 1
-  ].content.message = t
+  ].content.message = t;
 
   await saveMessage({
     role: 'user',
@@ -754,27 +754,27 @@ async function submitMessage() {
     user: user.value.id,
     deletionDivider: user.value.currentDeletionDivider,
     patient: pId,
-  })
-  isNewMessagesDone.value = true
-  newMessagesIndex.value++
+  });
+  isNewMessagesDone.value = true;
+  newMessagesIndex.value++;
 }
-const showDeleteModal = ref(false)
+const showDeleteModal = ref(false);
 
-const isDeleting = ref(false)
+const isDeleting = ref(false);
 const deleteAll = async () => {
-  isDeleting.value = true
+  isDeleting.value = true;
   try {
-    const res = await deleteAllMessages(nuxtApp.$pb.authStore.model.id)
-    incDivision()
+    const res = await deleteAllMessages(nuxtApp.$pb.authStore.model.id);
+    incDivision();
     toaster.show({
       title: 'حذف پیام ها', // Authentication
       message: `پیام ها با موفقیت حذف شد`, // Please log in again
       color: 'success',
       icon: 'ph:trash',
       closable: true,
-    })
-    await sleep(2000)
-    window.location.reload()
+    });
+    await sleep(2000);
+    window.location.reload();
   }
   catch (e) {
     toaster.show({
@@ -783,13 +783,13 @@ const deleteAll = async () => {
       color: 'danger',
       icon: 'ph:trash',
       closable: true,
-    })
+    });
   }
   finally {
-    showDeleteModal.value = false
-    isDeleting.value = false
+    showDeleteModal.value = false;
+    isDeleting.value = false;
   }
-}
+};
 const resend = async () => {
   toaster.show({
     title: 'باز ارسال آخرین پیام',
@@ -797,20 +797,20 @@ const resend = async () => {
     color: 'warning',
     icon: 'lucide:rotate-cw',
     closable: true,
-  })
-  isTyping.value = true
-  conversation.value.messages.pop()
-  await deleteMessage(conversation.value.messages.at(-1).id)
-  conversation.value.messages.pop()
-  isNewMessagesDone.value = true
-  await askForPatient()
-}
+  });
+  isTyping.value = true;
+  conversation.value.messages.pop();
+  await deleteMessage(conversation.value.messages.at(-1).id);
+  conversation.value.messages.pop();
+  isNewMessagesDone.value = true;
+  await askForPatient();
+};
 const changeExpanded = () => {
-  expanded.value = !expanded.value
-  localStorage.setItem('expanded', expanded.value + '')
-}
-const selectedByTherapist = ref([])
-const submitLoading = ref(false)
+  expanded.value = !expanded.value;
+  localStorage.setItem('expanded', expanded.value + '');
+};
+const selectedByTherapist = ref([]);
+const submitLoading = ref(false);
 const submitTherapist = async () => {
   if (conversation.value.messages.at(-1).contentFa.message === 'از پنل پایین انتخاب نمایید') {
     toaster.show({
@@ -819,10 +819,10 @@ const submitTherapist = async () => {
       color: 'warning',
       icon: 'ph:pencil',
       closable: true,
-    })
-    return
+    });
+    return;
   }
-  submitLoading.value = true
+  submitLoading.value = true;
   const newMsg = await saveMessage({
     user: user.value.id,
     role: 'assistant',
@@ -832,28 +832,28 @@ const submitTherapist = async () => {
     correctedContentFa: conversation.value.messages.at(-1)?.correctedContentFa,
     deletionDivider: user.value.currentDeletionDivider,
     patient: pId,
-  })
-  conversation.value.messages.at(-1).id = newMsg.id
-  conversation.value.messages.at(-1).role = 'assistant'
-  conversation.value.messages.at(-1).time = new Date().toLocaleTimeString('fa')
-  conversation.value.messages.at(-1).isVoiceDone = false
+  });
+  conversation.value.messages.at(-1).id = newMsg.id;
+  conversation.value.messages.at(-1).role = 'assistant';
+  conversation.value.messages.at(-1).time = new Date().toLocaleTimeString('fa');
+  conversation.value.messages.at(-1).isVoiceDone = false;
 
-  await nextTick()
+  await nextTick();
 
   if (chatEl.value) {
     chatEl.value.scrollTo({
       top: chatEl.value.scrollHeight,
       behavior: 'smooth',
-    })
+    });
   }
 
-  await askForPatient()
-  submitLoading.value = false
-}
-const submitEdit = ref(false)
-const showEditModal = ref(false)
-const selectedForEdit = ref()
-const selectionType = ref('sentences')
+  await askForPatient();
+  submitLoading.value = false;
+};
+const submitEdit = ref(false);
+const showEditModal = ref(false);
+const selectedForEdit = ref();
+const selectionType = ref('sentences');
 const openEditModal = async (text, index, type) => {
   if (text.contentFa.message === 'از پنل پایین انتخاب نمایید') {
     toaster.show({
@@ -862,132 +862,132 @@ const openEditModal = async (text, index, type) => {
       color: 'warning',
       icon: 'ph:pencil',
       closable: true,
-    })
-    return
+    });
+    return;
   }
-  selectedType.value = type
-  showEditModal.value = true
-  selectedForEdit.value = text
-  selectedForEdit.value.index = index
+  selectedType.value = type;
+  showEditModal.value = true;
+  selectedForEdit.value = text;
+  selectedForEdit.value.index = index;
   if (selectionType.value === 'words') {
-    selectedForEdit.value.sliced = selectedForEdit.value.contentFa.message.match(/[\p{L}\p{M}\p{N}_']+|[^\s\p{L}\p{M}\p{N}_]+/gu)
+    selectedForEdit.value.sliced = selectedForEdit.value.contentFa.message.match(/[\p{L}\p{M}\p{N}_']+|[^\s\p{L}\p{M}\p{N}_]+/gu);
   }
   else {
-    const segmenter = new Intl.Segmenter('fa', { granularity: 'sentence' })
-    const sentences = []
-    console.log(selectedForEdit.value.correcte)
+    const segmenter = new Intl.Segmenter('fa', { granularity: 'sentence' });
+    const sentences = [];
+    console.log(selectedForEdit.value.correcte);
 
     if (selectedForEdit.value.correctedContentFa) {
       for (const { segment } of segmenter.segment(selectedForEdit.value.correctedContentFa)) {
-        sentences.push(segment.trim())
+        sentences.push(segment.trim());
       }
     }
     else {
       for (const { segment } of segmenter.segment(selectedForEdit.value.contentFa.message)) {
-        sentences.push(segment.trim())
+        sentences.push(segment.trim());
       }
     }
 
-    selectedForEdit.value.sliced = sentences
-    const segmenterEn = new Intl.Segmenter('en', { granularity: 'sentence' })
-    const sentencesEn = []
+    selectedForEdit.value.sliced = sentences;
+    const segmenterEn = new Intl.Segmenter('en', { granularity: 'sentence' });
+    const sentencesEn = [];
 
     for (const { segment } of segmenterEn.segment(selectedForEdit.value.content.message)) {
-      sentencesEn.push(segment.trim())
+      sentencesEn.push(segment.trim());
     }
-    selectedForEdit.value.slicedEn = sentencesEn
+    selectedForEdit.value.slicedEn = sentencesEn;
   }
-}
-const selectedType = ref('')
+};
+const selectedType = ref('');
 const submitEditFinal = async () => {
   if (editedText.value != '') {
-    alert('لطفا تغییرات را ثبت و سپس ثبت نهایی کنید')
-    return
+    alert('لطفا تغییرات را ثبت و سپس ثبت نهایی کنید');
+    return;
   }
-  submitEdit.value = true
-  await sleep(2000)
-  submitEdit.value = false
-  showEditModal.value = false
+  submitEdit.value = true;
+  await sleep(2000);
+  submitEdit.value = false;
+  showEditModal.value = false;
   if (selectedType.value === 'user') {
-    await addEditToMessage(selectedForEdit.value)
+    await addEditToMessage(selectedForEdit.value);
   }
-  conversation.value.messages.at(selectedForEdit.value.index).correctedContentFa = selectedForEdit.value.sliced.join('\n')
+  conversation.value.messages.at(selectedForEdit.value.index).correctedContentFa = selectedForEdit.value.sliced.join('\n');
   toaster.show({
     title: 'ثبت تغییرات',
     message: `تغییرات با موفقیت ثبت شد`,
     color: 'success',
     icon: 'ph:check',
     closable: true,
-  })
-}
+  });
+};
 watch(selectionType, () => {
-  openEditModal(selectedForEdit.value)
-})
-const selectedForEditIndex = ref ()
+  openEditModal(selectedForEdit.value);
+});
+const selectedForEditIndex = ref ();
 const updateSelectedIndex = async (i) => {
   if (i !== -1 && !editedText.value) {
-    selectedForEditIndex.value = i
+    selectedForEditIndex.value = i;
   }
-}
-const editedTextIndex = ref(-1)
+};
+const editedTextIndex = ref(-1);
 const clickedOnText = (i) => {
   if (editedText.value) {
-    errorText.value = 'تغییرات را ذخیره نمایید.'
-    errorTextColor.value = 'danger'
+    errorText.value = 'تغییرات را ذخیره نمایید.';
+    errorTextColor.value = 'danger';
     setTimeout(() => {
-      errorText.value = ''
-      errorTextColor.value = ''
-    }, 2000)
-    return
+      errorText.value = '';
+      errorTextColor.value = '';
+    }, 2000);
+    return;
   }
-  editedTextIndex.value = i
-  editedText.value = selectedForEdit.value.sliced[i]
+  editedTextIndex.value = i;
+  editedText.value = selectedForEdit.value.sliced[i];
   // errorText.value = 'تغییرات را ذخیره نمایید یا متن را بازنشانی فرمایید.'
-}
-const editedText = ref()
-const errorText = ref()
-const errorTextColor = ref()
+};
+const editedText = ref();
+const errorText = ref();
+const errorTextColor = ref();
 
 watch(editedText, () => {
 
-})
+});
 const updateEditedToNew = () => {
-  selectedForEdit.value.sliced[selectedForEditIndex.value] = editedText.value
-  errorText.value = 'جمله ثبت شد'
-  errorTextColor.value = 'success'
+  selectedForEdit.value.sliced[selectedForEditIndex.value] = editedText.value;
+  errorText.value = 'جمله ثبت شد';
+  errorTextColor.value = 'success';
   setTimeout(() => {
-    errorText.value = ''
-    errorTextColor.value = ''
-    editedText.value = ''
-  }, 1000)
-}
+    errorText.value = '';
+    errorTextColor.value = '';
+    editedText.value = '';
+  }, 1000);
+};
 watch(selectedByTherapist, (n) => {
   if (conversation.value.messages.at(-1).role === 'assistant') {
-    let temp = selectedByTherapist.value.map(s => s.value).join(' ')
-    let tempEn = selectedByTherapist.value.map(s => s.valueEn).join(' ')
+    let temp = selectedByTherapist.value.map(s => s.value).join(' ');
+    let tempEn = selectedByTherapist.value.map(s => s.valueEn).join(' ');
 
     if (temp == '') {
-      temp = 'از پنل پایین انتخاب نمایید'
+      temp = 'از پنل پایین انتخاب نمایید';
     }
-    conversation.value.messages.at(-1).contentFa.message = temp
-    conversation.value.messages.at(-1).content.message = tempEn
+    conversation.value.messages.at(-1).contentFa.message = temp;
+    conversation.value.messages.at(-1).content.message = tempEn;
   }
-})
+});
 const expandFormFn = async () => {
-  expandForm.value = !expandForm.value
-  await nextTick()
+  expandForm.value = !expandForm.value;
+  await nextTick();
 
   if (chatEl.value) {
     chatEl.value.scrollTo({
       top: chatEl.value.scrollHeight,
       behavior: 'smooth',
-    })
+    });
   }
-}
+};
 const closeEdit = () => {
-  editedText.value = ''
-  showEditModal.value = false
-}
+  editedText.value = '';
+  showEditModal.value = false;
+};
 </script>
 
 <template>

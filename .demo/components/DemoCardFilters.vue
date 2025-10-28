@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Menu, MenuButton, MenuItems } from '@headlessui/vue'
+import { Menu, MenuButton, MenuItems } from '@headlessui/vue';
 
 const months = [
   {
@@ -50,7 +50,7 @@ const months = [
     id: 'december',
     label: 'Dec',
   },
-]
+];
 
 const defaultKeywords = [
   'Wallmart',
@@ -61,18 +61,18 @@ const defaultKeywords = [
   'Groceries',
   'Toys',
   'Restaurant',
-]
+];
 
-const activeFilterTab = ref('filter-1')
-const cardTypes = ref([''])
-const cardholders = ref([''])
-const status = ref([''])
-const accounts = ref([''])
-const spentStart = ref<number>()
-const spentEnd = ref<number>()
-const timeCategory = ref('all')
-const timeCategoryFrom = ref('')
-const timeCategoryTo = ref('')
+const activeFilterTab = ref('filter-1');
+const cardTypes = ref(['']);
+const cardholders = ref(['']);
+const status = ref(['']);
+const accounts = ref(['']);
+const spentStart = ref<number>();
+const spentEnd = ref<number>();
+const timeCategory = ref('all');
+const timeCategoryFrom = ref('');
+const timeCategoryTo = ref('');
 </script>
 
 <template>

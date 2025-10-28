@@ -1,43 +1,43 @@
 <script setup lang="ts">
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(10)
+const filter = ref('');
+const perPage = ref(10);
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
+  });
+});
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch('/api/transactions', {
   query,
-})
+});
 
 function statusColor(itemStatus: string) {
   switch (itemStatus) {
     case 'complete':
-      return 'success'
+      return 'success';
     case 'in progress':
-      return 'primary'
+      return 'primary';
     case 'processing':
-      return 'info'
+      return 'info';
     case 'cancelled':
-      return 'warning'
+      return 'warning';
     default:
-      break
+      break;
   }
 }
 </script>

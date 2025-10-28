@@ -1,65 +1,65 @@
-import { klona } from 'klona'
-import type { InjectionKey, UnwrapRef, MaybeRefOrGetter } from 'vue'
+import { klona } from 'klona';
+import type { InjectionKey, UnwrapRef, MaybeRefOrGetter } from 'vue';
 
-type WithId<T> = T & { id: number }
+type WithId<T> = T & { id: number };
 
 export interface StepForm<
   DATA extends Record<string, any> = Record<string, any>,
   META extends Record<string, any> = Record<string, any>,
   > {
-  meta: META
-  to: string
+  meta: META;
+  to: string;
 
-  validate?: (ctx: MultiStepFormContext<DATA, META>) => Promise<boolean | void> | boolean | void
+  validate?: (ctx: MultiStepFormContext<DATA, META>) => Promise<boolean | void> | boolean | void;
 }
 
 export interface MultiStepFormConfig<
   DATA extends Record<string, any> = Record<string, any>,
   META extends Record<string, any> = Record<string, any>,
 > {
-  initialState: MaybeRefOrGetter<DATA>
-  steps: StepForm<DATA, META>[]
+  initialState: MaybeRefOrGetter<DATA>;
+  steps: StepForm<DATA, META>[];
 
-  onSubmit?: (data: DATA, ctx: MultiStepFormContext<DATA, META>) => Promise<void> | void
+  onSubmit?: (data: DATA, ctx: MultiStepFormContext<DATA, META>) => Promise<void> | void;
   onError?: (
     error: any,
     ctx: MultiStepFormContext<DATA, META>,
-  ) => Promise<void> | void
+  ) => Promise<void> | void;
 }
 
 export interface MultiStepFormContext<
   DATA extends Record<string, any> = Record<string, any>,
   META extends Record<string, any> = Record<string, any>,
 > {
-  steps: ComputedRef<WithId<StepForm<DATA, META>>[]>
-  totalSteps: ComputedRef<number>
-  currentStepId: ComputedRef<number>
-  currentStep: ComputedRef<WithId<StepForm<DATA, META>>>
-  progress: ComputedRef<number>
-  isLastStep: ComputedRef<boolean>
-  data: Ref<UnwrapRef<DATA>>
+  steps: ComputedRef<WithId<StepForm<DATA, META>>[]>;
+  totalSteps: ComputedRef<number>;
+  currentStepId: ComputedRef<number>;
+  currentStep: ComputedRef<WithId<StepForm<DATA, META>>>;
+  progress: ComputedRef<number>;
+  isLastStep: ComputedRef<boolean>;
+  data: Ref<UnwrapRef<DATA>>;
   errors: Readonly<Ref<{
-    message: string
-    fields: Record<string, string | undefined>
-  }>>
-  loading: Readonly<Ref<boolean>>
-  complete: Readonly<Ref<boolean>>
+    message: string;
+    fields: Record<string, string | undefined>;
+  }>>;
+  loading: Readonly<Ref<boolean>>;
+  complete: Readonly<Ref<boolean>>;
 
-  getStep(id?: number): WithId<StepForm<DATA, META>> | undefined
-  getNextStep(id?: number): WithId<StepForm<DATA, META>> | null
-  getPrevStep(id?: number): WithId<StepForm<DATA, META>> | null
-  goToStep(step?: WithId<StepForm<DATA, META>>): Promise<void>
-  reset(initialState?: MaybeRefOrGetter<DATA>): void
-  setErrorMessage(message?: string): void
-  setFieldError(field: string, message?: string): void
-  resetFieldError(field?: string | string[]): void
+  getStep(id?: number): WithId<StepForm<DATA, META>> | undefined;
+  getNextStep(id?: number): WithId<StepForm<DATA, META>> | null;
+  getPrevStep(id?: number): WithId<StepForm<DATA, META>> | null;
+  goToStep(step?: WithId<StepForm<DATA, META>>): Promise<void>;
+  reset(initialState?: MaybeRefOrGetter<DATA>): void;
+  setErrorMessage(message?: string): void;
+  setFieldError(field: string, message?: string): void;
+  resetFieldError(field?: string | string[]): void;
 
-  validateStep(step?: WithId<StepForm<DATA, META>>): Promise<boolean>
-  handleSubmit(): Promise<void>
-  checkPreviousSteps(): Promise<void>
+  validateStep(step?: WithId<StepForm<DATA, META>>): Promise<boolean>;
+  handleSubmit(): Promise<void>;
+  checkPreviousSteps(): Promise<void>;
 }
 
-const injectionKey = Symbol('multi-step-form-context') as InjectionKey<MultiStepFormContext>
+const injectionKey = Symbol('multi-step-form-context') as InjectionKey<MultiStepFormContext>;
 
 /**
  * This function is used to create a multi-step form context.
@@ -75,29 +75,29 @@ export function provideMultiStepForm<
   DATA extends Record<string, any> = Record<string, any>,
   META extends Record<string, any> = Record<string, any>,
 >(rules: MultiStepFormConfig<DATA, META>): MultiStepFormContext<DATA, META> {
-  const data = ref<DATA>(klona(toValue(rules.initialState)))
+  const data = ref<DATA>(klona(toValue(rules.initialState)));
   const errors = ref<{
-    message: string
-    fields: Record<string, string | undefined>
+    message: string;
+    fields: Record<string, string | undefined>;
   }>({
     message: '',
     fields: {},
-  })
-  const router = useRouter()
+  });
+  const router = useRouter();
 
-  const loading = ref(false)
-  const complete = ref(false)
+  const loading = ref(false);
+  const complete = ref(false);
 
-  const steps = computed(() => rules.steps.map((step, id) => ({ ...step, id })))
-  const totalSteps = computed(() => steps.value.length)
+  const steps = computed(() => rules.steps.map((step, id) => ({ ...step, id })));
+  const totalSteps = computed(() => steps.value.length);
   const progress = computed(
     () => ((currentStepId.value + 1) / totalSteps.value) * 100,
-  )
+  );
   const currentStepId = computed(() => steps.value.find(
     step => step.to === router.currentRoute.value.path,
-  )?.id ?? 0)
-  const currentStep = computed(() => steps.value[currentStepId.value])
-  const isLastStep = computed(() => currentStepId.value === totalSteps.value - 1)
+  )?.id ?? 0);
+  const currentStep = computed(() => steps.value[currentStepId.value]);
+  const isLastStep = computed(() => currentStepId.value === totalSteps.value - 1);
 
   const context: MultiStepFormContext<DATA, META> = {
     steps,
@@ -121,130 +121,130 @@ export function provideMultiStepForm<
     validateStep,
     handleSubmit,
     checkPreviousSteps,
-  }
+  };
 
   function getNextStep(id = currentStepId.value) {
-    return getStep(id + 1)
+    return getStep(id + 1);
   }
   function getPrevStep(id = currentStepId.value) {
-    return getStep(id - 1)
+    return getStep(id - 1);
   }
   function getStep(id = currentStepId.value) {
-    return steps.value[id]
+    return steps.value[id];
   }
   async function goToStep(step?: StepForm<DATA, META>) {
     if (step) {
-      await router.push(step.to)
+      await router.push(step.to);
     }
   }
 
   function setFieldError(field: string, error?: string) {
-    errors.value.fields[field] = error
+    errors.value.fields[field] = error;
   }
   function resetFieldError(field?: string | string[]) {
     if (Array.isArray(field)) {
       field.forEach((key) => {
-        errors.value.fields[key] = undefined
-      })
+        errors.value.fields[key] = undefined;
+      });
     }
     else if (field) {
-      errors.value.fields[field] = undefined
+      errors.value.fields[field] = undefined;
     }
     else {
-      errors.value.fields = {}
+      errors.value.fields = {};
     }
   }
   function setErrorMessage(error: string = '') {
-    errors.value.message = error
+    errors.value.message = error;
   }
 
   async function validateStep(step = currentStep.value) {
     if (step.validate) {
       try {
-        const success = await step.validate(context)
-        const hasErrors = Object.values(errors.value.fields).filter(Boolean).length > 0 || errors.value.message
+        const success = await step.validate(context);
+        const hasErrors = Object.values(errors.value.fields).filter(Boolean).length > 0 || errors.value.message;
 
         if (success === false || hasErrors) {
-          return false
+          return false;
         }
       }
       catch (error) {
         if (rules.onError) {
-          await rules.onError(error, context)
+          await rules.onError(error, context);
         }
-        return false
+        return false;
       }
     }
 
-    return true
+    return true;
   }
 
   function reset(initialState = rules.initialState) {
-    data.value = klona(toValue(initialState)) as UnwrapRef<DATA>
-    loading.value = false
-    complete.value = false
+    data.value = klona(toValue(initialState)) as UnwrapRef<DATA>;
+    loading.value = false;
+    complete.value = false;
     errors.value = {
       message: '',
       fields: {},
-    }
+    };
   }
 
   async function checkPreviousSteps() {
-    let current = 0
+    let current = 0;
 
     while (current < currentStepId.value) {
-      const step = getStep(current)
-      if (!step) break
+      const step = getStep(current);
+      if (!step) break;
 
       if (!await validateStep(step)) {
-        await goToStep(step)
-        return
+        await goToStep(step);
+        return;
       }
 
-      current++
+      current++;
     }
   }
 
   async function handleSubmit() {
-    if (loading.value) return
+    if (loading.value) return;
 
-    loading.value = true
-    resetFieldError()
+    loading.value = true;
+    resetFieldError();
 
     if (!await validateStep()) {
-      loading.value = false
-      return
+      loading.value = false;
+      return;
     }
 
-    const nextStep = getNextStep()
+    const nextStep = getNextStep();
 
     // go to the next step if there is one
     if (nextStep) {
-      await goToStep(nextStep)
-      loading.value = false
-      return
+      await goToStep(nextStep);
+      loading.value = false;
+      return;
     }
 
     // submit the form otherwise
     try {
       if (rules.onSubmit) {
-        await rules.onSubmit(data.value as DATA, context)
+        await rules.onSubmit(data.value as DATA, context);
       }
-      complete.value = true
+      complete.value = true;
     }
     catch (error) {
       if (rules.onError) {
-        await rules.onError(error, context)
+        await rules.onError(error, context);
       }
     }
     finally {
-      loading.value = false
+      loading.value = false;
     }
   }
 
-  provide(injectionKey, context as any)
+  provide(injectionKey, context as any);
 
-  return context
+  return context;
 }
 
 export function useMultiStepForm<
@@ -256,12 +256,12 @@ export function useMultiStepForm<
       MultiStepFormContext<DATA, META>
     >,
     null,
-  )
+  );
   if (!context) {
     throw new Error(
       'MultiStepForm: no context found, did you forget to call provideMultiStepForm?',
-    )
+    );
   }
 
-  return context
+  return context;
 }

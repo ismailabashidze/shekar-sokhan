@@ -1,8 +1,8 @@
 <script setup lang="ts">
 function raiseError() {
-  throw new Error('Test error!')
+  throw new Error('Test error!');
 }
-raiseError()
+raiseError();
 </script>
 
 <template>

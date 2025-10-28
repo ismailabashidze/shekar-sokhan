@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { format } from 'date-fns'
+import { format } from 'date-fns';
 
 import {
   type CalendarCustomAttribute,
   type CalendarEvent,
   categoryTheme,
-} from '~/utils/bundles/calendar'
+} from '~/utils/bundles/calendar';
 
 const props = defineProps<{
-  event: CalendarCustomAttribute<CalendarEvent>
-}>()
+  event: CalendarCustomAttribute<CalendarEvent>;
+}>();
 
 const emits = defineEmits<{
-  positiondrag: [event: MouseEvent | TouchEvent]
-}>()
+  positiondrag: [event: MouseEvent | TouchEvent];
+}>();
 
 </script>
 

@@ -133,22 +133,22 @@
 </template>
 
 <script setup lang="ts">
-const { user } = useUser()
-const route = useRoute()
+const { user } = useUser();
+const route = useRoute();
 const {
   currentZone,
   currentZoneConfig,
   userZones,
   horizontalNavItems,
-} = useZones()
+} = useZones();
 
 const isActive = (path: string) => {
-  return route.path === path || route.path.startsWith(path + '/')
-}
+  return route.path === path || route.path.startsWith(path + '/');
+};
 
 const navigateToZone = (path: string) => {
   if (path) {
-    navigateTo(path)
+    navigateTo(path);
   }
-}
+};
 </script>

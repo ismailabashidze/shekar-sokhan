@@ -10,20 +10,20 @@ definePageMeta({
     order: 37,
     new: true,
   },
-})
+});
 
-const showFaq = ref(false)
-const step = ref(1)
+const showFaq = ref(false);
+const step = ref(1);
 const nextStep = () => {
-  step.value += 1
-}
+  step.value += 1;
+};
 const prevStep = () => {
-  step.value -= 1
-}
+  step.value -= 1;
+};
 
-const fullName = ref('')
-const duration = ref('')
-const amount = ref('')
+const fullName = ref('');
+const duration = ref('');
+const amount = ref('');
 </script>
 
 <template>

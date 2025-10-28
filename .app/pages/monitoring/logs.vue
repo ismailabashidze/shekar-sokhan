@@ -328,24 +328,24 @@
 </template>
 
 <script setup lang="ts">
-import { useNotificationLogger, LogLevel, LogCategory } from '~/composables/useNotificationLogger'
-import type { LogEntry as LogEntryType } from '~/composables/useNotificationLogger'
+import { useNotificationLogger, LogLevel, LogCategory } from '~/composables/useNotificationLogger';
+import type { LogEntry as LogEntryType } from '~/composables/useNotificationLogger';
 
 // Meta
 definePageMeta({
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 // Composables
-const logger = useNotificationLogger()
+const logger = useNotificationLogger();
 
 // Reactive state
-const isLoading = ref(false)
-const logs = ref<LogEntryType[]>([])
-const currentPage = ref(1)
-const pageSize = ref(50)
+const isLoading = ref(false);
+const logs = ref<LogEntryType[]>([]);
+const currentPage = ref(1);
+const pageSize = ref(50);
 
 // Filters
 const filters = ref({
@@ -354,75 +354,75 @@ const filters = ref({
   component: '',
   timeRange: '24h',
   search: '',
-})
+});
 
 // Computed
 const filteredLogs = computed(() => {
-  let filtered = [...logs.value]
+  let filtered = [...logs.value];
 
   // Apply level filter
   if (filters.value.level) {
-    filtered = filtered.filter(log => log.level === filters.value.level)
+    filtered = filtered.filter(log => log.level === filters.value.level);
   }
 
   // Apply category filter
   if (filters.value.category) {
-    filtered = filtered.filter(log => log.category === filters.value.category)
+    filtered = filtered.filter(log => log.category === filters.value.category);
   }
 
   // Apply component filter
   if (filters.value.component) {
     filtered = filtered.filter(log =>
       log.component?.toLowerCase().includes(filters.value.component.toLowerCase()),
-    )
+    );
   }
 
   // Apply search filter
   if (filters.value.search) {
-    const searchTerm = filters.value.search.toLowerCase()
+    const searchTerm = filters.value.search.toLowerCase();
     filtered = filtered.filter(log =>
       log.message.toLowerCase().includes(searchTerm)
       || log.component?.toLowerCase().includes(searchTerm)
       || log.method?.toLowerCase().includes(searchTerm),
-    )
+    );
   }
 
   // Sort by timestamp (newest first)
-  filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+  filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   // Apply pagination
-  const startIndex = (currentPage.value - 1) * pageSize.value
-  const endIndex = startIndex + pageSize.value
-  return filtered.slice(startIndex, endIndex)
-})
+  const startIndex = (currentPage.value - 1) * pageSize.value;
+  const endIndex = startIndex + pageSize.value;
+  return filtered.slice(startIndex, endIndex);
+});
 
 const totalPages = computed(() => {
   const totalFiltered = logs.value.filter((log) => {
-    let matches = true
+    let matches = true;
 
     if (filters.value.level) {
-      matches = matches && log.level === filters.value.level
+      matches = matches && log.level === filters.value.level;
     }
     if (filters.value.category) {
-      matches = matches && log.category === filters.value.category
+      matches = matches && log.category === filters.value.category;
     }
     if (filters.value.component) {
-      matches = matches && log.component?.toLowerCase().includes(filters.value.component.toLowerCase())
+      matches = matches && log.component?.toLowerCase().includes(filters.value.component.toLowerCase());
     }
     if (filters.value.search) {
-      const searchTerm = filters.value.search.toLowerCase()
+      const searchTerm = filters.value.search.toLowerCase();
       matches = matches && (
         log.message.toLowerCase().includes(searchTerm)
         || log.component?.toLowerCase().includes(searchTerm)
         || log.method?.toLowerCase().includes(searchTerm)
-      )
+      );
     }
 
-    return matches
-  }).length
+    return matches;
+  }).length;
 
-  return Math.ceil(totalFiltered / pageSize.value)
-})
+  return Math.ceil(totalFiltered / pageSize.value);
+});
 
 const logStats = computed(() => {
   const stats = {
@@ -431,82 +431,82 @@ const logStats = computed(() => {
     warnings: 0,
     info: 0,
     debug: 0,
-  }
+  };
 
   logs.value.forEach((log) => {
     switch (log.level) {
       case LogLevel.ERROR:
       case LogLevel.CRITICAL:
-        stats.errors++
-        break
+        stats.errors++;
+        break;
       case LogLevel.WARN:
-        stats.warnings++
-        break
+        stats.warnings++;
+        break;
       case LogLevel.INFO:
-        stats.info++
-        break
+        stats.info++;
+        break;
       case LogLevel.DEBUG:
-        stats.debug++
-        break
+        stats.debug++;
+        break;
     }
-  })
+  });
 
-  return stats
-})
+  return stats;
+});
 
 // Methods
 const refreshLogs = async () => {
-  if (isLoading.value) return
+  if (isLoading.value) return;
 
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    const timeRangeHours = getTimeRangeHours(filters.value.timeRange)
-    const startDate = new Date()
-    startDate.setHours(startDate.getHours() - timeRangeHours)
+    const timeRangeHours = getTimeRangeHours(filters.value.timeRange);
+    const startDate = new Date();
+    startDate.setHours(startDate.getHours() - timeRangeHours);
 
     const fetchedLogs = await logger.getLogs({
       startDate,
       limit: 1000,
-    })
+    });
 
-    logs.value = fetchedLogs
-    currentPage.value = 1
+    logs.value = fetchedLogs;
+    currentPage.value = 1;
   }
   catch (error) {
-    console.error('Failed to refresh logs:', error)
+    console.error('Failed to refresh logs:', error);
   }
   finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 const applyFilters = () => {
-  currentPage.value = 1
-  refreshLogs()
-}
+  currentPage.value = 1;
+  refreshLogs();
+};
 
 const getTimeRangeHours = (range: string): number => {
   switch (range) {
-    case '1h': return 1
-    case '6h': return 6
-    case '24h': return 24
-    case '7d': return 24 * 7
-    case '30d': return 24 * 30
-    default: return 24
+    case '1h': return 1;
+    case '6h': return 6;
+    case '24h': return 24;
+    case '7d': return 24 * 7;
+    case '30d': return 24 * 30;
+    default: return 24;
   }
-}
+};
 
 const previousPage = () => {
   if (currentPage.value > 1) {
-    currentPage.value--
+    currentPage.value--;
   }
-}
+};
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
-    currentPage.value++
+    currentPage.value++;
   }
-}
+};
 
 const exportLogs = async () => {
   try {
@@ -520,42 +520,42 @@ const exportLogs = async () => {
       duration_ms: log.duration_ms,
       user_id: log.user_id,
       details: log.details,
-    }))
+    }));
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
       type: 'application/json',
-    })
+    });
 
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `system-logs-${new Date().toISOString().split('T')[0]}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `system-logs-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
   catch (error) {
-    console.error('Failed to export logs:', error)
+    console.error('Failed to export logs:', error);
   }
-}
+};
 
 const clearLogs = async () => {
   if (!confirm('آیا مطمئن هستید که می‌خواهید همه گزارش‌ها را پاک کنید؟ این عمل قابل بازگشت نیست.')) {
-    return
+    return;
   }
 
   try {
-    await logger.cleanupOldLogs(0) // Clear all logs
-    await refreshLogs()
+    await logger.cleanupOldLogs(0); // Clear all logs
+    await refreshLogs();
   }
   catch (error) {
-    console.error('Failed to clear logs:', error)
+    console.error('Failed to clear logs:', error);
   }
-}
+};
 
 // Initialize
 onMounted(() => {
-  refreshLogs()
-})
+  refreshLogs();
+});
 </script>

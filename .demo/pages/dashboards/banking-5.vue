@@ -10,7 +10,7 @@ definePageMeta({
     order: 10,
     new: true,
   },
-})
+});
 </script>
 
 <template>

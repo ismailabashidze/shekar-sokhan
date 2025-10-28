@@ -1,9 +1,9 @@
 <script setup lang="ts">
 const props = defineProps<{
-  label?: string
-  hideLabel?: boolean
-  tabletHidden?: boolean
-}>()
+  label?: string;
+  hideLabel?: boolean;
+  tabletHidden?: boolean;
+}>();
 </script>
 
 <template>

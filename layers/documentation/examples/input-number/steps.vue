@@ -45,5 +45,5 @@ const fields = reactive({
   second: 1.5,
   third: 1.542312,
   fourth: 1024,
-})
+});
 </script>

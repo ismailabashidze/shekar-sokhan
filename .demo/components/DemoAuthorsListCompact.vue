@@ -36,7 +36,7 @@ const authors = [
     role: 'Business analyst',
     articles: 11,
   },
-]
+];
 </script>
 
 <template>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    rounded?: 'none' | 'sm' | 'md' | 'lg'
+    rounded?: 'none' | 'sm' | 'md' | 'lg';
   }>(),
   {
     rounded: 'sm',
   },
-)
+);
 
 const tags = [
   {
@@ -39,7 +39,7 @@ const tags = [
     name: 'Technology',
     highlight: true,
   },
-]
+];
 </script>
 
 <template>

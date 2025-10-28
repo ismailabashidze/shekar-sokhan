@@ -1,16 +1,16 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    title: string
-    text: string
-    label: string
-    to: string
-    rounded?: 'none' | 'sm' | 'md' | 'lg'
+    title: string;
+    text: string;
+    label: string;
+    to: string;
+    rounded?: 'none' | 'sm' | 'md' | 'lg';
   }>(),
   {
     rounded: 'sm',
   },
-)
+);
 </script>
 
 <template>

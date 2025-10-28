@@ -127,69 +127,69 @@
 
 <script setup lang="ts">
 interface Props {
-  showFloatingButton?: boolean
+  showFloatingButton?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showFloatingButton: true,
-})
+});
 
-const { tours, startTour, resetAllTours } = useTour()
-const isModalOpen = ref(false)
+const { tours, startTour, resetAllTours } = useTour();
+const isModalOpen = ref(false);
 
 // Available tours for current page
 const availableTours = computed(() => {
   // You can filter tours based on current route
-  const route = useRoute()
+  const route = useRoute();
 
   if (route.path === '/dashboard') {
-    return tours.filter(tour => tour.id === 'dashboard')
+    return tours.filter(tour => tour.id === 'dashboard');
   }
 
   if (route.path.includes('onboarding')) {
-    return tours.filter(tour => tour.id === 'onboarding')
+    return tours.filter(tour => tour.id === 'onboarding');
   }
 
   if (route.path.includes('therapists/sessions')) {
-    return tours.filter(tour => tour.id === 'sessions')
+    return tours.filter(tour => tour.id === 'sessions');
   }
 
   if (route.path.includes('therapists')) {
-    return tours.filter(tour => ['therapist-selection', 'session-management'].includes(tour.id))
+    return tours.filter(tour => ['therapist-selection', 'session-management'].includes(tour.id));
   }
 
-  return tours
-})
+  return tours;
+});
 
 const openTourModal = () => {
-  isModalOpen.value = true
-}
+  isModalOpen.value = true;
+};
 
 const closeModal = () => {
-  isModalOpen.value = false
-}
+  isModalOpen.value = false;
+};
 
 const startSelectedTour = (tourId: string) => {
-  closeModal()
+  closeModal();
   nextTick(() => {
-    startTour(tourId)
-  })
-}
+    startTour(tourId);
+  });
+};
 
 const resetAllToursAndClose = () => {
-  resetAllTours()
-  closeModal()
+  resetAllTours();
+  closeModal();
 
   // Show success message
-  const toaster = useToaster()
+  const toaster = useToaster();
   toaster.show({
     title: 'بازنشانی موفق',
     message: 'همه راهنماها بازنشانی شدند',
     color: 'success',
     icon: 'ph:check',
     closable: true,
-  })
-}
+  });
+};
 
 // Component is ready - no auto start
 </script>

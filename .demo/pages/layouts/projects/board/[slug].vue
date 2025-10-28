@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Container, Draggable } from 'vue3-smooth-dnd'
+import { Container, Draggable } from 'vue3-smooth-dnd';
 
 definePageMeta({
   title: 'Project Board',
@@ -28,15 +28,15 @@ definePageMeta({
       },
     },
   ],
-})
+});
 
 interface ColumnContent {
-  title: string
-  tasks: any[]
+  title: string;
+  tasks: any[];
 }
 
 interface Column {
-  [key: string]: ColumnContent
+  [key: string]: ColumnContent;
 }
 
 const columns = reactive<Column>({
@@ -64,73 +64,73 @@ const columns = reactive<Column>({
     title: 'Done',
     tasks: [],
   },
-})
+});
 
-const { open, close } = usePanels()
+const { open, close } = usePanels();
 
-const route = useRoute()
-const slug = computed(() => route.params.slug)
+const route = useRoute();
+const slug = computed(() => route.params.slug);
 
 const query = computed(() => {
   return {
     slug: slug.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch(
   '/api/company/projects',
   {
     query,
   },
-)
+);
 
 if (!data.value?.project) {
-  await navigateTo('/layouts/projects')
+  await navigateTo('/layouts/projects');
 }
 
-const tasks = ref(data.value?.project?.tasks)
+const tasks = ref(data.value?.project?.tasks);
 
 if (tasks.value) {
   for (const task of tasks.value) {
     switch (task.status) {
       case 0:
-        columns.new.tasks.push(task)
-        break
+        columns.new.tasks.push(task);
+        break;
       case 1:
-        columns.inProgress.tasks.push(task)
-        break
+        columns.inProgress.tasks.push(task);
+        break;
       case 2:
-        columns.blocked.tasks.push(task)
-        break
+        columns.blocked.tasks.push(task);
+        break;
       case 3:
-        columns.onHold.tasks.push(task)
-        break
+        columns.onHold.tasks.push(task);
+        break;
       case 4:
-        columns.inReview.tasks.push(task)
-        break
+        columns.inReview.tasks.push(task);
+        break;
       case 5:
-        columns.done.tasks.push(task)
-        break
+        columns.done.tasks.push(task);
+        break;
     }
   }
 }
 
-const board = computed(() => Object.values(columns || {}))
+const board = computed(() => Object.values(columns || {}));
 
-const currentTask = ref()
+const currentTask = ref();
 
 function openTaskPanel(id: number, tasks: any) {
-  currentTask.value = tasks.find((task: any) => task.id === id)
+  currentTask.value = tasks.find((task: any) => task.id === id);
   open('task', {
     task: currentTask,
 
     // listen to "message" event emited from panel component
     onMessage: async (message: any) => {
-      console.log('onMessage')
-      console.log(message)
-      close()
+      console.log('onMessage');
+      console.log(message);
+      close();
     },
-  })
+  });
 }
 
 function onDrop(column: ColumnContent, dropResult: any) {
@@ -138,19 +138,19 @@ function onDrop(column: ColumnContent, dropResult: any) {
     typeof dropResult?.addedIndex !== 'number'
     || typeof dropResult?.removedIndex !== 'number'
   ) {
-    return
+    return;
   }
   if (dropResult.addedIndex === dropResult.removedIndex) {
-    return
+    return;
   }
 
-  let itemToAdd
+  let itemToAdd;
 
   if (dropResult.removedIndex !== null) {
-    itemToAdd = column.tasks.splice(dropResult.removedIndex, 1)[0]
+    itemToAdd = column.tasks.splice(dropResult.removedIndex, 1)[0];
   }
   if (dropResult.addedIndex !== null) {
-    column.tasks.splice(dropResult.addedIndex, 0, itemToAdd)
+    column.tasks.splice(dropResult.addedIndex, 0, itemToAdd);
   }
 }
 </script>

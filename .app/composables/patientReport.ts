@@ -1,91 +1,91 @@
 // Types and mock data for session analysis collections
 
-export type Importance = 'high' | 'medium' | 'low'
-export type OverallMood = 'very_good' | 'good' | 'neutral' | 'challenging' | 'difficult'
-export type CommunicationQuality = 'excellent' | 'good' | 'developing' | 'needs_attention'
-export type UnderstandingLevel = 'high' | 'moderate' | 'growing' | 'initial'
-export type TrustLevel = 'strong' | 'building' | 'early_stage'
+export type Importance = 'high' | 'medium' | 'low';
+export type OverallMood = 'very_good' | 'good' | 'neutral' | 'challenging' | 'difficult';
+export type CommunicationQuality = 'excellent' | 'good' | 'developing' | 'needs_attention';
+export type UnderstandingLevel = 'high' | 'moderate' | 'growing' | 'initial';
+export type TrustLevel = 'strong' | 'building' | 'early_stage';
 
 export interface MainPoint {
-  session: string
-  title: string
-  description: string
-  importance: Importance
+  session: string;
+  title: string;
+  description: string;
+  importance: Importance;
   actionItems: {
-    title: string
-    completed: boolean
-    dueDate?: string
-    icon?: string
-  }[]
+    title: string;
+    completed: boolean;
+    dueDate?: string;
+    icon?: string;
+  }[];
 }
 
 export interface SessionProgress {
-  session: string
+  session: string;
   strengthsIdentified: {
-    strengths: { label: string, icon?: string }[]
-    notes?: string
-  }
+    strengths: { label: string; icon?: string }[];
+    notes?: string;
+  };
   areasForGrowth: {
-    areas: { title: string, reason?: string, suggestedActions?: { title: string, icon?: string }[], icon?: string }[]
-    notes?: string
-  }
+    areas: { title: string; reason?: string; suggestedActions?: { title: string; icon?: string }[]; icon?: string }[];
+    notes?: string;
+  };
   achievements: {
-    achievements: { title: string, date?: string, details?: string, icon?: string }[]
-    notes?: string
-  }
+    achievements: { title: string; date?: string; details?: string; icon?: string }[];
+    notes?: string;
+  };
   nextSteps: {
-    steps: { title: string, responsible?: string, dueDate?: string, description?: string, icon?: string }[]
-    responsible?: string
-    dueDate?: string
-  }
+    steps: { title: string; responsible?: string; dueDate?: string; description?: string; icon?: string }[];
+    responsible?: string;
+    dueDate?: string;
+  };
 }
 
 // Use different names for mock data to avoid conflicts
 export interface MockEmotionalJourney {
-  session: string
-  emojis: string
-  overallMood: OverallMood
-  moodDescription: string
+  session: string;
+  emojis: string;
+  overallMood: OverallMood;
+  moodDescription: string;
   keyEmotions: {
-    [emotion: string]: number // e.g. { joy: 3, sadness: 1 }
-  }
+    [emotion: string]: number; // e.g. { joy: 3, sadness: 1 }
+  };
   copingStrategies: {
-    strategies: { title: string, icon?: string }[]
-    effectiveness: string
-  }
+    strategies: { title: string; icon?: string }[];
+    effectiveness: string;
+  };
 }
 
 export interface MockPersonalGrowth {
-  session: string
+  session: string;
   insights: {
-    insights: { text: string, icon?: string }[]
-    summary?: string
-  }
+    insights: { text: string; icon?: string }[];
+    summary?: string;
+  };
   learnings: {
-    learnings: { text: string, icon?: string }[]
-    summary?: string
-  }
+    learnings: { text: string; icon?: string }[];
+    summary?: string;
+  };
 }
 
 export interface TherapeuticRelationship {
-  session: string
-  communicationQuality: CommunicationQuality
-  understandingLevel: UnderstandingLevel
-  trustLevel: TrustLevel
+  session: string;
+  communicationQuality: CommunicationQuality;
+  understandingLevel: UnderstandingLevel;
+  trustLevel: TrustLevel;
   nextStepsForBetterCommunication: {
-    steps: { title: string, icon?: string }[]
-    notes?: string
-  }
+    steps: { title: string; icon?: string }[];
+    notes?: string;
+  };
 }
 
 export interface MockSessionAnalysisForPatient {
-  session: string
-  sessionNumber: number
-  mainPoints: { title: string, icon?: string }[]
-  sessionProgress: string
-  emotionalJourney: string
-  personalGrowth: string
-  therapeuticRelationship: string
+  session: string;
+  sessionNumber: number;
+  mainPoints: { title: string; icon?: string }[];
+  sessionProgress: string;
+  emotionalJourney: string;
+  personalGrowth: string;
+  therapeuticRelationship: string;
 }
 
 // Mock Data
@@ -101,7 +101,7 @@ export const mockMainPoint: MainPoint = {
     { title: 'شناسایی موقعیت‌هایی که مرزهایم رعایت نمی‌شود و تحلیل واکنشم', completed: false, icon: '🔍' },
     { title: 'مطالعه مقاله‌ای درباره مرزهای سالم در روابط', completed: false, icon: '📚' },
   ],
-}
+};
 
 export const mockSessionProgress: SessionProgress = {
   session: 'RELATION_RECORD_ID',
@@ -192,7 +192,7 @@ export const mockSessionProgress: SessionProgress = {
     responsible: 'من',
     dueDate: '2025-05-16',
   },
-}
+};
 
 export const mockEmotionalJourney: MockEmotionalJourney = {
   session: 'RELATION_RECORD_ID',
@@ -211,7 +211,7 @@ export const mockEmotionalJourney: MockEmotionalJourney = {
     effectiveness:
       'احساس می‌کنم تکنیک‌های ذهن‌آگاهی و نوشتن احساساتم بیشترین تاثیر را داشتند. صحبت با دوستان هم به کاهش اضطرابم کمک کرد، اما هنوز باید تمرین کنم تا به طور مداوم از این روش‌ها استفاده کنم.',
   },
-}
+};
 
 export const mockPersonalGrowth: MockPersonalGrowth = {
   session: 'RELATION_RECORD_ID',
@@ -236,7 +236,7 @@ export const mockPersonalGrowth: MockPersonalGrowth = {
     summary:
       'در این جلسه مهارت‌هایی را تمرین کردم که می‌توانم در زندگی روزمره‌ام به کار ببرم و به تدریج اعتماد به نفس بیشتری پیدا کنم.',
   },
-}
+};
 
 export const mockTherapeuticRelationship: TherapeuticRelationship = {
   session: 'RELATION_RECORD_ID',
@@ -252,7 +252,7 @@ export const mockTherapeuticRelationship: TherapeuticRelationship = {
     notes:
       'می‌خواهم ارتباطم با درمانگرم را بازتر و شفاف‌تر کنم تا بهتر بتوانم پیشرفت کنم. گاهی هنوز احساس خجالت دارم اما تصمیم دارم این احساس را مدیریت کنم و بیشتر به خودم اعتماد کنم.',
   },
-}
+};
 
 export const mockSessionAnalysisForPatient: SessionAnalysisForPatient = {
   session: 'RELATION_RECORD_ID',
@@ -268,4 +268,4 @@ export const mockSessionAnalysisForPatient: SessionAnalysisForPatient = {
   emotionalJourney: 'RELATION_RECORD_ID',
   personalGrowth: 'RELATION_RECORD_ID',
   therapeuticRelationship: 'RELATION_RECORD_ID',
-}
+};

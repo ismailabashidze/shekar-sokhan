@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 // the v-model should be an array
-const values = ref([])
+const values = ref([]);
 
 const people = [
   {
@@ -88,5 +88,5 @@ const people = [
     text: 'Product Manager',
     media: '/img/avatars/2.svg',
   },
-]
+];
 </script>

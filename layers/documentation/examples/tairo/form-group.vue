@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-const firstName = ref('')
-const lastName = ref('')
-const email = ref('')
+const firstName = ref('');
+const lastName = ref('');
+const email = ref('');
 </script>

@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-const value = ref<any>([])
+const value = ref<any>([]);
 
 const tree = [
   {
@@ -62,5 +62,5 @@ const tree = [
   {
     item: 'Item 4',
   },
-]
+];
 </script>

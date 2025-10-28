@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-course-dark.png',
     order: 13,
   },
-})
+});
 
 const courses = [
   {
@@ -99,7 +99,7 @@ const courses = [
       },
     ],
   },
-]
+];
 
 const files = [
   {
@@ -120,7 +120,7 @@ const files = [
     uploaded: '2 weeks ago',
     icon: '/img/icons/files/doc-2.svg',
   },
-]
+];
 
 const students = [
   {
@@ -163,7 +163,7 @@ const students = [
     status: 'Offline',
     presence: 'On time',
   },
-]
+];
 </script>
 
 <template>

@@ -9,26 +9,26 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-action-2-dark.png',
     order: 86,
   },
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const isModalOpen = ref(false)
-const isSubmitting = ref(false)
+const isModalOpen = ref(false);
+const isSubmitting = ref(false);
 
-const couponCode = ref('')
+const couponCode = ref('');
 
 function closeModal() {
-  isModalOpen.value = false
+  isModalOpen.value = false;
 }
 function openModal() {
-  isModalOpen.value = true
+  isModalOpen.value = true;
 }
-const nuxtApp = useNuxtApp()
-const toaster = useToaster()
+const nuxtApp = useNuxtApp();
+const toaster = useToaster();
 const redeem = async () => {
-  isModalOpen.value = false
-  isSubmitting.value = true
+  isModalOpen.value = false;
+  isSubmitting.value = true;
 
   try {
     const { data, error } = await useAsyncData(
@@ -41,8 +41,8 @@ const redeem = async () => {
           },
           method: 'POST',
           timeout: 10000, // Add 10 second timeout
-        })
-        return structuredClone(record)
+        });
+        return structuredClone(record);
       },
       {
         server: false,
@@ -51,7 +51,7 @@ const redeem = async () => {
         watch: false,
         retry: 0,
       },
-    )
+    );
 
     if (!error.value) {
       toaster.show({
@@ -60,8 +60,8 @@ const redeem = async () => {
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
-      navigateTo('/darmana/patients/choosePatient')
+      });
+      navigateTo('/darmana/patients/choosePatient');
     }
     else {
       toaster.show({
@@ -70,23 +70,23 @@ const redeem = async () => {
         color: 'danger',
         icon: 'ph:warning',
         closable: true,
-      })
+      });
     }
   }
   catch (e) {
-    console.error('Error redeeming discount:', e)
+    console.error('Error redeeming discount:', e);
     toaster.show({
       title: 'خطا',
       message: 'خطا در ارتباط با سرور. لطفا مجددا تلاش کنید.',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
   finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
-}
+};
 </script>
 
 <template>

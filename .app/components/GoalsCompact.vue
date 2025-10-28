@@ -8,12 +8,12 @@ const props = withDefaults(
       | 'danger'
       | 'primary'
       | 'lime'
-      | 'sky'
+      | 'sky';
   }>(),
   {
     color: 'success',
   },
-)
+);
 
 const todos = [
   {
@@ -46,56 +46,56 @@ const todos = [
     description: 'Review complete design system',
     completed: true,
   },
-]
+];
 
-const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2'])
-const { goals, getGoals } = useGoal()
+const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2']);
+const { goals, getGoals } = useGoal();
 
 const progressFaText = (p: string) => {
   if (p == 'not started') {
-    return 'هنوز آغاز نشده است'
+    return 'هنوز آغاز نشده است';
   }
   else if (p == 'initialized') {
-    return 'مقدار دهی اولیه'
+    return 'مقدار دهی اولیه';
   }
   else if (p == 'in progress') {
-    return 'در حال انجام'
+    return 'در حال انجام';
   }
   else if (p == 'completed') {
-    return 'انجام شده'
+    return 'انجام شده';
   }
   else if (p == 'closed') {
-    return 'بسته شده'
+    return 'بسته شده';
   }
-  return 'Unknown'
-}
+  return 'Unknown';
+};
 const progressFaColor = (p: string) => {
   if (p == 'not started') {
-    return 'primary'
+    return 'primary';
   }
   else if (p == 'initialized') {
-    return 'primary'
+    return 'primary';
   }
   else if (p == 'in progress') {
-    return 'info'
+    return 'info';
   }
   else if (p == 'completed') {
-    return 'success'
+    return 'success';
   }
   else if (p == 'closed') {
-    return 'danger'
+    return 'danger';
   }
-  return 'default'
-}
+  return 'default';
+};
 onMounted(async () => {
-  await getGoals()
+  await getGoals();
   goals.value = goals.value.map((g) => {
     return {
       ...g,
       ...g.expand.generalTherapicGoal,
-    }
-  })
-})
+    };
+  });
+});
 </script>
 
 <template>

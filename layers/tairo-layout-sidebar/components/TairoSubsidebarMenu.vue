@@ -1,27 +1,27 @@
 <script setup lang="ts">
 interface NavigationGroupSeparator {
-  divider?: boolean
+  divider?: boolean;
 }
 interface NavigationGroupLink {
-  name: string
-  to: string
+  name: string;
+  to: string;
 }
 interface NavigationGroupCollapseLink {
-  name: string
+  name: string;
   children: {
-    name: string
-    to: string
-    icon: string
-  }[]
+    name: string;
+    to: string;
+    icon: string;
+  }[];
 }
 type NavigationItem =
   | NavigationGroupSeparator
   | NavigationGroupLink
-  | NavigationGroupCollapseLink
+  | NavigationGroupCollapseLink;
 
 const props = defineProps<{
-  navigation: NavigationItem[]
-}>()
+  navigation: NavigationItem[];
+}>();
 </script>
 
 <template>

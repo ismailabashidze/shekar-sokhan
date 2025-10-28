@@ -1,24 +1,24 @@
 // const LLM_ADDRESS = 'http://127.0.0.1:8000/query'
-const LLM_ADDRESS = 'http://193.163.201.12:8000/query'
-const LLM_ADDRESS_RUNPOD = 'https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions'
-const RUNPOD_TOKEN = '8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3'
-const LLM_MODEL = 'cognitivecomputations/dolphin-2.8-mistral-7b-v02'
-const LLM_TEMPERATURE = 1
-const LLM_MAX_TOKENS = 8192
-const LLM_REPEAT_PENALTY = 2
+const LLM_ADDRESS = 'http://193.163.201.12:8000/query';
+const LLM_ADDRESS_RUNPOD = 'https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions';
+const RUNPOD_TOKEN = '8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3';
+const LLM_MODEL = 'cognitivecomputations/dolphin-2.8-mistral-7b-v02';
+const LLM_TEMPERATURE = 1;
+const LLM_MAX_TOKENS = 8192;
+const LLM_REPEAT_PENALTY = 2;
 
 export type LLMMessage = {
-  role: 'system' | 'assistant' | 'user'
-  content: string
-}
+  role: 'system' | 'assistant' | 'user';
+  content: string;
+};
 
 async function fetchLLM(body: any) {
   const headers = {
     'Content-Type': 'application/json',
-  }
+  };
   const sendToLLM = body.llmMessages.map((msg) => {
-    return { role: msg.role, content: JSON.parse(msg.content).message }
-  })
+    return { role: msg.role, content: JSON.parse(msg.content).message };
+  });
   try {
     const sysPrompt = await $fetch(LLM_ADDRESS, {
       method: 'POST',
@@ -60,23 +60,23 @@ async function fetchLLM(body: any) {
           `),
       },
 
-    })
-    console.log('---SYS PROMPT---')
-    console.log(sysPrompt.final_response)
+    });
+    console.log('---SYS PROMPT---');
+    console.log(sysPrompt.final_response);
 
     if (typeof sysPrompt.final_response === 'string')
-      return sysPrompt.final_response
-    else JSON.stringify(sysPrompt.final_response)
-    return
+      return sysPrompt.final_response;
+    else JSON.stringify(sysPrompt.final_response);
+    return;
   }
   catch (e) {
-    return e
+    return e;
   }
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = await readBody(event);
   return await fetchLLM(
     body,
-  )
-})
+  );
+});

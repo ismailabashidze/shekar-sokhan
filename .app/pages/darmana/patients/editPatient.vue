@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useFieldError, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useFieldError, useForm } from 'vee-validate';
+import { z } from 'zod';
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 definePageMeta({
   title: 'ویرایش بیمار',
   layout: 'sidebar',
-})
+});
 
-const route = useRoute()
-const patientId = route.query.userId as string
-const role = useLocalStorage('role', '')
-const isAdmin = computed(() => role.value === 'admin')
+const route = useRoute();
+const patientId = route.query.userId as string;
+const role = useLocalStorage('role', '');
+const isAdmin = computed(() => role.value === 'admin');
 
 const VALIDATION_TEXT = {
   NAME_REQUIRED: 'نام بیمار نمی‌تواند خالی باشد',
@@ -28,9 +28,9 @@ const VALIDATION_TEXT = {
   MOTIVATION_REQUIRED: 'انگیزه نمی‌تواند خالی باشد',
   MOOD_REQUIRED: 'حالت روحی و احساسات فعلی نمی‌تواند خالی باشد',
   AVATAR_TOO_BIG: 'اندازه تصویر آواتار باید کمتر از ۱ مگابایت باشد',
-}
+};
 
-const ONE_MB = 1000000
+const ONE_MB = 1000000;
 
 const zodSchema = z.object({
   avatar: z
@@ -42,8 +42,8 @@ const zodSchema = z.object({
   patient: z.object({
     name: z.string().min(1, VALIDATION_TEXT.NAME_REQUIRED),
     age: z.preprocess((val) => {
-      if (val === '') return undefined
-      return Number(val)
+      if (val === '') return undefined;
+      return Number(val);
     }, z.number({
       required_error: VALIDATION_TEXT.AGE_REQUIRED,
       invalid_type_error: VALIDATION_TEXT.AGE_INVALID,
@@ -58,11 +58,11 @@ const zodSchema = z.object({
     moodAndCurrentEmotions: z.string().min(1, VALIDATION_TEXT.MOOD_REQUIRED),
     isActive: z.boolean().default(true),
   }),
-})
+});
 
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 
 const initialValues: FormInput = {
   avatar: null,
@@ -79,15 +79,15 @@ const initialValues: FormInput = {
     moodAndCurrentEmotions: '',
     isActive: true,
   },
-}
+};
 
-const nuxtApp = useNuxtApp()
-const { updatePatient } = usePatient()
+const nuxtApp = useNuxtApp();
+const { updatePatient } = usePatient();
 
 // Fetch patient data
 const fetchPatientData = async () => {
   try {
-    const record = await nuxtApp.$pb.collection('patients').getOne(patientId)
+    const record = await nuxtApp.$pb.collection('patients').getOne(patientId);
     if (record) {
       // Then set other fields
       setFieldValue('patient', {
@@ -102,42 +102,42 @@ const fetchPatientData = async () => {
         motivation: record.motivation,
         moodAndCurrentEmotions: record.moodAndCurrentEmotions,
         isActive: record.isActive ?? true,
-      })
+      });
 
       // If avatar exists, create a File object from the URL
       if (record.avatar) {
-        const avatarUrl = `https://pocket.zehna.ir/api/files/patients/${patientId}/${record.avatar}`
-        const response = await fetch(avatarUrl)
-        const blob = await response.blob()
-        const file = new File([blob], record.avatar, { type: blob.type })
-        setFieldValue('avatar', file)
+        const avatarUrl = `https://pocket.zehna.ir/api/files/patients/${patientId}/${record.avatar}`;
+        const response = await fetch(avatarUrl);
+        const blob = await response.blob();
+        const file = new File([blob], record.avatar, { type: blob.type });
+        setFieldValue('avatar', file);
       }
     }
   }
   catch (error) {
-    console.error('Error fetching patient:', error)
+    console.error('Error fetching patient:', error);
     toaster.show({
       title: 'خطا',
       message: 'مشکلی در دریافت اطلاعات بیمار پیش آمد.',
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   }
-}
+};
 
 const currentAvatar = computed(() => {
   if (!patientId)
-    return '/img/avatars/default-male.jpg'
+    return '/img/avatars/default-male.jpg';
 
   if (values.avatar instanceof File)
-    return URL.createObjectURL(values.avatar)
+    return URL.createObjectURL(values.avatar);
 
   if (values.avatar)
-    return `https://pocket.zehna.ir/api/files/patients/${patientId}/${values.avatar}`
+    return `https://pocket.zehna.ir/api/files/patients/${patientId}/${values.avatar}`;
 
-  return '/img/avatars/default-male.jpg'
-})
+  return '/img/avatars/default-male.jpg';
+});
 
 const {
   handleSubmit,
@@ -151,38 +151,38 @@ const {
 } = useForm<FormInput>({
   validationSchema,
   initialValues,
-})
+});
 
-const success = ref(false)
+const success = ref(false);
 
-const inputFile = ref<FileList | null>(null)
-const fileError = useFieldError('avatar')
+const inputFile = ref<FileList | null>(null);
+const fileError = useFieldError('avatar');
 watch(inputFile, (value) => {
-  const file = value?.item(0) || null
-  setFieldValue('avatar', file)
-})
+  const file = value?.item(0) || null;
+  setFieldValue('avatar', file);
+});
 
 const beforeRouteLeave = (to: any, from: any) => {
   // Only show warning for admin users and if there are unsaved changes
   if (isAdmin.value && meta.value.dirty) {
-    const answer = window.confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟')
+    const answer = window.confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟');
     if (!answer) {
-      return false
+      return false;
     }
   }
-  return true
-}
+  return true;
+};
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     try {
-      const formData = new FormData()
+      const formData = new FormData();
       if (values.avatar instanceof File)
-        formData.append('avatar', values.avatar)
+        formData.append('avatar', values.avatar);
 
       const patientData = {
         name: values.patient.name,
@@ -196,124 +196,124 @@ const onSubmit = handleSubmit(
         motivation: values.patient.motivation,
         moodAndCurrentEmotions: values.patient.moodAndCurrentEmotions,
         isActive: values.patient.isActive,
-      }
+      };
 
       // Add all patient data fields to FormData
       Object.entries(patientData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           // Convert boolean to string 'true'/'false' for FormData
-          const formValue = typeof value === 'boolean' ? value.toString() : value
-          formData.append(key, formValue)
+          const formValue = typeof value === 'boolean' ? value.toString() : value;
+          formData.append(key, formValue);
         }
-      })
+      });
 
-      const { updatePatient } = usePatient()
-      const record = await updatePatient(patientId, formData)
+      const { updatePatient } = usePatient();
+      const record = await updatePatient(patientId, formData);
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'موفقیت',
         message: 'اطلاعات بیمار با موفقیت به‌روزرسانی شد!',
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
 
       document.documentElement.scrollTo({
         top: 0,
         behavior: 'smooth',
-      })
+      });
 
-      success.value = true
+      success.value = true;
       setTimeout(() => {
-        success.value = false
-      }, 3000)
+        success.value = false;
+      }, 3000);
     }
     catch (error: any) {
-      console.error('patient-update-error', error)
+      console.error('patient-update-error', error);
 
       if (error.data && error.data.data) {
-        const backendErrors = error.data.data
+        const backendErrors = error.data.data;
         for (const key in backendErrors) {
-          setFieldError(`patient.${key}`, backendErrors[key].message)
+          setFieldError(`patient.${key}`, backendErrors[key].message);
         }
       }
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'خطا',
         message: 'مشکلی در به‌روزرسانی بیمار پیش آمد. لطفاً دوباره تلاش کنید.',
         color: 'danger',
         icon: 'lucide:alert-triangle',
         closable: true,
-      })
+      });
 
       document.documentElement.scrollTo({
         top: 0,
         behavior: 'smooth',
-      })
+      });
     }
   },
   () => {
-    success.value = false
+    success.value = false;
 
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 
 // Add loading state
-const isLoading = ref(true)
+const isLoading = ref(true);
 
 onMounted(() => {
   // Add 2 second delay for skeleton loading
   setTimeout(() => {
-    isLoading.value = false
-  }, 2000)
+    isLoading.value = false;
+  }, 2000);
 
   if (patientId) {
-    fetchPatientData()
+    fetchPatientData();
   }
-})
+});
 
-const isDeleteModalOpen = ref(false)
+const isDeleteModalOpen = ref(false);
 
 const openDeleteModal = () => {
-  isDeleteModalOpen.value = true
-}
+  isDeleteModalOpen.value = true;
+};
 
 const closeDeleteModal = () => {
-  isDeleteModalOpen.value = false
-}
+  isDeleteModalOpen.value = false;
+};
 
 const confirmDelete = async () => {
   try {
-    await nuxtApp.$pb.collection('patients').delete(patientId)
+    await nuxtApp.$pb.collection('patients').delete(patientId);
     toaster.show({
       title: 'موفقیت',
       message: 'بیمار با موفقیت حذف شد.',
       color: 'success',
       icon: 'ph:check',
       closable: true,
-    })
-    navigateTo('/darmana/patients/choosePatient')
+    });
+    navigateTo('/darmana/patients/choosePatient');
   }
   catch (error) {
-    console.error('Error deleting patient:', error)
+    console.error('Error deleting patient:', error);
     toaster.show({
       title: 'خطا',
       message: 'مشکلی در حذف بیمار پیش آمد.',
       color: 'danger',
       icon: 'lucide:alert-triangle',
       closable: true,
-    })
+    });
   }
   finally {
-    closeDeleteModal()
+    closeDeleteModal();
   }
-}
+};
 </script>
 
 <template>

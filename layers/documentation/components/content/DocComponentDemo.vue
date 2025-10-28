@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    tag?: string
-    title?: string
-    demo?: string
-    code?: boolean
-    dark?: boolean
-    condensed?: boolean
+    tag?: string;
+    title?: string;
+    demo?: string;
+    code?: boolean;
+    dark?: boolean;
+    condensed?: boolean;
   }>(),
   {
     tag: undefined,
@@ -16,52 +16,52 @@ const props = withDefaults(
     dark: true,
     condensed: false,
   },
-)
+);
 
-const demoRE = /^#examples\/([\w-]+)\/([\w-]+).vue$/
+const demoRE = /^#examples\/([\w-]+)\/([\w-]+).vue$/;
 
 if (import.meta.dev && props.demo && !demoRE.test(props.demo)) {
   console.error(
     `Invalid demo path: ${props.demo}. Expected format: #examples/<folder>/<file>.vue`,
-  )
+  );
 }
 
 const info = computed(() => {
-  const [, folder, file] = props.demo?.match(demoRE) ?? []
-  return { folder, file }
-})
+  const [, folder, file] = props.demo?.match(demoRE) ?? [];
+  return { folder, file };
+});
 
 const hasDemoInfo = computed(() =>
   Boolean(info.value.folder && info.value.file),
-)
-const demoPending = ref(hasDemoInfo.value)
-const exampleComponent = shallowRef()
-const exampleSource = shallowRef()
+);
+const demoPending = ref(hasDemoInfo.value);
+const exampleComponent = shallowRef();
+const exampleSource = shallowRef();
 
 const exampleMarkdown = computed(() => {
   if (!exampleSource.value) {
-    return ''
+    return '';
   }
-  return '```vue\n' + exampleSource.value + '\n```'
-})
+  return '```vue\n' + exampleSource.value + '\n```';
+});
 
 const hasDemoContent = computed(() =>
   Boolean(exampleComponent.value && exampleMarkdown.value),
-)
+);
 
-const forceDark = ref(false)
-const { md } = useTailwindBreakpoints()
+const forceDark = ref(false);
+const { md } = useTailwindBreakpoints();
 
-await loadDemo()
-watch(info, loadDemo)
+await loadDemo();
+watch(info, loadDemo);
 
 async function loadDemo() {
   if (!info.value.folder || !info.value.file) {
-    exampleComponent.value = null
-    exampleSource.value = ''
-    return
+    exampleComponent.value = null;
+    exampleSource.value = '';
+    return;
   }
-  demoPending.value = true
+  demoPending.value = true;
 
   // dynamically import the example component and source
   // we can not use path alias, nor paths in variables
@@ -74,16 +74,16 @@ async function loadDemo() {
       import(
         `../../examples/${info.value.folder}/${info.value.file}.vue?raw`
       ).then(m => m.default),
-    ])
-    exampleComponent.value = markRaw(compo)
-    exampleSource.value = source
+    ]);
+    exampleComponent.value = markRaw(compo);
+    exampleSource.value = source;
   }
   catch {
-    exampleComponent.value = null
-    exampleSource.value = ''
+    exampleComponent.value = null;
+    exampleSource.value = '';
   }
   finally {
-    demoPending.value = false
+    demoPending.value = false;
   }
 }
 </script>

@@ -1,22 +1,22 @@
 <script lang="ts" setup>
 const props = defineProps<{
-  hasPreview?: boolean
+  hasPreview?: boolean;
   // activeTabIndex: number
   tabs: {
-    filename?: string
-    language?: string
-    code?: string
-    active?: boolean
-    component: any
-  }[]
-}>()
+    filename?: string;
+    language?: string;
+    code?: string;
+    active?: boolean;
+    component: any;
+  }[];
+}>();
 
-const activeTabIndex = defineModel<number>('activeTabIndex')
+const activeTabIndex = defineModel<number>('activeTabIndex');
 
 const { copy, copied, isSupported } = useClipboard({
   source: () => activeTab.value?.code ?? '',
-})
-const activeTab = computed(() => activeTabIndex.value !== undefined ? props.tabs[activeTabIndex.value] : null)
+});
+const activeTab = computed(() => activeTabIndex.value !== undefined ? props.tabs[activeTabIndex.value] : null);
 </script>
 
 <template>

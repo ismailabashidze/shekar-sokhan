@@ -22,5 +22,5 @@
 </template>
 
 <script setup lang="ts">
-const value = ref('')
+const value = ref('');
 </script>

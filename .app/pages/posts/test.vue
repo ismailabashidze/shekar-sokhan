@@ -2,23 +2,23 @@
 definePageMeta({
   title: 'Test Posts Collection',
   layout: 'sidebar',
-})
+});
 
-const nuxtApp = useNuxtApp()
-const pb = nuxtApp.$pb
-const testResults = ref<any[]>([])
+const nuxtApp = useNuxtApp();
+const pb = nuxtApp.$pb;
+const testResults = ref<any[]>([]);
 
 const testPocketBase = async () => {
-  console.log('🧪 Testing PocketBase connection...')
+  console.log('🧪 Testing PocketBase connection...');
 
-  const results = []
+  const results = [];
 
   // Test 1: Check PocketBase instance
   results.push({
     test: 'PocketBase Instance',
     result: !!pb,
     details: pb ? 'Available' : 'Not Available',
-  })
+  });
 
   // Test 2: Check auth store
   results.push({
@@ -31,52 +31,52 @@ const testPocketBase = async () => {
           token: pb.authStore.token ? 'Token present' : 'No token',
         }
       : 'Not Available',
-  })
+  });
 
   // Test 3: Check PocketBase collections
   try {
-    console.log('📋 Checking available collections...')
+    console.log('📋 Checking available collections...');
     const collections = await pb.send('/api/collections', {
       method: 'GET',
-    })
+    });
     results.push({
       test: 'Collections List',
       result: true,
       details: collections?.items?.map((c: any) => c.name) || 'No collections found',
-    })
+    });
   }
   catch (err) {
     results.push({
       test: 'Collections List',
       result: false,
       details: err,
-    })
+    });
   }
 
   // Test 4: Try to get posts collection info
   try {
-    console.log('📝 Checking posts collection...')
+    console.log('📝 Checking posts collection...');
     const postsCollection = await pb.send('/api/collections/posts', {
       method: 'GET',
-    })
+    });
     results.push({
       test: 'Posts Collection Info',
       result: true,
       details: postsCollection,
-    })
+    });
   }
   catch (err) {
     results.push({
       test: 'Posts Collection Info',
       result: false,
       details: err,
-    })
+    });
   }
 
   // Test 5: Try to get posts records
   try {
-    console.log('📄 Checking posts records...')
-    const postsRecords = await pb.collection('posts').getList(1, 5)
+    console.log('📄 Checking posts records...');
+    const postsRecords = await pb.collection('posts').getList(1, 5);
     results.push({
       test: 'Posts Records',
       result: true,
@@ -90,26 +90,26 @@ const testPocketBase = async () => {
           created: item.created,
         })) || [],
       },
-    })
+    });
   }
   catch (err) {
     results.push({
       test: 'Posts Records',
       result: false,
       details: err,
-    })
+    });
   }
 
   // Test 6: Try usePosts composable
   try {
-    console.log('🔧 Testing usePosts composable...')
-    const { posts, loading, error, getPosts } = usePosts()
+    console.log('🔧 Testing usePosts composable...');
+    const { posts, loading, error, getPosts } = usePosts();
 
     await getPosts({
       page: 1,
       perPage: 5,
       filters: { status: 'published' },
-    })
+    });
 
     results.push({
       test: 'usePosts Composable',
@@ -124,23 +124,23 @@ const testPocketBase = async () => {
           status: post.status,
         })) || [],
       },
-    })
+    });
   }
   catch (err) {
     results.push({
       test: 'usePosts Composable',
       result: false,
       details: err,
-    })
+    });
   }
 
-  testResults.value = results
-  console.log('🧪 Test Results:', results)
-}
+  testResults.value = results;
+  console.log('🧪 Test Results:', results);
+};
 
 onMounted(() => {
-  testPocketBase()
-})
+  testPocketBase();
+});
 </script>
 
 <template>

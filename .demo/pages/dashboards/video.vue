@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-video-dark.png',
     order: 19,
   },
-})
+});
 
 const featuredVideos = [
   {
@@ -72,7 +72,7 @@ const featuredVideos = [
       avatar: '/img/avatars/2.svg',
     },
   },
-]
+];
 
 const videos = [
   {
@@ -185,7 +185,7 @@ const videos = [
       avatar: '/img/avatars/2.svg',
     },
   },
-]
+];
 </script>
 
 <template>

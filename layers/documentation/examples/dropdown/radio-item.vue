@@ -93,5 +93,5 @@
 </template>
 
 <script setup lang="ts">
-const value = ref('personal')
+const value = ref('personal');
 </script>

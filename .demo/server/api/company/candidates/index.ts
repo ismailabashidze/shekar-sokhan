@@ -1,41 +1,41 @@
 interface Candidate {
-  id: number
-  username: string
-  position: string
-  src?: string
-  badge: string
-  location: string
-  industry: string
-  status: string
-  initials?: string
+  id: number;
+  username: string;
+  position: string;
+  src?: string;
+  badge: string;
+  location: string;
+  industry: string;
+  status: string;
+  initials?: string;
   tasks: {
-    pending: number
-    done: number
-    status: number
-  }
+    pending: number;
+    done: number;
+    status: number;
+  };
   relations: {
-    id: number
-    src?: string
-    initials?: string
-    text?: string
-  }[]
+    id: number;
+    src?: string;
+    initials?: string;
+    text?: string;
+  }[];
 }
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const perPage = parseInt((query.perPage as string) || '5', 10)
-  const page = parseInt((query.page as string) || '1', 10)
-  const filter = (query.filter as string) || ''
+  const query = getQuery(event);
+  const perPage = parseInt((query.perPage as string) || '5', 10);
+  const page = parseInt((query.page as string) || '1', 10);
+  const filter = (query.filter as string) || '';
 
   if (perPage >= 50) {
     // Create an artificial delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  const data = await getDemoData()
+  const data = await getDemoData();
 
-  const offset = (page - 1) * perPage
-  const filterRe = new RegExp(filter, 'i')
+  const offset = (page - 1) * perPage;
+  const filterRe = new RegExp(filter, 'i');
 
   return {
     total: data.length,
@@ -45,11 +45,11 @@ export default defineEventHandler(async (event) => {
         .filter((item) => {
           return [item.username, item.location, item.position, item.industry].some(
             item => item.match(filterRe),
-          )
+          );
         })
         .slice(offset, offset + perPage),
-  }
-})
+  };
+});
 
 async function getDemoData(): Promise<Candidate[]> {
   return Promise.resolve([
@@ -595,5 +595,5 @@ async function getDemoData(): Promise<Candidate[]> {
         },
       ],
     },
-  ])
+  ]);
 }

@@ -65,10 +65,10 @@
     pending.value = true;
     try {
       const therapists = await getTherapists();
-      const activeTherapists = therapists.filter((therapist) => therapist.isActive);
+      const activeTherapists = therapists.filter(therapist => therapist.isActive);
 
       // Map therapists to the format expected by the template
-      const mappedTherapists = activeTherapists.map((therapist) => ({
+      const mappedTherapists = activeTherapists.map(therapist => ({
         id: therapist.id,
         username: therapist.name,
         position: therapist.specialty,
@@ -88,10 +88,12 @@
       }));
 
       data.value = { data: mappedTherapists };
-    } catch (err) {
+    }
+ catch (err) {
       console.error('Error fetching therapists:', err);
       error.value = 'خطا در دریافت اطلاعات روانشناسان';
-    } finally {
+    }
+ finally {
       pending.value = false;
     }
   };
@@ -126,7 +128,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center">
           <Icon name="ph:robot-duotone" class="text-primary-500 ml-2 size-6" />
-          <BaseHeading tag="h2" size="md" weight="medium" class="text-muted-800 dark:text-white">
+          <BaseHeading
+            tag="h2"
+            size="md"
+            weight="medium"
+            class="text-muted-800 dark:text-white"
+          >
             انتخاب عامل هوش مصنوعی
           </BaseHeading>
         </div>
@@ -169,7 +176,11 @@
       <div v-if="pending" class="py-10">
         <div class="flex flex-col items-center justify-center">
           <div class="mt-8 grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div v-for="i in 8" :key="i" class="flex flex-col">
+            <div
+              v-for="i in 8"
+              :key="i"
+              class="flex flex-col"
+            >
               <BaseCard shape="curved" class="flex flex-col overflow-hidden">
                 <div class="bg-muted-50 dark:bg-muted-800/30 p-6">
                   <div class="flex items-center justify-between">
@@ -209,15 +220,21 @@
               class="block dark:hidden"
               src="/img/illustrations/placeholders/flat/placeholder-search.png"
               alt="Placeholder image"
-            />
+            >
             <img
               class="hidden dark:block"
               src="/img/illustrations/placeholders/flat/placeholder-search.png"
               alt="Placeholder image"
-            />
+            >
           </template>
           <template #action>
-            <BaseButton color="primary" shape="curved" @click="filter = ''">نمایش همه عامل‌ها</BaseButton>
+            <BaseButton
+              color="primary"
+              shape="curved"
+              @click="filter = ''"
+            >
+              نمایش همه عامل‌ها
+            </BaseButton>
           </template>
         </BasePlaceholderPage>
       </div>
@@ -232,12 +249,20 @@
           leave-from-class="opacity-100 translate-y-0"
           leave-to-class="opacity-0 -translate-y-4"
         >
-          <div v-for="therapist in data.data" :key="therapist.id" class="flex flex-col">
+          <div
+            v-for="therapist in data.data"
+            :key="therapist.id"
+            class="flex flex-col"
+          >
             <BaseCard shape="curved" class="flex flex-col overflow-hidden">
               <div class="bg-muted-50 dark:bg-muted-800/30 p-6">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
-                    <BaseTag :color="therapist.status === 'online' ? 'success' : 'warning'" shape="curved" size="sm">
+                    <BaseTag
+                      :color="therapist.status === 'online' ? 'success' : 'warning'"
+                      shape="curved"
+                      size="sm"
+                    >
                       {{ therapist.status === 'online' ? 'فعال' : 'غیرفعال' }}
                     </BaseTag>
                   </div>
@@ -254,7 +279,13 @@
                   />
                 </div>
                 <div class="text-center">
-                  <BaseHeading as="h3" size="sm" weight="medium" lead="tight" class="text-muted-800 dark:text-white">
+                  <BaseHeading
+                    as="h3"
+                    size="sm"
+                    weight="medium"
+                    lead="tight"
+                    class="text-muted-800 dark:text-white"
+                  >
                     {{ therapist.username }}
                   </BaseHeading>
                   <BaseParagraph size="sm" class="text-muted-400 mt-2">

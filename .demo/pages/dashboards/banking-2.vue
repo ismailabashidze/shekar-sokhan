@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-banking-2-dark.png',
     order: 8,
   },
-})
+});
 
 const cards = [
   {
@@ -27,7 +27,7 @@ const cards = [
     endingNumber: 1231,
     balance: 839.49,
   },
-]
+];
 
 const banks = [
   {
@@ -48,17 +48,17 @@ const banks = [
     text: 'checking **** **** 8448',
     media: '/img/icons/banking/bank-3.svg',
   },
-]
+];
 
-const selectedBank = ref(banks[0])
-const activeCard = ref(0)
+const selectedBank = ref(banks[0]);
+const activeCard = ref(0);
 
-const areaExpenses = reactive(useAreaExpenses())
+const areaExpenses = reactive(useAreaExpenses());
 
 function useAreaExpenses() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 250
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 250;
 
   const options = {
     chart: {
@@ -136,7 +136,7 @@ function useAreaExpenses() {
       type: 'solid',
       fillOpacity: 0.7,
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -147,22 +147,22 @@ function useAreaExpenses() {
       name: 'Card Expenses',
       data: generateDayWiseTimeSeries(1, 18),
     },
-  ])
+  ]);
 
   function generateDayWiseTimeSeries(s: number, count: number) {
     const values = [
       [4, 3, 10, 9, 29, 19, 25, 9, 12, 7, 19, 5, 13, 9, 17, 2, 7, 5],
       [2, 3, 8, 7, 22, 16, 23, 7, 11, 5, 12, 5, 10, 4, 15, 2, 6, 2],
-    ]
-    let i = 0
-    const series = []
-    let x = new Date('11 Nov 2020').getTime()
+    ];
+    let i = 0;
+    const series = [];
+    let x = new Date('11 Nov 2020').getTime();
     while (i < count) {
-      series.push([x, values[s][i]])
-      x += 86400000
-      i++
+      series.push([x, values[s][i]]);
+      x += 86400000;
+      i++;
     }
-    return series
+    return series;
   }
 
   return {
@@ -170,7 +170,7 @@ function useAreaExpenses() {
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

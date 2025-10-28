@@ -1,38 +1,38 @@
 export function usePwaCache() {
-  const isClearing = ref(false)
-  const isRefreshing = ref(false)
+  const isClearing = ref(false);
+  const isRefreshing = ref(false);
 
   // Helper: Clear all caches
   const clearAllCaches = async (): Promise<boolean> => {
     try {
-      isClearing.value = true
+      isClearing.value = true;
 
       if (!('serviceWorker' in navigator)) {
-        return false
+        return false;
       }
 
       // Clear browser caches
-      const cacheNames = await caches.keys()
-      await Promise.all(cacheNames.map(name => caches.delete(name)))
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
 
       // Also clear service worker caches via message
-      const registration = await navigator.serviceWorker.ready
+      const registration = await navigator.serviceWorker.ready;
       if (registration.active) {
-        const messageChannel = new MessageChannel()
+        const messageChannel = new MessageChannel();
 
         const success = await new Promise<boolean>((resolve) => {
-          const timeout = setTimeout(() => resolve(false), 5000) // 5 second timeout
+          const timeout = setTimeout(() => resolve(false), 5000); // 5 second timeout
 
           messageChannel.port1.onmessage = (event) => {
-            clearTimeout(timeout)
-            resolve(event.data.success || false)
-          }
+            clearTimeout(timeout);
+            resolve(event.data.success || false);
+          };
 
           registration.active!.postMessage(
             { type: 'CLEAR_ALL_CACHES' },
             [messageChannel.port2],
-          )
-        })
+          );
+        });
 
         if (success) {
 
@@ -42,66 +42,66 @@ export function usePwaCache() {
         }
       }
 
-      return true
+      return true;
     }
     catch (error) {
-      return false
+      return false;
     }
     finally {
-      isClearing.value = false
+      isClearing.value = false;
     }
-  }
+  };
 
   // Helper: Force refresh without cache
   const forceRefresh = async (): Promise<void> => {
     try {
-      isRefreshing.value = true
+      isRefreshing.value = true;
 
       // Clear all caches first
-      await clearAllCaches()
+      await clearAllCaches();
 
       // Unregister service worker
       if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations()
-        await Promise.all(registrations.map(reg => reg.unregister()))
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(reg => reg.unregister()));
       }
 
       // Force reload the page without cache
-      window.location.reload()
+      window.location.reload();
     }
     catch (error) {
       // Fallback to simple reload
-      window.location.reload()
+      window.location.reload();
     }
-  }
+  };
 
   // Helper: Check cache status
   const getCacheStatus = async () => {
     try {
-      if (!('caches' in window)) return null
+      if (!('caches' in window)) return null;
 
-      const cacheNames = await caches.keys()
+      const cacheNames = await caches.keys();
       const cacheStats = await Promise.all(
         cacheNames.map(async (name) => {
-          const cache = await caches.open(name)
-          const keys = await cache.keys()
+          const cache = await caches.open(name);
+          const keys = await cache.keys();
           return {
             name,
             size: keys.length,
-          }
+          };
         }),
-      )
+      );
 
       return {
         totalCaches: cacheNames.length,
         caches: cacheStats,
         totalItems: cacheStats.reduce((sum, cache) => sum + cache.size, 0),
-      }
+      };
     }
     catch (error) {
-      return null
+      return null;
     }
-  }
+  };
 
   return {
     isClearing: readonly(isClearing),
@@ -109,5 +109,5 @@ export function usePwaCache() {
     clearAllCaches,
     forceRefresh,
     getCacheStatus,
-  }
+  };
 }

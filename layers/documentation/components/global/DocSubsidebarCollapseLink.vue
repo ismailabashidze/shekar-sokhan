@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import type { NavItem } from '@nuxt/content/dist/runtime/types'
+import type { NavItem } from '@nuxt/content/dist/runtime/types';
 
 const props = defineProps<{
-  link: NavItem
-}>()
+  link: NavItem;
+}>();
 
-const route = useRoute()
-const isOpen = ref(true)
+const route = useRoute();
+const isOpen = ref(true);
 
-const { toggle } = useSidebar()
-const { xl } = useTailwindBreakpoints()
+const { toggle } = useSidebar();
+const { xl } = useTailwindBreakpoints();
 
 function onLinkClick() {
   if (xl.value) {
-    return
+    return;
   }
 
-  toggle()
+  toggle();
 }
 
-const buttonRef = ref<HTMLElement>()
+const buttonRef = ref<HTMLElement>();
 function onDropClick() {
-  isOpen.value = !isOpen.value
+  isOpen.value = !isOpen.value;
   if (!isOpen.value) {
-    buttonRef.value?.blur()
+    buttonRef.value?.blur();
   }
 }
 </script>

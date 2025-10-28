@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTopnav } from '../composables/topnav'
+import { useTopnav } from '../composables/topnav';
 
 const props = withDefaults(
   defineProps<{
@@ -9,16 +9,16 @@ const props = withDefaults(
       | 'expanded-sm'
       | 'expanded-md'
       | 'expanded-lg'
-      | 'expanded-xl'
-    position: 'fixed' | 'absolute'
+      | 'expanded-xl';
+    position: 'fixed' | 'absolute';
   }>(),
   {
     display: 'expanded-md',
     position: 'absolute',
   },
-)
-const { menuItems, isMobileOpen } = useTopnav()
-const app = useAppConfig()
+);
+const { menuItems, isMobileOpen } = useTopnav();
+const app = useAppConfig();
 </script>
 
 <template>

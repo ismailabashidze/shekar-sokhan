@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Company',
@@ -14,15 +14,15 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-company-dark.png',
     order: 11,
   },
-})
+});
 
-const gaugePersonal = reactive(useGaugePersonal())
-const barSalesProfit = reactive(useBarSalesProfit())
+const gaugePersonal = reactive(useGaugePersonal());
+const barSalesProfit = reactive(useBarSalesProfit());
 
 function useGaugePersonal() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 220
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 220;
 
   const options = {
     title: {
@@ -81,22 +81,22 @@ function useGaugePersonal() {
       },
     },
     labels: ['Average Results'],
-  }
+  };
 
-  const series = shallowRef([76])
+  const series = shallowRef([76]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useBarSalesProfit() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'bar'
-  const height = 250
+  const { primary, info, success } = useTailwindColors();
+  const type = 'bar';
+  const height = 250;
 
   const options = {
     chart: {
@@ -139,7 +139,7 @@ function useBarSalesProfit() {
     yaxis: {
       labels: {
         formatter: function (val: string) {
-          return val + 70
+          return val + 70;
         },
       },
     },
@@ -149,11 +149,11 @@ function useBarSalesProfit() {
     tooltip: {
       y: {
         formatter: function (val: string) {
-          return val + 70
+          return val + 70;
         },
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -168,14 +168,14 @@ function useBarSalesProfit() {
       name: 'Free Cash Flow',
       data: [-35, -29, -34, -44, -25, -22, -18, -17, -29],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 const team = shallowRef([
@@ -215,20 +215,20 @@ const team = shallowRef([
     rate: 69,
     status: 'New',
   },
-])
+]);
 
-const selected = ref<string[]>([])
+const selected = ref<string[]>([]);
 
 const isAllVisibleSelected = computed(() => {
-  return selected.value.length === team.value?.length
-})
+  return selected.value.length === team.value?.length;
+});
 
 function toggleAllVisibleSelection() {
   if (isAllVisibleSelected.value) {
-    selected.value = []
+    selected.value = [];
   }
   else {
-    selected.value = team.value?.map(item => item.id) ?? []
+    selected.value = team.value?.map(item => item.id) ?? [];
   }
 }
 </script>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Project, ProjectStepData } from '../types'
+import type { Project, ProjectStepData } from '../types';
 const {
   steps,
   currentStep,
@@ -8,15 +8,15 @@ const {
 } = useMultiStepForm<
   Project,
   ProjectStepData
->()
+>();
 
-const target = ref(null)
-const open = ref(false)
+const target = ref(null);
+const open = ref(false);
 
 function openDropdown() {
-  open.value = true
+  open.value = true;
 }
-onClickOutside(target, () => (open.value = false))
+onClickOutside(target, () => (open.value = false));
 </script>
 
 <template>

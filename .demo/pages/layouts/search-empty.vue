@@ -9,9 +9,9 @@ definePageMeta({
     srcDark: '/img/screens/layouts-subpages-search-empty-dark.png',
     order: 83,
   },
-})
+});
 
-const searchTerms = ref('Ice cream pizza')
+const searchTerms = ref('Ice cream pizza');
 </script>
 
 <template>

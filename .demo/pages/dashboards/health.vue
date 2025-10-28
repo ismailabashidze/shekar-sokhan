@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Health',
@@ -14,18 +14,18 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-health-dark.png',
     order: 17,
   },
-})
+});
 
-const areaCondition = reactive(useAreaCondition())
-const scatterEnergy = reactive(useScatterEnergy())
-const barOxygen = reactive(useBarOxygen())
-const areaProgress = reactive(useAreaProgress())
-const gaugePersonal = reactive(useGaugePersonal())
+const areaCondition = reactive(useAreaCondition());
+const scatterEnergy = reactive(useScatterEnergy());
+const barOxygen = reactive(useBarOxygen());
+const areaProgress = reactive(useAreaProgress());
+const gaugePersonal = reactive(useGaugePersonal());
 
 function useAreaCondition() {
-  const { primary } = useTailwindColors()
-  const type = 'area'
-  const height = 280
+  const { primary } = useTailwindColors();
+  const type = 'area';
+  const height = 280;
 
   const options = {
     chart: {
@@ -55,27 +55,27 @@ function useAreaCondition() {
     legend: {
       horizontalAlign: 'left',
     },
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'Condition (pt)',
       data: [31, 40, 28, 51, 42, 109, 100],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useScatterEnergy() {
-  const { primary, info, success } = useTailwindColors()
-  const height = 280
-  const type = 'scatter'
+  const { primary, info, success } = useTailwindColors();
+  const height = 280;
+  const type = 'scatter';
 
   const options = {
     chart: {
@@ -119,7 +119,7 @@ function useScatterEnergy() {
       position: 'top',
       horizontalAlign: 'center',
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -155,24 +155,24 @@ function useScatterEnergy() {
         },
       ),
     },
-  ])
+  ]);
 
   function generateDayWiseTimeSeries(
     baseval: number,
     count: number,
-    yrange: { min: number, max: number },
+    yrange: { min: number; max: number },
   ) {
-    let i = 0
-    const series = []
+    let i = 0;
+    const series = [];
     while (i < count) {
       const y
-        = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min
+        = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
 
-      series.push([baseval, y])
-      baseval += 86400000
-      i++
+      series.push([baseval, y]);
+      baseval += 86400000;
+      i++;
     }
-    return series
+    return series;
   }
 
   return {
@@ -180,13 +180,13 @@ function useScatterEnergy() {
     height,
     options,
     series,
-  }
+  };
 }
 
 function useBarOxygen() {
-  const { primary } = useTailwindColors()
-  const height = 280
-  const type = 'bar'
+  const { primary } = useTailwindColors();
+  const height = 280;
+  const type = 'bar';
 
   const options = {
     chart: {
@@ -251,27 +251,27 @@ function useBarOxygen() {
       },
     },
     colors: [primary.value],
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'Variation (pt)',
       data: [23, 26, 10, 7, 11, 18, 16],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useAreaProgress() {
-  const { primary } = useTailwindColors()
-  const type = 'area'
-  const height = 280
+  const { primary } = useTailwindColors();
+  const type = 'area';
+  const height = 280;
 
   const options = {
     chart: {
@@ -301,27 +301,27 @@ function useAreaProgress() {
     legend: {
       horizontalAlign: 'left',
     },
-  } as const
+  } as const;
 
   const series = shallowRef([
     {
       name: 'Progress (pt)',
       data: [31, 40, 28, 51, 42, 109, 100],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useGaugePersonal() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 220
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 220;
 
   const options = {
     title: {
@@ -380,16 +380,16 @@ function useGaugePersonal() {
       },
     },
     labels: ['Average Results'],
-  }
+  };
 
-  const series = shallowRef([76])
+  const series = shallowRef([76]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

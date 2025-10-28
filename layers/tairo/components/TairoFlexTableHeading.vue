@@ -4,12 +4,12 @@ const props = withDefaults(
     /**
      * The type of the heading.
      */
-    type?: 'grow' | 'shrink' | 'stable'
+    type?: 'grow' | 'shrink' | 'stable';
   }>(),
   {
     type: 'stable',
   },
-)
+);
 </script>
 
 <template>

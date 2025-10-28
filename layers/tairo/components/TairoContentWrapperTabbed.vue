@@ -1,18 +1,18 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    title?: string
-    shape?: 'straight' | 'rounded' | 'curved' | 'full'
-    labels: string[]
-    reverse?: boolean
+    title?: string;
+    shape?: 'straight' | 'rounded' | 'curved' | 'full';
+    labels: string[];
+    reverse?: boolean;
   }>(),
   {
     shape: 'rounded',
     title: undefined,
   },
-)
+);
 
-const activeTab = ref('tab-1')
+const activeTab = ref('tab-1');
 </script>
 
 <template>

@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 definePageMeta({
   layout: 'blank',
   title: 'تنظیمات قفل',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const router = useRouter()
-const toaster = useToaster()
-const { setPin, hasPin, removePin } = useLockSystem()
-const { user } = useUser()
+const router = useRouter();
+const toaster = useToaster();
+const { setPin, hasPin, removePin } = useLockSystem();
+const { user } = useUser();
 
 const VALIDATION_TEXT = {
   PIN_REQUIRED: 'ورود پین الزامی است',
@@ -21,7 +21,7 @@ const VALIDATION_TEXT = {
   PIN_INVALID: 'فقط اعداد مجاز است',
   CONFIRM_PIN_REQUIRED: 'تأیید پین الزامی است',
   CONFIRM_PIN_MISMATCH: 'پین‌ها یکسان نیستند',
-}
+};
 
 const zodSchema = z.object({
   pin: z.string({ required_error: VALIDATION_TEXT.PIN_REQUIRED })
@@ -34,15 +34,15 @@ const zodSchema = z.object({
 }).refine(data => data.pin === data.confirmPin, {
   message: VALIDATION_TEXT.CONFIRM_PIN_MISMATCH,
   path: ['confirmPin'],
-})
+});
 
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = computed<FormInput>(() => ({
   pin: '',
   confirmPin: '',
-}))
+}));
 
 const {
   handleSubmit,
@@ -50,21 +50,21 @@ const {
   setFieldError,
 } = useForm({
   validationSchema,
-})
+});
 
-const isRemovingPin = ref(false)
+const isRemovingPin = ref(false);
 
 const onSubmit = handleSubmit(async (values) => {
   try {
     if (!user.value?.id) {
-      throw new Error('کاربر وارد نشده است')
+      throw new Error('کاربر وارد نشده است');
     }
 
     // Set the PIN (save to both PocketBase and localStorage)
-    const success = await setPin(values.pin, user.value.id)
+    const success = await setPin(values.pin, user.value.id);
 
     if (!success) {
-      throw new Error('Failed to save PIN to server')
+      throw new Error('Failed to save PIN to server');
     }
 
     toaster.show({
@@ -73,30 +73,30 @@ const onSubmit = handleSubmit(async (values) => {
       color: 'success',
       icon: 'ph:check-circle',
       closable: true,
-    })
+    });
 
     // Redirect to dashboard after a short delay
     setTimeout(() => {
-      router.push('/dashboard')
-    }, 1500)
+      router.push('/dashboard');
+    }, 1500);
   }
   catch (error) {
-    console.error('Set PIN error:', error)
+    console.error('Set PIN error:', error);
     toaster.show({
       title: 'خطا',
       message: 'مشکلی در تنظیم پین پیش آمد',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
-})
+});
 
 const handleRemovePin = async () => {
-  isRemovingPin.value = true
+  isRemovingPin.value = true;
 
   try {
-    removePin()
+    removePin();
 
     toaster.show({
       title: 'موفقیت',
@@ -104,31 +104,31 @@ const handleRemovePin = async () => {
       color: 'success',
       icon: 'ph:trash',
       closable: true,
-    })
+    });
 
     // Redirect to dashboard
     setTimeout(() => {
-      router.push('/dashboard')
-    }, 1500)
+      router.push('/dashboard');
+    }, 1500);
   }
   catch (error) {
-    console.error('Remove PIN error:', error)
+    console.error('Remove PIN error:', error);
     toaster.show({
       title: 'خطا',
       message: 'مشکلی در حذف پین پیش آمد',
       color: 'danger',
       icon: 'ph:warning',
       closable: true,
-    })
+    });
   }
   finally {
-    isRemovingPin.value = false
+    isRemovingPin.value = false;
   }
-}
+};
 
 // Redirect if user already has PIN set
 if (hasPin.value) {
-  router.push('/dashboard')
+  router.push('/dashboard');
 }
 </script>
 

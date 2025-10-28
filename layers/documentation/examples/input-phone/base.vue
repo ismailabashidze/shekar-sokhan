@@ -9,5 +9,5 @@
 </template>
 
 <script lang="ts" setup>
-const phone = ref('')
+const phone = ref('');
 </script>

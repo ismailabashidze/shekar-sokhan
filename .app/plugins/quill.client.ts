@@ -2,7 +2,7 @@ export default defineNuxtPlugin(() => {
   // This plugin runs only on client-side to configure Quill
   if (process.client) {
     // Add RTL direction support for Persian/Arabic text
-    const style = document.createElement('style')
+    const style = document.createElement('style');
     style.textContent = `
       /* RTL support for Quill editor */
       .ql-editor[dir="rtl"] {
@@ -39,7 +39,7 @@ export default defineNuxtPlugin(() => {
         right: 15px !important;
         text-align: right;
       }
-    `
-    document.head.appendChild(style)
+    `;
+    document.head.appendChild(style);
   }
-})
+});

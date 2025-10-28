@@ -1,9 +1,9 @@
 <script setup lang="ts">
 const props = defineProps<{
-  rounded?: 'none' | 'sm' | 'md' | 'lg'
-  spaced?: boolean
-  condensed?: boolean
-}>()
+  rounded?: 'none' | 'sm' | 'md' | 'lg';
+  spaced?: boolean;
+  condensed?: boolean;
+}>();
 </script>
 
 <template>

@@ -1,18 +1,18 @@
 <script setup lang="ts">
-const route = useRoute()
-const router = useRouter()
-const activeAnchor = ref('')
-const toc = useState<any[]>('tairo-toc', () => [])
+const route = useRoute();
+const router = useRouter();
+const activeAnchor = ref('');
+const toc = useState<any[]>('tairo-toc', () => []);
 
-const ids = computed(() => toc.value.map(({ id }: any) => `#${id}`))
+const ids = computed(() => toc.value.map(({ id }: any) => `#${id}`));
 
 const { activeIds } = useNinjaScrollspy(
   {
     rootMargin: '0px 0px -90% 0px',
   },
   () => ids.value,
-)
-const nuxtApp = useNuxtApp()
+);
+const nuxtApp = useNuxtApp();
 
 if (import.meta.client) {
   // active item when hash change
@@ -20,76 +20,76 @@ if (import.meta.client) {
     () => route.hash,
     () => {
       if (route.hash) {
-        activeAnchor.value = route.hash.slice(1)
+        activeAnchor.value = route.hash.slice(1);
       }
     },
     {
       immediate: true,
     },
-  )
+  );
 
   // load toc item from dom
   const stopPage = nuxtApp.hook('page:finish', (e) => {
-    loadTocItemFromDom()
-  })
+    loadTocItemFromDom();
+  });
   const stopTransition = nuxtApp.hook('page:transition:finish', (e) => {
-    loadTocItemFromDom()
-  })
+    loadTocItemFromDom();
+  });
 
   onBeforeUnmount(() => {
-    stopPage()
-    stopTransition()
-  })
+    stopPage();
+    stopTransition();
+  });
 }
 
 function getTocItemClass(item: any) {
-  const classes = ['pe-3']
+  const classes = ['pe-3'];
 
   if (item.level > 2) {
-    classes.push('ms-3 text-xs')
+    classes.push('ms-3 text-xs');
   }
 
   if (activeAnchor.value === item.id) {
-    classes.push('border-primary-500 text-primary-500')
+    classes.push('border-primary-500 text-primary-500');
   }
   else if (activeIds.value.includes(item.id)) {
     classes.push(
       'border-primary-400 dark:border-primary-600 text-muted-500 dark:text-muted-400 dark:hover:text-muted-300 hover:text-muted-400',
-    )
+    );
   }
   else {
     classes.push(
       'border-muted-200 dark:border-muted-800 text-muted-500 dark:text-muted-400 dark:hover:text-muted-300 hover:text-muted-400',
-    )
+    );
   }
 
-  return classes
+  return classes;
 }
 
 async function loadTocItemFromDom() {
-  await nextTick()
+  await nextTick();
 
-  const elements = document.querySelectorAll('.tairo-toc-anchor')
+  const elements = document.querySelectorAll('.tairo-toc-anchor');
 
   toc.value = Array.from(elements).map((el) => {
     return {
       id: el.getAttribute('id'),
       level: ('dataset' in el && (el.dataset as any)?.tocLevel) ?? 2,
       label: 'dataset' in el && (el.dataset as any)?.tocLabel,
-    }
-  })
+    };
+  });
 }
 
 function focus(id: string) {
-  const el = document.getElementById(id)
+  const el = document.getElementById(id);
 
   if (el) {
-    el?.focus({ preventScroll: true })
-    el?.scrollIntoView({ behavior: 'smooth' })
+    el?.focus({ preventScroll: true });
+    el?.scrollIntoView({ behavior: 'smooth' });
 
     // update hash without using router to avoid scroll handler
-    window.history.pushState({}, '', `#${id}`)
-    activeAnchor.value = id
+    window.history.pushState({}, '', `#${id}`);
+    activeAnchor.value = id;
   }
 }
 </script>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoBarRange = reactive(useDemoBarRange())
+const demoBarRange = reactive(useDemoBarRange());
 
 function useDemoBarRange() {
-  const { primary, info, success, warning } = useTailwindColors()
-  const type = 'rangeBar'
-  const height = 280
+  const { primary, info, success, warning } = useTailwindColors();
+  const type = 'rangeBar';
+  const height = 280;
 
   const options = {
     chart: {
@@ -29,7 +29,7 @@ function useDemoBarRange() {
     dataLabels: {
       enabled: true,
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -74,14 +74,14 @@ function useDemoBarRange() {
         },
       ],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

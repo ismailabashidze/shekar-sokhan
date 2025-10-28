@@ -1,25 +1,25 @@
-import { tryOnBeforeMount } from '@vueuse/core'
+import { tryOnBeforeMount } from '@vueuse/core';
 
-const macLikeRE = /Mac|iP/
+const macLikeRE = /Mac|iP/;
 
 /**
  * Boolean indicating if the platform is a Mac or iOS device.
  */
 export function useIsMacLike() {
-  const isMac = ref(false)
+  const isMac = ref(false);
   tryOnBeforeMount(() => {
     if (macLikeRE.test(navigator.platform)) {
-      isMac.value = true
+      isMac.value = true;
     }
-  })
+  });
 
-  return readonly(isMac)
+  return readonly(isMac);
 }
 
 export function useMetaKey() {
-  const isMac = useIsMacLike()
+  const isMac = useIsMacLike();
 
   return computed(() => {
-    return isMac.value ? '⌘' : 'ctrl'
-  })
+    return isMac.value ? '⌘' : 'ctrl';
+  });
 }

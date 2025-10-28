@@ -1,12 +1,12 @@
-import { defu } from 'defu'
+import { defu } from 'defu';
 
 interface Panel {
-  name: string
-  component?: string
-  props?: Record<string, any>
-  position?: 'left' | 'right' | 'top' | 'bottom'
-  size: 'sm' | 'md'
-  overlay?: boolean
+  name: string;
+  component?: string;
+  props?: Record<string, any>;
+  position?: 'left' | 'right' | 'top' | 'bottom';
+  size: 'sm' | 'md';
+  overlay?: boolean;
 }
 
 /**
@@ -46,7 +46,7 @@ interface Panel {
  * ```
  */
 export function usePanels() {
-  const app = useAppConfig()
+  const app = useAppConfig();
 
   const panels = computed<Panel[]>(
     () =>
@@ -56,38 +56,38 @@ export function usePanels() {
         position: (panel as any).position ?? 'left',
         overlay: (panel as any).overlay ?? true,
       })) ?? [],
-  )
+  );
 
-  const currentName = useState('panels-current-name', () => '')
+  const currentName = useState('panels-current-name', () => '');
 
   // we need to know from which side the panel is coming from
   // and preserve it in the state so we can animate it when it's closing
-  const transitionFrom = useState('panels-transition-from', () => 'left')
-  const showOverlay = useState('panels-overlay', () => true)
+  const transitionFrom = useState('panels-transition-from', () => 'left');
+  const showOverlay = useState('panels-overlay', () => true);
 
-  const currentProps = useState('panels-current-props', () => ({}))
+  const currentProps = useState('panels-current-props', () => ({}));
 
   const current = computed(() => {
     if (!currentName.value) {
-      return undefined
+      return undefined;
     }
 
-    return panels.value.find(panel => panel.name === currentName.value)
-  })
+    return panels.value.find(panel => panel.name === currentName.value);
+  });
 
   function open(name: string, props?: Record<string, any>) {
-    const panel = panels.value.find(({ name: panelName }) => panelName === name)
+    const panel = panels.value.find(({ name: panelName }) => panelName === name);
     if (panel) {
-      transitionFrom.value = panel.position ?? 'left'
-      currentName.value = panel.name
-      showOverlay.value = !!panel.overlay
+      transitionFrom.value = panel.position ?? 'left';
+      currentName.value = panel.name;
+      showOverlay.value = !!panel.overlay;
 
       // merge props from the panel config and the props passed to the function
-      currentProps.value = defu(props ?? {}, (panel as any).props ?? {})
+      currentProps.value = defu(props ?? {}, (panel as any).props ?? {});
     }
   }
   function close() {
-    currentName.value = ''
+    currentName.value = '';
   }
 
   return {
@@ -98,5 +98,5 @@ export function usePanels() {
     showOverlay,
     open,
     close,
-  }
+  };
 }

@@ -1,22 +1,22 @@
-import type { RehypeShikiOptions } from '@shikijs/rehype'
+import type { RehypeShikiOptions } from '@shikijs/rehype';
 
 // this is used to cache the markdown processor
-let processor: ReturnType<typeof createProcessor>
+let processor: ReturnType<typeof createProcessor>;
 
 export function getMarkdownProcessors(
   themes: Record<string, any> = {},
   langs: RehypeShikiOptions['langs'] = [],
 ) {
   if (processor) {
-    return processor
+    return processor;
   }
 
   processor = createProcessor({
     langs,
     themes,
-  })
+  });
 
-  return processor
+  return processor;
 }
 
 async function createProcessor(options: RehypeShikiOptions) {
@@ -41,7 +41,7 @@ async function createProcessor(options: RehypeShikiOptions) {
     import('remark-rehype').then(m => m.default),
     import('unified').then(m => m.unified),
 
-  ])
+  ]);
 
   return (
     unified()
@@ -80,5 +80,5 @@ async function createProcessor(options: RehypeShikiOptions) {
         target: '_blank',
       })
       .use(rehypeStringify)
-  )
+  );
 }

@@ -126,15 +126,15 @@
 </template>
 
 <script setup lang="ts">
-import type { LogEntry as LogEntryType } from '~/composables/useNotificationLogger'
+import type { LogEntry as LogEntryType } from '~/composables/useNotificationLogger';
 
 interface Props {
-  log: LogEntryType
+  log: LogEntryType;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
-const expanded = ref(false)
+const expanded = ref(false);
 
 const hasExpandableDetails = computed(() => {
   return !!(
@@ -143,38 +143,38 @@ const hasExpandableDetails = computed(() => {
     || props.log.memory_usage
     || props.log.user_agent
     || props.log.ip_address
-  )
-})
+  );
+});
 
 const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / (1000 * 60))
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 
   if (diffMins < 1) {
-    return 'Just now'
+    return 'Just now';
   }
   else if (diffMins < 60) {
-    return `${diffMins}m ago`
+    return `${diffMins}m ago`;
   }
   else if (diffHours < 24) {
-    return `${diffHours}h ago`
+    return `${diffHours}h ago`;
   }
   else {
-    return date.toLocaleString()
+    return date.toLocaleString();
   }
-}
+};
 
 const formatCategory = (category: string): string => {
-  return category.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-}
+  return category.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+};
 
 const truncateUserAgent = (userAgent: string): string => {
-  if (userAgent.length <= 50) return userAgent
-  return userAgent.substring(0, 47) + '...'
-}
+  if (userAgent.length <= 50) return userAgent;
+  return userAgent.substring(0, 47) + '...';
+};
 
 const copyLogEntry = async () => {
   try {
@@ -187,18 +187,18 @@ const copyLogEntry = async () => {
       method: props.log.method,
       details: props.log.details,
       error_stack: props.log.error_stack,
-    }
+    };
 
-    await navigator.clipboard.writeText(JSON.stringify(logData, null, 2))
-    console.log('Log entry copied to clipboard')
+    await navigator.clipboard.writeText(JSON.stringify(logData, null, 2));
+    console.log('Log entry copied to clipboard');
   }
   catch (error) {
-    console.error('Failed to copy log entry:', error)
+    console.error('Failed to copy log entry:', error);
   }
-}
+};
 
 const reportIssue = () => {
   // In a real implementation, this might open a modal or navigate to an issue reporting page
-  console.log('Report issue for log:', props.log.id)
-}
+  console.log('Report issue for log:', props.log.id);
+};
 </script>

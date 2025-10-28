@@ -1,9 +1,9 @@
-import { addDays, addHours, addMinutes, roundToNearestMinutes } from 'date-fns'
-import type { CalendarCustomAttribute, CalendarEvent } from '../types'
+import { addDays, addHours, addMinutes, roundToNearestMinutes } from 'date-fns';
+import type { CalendarCustomAttribute, CalendarEvent } from '../types';
 
 interface UseCalendarEventsProps {
-  fromDate: MaybeRefOrGetter<Date>
-  toDate: MaybeRefOrGetter<Date>
+  fromDate: MaybeRefOrGetter<Date>;
+  toDate: MaybeRefOrGetter<Date>;
 }
 
 function randomDate(start: Date, end: Date) {
@@ -12,12 +12,12 @@ function randomDate(start: Date, end: Date) {
       start.getTime() + Math.random() * (end.getTime() - start.getTime()),
     ),
     { nearestTo: 15 },
-  )
+  );
 }
 
 export function useCalendarEvents(props: UseCalendarEventsProps) {
-  const calendarEvents = ref<CalendarCustomAttribute<CalendarEvent>[]>([])
-  const pendingEvents = ref<Omit<CalendarEvent, 'startDate' | 'endDate'>[]>([])
+  const calendarEvents = ref<CalendarCustomAttribute<CalendarEvent>[]>([]);
+  const pendingEvents = ref<Omit<CalendarEvent, 'startDate' | 'endDate'>[]>([]);
   async function refresh() {
     // This is a fake data, in real life you would fetch it from an API
     pendingEvents.value = [
@@ -98,19 +98,19 @@ export function useCalendarEvents(props: UseCalendarEventsProps) {
         },
         participants: [],
       },
-    ]
+    ];
 
     for (let i = 0; i < 7; i++) {
-      const date = addDays(toValue(props.fromDate), i)
-      const events: CalendarCustomAttribute<CalendarEvent>[] = []
-      const count = Math.floor(Math.random() * 3)
+      const date = addDays(toValue(props.fromDate), i);
+      const events: CalendarCustomAttribute<CalendarEvent>[] = [];
+      const count = Math.floor(Math.random() * 3);
       for (let j = 0; j < count; j++) {
         const event
           = pendingEvents.value[
             Math.floor(Math.random() * pendingEvents.value.length)
-          ]
-        const startDate = randomDate(addHours(date, 8), addHours(date, 18))
-        const endDate = addMinutes(startDate, event.duration)
+          ];
+        const startDate = randomDate(addHours(date, 8), addHours(date, 18));
+        const endDate = addMinutes(startDate, event.duration);
         events.push({
           key: `${i}-${j}`,
           customData: {
@@ -120,20 +120,20 @@ export function useCalendarEvents(props: UseCalendarEventsProps) {
             endDate: addMinutes(startDate, event.duration),
           },
           dates: [startDate, endDate],
-        })
+        });
       }
-      calendarEvents.value.push(...events)
+      calendarEvents.value.push(...events);
     }
   }
 
   // refresh on fromDate and toDate change and on mounted
   watch([() => toValue(props.fromDate), () => toValue(props.toDate)], refresh, {
     immediate: true,
-  })
+  });
 
   return {
     calendarEvents,
     pendingEvents,
     refresh,
-  }
+  };
 }

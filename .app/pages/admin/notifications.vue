@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import type { AdminNotificationForm, BulkSendOptions } from '~/composables/useAdminNotifications'
-import { persianDateTimeToISO, isoToPersianDateTime, getRelativeTimeToAnnounce, formatPersianDate } from '~/utils/persian-date'
-import PersianCalendar from '~/components/PersianCalendar.vue'
+import type { AdminNotificationForm, BulkSendOptions } from '~/composables/useAdminNotifications';
+import { persianDateTimeToISO, isoToPersianDateTime, getRelativeTimeToAnnounce, formatPersianDate } from '~/utils/persian-date';
+import PersianCalendar from '~/components/PersianCalendar.vue';
 
 definePageMeta({
   title: 'مدیریت اعلان‌ها',
   layout: 'zone',
   // Using global middlewares only
-})
+});
 
 useHead({
   htmlAttrs: { dir: 'rtl' },
   title: 'مدیریت اعلان‌ها - پنل ادمین - ذهنا',
-})
+});
 
 const {
   fetchUsers,
@@ -32,12 +32,12 @@ const {
   searchQuery,
   hasMoreUsers,
   totalUsers,
-} = useAdminNotifications()
+} = useAdminNotifications();
 
-const { getUserAvatarUrl } = useAvatarManager()
+const { getUserAvatarUrl } = useAvatarManager();
 
 // Form state
-const showForm = ref(true)
+const showForm = ref(true);
 const formData = ref<AdminNotificationForm>({
   title: '',
   message: '',
@@ -48,59 +48,59 @@ const formData = ref<AdminNotificationForm>({
   action_text: '',
   user_id: '',
   announce_time: '',
-})
+});
 
 // Persian calendar state
-const announcePersianDate = ref('')
-const announceTime = ref('')
+const announcePersianDate = ref('');
+const announceTime = ref('');
 
 // Computed property to sync Persian date/time with ISO announce_time
 const announceTimeISO = computed({
   get: () => formData.value.announce_time || '',
   set: (value: string) => {
-    formData.value.announce_time = value
+    formData.value.announce_time = value;
   },
-})
+});
 
 // Watch for changes in Persian date/time and update ISO format
 watch([announcePersianDate, announceTime], ([persianDate, time]) => {
   if (persianDate && time) {
-    formData.value.announce_time = persianDateTimeToISO(persianDate, time)
+    formData.value.announce_time = persianDateTimeToISO(persianDate, time);
   }
   else if (persianDate) {
     // Default to current time if no time is provided
-    const now = new Date()
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
-    formData.value.announce_time = persianDateTimeToISO(persianDate, currentTime)
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    formData.value.announce_time = persianDateTimeToISO(persianDate, currentTime);
   }
   else {
-    formData.value.announce_time = ''
+    formData.value.announce_time = '';
   }
-})
+});
 
 // Watch for changes in ISO announce_time and update Persian date/time
 watch(() => formData.value.announce_time, (isoString) => {
   if (isoString) {
-    const { persianDate, time } = isoToPersianDateTime(isoString)
-    announcePersianDate.value = persianDate
-    announceTime.value = time
+    const { persianDate, time } = isoToPersianDateTime(isoString);
+    announcePersianDate.value = persianDate;
+    announceTime.value = time;
   }
   else {
-    announcePersianDate.value = ''
-    announceTime.value = ''
+    announcePersianDate.value = '';
+    announceTime.value = '';
   }
-}, { immediate: true })
+}, { immediate: true });
 
 const bulkOptions = ref<BulkSendOptions>({
   sendToAll: false,
   selectedRecipients: [],
   userRole: '',
-})
+});
 
 // Local state
-const selectedRole = ref('')
-const showPreview = ref(false)
-const localSearchQuery = ref('')
+const selectedRole = ref('');
+const showPreview = ref(false);
+const localSearchQuery = ref('');
 
 // System templates
 const systemTemplates = {
@@ -128,7 +128,7 @@ const systemTemplates = {
     type: 'error' as const,
     priority: 'urgent' as const,
   },
-}
+};
 
 // Computed
 const filteredUsers = computed(() => {
@@ -136,105 +136,105 @@ const filteredUsers = computed(() => {
   if (localSearchQuery.value.trim()) {
     return searchResults.value.filter((u: any) =>
       selectedRole.value ? u.role === selectedRole.value : true,
-    )
+    );
   }
 
   // Otherwise use regular users list with role filter
   return users.value.filter((u: any) =>
     selectedRole.value ? u.role === selectedRole.value : true,
-  )
-})
+  );
+});
 
 const displayedUsers = computed(() => {
-  return filteredUsers.value
-})
+  return filteredUsers.value;
+});
 
 const canSend = computed(() => {
   return formData.value.title
     && formData.value.message
-    && (bulkOptions.value.sendToAll || bulkOptions.value.selectedRecipients.length > 0)
-})
+    && (bulkOptions.value.sendToAll || bulkOptions.value.selectedRecipients.length > 0);
+});
 
 const selectedUsersCount = computed(() => {
   if (bulkOptions.value.sendToAll) {
     if (selectedRole.value) {
-      return getUsersByRole(selectedRole.value).length
+      return getUsersByRole(selectedRole.value).length;
     }
-    return totalUsers.value || users.value.length
+    return totalUsers.value || users.value.length;
   }
-  return bulkOptions.value.selectedRecipients.length
-})
+  return bulkOptions.value.selectedRecipients.length;
+});
 
 // Methods
 const loadTemplate = (templateKey: keyof typeof systemTemplates) => {
-  const template = systemTemplates[templateKey]
+  const template = systemTemplates[templateKey];
   formData.value = {
     ...formData.value,
     ...template,
-  }
-}
+  };
+};
 
 const toggleUserSelection = (userId: string) => {
-  const index = bulkOptions.value.selectedRecipients.indexOf(userId)
+  const index = bulkOptions.value.selectedRecipients.indexOf(userId);
   if (index > -1) {
-    bulkOptions.value.selectedRecipients.splice(index, 1)
+    bulkOptions.value.selectedRecipients.splice(index, 1);
   }
   else {
-    bulkOptions.value.selectedRecipients.push(userId)
+    bulkOptions.value.selectedRecipients.push(userId);
   }
-}
+};
 
 const selectAllUsers = () => {
   if (bulkOptions.value.selectedRecipients.length === displayedUsers.value.length) {
     // Deselect all
-    bulkOptions.value.selectedRecipients = []
+    bulkOptions.value.selectedRecipients = [];
   }
   else {
     // Select all displayed users
-    bulkOptions.value.selectedRecipients = displayedUsers.value.map((u: any) => u.id)
+    bulkOptions.value.selectedRecipients = displayedUsers.value.map((u: any) => u.id);
   }
-}
+};
 
 // Search handling
 const handleSearch = (query: string | number | undefined) => {
-  const queryValue = String(query || '')
-  localSearchQuery.value = queryValue
+  const queryValue = String(query || '');
+  localSearchQuery.value = queryValue;
   if (queryValue.trim()) {
-    debouncedSearch(queryValue, selectedRole.value)
+    debouncedSearch(queryValue, selectedRole.value);
   }
   else {
-    clearSearch()
+    clearSearch();
   }
-}
+};
 
 // Infinite scroll for users list
 const handleScroll = (event: Event) => {
-  const target = event.target as HTMLElement
-  const { scrollTop, scrollHeight, clientHeight } = target
+  const target = event.target as HTMLElement;
+  const { scrollTop, scrollHeight, clientHeight } = target;
 
   // Check if scrolled to bottom and load more regular users (not search results)
   if (scrollTop + clientHeight >= scrollHeight - 10 && !localSearchQuery.value.trim()) {
     // Load more regular users
-    loadMoreUsers(selectedRole.value)
+    loadMoreUsers(selectedRole.value);
     // Note: For search results, we could implement search pagination if needed
   }
-}
+};
 
 // Handle role change
 const handleRoleChange = async (role: string | string[] | undefined) => {
-  const roleValue = Array.isArray(role) ? role[0] : role || ''
-  selectedRole.value = roleValue
-  bulkOptions.value.selectedRecipients = []
+  const roleValue = Array.isArray(role) ? role[0] : role || '';
+  selectedRole.value = roleValue;
+  bulkOptions.value.selectedRecipients = [];
 
   if (localSearchQuery.value.trim()) {
     // Re-search with new role filter
-    debouncedSearch(localSearchQuery.value, roleValue)
+    debouncedSearch(localSearchQuery.value, roleValue);
   }
   else {
     // Reload users with role filter
-    await fetchUsers(1, 20, roleValue, true)
+    await fetchUsers(1, 20, roleValue, true);
   }
-}
+};
 
 const sendNotification = async () => {
   try {
@@ -242,9 +242,9 @@ const sendNotification = async () => {
     const options = {
       ...bulkOptions.value,
       userRole: selectedRole.value,
-    }
+    };
 
-    const sentCount = await sendBulkNotification(formData.value, options)
+    const sentCount = await sendBulkNotification(formData.value, options);
 
     // Reset form
     formData.value = {
@@ -257,56 +257,56 @@ const sendNotification = async () => {
       action_text: '',
       user_id: '',
       announce_time: '',
-    }
+    };
 
     // Reset Persian calendar state
-    announcePersianDate.value = ''
-    announceTime.value = ''
+    announcePersianDate.value = '';
+    announceTime.value = '';
     bulkOptions.value = {
       sendToAll: false,
       selectedRecipients: [],
       userRole: '',
-    }
-    selectedRole.value = ''
-    localSearchQuery.value = ''
-    clearSearch()
+    };
+    selectedRole.value = '';
+    localSearchQuery.value = '';
+    clearSearch();
 
     // Show success message
-    console.log(`اعلان با موفقیت برای ${sentCount} کاربر ارسال شد`)
+    console.log(`اعلان با موفقیت برای ${sentCount} کاربر ارسال شد`);
   }
   catch (error) {
-    console.error('خطا در ارسال اعلان:', error)
+    console.error('خطا در ارسال اعلان:', error);
   }
-}
+};
 
 // Initialize
 onMounted(async () => {
   try {
-    await fetchUsers(1, 20, '', true)
+    await fetchUsers(1, 20, '', true);
   }
   catch (error) {
-    console.error('خطا در بارگذاری داده‌ها:', error)
+    console.error('خطا در بارگذاری داده‌ها:', error);
   }
-})
+});
 
 // Cleanup
 onBeforeUnmount(() => {
-  clearSearch()
-})
+  clearSearch();
+});
 
 interface NotificationTypeOption {
-  label: string
-  value: 'info' | 'success' | 'warning' | 'error' | 'system'
+  label: string;
+  value: 'info' | 'success' | 'warning' | 'error' | 'system';
 }
 
 interface NotificationPriorityOption {
-  label: string
-  value: 'low' | 'medium' | 'high' | 'urgent'
+  label: string;
+  value: 'low' | 'medium' | 'high' | 'urgent';
 }
 
 interface RoleOption {
-  label: string
-  value: string
+  label: string;
+  value: string;
 }
 
 const notificationTypeOptions: NotificationTypeOption[] = [
@@ -315,21 +315,21 @@ const notificationTypeOptions: NotificationTypeOption[] = [
   { label: 'هشدار', value: 'warning' },
   { label: 'خطا', value: 'error' },
   { label: 'سیستم', value: 'system' },
-]
+];
 
 const notificationPriorityOptions: NotificationPriorityOption[] = [
   { label: 'کم', value: 'low' },
   { label: 'متوسط', value: 'medium' },
   { label: 'زیاد', value: 'high' },
   { label: 'فوری', value: 'urgent' },
-]
+];
 
 const roleOptions: RoleOption[] = [
   { label: 'همه نقش‌ها', value: '' },
   { label: 'کاربر عادی', value: 'user' },
   { label: 'درمانگر', value: 'therapist' },
   { label: 'ادمین', value: 'admin' },
-]
+];
 </script>
 
 <template>

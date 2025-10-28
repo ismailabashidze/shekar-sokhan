@@ -47,7 +47,8 @@
         setTimeout(() => reject(new Error('backend validation error')), 2000);
         setTimeout(resolve, 4000);
       });
-    } catch (error: any) {
+    }
+ catch (error: any) {
       if (error.message === 'backend validation error') {
         setFieldError('email', 'نام کاربری یا رمز عبور اشتباه است');
         setFieldError('password', 'نام کاربری یا رمز عبور اشتباه است');
@@ -128,7 +129,8 @@
           await setUser(appUser, appUser.role);
 
           console.log('✅ User zones updated to ["hamdel"]');
-        } catch (error) {
+        }
+ catch (error) {
           console.error('❌ Failed to update user zones after login:', error);
           // Continue login process even if zones update fails
         }
@@ -157,7 +159,8 @@
         // Redirect to lock page if user has PIN, otherwise go to dashboard
         router.push(hasLockPin ? '/lock' : '/dashboard');
       }, 1000);
-    } catch (error) {
+    }
+ catch (error) {
       console.error('❌ Google Login Error Details:', {
         error,
         message: error?.message,
@@ -172,11 +175,14 @@
 
       if (error?.message?.includes('OAuth2')) {
         errorMessage = 'مشکل در تنظیمات OAuth. لطفا با پشتیبانی تماس بگیرید.';
-      } else if (error?.message?.includes('network')) {
+      }
+ else if (error?.message?.includes('network')) {
         errorMessage = 'مشکل در اتصال به اینترنت. لطفا اتصالتان را بررسی کنید.';
-      } else if (error?.status === 400) {
+      }
+ else if (error?.status === 400) {
         errorMessage = 'درخواست نامعتبر. لطفا صفحه را رفرش کنید.';
-      } else if (error?.status === 500) {
+      }
+ else if (error?.status === 500) {
         errorMessage = 'مشکل سرور. لطفا چند دقیقه بعد تلاش کنید.';
       }
 
@@ -187,7 +193,8 @@
         icon: 'ph:warning',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       isGoogleLogin.value = false;
     }
   };
@@ -203,7 +210,13 @@
     <div class="bg-muted-100 dark:bg-muted-900 relative hidden w-0 flex-1 items-center justify-center lg:flex lg:w-3/5">
       <div class="mx-auto flex size-full max-w-4xl items-center justify-center">
         <!--Media image-->
-        <img class="mx-auto max-w-xl rounded-md" src="/img/illustrations/login.png" alt="" width="619" height="594" />
+        <img
+          class="mx-auto max-w-xl rounded-md"
+          src="/img/illustrations/login.png"
+          alt=""
+          width="619"
+          height="594"
+        >
       </div>
     </div>
     <div class="relative flex flex-1 flex-col justify-center px-6 py-8 lg:w-2/5 lg:flex-none">
@@ -221,7 +234,13 @@
           <BaseThemeToggle />
         </div>
         <div>
-          <BaseHeading as="h2" size="3xl" lead="relaxed" weight="medium" class="mt-6">
+          <BaseHeading
+            as="h2"
+            size="3xl"
+            lead="relaxed"
+            weight="medium"
+            class="mt-6"
+          >
             کاربر عزیز، خوش آمدید
           </BaseHeading>
           <BaseParagraph size="sm" class="text-muted-400 mb-6 mt-3">
@@ -249,8 +268,16 @@
               :disabled="isGoogleLogin"
               @click="loginWithGoogle"
             >
-              <Icon v-if="!isGoogleLogin" name="logos:google-icon" class="size-5" />
-              <Icon v-else name="line-md:loading-twotone-loop" class="size-5" />
+              <Icon
+                v-if="!isGoogleLogin"
+                name="logos:google-icon"
+                class="size-5"
+              />
+              <Icon
+                v-else
+                name="line-md:loading-twotone-loop"
+                class="size-5"
+              />
               <div>
                 {{ isGoogleLogin ? 'در حال ورود...' : 'ورود با گوگل' }}
               </div>
@@ -270,9 +297,9 @@
           </div>
           <!-- 'or' divider -->
           <div class="flex-100 mt-8 flex items-center">
-            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2" />
+            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2">
             <span class="text-muted-400 px-4 font-sans font-light">یا با استفاده از</span>
-            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2" />
+            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2">
           </div>
         </div>
 
@@ -280,7 +307,13 @@
         <div>
           <div class="mt-5">
             <!--Form-->
-            <form method="POST" action="" class="mt-6" novalidate @submit.prevent="onSubmit">
+            <form
+              method="POST"
+              action=""
+              class="mt-6"
+              novalidate
+              @submit.prevent="onSubmit"
+            >
               <div class="space-y-4">
                 <Field v-slot="{ field, errorMessage, handleChange, handleBlur }" name="email">
                   <BaseInput

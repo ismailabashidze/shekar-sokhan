@@ -1,29 +1,29 @@
 <script setup lang="ts">
 const props = defineProps<{
-  to: string
-}>()
+  to: string;
+}>();
 
 const { pending, data } = useAsyncData(
   `doc-linker-to-${props.to}`,
   () => {
-    if (!props.to) return Promise.resolve(null)
+    if (!props.to) return Promise.resolve(null);
 
     return queryContent()
       .where({
         components: { $contains: props.to },
       })
       .only(['_path'])
-      .findOne()
+      .findOne();
   },
   {
     watch: [() => props.to],
   },
-)
+);
 
 const tooltip = computed(() => {
-  if (!data.value?._path) return `Documentation for ${props.to} is missing`
-  return `Read ${props.to} docs`
-})
+  if (!data.value?._path) return `Documentation for ${props.to} is missing`;
+  return `Read ${props.to} docs`;
+});
 </script>
 
 <template>

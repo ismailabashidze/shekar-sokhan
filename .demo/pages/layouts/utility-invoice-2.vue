@@ -10,20 +10,20 @@ definePageMeta({
     order: 8,
     new: true,
   },
-})
+});
 
-const pdfAttachment = ref(true)
-const itemName = ref('UI/UX Design')
-const itemHours = ref(20)
-const hourRate = ref(50.45)
-const taxRate = ref(6.5)
+const pdfAttachment = ref(true);
+const itemName = ref('UI/UX Design');
+const itemHours = ref(20);
+const hourRate = ref(50.45);
+const taxRate = ref(6.5);
 
 const itemSubtotal = computed(() =>
   (
     itemHours.value * hourRate.value
     + itemHours.value * hourRate.value * (taxRate.value / 100)
   ).toFixed(2),
-)
+);
 </script>
 
 <template>

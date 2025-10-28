@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Ecommerce',
@@ -14,24 +14,24 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-ecommerce-dark.png',
     order: 21,
   },
-})
+});
 
-const sparkLineOne = reactive(useSparkLineOne())
-const sparkLineTwo = reactive(useSparkLineTwo())
-const sparkLineThree = reactive(useSparkLineThree())
-const sparkLineFour = reactive(useSparkLineFour())
-const areaCustomers = reactive(useAreaCustomers())
-const radialSalesRevenue = reactive(useRadialSalesRevenue())
-const radialSmallOne = reactive(useRadialSmallOne())
-const radialSmallTwo = reactive(useRadialSmallTwo())
-const radialSmallThree = reactive(useRadialSmallThree())
-const gaugePersonal = reactive(useGaugePersonal())
-const barOrders = reactive(useBarOrders())
+const sparkLineOne = reactive(useSparkLineOne());
+const sparkLineTwo = reactive(useSparkLineTwo());
+const sparkLineThree = reactive(useSparkLineThree());
+const sparkLineFour = reactive(useSparkLineFour());
+const areaCustomers = reactive(useAreaCustomers());
+const radialSalesRevenue = reactive(useRadialSalesRevenue());
+const radialSmallOne = reactive(useRadialSmallOne());
+const radialSmallTwo = reactive(useRadialSmallTwo());
+const radialSmallThree = reactive(useRadialSmallThree());
+const gaugePersonal = reactive(useGaugePersonal());
+const barOrders = reactive(useBarOrders());
 
 function useSparkLineOne() {
-  const { primary } = useTailwindColors()
-  const height = 60
-  const type = 'line'
+  const { primary } = useTailwindColors();
+  const height = 60;
+  const type = 'line';
 
   const options = {
     chart: {
@@ -72,22 +72,22 @@ function useSparkLineOne() {
       },
     },
     colors: [primary.value],
-  } as const
+  } as const;
 
   const series = shallowRef([
     {
       name: 'Sales',
       data: [2565, 6126, 4271, 5249, 2245, 4424, 1752, 3996, 976, 2157],
     },
-  ])
+  ]);
 
-  return { height, type, options, series }
+  return { height, type, options, series };
 }
 
 function useSparkLineTwo() {
-  const { success } = useTailwindColors()
-  const type = 'line'
-  const height = 60
+  const { success } = useTailwindColors();
+  const type = 'line';
+  const height = 60;
 
   const options = {
     chart: {
@@ -131,22 +131,22 @@ function useSparkLineTwo() {
       },
     },
     colors: [success.value],
-  } as const
+  } as const;
 
   const series = shallowRef([
     {
       name: 'Income',
       data: [12.2, 14.5, 2.5, 47.5, 32.5, 44.5, 14.8, 55.5, 41.3, 69.7],
     },
-  ])
+  ]);
 
-  return { height, type, options, series }
+  return { height, type, options, series };
 }
 
 function useSparkLineThree() {
-  const { info } = useTailwindColors()
-  const height = 60
-  const type = 'line'
+  const { info } = useTailwindColors();
+  const height = 60;
+  const type = 'line';
 
   const options = {
     chart: {
@@ -192,22 +192,22 @@ function useSparkLineThree() {
         minWidth: 100,
       },
     },
-  } as const
+  } as const;
 
   const series = shallowRef([
     {
       name: 'New Orders',
       data: [4457, 4533, 7274, 3272, 5876, 3271, 4614, 3553, 4835, 1579],
     },
-  ])
+  ]);
 
-  return { height, type, options, series }
+  return { height, type, options, series };
 }
 
 function useSparkLineFour() {
-  const { danger } = useTailwindColors()
-  const type = 'line'
-  const height = 60
+  const { danger } = useTailwindColors();
+  const type = 'line';
+  const height = 60;
 
   const options = {
     chart: {
@@ -253,22 +253,22 @@ function useSparkLineFour() {
         minWidth: 100,
       },
     },
-  } as const
+  } as const;
 
   const series = shallowRef([
     {
       name: 'Abandonned',
       data: [1412, 725, 427, 655, 145, 325, 197, 584, 424, 651],
     },
-  ])
+  ]);
 
-  return { height, type, options, series }
+  return { height, type, options, series };
 }
 
 function useAreaCustomers() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 258
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 258;
 
   const options = {
     chart: {
@@ -310,7 +310,7 @@ function useAreaCustomers() {
         format: 'dd/MM/yy HH:mm',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -325,20 +325,20 @@ function useAreaCustomers() {
       name: 'Abandonned',
       data: [78, 53, 36, 10, 14, 5, 2],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialSalesRevenue() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 155
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 155;
 
   const options = {
     chart: {
@@ -372,22 +372,22 @@ function useRadialSalesRevenue() {
       },
     },
     labels: ['Progress'],
-  }
+  };
 
-  const series = shallowRef([65])
+  const series = shallowRef([65]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialSmallOne() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 100
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 100;
 
   const options = {
     chart: {
@@ -410,22 +410,22 @@ function useRadialSmallOne() {
       },
     },
     labels: [''],
-  }
+  };
 
-  const series = shallowRef([31])
+  const series = shallowRef([31]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialSmallTwo() {
-  const { success } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 100
+  const { success } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 100;
 
   const options = {
     chart: {
@@ -448,22 +448,22 @@ function useRadialSmallTwo() {
       },
     },
     labels: [''],
-  }
+  };
 
-  const series = shallowRef([53])
+  const series = shallowRef([53]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialSmallThree() {
-  const { danger } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 100
+  const { danger } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 100;
 
   const options = {
     chart: {
@@ -486,22 +486,22 @@ function useRadialSmallThree() {
       },
     },
     labels: [''],
-  }
+  };
 
-  const series = shallowRef([84])
+  const series = shallowRef([84]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useGaugePersonal() {
-  const { primary } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 220
+  const { primary } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 220;
 
   const options = {
     title: {
@@ -560,24 +560,24 @@ function useGaugePersonal() {
       },
     },
     labels: ['Average Results'],
-  }
+  };
 
-  const series = shallowRef([76])
+  const series = shallowRef([76]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useBarOrders() {
-  const { primary, success } = useTailwindColors()
-  const type = 'bar'
-  const height = 210
+  const { primary, success } = useTailwindColors();
+  const type = 'bar';
+  const height = 210;
 
-  const series = shallowRef<any[]>([])
+  const series = shallowRef<any[]>([]);
 
   const options = {
     chart: {
@@ -600,11 +600,11 @@ function useBarOrders() {
         rotateAlways: true,
       },
     },
-  } as const
+  } as const;
 
   // delay the data loading
-  let timeout: any
-  let timeout2: any
+  let timeout: any;
+  let timeout2: any;
 
   onMounted(() => {
     timeout = setTimeout(() => {
@@ -660,8 +660,8 @@ function useBarOrders() {
             y: 366,
           },
         ],
-      })
-    }, 1500)
+      });
+    }, 1500);
 
     timeout2 = setTimeout(() => {
       series.value.push({
@@ -716,20 +716,20 @@ function useBarOrders() {
             y: 8,
           },
         ],
-      })
-    }, 2500)
-  })
+      });
+    }, 2500);
+  });
   onBeforeUnmount(() => {
-    clearTimeout(timeout)
-    clearTimeout(timeout2)
-  })
+    clearTimeout(timeout);
+    clearTimeout(timeout2);
+  });
 
   return {
     height,
     type,
     series,
     options,
-  }
+  };
 }
 </script>
 

@@ -1,15 +1,15 @@
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 // خواندن ورژن از package.json
-let appVersion = '3.3.1'
+let appVersion = '3.3.1';
 try {
-  const packagePath = resolve(__dirname, '../package.json')
-  const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'))
-  appVersion = packageJson.version || '3.3.1'
+  const packagePath = resolve(__dirname, '../package.json');
+  const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
+  appVersion = packageJson.version || '3.3.1';
 }
 catch (error) {
-  console.warn('Could not read version from package.json, using fallback:', appVersion)
+  console.warn('Could not read version from package.json, using fallback:', appVersion);
 }
 
 export default defineNuxtConfig({
@@ -203,4 +203,4 @@ export default defineNuxtConfig({
       injectionPoint: 'self.__WB_MANIFEST',
     },
   },
-})
+});

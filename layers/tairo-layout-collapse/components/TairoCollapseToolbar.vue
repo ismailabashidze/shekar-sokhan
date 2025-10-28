@@ -1,21 +1,21 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    collapse?: boolean
-    horizontalScroll?: boolean
+    collapse?: boolean;
+    horizontalScroll?: boolean;
   }>(),
   {
     collapse: true,
   },
-)
+);
 
-const app = useAppConfig()
+const app = useAppConfig();
 
-const route = useRoute()
+const route = useRoute();
 
 const showNavBurger = computed(() => {
-  return props.collapse && app.tairo?.collapse?.toolbar?.showNavBurger
-})
+  return props.collapse && app.tairo?.collapse?.toolbar?.showNavBurger;
+});
 </script>
 
 <template>

@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-soccer-dark.png',
     order: 20,
   },
-})
+});
 
 const matches = [
   {
@@ -120,7 +120,7 @@ const matches = [
       },
     },
   },
-]
+];
 </script>
 
 <template>

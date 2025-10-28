@@ -1,20 +1,20 @@
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router';
 
 export interface TairoTopnavResolvedConfig {
-  name: string
-  divider?: boolean
+  name: string;
+  divider?: boolean;
   icon: {
-    name: string
-    class?: string
-  }
-  children?: any[]
+    name: string;
+    class?: string;
+  };
+  children?: any[];
   component?: {
-    name: string
-    props?: any
-  }
-  to?: RouteLocationRaw
-  click?: () => void | Promise<void>
-  activePath?: string
+    name: string;
+    props?: any;
+  };
+  to?: RouteLocationRaw;
+  click?: () => void | Promise<void>;
+  activePath?: string;
 }
 
 /**
@@ -55,47 +55,47 @@ export interface TairoTopnavResolvedConfig {
  * ```
  */
 export function useTopnav() {
-  const route = useRoute()
-  const app = useAppConfig()
+  const route = useRoute();
+  const app = useAppConfig();
 
   const menuItems = computed(() => {
     if (
       (app.tairo?.topnav?.navigation?.enabled as boolean) === false
       || app.tairo?.topnav?.navigation?.items?.length === 0
     ) {
-      return []
+      return [];
     }
     return app.tairo?.topnav?.navigation?.items?.map(
       navigation =>
         <TairoTopnavResolvedConfig>{
           ...navigation,
         },
-    )
-  })
+    );
+  });
 
-  const isMobileOpen = useState('collapse-open', () => false)
+  const isMobileOpen = useState('collapse-open', () => false);
 
   const activeMenuItem = computed(() => {
     return menuItems.value?.find((item) => {
       if (item.activePath) {
-        return route.path.startsWith(item.activePath)
+        return route.path.startsWith(item.activePath);
       }
       if (item.to) {
-        return route.path.startsWith(item.to.toString())
+        return route.path.startsWith(item.to.toString());
       }
-      return false
-    })
-  })
+      return false;
+    });
+  });
   const selectedMenuItem = useState(
     'topnav-selected-menu-item',
     () => activeMenuItem.value,
-  )
+  );
   watch(activeMenuItem, (item) => {
-    selectedMenuItem.value = item
-  })
+    selectedMenuItem.value = item;
+  });
 
   if (import.meta.client) {
-    const { lg, xl } = useTailwindBreakpoints()
+    const { lg, xl } = useTailwindBreakpoints();
     /* watch(xl, (isXl) => {
       if (!isXl) {
         isOpen.value = false
@@ -108,5 +108,5 @@ export function useTopnav() {
     activeMenuItem,
     selectedMenuItem,
     isMobileOpen,
-  }
+  };
 }

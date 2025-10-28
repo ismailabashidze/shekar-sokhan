@@ -1,25 +1,25 @@
 <script setup lang="ts">
-const { y } = useNinjaWindowScroll()
-const app = useAppConfig()
+const { y } = useNinjaWindowScroll();
+const app = useAppConfig();
 
-const isOpened = ref(false)
+const isOpened = ref(false);
 const isScrolled = computed(() => {
   if (y.value < 60) {
-    isOpened.value = false
+    isOpened.value = false;
   }
-  return y.value > 60
-})
+  return y.value > 60;
+});
 
 const toolOffsets = [
   'translate-x-[-6.5em] rtl:translate-x-[6.5em] translate-y-[-0.25em]',
   'translate-x-[-5.75em] rtl:translate-x-[5.75em] translate-y-[3em]',
   'translate-x-[-3.15em] rtl:translate-x-[3.15em] translate-y-[5.5em]',
   'translate-x-[0em] translate-y-[6.5em]',
-] as const
+] as const;
 
 const tools = computed(() => {
-  return app.tairo?.collapse?.circularMenu?.tools?.slice(0, 4) || []
-})
+  return app.tairo?.collapse?.circularMenu?.tools?.slice(0, 4) || [];
+});
 </script>
 
 <template>

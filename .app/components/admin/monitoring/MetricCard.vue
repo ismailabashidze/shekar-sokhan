@@ -66,44 +66,44 @@
 
 <script setup lang="ts">
 interface Props {
-  title: string
-  value: number
-  unit: string
-  trend: 'up' | 'down' | 'neutral'
-  status: 'good' | 'warning' | 'critical' | 'neutral'
-  icon: string
+  title: string;
+  value: number;
+  unit: string;
+  trend: 'up' | 'down' | 'neutral';
+  status: 'good' | 'warning' | 'critical' | 'neutral';
+  icon: string;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const formatValue = (value: number): string => {
   if (value >= 1000000) {
-    return (value / 1000000).toFixed(1) + 'M'
+    return (value / 1000000).toFixed(1) + 'M';
   }
   else if (value >= 1000) {
-    return (value / 1000).toFixed(1) + 'K'
+    return (value / 1000).toFixed(1) + 'K';
   }
   else if (value % 1 !== 0) {
-    return value.toFixed(1)
+    return value.toFixed(1);
   }
-  return value.toString()
-}
+  return value.toString();
+};
 
 const getProgressWidth = (): string => {
   if (props.unit === '%') {
-    return `${Math.min(props.value, 100)}%`
+    return `${Math.min(props.value, 100)}%`;
   }
 
   // For other metrics, show relative progress based on status
   switch (props.status) {
     case 'good':
-      return '100%'
+      return '100%';
     case 'warning':
-      return '70%'
+      return '70%';
     case 'critical':
-      return '30%'
+      return '30%';
     default:
-      return '50%'
+      return '50%';
   }
-}
+};
 </script>

@@ -44,5 +44,5 @@ const fields = reactive({
   third: 0,
   fourth: 0,
   fifth: 0,
-})
+});
 </script>

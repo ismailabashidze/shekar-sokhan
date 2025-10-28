@@ -8,12 +8,12 @@ const props = withDefaults(
       | 'danger'
       | 'primary'
       | 'lime'
-      | 'sky'
+      | 'sky';
   }>(),
   {
     color: 'success',
   },
-)
+);
 
 const todos = [
   {
@@ -46,9 +46,9 @@ const todos = [
     description: 'Review complete design system',
     completed: true,
   },
-]
+];
 
-const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2'])
+const tasks = ref<string[]>(['Option 0', 'Option 1', 'Option 2']);
 </script>
 
 <template>

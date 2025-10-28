@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Interviews',
@@ -14,14 +14,14 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-personal-3-dark.png',
     order: 3,
   },
-})
+});
 
-const areaInterviews = reactive(useAreaInterviews())
+const areaInterviews = reactive(useAreaInterviews());
 
 function useAreaInterviews() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 220
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 220;
 
   const options = {
     chart: {
@@ -63,21 +63,21 @@ function useAreaInterviews() {
         format: 'dd/MM/yy HH:mm',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'Interviews',
       data: [31, 40, 28, 51, 42, 109, 100],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 const candidates = [
@@ -109,7 +109,7 @@ const candidates = [
     text: 'NL',
     role: 'UI/UX designer',
   },
-]
+];
 </script>
 
 <template>

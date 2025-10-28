@@ -653,5 +653,5 @@ export default defineEventHandler(async () => {
         },
       ],
     },
-  ]
-})
+  ];
+});

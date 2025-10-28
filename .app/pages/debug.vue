@@ -62,7 +62,7 @@
 // This page should be public - no middleware
 definePageMeta({
   layout: false,
-})
+});
 
-const { user } = useUser()
+const { user } = useUser();
 </script>

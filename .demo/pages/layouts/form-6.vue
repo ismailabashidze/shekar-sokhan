@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { DatePicker } from 'v-calendar'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { DatePicker } from 'v-calendar';
+import { Field, useForm } from 'vee-validate';
+import { z } from 'zod';
 
 definePageMeta({
   title: 'Meeting',
@@ -14,7 +14,7 @@ definePageMeta({
     srcDark: '/img/screens/layouts-form-6-dark.png',
     order: 52,
   },
-})
+});
 
 const VALIDATION_TEXT = {
   FIRSTNAME_REQUIRED: 'First name can\'t be empty',
@@ -27,7 +27,7 @@ const VALIDATION_TEXT = {
   ZIPCODE_REQUIRED: 'Please enter a zipcode',
   STATUS_REQUIRED: 'Pick a status',
   AVATAR_TOO_BIG: `Avatar size must be less than 1MB`,
-}
+};
 
 // This is the Zod schema for the form input
 // It's used to define the shape that the form data will have
@@ -58,13 +58,13 @@ const zodSchema = z.object({
       modifications: z.boolean(),
     }),
   }),
-})
+});
 
 // Zod has a great infer method that will
 // infer the shape of the schema into a TypeScript type
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 const initialValues = {
   meeting: {
     title: '',
@@ -86,7 +86,7 @@ const initialValues = {
       modifications: false,
     },
   },
-} satisfies FormInput
+} satisfies FormInput;
 
 const {
   handleSubmit,
@@ -101,27 +101,27 @@ const {
 } = useForm({
   validationSchema,
   initialValues,
-})
+});
 
-const success = ref(false)
-const fieldsWithErrors = computed(() => Object.keys(errors.value).length)
+const success = ref(false);
+const fieldsWithErrors = computed(() => Object.keys(errors.value).length);
 
 // Ask the user for confirmation before leaving the page if the form has unsaved changes
 onBeforeRouteLeave(() => {
   if (meta.value.dirty) {
-    return confirm('You have unsaved changes. Are you sure you want to leave?')
+    return confirm('You have unsaved changes. Are you sure you want to leave?');
   }
-})
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 
 // This is where you would send the form data to the server
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     // here you have access to the validated form values
-    console.log('meeting-create-success', values)
+    console.log('meeting-create-success', values);
 
     try {
       // fake delay, this will make isSubmitting value to be true
@@ -131,68 +131,68 @@ const onSubmit = handleSubmit(
           setTimeout(
             () => reject(new Error('Fake backend validation error')),
             2000,
-          )
+          );
         }
-        setTimeout(resolve, 4000)
-      })
+        setTimeout(resolve, 4000);
+      });
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'Success',
         message: `Record has been created!`,
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
     }
     catch (error: any) {
       // this will set the error on the form
       if (error.message === 'Fake backend validation error') {
-        setFieldError('meeting.title', 'This name is not allowed')
+        setFieldError('meeting.title', 'This name is not allowed');
 
         document.documentElement.scrollTo({
           top: 0,
           behavior: 'smooth',
-        })
+        });
 
-        toaster.clearAll()
+        toaster.clearAll();
         toaster.show({
           title: 'Oops!',
           message: 'Please review the errors in the form',
           color: 'danger',
           icon: 'lucide:alert-triangle',
           closable: true,
-        })
+        });
       }
-      return
+      return;
     }
 
-    resetForm()
+    resetForm();
 
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
 
-    success.value = true
+    success.value = true;
     setTimeout(() => {
-      success.value = false
-    }, 3000)
+      success.value = false;
+    }, 3000);
   },
   (error) => {
     // this callback is optional and called only if the form has errors
-    success.value = false
+    success.value = false;
 
     // here you have access to the error
-    console.log('meeting-create-error', error)
+    console.log('meeting-create-error', error);
 
     // you can use it to scroll to the first error
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 
 const calendars = [
   {
@@ -213,27 +213,27 @@ const calendars = [
     text: 'Your company calendar',
     icon: 'ph:buildings-duotone',
   },
-]
+];
 
 const dates = ref({
   start: new Date(),
   end: new Date(),
-})
+});
 
 const masks = ref({
   input: 'YYYY-MM-DD',
-})
+});
 
-const frequency = ref('day')
+const frequency = ref('day');
 const selectedCalendar = ref({
   id: 1,
   name: 'My Calendar',
   text: 'Your personal calendar',
   icon: 'ph:user-duotone',
-})
+});
 
-const uploadedFiles = ref<FileList | null>(null)
-const colorCode = ref('color_code_1')
+const uploadedFiles = ref<FileList | null>(null);
+const colorCode = ref('color_code_1');
 </script>
 
 <template>

@@ -1,16 +1,16 @@
 <script setup lang="ts">
-const selectedStyle = ref('classic')
-const toggled = ref(false)
+const selectedStyle = ref('classic');
+const toggled = ref(false);
 
 watch(selectedStyle, (value) => {
   if (value) {
-    toggled.value = true
+    toggled.value = true;
     const timeout = setTimeout(() => {
-      toggled.value = false
-      clearTimeout(timeout)
-    }, 1750)
+      toggled.value = false;
+      clearTimeout(timeout);
+    }, 1750);
   }
-})
+});
 </script>
 
 <template>

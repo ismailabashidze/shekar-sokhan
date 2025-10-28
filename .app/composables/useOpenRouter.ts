@@ -1,125 +1,125 @@
-import type { TherapistGenerateInput, TherapistGenerateOutput } from '~/types'
-import type { AiResponseSettings } from './useAIResponseSettings'
+import type { TherapistGenerateInput, TherapistGenerateOutput } from '~/types';
+import type { AiResponseSettings } from './useAIResponseSettings';
 
 interface ChatMessage {
-  role: 'user' | 'assistant' | 'system'
-  content: string
+  role: 'user' | 'assistant' | 'system';
+  content: string;
 }
 
 interface AIResponseConfig {
-  max_tokens: number
-  temperature: number
-  response_format?: { type: string }
-  system_prompt_additions: string
+  max_tokens: number;
+  temperature: number;
+  response_format?: { type: string };
+  system_prompt_additions: string;
   post_processing: {
-    enable_emoji_injection: boolean
-    emoji_density: number
-    enable_formatting: boolean
-    format_type: string
-  }
+    enable_emoji_injection: boolean;
+    emoji_density: number;
+    enable_formatting: boolean;
+    format_type: string;
+  };
 }
 
 interface StructuredRequestOptions {
-  messages: ChatMessage[]
-  schema: any
-  schemaName?: string
-  model?: string
-  maxTokens?: number
-  temperature?: number
-  signal?: AbortSignal
-  timeout?: number
-  retries?: number
-  strict?: boolean
+  messages: ChatMessage[];
+  schema: any;
+  schemaName?: string;
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+  signal?: AbortSignal;
+  timeout?: number;
+  retries?: number;
+  strict?: boolean;
 }
 
 interface RequestRetryOptions {
-  maxAttempts?: number
-  timeoutMs?: number
-  signal?: AbortSignal
+  maxAttempts?: number;
+  timeoutMs?: number;
+  signal?: AbortSignal;
 }
 
 interface AbortManager {
-  controller: AbortController
-  cleanup: () => void
-  timedOut: () => boolean
-  externalAborted: () => boolean
+  controller: AbortController;
+  cleanup: () => void;
+  timedOut: () => boolean;
+  externalAborted: () => boolean;
 }
 
 interface TypingConfig {
-  messageDelay: number // delay between multi-messages (default 2000ms)
-  enableTypingEffect: boolean // enable typing effect for multi-messages
-  signal?: AbortSignal // abort signal for cancellation
+  messageDelay: number; // delay between multi-messages (default 2000ms)
+  enableTypingEffect: boolean; // enable typing effect for multi-messages
+  signal?: AbortSignal; // abort signal for cancellation
 }
 
 interface OpenRouterModel {
-  id: string
-  name: string
-  description: string
-  context_length: number
+  id: string;
+  name: string;
+  description: string;
+  context_length: number;
   pricing: {
-    prompt: string
-    completion: string
-  }
+    prompt: string;
+    completion: string;
+  };
 }
 
 interface OpenRouterOptions {
-  model?: string
-  temperature?: number
-  max_tokens?: number
+  model?: string;
+  temperature?: number;
+  max_tokens?: number;
   patientDetails?: {
-    name: string
-    age: string
-    shortDescription: string
-    longDescription: string
-    definingTraits: string
-    backStory: string
-    personality: string
-    appearance: string
-    motivation: string
-    moodAndCurrentEmotions: string
-  }
+    name: string;
+    age: string;
+    shortDescription: string;
+    longDescription: string;
+    definingTraits: string;
+    backStory: string;
+    personality: string;
+    appearance: string;
+    motivation: string;
+    moodAndCurrentEmotions: string;
+  };
   therapistDetails?: {
-    name: string
-    specialty: string
-    shortDescription: string
-    longDescription: string
-    definingTraits: string
-    backStory: string
-    personality: string
-    appearance: string
-    approach: string
-    expertise: string
-  }
-  aiResponseSettings?: AiResponseSettings
-  isConversationStarter?: boolean
-  typingConfig?: TypingConfig
-  signal?: AbortSignal // Add abort signal support
+    name: string;
+    specialty: string;
+    shortDescription: string;
+    longDescription: string;
+    definingTraits: string;
+    backStory: string;
+    personality: string;
+    appearance: string;
+    approach: string;
+    expertise: string;
+  };
+  aiResponseSettings?: AiResponseSettings;
+  isConversationStarter?: boolean;
+  typingConfig?: TypingConfig;
+  signal?: AbortSignal; // Add abort signal support
 }
 
 export interface PatientGenerateInput {
-  name: string
-  age: number
-  shortDescription: string
+  name: string;
+  age: number;
+  shortDescription: string;
 }
 
 export interface PatientGenerateOutput {
-  longDescription: string
-  definingTraits: string
-  backStory: string
-  personality: string
-  appearance: string
-  motivation: string
-  moodAndCurrentEmotions: string
+  longDescription: string;
+  definingTraits: string;
+  backStory: string;
+  personality: string;
+  appearance: string;
+  motivation: string;
+  moodAndCurrentEmotions: string;
 }
 
-const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
-const DEFAULT_TIMEOUT_MS = 30000
-const RATE_LIMIT_DELAYS = [5000, 10000, 15000]
-const GENERIC_RETRY_DELAY_MS = 1000
-const ABORT_FLAG = '__REQUEST_ABORTED__'
-const TIMEOUT_FLAG = '__REQUEST_TIMEOUT__'
+const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+const DEFAULT_TIMEOUT_MS = 30000;
+const RATE_LIMIT_DELAYS = [5000, 10000, 15000];
+const GENERIC_RETRY_DELAY_MS = 1000;
+const ABORT_FLAG = '__REQUEST_ABORTED__';
+const TIMEOUT_FLAG = '__REQUEST_TIMEOUT__';
 
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const patientDetailsSchema = {
   type: 'object',
   properties: {
@@ -162,7 +162,7 @@ const patientDetailsSchema = {
     'moodAndCurrentEmotions',
   ],
   additionalProperties: false,
-}
+};
 
 const therapistDetailsSchema = {
   type: 'object',
@@ -206,74 +206,74 @@ const therapistDetailsSchema = {
     'expertise',
   ],
   additionalProperties: false,
-}
+};
 
 function createAbortManager(
   timeoutMs: number,
   external?: AbortSignal,
 ): AbortManager {
-  const controller = new AbortController()
-  let timedOut = false
-  let externalAborted = false
+  const controller = new AbortController();
+  let timedOut = false;
+  let externalAborted = false;
 
   const onExternalAbort = () => {
-    externalAborted = true
-    controller.abort()
-  }
+    externalAborted = true;
+    controller.abort();
+  };
 
   if (external) {
     if (external.aborted) {
-      externalAborted = true
-      controller.abort()
+      externalAborted = true;
+      controller.abort();
     }
     else {
-      external.addEventListener('abort', onExternalAbort, { once: true })
+      external.addEventListener('abort', onExternalAbort, { once: true });
     }
   }
 
   const timeoutId
     = timeoutMs > 0
       ? setTimeout(() => {
-        timedOut = true
-        controller.abort()
+        timedOut = true;
+        controller.abort();
       }, timeoutMs)
-      : null
+      : null;
 
   const cleanup = () => {
     if (timeoutId) {
-      clearTimeout(timeoutId)
+      clearTimeout(timeoutId);
     }
     if (external) {
-      external.removeEventListener('abort', onExternalAbort)
+      external.removeEventListener('abort', onExternalAbort);
     }
-  }
+  };
 
   return {
     controller,
     cleanup,
     timedOut: () => timedOut,
     externalAborted: () => externalAborted,
-  }
+  };
 }
 
 async function buildHttpError(response: Response): Promise<Error> {
-  const text = await response.text().catch(() => '')
+  const text = await response.text().catch(() => '');
 
   if (text) {
     try {
-      const data = JSON.parse(text)
-      const message = data?.error?.message || data?.message
+      const data = JSON.parse(text);
+      const message = data?.error?.message || data?.message;
       if (message) {
-        return new Error(`HTTP ${response.status}: ${message}`)
+        return new Error(`HTTP ${response.status}: ${message}`);
       }
     }
     catch {
       // ignore JSON parse issues and fall back to raw text
     }
-    return new Error(`HTTP ${response.status}: ${text}`)
+    return new Error(`HTTP ${response.status}: ${text}`);
   }
 
-  return new Error(`HTTP ${response.status}`)
+  return new Error(`HTTP ${response.status}`);
 }
 
 async function requestWithRetry(
@@ -284,89 +284,89 @@ async function requestWithRetry(
     signal,
   }: RequestRetryOptions = {},
 ): Promise<Response> {
-  let attempt = 0
-  let lastError: Error | null = null
+  let attempt = 0;
+  let lastError: Error | null = null;
 
   while (attempt < maxAttempts) {
-    attempt++
-    const abortManager = createAbortManager(timeoutMs, signal)
+    attempt++;
+    const abortManager = createAbortManager(timeoutMs, signal);
 
     try {
-      const response = await requestFactory(abortManager.controller.signal)
+      const response = await requestFactory(abortManager.controller.signal);
 
       if (response.ok) {
-        abortManager.cleanup()
-        return response
+        abortManager.cleanup();
+        return response;
       }
 
       if (response.status === 429 && attempt < maxAttempts) {
-        abortManager.cleanup()
+        abortManager.cleanup();
         const delay
           = RATE_LIMIT_DELAYS[attempt - 1]
-          ?? RATE_LIMIT_DELAYS[RATE_LIMIT_DELAYS.length - 1]
-        await wait(delay)
-        continue
+          ?? RATE_LIMIT_DELAYS[RATE_LIMIT_DELAYS.length - 1];
+        await wait(delay);
+        continue;
       }
 
-      abortManager.cleanup()
-      throw await buildHttpError(response)
+      abortManager.cleanup();
+      throw await buildHttpError(response);
     }
     catch (error: any) {
-      abortManager.cleanup()
+      abortManager.cleanup();
 
       if (abortManager.controller.signal.aborted) {
         if (abortManager.timedOut()) {
-          throw new Error(TIMEOUT_FLAG)
+          throw new Error(TIMEOUT_FLAG);
         }
         if (abortManager.externalAborted()) {
-          throw new Error(ABORT_FLAG)
+          throw new Error(ABORT_FLAG);
         }
-        throw error
+        throw error;
       }
 
-      lastError = error instanceof Error ? error : new Error(String(error))
+      lastError = error instanceof Error ? error : new Error(String(error));
 
       if (attempt >= maxAttempts) {
-        throw lastError
+        throw lastError;
       }
 
-      await wait(Math.min(GENERIC_RETRY_DELAY_MS * attempt, 3000))
+      await wait(Math.min(GENERIC_RETRY_DELAY_MS * attempt, 3000));
     }
   }
 
-  throw lastError || new Error('Request failed after retries')
+  throw lastError || new Error('Request failed after retries');
 }
 
 function cleanJsonContent(raw: string): string {
-  let cleaned = raw.trim()
+  let cleaned = raw.trim();
 
   if (cleaned.startsWith('```json')) {
-    cleaned = cleaned.substring(7).trimStart()
+    cleaned = cleaned.substring(7).trimStart();
   }
   if (cleaned.startsWith('```')) {
-    cleaned = cleaned.substring(3).trimStart()
+    cleaned = cleaned.substring(3).trimStart();
   }
   if (cleaned.endsWith('```')) {
-    cleaned = cleaned.substring(0, cleaned.length - 3).trimEnd()
+    cleaned = cleaned.substring(0, cleaned.length - 3).trimEnd();
   }
 
-  return cleaned
+  return cleaned;
 }
 
 function safeParseJson<T = any>(raw: string): T {
-  const cleaned = cleanJsonContent(raw)
+  const cleaned = cleanJsonContent(raw);
 
   try {
-    return JSON.parse(cleaned) as T
+    return JSON.parse(cleaned) as T;
   }
   catch (parseError: any) {
-    let fixedContent = cleaned
-    const quoteCount = (fixedContent.match(/"/g) || []).length
+    let fixedContent = cleaned;
+    const quoteCount = (fixedContent.match(/"/g) || []).length;
 
     if (quoteCount % 2 !== 0) {
-      const lastQuoteIndex = fixedContent.lastIndexOf('"')
+      const lastQuoteIndex = fixedContent.lastIndexOf('"');
       if (lastQuoteIndex > -1) {
-        const afterQuote = fixedContent.substring(lastQuoteIndex + 1)
+        const afterQuote = fixedContent.substring(lastQuoteIndex + 1);
         if (
           afterQuote.trim() === ''
           || afterQuote.trim().startsWith('}')
@@ -375,62 +375,62 @@ function safeParseJson<T = any>(raw: string): T {
           fixedContent = `${fixedContent.substring(
             0,
             lastQuoteIndex + 1,
-          )}"${fixedContent.substring(lastQuoteIndex + 1)}`
+          )}"${fixedContent.substring(lastQuoteIndex + 1)}`;
         }
       }
     }
 
-    const braceStack: string[] = []
-    let inString = false
-    let escapeNext = false
+    const braceStack: string[] = [];
+    let inString = false;
+    let escapeNext = false;
 
     for (let i = 0; i < fixedContent.length; i++) {
-      const char = fixedContent[i]
+      const char = fixedContent[i];
 
       if (escapeNext) {
-        escapeNext = false
-        continue
+        escapeNext = false;
+        continue;
       }
 
       if (char === '\\') {
-        escapeNext = true
-        continue
+        escapeNext = true;
+        continue;
       }
 
       if (char === '"' && !escapeNext) {
-        inString = !inString
-        continue
+        inString = !inString;
+        continue;
       }
 
-      if (inString) continue
+      if (inString) continue;
 
       if (char === '{' || char === '[') {
-        braceStack.push(char)
+        braceStack.push(char);
       }
       else if (char === '}' || char === ']') {
         if (braceStack.length > 0) {
-          braceStack.pop()
+          braceStack.pop();
         }
       }
     }
 
     while (braceStack.length > 0) {
-      const lastOpen = braceStack.pop()
+      const lastOpen = braceStack.pop();
       if (lastOpen === '{') {
-        fixedContent += '}'
+        fixedContent += '}';
       }
       else if (lastOpen === '[') {
-        fixedContent += ']'
+        fixedContent += ']';
       }
     }
 
     try {
-      return JSON.parse(fixedContent) as T
+      return JSON.parse(fixedContent) as T;
     }
     catch (fixedParseError: any) {
       throw new Error(
         `Invalid JSON response even after fixing: ${fixedParseError.message}. Original error: ${parseError.message}`,
-      )
+      );
     }
   }
 }
@@ -442,110 +442,110 @@ function normalizeRequestError(
 ): Error {
   if (error instanceof Error) {
     if (error.message === ABORT_FLAG) {
-      return new Error(abortMessage)
+      return new Error(abortMessage);
     }
     if (error.message === TIMEOUT_FLAG) {
-      return new Error(timeoutMessage)
+      return new Error(timeoutMessage);
     }
-    return error
+    return error;
   }
-  return new Error(String(error))
+  return new Error(String(error));
 }
 
 async function waitForDelay(ms: number, signal?: AbortSignal) {
-  if (ms <= 0) return
+  if (ms <= 0) return;
 
   await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => {
-      cleanup()
-      resolve()
-    }, ms)
+      cleanup();
+      resolve();
+    }, ms);
 
     const cleanup = () => {
-      clearTimeout(timer)
+      clearTimeout(timer);
       if (signal) {
-        signal.removeEventListener('abort', onAbort)
+        signal.removeEventListener('abort', onAbort);
       }
-    }
+    };
 
     const onAbort = () => {
-      cleanup()
-      reject(new Error(ABORT_FLAG))
-    }
+      cleanup();
+      reject(new Error(ABORT_FLAG));
+    };
 
     if (signal) {
       if (signal.aborted) {
-        cleanup()
-        reject(new Error(ABORT_FLAG))
-        return
+        cleanup();
+        reject(new Error(ABORT_FLAG));
+        return;
       }
-      signal.addEventListener('abort', onAbort, { once: true })
+      signal.addEventListener('abort', onAbort, { once: true });
     }
-  })
+  });
 }
 
 async function readStreamResponse(
   response: Response,
   onChunk: (chunk: any) => void,
 ): Promise<string> {
-  const reader = response.body?.getReader()
+  const reader = response.body?.getReader();
   if (!reader) {
-    throw new Error('Could not get response reader')
+    throw new Error('Could not get response reader');
   }
 
-  const decoder = new TextDecoder()
-  let buffer = ''
-  let fullResponse = ''
-  let streamCompleted = false
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let fullResponse = '';
+  let streamCompleted = false;
 
   const processBuffer = (flush: boolean) => {
-    const segments = buffer.split('\n')
-    buffer = flush ? '' : segments.pop() ?? ''
+    const segments = buffer.split('\n');
+    buffer = flush ? '' : segments.pop() ?? '';
 
     for (const segment of segments) {
-      const line = segment.trim()
-      if (!line || !line.startsWith('data: ')) continue
+      const line = segment.trim();
+      if (!line || !line.startsWith('data: ')) continue;
 
-      const data = line.slice(6)
+      const data = line.slice(6);
       if (data === '[DONE]') {
-        streamCompleted = true
-        return
+        streamCompleted = true;
+        return;
       }
 
       try {
-        const parsed = JSON.parse(data)
-        const delta = parsed.choices?.[0]?.delta
+        const parsed = JSON.parse(data);
+        const delta = parsed.choices?.[0]?.delta;
         if (delta?.content) {
-          fullResponse += delta.content
-          onChunk(delta.content)
+          fullResponse += delta.content;
+          onChunk(delta.content);
         }
       }
       catch {
         // ignore malformed chunks
       }
     }
-  }
+  };
 
   try {
     while (!streamCompleted) {
-      const { done, value } = await reader.read()
+      const { done, value } = await reader.read();
       if (value) {
-        buffer += decoder.decode(value, { stream: true })
+        buffer += decoder.decode(value, { stream: true });
       }
       if (done) {
-        streamCompleted = true
-        processBuffer(true)
+        streamCompleted = true;
+        processBuffer(true);
       }
       else {
-        processBuffer(false)
+        processBuffer(false);
       }
     }
   }
   finally {
-    reader.releaseLock()
+    reader.releaseLock();
   }
 
-  return fullResponse
+  return fullResponse;
 }
 
 function mapCreativityToTemperature(creativity: string): number {
@@ -553,18 +553,18 @@ function mapCreativityToTemperature(creativity: string): number {
     0: 0.2, // Very focused and deterministic
     1: 0.7, // Balanced
     2: 1.2, // Highly creative
-  }
-  return mapping[creativity] || 0.7
+  };
+  return mapping[creativity] || 0.7;
 }
 
 function generateRandomMessageCount(): number {
-  const random = Math.random()
+  const random = Math.random();
 
   // Weighted randomization favoring 2-3 messages with decreased chance of 1 message
-  if (random < 0.05) return 1 // 5% chance for 1 message (decreased from 15%)
-  if (random < 0.45) return 2 // 40% chance for 2 messages (increased from 35%)
-  if (random < 0.85) return 3 // 40% chance for 3 messages (increased from 35%)
-  return 4 // 15% chance for 4 messages (unchanged)
+  if (random < 0.05) return 1; // 5% chance for 1 message (decreased from 15%)
+  if (random < 0.45) return 2; // 40% chance for 2 messages (increased from 35%)
+  if (random < 0.85) return 3; // 40% chance for 3 messages (increased from 35%)
+  return 4; // 15% chance for 4 messages (unchanged)
 }
 
 function generateAIConfig(
@@ -585,7 +585,7 @@ function generateAIConfig(
       },
       // Note: NEVER use json_object response format for conversation starters
       // Note: NEVER use multi-message for conversation starters - keep it as one comprehensive message
-    }
+    };
   }
 
   // Regular user-response configuration
@@ -599,19 +599,19 @@ function generateAIConfig(
       enable_formatting: aiSettings.formatting !== 'none',
       format_type: aiSettings.formatting,
     },
-  }
+  };
 
   // Multi-message mode requires JSON response format
   if (aiSettings.multiMsgMode !== 'single') {
-    config.response_format = { type: 'json_object' }
+    config.response_format = { type: 'json_object' };
   }
   // Single message mode uses regular string response (no response_format specified)
 
-  return config
+  return config;
 }
 
 function generateAdvancedSystemPrompt(aiSettings: any): string {
-  let prompt = '\n\n=== تنظیمات پیشرفته پاسخ‌دهی ===\n'
+  let prompt = '\n\n=== تنظیمات پیشرفته پاسخ‌دهی ===\n';
 
   // UX instruction: Use natural language instead of template placeholders
   prompt += `
@@ -624,25 +624,25 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 - به جای [موقعیت] از "در شرایط فعلی" یا "در وضعیت کنونی" استفاده کنید
 
 این کار باعث احساس طبیعی‌تر و دوستانه‌تر شدن گفتگو می‌شود و تجربه کاربری بهتری ایجاد می‌کند.
-`
+`;
 
   // Add information about answer size/length preference
   const lengthPreferences = {
     short: 'پاسخ کوتاه و مختصر (2-3 جمله)',
     medium: 'پاسخ متعادل و جامع (4-6 جمله)',
     long: 'پاسخ کامل و تفصیلی (7 جمله یا بیشتر)',
-  }
+  };
 
   if (aiSettings.lengthPref && lengthPreferences[aiSettings.lengthPref]) {
     prompt += `\nتوضیح درباره اندازه پاسخ: ${
       lengthPreferences[aiSettings.lengthPref]
-    }\n`
+    }\n`;
   }
 
   // Multi-message handling with randomization
   if (aiSettings.multiMsgMode !== 'single') {
     // Generate random number of messages (2-4, with preference for 2-3)
-    const randomMessageCount = generateRandomMessageCount()
+    const randomMessageCount = generateRandomMessageCount();
 
     prompt += `
 CRITICAL INSTRUCTION - MULTI-MESSAGE MODE:
@@ -666,7 +666,7 @@ IMPORTANT: Respond with a simple JSON object in this format:
 DO NOT use function calls or complex JSON structures. Just return a simple object with a "messages" array containing ${randomMessageCount} text string${
       randomMessageCount > 1 ? 's' : ''
     }.
-`
+`;
   }
 
   // Tone and style instructions
@@ -674,7 +674,7 @@ DO NOT use function calls or complex JSON structures. Just return a simple objec
     formal: 'استفاده از زبان رسمی، اصطلاحات تخصصی مناسب، و ساختار جملات منظم.',
     casual: 'استفاده از زبان محاورهای، کلمات ساده، و لحن دوستانه و صمیمی.',
     neutral: 'حفظ تعادل بین رسمی و غیررسمی، استفاده از زبان روان و قابل فهم.',
-  }
+  };
 
   const kindnessInstructions = {
     very_kind:
@@ -682,14 +682,14 @@ DO NOT use function calls or complex JSON structures. Just return a simple objec
     kind: 'ابراز مهربانی و درک، گوش دادن فعال، و ارائه حمایت عاطفی.',
     neutral: 'حفظ حرفه‌ای بودن همراه با گرمی، ارائه کمک بدون احساساتی شدن.',
     direct: 'صادق و مستقیم بودن، تمرکز بر راه‌حل‌های عملی، اجتناب از تعارف.',
-  }
+  };
 
   if (aiSettings.tone && toneInstructions[aiSettings.tone]) {
-    prompt += `\nسبک گفتار: ${toneInstructions[aiSettings.tone]}\n`
+    prompt += `\nسبک گفتار: ${toneInstructions[aiSettings.tone]}\n`;
   }
 
   if (aiSettings.kindness && kindnessInstructions[aiSettings.kindness]) {
-    prompt += `سطح مهربانی: ${kindnessInstructions[aiSettings.kindness]}\n`
+    prompt += `سطح مهربانی: ${kindnessInstructions[aiSettings.kindness]}\n`;
   }
 
   // Language style
@@ -699,10 +699,10 @@ DO NOT use function calls or complex JSON structures. Just return a simple objec
     casual: 'استفاده از زبان روزمره، مثال‌های از زندگی عادی، و توضیحات ساده.',
     friendly:
       'ایجاد حس صمیمیت، استفاده از تشبیهات دوستانه، و لحن گرم و دعوت‌کننده.',
-  }
+  };
 
   if (aiSettings.languageStyle && languageStyles[aiSettings.languageStyle]) {
-    prompt += `سبک زبان: ${languageStyles[aiSettings.languageStyle]}\n`
+    prompt += `سبک زبان: ${languageStyles[aiSettings.languageStyle]}\n`;
   }
 
   // Premium enhancements
@@ -713,14 +713,14 @@ PREMIUM FEATURES ENABLED:
 - استفاده از تکنیک‌های پیشرفته روان‌درمانی
 - ارائه تمرین‌های عملی و راهکارهای تخصصی
 - پیگیری مراحل پیشرفت و ارائه بازخورد دقیق
-`
+`;
   }
 
-  return prompt
+  return prompt;
 }
 
 function generateConversationStarterPrompt(aiSettings: any): string {
-  let prompt = '\n\n=== تنظیمات ویژه پیام آغازین ===\n'
+  let prompt = '\n\n=== تنظیمات ویژه پیام آغازین ===\n';
 
   // UX instruction: Use natural language instead of template placeholders
   prompt += `
@@ -733,19 +733,19 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 - به جای [موقعیت] از "در شرایط فعلی" یا "در وضعیت کنونی" استفاده کنید
 
 این کار باعث احساس طبیعی‌تر و دوستانه‌تر شدن گفتگو می‌شود و تجربه کاربری بهتری ایجاد می‌کند.
-`
+`;
 
   // Add information about answer size/length preference
   const lengthPreferences = {
     short: 'پاسخ کوتاه و مختصر (2-3 جمله)',
     medium: 'پاسخ متعادل و جامع (4-6 جمله)',
     long: 'پاسخ کامل و تفصیلی (7 جمله یا بیشتر)',
-  }
+  };
 
   if (aiSettings.lengthPref && lengthPreferences[aiSettings.lengthPref]) {
     prompt += `\nتوضیح درباره اندازه پاسخ: ${
       lengthPreferences[aiSettings.lengthPref]
-    }\n`
+    }\n`;
   }
 
   prompt += `
@@ -760,7 +760,7 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 استفاده از ایموجی‌های مناسب برای ایجاد فضای دوستانه
 قالب‌بندی مناسب برای خوانایی بهتر
 
-`
+`;
 
   // Always include premium features for conversation starters regardless of user's premium status
   prompt += `
@@ -768,9 +768,9 @@ CRITICAL UX RULE: هنگامی که اطلاعات خاصی در دسترس ند
 - استفاده از تکنیک‌های پیشرفته روان‌درمانی در خلاصه‌سازی
 - ارائه بینش‌های تخصصی درباره پیشرفت مراجع
 - پیشنهاد موضوعات و سؤالات هدفمند برای جلسه جدید
-`
+`;
 
-  return prompt
+  return prompt;
 }
 
 function getEmojiDensity(emojiLevel: string): number {
@@ -779,15 +779,15 @@ function getEmojiDensity(emojiLevel: string): number {
     medium: 0.08, // ~8% of words can have emoji
     low: 0.03, // ~3% of words can have emoji
     none: 0,
-  }
-  return densities[emojiLevel] || 0
+  };
+  return densities[emojiLevel] || 0;
 }
 
 function postProcessResponse(
   response: string,
   config: AIResponseConfig,
 ): string {
-  let processedResponse = response
+  let processedResponse = response;
 
   // Emoji injection
   if (
@@ -797,7 +797,7 @@ function postProcessResponse(
     processedResponse = injectEmojis(
       processedResponse,
       config.post_processing.emoji_density,
-    )
+    );
   }
 
   // Formatting
@@ -805,10 +805,10 @@ function postProcessResponse(
     processedResponse = applyFormatting(
       processedResponse,
       config.post_processing.format_type,
-    )
+    );
   }
 
-  return processedResponse
+  return processedResponse;
 }
 
 function injectEmojis(text: string, density: number): string {
@@ -823,43 +823,43 @@ function injectEmojis(text: string, density: number): string {
     'عشق|محبت': '❤️',
     'فکر|تفکر': '🤔',
     'موفقیت|پیروز': '🎉',
-  }
+  };
 
-  const sentences = text.split('.')
-  const targetSentences = Math.floor(sentences.length * density)
+  const sentences = text.split('.');
+  const targetSentences = Math.floor(sentences.length * density);
 
   for (let i = 0; i < targetSentences && i < sentences.length; i++) {
-    const sentence = sentences[i]
+    const sentence = sentences[i];
 
     for (const [pattern, emoji] of Object.entries(emotionEmojis)) {
-      const regex = new RegExp(pattern, 'gi')
+      const regex = new RegExp(pattern, 'gi');
       if (sentence.match(regex)) {
-        sentences[i] = sentence + ' ' + emoji
-        break
+        sentences[i] = sentence + ' ' + emoji;
+        break;
       }
     }
   }
 
-  return sentences.join('.')
+  return sentences.join('.');
 }
 
 function applyFormatting(text: string, formatType: string): string {
   switch (formatType) {
     case 'bullets':
-      return text.replace(/(\d+[\.\-\:]|[\-\*])\s*/g, '• ')
+      return text.replace(/(\d+[\.\-\:]|[\-\*])\s*/g, '• ');
     case 'numbers':
-      let counter = 1
-      return text.replace(/[\-\*•]\s*/g, () => `${counter++}. `)
+      let counter = 1;
+      return text.replace(/[\-\*•]\s*/g, () => `${counter++}. `);
     case 'markdown':
       return text
         .replace(/\*\*(.*?)\*\*/g, '**$1**')
-        .replace(/\*(.*?)\*/g, '*$1*')
+        .replace(/\*(.*?)\*/g, '*$1*');
     case 'rich':
       return text
         .replace(/(نکته مهم|توجه|هشدار)/gi, '🔔 **$1**')
-        .replace(/(راه[‌\s]?حل|پیشنهاد)/gi, '💡 **$1**')
+        .replace(/(راه[‌\s]?حل|پیشنهاد)/gi, '💡 **$1**');
     default:
-      return text
+      return text;
   }
 }
 
@@ -867,7 +867,7 @@ const defaultTypingConfig: TypingConfig = {
   messageDelay: 2000, // 2 seconds between multi-messages
   enableTypingEffect: true,
   signal: undefined,
-}
+};
 
 async function handleMessageWithTyping(
   message: string,
@@ -877,7 +877,7 @@ async function handleMessageWithTyping(
   typingConfig: TypingConfig = defaultTypingConfig,
 ) {
   if (typingConfig.signal && typingConfig.signal.aborted) {
-    throw new Error(ABORT_FLAG)
+    throw new Error(ABORT_FLAG);
   }
 
   onChunk({
@@ -885,7 +885,7 @@ async function handleMessageWithTyping(
     message,
     index: messageIndex,
     total: totalMessages,
-  })
+  });
 }
 
 async function handleMultiMessageResponse(
@@ -900,8 +900,8 @@ async function handleMultiMessageResponse(
 ) {
   const handleInvalidStructure = async () => {
     if (retryCount >= maxRetries || !retryCallback || !originalMessages) {
-      onChunk(postProcessResponse(response, config))
-      return
+      onChunk(postProcessResponse(response, config));
+      return;
     }
 
     try {
@@ -918,9 +918,9 @@ async function handleMultiMessageResponse(
   ]
 }`,
         },
-      ]
+      ];
 
-      const newResponse = await retryCallback(retryMessages)
+      const newResponse = await retryCallback(retryMessages);
       await handleMultiMessageResponse(
         newResponse,
         config,
@@ -930,46 +930,46 @@ async function handleMultiMessageResponse(
         maxRetries,
         originalMessages,
         retryCallback,
-      )
+      );
     }
     catch {
-      onChunk(postProcessResponse(response, config))
+      onChunk(postProcessResponse(response, config));
     }
-  }
+  };
 
-  let parsed: any
+  let parsed: any;
   try {
-    parsed = safeParseJson<any>(response)
+    parsed = safeParseJson<any>(response);
   }
   catch {
-    await handleInvalidStructure()
-    return
+    await handleInvalidStructure();
+    return;
   }
 
-  const rawMessages = Array.isArray(parsed?.messages) ? parsed.messages : []
+  const rawMessages = Array.isArray(parsed?.messages) ? parsed.messages : [];
   const validMessages = rawMessages.filter(
     (msg: any) => typeof msg === 'string' && msg.trim().length > 0,
-  )
+  );
 
   if (validMessages.length === 0) {
-    await handleInvalidStructure()
-    return
+    await handleInvalidStructure();
+    return;
   }
 
   for (let i = 0; i < validMessages.length; i++) {
-    const message = postProcessResponse(validMessages[i], config)
-    if (!message.trim()) continue
+    const message = postProcessResponse(validMessages[i], config);
+    if (!message.trim()) continue;
 
     if (i > 0 && typingConfig.enableTypingEffect) {
       try {
-        await waitForDelay(typingConfig.messageDelay, typingConfig.signal)
+        await waitForDelay(typingConfig.messageDelay, typingConfig.signal);
       }
       catch (delayError) {
         throw normalizeRequestError(
           delayError,
           'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.',
           'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.',
-        )
+        );
       }
     }
 
@@ -979,37 +979,37 @@ async function handleMultiMessageResponse(
       validMessages.length,
       onChunk,
       typingConfig,
-    )
+    );
   }
 }
 
 export function useOpenRouter() {
-  const config = useRuntimeConfig()
+  const config = useRuntimeConfig();
 
   // Chat state
-  const processing = ref(false)
-  const error = ref<string | null>(null)
+  const processing = ref(false);
+  const error = ref<string | null>(null);
 
   // Models state
-  const allModels = ref<OpenRouterModel[]>([])
-  const selectedModel = ref<string>('google/gemma-3-27b-it')
-  const loading = ref(false)
-  const searchQuery = ref('')
+  const allModels = ref<OpenRouterModel[]>([]);
+  const selectedModel = ref<string>('google/gemma-3-27b-it');
+  const loading = ref(false);
+  const searchQuery = ref('');
 
   const filteredModels = computed(() => {
-    if (!searchQuery.value) return allModels.value
-    const query = searchQuery.value.toLowerCase()
+    if (!searchQuery.value) return allModels.value;
+    const query = searchQuery.value.toLowerCase();
     return allModels.value.filter(
       model =>
         model.name.toLowerCase().includes(query)
         || model.id.toLowerCase().includes(query)
         || model.description.toLowerCase().includes(query),
-    )
-  })
+    );
+  });
 
   const fetchModels = async () => {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
     try {
       const response = await requestWithRetry(signal =>
         fetch(`${OPENROUTER_BASE_URL}/models`, {
@@ -1019,43 +1019,43 @@ export function useOpenRouter() {
           },
           signal,
         }),
-      )
+      );
 
-      const data = await response.json()
+      const data = await response.json();
       if (!Array.isArray(data?.data) || data.data.length === 0) {
-        throw new Error('No models available')
+        throw new Error('No models available');
       }
 
-      allModels.value = data.data
+      allModels.value = data.data;
     }
     catch (e) {
       const normalized = normalizeRequestError(
         e,
         'Request aborted',
         'Request timeout after 30 seconds',
-      )
-      error.value = normalized.message
-      allModels.value = []
-      console.error('Error fetching models:', normalized)
+      );
+      error.value = normalized.message;
+      allModels.value = [];
+      console.error('Error fetching models:', normalized);
     }
     finally {
-      loading.value = false
+      loading.value = false;
     }
-  }
+  };
 
   const streamChat = async (
     messages: ChatMessage[],
     options: OpenRouterOptions = {},
     onChunk: (chunk: any) => void,
   ): Promise<string> => {
-    processing.value = true
-    error.value = null
+    processing.value = true;
+    error.value = null;
 
-    const systemMessage = messages[0]?.role === 'system' ? messages[0] : null
-    const patientDetails = options.patientDetails
-    const therapistDetails = options.therapistDetails
+    const systemMessage = messages[0]?.role === 'system' ? messages[0] : null;
+    const patientDetails = options.patientDetails;
+    const therapistDetails = options.therapistDetails;
 
-    let systemPrompt = ''
+    let systemPrompt = '';
 
     if (patientDetails) {
       systemPrompt = `اطلاعات هویتی تو در پایین آمده است. 
@@ -1075,7 +1075,7 @@ export function useOpenRouter() {
 نیازی نیست خیلی مودب باشی اگر لازم بود پرخاش کن.
 دقت کن که نقش تو مراجع برای روان درمانی است و نقش مقابل تو یک روان شناس است.
 فقط یک بار سلام کافی است. دیگر نیازی به سلام مجدد نیست
-`
+`;
     }
 
     if (therapistDetails) {
@@ -1165,23 +1165,23 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
 تو توسط تیم دانشگاه تهران توسعه یافته ای. هیچ مشاوری را توصیه نمی کنی و فقط از خودت به عنوان یک پشتیبان حمایتی مایه بگذار.
 توجه کن که در فرهنگ ایرانی حساسیت زیادی نسبت به آموزش های جنسی باز وجود دارد و ساختار سنتی زن  / مرد یک باور مورد تایید است و آزادی ها و آموزش های جنسی را ارائه نمی کنی. در مقابل بیان کن که این موارد می تواند نشانگان موضوع مهم دیگری باشد که نیاز به بررسی با روان شناس دارد.
 تو همیشه پاسخ نهایی را بر اساس اطلاعات موجود ایجاد می کنی.
-`
+`;
     }
 
-    const aiSettings = options.aiResponseSettings
-    const isConversationStarter = options.isConversationStarter || false
-    const typingConfig = options.typingConfig || defaultTypingConfig
-    let aiConfig: AIResponseConfig | null = null
+    const aiSettings = options.aiResponseSettings;
+    const isConversationStarter = options.isConversationStarter || false;
+    const typingConfig = options.typingConfig || defaultTypingConfig;
+    let aiConfig: AIResponseConfig | null = null;
 
     if (aiSettings && therapistDetails) {
-      aiConfig = generateAIConfig(aiSettings, isConversationStarter)
-      systemPrompt += aiConfig.system_prompt_additions
+      aiConfig = generateAIConfig(aiSettings, isConversationStarter);
+      systemPrompt += aiConfig.system_prompt_additions;
     }
 
-    const messagesWithSystem = [...messages]
+    const messagesWithSystem = [...messages];
 
     if (!systemMessage) {
-      messagesWithSystem.unshift({ role: 'system', content: systemPrompt })
+      messagesWithSystem.unshift({ role: 'system', content: systemPrompt });
     }
 
     if (isConversationStarter) {
@@ -1189,8 +1189,8 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
         role: 'user',
         content:
           'سلام، به عنوان روانشناس من، لطفاً خلاصه‌ای از جلسات قبلی و وضعیت فعلی را برایم بفرست.',
-      }
-      messagesWithSystem.splice(1, 0, initialUserMessage)
+      };
+      messagesWithSystem.splice(1, 0, initialUserMessage);
     }
 
     const headers = {
@@ -1198,7 +1198,7 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
       'Authorization': `Bearer ${config.public.openRouterApiKey}`,
       'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
       'X-Title': 'Therapist Chat',
-    }
+    };
 
     const buildPayload = (payloadMessages: ChatMessage[]) => {
       const payload: any = {
@@ -1210,17 +1210,17 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
         max_tokens: 0,
         plugins: [],
         transforms: ['middle-out'],
-      }
+      };
 
       if (aiConfig?.response_format?.type === 'json_object') {
-        payload.response_format = { type: 'json_object' }
+        payload.response_format = { type: 'json_object' };
       }
       else if (aiConfig?.response_format) {
-        payload.response_format = aiConfig.response_format
+        payload.response_format = aiConfig.response_format;
       }
 
-      return payload
-    }
+      return payload;
+    };
 
     const requestChat = (payloadMessages: ChatMessage[]) =>
       requestWithRetry(
@@ -1232,19 +1232,19 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
             signal,
           }),
         { signal: options.signal },
-      )
+      );
 
     try {
-      const response = await requestChat(messagesWithSystem)
-      const isJsonResponse = aiConfig?.response_format?.type === 'json_object'
+      const response = await requestChat(messagesWithSystem);
+      const isJsonResponse = aiConfig?.response_format?.type === 'json_object';
 
       if (isJsonResponse && aiConfig) {
-        const data = await response.json()
-        const fullResponse = data?.choices?.[0]?.message?.content ?? ''
+        const data = await response.json();
+        const fullResponse = data?.choices?.[0]?.message?.content ?? '';
 
         if (!fullResponse.trim()) {
-          onChunk('متاسفانه پاسخی دریافت نشد. لطفا دوباره تلاش کنید.')
-          return ''
+          onChunk('متاسفانه پاسخی دریافت نشد. لطفا دوباره تلاش کنید.');
+          return '';
         }
 
         await handleMultiMessageResponse(
@@ -1268,49 +1268,49 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
                   signal,
                 }),
               { signal: options.signal },
-            )
-            const retryData = await retryResponse.json()
-            return retryData?.choices?.[0]?.message?.content ?? ''
+            );
+            const retryData = await retryResponse.json();
+            return retryData?.choices?.[0]?.message?.content ?? '';
           },
-        )
+        );
 
-        return fullResponse
+        return fullResponse;
       }
 
       return await readStreamResponse(response, chunk =>
         onChunk(chunk),
-      )
+      );
     }
     catch (e) {
       const normalized = normalizeRequestError(
         e,
         'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.',
         'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.',
-      )
-      error.value = normalized.message
-      throw normalized
+      );
+      error.value = normalized.message;
+      throw normalized;
     }
     finally {
-      processing.value = false
+      processing.value = false;
     }
-  }
+  };
 
   // Accepts only the last message for inline analysis
   const generateInlineAnalysis = async (
     lastMessage: ChatMessage,
     options: { signal?: AbortSignal } = {},
   ): Promise<any> => {
-    processing.value = true
-    error.value = null
+    processing.value = true;
+    error.value = null;
 
     try {
       const systemPrompt: ChatMessage = {
         role: 'system',
         content:
           'شما یک تحلیل گر پیام ها در یک سیستم مشاوره آنلاین برخط و به صورت متنی هستید. شما به پیام های مشاور و مراجع دسترسی دارید و بر اساس این پیام ها موارد خواسته شده را ارزیابی می کنید. خروجی تحلیل شما در اختیار روانشناس و سیستم قرار خواهد گرفت تا بهترین کمک به مراجع انجام شود. از اهمیت ویژه ای برخوردار است که ریسک خودکشی مراجع با دقت ارزیابی شود. اگر مراجع هر نوع اشاره یا تمایل به خودکشی، آسیب رساندن به خود، یا ابراز ناراحتی عمیق داشت، باید آن را به دقت ارزیابی کنید و در میزان medium و بالاتر، باید نشانه‌ها و واقعیت‌های متن اصلی را در توضیح ذکر کنید. همچنین باید هر نشانه مرتبط با افکار یا رفتارهای خودکشی را استخراج کنید، متن دقیق یا خلاصه‌ای کوتاه از پیام را ذکر کنید، آن را در یکی از دسته‌های suicidal_ideation، self_harm، hopelessness، previous_attempt، plan، means، intent، recklessness، giving_away_possessions، saying_goodbye، substance_abuse، depression، anxiety، isolation، trauma، loss، crisis، impulsivity، aggression، psychosis، emotional_pain، worthlessness، burden، sleep_disturbance، agitation، withdrawal، mood_changes طبقه‌بندی کنید و برای هر نشانه سطح خطر کیفی را با یکی از برچسب‌های minimal، low، moderate، high، critical بیان کنید. برای هر نشانه توضیحی کوتاه بنویسید که چگونه متن به آن نشانه مرتبط است. اگر هیچ نشانه‌ای وجود ندارد، آرایه مربوطه باید خالی باشد.',
-      }
+      };
 
-      const messagesWithSystem: ChatMessage[] = [systemPrompt, lastMessage]
+      const messagesWithSystem: ChatMessage[] = [systemPrompt, lastMessage];
 
       const response = await requestWithRetry(
         signal =>
@@ -1483,26 +1483,26 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
             signal,
           }),
         { signal: options.signal },
-      )
+      );
 
-      const data = await response.json()
-      const content = data.choices?.[0]?.message?.content
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
 
-      return typeof content === 'string' ? safeParseJson(content) : content
+      return typeof content === 'string' ? safeParseJson(content) : content;
     }
     catch (e) {
       const normalized = normalizeRequestError(
         e,
         'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.',
         'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.',
-      )
-      error.value = normalized.message
-      throw normalized
+      );
+      error.value = normalized.message;
+      throw normalized;
     }
     finally {
-      processing.value = false
+      processing.value = false;
     }
-  }
+  };
 
   const generateStructuredResponse = async ({
     messages,
@@ -1516,13 +1516,13 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
     retries = 3,
     strict = true,
   }: StructuredRequestOptions): Promise<any> => {
-    error.value = null
+    error.value = null;
 
-    let attempt = 0
-    let lastError: Error | null = null
+    let attempt = 0;
+    let lastError: Error | null = null;
 
     while (attempt < retries) {
-      attempt++
+      attempt++;
       try {
         const response = await requestWithRetry(
           signalArg =>
@@ -1553,58 +1553,58 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
               signal: signalArg,
             }),
           { signal, timeoutMs: timeout },
-        )
+        );
 
-        const data = await response.json()
-        const content = data.choices?.[0]?.message?.content
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
 
         if (!content) {
-          throw new Error('Empty response content from OpenRouter API')
+          throw new Error('Empty response content from OpenRouter API');
         }
 
         if (typeof content === 'string') {
-          return safeParseJson(content)
+          return safeParseJson(content);
         }
 
-        return content
+        return content;
       }
       catch (e) {
         const normalized = normalizeRequestError(
           e,
           'درخواست توسط کاربر متوقف شد',
           'زمان پاسخ‌دهی به پایان رسید',
-        )
+        );
 
-        lastError = normalized
+        lastError = normalized;
 
         if (
           normalized.message === 'درخواست توسط کاربر متوقف شد'
           || normalized.message === 'زمان پاسخ‌دهی به پایان رسید'
         ) {
-          error.value = normalized.message
-          throw normalized
+          error.value = normalized.message;
+          throw normalized;
         }
 
         if (attempt >= retries) {
-          error.value = normalized.message
-          throw normalized
+          error.value = normalized.message;
+          throw normalized;
         }
 
-        await wait(Math.min(1000 * attempt, 3000))
+        await wait(Math.min(1000 * attempt, 3000));
       }
     }
 
     const fallbackError
-      = lastError || new Error('Structured request failed without specific error')
-    error.value = fallbackError.message
-    throw fallbackError
-  }
+      = lastError || new Error('Structured request failed without specific error');
+    error.value = fallbackError.message;
+    throw fallbackError;
+  };
 
   const generate = async (
     input: PatientGenerateInput,
   ): Promise<PatientGenerateOutput> => {
-    processing.value = true
-    error.value = null
+    processing.value = true;
+    error.value = null;
 
     try {
       const result = await generateStructuredResponse({
@@ -1640,25 +1640,25 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
         model: selectedModel.value,
         maxTokens: 0,
         temperature: 0.7,
-      })
+      });
 
-      return result as PatientGenerateOutput
+      return result as PatientGenerateOutput;
     }
     catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e))
-      error.value = err.message
-      throw err
+      const err = e instanceof Error ? e : new Error(String(e));
+      error.value = err.message;
+      throw err;
     }
     finally {
-      processing.value = false
+      processing.value = false;
     }
-  }
+  };
 
   const generateTherapist = async (
     input: TherapistGenerateInput,
   ): Promise<TherapistGenerateOutput> => {
-    processing.value = true
-    error.value = null
+    processing.value = true;
+    error.value = null;
 
     try {
       const result = await generateStructuredResponse({
@@ -1681,41 +1681,41 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
         model: selectedModel.value,
         maxTokens: 0,
         temperature: 0.7,
-      })
+      });
 
-      return result as TherapistGenerateOutput
+      return result as TherapistGenerateOutput;
     }
     catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e))
-      error.value = err.message
-      throw err
+      const err = e instanceof Error ? e : new Error(String(e));
+      error.value = err.message;
+      throw err;
     }
     finally {
-      processing.value = false
+      processing.value = false;
     }
-  }
+  };
 
   async function generateGoalsList(topic: string): Promise<string> {
-    const prompt = `با توجه به موضوع زیر، یک لیست از اهداف آموزشی و روانشناختی که خواننده پس از مطالعه این مقاله به دست می‌آورد به زبان فارسی بنویس. تاکید: خروجی باید فقط یک لیست باشد و هر هدف در یک خط مجزا نوشته شود.\nموضوع: ${topic}`
+    const prompt = `با توجه به موضوع زیر، یک لیست از اهداف آموزشی و روانشناختی که خواننده پس از مطالعه این مقاله به دست می‌آورد به زبان فارسی بنویس. تاکید: خروجی باید فقط یک لیست باشد و هر هدف در یک خط مجزا نوشته شود.\nموضوع: ${topic}`;
     const messages = [
       {
         role: 'system',
         content: 'شما یک دستیار متخصص تولید محتوای روانشناسی هستید.',
       },
       { role: 'user', content: prompt },
-    ]
+    ];
     return new Promise((resolve, reject) => {
       streamChat(messages as ChatMessage[], {}, (chunk) => {
         // With non-streaming, we get the complete response in one chunk
-        resolve(chunk)
-      }).catch(reject)
-    })
+        resolve(chunk);
+      }).catch(reject);
+    });
   }
 
   // Initialize models on composable creation
   onMounted(() => {
-    fetchModels()
-  })
+    fetchModels();
+  });
 
   return {
     // Chat functionality
@@ -1736,5 +1736,5 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
     generateInlineAnalysis,
     generateStructuredResponse,
     generateGoalsList,
-  }
+  };
 }

@@ -156,5 +156,5 @@
 definePageMeta({
   layout: 'zone',
   // Using global middlewares only
-})
+});
 </script>

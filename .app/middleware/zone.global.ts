@@ -34,7 +34,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
     '/debug',
   ];
 
-  const isPublicPath = publicPaths.some((path) => to.path.startsWith(path));
+  const isPublicPath = publicPaths.some(path => to.path.startsWith(path));
   if (isPublicPath) {
     console.log('✅ ZONE MIDDLEWARE - Public path, no zone check needed');
     return true;
@@ -57,7 +57,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
   };
 
   // Get the zone for current path
-  const pathZone = Object.keys(zonePaths).find((zone) => to.path.startsWith(zone));
+  const pathZone = Object.keys(zonePaths).find(zone => to.path.startsWith(zone));
   console.log('🔍 ZONE MIDDLEWARE - Detected zone:', pathZone);
 
   if (!pathZone) {

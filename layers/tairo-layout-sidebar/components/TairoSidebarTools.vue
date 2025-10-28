@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const app = useAppConfig()
+const app = useAppConfig();
 </script>
 
 <template>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const demoAreaMulti = reactive(useDemoAreaMulti())
+const demoAreaMulti = reactive(useDemoAreaMulti());
 
 function useDemoAreaMulti() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 280
+  const { primary, info, success } = useTailwindColors();
+  const type = 'area';
+  const height = 280;
 
   const options = {
     chart: {
@@ -44,7 +44,7 @@ function useDemoAreaMulti() {
         format: 'dd/MM/yy HH:mm',
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -55,14 +55,14 @@ function useDemoAreaMulti() {
       name: 'Pending',
       data: [11, 32, 45, 32, 34, 52, 41],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 

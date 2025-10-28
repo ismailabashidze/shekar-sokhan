@@ -1,5 +1,5 @@
 <script lang="ts">
-import { CodeGroupHeader } from '#components'
+import { CodeGroupHeader } from '#components';
 
 export default defineComponent({
   props: {
@@ -9,18 +9,18 @@ export default defineComponent({
     },
   },
   setup(props, context) {
-    const expanded = ref(false)
-    const wrapperEl = ref<HTMLElement | null>(null)
-    const activeTabIndex = ref(0)
-    provide('code-group-context', true)
+    const expanded = ref(false);
+    const wrapperEl = ref<HTMLElement | null>(null);
+    const activeTabIndex = ref(0);
+    provide('code-group-context', true);
 
     const isTag = (slot: any, tag: string) => {
-      return slot.type && slot.type.tag && slot.type.tag === tag
-    }
+      return slot.type && slot.type.tag && slot.type.tag === tag;
+    };
 
     return () => {
-      const previewSlot = context.slots?.preview?.()
-      const slots = context.slots?.default?.() || []
+      const previewSlot = context.slots?.preview?.();
+      const slots = context.slots?.default?.() || [];
       const tabs = slots?.map?.((slot, index) => {
         return {
           filename: slot?.props?.filename,
@@ -28,8 +28,8 @@ export default defineComponent({
           code: slot?.props?.code,
           active: slot?.props?.active || false,
           component: slot,
-        }
-      })
+        };
+      });
 
       return h(
         'div',
@@ -90,13 +90,13 @@ export default defineComponent({
                                 'absolute bottom-8 start-0 end-0 mx-auto w-36 z-[3] py-1 px-4 flex items-center justify-center text-sm text-muted-500 hover:text-muted-800 dark:text-muted-400 dark:hover:text-muted-100 rounded-full border border-muted-300 dark:border-muted-700 hover:border-muted-200 dark:hover:border-muted-600 bg-white dark:bg-muted-800 transition-colors duration-300',
                               ],
                               onClick: () => {
-                                expanded.value = !expanded.value
+                                expanded.value = !expanded.value;
 
                                 if (!expanded.value) {
                                   wrapperEl.value?.scrollIntoView({
                                     behavior: 'instant',
                                     block: 'start',
-                                  })
+                                  });
                                 }
                               },
                             },
@@ -152,10 +152,10 @@ export default defineComponent({
             ],
           ),
         ],
-      )
-    }
+      );
+    };
   },
-})
+});
 </script>
 
 <style scoped>

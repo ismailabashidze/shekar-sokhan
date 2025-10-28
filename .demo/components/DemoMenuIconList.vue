@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    shape?: 'straight' | 'rounded' | 'curved'
+    shape?: 'straight' | 'rounded' | 'curved';
   }>(),
   {
     shape: 'rounded',
   },
-)
+);
 
 const menu = [
   {
@@ -34,7 +34,7 @@ const menu = [
     url: '#',
     icon: 'lucide:file',
   },
-]
+];
 </script>
 
 <template>

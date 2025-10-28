@@ -164,5 +164,5 @@
 </template>
 
 <script setup lang="ts">
-const value = ref('value_1')
+const value = ref('value_1');
 </script>

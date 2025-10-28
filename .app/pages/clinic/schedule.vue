@@ -11,38 +11,38 @@ definePageMeta({
 
   },
   layout: 'sidebar',
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const page = computed(() => parseInt((route.query.page as string) ?? '1'))
+const route = useRoute();
+const router = useRouter();
+const page = computed(() => parseInt((route.query.page as string) ?? '1'));
 
-const filter = ref('')
-const perPage = ref(45)
-const { open } = usePanels()
+const filter = ref('');
+const perPage = ref(45);
+const { open } = usePanels();
 
 watch([filter, perPage], () => {
   router.push({
     query: {
       page: undefined,
     },
-  })
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+  });
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 const query = computed(() => {
   return {
     filter: filter.value,
     perPage: perPage.value,
     page: page.value,
-  }
-})
+  };
+});
 
 const { data, pending, error, refresh } = await useFetch('/api/members', {
   query,
-})
+});
 
-const currentMember = ref()
+const currentMember = ref();
 </script>
 
 <template>

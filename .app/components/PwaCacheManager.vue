@@ -5,26 +5,26 @@ const {
   clearAllCaches,
   forceRefresh,
   getCacheStatus,
-} = usePwaCache()
+} = usePwaCache();
 
-const cacheStatus = ref(null)
+const cacheStatus = ref(null);
 
 const handleClearCache = async () => {
-  const success = await clearAllCaches()
+  const success = await clearAllCaches();
   if (success) {
     // Refresh cache status
-    cacheStatus.value = await getCacheStatus()
+    cacheStatus.value = await getCacheStatus();
   }
-}
+};
 
 const handleForceRefresh = async () => {
-  await forceRefresh()
-}
+  await forceRefresh();
+};
 
 // Load cache status on mount
 onMounted(async () => {
-  cacheStatus.value = await getCacheStatus()
-})
+  cacheStatus.value = await getCacheStatus();
+});
 </script>
 
 <template>

@@ -3,63 +3,63 @@ definePageMeta({
   title: 'ایجاد کد',
   layout: 'sidebar',
 
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
+});
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { generateCoupon, generateBatchCoupons, getCoupons, deleteCoupons } = useDiscountCopoun()
-const loading = ref(false)
-const coupons = ref<any[]>([])
-const selectedCoupons = ref<string[]>([])
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-const statusFilter = ref('all')
-const prefixFilter = ref('')
+const { generateCoupon, generateBatchCoupons, getCoupons, deleteCoupons } = useDiscountCopoun();
+const loading = ref(false);
+const coupons = ref<any[]>([]);
+const selectedCoupons = ref<string[]>([]);
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const statusFilter = ref('all');
+const prefixFilter = ref('');
 
-const amount = ref<number>()
-const code = ref('')
-const duration = ref<number>()
-const prefix = ref('')
-const value = ref('value_1')
-const isCustomModalOpen = ref(false)
-const customCount = ref(1)
-const codeMode = ref('manual')
+const amount = ref<number>();
+const code = ref('');
+const duration = ref<number>();
+const prefix = ref('');
+const value = ref('value_1');
+const isCustomModalOpen = ref(false);
+const customCount = ref(1);
+const codeMode = ref('manual');
 
 // Validation
 const errors = reactive({
   amount: '',
   duration: '',
   code: '',
-})
+});
 
 const validateForm = () => {
-  let isValid = true
-  errors.amount = ''
-  errors.duration = ''
-  errors.code = ''
+  let isValid = true;
+  errors.amount = '';
+  errors.duration = '';
+  errors.code = '';
 
   if (!amount.value || amount.value <= 0) {
-    errors.amount = 'مبلغ تخفیف باید بیشتر از صفر باشد'
-    isValid = false
+    errors.amount = 'مبلغ تخفیف باید بیشتر از صفر باشد';
+    isValid = false;
   }
 
   if (!duration.value || duration.value <= 0) {
-    errors.duration = 'مدت اعتبار باید بیشتر از صفر باشد'
-    isValid = false
+    errors.duration = 'مدت اعتبار باید بیشتر از صفر باشد';
+    isValid = false;
   }
 
   if (!isRandomMode.value && (!code.value || code.value.length < 3)) {
-    errors.code = 'کد تخفیف باید حداقل 3 کاراکتر باشد'
-    isValid = false
+    errors.code = 'کد تخفیف باید حداقل 3 کاراکتر باشد';
+    isValid = false;
   }
 
-  return isValid
-}
+  return isValid;
+};
 
 const isFormValid = computed(() =>
   amount.value > 0
   && duration.value > 0
   && (isRandomMode.value || (code.value && code.value.length >= 3)),
-)
+);
 
 // Map radio values to number of codes
 const codeCountMap = {
@@ -68,46 +68,46 @@ const codeCountMap = {
   value_3: 10,
   value_4: 20,
   custom: 0, // Will be replaced by customCount
-}
+};
 
 const batchCount = computed(() => {
   if (value.value === 'custom') {
-    return customCount.value
+    return customCount.value;
   }
-  return codeCountMap[value.value] || 1
-})
+  return codeCountMap[value.value] || 1;
+});
 
-const isRandomMode = computed(() => batchCount.value > 1 || codeMode.value === 'random')
+const isRandomMode = computed(() => batchCount.value > 1 || codeMode.value === 'random');
 
 const openCustomModal = () => {
-  isCustomModalOpen.value = true
-}
+  isCustomModalOpen.value = true;
+};
 
 const closeCustomModal = () => {
-  isCustomModalOpen.value = false
-}
+  isCustomModalOpen.value = false;
+};
 
 const applyCustomCount = () => {
   if (customCount.value >= 1 && customCount.value <= 100) {
-    value.value = 'custom'
-    closeCustomModal()
+    value.value = 'custom';
+    closeCustomModal();
   }
-}
+};
 
 const generateRandomCode = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  let result = prefix.value
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = prefix.value;
   for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  code.value = result
-}
+  code.value = result;
+};
 
 watch([batchCount, codeMode], ([newBatchCount, newCodeMode]) => {
   if (newBatchCount > 1 || newCodeMode === 'random') {
-    generateRandomCode()
+    generateRandomCode();
   }
-})
+});
 
 const generateCode = async () => {
   if (!validateForm()) {
@@ -117,14 +117,14 @@ const generateCode = async () => {
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
-    return
+    });
+    return;
   }
 
-  loading.value = true
+  loading.value = true;
   try {
     if (batchCount.value > 1) {
-      await generateBatchCoupons(amount.value!, duration.value!, batchCount.value, prefix.value)
+      await generateBatchCoupons(amount.value!, duration.value!, batchCount.value, prefix.value);
     }
     else {
       await generateCoupon({
@@ -132,7 +132,7 @@ const generateCode = async () => {
         duration: duration.value!,
         code: code.value,
         type: 'admin',
-      })
+      });
     }
     toaster.show({
       title: 'موفق',
@@ -140,95 +140,95 @@ const generateCode = async () => {
       color: 'success',
       icon: 'ph:check-circle-fill',
       closable: true,
-    })
-    await loadCoupons()
+    });
+    await loadCoupons();
     // Reset form
     if (batchCount.value === 1) {
-      amount.value = 0
-      code.value = ''
-      duration.value = 0
+      amount.value = 0;
+      code.value = '';
+      duration.value = 0;
     }
   }
   catch (error) {
-    console.error('Error generating coupon:', error)
+    console.error('Error generating coupon:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در ایجاد کد تخفیف',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const loadCoupons = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const result = await getCoupons()
-    console.log('Loaded coupons:', result)
-    coupons.value = result
+    const result = await getCoupons();
+    console.log('Loaded coupons:', result);
+    coupons.value = result;
   }
   catch (error) {
-    console.error('Error loading coupons:', error)
+    console.error('Error loading coupons:', error);
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const filteredCoupons = computed(() => {
-  let filtered = [...coupons.value]
+  let filtered = [...coupons.value];
 
   // Filter by status
   if (statusFilter.value !== 'all') {
-    const isUsed = statusFilter.value === 'used'
-    filtered = filtered.filter(coupon => coupon.isUsed === isUsed)
+    const isUsed = statusFilter.value === 'used';
+    filtered = filtered.filter(coupon => coupon.isUsed === isUsed);
   }
 
   // Filter by prefix
   if (prefixFilter.value) {
     filtered = filtered.filter(coupon =>
       coupon.code.toLowerCase().startsWith(prefixFilter.value.toLowerCase()),
-    )
+    );
   }
 
-  return filtered.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
-})
+  return filtered.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+});
 
 const paginatedCoupons = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredCoupons.value.slice(start, end)
-})
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredCoupons.value.slice(start, end);
+});
 
 const totalPages = computed(() =>
   Math.ceil(filteredCoupons.value.length / itemsPerPage.value),
-)
+);
 
 const copySelectedCodes = async () => {
   const codes = selectedCoupons.value.map(id =>
     coupons.value.find(c => c.id === id)?.code,
-  ).filter(Boolean).join('\n')
+  ).filter(Boolean).join('\n');
 
   if (codes) {
-    await navigator.clipboard.writeText(codes)
+    await navigator.clipboard.writeText(codes);
     toaster.show({
       title: 'موفق',
       message: 'کدهای انتخاب شده کپی شدند',
       color: 'success',
       icon: 'ph:check-circle-fill',
       closable: true,
-    })
+    });
   }
-}
+};
 
 const deleteSelectedCoupons = async () => {
   try {
-    loading.value = true
-    const success = await deleteCoupons(selectedCoupons.value)
+    loading.value = true;
+    const success = await deleteCoupons(selectedCoupons.value);
 
     if (success) {
       toaster.show({
@@ -237,55 +237,55 @@ const deleteSelectedCoupons = async () => {
         color: 'success',
         icon: 'ph:check-circle-fill',
         closable: true,
-      })
+      });
 
       // Remove deleted coupons from the list
       coupons.value = coupons.value.filter(
         coupon => !selectedCoupons.value.includes(coupon.id),
-      )
-      selectedCoupons.value = []
+      );
+      selectedCoupons.value = [];
     }
   }
   catch (error: any) {
-    console.error('Error deleting coupons:', error)
+    console.error('Error deleting coupons:', error);
     toaster.show({
       title: 'خطا',
       message: 'خطا در حذف کدهای تخفیف',
       color: 'danger',
       icon: 'ph:x-circle-fill',
       closable: true,
-    })
+    });
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('fa-IR').format(price)
-}
+  return new Intl.NumberFormat('fa-IR').format(price);
+};
 
 const toggleAllCoupons = (checked: boolean) => {
-  selectedCoupons.value = checked ? paginatedCoupons.value.map(c => c.id) : []
-}
+  selectedCoupons.value = checked ? paginatedCoupons.value.map(c => c.id) : [];
+};
 
 const resetFilters = () => {
-  statusFilter.value = 'all'
-  prefixFilter.value = ''
-  currentPage.value = 1
-  selectedCoupons.value = []
-}
+  statusFilter.value = 'all';
+  prefixFilter.value = '';
+  currentPage.value = 1;
+  selectedCoupons.value = [];
+};
 
 watch([statusFilter, prefixFilter, itemsPerPage], () => {
-  currentPage.value = 1
-})
+  currentPage.value = 1;
+});
 
 onMounted(() => {
-  console.log('Component mounted, loading coupons...')
-  loadCoupons()
-})
+  console.log('Component mounted, loading coupons...');
+  loadCoupons();
+});
 
-const toaster = useToaster()
+const toaster = useToaster();
 </script>
 
 <template>

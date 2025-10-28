@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useFieldError, useForm } from 'vee-validate'
-import { z } from 'zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { Field, useFieldError, useForm } from 'vee-validate';
+import { z } from 'zod';
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
 definePageMeta({
   title: 'فرم روانشناس هوش مصنوعی جدید',
   layout: 'sidebar',
-})
+});
 
 const VALIDATION_TEXT = {
   NAME_REQUIRED: 'نام روانشناس نمی‌تواند خالی باشد',
@@ -22,9 +22,9 @@ const VALIDATION_TEXT = {
   APPROACH_REQUIRED: 'رویکرد درمانی نمی‌تواند خالی باشد',
   EXPERTISE_REQUIRED: 'تخصص و مهارت‌ها نمی‌تواند خالی باشد',
   AVATAR_TOO_BIG: 'اندازه تصویر آواتار باید کمتر از ۱ مگابایت باشد',
-}
+};
 
-const ONE_MB = 1000000
+const ONE_MB = 1000000;
 
 const zodSchema = z.object({
   avatar: z
@@ -46,11 +46,11 @@ const zodSchema = z.object({
     expertise: z.string().min(1, VALIDATION_TEXT.EXPERTISE_REQUIRED),
     isActive: z.boolean().default(true),
   }),
-})
+});
 
-type FormInput = z.infer<typeof zodSchema>
+type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
+const validationSchema = toTypedSchema(zodSchema);
 
 const initialValues: FormInput = {
   avatar: null,
@@ -67,9 +67,9 @@ const initialValues: FormInput = {
     expertise: '',
     isActive: true,
   },
-}
+};
 
-const currentAvatar = computed(() => '/img/avatars/default-male.jpg')
+const currentAvatar = computed(() => '/img/avatars/default-male.jpg');
 
 const {
   handleSubmit,
@@ -83,20 +83,20 @@ const {
 } = useForm<FormInput>({
   validationSchema,
   initialValues,
-})
+});
 
-const success = ref(false)
-const generating = ref(false)
-const loadingFields = ref<string[]>([])
+const success = ref(false);
+const generating = ref(false);
+const loadingFields = ref<string[]>([]);
 
-const inputFile = ref<FileList | null>(null)
-const fileError = useFieldError('avatar')
+const inputFile = ref<FileList | null>(null);
+const fileError = useFieldError('avatar');
 watch(inputFile, (value) => {
-  const file = value?.item(0) || null
-  setFieldValue('avatar', file)
-})
+  const file = value?.item(0) || null;
+  setFieldValue('avatar', file);
+});
 
-const { generateTherapist } = useOpenRouter()
+const { generateTherapist } = useOpenRouter();
 
 const canGenerate = computed(() => {
   return Boolean(
@@ -104,102 +104,102 @@ const canGenerate = computed(() => {
     && values.therapist.specialty?.trim()
     && values.therapist.shortDescription?.trim()
     && !generating.value,
-  )
-})
+  );
+});
 
 const generateDetails = async () => {
   // Prevent multiple simultaneous generations
   if (generating.value) {
-    return
+    return;
   }
 
   // Check if required fields are filled
   if (!values.therapist.name || !values.therapist.specialty || !values.therapist.shortDescription) {
-    toaster.error('لطفا نام، تخصص و توضیح کوتاه را وارد کنید')
-    return
+    toaster.error('لطفا نام، تخصص و توضیح کوتاه را وارد کنید');
+    return;
   }
 
-  generating.value = true
+  generating.value = true;
   // Set loading state for fields that will be generated
-  loadingFields.value = ['longDescription', 'definingTraits', 'backStory', 'personality', 'appearance', 'approach', 'expertise']
+  loadingFields.value = ['longDescription', 'definingTraits', 'backStory', 'personality', 'appearance', 'approach', 'expertise'];
 
   try {
     const response = await generateTherapist({
       name: values.therapist.name,
       specialty: values.therapist.specialty,
       shortDescription: values.therapist.shortDescription,
-    })
+    });
 
     // Parse the response if it's in JSON format
-    let parsedResponse
+    let parsedResponse;
     if (typeof response === 'string') {
       try {
-        const parsed = JSON.parse(response)
+        const parsed = JSON.parse(response);
         if (parsed.choices?.[0]?.message?.content) {
-          parsedResponse = JSON.parse(parsed.choices[0].message.content)
+          parsedResponse = JSON.parse(parsed.choices[0].message.content);
         }
       }
       catch (e) {
-        console.error('Error parsing response:', e)
-        throw new Error('خطا در پردازش پاسخ')
+        console.error('Error parsing response:', e);
+        throw new Error('خطا در پردازش پاسخ');
       }
     }
     else {
-      parsedResponse = response
+      parsedResponse = response;
     }
 
     // Update form fields with generated content
     if (parsedResponse) {
       Object.entries(parsedResponse).forEach(([key, value]) => {
         if (typeof value === 'string') {
-          setFieldValue(`therapist.${key}`, value.trim())
+          setFieldValue(`therapist.${key}`, value.trim());
         }
-      })
+      });
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'تولید موفق',
         message: 'اطلاعات روانشناس با موفقیت تولید شد',
         color: 'success',
         icon: 'ph:user-circle-fill',
         closable: true,
-      })
+      });
     }
   }
   catch (error: any) {
-    console.error('Error generating details:', error)
+    console.error('Error generating details:', error);
     // Clear any partially generated content
     loadingFields.value.forEach((field) => {
-      setFieldValue(`therapist.${field}`, '')
-    })
+      setFieldValue(`therapist.${field}`, '');
+    });
 
-    toaster.clearAll()
+    toaster.clearAll();
     toaster.show({
       title: 'خطا',
       message: error?.message || error?.data?.message || 'خطا در تولید اطلاعات',
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
   finally {
-    generating.value = false
-    loadingFields.value = []
+    generating.value = false;
+    loadingFields.value = [];
   }
-}
+};
 
 onBeforeRouteLeave(() => {
   if (meta.value.dirty) {
-    return confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟')
+    return confirm('شما تغییرات ذخیره‌نشده دارید. آیا مطمئن هستید که می‌خواهید خارج شوید؟');
   }
-})
+});
 
-const toaster = useToaster()
-const { createNewTherapist } = useTherapist()
+const toaster = useToaster();
+const { createNewTherapist } = useTherapist();
 
 const onSubmit = handleSubmit(
   async (values) => {
-    success.value = false
+    success.value = false;
 
     try {
       const therapistData = {
@@ -214,79 +214,79 @@ const onSubmit = handleSubmit(
         approach: values.therapist.approach,
         expertise: values.therapist.expertise,
         isActive: values.therapist.isActive,
-      }
+      };
 
-      let record
+      let record;
       if (values.avatar) {
-        const formData = new FormData()
-        formData.append('avatar', values.avatar)
+        const formData = new FormData();
+        formData.append('avatar', values.avatar);
 
         for (const key in therapistData) {
-          formData.append(key, therapistData[key as keyof typeof therapistData] || '')
+          formData.append(key, therapistData[key as keyof typeof therapistData] || '');
         }
 
-        record = await createNewTherapist(formData)
+        record = await createNewTherapist(formData);
       }
       else {
-        record = await createNewTherapist(therapistData)
+        record = await createNewTherapist(therapistData);
       }
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'موفقیت',
         message: 'روانشناس هوش مصنوعی جدید با موفقیت ایجاد شد!',
         color: 'success',
         icon: 'ph:check',
         closable: true,
-      })
+      });
 
-      resetForm()
+      resetForm();
       document.documentElement.scrollTo({
         top: 0,
         behavior: 'smooth',
-      })
+      });
 
-      success.value = true
+      success.value = true;
       setTimeout(() => {
-        success.value = false
-      }, 3000)
+        success.value = false;
+      }, 3000);
     }
     catch (error: any) {
-      console.error('therapist-create-error', error)
+      console.error('therapist-create-error', error);
 
       if (error.data && error.data.data) {
-        const backendErrors = error.data.data
+        const backendErrors = error.data.data;
         for (const key in backendErrors) {
-          setFieldError(`therapist.${key}`, backendErrors[key].message)
+          setFieldError(`therapist.${key}`, backendErrors[key].message);
         }
       }
 
-      toaster.clearAll()
+      toaster.clearAll();
       toaster.show({
         title: 'خطا',
         message: 'مشکلی در ایجاد روانشناس هوش مصنوعی پیش آمد. لطفاً دوباره تلاش کنید.',
         color: 'danger',
         icon: 'lucide:alert-triangle',
         closable: true,
-      })
+      });
 
       document.documentElement.scrollTo({
         top: 0,
         behavior: 'smooth',
-      })
+      });
     }
   },
   () => {
-    success.value = false
+    success.value = false;
 
     document.documentElement.scrollTo({
       top: 0,
       behavior: 'smooth',
-    })
+    });
   },
-)
+);
 
-const therapistStatus = computed(() => values.therapist.isActive ? 'روانشناس فعال است' : 'روانشناس غیرفعال است')
+const therapistStatus = computed(() => values.therapist.isActive ? 'روانشناس فعال است' : 'روانشناس غیرفعال است');
 </script>
 
 <template>

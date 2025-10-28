@@ -28,7 +28,7 @@ const demoBreadcrumbOne = [
     hideLabel: false,
     to: '#',
   },
-]
+];
 
 const demoBreadcrumbTwo = [
   {
@@ -49,5 +49,5 @@ const demoBreadcrumbTwo = [
     icon: 'lucide:laptop',
     to: '#',
   },
-]
+];
 </script>

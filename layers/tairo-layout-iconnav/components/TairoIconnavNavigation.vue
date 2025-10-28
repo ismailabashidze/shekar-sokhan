@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useIconnav } from '../composables/iconnav'
+import { useIconnav } from '../composables/iconnav';
 
 const props = withDefaults(
   defineProps<{
@@ -9,20 +9,20 @@ const props = withDefaults(
       | 'expanded-sm'
       | 'expanded-md'
       | 'expanded-lg'
-      | 'expanded-xl'
-    position: 'fixed' | 'absolute'
+      | 'expanded-xl';
+    position: 'fixed' | 'absolute';
   }>(),
   {
     display: 'expanded-lg',
     position: 'absolute',
   },
-)
-const isSearchOpen = useState('search-open', () => false)
-const metaKey = useMetaKey()
-const { menuItems, selectedMenuItem } = useIconnav()
-const app = useAppConfig()
+);
+const isSearchOpen = useState('search-open', () => false);
+const metaKey = useMetaKey();
+const { menuItems, selectedMenuItem } = useIconnav();
+const app = useAppConfig();
 
-const router = useRouter()
+const router = useRouter();
 </script>
 
 <template>

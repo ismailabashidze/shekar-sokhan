@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Deed } from '~/composables/useDeed'
-import { useState } from '#app'
+import type { Deed } from '~/composables/useDeed';
+import { useState } from '#app';
 
 definePageMeta({
   title: 'پیشنهاد کار نیک - مرحله ۱',
@@ -12,16 +12,16 @@ definePageMeta({
     srcDark: '/img/screens/wizard-1-dark.png',
     order: 30,
   },
-})
+});
 useHead({
   title: 'نوع کار نیک',
-})
+});
 
-const deed = useState<Partial<Deed>>('new-deed-suggestion', () => ({}))
+const deed = useState<Partial<Deed>>('new-deed-suggestion', () => ({}));
 
 function onSelectType(type: 'family' | 'society' | 'spiritual' | 'environment' | 'mindfulness' | 'self') {
-  deed.value.type = type
-  navigateTo('/deeds/suggest/step-2')
+  deed.value.type = type;
+  navigateTo('/deeds/suggest/step-2');
 }
 </script>
 

@@ -3,33 +3,33 @@
 definePageMeta({
   title: 'کدهای تخفیف من',
   layout: 'sidebar',
-})
+});
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const { getMyCoupons } = useDiscountCopoun()
-const toaster = useToaster()
+const { getMyCoupons } = useDiscountCopoun();
+const toaster = useToaster();
 
 // Filters
-const statusFilter = ref('all')
-const prefixFilter = ref('')
+const statusFilter = ref('all');
+const prefixFilter = ref('');
 
 // Pagination
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
 // Selected codes for bulk actions
-const selectedCoupons = ref<string[]>([])
+const selectedCoupons = ref<string[]>([]);
 
 // Coupons data
-const coupons = ref<discountCopoun[]>([])
+const coupons = ref<discountCopoun[]>([]);
 
 // Load coupons
 const loadCoupons = async () => {
   try {
-    const result = await getMyCoupons()
-    console.log(result)
-    coupons.value = result
+    const result = await getMyCoupons();
+    console.log(result);
+    coupons.value = result;
   }
   catch (err) {
     toaster.show({
@@ -38,102 +38,102 @@ const loadCoupons = async () => {
       color: 'danger',
       icon: 'ph:warning-circle-fill',
       closable: true,
-    })
+    });
   }
-}
+};
 
 // Filter coupons
 const filteredCoupons = computed(() => {
   return coupons.value.filter((coupon) => {
     if (statusFilter.value !== 'all') {
-      if (statusFilter.value === 'active' && (coupon.isUsed || isExpired(coupon.expiresAt))) return false
-      if (statusFilter.value === 'used' && !coupon.isUsed) return false
+      if (statusFilter.value === 'active' && (coupon.isUsed || isExpired(coupon.expiresAt))) return false;
+      if (statusFilter.value === 'used' && !coupon.isUsed) return false;
     }
     if (prefixFilter.value && !coupon.code.toLowerCase().includes(prefixFilter.value.toLowerCase())) {
-      return false
+      return false;
     }
-    return true
-  }).sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
-})
+    return true;
+  }).sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+});
 
 // Pagination
-const totalPages = computed(() => Math.ceil(filteredCoupons.value.length / itemsPerPage.value))
+const totalPages = computed(() => Math.ceil(filteredCoupons.value.length / itemsPerPage.value));
 const paginatedCoupons = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredCoupons.value.slice(start, end)
-})
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredCoupons.value.slice(start, end);
+});
 
 // Reset filters
 const resetFilters = () => {
-  statusFilter.value = 'all'
-  prefixFilter.value = ''
-  currentPage.value = 1
-  selectedCoupons.value = []
-}
+  statusFilter.value = 'all';
+  prefixFilter.value = '';
+  currentPage.value = 1;
+  selectedCoupons.value = [];
+};
 
 // Format price
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('fa-IR').format(price)
-}
+  return new Intl.NumberFormat('fa-IR').format(price);
+};
 
 // Copy selected codes
 const copySelectedCodes = async () => {
   const codes = selectedCoupons.value
     .map(id => coupons.value.find(c => c.id === id)?.code)
     .filter(Boolean)
-    .join('\n')
+    .join('\n');
 
   if (codes) {
-    await navigator.clipboard.writeText(codes)
+    await navigator.clipboard.writeText(codes);
     toaster.show({
       title: 'موفق',
       message: 'کدهای انتخاب شده کپی شدند',
       color: 'success',
       icon: 'ph:check-circle-fill',
       closable: true,
-    })
+    });
   }
-}
+};
 
 // Toggle all coupons selection
 const toggleAllCoupons = (checked: boolean) => {
   if (checked) {
-    selectedCoupons.value = paginatedCoupons.value.map(coupon => coupon.id)
+    selectedCoupons.value = paginatedCoupons.value.map(coupon => coupon.id);
   }
   else {
-    selectedCoupons.value = []
+    selectedCoupons.value = [];
   }
-}
+};
 
 // Check if code is expired
 const isExpired = (expiresAt: string) => {
-  return new Date(expiresAt) < new Date()
-}
+  return new Date(expiresAt) < new Date();
+};
 
 // Get status color
 const getStatusColor = (coupon: UserCoupon) => {
-  if (coupon.isUsed) return 'danger'
-  if (isExpired(coupon.expiresAt)) return 'warning'
-  return 'success'
-}
+  if (coupon.isUsed) return 'danger';
+  if (isExpired(coupon.expiresAt)) return 'warning';
+  return 'success';
+};
 
 // Get status text
 const getStatusText = (coupon: UserCoupon) => {
-  if (coupon.isUsed) return 'استفاده شده'
-  if (isExpired(coupon.expiresAt)) return 'منقضی شده'
-  return 'فعال'
-}
+  if (coupon.isUsed) return 'استفاده شده';
+  if (isExpired(coupon.expiresAt)) return 'منقضی شده';
+  return 'فعال';
+};
 
 // Watch for filter changes to reset page
 watch([statusFilter, prefixFilter, itemsPerPage], () => {
-  currentPage.value = 1
-})
+  currentPage.value = 1;
+});
 
 // Load coupons on mount
 onMounted(() => {
-  loadCoupons()
-})
+  loadCoupons();
+});
 </script>
 
 <template>

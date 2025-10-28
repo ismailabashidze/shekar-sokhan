@@ -250,40 +250,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
-import { useDebounceFn } from '@vueuse/core'
-import { useSmartFiltering, type FilterOptions } from '@/composables/useSmartFiltering'
+import { ref, computed, watch, onMounted } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
+import { useSmartFiltering, type FilterOptions } from '@/composables/useSmartFiltering';
 
 interface Props {
-  modelValue: FilterOptions
-  totalCount?: number
-  filteredCount?: number
+  modelValue: FilterOptions;
+  totalCount?: number;
+  filteredCount?: number;
 }
 
 interface Emits {
-  (e: 'update:modelValue', value: FilterOptions): void
+  (e: 'update:modelValue', value: FilterOptions): void;
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
 
-const { getFilterPresets } = useSmartFiltering()
-const filterPresets = getFilterPresets()
+const { getFilterPresets } = useSmartFiltering();
+const filterPresets = getFilterPresets();
 
 // Local reactive copies of filters
-const localFilters = ref<FilterOptions>({ ...props.modelValue })
-const activePreset = ref<string | null>(null)
+const localFilters = ref<FilterOptions>({ ...props.modelValue });
+const activePreset = ref<string | null>(null);
 
 // Date inputs (string format for HTML inputs)
-const startDate = ref('')
-const endDate = ref('')
+const startDate = ref('');
+const endDate = ref('');
 
 // Compression checkboxes
-const showCompressed = ref(true)
-const showUncompressed = ref(true)
+const showCompressed = ref(true);
+const showUncompressed = ref(true);
 
 // UI state
-const showImportanceGuide = ref(false)
+const showImportanceGuide = ref(false);
 
 // Enhanced filter presets with descriptions and icons
 const enhancedFilterPresets = computed(() => ({
@@ -311,7 +311,7 @@ const enhancedFilterPresets = computed(() => ({
     description: 'جلسات بهینه‌سازی شده - صرفه‌جویی در فضا',
     icon: 'ph:archive-duotone',
   },
-}))
+}));
 
 // Computed properties
 const hasActiveFilters = computed(() => {
@@ -322,189 +322,189 @@ const hasActiveFilters = computed(() => {
     || startDate.value
     || endDate.value
     || !showCompressed.value
-    || !showUncompressed.value
-})
+    || !showUncompressed.value;
+});
 
 const filterStats = computed(() => {
   if (props.totalCount !== undefined && props.filteredCount !== undefined) {
     return {
       totalCount: props.totalCount,
       filteredCount: props.filteredCount,
-    }
+    };
   }
-  return null
-})
+  return null;
+});
 
 // Helper functions for preset styling
 function getPresetIconColor(key: string) {
   switch (key) {
     case 'critical':
-      return 'text-red-500'
+      return 'text-red-500';
     case 'recent':
-      return 'text-blue-500'
+      return 'text-blue-500';
     case 'important':
-      return 'text-orange-500'
+      return 'text-orange-500';
     case 'compressed':
-      return 'text-purple-500'
+      return 'text-purple-500';
     default:
-      return 'text-gray-500'
+      return 'text-gray-500';
   }
 }
 
 function getPresetTextColor(key: string) {
-  const isActive = activePreset.value === key
-  if (isActive) return 'text-primary-700 dark:text-primary-300'
+  const isActive = activePreset.value === key;
+  if (isActive) return 'text-primary-700 dark:text-primary-300';
 
-  return 'text-muted-800 dark:text-muted-200'
+  return 'text-muted-800 dark:text-muted-200';
 }
 
 function getPresetDescriptionColor(key: string) {
-  const isActive = activePreset.value === key
-  if (isActive) return 'text-primary-600 dark:text-primary-400'
+  const isActive = activePreset.value === key;
+  if (isActive) return 'text-primary-600 dark:text-primary-400';
 
-  return 'text-muted-600 dark:text-muted-400'
+  return 'text-muted-600 dark:text-muted-400';
 }
 
 function getPresetDetails(preset: any) {
-  const details = []
+  const details = [];
 
   if (preset.minImportance !== undefined) {
-    details.push(`حداقل امتیاز: ${preset.minImportance}`)
+    details.push(`حداقل امتیاز: ${preset.minImportance}`);
   }
   if (preset.maxImportance !== undefined && preset.maxImportance < 100) {
-    details.push(`حداکثر امتیاز: ${preset.maxImportance}`)
+    details.push(`حداکثر امتیاز: ${preset.maxImportance}`);
   }
   if (preset.dateRange) {
-    details.push(`محدوده زمانی: ${preset.dateRange} روز`)
+    details.push(`محدوده زمانی: ${preset.dateRange} روز`);
   }
   if (preset.compressionFilter !== undefined) {
-    details.push(preset.compressionFilter ? 'فقط فشرده' : 'غیر فشرده')
+    details.push(preset.compressionFilter ? 'فقط فشرده' : 'غیر فشرده');
   }
 
-  return details.join(' • ')
+  return details.join(' • ');
 }
 
 function applyPreset(key: string) {
-  const preset = enhancedFilterPresets.value[key]
-  if (!preset) return
+  const preset = enhancedFilterPresets.value[key];
+  if (!preset) return;
 
-  activePreset.value = key
+  activePreset.value = key;
 
   // Apply preset values to local filters
-  Object.assign(localFilters.value, preset)
+  Object.assign(localFilters.value, preset);
 
   // Update date inputs if preset has date range
   if (preset.dateRange) {
-    const endDateObj = new Date()
-    const startDateObj = new Date()
-    startDateObj.setDate(startDateObj.getDate() - preset.dateRange)
+    const endDateObj = new Date();
+    const startDateObj = new Date();
+    startDateObj.setDate(startDateObj.getDate() - preset.dateRange);
 
-    startDate.value = startDateObj.toISOString().split('T')[0]
-    endDate.value = endDateObj.toISOString().split('T')[0]
+    startDate.value = startDateObj.toISOString().split('T')[0];
+    endDate.value = endDateObj.toISOString().split('T')[0];
 
-    localFilters.value.startDate = startDate.value
-    localFilters.value.endDate = endDate.value
+    localFilters.value.startDate = startDate.value;
+    localFilters.value.endDate = endDate.value;
   }
 
   // Update compression filters
   if (preset.compressionFilter !== undefined) {
-    showCompressed.value = preset.compressionFilter
-    showUncompressed.value = !preset.compressionFilter
-    localFilters.value.showCompressed = preset.compressionFilter
-    localFilters.value.showUncompressed = !preset.compressionFilter
+    showCompressed.value = preset.compressionFilter;
+    showUncompressed.value = !preset.compressionFilter;
+    localFilters.value.showCompressed = preset.compressionFilter;
+    localFilters.value.showUncompressed = !preset.compressionFilter;
   }
 
   // Emit changes
-  emit('update:modelValue', { ...localFilters.value })
+  emit('update:modelValue', { ...localFilters.value });
 }
 
 // Clear all filters
 function clearAllFilters() {
-  activePreset.value = null
+  activePreset.value = null;
   localFilters.value = {
     minImportance: 0,
     maxImportance: 100,
     sortBy: 'relevance',
     sortOrder: 'desc',
-  }
-  startDate.value = ''
-  endDate.value = ''
-  showCompressed.value = true
-  showUncompressed.value = true
-  emitFilters()
+  };
+  startDate.value = '';
+  endDate.value = '';
+  showCompressed.value = true;
+  showUncompressed.value = true;
+  emitFilters();
 }
 
 // Initialize filters from props
 function initializeFilters() {
-  localFilters.value = { ...props.modelValue }
-  updateDateInputs()
+  localFilters.value = { ...props.modelValue };
+  updateDateInputs();
 
   // Initialize sliders with default values if not set
   if (localFilters.value.minImportance === undefined) {
-    localFilters.value.minImportance = 0
+    localFilters.value.minImportance = 0;
   }
   if (localFilters.value.maxImportance === undefined) {
-    localFilters.value.maxImportance = 100
+    localFilters.value.maxImportance = 100;
   }
 }
 
 // Update date inputs from filter object
 function updateDateInputs() {
   if (localFilters.value.dateRange?.start) {
-    startDate.value = localFilters.value.dateRange.start.toISOString().split('T')[0]
+    startDate.value = localFilters.value.dateRange.start.toISOString().split('T')[0];
   }
   else {
-    startDate.value = ''
+    startDate.value = '';
   }
 
   if (localFilters.value.dateRange?.end) {
-    endDate.value = localFilters.value.dateRange.end.toISOString().split('T')[0]
+    endDate.value = localFilters.value.dateRange.end.toISOString().split('T')[0];
   }
   else {
-    endDate.value = ''
+    endDate.value = '';
   }
 }
 
 // Emit filter changes
 function emitFilters() {
-  const filters: FilterOptions = { ...localFilters.value }
+  const filters: FilterOptions = { ...localFilters.value };
 
   // Handle date range
   if (startDate.value || endDate.value) {
-    filters.dateRange = {}
+    filters.dateRange = {};
     if (startDate.value) {
-      filters.dateRange.start = new Date(startDate.value)
+      filters.dateRange.start = new Date(startDate.value);
     }
     if (endDate.value) {
-      filters.dateRange.end = new Date(endDate.value)
+      filters.dateRange.end = new Date(endDate.value);
     }
   }
   else {
-    delete filters.dateRange
+    delete filters.dateRange;
   }
 
   // Handle compression filters
   if (showCompressed.value && !showUncompressed.value) {
-    filters.onlyCompressed = true
-    delete filters.onlyUncompressed
+    filters.onlyCompressed = true;
+    delete filters.onlyUncompressed;
   }
   else if (!showCompressed.value && showUncompressed.value) {
-    filters.onlyUncompressed = true
-    delete filters.onlyCompressed
+    filters.onlyUncompressed = true;
+    delete filters.onlyCompressed;
   }
   else {
-    delete filters.onlyCompressed
-    delete filters.onlyUncompressed
+    delete filters.onlyCompressed;
+    delete filters.onlyUncompressed;
   }
 
-  emit('update:modelValue', filters)
+  emit('update:modelValue', filters);
 }
 
 // Debounced search function
 const debouncedSearch = useDebounceFn(() => {
-  activePreset.value = null // Clear preset when manually searching
-  emitFilters()
-}, 300)
+  activePreset.value = null; // Clear preset when manually searching
+  emitFilters();
+}, 300);
 
 // Watch for changes in local filters
 watch(() => [
@@ -513,32 +513,32 @@ watch(() => [
   localFilters.value.sortBy,
   localFilters.value.sortOrder,
 ], () => {
-  activePreset.value = null // Clear preset when manually changing
-  emitFilters()
-})
+  activePreset.value = null; // Clear preset when manually changing
+  emitFilters();
+});
 
 // Watch date inputs
 watch([startDate, endDate], () => {
-  activePreset.value = null
-  emitFilters()
-})
+  activePreset.value = null;
+  emitFilters();
+});
 
 // Watch compression checkboxes
 watch([showCompressed, showUncompressed], () => {
-  activePreset.value = null
-  emitFilters()
-})
+  activePreset.value = null;
+  emitFilters();
+});
 
 // Initialize on mount
 onMounted(() => {
-  initializeFilters()
-})
+  initializeFilters();
+});
 
 // Watch for external changes to modelValue
 watch(() => props.modelValue, (newValue) => {
-  localFilters.value = { ...newValue }
-  updateDateInputs()
-}, { deep: true })
+  localFilters.value = { ...newValue };
+  updateDateInputs();
+}, { deep: true });
 </script>
 
 <style scoped>

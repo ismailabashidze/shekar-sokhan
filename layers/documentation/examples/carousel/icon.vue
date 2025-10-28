@@ -74,5 +74,5 @@ const topics = [
     title: 'Enterprise',
     link: '/',
   },
-]
+];
 </script>

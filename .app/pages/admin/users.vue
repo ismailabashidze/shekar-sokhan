@@ -1,106 +1,100 @@
 <script setup lang="ts">
-definePageMeta({
-  title: 'کاربران',
-  layout: 'zone',
-  // Using global middlewares only
-})
-useHead({ htmlAttrs: { dir: 'rtl' } })
-const nuxtApp = useNuxtApp()
-const { getUserAvatarUrl } = useAvatarManager()
+  definePageMeta({
+    title: 'کاربران',
+    layout: 'sidebar',
+  });
+  useHead({ htmlAttrs: { dir: 'rtl' } });
+  const nuxtApp = useNuxtApp();
+  const { getUserAvatarUrl } = useAvatarManager();
 
-const query = reactive({
-  page: 1,
-  perPage: 10,
-  filter: '',
-})
+  const query = reactive({
+    page: 1,
+    perPage: 10,
+    filter: '',
+  });
 
-const { data, pending, error, refresh } = await useAsyncData(
-  'users',
-  async () => {
-    try {
-      const resultList = await nuxtApp.$pb.collection('users').getList(
-        query.page,
-        query.perPage,
-        {
+  const { data, pending, error, refresh } = await useAsyncData(
+    'users',
+    async () => {
+      try {
+        const resultList = await nuxtApp.$pb.collection('users').getList(query.page, query.perPage, {
           filter: query.filter,
           sort: '-created',
-        },
-      )
-      return {
-        data: resultList.items.map(item => ({
-          id: item.id,
-          avatarUrl: getUserAvatarUrl(item),
-          name: item.meta?.name,
-          username: item.username,
-          email: item.meta?.email,
-          emailVisibility: item.emailVisibility,
-          role: item.role,
-          hasCharge: item.hasCharge,
-          startChargeTime: item.startChargeTime,
-          expireChargeTime: item.expireChargeTime,
-          zones: item.zones || [],
-          created: item.created,
-          initials: item.meta?.name?.substring(0, 2) || 'کا',
-          isNew: item.meta?.isNew,
-        })),
-        total: resultList.totalItems,
+        });
+        return {
+          data: resultList.items.map(item => ({
+            id: item.id,
+            avatarUrl: getUserAvatarUrl(item),
+            name: item.meta?.name,
+            username: item.username,
+            email: item.meta?.email,
+            emailVisibility: item.emailVisibility,
+            role: item.role,
+            hasCharge: item.hasCharge,
+            startChargeTime: item.startChargeTime,
+            expireChargeTime: item.expireChargeTime,
+            zones: item.zones || [],
+            created: item.created,
+            initials: item.meta?.name?.substring(0, 2) || 'کا',
+            isNew: item.meta?.isNew,
+          })),
+          total: resultList.totalItems,
+        };
       }
+ catch (err) {
+        console.error('Error fetching users:', err);
+        return { data: [], total: 0 };
+      }
+    },
+    {
+      watch: [query],
+      initialCache: false,
+    },
+  );
+
+  const selected = ref<string[]>([]);
+
+  const isAllVisibleSelected = computed(() => {
+    return (data.value?.data?.length ?? 0) > 0 && selected.value.length === data.value?.data?.length;
+  });
+
+  function toggleAllVisibleSelection() {
+    if (isAllVisibleSelected.value) {
+      selected.value = [];
     }
-    catch (err) {
-      console.error('Error fetching users:', err)
-      return { data: [], total: 0 }
+ else {
+      selected.value = data.value?.data?.map(item => item.id) ?? [];
     }
-  },
-  {
-    watch: [query],
-    initialCache: false,
-  },
-)
-
-const selected = ref<string[]>([])
-
-const isAllVisibleSelected = computed(() => {
-  return (data.value?.data?.length ?? 0) > 0 && selected.value.length === data.value?.data?.length
-})
-
-function toggleAllVisibleSelection() {
-  if (isAllVisibleSelected.value) {
-    selected.value = []
   }
-  else {
-    selected.value = data.value?.data?.map(item => item.id) ?? []
+
+  function toPersianNumber(num: number | string) {
+    return String(num).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
   }
-}
 
-function toPersianNumber(num: number | string) {
-  return String(num).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)])
-}
+  function getRelativeTime(dateString: string) {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
 
-function getRelativeTime(dateString: string) {
-  const now = new Date()
-  const date = new Date(dateString)
-  const diffMs = now.getTime() - date.getTime()
-  const diffSec = Math.floor(diffMs / 1000)
-  const diffMin = Math.floor(diffSec / 60)
-  const diffHour = Math.floor(diffMin / 60)
-  const diffDay = Math.floor(diffHour / 24)
+    if (diffSec < 60) return 'لحظاتی پیش';
+    if (diffMin < 60) return `${toPersianNumber(diffMin)} دقیقه پیش`;
+    if (diffHour < 24) return `${toPersianNumber(diffHour)} ساعت پیش`;
+    return `${toPersianNumber(diffDay)} روز پیش`;
+  }
 
-  if (diffSec < 60) return 'لحظاتی پیش'
-  if (diffMin < 60) return `${toPersianNumber(diffMin)} دقیقه پیش`
-  if (diffHour < 24) return `${toPersianNumber(diffHour)} ساعت پیش`
-  return `${toPersianNumber(diffDay)} روز پیش`
-}
+  function formatPersianDateTime(dateInput: string | number | Date): string {
+    const date = new Date(dateInput);
+    if (isNaN(date.getTime())) return 'نامشخص';
+    return date.toLocaleTimeString('fa-IR') + ' - ' + date.toLocaleDateString('fa-IR');
+  }
 
-function formatPersianDateTime(dateInput: string | number | Date): string {
-  const date = new Date(dateInput)
-  if (isNaN(date.getTime())) return 'نامشخص'
-  return date.toLocaleTimeString('fa-IR') + ' - ' + date.toLocaleDateString('fa-IR')
-}
-
-function onPageChange(newPage: number) {
-  query.page = newPage
-}
-
+  function onPageChange(newPage: number) {
+    query.page = newPage;
+  }
 </script>
 
 <template>
@@ -351,7 +345,10 @@ function onPageChange(newPage: number) {
               </template>
 
               <TairoTableRow v-if="selected.length > 0" :hoverable="false">
-                <TairoTableCell colspan="11" class="bg-success-100 text-success-700 dark:bg-success-700 dark:text-success-100 p-4">
+                <TairoTableCell
+                  colspan="11"
+                  class="bg-success-100 text-success-700 dark:bg-success-700 dark:text-success-100 p-4"
+                >
                   You have selected {{ selected.length }} items of the total {{ data?.total }} items.
                 </TairoTableCell>
               </TairoTableRow>
@@ -416,22 +413,13 @@ function onPageChange(newPage: number) {
                   </BaseTag>
                 </TairoTableCell>
 
-                <TairoTableCell
-                  spaced
-                  class="text-center"
-                >
+                <TairoTableCell spaced class="text-center">
                   {{ formatPersianDateTime(user.startChargeTime) }}
                 </TairoTableCell>
-                <TairoTableCell
-                  spaced
-                  class="text-center"
-                >
+                <TairoTableCell spaced class="text-center">
                   {{ formatPersianDateTime(user.expireChargeTime) }}
                 </TairoTableCell>
-                <TairoTableCell
-                  spaced
-                  class="text-center"
-                >
+                <TairoTableCell spaced class="text-center">
                   <div class="flex flex-wrap justify-center gap-1">
                     <BaseTag
                       v-for="zone in user.zones"
@@ -443,27 +431,16 @@ function onPageChange(newPage: number) {
                     >
                       {{ zone }}
                     </BaseTag>
-                    <span v-if="!user.zones?.length" class="text-muted-400 text-xs">
-                      بدون منطقه
-                    </span>
+                    <span v-if="!user.zones?.length" class="text-muted-400 text-xs">بدون منطقه</span>
                   </div>
                 </TairoTableCell>
-                <TairoTableCell
-                  spaced
-                  class="text-center"
-                >
+                <TairoTableCell spaced class="text-center">
                   {{ new Date(user.created).toLocaleDateString('fa-IR') }}
                 </TairoTableCell>
-                <TairoTableCell
-                  spaced
-                  class="text-center"
-                >
+                <TairoTableCell spaced class="text-center">
                   {{ getRelativeTime(user.created) }}
                 </TairoTableCell>
-                <TairoTableCell
-                  spaced
-                  class="text-center"
-                >
+                <TairoTableCell spaced class="text-center">
                   <div class="flex justify-end">
                     <BaseDropdown
                       variant="context"
@@ -481,7 +458,7 @@ function onPageChange(newPage: number) {
                         </template>
                       </BaseDropdownItem>
                       <BaseDropdownItem
-                        :to="`/darmana/therapists/sessions?userId=${user.id}`"
+                        :to="`/hamdel/sessions?userId=${user.id}`"
                         text="مشاهده نشست‌ها"
                         rounded="md"
                         @click="$event.stopPropagation()"
@@ -516,6 +493,16 @@ function onPageChange(newPage: number) {
                       >
                         <template #start>
                           <Icon name="lucide:file-text" class="me-2 block text-[1.15rem]" />
+                        </template>
+                      </BaseDropdownItem>
+                      <BaseDropdownItem
+                        :to="`/admin/zone-set?userId=${user.id}`"
+                        text="پیکربندی مناطق"
+                        rounded="md"
+                        @click="$event.stopPropagation()"
+                      >
+                        <template #start>
+                          <Icon name="lucide:map-pin" class="me-2 block text-[1.15rem]" />
                         </template>
                       </BaseDropdownItem>
                       <BaseDropdownItem

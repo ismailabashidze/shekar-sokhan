@@ -10,9 +10,9 @@ definePageMeta({
     order: 37,
     new: true,
   },
-})
+});
 
-const format = ref('quickbooks')
+const format = ref('quickbooks');
 </script>
 
 <template>

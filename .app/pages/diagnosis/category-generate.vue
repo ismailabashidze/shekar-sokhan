@@ -601,8 +601,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useDSMCategoryGenerator, type CategoryInfo } from '~/composables/useDSMCategoryGenerator'
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useDSMCategoryGenerator, type CategoryInfo } from '~/composables/useDSMCategoryGenerator';
 
 // SEO
 useHead({
@@ -611,7 +611,7 @@ useHead({
     { name: 'description', content: 'تولید کامل دسته‌بندی‌های DSM-5 با اختلالات مرتبط' },
   ],
   htmlAttrs: { dir: 'rtl' },
-})
+});
 
 const {
   generateCompleteCategoryInfo,
@@ -620,27 +620,27 @@ const {
   categoryProgress,
   clearProgress,
   getAllProgress,
-} = useDSMCategoryGenerator()
-const { CATEGORY_SECTIONS } = await import('~/composables/useDSMCategoryGenerator')
-const nuxtApp = useNuxtApp()
+} = useDSMCategoryGenerator();
+const { CATEGORY_SECTIONS } = await import('~/composables/useDSMCategoryGenerator');
+const nuxtApp = useNuxtApp();
 
 // State
-const categoryEnglishName = ref('')
-const generatedCategory = ref<CategoryInfo | null>(null)
-const copied = ref(false)
-const showJson = ref(false)
-const saving = ref(false)
-const saved = ref(false)
-const saveError = ref<string | null>(null)
+const categoryEnglishName = ref('');
+const generatedCategory = ref<CategoryInfo | null>(null);
+const copied = ref(false);
+const showJson = ref(false);
+const saving = ref(false);
+const saved = ref(false);
+const saveError = ref<string | null>(null);
 
 // Bulk generation state
-const generationMode = ref<'single' | 'bulk'>('single')
-const bulkProcessing = ref(false)
-const bulkPaused = ref(false)
-const bulkStartTime = ref<number | null>(null)
-const currentBulkItem = ref<{ categoryTitle: string } | null>(null)
-const existingCategories = ref<string[]>([])
-const existingCategoriesLoaded = ref(false)
+const generationMode = ref<'single' | 'bulk'>('single');
+const bulkProcessing = ref(false);
+const bulkPaused = ref(false);
+const bulkStartTime = ref<number | null>(null);
+const currentBulkItem = ref<{ categoryTitle: string } | null>(null);
+const existingCategories = ref<string[]>([]);
+const existingCategoriesLoaded = ref(false);
 
 // Bulk statistics
 const bulkStats = reactive({
@@ -649,7 +649,7 @@ const bulkStats = reactive({
   processing: 0,
   failed: 0,
   remaining: 0,
-})
+});
 
 // DSM-5 Categories List
 const bulkCategoriesList = ref([
@@ -785,7 +785,7 @@ const bulkCategoriesList = ref([
     selected: true,
     exists: false,
   },
-])
+]);
 
 const generationSteps = reactive([
   { id: 1, title: 'اطلاعات کلی', description: 'تولید کد، عنوان‌ها، آیکون و توضیحات', status: 'pending' },
@@ -795,135 +795,135 @@ const generationSteps = reactive([
   { id: 5, title: 'اطلاعات کلی', description: 'تولید عنوان و توضیحات بخش overview', status: 'pending' },
   { id: 6, title: 'منابع مفید', description: 'تولید منابع تخصصی و مراجع', status: 'pending' },
   { id: 7, title: 'اختلالات خلاصه', description: 'تولید فهرست اختلالات مرتبط', status: 'pending' },
-])
+]);
 
 // Computed properties
 const selectedCategoriesCount = computed(() => {
-  return bulkCategoriesList.value.filter(cat => cat.selected).length
-})
+  return bulkCategoriesList.value.filter(cat => cat.selected).length;
+});
 
 const currentProgressDetails = computed(() => {
   return getAllProgress().filter(progress =>
     progress.status === 'processing'
     || progress.status === 'completed'
     || progress.status === 'failed',
-  )
-})
+  );
+});
 
 // Generate single category using AI
 const generateCategoryInfo = async () => {
-  if (!categoryEnglishName.value.trim()) return
+  if (!categoryEnglishName.value.trim()) return;
 
   try {
     // Reset all steps
-    generationSteps.forEach(step => step.status = 'pending')
-    generatedCategory.value = null
+    generationSteps.forEach(step => step.status = 'pending');
+    generatedCategory.value = null;
 
     // Simulate step-by-step progress
     for (let i = 1; i <= generationSteps.length; i++) {
-      updateStepStatus(i, 'processing')
-      await new Promise(resolve => setTimeout(resolve, 200))
+      updateStepStatus(i, 'processing');
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
 
-    const result = await generateCompleteCategoryInfo(categoryEnglishName.value.trim())
-    generatedCategory.value = result
+    const result = await generateCompleteCategoryInfo(categoryEnglishName.value.trim());
+    generatedCategory.value = result;
 
     // Mark all steps as completed
-    generationSteps.forEach(step => step.status = 'completed')
+    generationSteps.forEach(step => step.status = 'completed');
   }
   catch (err: any) {
-    console.error('Category generation failed:', err)
+    console.error('Category generation failed:', err);
     // Reset step statuses on error
-    generationSteps.forEach(step => step.status = 'pending')
+    generationSteps.forEach(step => step.status = 'pending');
   }
-}
+};
 
 const updateStepStatus = (stepId: number, status: 'pending' | 'processing' | 'completed') => {
-  const step = generationSteps.find(s => s.id === stepId)
+  const step = generationSteps.find(s => s.id === stepId);
   if (step) {
-    step.status = status
+    step.status = status;
   }
-}
+};
 
 // Load existing categories
 const loadExistingCategories = async () => {
   try {
-    const pb = nuxtApp.$pb
+    const pb = nuxtApp.$pb;
     const records = await pb.collection('DSM5_categories').getFullList({
       fields: 'titleEn',
-    })
+    });
 
-    existingCategories.value = records.map(record => record.titleEn)
+    existingCategories.value = records.map(record => record.titleEn);
 
     // Update exists status
     bulkCategoriesList.value.forEach((category) => {
-      category.exists = existingCategories.value.includes(category.titleEn)
-    })
+      category.exists = existingCategories.value.includes(category.titleEn);
+    });
 
-    existingCategoriesLoaded.value = true
-    console.log(`Loaded ${existingCategories.value.length} existing categories`)
+    existingCategoriesLoaded.value = true;
+    console.log(`Loaded ${existingCategories.value.length} existing categories`);
   }
   catch (error) {
-    console.error('Failed to load existing categories:', error)
-    existingCategoriesLoaded.value = true
+    console.error('Failed to load existing categories:', error);
+    existingCategoriesLoaded.value = true;
   }
-}
+};
 
 // Category selection functions
 const selectAllCategories = () => {
-  bulkCategoriesList.value.forEach(cat => cat.selected = true)
-}
+  bulkCategoriesList.value.forEach(cat => cat.selected = true);
+};
 
 const deselectAllCategories = () => {
-  bulkCategoriesList.value.forEach(cat => cat.selected = false)
-}
+  bulkCategoriesList.value.forEach(cat => cat.selected = false);
+};
 
 const selectMissingCategories = () => {
   bulkCategoriesList.value.forEach((cat) => {
-    cat.selected = !cat.exists
-  })
-}
+    cat.selected = !cat.exists;
+  });
+};
 
 // Bulk generation with AI
 const startBulkGeneration = async () => {
-  bulkProcessing.value = true
-  bulkPaused.value = false
-  bulkStartTime.value = Date.now()
-  clearProgress() // Clear previous progress
+  bulkProcessing.value = true;
+  bulkPaused.value = false;
+  bulkStartTime.value = Date.now();
+  clearProgress(); // Clear previous progress
 
-  const selectedCategories = bulkCategoriesList.value.filter(cat => cat.selected && !cat.exists)
+  const selectedCategories = bulkCategoriesList.value.filter(cat => cat.selected && !cat.exists);
 
-  bulkStats.total = selectedCategories.length
-  bulkStats.completed = 0
-  bulkStats.processing = 0
-  bulkStats.failed = 0
-  bulkStats.remaining = selectedCategories.length
+  bulkStats.total = selectedCategories.length;
+  bulkStats.completed = 0;
+  bulkStats.processing = 0;
+  bulkStats.failed = 0;
+  bulkStats.remaining = selectedCategories.length;
 
   try {
-    console.log(`🚀 Starting bulk category generation: ${selectedCategories.length} categories`)
+    console.log(`🚀 Starting bulk category generation: ${selectedCategories.length} categories`);
 
     for (const category of selectedCategories) {
-      if (!bulkProcessing.value) break
+      if (!bulkProcessing.value) break;
 
       // Wait if paused
       while (bulkPaused.value && bulkProcessing.value) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      if (!bulkProcessing.value) break
+      if (!bulkProcessing.value) break;
 
       try {
-        bulkStats.processing = 1
-        currentBulkItem.value = { categoryTitle: category.titleFa }
+        bulkStats.processing = 1;
+        currentBulkItem.value = { categoryTitle: category.titleFa };
 
         // Generate category using AI with detailed progress
         const result = await generateCompleteCategoryInfo(
           category.titleEn,
           true, // Enable detailed progress
-        )
+        );
 
         // Save to database
-        const pb = nuxtApp.$pb
+        const pb = nuxtApp.$pb;
         const data = {
           code: result.code,
           titleFa: result.titleFa,
@@ -936,67 +936,67 @@ const startBulkGeneration = async () => {
           overview: JSON.stringify(result.overview),
           resources: JSON.stringify(result.resources),
           disorders: JSON.stringify(result.disorders),
-        }
+        };
 
-        await pb.collection('DSM5_categories').create(data)
-        console.log(`💾 Category saved: ${result.titleEn}`)
+        await pb.collection('DSM5_categories').create(data);
+        console.log(`💾 Category saved: ${result.titleEn}`);
 
-        bulkStats.completed++
-        bulkStats.remaining--
-        category.exists = true
+        bulkStats.completed++;
+        bulkStats.remaining--;
+        category.exists = true;
 
-        console.log(`✅ Generated category: ${category.titleEn}`)
+        console.log(`✅ Generated category: ${category.titleEn}`);
       }
       catch (error: any) {
-        console.error(`❌ Failed category: ${category.titleEn} -`, error.message)
-        bulkStats.failed++
-        bulkStats.remaining--
+        console.error(`❌ Failed category: ${category.titleEn} -`, error.message);
+        bulkStats.failed++;
+        bulkStats.remaining--;
       }
 
-      bulkStats.processing = 0
+      bulkStats.processing = 0;
 
       // Delay between categories
       if (bulkProcessing.value) {
-        await new Promise(resolve => setTimeout(resolve, 3000))
+        await new Promise(resolve => setTimeout(resolve, 3000));
       }
     }
 
     if (bulkProcessing.value) {
-      console.log('🎉 Bulk category generation completed!')
+      console.log('🎉 Bulk category generation completed!');
     }
   }
   catch (error: any) {
-    console.error('Bulk generation failed:', error)
+    console.error('Bulk generation failed:', error);
   }
   finally {
-    bulkProcessing.value = false
-    bulkPaused.value = false
-    currentBulkItem.value = null
-    bulkStats.processing = 0
+    bulkProcessing.value = false;
+    bulkPaused.value = false;
+    currentBulkItem.value = null;
+    bulkStats.processing = 0;
   }
-}
+};
 
 const pauseBulkGeneration = () => {
-  bulkPaused.value = !bulkPaused.value
-}
+  bulkPaused.value = !bulkPaused.value;
+};
 
 const stopBulkGeneration = () => {
-  bulkProcessing.value = false
-  bulkPaused.value = false
-  currentBulkItem.value = null
-  bulkStats.processing = 0
-}
+  bulkProcessing.value = false;
+  bulkPaused.value = false;
+  currentBulkItem.value = null;
+  bulkStats.processing = 0;
+};
 
 // Save to database
 const saveToDatabase = async () => {
-  if (!generatedCategory.value) return
+  if (!generatedCategory.value) return;
 
-  saving.value = true
-  saveError.value = null
-  saved.value = false
+  saving.value = true;
+  saveError.value = null;
+  saved.value = false;
 
   try {
-    const pb = nuxtApp.$pb
+    const pb = nuxtApp.$pb;
 
     const data = {
       code: generatedCategory.value.code,
@@ -1010,76 +1010,76 @@ const saveToDatabase = async () => {
       overview: JSON.stringify(generatedCategory.value.overview),
       resources: JSON.stringify(generatedCategory.value.resources),
       disorders: JSON.stringify(generatedCategory.value.disorders),
-    }
+    };
 
-    const record = await pb.collection('DSM5_categories').create(data)
-    console.log('Category saved successfully:', record)
+    const record = await pb.collection('DSM5_categories').create(data);
+    console.log('Category saved successfully:', record);
 
-    saved.value = true
+    saved.value = true;
     setTimeout(() => {
-      saved.value = false
-    }, 5000)
+      saved.value = false;
+    }, 5000);
   }
   catch (err: any) {
-    console.error('Failed to save to database:', err)
-    saveError.value = err.message || 'خطا در ذخیره اطلاعات'
+    console.error('Failed to save to database:', err);
+    saveError.value = err.message || 'خطا در ذخیره اطلاعات';
     setTimeout(() => {
-      saveError.value = null
-    }, 5000)
+      saveError.value = null;
+    }, 5000);
   }
   finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
 // Copy to clipboard
 const copyToClipboard = async () => {
-  if (!generatedCategory.value) return
+  if (!generatedCategory.value) return;
 
   try {
-    await navigator.clipboard.writeText(JSON.stringify(generatedCategory.value, null, 2))
-    copied.value = true
+    await navigator.clipboard.writeText(JSON.stringify(generatedCategory.value, null, 2));
+    copied.value = true;
     setTimeout(() => {
-      copied.value = false
-    }, 3000)
+      copied.value = false;
+    }, 3000);
   }
   catch (err) {
-    console.error('Failed to copy:', err)
+    console.error('Failed to copy:', err);
   }
-}
+};
 
 // Get section progress summary
 const getSectionProgressSummary = (progress: any) => {
-  const completedSections = Object.values(progress.sections).filter((section: any) => section.status === 'completed').length
-  const totalSections = CATEGORY_SECTIONS.length
-  return `${completedSections}/${totalSections}`
-}
+  const completedSections = Object.values(progress.sections).filter((section: any) => section.status === 'completed').length;
+  const totalSections = CATEGORY_SECTIONS.length;
+  return `${completedSections}/${totalSections}`;
+};
 
 // Format duration
 const formatDuration = (milliseconds: number) => {
-  const seconds = Math.floor(milliseconds / 1000)
-  const minutes = Math.floor(seconds / 60)
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
 
   if (minutes > 0) {
-    return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`
+    return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`;
   }
-  return `${seconds}s`
-}
+  return `${seconds}s`;
+};
 
 // Format elapsed time
 const formatElapsedTime = (milliseconds: number) => {
-  const seconds = Math.floor(milliseconds / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
 
   if (hours > 0) {
-    return `${hours}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`
+    return `${hours}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
   }
-  return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`
-}
+  return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`;
+};
 
 // Initialize on mount
 onMounted(async () => {
-  await loadExistingCategories()
-})
+  await loadExistingCategories();
+});
 </script>

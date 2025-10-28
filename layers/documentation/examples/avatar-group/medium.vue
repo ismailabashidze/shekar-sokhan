@@ -24,5 +24,5 @@ const people = [
     'data-nui-tooltip': 'Maya Rosselini',
     'src': '/img/avatars/2.svg',
   },
-]
+];
 </script>

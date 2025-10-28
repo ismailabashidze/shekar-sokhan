@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
-  head?: string[]
-}>()
+  head?: string[];
+}>();
 </script>
 
 <template>

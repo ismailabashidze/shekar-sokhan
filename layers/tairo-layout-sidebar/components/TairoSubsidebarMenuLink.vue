@@ -1,19 +1,19 @@
 <script setup lang="ts">
 const props = defineProps<{
-  name: string
-  to: string
-}>()
+  name: string;
+  to: string;
+}>();
 
-const { toggle } = useSidebar()
-const { xl } = useTailwindBreakpoints()
+const { toggle } = useSidebar();
+const { xl } = useTailwindBreakpoints();
 
 function onClick() {
-  console.log('onClick', props.name, xl.value)
+  console.log('onClick', props.name, xl.value);
   if (xl.value) {
-    return
+    return;
   }
 
-  toggle()
+  toggle();
 }
 </script>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Project, ProjectStepData, ProjectType } from '../../types'
+import type { Project, ProjectStepData, ProjectType } from '../../types';
 
 definePageMeta({
   title: 'Wizard — Step 1',
@@ -11,23 +11,23 @@ definePageMeta({
     srcDark: '/img/screens/wizard-1-dark.png',
     order: 30,
   },
-})
+});
 useHead({
   title: 'Project type',
-})
+});
 
 const {
   getNextStep,
   data: project,
   handleSubmit,
   goToStep,
-} = useMultiStepForm<Project, ProjectStepData>()
+} = useMultiStepForm<Project, ProjectStepData>();
 
 function onSelectType(type: ProjectType) {
   // const next = getNextStep()
   // if (next) {
-  project.value.type = type
-  handleSubmit()
+  project.value.type = type;
+  handleSubmit();
   // goToStep(next)
   // }
 }

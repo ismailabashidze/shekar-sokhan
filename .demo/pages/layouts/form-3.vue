@@ -9,7 +9,7 @@ definePageMeta({
     srcDark: '/img/screens/layouts-form-3-dark.png',
     order: 49,
   },
-})
+});
 
 const cardInfo = ref({
   name: undefined,
@@ -17,11 +17,11 @@ const cardInfo = ref({
   expiryYear: '',
   expiryMonth: '',
   cvc: undefined,
-})
+});
 
-const selectedMethod = ref('cc')
-const billingCycles = ref('monthly')
-const termsApproval = ref(false)
+const selectedMethod = ref('cc');
+const billingCycles = ref('monthly');
+const termsApproval = ref(false);
 </script>
 
 <template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Calendar } from 'v-calendar'
+import { Calendar } from 'v-calendar';
 
-import 'v-calendar/dist/style.css'
-import '~/assets/css/vcalendar.css'
+import 'v-calendar/dist/style.css';
+import '~/assets/css/vcalendar.css';
 
 definePageMeta({
   title: 'Analytics',
@@ -14,17 +14,17 @@ definePageMeta({
     srcDark: '/img/screens/dashboards-analytics-dark.png',
     order: 4,
   },
-})
+});
 
-const lineRevenue = reactive(useLineRevenue())
-const radialGoal = reactive(useRadialGoal())
-const radialGrowth = reactive(useRadialGrowth())
-const barSalesProfit = reactive(useBarSalesProfit())
+const lineRevenue = reactive(useLineRevenue());
+const radialGoal = reactive(useRadialGoal());
+const radialGrowth = reactive(useRadialGrowth());
+const barSalesProfit = reactive(useBarSalesProfit());
 
 function useLineRevenue() {
-  const { primary } = useTailwindColors()
-  const type = 'line'
-  const height = 250
+  const { primary } = useTailwindColors();
+  const type = 'line';
+  const height = 250;
 
   const options = {
     chart: {
@@ -65,31 +65,31 @@ function useLineRevenue() {
     tooltip: {
       y: {
         formatter: function (val: string) {
-          return '$' + val
+          return '$' + val;
         },
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
       name: 'Revenue',
       data: [10835, 40214, 36257, 51411, 45697, 61221, 65295, 91512, 75648],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialGoal() {
-  const { primary, success } = useTailwindColors()
-  const type = 'radialBar'
-  const height = 220
+  const { primary, success } = useTailwindColors();
+  const type = 'radialBar';
+  const height = 220;
 
   const options = {
     chart: {
@@ -135,22 +135,22 @@ function useRadialGoal() {
       lineCap: 'round',
     },
     labels: ['Efficiency', 'Productivity'],
-  }
+  };
 
-  const series = shallowRef([57, 86])
+  const series = shallowRef([57, 86]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useRadialGrowth() {
-  const { success } = useTailwindColors()
-  const height = 180
-  const type = 'radialBar'
+  const { success } = useTailwindColors();
+  const height = 180;
+  const type = 'radialBar';
 
   const options = {
     chart: {
@@ -184,22 +184,22 @@ function useRadialGrowth() {
       },
     },
     labels: ['Growth'],
-  }
+  };
 
-  const series = shallowRef([65])
+  const series = shallowRef([65]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 
 function useBarSalesProfit() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'bar'
-  const height = 250
+  const { primary, info, success } = useTailwindColors();
+  const type = 'bar';
+  const height = 250;
 
   const options = {
     chart: {
@@ -242,7 +242,7 @@ function useBarSalesProfit() {
     yaxis: {
       labels: {
         formatter: function (val: string) {
-          return val + 70
+          return val + 70;
         },
       },
     },
@@ -252,11 +252,11 @@ function useBarSalesProfit() {
     tooltip: {
       y: {
         formatter: function (val: string) {
-          return val + 70
+          return val + 70;
         },
       },
     },
-  }
+  };
 
   const series = shallowRef([
     {
@@ -271,14 +271,14 @@ function useBarSalesProfit() {
       name: 'Free Cash Flow',
       data: [-35, -29, -34, -44, -25, -22, -18, -17, -29],
     },
-  ])
+  ]);
 
   return {
     type,
     height,
     options,
     series,
-  }
+  };
 }
 </script>
 
