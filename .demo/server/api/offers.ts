@@ -274,10 +274,10 @@ async function getDemoData() {
     {
       id: 27,
       categories: ['development'],
-      slug: 'firebase',
-      title: 'Firebase',
+      slug: 'backend-service',
+      title: 'Backend Service',
       subtitle: '3 months free',
-      icon: 'logos:firebase',
+      icon: 'logos:nodejs-icon',
       remaining: '10 days',
     },
   ])

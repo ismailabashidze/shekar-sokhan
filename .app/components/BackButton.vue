@@ -19,7 +19,7 @@ const goBack = () => {
     router.push('/lock')
     return
   }
-  
+
   // Otherwise, go back in history
   window.history.back()
 }

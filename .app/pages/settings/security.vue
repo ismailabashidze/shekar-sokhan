@@ -42,7 +42,7 @@ const formatTimerLabel = (seconds: number | null) => {
 const selectTimer = (value: number | null) => {
   setAutoLockTimer(value)
   showTimerModal.value = false
-  
+
   toaster.show({
     title: 'تنظیمات ذخیره شد',
     message: value ? `قفل خودکار پس از ${formatTimerLabel(value)} فعال شد` : 'قفل خودکار غیرفعال شد',
@@ -81,26 +81,26 @@ const selectTimer = (value: number | null) => {
           قفل برنامه
         </BaseHeading>
 
-        <div class="rounded-lg border border-muted-200 bg-white p-4 dark:border-muted-700 dark:bg-muted-800">
+        <div class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 rounded-lg border bg-white p-4">
           <div class="flex items-start justify-between gap-4">
             <div class="flex-1">
               <div class="mb-2 flex items-center gap-2">
-                <Icon name="ph:lock-simple" class="size-5 text-muted-500" />
-                <h5 class="font-medium text-muted-800 dark:text-muted-200">
+                <Icon name="ph:lock-simple" class="text-muted-500 size-5" />
+                <h5 class="text-muted-800 dark:text-muted-200 font-medium">
                   پین امنیتی
                 </h5>
               </div>
-              <p class="text-sm text-muted-500">
+              <p class="text-muted-500 text-sm">
                 {{ hasPin ? 'پین امنیتی فعال است. برنامه پس از ورود قفل می‌شود.' : 'با تنظیم پین ۴ رقمی، برنامه خود را از دسترسی غیرمجاز محافظت کنید.' }}
               </p>
               <div v-if="hasPin" class="mt-2 flex items-center gap-2">
-                <div class="flex size-2 rounded-full bg-success-500" />
-                <span class="text-xs font-medium text-success-600 dark:text-success-400">
+                <div class="bg-success-500 flex size-2 rounded-full" />
+                <span class="text-success-600 dark:text-success-400 text-xs font-medium">
                   فعال
                 </span>
               </div>
             </div>
-            
+
             <div class="flex gap-2">
               <BaseButton
                 v-if="!hasPin"
@@ -125,11 +125,13 @@ const selectTimer = (value: number | null) => {
           </div>
 
           <!-- Info Box -->
-          <div class="mt-4 rounded-md bg-muted-100 p-3 dark:bg-muted-900/50">
+          <div class="bg-muted-100 dark:bg-muted-900/50 mt-4 rounded-md p-3">
             <div class="flex items-start gap-2">
-              <Icon name="ph:info" class="mt-0.5 size-4 shrink-0 text-primary-500" />
-              <div class="text-xs text-muted-600 dark:text-muted-400">
-                <p class="mb-1 font-medium">نکات مهم:</p>
+              <Icon name="ph:info" class="text-primary-500 mt-0.5 size-4 shrink-0" />
+              <div class="text-muted-600 dark:text-muted-400 text-xs">
+                <p class="mb-1 font-medium">
+                  نکات مهم:
+                </p>
                 <ul class="list-inside list-disc space-y-0.5">
                   <li>پین شما در سرور ذخیره می‌شود</li>
                   <li>خروج از حساب، قفل را باز نمی‌کند</li>
@@ -152,48 +154,50 @@ const selectTimer = (value: number | null) => {
           قفل خودکار
         </BaseHeading>
 
-        <div class="rounded-lg border border-muted-200 bg-white p-4 dark:border-muted-700 dark:bg-muted-800">
+        <div class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 rounded-lg border bg-white p-4">
           <div class="flex items-start justify-between gap-4">
             <div class="flex-1">
               <div class="mb-2 flex items-center gap-2">
-                <Icon name="ph:timer" class="size-5 text-muted-500" />
-                <h5 class="font-medium text-muted-800 dark:text-muted-200">
+                <Icon name="ph:timer" class="text-muted-500 size-5" />
+                <h5 class="text-muted-800 dark:text-muted-200 font-medium">
                   زمان قفل خودکار
                 </h5>
               </div>
-              <p class="text-sm text-muted-500">
+              <p class="text-muted-500 text-sm">
                 برنامه پس از مدت زمان مشخص عدم فعالیت، به صورت خودکار قفل می‌شود
               </p>
               <div v-if="autoLockTimer" class="mt-2 flex items-center gap-2">
-                <div class="flex size-2 rounded-full bg-warning-500" />
-                <span class="text-xs font-medium text-warning-600 dark:text-warning-400">
+                <div class="bg-warning-500 flex size-2 rounded-full" />
+                <span class="text-warning-600 dark:text-warning-400 text-xs font-medium">
                   فعال: {{ formatTimerLabel(autoLockTimer) }}
                 </span>
               </div>
               <div v-else class="mt-2 flex items-center gap-2">
-                <div class="flex size-2 rounded-full bg-muted-400" />
-                <span class="text-xs font-medium text-muted-500">
+                <div class="bg-muted-400 flex size-2 rounded-full" />
+                <span class="text-muted-500 text-xs font-medium">
                   غیرفعال
                 </span>
               </div>
             </div>
-            
+
             <BaseButton
               color="muted"
               size="sm"
               @click="showTimerModal = true"
             >
-              <Icon name="ph:gear" class="size-4 ml-2" />
+              <Icon name="ph:gear" class="ml-2 size-4" />
               تنظیم
             </BaseButton>
           </div>
 
           <!-- Info Box -->
-          <div class="mt-4 rounded-md bg-muted-100 p-3 dark:bg-muted-900/50">
+          <div class="bg-muted-100 dark:bg-muted-900/50 mt-4 rounded-md p-3">
             <div class="flex items-start gap-2">
-              <Icon name="ph:info" class="mt-0.5 size-4 shrink-0 text-primary-500" />
-              <div class="text-xs text-muted-600 dark:text-muted-400">
-                <p class="mb-1 font-medium">نحوه کار:</p>
+              <Icon name="ph:info" class="text-primary-500 mt-0.5 size-4 shrink-0" />
+              <div class="text-muted-600 dark:text-muted-400 text-xs">
+                <p class="mb-1 font-medium">
+                  نحوه کار:
+                </p>
                 <ul class="list-inside list-disc space-y-0.5">
                   <li>تایمر پس از هر فعالیت شما ریست می‌شود</li>
                   <li>فعالیت شامل: حرکت موس، کلیک، تایپ و اسکرول</li>
@@ -231,14 +235,14 @@ const selectTimer = (value: number | null) => {
   >
     <template #header>
       <div class="flex items-center gap-4 p-2" dir="rtl">
-        <div class="flex size-12 items-center justify-center rounded-full bg-warning-100 dark:bg-warning-900">
-          <Icon name="ph:timer" class="size-6 text-warning-600 dark:text-warning-400" />
+        <div class="bg-warning-100 dark:bg-warning-900 flex size-12 items-center justify-center rounded-full">
+          <Icon name="ph:timer" class="text-warning-600 dark:text-warning-400 size-6" />
         </div>
         <div class="flex-1 text-right">
-          <h3 class="text-lg font-semibold text-muted-800 dark:text-muted-200">
+          <h3 class="text-muted-800 dark:text-muted-200 text-lg font-semibold">
             زمان قفل خودکار
           </h3>
-          <p class="mt-1 text-sm text-muted-500">
+          <p class="text-muted-500 mt-1 text-sm">
             انتخاب مدت زمان عدم فعالیت
           </p>
         </div>
@@ -251,36 +255,36 @@ const selectTimer = (value: number | null) => {
           <div
             v-for="option in timerOptions"
             :key="option.value || 'disabled'"
-            class="flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 p-4 transition-all hover:border-primary-500 hover:shadow-md"
-            :class="autoLockTimer === option.value 
-              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
+            class="hover:border-primary-500 flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 p-4 transition-all hover:shadow-md"
+            :class="autoLockTimer === option.value
+              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
               : 'border-muted-200 bg-white dark:border-muted-700 dark:bg-muted-800'"
             @click="selectTimer(option.value)"
           >
-            <div 
+            <div
               class="flex size-14 items-center justify-center rounded-lg"
-              :class="autoLockTimer === option.value 
-                ? 'bg-primary-500' 
+              :class="autoLockTimer === option.value
+                ? 'bg-primary-500'
                 : 'bg-muted-100 dark:bg-muted-700'"
             >
-              <Icon 
-                :name="option.icon" 
+              <Icon
+                :name="option.icon"
                 class="size-7"
-                :class="autoLockTimer === option.value 
-                  ? 'text-white' 
+                :class="autoLockTimer === option.value
+                  ? 'text-white'
                   : 'text-muted-600 dark:text-muted-400'"
               />
             </div>
             <div class="text-center">
-              <p 
+              <p
                 class="text-sm font-semibold"
-                :class="autoLockTimer === option.value 
-                  ? 'text-primary-700 dark:text-primary-300' 
+                :class="autoLockTimer === option.value
+                  ? 'text-primary-700 dark:text-primary-300'
                   : 'text-muted-800 dark:text-muted-100'"
               >
                 {{ option.label }}
               </p>
-              <p class="mt-1 text-xs text-muted-500">
+              <p class="text-muted-500 mt-1 text-xs">
                 {{ option.description }}
               </p>
             </div>
@@ -302,5 +306,3 @@ const selectTimer = (value: number | null) => {
     </template>
   </TairoModal>
 </template>
-
-

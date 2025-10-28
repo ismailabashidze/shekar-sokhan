@@ -4,7 +4,7 @@ import type { NotificationCampaign, CampaignAnalytics } from '~/types/campaigns'
 definePageMeta({
   title: 'آنالیتیک کمپین',
   layout: 'sidebar',
-  middleware: 'admin',
+  // Using global middlewares only
 })
 
 const route = useRoute()
@@ -17,7 +17,7 @@ useHead({
 
 const {
   getCampaignAnalytics,
-  getCampaignMetrics
+  getCampaignMetrics,
 } = useCampaignManager()
 
 // State
@@ -34,7 +34,7 @@ const performanceData = ref([
   { date: '2024-01-04', sent: 200, delivered: 190, opened: 85, clicked: 22 },
   { date: '2024-01-05', sent: 180, delivered: 175, opened: 78, clicked: 20 },
   { date: '2024-01-06', sent: 160, delivered: 152, opened: 71, clicked: 19 },
-  { date: '2024-01-07', sent: 140, delivered: 135, opened: 62, clicked: 16 }
+  { date: '2024-01-07', sent: 140, delivered: 135, opened: 62, clicked: 16 },
 ])
 
 // Initialize data
@@ -42,9 +42,11 @@ onMounted(async () => {
   try {
     analytics.value = await getCampaignAnalytics(campaignId)
     campaign.value = analytics.value.campaign
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در بارگذاری آنالیتیک:', error)
-  } finally {
+  }
+  finally {
     isLoading.value = false
   }
 })
@@ -63,30 +65,30 @@ const chartData = computed(() => {
         data: performanceData.value.map(d => d.sent),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4
+        tension: 0.4,
       },
       {
         label: 'تحویل شده',
         data: performanceData.value.map(d => d.delivered),
         borderColor: 'rgb(34, 197, 94)',
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
-        tension: 0.4
+        tension: 0.4,
       },
       {
         label: 'بازدید شده',
         data: performanceData.value.map(d => d.opened),
         borderColor: 'rgb(251, 146, 60)',
         backgroundColor: 'rgba(251, 146, 60, 0.1)',
-        tension: 0.4
+        tension: 0.4,
       },
       {
         label: 'کلیک شده',
         data: performanceData.value.map(d => d.clicked),
         borderColor: 'rgb(168, 85, 247)',
         backgroundColor: 'rgba(168, 85, 247, 0.1)',
-        tension: 0.4
-      }
-    ]
+        tension: 0.4,
+      },
+    ],
   }
 })
 
@@ -99,39 +101,39 @@ const chartOptions = {
     },
     title: {
       display: true,
-      text: 'عملکرد کمپین در طول زمان'
-    }
+      text: 'عملکرد کمپین در طول زمان',
+    },
   },
   scales: {
     y: {
-      beginAtZero: true
-    }
-  }
+      beginAtZero: true,
+    },
+  },
 }
 
 const engagementData = computed(() => {
   if (!metrics.value) return null
-  
+
   return {
     labels: ['تحویل شده', 'بازدید شده', 'کلیک شده'],
     datasets: [{
       data: [
         metrics.value.delivery_rate,
         metrics.value.open_rate,
-        metrics.value.click_rate
+        metrics.value.click_rate,
       ],
       backgroundColor: [
         'rgba(34, 197, 94, 0.8)',
         'rgba(251, 146, 60, 0.8)',
-        'rgba(168, 85, 247, 0.8)'
+        'rgba(168, 85, 247, 0.8)',
       ],
       borderColor: [
         'rgb(34, 197, 94)',
         'rgb(251, 146, 60)',
-        'rgb(168, 85, 247)'
+        'rgb(168, 85, 247)',
       ],
-      borderWidth: 2
-    }]
+      borderWidth: 2,
+    }],
   }
 })
 
@@ -144,9 +146,9 @@ const engagementOptions = {
     },
     title: {
       display: true,
-      text: 'نرخ‌های تعامل (%)'
-    }
-  }
+      text: 'نرخ‌های تعامل (%)',
+    },
+  },
 }
 
 // Methods
@@ -160,9 +162,11 @@ const refreshData = async () => {
   try {
     analytics.value = await getCampaignAnalytics(campaignId)
     campaign.value = analytics.value.campaign
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در بروزرسانی داده‌ها:', error)
-  } finally {
+  }
+  finally {
     isLoading.value = false
   }
 }
@@ -194,14 +198,14 @@ const getStatusLabel = (status: string) => {
   <div class="campaign-analytics bg-muted-50 dark:bg-muted-900 min-h-screen">
     <div class="container-wrapper mx-auto w-full max-w-7xl px-4 py-8">
       <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-12">
+      <div v-if="isLoading" class="py-12 text-center">
         <p class="text-muted-500 dark:text-muted-400">
           در حال بارگذاری آنالیتیک...
         </p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="!campaign" class="text-center py-12">
+      <div v-else-if="!campaign" class="py-12 text-center">
         <Icon name="ph:warning" class="text-muted-400 mx-auto mb-4 size-12" />
         <p class="text-muted-500 dark:text-muted-400 mb-4">
           کمپین یافت نشد
@@ -242,12 +246,12 @@ const getStatusLabel = (status: string) => {
               {{ campaign.description }}
             </p>
           </div>
-          
+
           <div class="flex items-center gap-3">
             <BaseButton
               variant="outline"
-              @click="refreshData"
               :loading="isLoading"
+              @click="refreshData"
             >
               <Icon name="ph:arrow-clockwise" class="ml-2 size-4" />
               بروزرسانی
@@ -273,7 +277,7 @@ const getStatusLabel = (status: string) => {
                 <p class="text-muted-900 text-3xl font-bold dark:text-white">
                   {{ metrics?.sent_count.toLocaleString('fa-IR') }}
                 </p>
-                <p class="text-muted-500 dark:text-muted-400 text-xs mt-1">
+                <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs">
                   از زمان شروع کمپین
                 </p>
               </div>
@@ -292,7 +296,7 @@ const getStatusLabel = (status: string) => {
                 <p class="text-3xl font-bold text-green-600 dark:text-green-400">
                   {{ metrics?.delivery_rate }}%
                 </p>
-                <p class="text-muted-500 dark:text-muted-400 text-xs mt-1">
+                <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs">
                   {{ metrics?.delivered_count.toLocaleString('fa-IR') }} تحویل شده
                 </p>
               </div>
@@ -311,7 +315,7 @@ const getStatusLabel = (status: string) => {
                 <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">
                   {{ metrics?.open_rate }}%
                 </p>
-                <p class="text-muted-500 dark:text-muted-400 text-xs mt-1">
+                <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs">
                   {{ metrics?.opened_count.toLocaleString('fa-IR') }} بازدید
                 </p>
               </div>
@@ -330,7 +334,7 @@ const getStatusLabel = (status: string) => {
                 <p class="text-3xl font-bold text-purple-600 dark:text-purple-400">
                   {{ metrics?.click_rate }}%
                 </p>
-                <p class="text-muted-500 dark:text-muted-400 text-xs mt-1">
+                <p class="text-muted-500 dark:text-muted-400 mt-1 text-xs">
                   {{ metrics?.clicked_count.toLocaleString('fa-IR') }} کلیک
                 </p>
               </div>
@@ -344,7 +348,7 @@ const getStatusLabel = (status: string) => {
         <!-- Charts Section -->
         <div class="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
           <!-- Performance Trend Chart -->
-          <div class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 lg:col-span-2 rounded-xl border bg-white p-6">
+          <div class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 rounded-xl border bg-white p-6 lg:col-span-2">
             <div class="mb-6 flex items-center justify-between">
               <h3 class="text-muted-900 text-lg font-semibold dark:text-white">
                 روند عملکرد
@@ -354,14 +358,22 @@ const getStatusLabel = (status: string) => {
                   v-model="selectedTimeRange"
                   class="border-muted-200 dark:border-muted-700 dark:bg-muted-800 text-muted-700 dark:text-muted-300 rounded-lg border bg-white px-3 py-2 text-sm"
                 >
-                  <option value="7d">۷ روز گذشته</option>
-                  <option value="30d">۳۰ روز گذشته</option>
-                  <option value="90d">۹۰ روز گذشته</option>
-                  <option value="all">همه زمان‌ها</option>
+                  <option value="7d">
+                    ۷ روز گذشته
+                  </option>
+                  <option value="30d">
+                    ۳۰ روز گذشته
+                  </option>
+                  <option value="90d">
+                    ۹۰ روز گذشته
+                  </option>
+                  <option value="all">
+                    همه زمان‌ها
+                  </option>
                 </select>
               </div>
             </div>
-            
+
             <div class="h-80">
               <!-- Chart component would go here -->
               <div class="bg-muted-100 dark:bg-muted-700 flex h-full items-center justify-center rounded-lg">
@@ -377,11 +389,11 @@ const getStatusLabel = (status: string) => {
             <h3 class="text-muted-900 mb-6 text-lg font-semibold dark:text-white">
               نرخ‌های تعامل
             </h3>
-            
+
             <div class="h-80">
               <!-- Pie chart component would go here -->
               <div class="bg-muted-100 dark:bg-muted-700 flex h-full items-center justify-center rounded-lg">
-                <p class="text-muted-500 dark:text-muted-400 text-sm text-center">
+                <p class="text-muted-500 dark:text-muted-400 text-center text-sm">
                   نمودار دایره‌ای نرخ‌های تعامل<br>
                   (نیاز به کتابخانه Chart.js)
                 </p>
@@ -397,7 +409,7 @@ const getStatusLabel = (status: string) => {
             <h3 class="text-muted-900 mb-6 text-lg font-semibold dark:text-white">
               تجزیه عملکرد
             </h3>
-            
+
             <div class="space-y-4">
               <div class="flex items-center justify-between">
                 <span class="text-muted-600 dark:text-muted-300 text-sm">
@@ -405,7 +417,7 @@ const getStatusLabel = (status: string) => {
                 </span>
                 <div class="flex items-center gap-2">
                   <div class="bg-muted-200 dark:bg-muted-700 h-2 w-24 rounded-full">
-                    <div 
+                    <div
                       class="h-2 rounded-full bg-green-500"
                       :style="{ width: `${metrics?.delivery_rate || 0}%` }"
                     />
@@ -422,7 +434,7 @@ const getStatusLabel = (status: string) => {
                 </span>
                 <div class="flex items-center gap-2">
                   <div class="bg-muted-200 dark:bg-muted-700 h-2 w-24 rounded-full">
-                    <div 
+                    <div
                       class="h-2 rounded-full bg-blue-500"
                       :style="{ width: `${metrics?.open_rate || 0}%` }"
                     />
@@ -439,7 +451,7 @@ const getStatusLabel = (status: string) => {
                 </span>
                 <div class="flex items-center gap-2">
                   <div class="bg-muted-200 dark:bg-muted-700 h-2 w-24 rounded-full">
-                    <div 
+                    <div
                       class="h-2 rounded-full bg-purple-500"
                       :style="{ width: `${metrics?.click_rate || 0}%` }"
                     />
@@ -457,7 +469,7 @@ const getStatusLabel = (status: string) => {
             <h3 class="text-muted-900 mb-6 text-lg font-semibold dark:text-white">
               جزئیات کمپین
             </h3>
-            
+
             <div class="space-y-4">
               <div class="flex items-center justify-between">
                 <span class="text-muted-600 dark:text-muted-300 text-sm">
@@ -492,7 +504,7 @@ const getStatusLabel = (status: string) => {
                 </span>
                 <span class="text-muted-900 text-sm font-medium dark:text-white">
                   {{ campaign.schedule.type === 'immediate' ? 'فوری' :
-                     campaign.schedule.type === 'scheduled' ? 'زمان‌بندی شده' : 'تکراری' }}
+                    campaign.schedule.type === 'scheduled' ? 'زمان‌بندی شده' : 'تکراری' }}
                 </span>
               </div>
             </div>

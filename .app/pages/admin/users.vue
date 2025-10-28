@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
   title: 'کاربران',
-  layout: 'sidebar',
+  layout: 'zone',
+  // Using global middlewares only
 })
 useHead({ htmlAttrs: { dir: 'rtl' } })
 const nuxtApp = useNuxtApp()
@@ -37,6 +38,7 @@ const { data, pending, error, refresh } = await useAsyncData(
           hasCharge: item.hasCharge,
           startChargeTime: item.startChargeTime,
           expireChargeTime: item.expireChargeTime,
+          zones: item.zones || [],
           created: item.created,
           initials: item.meta?.name?.substring(0, 2) || 'کا',
           isNew: item.meta?.isNew,
@@ -178,6 +180,13 @@ function onPageChange(newPage: number) {
                   spaced
                   class="text-center"
                 >
+                  مناطق
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
                   تاریخ ساخت
                 </TairoTableHeading>
                 <TairoTableHeading
@@ -224,6 +233,9 @@ function onPageChange(newPage: number) {
                 </TairoTableCell>
                 <TairoTableCell spaced class="text-center">
                   <BasePlaceload class="h-3 w-24 rounded-lg" />
+                </TairoTableCell>
+                <TairoTableCell spaced class="text-center">
+                  <BasePlaceload class="h-3 w-16 rounded-lg" />
                 </TairoTableCell>
                 <TairoTableCell spaced class="text-center">
                   <BasePlaceload class="h-3 w-16 rounded-lg" />
@@ -313,6 +325,13 @@ function onPageChange(newPage: number) {
                   spaced
                   class="text-center"
                 >
+                  مناطق
+                </TairoTableHeading>
+                <TairoTableHeading
+                  uppercase
+                  spaced
+                  class="text-center"
+                >
                   تاریخ ساخت
                 </TairoTableHeading>
                 <TairoTableHeading
@@ -332,7 +351,7 @@ function onPageChange(newPage: number) {
               </template>
 
               <TairoTableRow v-if="selected.length > 0" :hoverable="false">
-                <TairoTableCell colspan="10" class="bg-success-100 text-success-700 dark:bg-success-700 dark:text-success-100 p-4">
+                <TairoTableCell colspan="11" class="bg-success-100 text-success-700 dark:bg-success-700 dark:text-success-100 p-4">
                   You have selected {{ selected.length }} items of the total {{ data?.total }} items.
                 </TairoTableCell>
               </TairoTableRow>
@@ -408,6 +427,26 @@ function onPageChange(newPage: number) {
                   class="text-center"
                 >
                   {{ formatPersianDateTime(user.expireChargeTime) }}
+                </TairoTableCell>
+                <TairoTableCell
+                  spaced
+                  class="text-center"
+                >
+                  <div class="flex flex-wrap justify-center gap-1">
+                    <BaseTag
+                      v-for="zone in user.zones"
+                      :key="zone"
+                      color="info"
+                      variant="pastel"
+                      rounded="full"
+                      size="sm"
+                    >
+                      {{ zone }}
+                    </BaseTag>
+                    <span v-if="!user.zones?.length" class="text-muted-400 text-xs">
+                      بدون منطقه
+                    </span>
+                  </div>
                 </TairoTableCell>
                 <TairoTableCell
                   spaced

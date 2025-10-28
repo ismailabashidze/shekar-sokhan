@@ -133,19 +133,19 @@ if (hasPin.value) {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-white dark:bg-muted-800">
+  <div class="dark:bg-muted-800 flex min-h-screen bg-white">
     <div
-      class="relative hidden w-0 flex-1 items-center justify-center bg-muted-100 dark:bg-muted-900 lg:flex lg:w-2/5"
+      class="bg-muted-100 dark:bg-muted-900 relative hidden w-0 flex-1 items-center justify-center lg:flex lg:w-2/5"
     >
       <div class="mx-auto flex size-full max-w-2xl items-center justify-center p-12">
         <div class="text-center">
-          <div class="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
-            <Icon name="ph:lock-simple" class="size-12 text-primary-600 dark:text-primary-400" />
+          <div class="bg-primary-100 dark:bg-primary-900 mx-auto mb-6 flex size-24 items-center justify-center rounded-full">
+            <Icon name="ph:lock-simple" class="text-primary-600 dark:text-primary-400 size-12" />
           </div>
-          <h1 class="mb-4 text-2xl font-bold text-muted-800 dark:text-muted-200">
+          <h1 class="text-muted-800 dark:text-muted-200 mb-4 text-2xl font-bold">
             تنظیم پین امنیتی
           </h1>
-          <p class="mx-auto max-w-sm text-muted-500 dark:text-muted-400">
+          <p class="text-muted-500 dark:text-muted-400 mx-auto max-w-sm">
             برای محافظت از حریم خصوصی خود، یک پین ۴ رقمی تنظیم کنید
           </p>
         </div>
@@ -153,16 +153,16 @@ if (hasPin.value) {
     </div>
 
     <div class="relative flex flex-1 flex-col justify-center px-6 py-8 lg:w-3/5 lg:flex-none">
-      <div class="relative mx-auto w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl dark:bg-muted-800">
+      <div class="dark:bg-muted-800 relative mx-auto w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl">
         <!-- Header -->
         <div class="mb-6 text-center">
-          <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-success-100 dark:bg-success-900">
-            <Icon name="ph:shield-check" class="size-8 text-success-600 dark:text-success-400" />
+          <div class="bg-success-100 dark:bg-success-900 mx-auto mb-4 flex size-16 items-center justify-center rounded-full">
+            <Icon name="ph:shield-check" class="text-success-600 dark:text-success-400 size-8" />
           </div>
-          <h2 class="text-xl font-semibold text-muted-800 dark:text-muted-200">
+          <h2 class="text-muted-800 dark:text-muted-200 text-xl font-semibold">
             ایجاد پین امنیتی
           </h2>
-          <p class="mt-1 text-sm text-muted-500">
+          <p class="text-muted-500 mt-1 text-sm">
             پین ۴ رقمی خود را برای قفل کردن برنامه تنظیم کنید
           </p>
         </div>
@@ -232,11 +232,11 @@ if (hasPin.value) {
         </form>
 
         <!-- Security Info -->
-        <div class="mt-6 border-t border-muted-200 pt-6 dark:border-muted-700">
+        <div class="border-muted-200 dark:border-muted-700 mt-6 border-t pt-6">
           <div class="space-y-3">
             <div class="flex items-start gap-3">
-              <Icon name="ph:info" class="mt-0.5 size-5 text-muted-400" />
-              <div class="text-xs text-muted-500">
+              <Icon name="ph:info" class="text-muted-400 mt-0.5 size-5" />
+              <div class="text-muted-500 text-xs">
                 <p>• پین شما به صورت محلی ذخیره می‌شود</p>
                 <p>• با قفل کردن برنامه، فقط با وارد کردن پین می‌توانید به آن دسترسی داشته باشید</p>
                 <p>• خروج از حساب کاربری قفل را باز نمی‌کند</p>

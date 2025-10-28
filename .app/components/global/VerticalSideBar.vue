@@ -82,7 +82,28 @@
               title="مشاهده پروفایل"
               :text="user.meta?.name || 'کاربر جدید'"
               rounded="sm"
-            />
+            >
+              <template v-if="user.zones?.length" #text>
+                <div>
+                  <div>{{ user.meta?.name || 'کاربر جدید' }}</div>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <BaseTag
+                      v-for="zone in user.zones.slice(0, 2)"
+                      :key="zone"
+                      color="info"
+                      variant="pastel"
+                      rounded="full"
+                      size="xs"
+                    >
+                      {{ zone }}
+                    </BaseTag>
+                    <span v-if="user.zones.length > 2" class="text-muted-400 text-xs">
+                      +{{ user.zones.length - 2 }}
+                    </span>
+                  </div>
+                </div>
+              </template>
+            </BaseDropdownItem>
 
             <BaseDropdownItem
               to="/darmana/therapists/sessions"

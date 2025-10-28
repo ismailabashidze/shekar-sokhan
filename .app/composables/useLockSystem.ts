@@ -230,11 +230,11 @@ export const useLockSystem = () => {
   }
 
   // Auto-lock timer functions
-  
+
   // Set auto-lock timer duration (in seconds)
   const setAutoLockTimer = (seconds: number | null) => {
     lockState.value.autoLockTimer = seconds
-    
+
     // Reset and restart monitoring if timer is set
     if (seconds && hasPin.value && !isAppLocked.value) {
       resetInactivityTimer()

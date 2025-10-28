@@ -4,7 +4,7 @@ import { onMounted } from 'vue'
 definePageMeta({
   title: 'بازخوردهای کاربران',
   layout: 'sidebar',
-  middleware: 'admin',
+  // Using global middlewares only
 })
 
 useHead({

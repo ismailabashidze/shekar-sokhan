@@ -4,7 +4,7 @@ import type { TemplateForm, TemplateVariable } from '~/types/campaigns'
 definePageMeta({
   title: 'مدیریت قالب‌ها',
   layout: 'sidebar',
-  middleware: 'admin',
+  // Using global middlewares only
 })
 
 useHead({
@@ -27,7 +27,7 @@ const {
   deleteTemplate,
   previewTemplate,
   validateTemplate,
-  getAvailableVariables
+  getAvailableVariables,
 } = useTemplateManager()
 
 // State
@@ -47,14 +47,15 @@ const formData = ref<TemplateForm>({
   body_template: '',
   action_text_template: '',
   action_url_template: '',
-  variables: []
+  variables: [],
 })
 
 // Initialize data
 onMounted(async () => {
   try {
     await fetchTemplates()
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در بارگذاری قالب‌ها:', error)
   }
 })
@@ -70,7 +71,7 @@ const resetForm = () => {
     body_template: '',
     action_text_template: '',
     action_url_template: '',
-    variables: []
+    variables: [],
   }
   editingTemplate.value = null
 }
@@ -86,7 +87,8 @@ const handleCreateTemplate = async () => {
     await createTemplate(formData.value)
     showCreateForm.value = false
     resetForm()
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در ایجاد قالب:', error)
   }
 }
@@ -101,7 +103,7 @@ const handleEditTemplate = (template: any) => {
     body_template: template.body_template,
     action_text_template: template.action_text_template || '',
     action_url_template: template.action_url_template || '',
-    variables: template.variables || []
+    variables: template.variables || [],
   }
   editingTemplate.value = template.id
   showCreateForm.value = true
@@ -120,7 +122,8 @@ const handleUpdateTemplate = async () => {
     await updateTemplate(editingTemplate.value, formData.value)
     showCreateForm.value = false
     resetForm()
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در بروزرسانی قالب:', error)
   }
 }
@@ -129,7 +132,8 @@ const handleDeleteTemplate = async (templateId: string) => {
   if (confirm('آیا از حذف این قالب اطمینان دارید؟')) {
     try {
       await deleteTemplate(templateId)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('خطا در حذف قالب:', error)
     }
   }
@@ -142,12 +146,12 @@ const handlePreviewTemplate = (template: any) => {
     current_date: new Date().toLocaleDateString('fa-IR'),
     session_date: 'دوشنبه ۱۵ آبان',
     session_time: '۱۰:۳۰',
-    therapist_name: 'دکتر مریم رضایی'
+    therapist_name: 'دکتر مریم رضایی',
   }
-  
+
   previewData.value = {
     template,
-    preview: previewTemplate(template, sampleData)
+    preview: previewTemplate(template, sampleData),
   }
   showPreview.value = true
 }
@@ -158,7 +162,7 @@ const addVariable = () => {
     type: 'string',
     source: 'user',
     fallback: '',
-    description: ''
+    description: '',
   })
 }
 
@@ -183,9 +187,9 @@ const filteredTemplates = computed(() => {
   // Filter by search query
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(t => 
-      t.name.toLowerCase().includes(query) ||
-      t.description.toLowerCase().includes(query)
+    filtered = filtered.filter(t =>
+      t.name.toLowerCase().includes(query)
+      || t.description.toLowerCase().includes(query),
     )
   }
 
@@ -193,33 +197,33 @@ const filteredTemplates = computed(() => {
 })
 
 const canSubmit = computed(() => {
-  return formData.value.name.trim() && 
-         formData.value.title_template.trim() && 
-         formData.value.body_template.trim()
+  return formData.value.name.trim()
+    && formData.value.title_template.trim()
+    && formData.value.body_template.trim()
 })
 
 const categoryOptions = [
   { label: 'جلسه', value: 'session' },
   { label: 'ادمین', value: 'admin' },
-  { label: 'سیستم', value: 'system' }
+  { label: 'سیستم', value: 'system' },
 ]
 
 const languageOptions = [
   { label: 'فارسی', value: 'fa' },
-  { label: 'انگلیسی', value: 'en' }
+  { label: 'انگلیسی', value: 'en' },
 ]
 
 const variableTypeOptions = [
   { label: 'متن', value: 'string' },
   { label: 'عدد', value: 'number' },
   { label: 'تاریخ', value: 'date' },
-  { label: 'بولین', value: 'boolean' }
+  { label: 'بولین', value: 'boolean' },
 ]
 
 const variableSourceOptions = [
   { label: 'کاربر', value: 'user' },
   { label: 'جلسه', value: 'session' },
-  { label: 'سیستم', value: 'system' }
+  { label: 'سیستم', value: 'system' },
 ]
 </script>
 
@@ -236,7 +240,7 @@ const variableSourceOptions = [
             ایجاد و مدیریت قالب‌های پیام برای کمپین‌ها
           </p>
         </div>
-        
+
         <BaseButton
           color="primary"
           @click="showCreateForm = true"
@@ -312,7 +316,7 @@ const variableSourceOptions = [
           </div>
         </div>
       </div>      <
-!-- Filters -->
+      !-- Filters -->
       <div class="dark:bg-muted-800 border-muted-200 dark:border-muted-700 mb-6 rounded-xl border bg-white p-6">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div class="flex flex-wrap gap-2">
@@ -320,8 +324,8 @@ const variableSourceOptions = [
               v-for="(tab, key) in { all: 'همه', session: 'جلسه', admin: 'ادمین', system: 'سیستم' }"
               :key="key"
               class="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-              :class="selectedCategory === key 
-                ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300' 
+              :class="selectedCategory === key
+                ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
                 : 'text-muted-600 hover:bg-muted-100 dark:text-muted-400 dark:hover:bg-muted-700'"
               @click="selectedCategory = key as any"
             >
@@ -339,13 +343,13 @@ const variableSourceOptions = [
       </div>
 
       <!-- Templates List -->
-      <div v-if="isLoading" class="text-center py-12">
+      <div v-if="isLoading" class="py-12 text-center">
         <p class="text-muted-500 dark:text-muted-400">
           در حال بارگذاری قالب‌ها...
         </p>
       </div>
 
-      <div v-else-if="filteredTemplates.length === 0" class="text-center py-12">
+      <div v-else-if="filteredTemplates.length === 0" class="py-12 text-center">
         <Icon name="ph:template" class="text-muted-400 mx-auto mb-4 size-12" />
         <p class="text-muted-500 dark:text-muted-400 mb-4">
           {{ searchQuery.trim() ? 'قالبی یافت نشد' : 'قالبی در این دسته وجود ندارد' }}
@@ -373,19 +377,19 @@ const variableSourceOptions = [
                   {{ template.name }}
                 </h3>
                 <BaseBadge
-                  :color="template.category === 'session' ? 'success' : 
-                         template.category === 'admin' ? 'info' : 'warning'"
+                  :color="template.category === 'session' ? 'success' :
+                    template.category === 'admin' ? 'info' : 'warning'"
                   size="sm"
                 >
                   {{ template.category === 'session' ? 'جلسه' :
-                     template.category === 'admin' ? 'ادمین' : 'سیستم' }}
+                    template.category === 'admin' ? 'ادمین' : 'سیستم' }}
                 </BaseBadge>
               </div>
-              <p class="text-muted-600 dark:text-muted-300 text-sm line-clamp-2">
+              <p class="text-muted-600 dark:text-muted-300 line-clamp-2 text-sm">
                 {{ template.description }}
               </p>
             </div>
-            
+
             <div class="flex items-center gap-1">
               <button
                 class="text-muted-400 hover:text-muted-600 dark:hover:text-muted-300 p-1 transition-colors"
@@ -402,7 +406,7 @@ const variableSourceOptions = [
             <p class="text-muted-900 mb-1 text-sm font-medium dark:text-white">
               {{ template.title_template }}
             </p>
-            <p class="text-muted-600 dark:text-muted-300 text-xs line-clamp-2">
+            <p class="text-muted-600 dark:text-muted-300 line-clamp-2 text-xs">
               {{ template.body_template }}
             </p>
           </div>
@@ -464,8 +468,8 @@ const variableSourceOptions = [
           </div>
         </div>
       </div>
-    </div>  
-  <!-- Create/Edit Template Modal -->
+    </div>
+    <!-- Create/Edit Template Modal -->
     <BaseModal
       v-model="showCreateForm"
       :title="editingTemplate ? 'ویرایش قالب' : 'ایجاد قالب جدید'"
@@ -669,7 +673,7 @@ const variableSourceOptions = [
               <p class="text-muted-600 dark:text-muted-300 mb-3 text-sm">
                 {{ previewData.preview.body }}
               </p>
-              
+
               <div v-if="previewData.preview.actionText" class="flex gap-2">
                 <button class="bg-primary-600 hover:bg-primary-700 rounded px-3 py-1 text-sm text-white transition-colors">
                   {{ previewData.preview.actionText }}

@@ -52,11 +52,11 @@ const educationLabel = (value?: string | null) => {
   if (!value) return ''
   const map: Record<string, string> = {
     'under diploma': 'زیر دیپلم',
-    diploma: 'دیپلم',
-    bachelor: 'کارشناسی',
-    master: 'کارشناسی ارشد',
-    phd: 'دکتری',
-    other: 'سایر',
+    'diploma': 'دیپلم',
+    'bachelor': 'کارشناسی',
+    'master': 'کارشناسی ارشد',
+    'phd': 'دکتری',
+    'other': 'سایر',
   }
   return map[value] || value
 }
@@ -64,13 +64,13 @@ const educationLabel = (value?: string | null) => {
 const occupationLabel = (value?: string | null) => {
   if (!value) return ''
   const map: Record<string, string> = {
-    student: 'دانشجو',
-    employed: 'کارمند',
+    'student': 'دانشجو',
+    'employed': 'کارمند',
     'self-employed': 'آزاد',
-    unemployed: 'بیکار',
-    retired: 'بازنشسته',
-    householder: 'خانه‌دار',
-    other: 'سایر',
+    'unemployed': 'بیکار',
+    'retired': 'بازنشسته',
+    'householder': 'خانه‌دار',
+    'other': 'سایر',
   }
   return map[value] || value
 }

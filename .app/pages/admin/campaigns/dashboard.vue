@@ -4,7 +4,7 @@ import type { NotificationCampaign } from '~/types/campaigns'
 definePageMeta({
   title: 'داشبورد کمپین‌ها',
   layout: 'sidebar',
-  middleware: 'admin',
+  // Using global middlewares only
 })
 
 useHead({
@@ -23,7 +23,7 @@ const {
   getCampaignMetrics,
   launchCampaign,
   pauseCampaign,
-  resumeCampaign
+  resumeCampaign,
 } = useCampaignManager()
 
 // State
@@ -38,7 +38,8 @@ const scheduleTime = ref('')
 onMounted(async () => {
   try {
     await fetchCampaigns()
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در بارگذاری کمپین‌ها:', error)
   }
 })
@@ -55,9 +56,9 @@ const filteredCampaigns = computed(() => {
   // Filter by search query
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(c => 
-      c.name.toLowerCase().includes(query) ||
-      c.description.toLowerCase().includes(query)
+    filtered = filtered.filter(c =>
+      c.name.toLowerCase().includes(query)
+      || c.description.toLowerCase().includes(query),
     )
   }
 
@@ -71,19 +72,19 @@ const totalMetrics = computed(() => {
       sent_count: acc.sent_count + metrics.sent_count,
       delivered_count: acc.delivered_count + metrics.delivered_count,
       opened_count: acc.opened_count + metrics.opened_count,
-      clicked_count: acc.clicked_count + metrics.clicked_count
+      clicked_count: acc.clicked_count + metrics.clicked_count,
     }
   }, { sent_count: 0, delivered_count: 0, opened_count: 0, clicked_count: 0 })
 })
 
 const overallDeliveryRate = computed(() => {
-  return totalMetrics.value.sent_count > 0 
+  return totalMetrics.value.sent_count > 0
     ? Math.round((totalMetrics.value.delivered_count / totalMetrics.value.sent_count) * 100)
     : 0
 })
 
 const overallOpenRate = computed(() => {
-  return totalMetrics.value.delivered_count > 0 
+  return totalMetrics.value.delivered_count > 0
     ? Math.round((totalMetrics.value.opened_count / totalMetrics.value.delivered_count) * 100)
     : 0
 })
@@ -106,7 +107,8 @@ const handleQuickAction = async (campaign: NotificationCampaign, action: string)
         showScheduleModal.value = true
         break
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در انجام عملیات:', error)
   }
 }
@@ -116,18 +118,19 @@ const handleScheduleCampaign = async () => {
 
   try {
     const scheduleDateTime = `${scheduleDate.value}T${scheduleTime.value}`
-    
+
     // Update campaign with schedule
     await updateCampaignStatus(selectedCampaign.value.id, 'scheduled')
-    
+
     // Here you would also update the schedule field in the campaign
     // This would require extending the updateCampaign method
-    
+
     showScheduleModal.value = false
     scheduleDate.value = ''
     scheduleTime.value = ''
     selectedCampaign.value = null
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در زمان‌بندی کمپین:', error)
   }
 }
@@ -171,7 +174,7 @@ const tabCounts = computed(() => ({
   draft: draftCampaigns.value.length,
   scheduled: campaigns.value.filter(c => c.status === 'scheduled').length,
   paused: campaigns.value.filter(c => c.status === 'paused').length,
-  completed: completedCampaigns.value.length
+  completed: completedCampaigns.value.length,
 }))
 </script>
 
@@ -188,7 +191,7 @@ const tabCounts = computed(() => ({
             مدیریت و نظارت بر کمپین‌های اعلان‌رسانی
           </p>
         </div>
-        
+
         <div class="flex items-center gap-3">
           <BaseButton
             variant="outline"
@@ -282,8 +285,8 @@ const tabCounts = computed(() => ({
               v-for="(tab, key) in { all: 'همه', active: 'فعال', draft: 'پیش‌نویس', scheduled: 'زمان‌بندی شده', paused: 'متوقف', completed: 'تکمیل شده' }"
               :key="key"
               class="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-              :class="selectedTab === key 
-                ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300' 
+              :class="selectedTab === key
+                ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
                 : 'text-muted-600 hover:bg-muted-100 dark:text-muted-400 dark:hover:bg-muted-700'"
               @click="selectedTab = key as any"
             >
@@ -304,13 +307,13 @@ const tabCounts = computed(() => ({
       </div>
 
       <!-- Campaigns Grid -->
-      <div v-if="isLoading" class="text-center py-12">
+      <div v-if="isLoading" class="py-12 text-center">
         <p class="text-muted-500 dark:text-muted-400">
           در حال بارگذاری کمپین‌ها...
         </p>
       </div>
 
-      <div v-else-if="filteredCampaigns.length === 0" class="text-center py-12">
+      <div v-else-if="filteredCampaigns.length === 0" class="py-12 text-center">
         <Icon name="ph:megaphone" class="text-muted-400 mx-auto mb-4 size-12" />
         <p class="text-muted-500 dark:text-muted-400 mb-4">
           {{ searchQuery.trim() ? 'کمپینی یافت نشد' : 'کمپینی در این دسته وجود ندارد' }}
@@ -329,11 +332,11 @@ const tabCounts = computed(() => ({
               <h3 class="text-muted-900 mb-2 text-lg font-semibold dark:text-white">
                 {{ campaign.name }}
               </h3>
-              <p class="text-muted-600 dark:text-muted-300 text-sm line-clamp-2">
+              <p class="text-muted-600 dark:text-muted-300 line-clamp-2 text-sm">
                 {{ campaign.description }}
               </p>
             </div>
-            
+
             <BaseBadge
               :color="getStatusColor(campaign.status)"
               size="sm"

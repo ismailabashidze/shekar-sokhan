@@ -90,7 +90,8 @@ export const useSessionAnalysis = () => {
   const createAnalysis = async (data: Partial<SessionAnalysis>) => {
     try {
       return await pb.collection('session_analysis_for_system').create(data)
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Error creating session analysis:', error)
       throw error
     }
@@ -101,7 +102,8 @@ export const useSessionAnalysis = () => {
       return await pb.collection('session_analysis_for_system').getOne(id, {
         expand: 'session, session.user, session.therapist',
       })
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Error getting session analysis:', error)
       throw error
     }
@@ -113,7 +115,8 @@ export const useSessionAnalysis = () => {
         filter,
         sort,
       })
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Error listing session analysis:', error)
       throw error
     }
@@ -122,7 +125,8 @@ export const useSessionAnalysis = () => {
   const updateAnalysis = async (id: string, data: Partial<SessionAnalysis>) => {
     try {
       return await pb.collection('session_analysis_for_system').update(id, data)
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Error updating session analysis:', error)
       throw error
     }
@@ -131,7 +135,8 @@ export const useSessionAnalysis = () => {
   const deleteAnalysis = async (id: string) => {
     try {
       return await pb.collection('session_analysis_for_system').delete(id)
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error('Error deleting session analysis:', error)
       throw error
     }
@@ -206,9 +211,9 @@ export const useSessionAnalysis = () => {
 
   const isNonEmptyStringArray = (value: unknown, minItems: number) => {
     return (
-      Array.isArray(value) &&
-      value.length >= minItems &&
-      value.every((item) => isNonEmptyString(item, 3))
+      Array.isArray(value)
+      && value.length >= minItems
+      && value.every(item => isNonEmptyString(item, 3))
     )
   }
 
@@ -229,7 +234,8 @@ export const useSessionAnalysis = () => {
         console.warn(`${label} validation issue`, result)
         lastError = new Error(`${label} validation failed (attempt ${attempt})`)
         console.warn(lastError.message)
-      } catch (err: any) {
+      }
+      catch (err: any) {
         lastError = err instanceof Error ? err : new Error(String(err))
         console.error(
           `${label} generation error (attempt ${attempt}):`,
@@ -247,26 +253,26 @@ export const useSessionAnalysis = () => {
 
   const validateOverview = (data: any) => {
     return (
-      data &&
-      isNonEmptyString(data.title, 5) &&
-      isNonEmptyString(data.summaryOfSession, 80) &&
-      Array.isArray(data.headlines) &&
-      data.headlines.length === 4 &&
-      data.headlines.every(
+      data
+      && isNonEmptyString(data.title, 5)
+      && isNonEmptyString(data.summaryOfSession, 80)
+      && Array.isArray(data.headlines)
+      && data.headlines.length === 4
+      && data.headlines.every(
         (item: any) =>
-          isNonEmptyString(item?.title, 3) &&
-          isNonEmptyString(item?.description, 20),
+          isNonEmptyString(item?.title, 3)
+          && isNonEmptyString(item?.description, 20),
       )
     )
   }
 
   const validateTrustAndOpenness = (data: any) => {
     return (
-      data &&
-      ['veryHigh', 'high', 'low', 'veryLow'].includes(
+      data
+      && ['veryHigh', 'high', 'low', 'veryLow'].includes(
         data.finalTrustAndOppennessOfUser,
-      ) &&
-      isNonEmptyString(
+      )
+      && isNonEmptyString(
         data.finalTrustAndOppennessOfUserEvaluationDescription,
         50,
       )
@@ -274,60 +280,60 @@ export const useSessionAnalysis = () => {
   }
 
   const validateTherapistEvaluation = (data: any) => {
-    const negativeListValid =
-      Array.isArray(data?.negativeScoresList) &&
-      data.negativeScoresList.length > 0 &&
-      data.negativeScoresList.every(
+    const negativeListValid
+      = Array.isArray(data?.negativeScoresList)
+      && data.negativeScoresList.length > 0
+      && data.negativeScoresList.every(
         (item: any) =>
-          typeof item?.points === 'number' &&
-          item.points >= 10 &&
-          item.points <= 20 &&
-          isNonEmptyString(item?.cause, 20),
+          typeof item?.points === 'number'
+          && item.points >= 10
+          && item.points <= 20
+          && isNonEmptyString(item?.cause, 20),
       )
 
     return (
-      data &&
-      isNonEmptyString(data.psychotherapistEvaluation, 80) &&
-      negativeListValid &&
-      isNonEmptyStringArray(
+      data
+      && isNonEmptyString(data.psychotherapistEvaluation, 80)
+      && negativeListValid
+      && isNonEmptyStringArray(
         data.psychotherapistEvaluationScorePositiveBehavior,
         3,
-      ) &&
-      isNonEmptyStringArray(
+      )
+      && isNonEmptyStringArray(
         data.psychotherapistEvaluationScoreSuggestionsToImprove,
         3,
       )
     )
   }
 
-  const validateSummaryField =
-    (field: string, minLength = 60) =>
-    (data: any) => {
-      return data && isNonEmptyString(data[field], minLength)
-    }
+  const validateSummaryField
+    = (field: string, minLength = 60) =>
+      (data: any) => {
+        return data && isNonEmptyString(data[field], minLength)
+      }
 
   const validateRiskFactors = (data: any) => {
     return (
-      data &&
-      Array.isArray(data.possibleRiskFactorsExtracted) &&
-      data.possibleRiskFactorsExtracted.length > 0 &&
-      data.possibleRiskFactorsExtracted.every(
+      data
+      && Array.isArray(data.possibleRiskFactorsExtracted)
+      && data.possibleRiskFactorsExtracted.length > 0
+      && data.possibleRiskFactorsExtracted.every(
         (item: any) =>
-          isNonEmptyString(item?.title, 3) &&
-          isNonEmptyString(item?.description, 20),
+          isNonEmptyString(item?.title, 3)
+          && isNonEmptyString(item?.description, 20),
       )
     )
   }
 
   const validateNextSteps = (data: any) => {
     return (
-      data &&
-      Array.isArray(data.suggestedNextStepsForTherapistForNextSession) &&
-      data.suggestedNextStepsForTherapistForNextSession.length >= 3 &&
-      data.suggestedNextStepsForTherapistForNextSession.every(
+      data
+      && Array.isArray(data.suggestedNextStepsForTherapistForNextSession)
+      && data.suggestedNextStepsForTherapistForNextSession.length >= 3
+      && data.suggestedNextStepsForTherapistForNextSession.every(
         (item: any) =>
-          isNonEmptyString(item?.title, 3) &&
-          isNonEmptyString(item?.description, 20),
+          isNonEmptyString(item?.title, 3)
+          && isNonEmptyString(item?.description, 20),
       )
     )
   }
@@ -342,8 +348,8 @@ export const useSessionAnalysis = () => {
 
   // Individual analysis functions
   const getSessionOverview = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا با بررسی پیام‌های جلسه، عنوان، خلاصه و تیترهای جلسه را استخراج کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا با بررسی پیام‌های جلسه، عنوان، خلاصه و تیترهای جلسه را استخراج کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -390,7 +396,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -400,8 +406,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getTrustAndOpennessAnalysis = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا سطح اعتماد و صراحت کاربر را نسبت به روان شناس هوش مصنوعی تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند. برای فیلدهایی که مقدار آن‌ها از میان گزینه‌های محدود انتخاب می‌شود (مانند "finalTrustAndOppennessOfUser") دقیقاً یکی از مقادیر انگلیسی تعریف‌شده در schema را برگردان.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا سطح اعتماد و صراحت کاربر را نسبت به روان شناس هوش مصنوعی تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند. برای فیلدهایی که مقدار آن‌ها از میان گزینه‌های محدود انتخاب می‌شود (مانند "finalTrustAndOppennessOfUser") دقیقاً یکی از مقادیر انگلیسی تعریف‌شده در schema را برگردان.'
 
     const schema = {
       type: 'object',
@@ -432,7 +438,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -442,8 +448,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getTherapistEvaluation = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا عملکرد روان شناس را ارزیابی کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا عملکرد روان شناس را ارزیابی کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
       + ' حتماً حداقل یک مورد در فهرست negativeScoresList ارائه بده و مقدار points را بین ۱۰ تا ۲۰ در نظر بگیر.'
       + ' همچنین ضروری است حداقل سه مورد متمایز برای psychotherapistEvaluationScorePositiveBehavior و حداقل سه مورد متمایز برای psychotherapistEvaluationScoreSuggestionsToImprove تولید کنی و در صورت امکان تعداد آن‌ها را بین سه تا پنج نگه دار.'
 
@@ -519,7 +525,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -529,8 +535,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getBehavioralAnalysis = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای رفتاری بیمار و شواهد را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای رفتاری بیمار و شواهد را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -551,7 +557,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -561,8 +567,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getEmotionalAnalysis = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا حالت ها و الگوهای احساسی بیمار را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا حالت ها و الگوهای احساسی بیمار را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -583,7 +589,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -593,8 +599,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getThoughtsAndConcerns = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا افکار و نگرانی های اصلی بیمار را خلاصه کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا افکار و نگرانی های اصلی بیمار را خلاصه کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -615,7 +621,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -625,8 +631,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getPsychoAnalysis = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا تفسیر روانکاوی جلسه را ارائه دهید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا تفسیر روانکاوی جلسه را ارائه دهید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -652,7 +658,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -662,8 +668,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getDefenseMechanisms = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مکانیسم های دفاعی شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های تعیین‌شده در schema استفاده کن و اگر مطمئن نیستی مقدار "بدون داده" را قرار بده.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مکانیسم های دفاعی شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های تعیین‌شده در schema استفاده کن و اگر مطمئن نیستی مقدار "بدون داده" را قرار بده.'
 
     const schema = {
       type: 'object',
@@ -727,7 +733,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -737,8 +743,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getSchemas = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای شناسایی شده در طول جلسه بر اساس نظریه الگوهای یانگ را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های فهرست‌شده در schema استفاده کن و در صورت نبود داده مقدار "بدون داده" را قرار بده.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا الگوهای شناسایی شده در طول جلسه بر اساس نظریه الگوهای یانگ را تحلیل کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. توضیحات را به زبان فارسی ارائه کن. برای فیلد "name" دقیقاً از گزینه‌های فهرست‌شده در schema استفاده کن و در صورت نبود داده مقدار "بدون داده" را قرار بده.'
 
     const schema = {
       type: 'object',
@@ -799,7 +805,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -809,8 +815,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getDemographicData = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا اطلاعات دموگرافیک بیمار را از جلسه استخراج کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. تمام توضیحات متنی را به زبان فارسی بنویس. برای فیلدهایی که مقدار آن‌ها باید از میان گزینه‌های مشخص انگلیسی انتخاب شود (مانند gender، education، occupation و maritalStatus) دقیقاً از همان مقادیر انگلیسی تعریف‌شده در schema استفاده کن و از تولید معادل فارسی برای این فیلدها خودداری کن.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا اطلاعات دموگرافیک بیمار را از جلسه استخراج کنید. خروجی شما باید به شکل JSON باشد و این json باید معتبر باشد. تمام توضیحات متنی را به زبان فارسی بنویس. برای فیلدهایی که مقدار آن‌ها باید از میان گزینه‌های مشخص انگلیسی انتخاب شود (مانند gender، education، occupation و maritalStatus) دقیقاً از همان مقادیر انگلیسی تعریف‌شده در schema استفاده کن و از تولید معادل فارسی برای این فیلدها خودداری کن.'
 
     const schema = {
       type: 'object',
@@ -894,7 +900,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -904,8 +910,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getNextSteps = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مراحل پیشنهادی بعدی برای درمانگر را ارائه دهید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا مراحل پیشنهادی بعدی برای درمانگر را ارائه دهید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -945,7 +951,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -955,8 +961,8 @@ export const useSessionAnalysis = () => {
   }
 
   const getRiskFactors = async (messages: any[]) => {
-    const systemMessage =
-      'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا عوامل ریسک شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
+    const systemMessage
+      = 'شما یک دستیار تحلیلگر جلسات روانشناسی هستید. لطفا عوامل ریسک شناسایی شده در طول جلسه را تحلیل کنید. خروجی شما باید به شکل JSON باشد. این json باید معتبر باشد. تمام پاسخ‌ها باید به زبان فارسی باشند و تمام مقادیر رشته‌ای باید به عنوان متن فارسی باشند. تأکید ویژه داریم بر اینکه تمام توضیحات، عنوان‌ها، و مقادیر متنی به صورت کاملاً فارسی تولید شوند.'
 
     const schema = {
       type: 'object',
@@ -996,7 +1002,7 @@ export const useSessionAnalysis = () => {
         {
           role: 'user',
           content: `لطفا پیام‌های زیر را تحلیل کنید:\n${messages
-            .map((m) => `${m.role}: ${m.content}`)
+            .map(m => `${m.role}: ${m.content}`)
             .join('\n')}`,
         },
       ],
@@ -1079,8 +1085,8 @@ export const useSessionAnalysis = () => {
         fetchWithValidation(
           () => getPsychoAnalysis(messages),
           (data: any) =>
-            isNonEmptyString(data?.psychoAnalysis, 120) &&
-            isNonEmptyString(data?.possibleDeeperGoalsOfPatient, 80),
+            isNonEmptyString(data?.psychoAnalysis, 120)
+            && isNonEmptyString(data?.possibleDeeperGoalsOfPatient, 80),
           'تحلیل روان‌کاوانه',
           2,
         ),
@@ -1121,11 +1127,13 @@ export const useSessionAnalysis = () => {
 
       console.log('✅ Session analysis generation completed successfully')
       return combinedResult
-    } catch (e: any) {
+    }
+    catch (e: any) {
       console.error('💥 Critical error in generateAnalysis:', e)
       error.value = e.message
       throw e
-    } finally {
+    }
+    finally {
       processing.value = false
       console.log('🏁 generateAnalysis function completed')
     }
@@ -1148,7 +1156,8 @@ export const useSessionAnalysis = () => {
         return records.items[0] as unknown as SessionAnalysis
       }
       return null
-    } catch (error: any) {
+    }
+    catch (error: any) {
       if (error?.status === 404) {
         return null
       }

@@ -90,37 +90,37 @@ const formatTime = (dateString: string | Date) => {
 
 const translateIndicatorType = (type?: string | null) => {
   if (!type) return 'شاخص'
-  
+
   const translations: Record<string, string> = {
-    'suicidal_ideation': 'افکار خودکشی',
-    'previous_attempt': 'اقدام قبلی',
-    'self_harm': 'آسیب به خود',
-    'plan': 'برنامه خودکشی',
-    'means': 'ابزار خودکشی',
-    'intent': 'قصد خودکشی',
-    'recklessness': 'بی‌پروایی',
-    'giving_away_possessions': 'اهدای اموال',
-    'saying_goodbye': 'خداحافظی',
-    'substance_abuse': 'سوء مصرف مواد',
-    'hopelessness': 'ناامیدی',
-    'depression': 'افسردگی',
-    'anxiety': 'اضطراب',
-    'isolation': 'انزوا',
-    'trauma': 'تروما',
-    'loss': 'از دست دادن',
-    'crisis': 'بحران',
-    'impulsivity': 'تکانشگری',
-    'aggression': 'پرخاشگری',
-    'psychosis': 'روان‌پریشی',
-    'emotional_pain': 'درد عاطفی',
-    'worthlessness': 'احساس بی‌ارزشی',
-    'burden': 'احساس بار بودن',
-    'sleep_disturbance': 'اختلال خواب',
-    'agitation': 'تحریک‌پذیری',
-    'withdrawal': 'کناره‌گیری',
-    'mood_changes': 'تغییرات خلقی',
+    suicidal_ideation: 'افکار خودکشی',
+    previous_attempt: 'اقدام قبلی',
+    self_harm: 'آسیب به خود',
+    plan: 'برنامه خودکشی',
+    means: 'ابزار خودکشی',
+    intent: 'قصد خودکشی',
+    recklessness: 'بی‌پروایی',
+    giving_away_possessions: 'اهدای اموال',
+    saying_goodbye: 'خداحافظی',
+    substance_abuse: 'سوء مصرف مواد',
+    hopelessness: 'ناامیدی',
+    depression: 'افسردگی',
+    anxiety: 'اضطراب',
+    isolation: 'انزوا',
+    trauma: 'تروما',
+    loss: 'از دست دادن',
+    crisis: 'بحران',
+    impulsivity: 'تکانشگری',
+    aggression: 'پرخاشگری',
+    psychosis: 'روان‌پریشی',
+    emotional_pain: 'درد عاطفی',
+    worthlessness: 'احساس بی‌ارزشی',
+    burden: 'احساس بار بودن',
+    sleep_disturbance: 'اختلال خواب',
+    agitation: 'تحریک‌پذیری',
+    withdrawal: 'کناره‌گیری',
+    mood_changes: 'تغییرات خلقی',
   }
-  
+
   const normalized = type.toLowerCase().trim().replace(/[\s_-]+/g, '_')
   return translations[normalized] || type
 }
@@ -166,14 +166,14 @@ const latestRiskDescription = computed(() => {
 // Enhanced risk summary based on highest risk level and its occurrences
 const riskSummary = computed(() => {
   const riskLevelCounts: Record<string, { risk: typeof baseRiskLevels[keyof typeof baseRiskLevels], count: number, descriptions: string[] }> = {}
-  
+
   processedMessages.value.forEach((message) => {
     const riskKey = message.risk.key
     if (!riskLevelCounts[riskKey]) {
       riskLevelCounts[riskKey] = {
         risk: message.risk,
         count: 0,
-        descriptions: []
+        descriptions: [],
       }
     }
     riskLevelCounts[riskKey].count++
@@ -181,24 +181,26 @@ const riskSummary = computed(() => {
       riskLevelCounts[riskKey].descriptions.push(message.analysis.suicideRiskDescription)
     }
   })
-  
+
   // Find highest risk level
   const sortedRisks = Object.values(riskLevelCounts).sort((a, b) => b.risk.score - a.risk.score)
   const highestRisk = sortedRisks[0] || { risk: fallbackRisk, count: 0, descriptions: [] }
-  
+
   // Generate comprehensive summary
   let summary = ''
-  
+
   if (highestRisk.risk.key === 'na') {
     summary = `در طول این جلسه، ${highestRisk.count} پیام وجود دارد که سطح خطر آن‌ها قابل ارزیابی نبوده است. این می‌تواند به دلیل عدم وجود نشانه‌های واضح یا داده‌های ناکافی برای تحلیل باشد.`
-  } else if (highestRisk.risk.key === 'none') {
+  }
+  else if (highestRisk.risk.key === 'none') {
     summary = `بررسی این جلسه نشان می‌دهد که در ${highestRisk.count} پیام، هیچ نشانه خطری برای خودکشی یا آسیب به خود شناسایی نشده است. این یک نشانه مثبت است.`
-  } else {
+  }
+  else {
     const riskLevelText = highestRisk.risk.label
     const percentage = Math.round((highestRisk.count / processedMessages.value.length) * 100)
-    
+
     summary = `بالاترین سطح خطر شناسایی شده در این جلسه "${riskLevelText}" است که در ${highestRisk.count} پیام (${percentage}٪ از کل پیام‌ها) مشاهده شده است. `
-    
+
     // Add critical indicator information
     const criticalIndicatorTypes = new Set<string>()
     processedMessages.value.forEach((msg) => {
@@ -210,19 +212,19 @@ const riskSummary = computed(() => {
         })
       }
     })
-    
+
     if (criticalIndicatorTypes.size > 0) {
       const indicatorsList = Array.from(criticalIndicatorTypes).slice(0, 5).join('، ')
       summary += `شاخص‌های شناسایی شده شامل: ${indicatorsList}${criticalIndicatorTypes.size > 5 ? ' و موارد دیگر' : ''} می‌باشد. `
     }
-    
+
     // Add latest description if available
     if (highestRisk.descriptions.length > 0) {
       const latestDesc = highestRisk.descriptions[highestRisk.descriptions.length - 1]
       summary += `\n\nآخرین توضیح تحلیل: ${latestDesc}`
     }
   }
-  
+
   return summary
 })
 
@@ -231,7 +233,7 @@ const indicatorEntries = computed(() => {
   processedMessages.value.forEach((message) => {
     (message.analysis?.suicideIndicators || []).forEach((indicator: any) => {
       const level = indicator?.dangerousnessLevel?.toString().toLowerCase() || 'unknown'
-      console.log("level")
+      console.log('level')
       console.log(level)
 
       const levelLabel = level === 'critical'
@@ -369,8 +371,8 @@ const applyRiskLabelStyles = (chartInstance: any) => {
     const riskKey = point?.riskKey || 'none'
 
       ;['na', 'none', 'low', 'medium', 'high', 'critical'].forEach((key) => {
-        label.classList.remove(`${key}-risk-label`)
-      })
+      label.classList.remove(`${key}-risk-label`)
+    })
 
     label.classList.add(`${riskKey}-risk-label`)
 
@@ -581,7 +583,8 @@ const riskChartOptions = computed(() => {
             <span style="font-size: 16px;">${isNA ? '⚠️' : '❤️'}</span>
             <span>${label}</span>
           </div>
-          ${isNA ? `
+          ${isNA
+? `
             <div style="
               font-size: 11px;
               color: #92400e;
@@ -592,7 +595,8 @@ const riskChartOptions = computed(() => {
             ">
               داده‌های کافی برای تحلیل وجود ندارد
             </div>
-          ` : ''}
+          `
+: ''}
           <div style="
             margin-top: 8px;
             font-size: 11px;
@@ -703,14 +707,15 @@ const hasData = computed(() => processedMessages.value.length > 0)
 // Aggregate all unique indicator types across all messages
 const allIndicatorTags = computed(() => {
   const tagsMap = new Map<string, { type: string, count: number, label: string }>()
-  
+
   processedMessages.value.forEach((message) => {
     (message.analysis?.suicideIndicators || []).forEach((indicator: any) => {
       const type = indicator?.indicatorType
       if (type) {
         if (tagsMap.has(type)) {
           tagsMap.get(type)!.count++
-        } else {
+        }
+        else {
           tagsMap.set(type, {
             type,
             count: 1,
@@ -720,7 +725,7 @@ const allIndicatorTags = computed(() => {
       }
     })
   })
-  
+
   // Sort by count (descending) and then by label
   return Array.from(tagsMap.values()).sort((a, b) => {
     if (b.count !== a.count) return b.count - a.count
@@ -750,7 +755,7 @@ const getIndicatorColor = (type: string) => {
 const riskPieChartSeries = computed(() => {
   const counts: number[] = []
   const labels: string[] = []
-  
+
   // Get risk counts sorted by severity (highest first)
   const sortedRisks = Object.entries(riskCounts.value)
     .map(([label, count]) => {
@@ -759,25 +764,25 @@ const riskPieChartSeries = computed(() => {
       return { label, count, score: riskLevel?.score ?? -2 }
     })
     .sort((a, b) => b.score - a.score)
-  
+
   sortedRisks.forEach(({ label, count }) => {
     labels.push(label as string)
     counts.push(count as number)
   })
-  
+
   return { series: counts, labels }
 })
 
 const riskPieChartOptions = computed(() => {
   const colors: string[] = []
-  
+
   riskPieChartSeries.value.labels.forEach((label) => {
     const riskLevel = Object.values(baseRiskLevels).find(r => r.label === label)
     if (riskLevel) {
       colors.push(riskColors.value[riskLevel.key] || riskColors.value.fallback)
     }
   })
-  
+
   return {
     chart: {
       type: 'donut',
@@ -884,7 +889,12 @@ const riskPieChartOptions = computed(() => {
               <Icon name="ph:pulse-duotone" class="text-danger-500 size-6" />
             </div>
             <div>
-              <BaseHeading tag="h1" size="lg" weight="medium" class="text-muted-900 dark:text-white">
+              <BaseHeading
+                tag="h1"
+                size="lg"
+                weight="medium"
+                class="text-muted-900 dark:text-white"
+              >
                 گزارش خطر آسیب به خود
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-500 mt-1">
@@ -894,14 +904,23 @@ const riskPieChartOptions = computed(() => {
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <BaseButton color="muted" shape="curved" class="gap-2" @click="goBack">
+            <BaseButton
+              color="muted"
+              shape="curved"
+              class="gap-2"
+              @click="goBack"
+            >
               <Icon name="ph:arrow-right" class="size-4" />
               بازگشت به جلسات
             </BaseButton>
           </div>
         </div>
 
-        <BaseCard v-if="loading" shape="curved" class="p-8">
+        <BaseCard
+          v-if="loading"
+          shape="curved"
+          class="p-8"
+        >
           <div class="flex flex-col items-center gap-4">
             <BasePlaceload class="h-6 w-40 rounded" />
             <BasePlaceload class="h-4 w-64 rounded" />
@@ -909,11 +928,21 @@ const riskPieChartOptions = computed(() => {
           </div>
         </BaseCard>
 
-        <BaseCard v-else-if="error" shape="curved" class="p-8">
+        <BaseCard
+          v-else-if="error"
+          shape="curved"
+          class="p-8"
+        >
           <div class="flex flex-col items-center gap-3 text-center">
             <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-10" />
-            <BaseHeading tag="h2" size="md">{{ error }}</BaseHeading>
-            <BaseButton color="primary" shape="curved" @click="goBack">
+            <BaseHeading tag="h2" size="md">
+              {{ error }}
+            </BaseHeading>
+            <BaseButton
+              color="primary"
+              shape="curved"
+              @click="goBack"
+            >
               بازگشت
             </BaseButton>
           </div>
@@ -924,7 +953,11 @@ const riskPieChartOptions = computed(() => {
             <BaseCard shape="curved" class="col-span-2 p-6">
               <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <BaseHeading tag="h2" size="md" class="text-muted-900 dark:text-white">
+                  <BaseHeading
+                    tag="h2"
+                    size="md"
+                    class="text-muted-900 dark:text-white"
+                  >
                     {{ session.expand?.therapist?.name || 'جلسه درمانی' }}
                   </BaseHeading>
                   <div class="text-muted-500 mt-2 flex items-center gap-2 text-sm">
@@ -934,12 +967,19 @@ const riskPieChartOptions = computed(() => {
                     <span>{{ session.session_type === 'therapic' ? 'جلسه درمانی' : 'جلسه آموزشی' }}</span>
                   </div>
                 </div>
-                <div v-if="overallRisk.key === 'na'"
-                  class="flex items-center gap-2 rounded-xl bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">
+                <div
+                  v-if="overallRisk.key === 'na'"
+                  class="flex items-center gap-2 rounded-xl bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                >
                   <Icon name="ph:warning-duotone" class="size-4" />
                   <span>{{ overallRisk.label }}</span>
                 </div>
-                <BaseTag v-else :color="overallRisk.tag" shape="curved" size="md">
+                <BaseTag
+                  v-else
+                  :color="overallRisk.tag"
+                  shape="curved"
+                  size="md"
+                >
                   <div class="flex items-center gap-2 px-3 py-1">
                     <Icon name="ph:heartbeat-duotone" class="size-4" />
                     <span>{{ overallRisk.label }}</span>
@@ -953,7 +993,7 @@ const riskPieChartOptions = computed(() => {
                     <span class="text-muted-500 text-xs">پیام‌های دارای تحلیل</span>
                     <Icon name="ph:chat-dots-duotone" class="text-primary-500 size-4" />
                   </div>
-                  <p class="text-muted-900 dark:text-white mt-3 text-2xl font-semibold">
+                  <p class="text-muted-900 mt-3 text-2xl font-semibold dark:text-white">
                     {{ processedMessages.length }}
                   </p>
                 </div>
@@ -962,7 +1002,7 @@ const riskPieChartOptions = computed(() => {
                     <span class="text-muted-500 text-xs">مجموع شاخص‌های هشدار</span>
                     <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-4" />
                   </div>
-                  <p class="text-muted-900 dark:text-white mt-3 text-2xl font-semibold">
+                  <p class="text-muted-900 mt-3 text-2xl font-semibold dark:text-white">
                     {{ totalIndicators }}
                   </p>
                 </div>
@@ -971,7 +1011,7 @@ const riskPieChartOptions = computed(() => {
                     <span class="text-muted-500 text-xs">وضعیت جلسه</span>
                     <Icon name="ph:clipboard-text-duotone" class="text-info-500 size-4" />
                   </div>
-                  <p class="text-muted-900 dark:text-white mt-3 text-base font-medium">
+                  <p class="text-muted-900 mt-3 text-base font-medium dark:text-white">
                     {{ session.status === 'done'
                       ? 'تکمیل شده'
                       : session.status === 'inprogress'
@@ -984,19 +1024,23 @@ const riskPieChartOptions = computed(() => {
               </div>
 
               <!-- Pie Chart for Risk Distribution -->
-              <div v-if="riskPieChartSeries.series.length > 0" class="mt-6 border-t border-muted-200 dark:border-muted-700 pt-6">
+              <div v-if="riskPieChartSeries.series.length > 0" class="border-muted-200 dark:border-muted-700 mt-6 border-t pt-6">
                 <div class="mb-4 flex items-center gap-2">
                   <Icon name="ph:chart-pie-duotone" class="text-primary-500 size-5" />
-                  <BaseHeading tag="h3" size="xs" class="text-muted-800 dark:text-muted-200">
+                  <BaseHeading
+                    tag="h3"
+                    size="xs"
+                    class="text-muted-800 dark:text-muted-200"
+                  >
                     توزیع سطوح خطر در پیام‌ها
                   </BaseHeading>
                 </div>
                 <div class="flex justify-center">
-                  <AddonApexcharts 
-                    type="donut" 
+                  <AddonApexcharts
+                    type="donut"
                     :height="280"
-                    :series="riskPieChartSeries.series" 
-                    :options="riskPieChartOptions" 
+                    :series="riskPieChartSeries.series"
+                    :options="riskPieChartOptions"
                   />
                 </div>
               </div>
@@ -1005,27 +1049,34 @@ const riskPieChartOptions = computed(() => {
             <BaseCard shape="curved" class="p-6">
               <div class="flex flex-col gap-4">
                 <div>
-                  <div class="flex items-center gap-2 mb-3">
+                  <div class="mb-3 flex items-center gap-2">
                     <Icon name="ph:clipboard-text-duotone" class="text-primary-500 size-5" />
-                    <BaseHeading tag="h3" size="sm" class="text-muted-900 dark:text-white">
+                    <BaseHeading
+                      tag="h3"
+                      size="sm"
+                      class="text-muted-900 dark:text-white"
+                    >
                       جمع‌بندی خطر
                     </BaseHeading>
                   </div>
-                  <BaseParagraph size="sm" class="text-muted-500 leading-6 whitespace-pre-line">
+                  <BaseParagraph size="sm" class="text-muted-500 whitespace-pre-line leading-6">
                     {{ riskSummary }}
                   </BaseParagraph>
                 </div>
 
-                <div class="border-t border-muted-200 dark:border-muted-700 pt-4">
+                <div class="border-muted-200 dark:border-muted-700 border-t pt-4">
                   <div class="text-muted-600 dark:text-muted-400 mb-3 text-xs font-semibold">
                     توزیع سطوح خطر در جلسه:
                   </div>
                   <div class="space-y-2 text-sm">
-                    <div v-for="(count, label) in riskCounts" :key="label"
-                      class="flex items-center justify-between rounded-xl bg-muted-50 p-3 dark:bg-muted-800">
+                    <div
+                      v-for="(count, label) in riskCounts"
+                      :key="label"
+                      class="bg-muted-50 dark:bg-muted-800 flex items-center justify-between rounded-xl p-3"
+                    >
                       <span class="text-muted-600 dark:text-muted-300">{{ label }}</span>
                       <div class="flex items-center gap-2">
-                        <span class="text-muted-900 dark:text-white font-semibold">{{ count }}</span>
+                        <span class="text-muted-900 font-semibold dark:text-white">{{ count }}</span>
                         <span class="text-muted-400 text-xs">پیام</span>
                       </div>
                     </div>
@@ -1035,46 +1086,78 @@ const riskPieChartOptions = computed(() => {
             </BaseCard>
           </div>
 
-          <BaseCard v-if="hasData" shape="curved" class="mt-6 p-6">
+          <BaseCard
+            v-if="hasData"
+            shape="curved"
+            class="mt-6 p-6"
+          >
             <div class="flex flex-col gap-4">
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <BaseHeading tag="h3" size="sm" class="text-muted-900 dark:text-white">
+                  <BaseHeading
+                    tag="h3"
+                    size="sm"
+                    class="text-muted-900 dark:text-white"
+                  >
                     روند خطر در طول جلسه
                   </BaseHeading>
                   <BaseParagraph size="sm" class="text-muted-500 mt-1">
                     نمایش سطح خطر ارزیابی شده برای هر پیام در گذر زمان
                   </BaseParagraph>
                 </div>
-                <div v-if="overallRisk.key === 'na'"
-                  class="flex items-center gap-2 rounded-xl bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">
+                <div
+                  v-if="overallRisk.key === 'na'"
+                  class="flex items-center gap-2 rounded-xl bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                >
                   <Icon name="ph:warning-duotone" class="size-4" />
                   {{ overallRisk.label }} (داده ناکافی)
                 </div>
-                <BaseTag v-else :color="overallRisk.tag" shape="smooth" size="sm">
+                <BaseTag
+                  v-else
+                  :color="overallRisk.tag"
+                  shape="smooth"
+                  size="sm"
+                >
                   <div class="flex items-center gap-2 px-3 py-1">
                     <Icon name="ph:trend-up-duotone" class="size-4" />
                     {{ overallRisk.label }}
                   </div>
                 </BaseTag>
               </div>
-              <AddonApexcharts type="line" :height="320" :series="riskChartSeries" :options="riskChartOptions" />
+              <AddonApexcharts
+                type="line"
+                :height="320"
+                :series="riskChartSeries"
+                :options="riskChartOptions"
+              />
             </div>
           </BaseCard>
 
           <!-- Indicator Tags Summary Card -->
-          <BaseCard v-if="allIndicatorTags.length" shape="curved" class="mt-6 p-6">
+          <BaseCard
+            v-if="allIndicatorTags.length"
+            shape="curved"
+            class="mt-6 p-6"
+          >
             <div class="flex flex-col gap-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <BaseHeading tag="h3" size="sm" class="text-muted-900 dark:text-white">
+                  <BaseHeading
+                    tag="h3"
+                    size="sm"
+                    class="text-muted-900 dark:text-white"
+                  >
                     شاخص‌های تشخیص داده‌شده
                   </BaseHeading>
                   <BaseParagraph size="xs" class="text-muted-500 mt-1">
                     خلاصه تمام شاخص‌های خطر شناسایی شده در طول جلسه
                   </BaseParagraph>
                 </div>
-                <BaseTag color="primary" shape="curved" size="sm">
+                <BaseTag
+                  color="primary"
+                  shape="curved"
+                  size="sm"
+                >
                   <div class="flex items-center gap-2 px-3 py-1">
                     <Icon name="ph:tag-duotone" class="size-4" />
                     {{ allIndicatorTags.length }} نوع شاخص
@@ -1089,8 +1172,11 @@ const riskPieChartOptions = computed(() => {
                   <span class="text-danger-700 dark:text-danger-400 text-sm font-semibold">شاخص‌های با اولویت بالا</span>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                  <div v-for="tag in priorityIndicatorTags" :key="tag.type"
-                    class="bg-danger-50 dark:bg-danger-900/20 border-danger-200 dark:border-danger-800 flex items-center gap-2 rounded-xl border px-3 py-2">
+                  <div
+                    v-for="tag in priorityIndicatorTags"
+                    :key="tag.type"
+                    class="bg-danger-50 dark:bg-danger-900/20 border-danger-200 dark:border-danger-800 flex items-center gap-2 rounded-xl border px-3 py-2"
+                  >
                     <Icon name="ph:shield-warning-duotone" class="text-danger-600 dark:text-danger-400 size-5" />
                     <div class="flex flex-col">
                       <span class="text-danger-900 dark:text-danger-100 text-sm font-semibold">{{ tag.label }}</span>
@@ -1107,8 +1193,11 @@ const riskPieChartOptions = computed(() => {
                   <span class="text-warning-700 dark:text-warning-400 text-sm font-semibold">سایر شاخص‌ها</span>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                  <div v-for="tag in otherIndicatorTags" :key="tag.type"
-                    class="bg-warning-50 dark:bg-warning-900/20 border-warning-200 dark:border-warning-800 flex items-center gap-2 rounded-xl border px-3 py-2">
+                  <div
+                    v-for="tag in otherIndicatorTags"
+                    :key="tag.type"
+                    class="bg-warning-50 dark:bg-warning-900/20 border-warning-200 dark:border-warning-800 flex items-center gap-2 rounded-xl border px-3 py-2"
+                  >
                     <Icon name="ph:tag-duotone" class="text-warning-600 dark:text-warning-400 size-4" />
                     <div class="flex flex-col">
                       <span class="text-warning-900 dark:text-warning-100 text-sm font-medium">{{ tag.label }}</span>
@@ -1120,13 +1209,25 @@ const riskPieChartOptions = computed(() => {
             </div>
           </BaseCard>
 
-          <BaseCard v-if="indicatorEntries.length" shape="curved" class="mt-6 p-6">
+          <BaseCard
+            v-if="indicatorEntries.length"
+            shape="curved"
+            class="mt-6 p-6"
+          >
             <div class="flex flex-col gap-4">
               <div class="flex items-center justify-between">
-                <BaseHeading tag="h3" size="sm" class="text-muted-900 dark:text-white">
+                <BaseHeading
+                  tag="h3"
+                  size="sm"
+                  class="text-muted-900 dark:text-white"
+                >
                   شاخص‌های هشداردهنده (جزئیات)
                 </BaseHeading>
-                <BaseTag color="danger" shape="curved" size="sm">
+                <BaseTag
+                  color="danger"
+                  shape="curved"
+                  size="sm"
+                >
                   <div class="flex items-center gap-2 px-3 py-1">
                     <Icon name="ph:warning-duotone" class="size-4" />
                     {{ indicatorEntries.length }} شاخص
@@ -1135,12 +1236,17 @@ const riskPieChartOptions = computed(() => {
               </div>
 
               <div class="grid gap-4 lg:grid-cols-2">
-                <div v-for="(indicator, index) in indicatorsByPriority" :key="index"
-                  class="border-muted-200 dark:border-muted-700 rounded-2xl border p-4">
+                <div
+                  v-for="(indicator, index) in indicatorsByPriority"
+                  :key="index"
+                  class="border-muted-200 dark:border-muted-700 rounded-2xl border p-4"
+                >
                   <div class="flex items-center justify-between">
                     <BaseTag
                       :color="indicator.level === 'critical' ? 'danger' : indicator.level === 'high' ? 'danger' : indicator.level === 'medium' ? 'warning' : indicator.level === 'moderate' ? 'warning' : 'info'"
-                      shape="curved" size="sm">
+                      shape="curved"
+                      size="sm"
+                    >
                       <div class="flex items-center gap-2 px-2 py-1">
                         <Icon name="ph:activity-duotone" class="size-4" />
                         {{ indicator.levelLabel }}
@@ -1149,14 +1255,15 @@ const riskPieChartOptions = computed(() => {
                     <span class="text-muted-400 text-xs">{{ formatTime(indicator.timestamp) }}</span>
                   </div>
 
-                  <p class="text-muted-900 dark:text-white mt-3 text-sm font-medium leading-6">
+                  <p class="text-muted-900 mt-3 text-sm font-medium leading-6 dark:text-white">
                     {{ indicator.text }}
                   </p>
                   <BaseParagraph size="xs" class="text-muted-500 mt-2 leading-6">
                     {{ indicator.reasoning }}
                   </BaseParagraph>
                   <div
-                    class="border-muted-200 dark:border-muted-700 mt-4 rounded-xl border bg-muted-50 p-3 text-xs dark:bg-muted-800">
+                    class="border-muted-200 dark:border-muted-700 bg-muted-50 dark:bg-muted-800 mt-4 rounded-xl border p-3 text-xs"
+                  >
                     <span class="text-muted-500">بخشی از پیام:</span>
                     <p class="text-muted-800 dark:text-muted-200 mt-2 leading-6">
                       {{ indicator.message }}
@@ -1167,10 +1274,18 @@ const riskPieChartOptions = computed(() => {
             </div>
           </BaseCard>
 
-          <BaseCard v-if="hasData" shape="curved" class="mt-6 p-6">
+          <BaseCard
+            v-if="hasData"
+            shape="curved"
+            class="mt-6 p-6"
+          >
             <div class="flex flex-col gap-5">
               <div class="flex flex-col gap-1">
-                <BaseHeading tag="h3" size="sm" class="text-muted-900 dark:text-white">
+                <BaseHeading
+                  tag="h3"
+                  size="sm"
+                  class="text-muted-900 dark:text-white"
+                >
                   پیام‌ها و ارزیابی خطر
                 </BaseHeading>
                 <BaseParagraph size="sm" class="text-muted-500">
@@ -1179,27 +1294,37 @@ const riskPieChartOptions = computed(() => {
               </div>
 
               <div class="space-y-4">
-                <div v-for="message in processedMessages" :key="message.id"
-                  class="border-muted-200 dark:border-muted-700 rounded-2xl border p-4">
+                <div
+                  v-for="message in processedMessages"
+                  :key="message.id"
+                  class="border-muted-200 dark:border-muted-700 rounded-2xl border p-4"
+                >
                   <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <div class="flex items-center gap-2 text-xs text-muted-400">
+                      <div class="text-muted-400 flex items-center gap-2 text-xs">
                         <Icon name="ph:clock-duotone" class="size-4" />
                         <span>{{ formatDate(message.timestamp) }}</span>
                         <span>·</span>
                         <span>{{ formatTime(message.timestamp) }}</span>
                       </div>
-                      <p class="text-muted-900 dark:text-white mt-2 text-sm leading-7">
+                      <p class="text-muted-900 mt-2 text-sm leading-7 dark:text-white">
                         {{ message.text }}
                       </p>
                     </div>
 
-                    <div v-if="message.risk.key === 'na'"
-                      class="flex items-center gap-2 rounded-xl bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">
+                    <div
+                      v-if="message.risk.key === 'na'"
+                      class="flex items-center gap-2 rounded-xl bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                    >
                       <Icon name="ph:warning-duotone" class="size-4" />
                       <span>{{ message.risk.label }}</span>
                     </div>
-                    <BaseTag v-else :color="message.risk.tag" shape="curved" size="sm">
+                    <BaseTag
+                      v-else
+                      :color="message.risk.tag"
+                      shape="curved"
+                      size="sm"
+                    >
                       <div class="flex items-center gap-2 px-3 py-1">
                         <Icon name="ph:heartbeat-duotone" class="size-4" />
                         <span>{{ message.risk.label }}</span>
@@ -1207,8 +1332,10 @@ const riskPieChartOptions = computed(() => {
                     </BaseTag>
                   </div>
 
-                  <div v-if="message.analysis?.suicideRiskDescription"
-                    class="bg-muted-50 dark:bg-muted-800 mt-3 rounded-xl p-3 text-xs leading-6">
+                  <div
+                    v-if="message.analysis?.suicideRiskDescription"
+                    class="bg-muted-50 dark:bg-muted-800 mt-3 rounded-xl p-3 text-xs leading-6"
+                  >
                     <span class="text-muted-500">توضیح تحلیل:</span>
                     <p class="text-muted-700 dark:text-muted-200 mt-2">
                       {{ message.analysis.suicideRiskDescription }}
@@ -1220,9 +1347,13 @@ const riskPieChartOptions = computed(() => {
                       شاخص‌های تشخیص داده‌شده:
                     </div>
                     <div class="flex flex-wrap gap-2">
-                      <BaseTag v-for="(indicator, idx) in message.analysis.suicideIndicators" :key="idx"
+                      <BaseTag
+                        v-for="(indicator, idx) in message.analysis.suicideIndicators"
+                        :key="idx"
                         :color="indicator?.dangerousnessLevel === 'high' ? 'danger' : indicator?.dangerousnessLevel === 'medium' ? 'warning' : 'info'"
-                        shape="rounded" size="sm">
+                        shape="rounded"
+                        size="sm"
+                      >
                         <div class="flex items-center gap-2 px-2 py-1">
                           <Icon name="ph:shield-check-duotone" class="size-4" />
                           <span>{{ translateIndicatorType(indicator?.indicatorType) || 'شاخص' }}</span>
@@ -1235,10 +1366,18 @@ const riskPieChartOptions = computed(() => {
             </div>
           </BaseCard>
 
-          <BaseCard v-else shape="curved" class="mt-6 p-8 text-center">
+          <BaseCard
+            v-else
+            shape="curved"
+            class="mt-6 p-8 text-center"
+          >
             <div class="flex flex-col items-center gap-3">
               <Icon name="ph:chat-slash-duotone" class="text-muted-300 size-12" />
-              <BaseHeading tag="h3" size="sm" class="text-muted-700 dark:text-muted-300">
+              <BaseHeading
+                tag="h3"
+                size="sm"
+                class="text-muted-700 dark:text-muted-300"
+              >
                 تحلیلی برای این جلسه ثبت نشده است
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-500">

@@ -129,6 +129,21 @@ const confirmDeletion = async () => {
           <BaseParagraph size="sm" class="text-muted-400 mb-3 mt-1">
             {{ user?.meta?.shortBio? user?.meta?.shortBio : 'اطلاعات در حال تکمیل شدن است.' }}
           </BaseParagraph>
+          <div v-if="user?.zones?.length" class="mb-4 flex flex-wrap justify-center gap-2">
+            <BaseText size="xs" class="text-muted-600 mb-1 w-full">
+              مناطق شما:
+            </BaseText>
+            <BaseTag
+              v-for="zone in user.zones"
+              :key="zone"
+              color="info"
+              variant="pastel"
+              rounded="full"
+              size="sm"
+            >
+              {{ zone }}
+            </BaseTag>
+          </div>
           <div
             class="divide-muted-200 dark:divide-muted-800 divide-s flex items-center justify-center"
           >

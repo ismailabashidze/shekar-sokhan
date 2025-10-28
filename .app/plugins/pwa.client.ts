@@ -1,18 +1,19 @@
 export default defineNuxtPlugin(async () => {
   if (process.client && 'serviceWorker' in navigator) {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+      // Register PWA service worker
+      const pwaRegistration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
       })
 
       // Check if service worker is already active
-      if (registration.active) {
+      if (pwaRegistration.active) {
         // Service worker is active
       }
 
       // Update service worker if needed
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing
+      pwaRegistration.addEventListener('updatefound', () => {
+        const newWorker = pwaRegistration.installing
 
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
@@ -30,12 +31,12 @@ export default defineNuxtPlugin(async () => {
       })
 
       // Listen for service worker errors
-      registration.addEventListener('error', (error) => {
+      pwaRegistration.addEventListener('error', (error) => {
         // Service worker error
       })
 
       // Check for waiting service worker
-      if (registration.waiting) {
+      if (pwaRegistration.waiting) {
         // Service worker is waiting for activation
       }
     }

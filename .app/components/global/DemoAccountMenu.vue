@@ -68,6 +68,21 @@ const displayName = computed(() => user.value.meta?.name || 'کاربر جدید
                 <p class="text-muted-400 font-sans text-xs">
                   {{ (user.role ?? 'user') === 'user' ? 'کاربر' : 'ادمین' }}
                 </p>
+                <div v-if="user.zones?.length" class="mt-1 flex flex-wrap justify-end gap-1">
+                  <BaseTag
+                    v-for="zone in user.zones.slice(0, 2)"
+                    :key="zone"
+                    color="info"
+                    variant="pastel"
+                    rounded="full"
+                    size="xs"
+                  >
+                    {{ zone }}
+                  </BaseTag>
+                  <span v-if="user.zones.length > 2" class="text-muted-400 font-sans text-xs">
+                    +{{ user.zones.length - 2 }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

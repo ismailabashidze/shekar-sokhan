@@ -4,7 +4,7 @@ import type { CampaignForm, CampaignSchedule } from '~/types/campaigns'
 definePageMeta({
   title: 'مدیریت کمپین‌ها',
   layout: 'sidebar',
-  middleware: 'admin',
+  // Using global middlewares only
 })
 
 useHead({
@@ -26,17 +26,17 @@ const {
   getCampaignMetrics,
   launchCampaign,
   pauseCampaign,
-  resumeCampaign
+  resumeCampaign,
 } = useCampaignManager()
 
 const {
   userGroups,
-  fetchUserGroups
+  fetchUserGroups,
 } = useUserGroupManager()
 
 const {
   activeTemplates,
-  fetchTemplates
+  fetchTemplates,
 } = useTemplateManager()
 
 // Form state
@@ -49,8 +49,8 @@ const formData = ref<CampaignForm>({
   template_id: '',
   schedule: {
     type: 'immediate',
-    timezone: 'Asia/Tehran'
-  }
+    timezone: 'Asia/Tehran',
+  },
 })
 
 // Initialize data
@@ -59,9 +59,10 @@ onMounted(async () => {
     await Promise.all([
       fetchCampaigns(),
       fetchUserGroups(),
-      fetchTemplates()
+      fetchTemplates(),
     ])
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در بارگذاری داده‌ها:', error)
   }
 })
@@ -75,8 +76,8 @@ const resetForm = () => {
     template_id: '',
     schedule: {
       type: 'immediate',
-      timezone: 'Asia/Tehran'
-    }
+      timezone: 'Asia/Tehran',
+    },
   }
   editingCampaign.value = null
 }
@@ -86,7 +87,8 @@ const handleCreateCampaign = async () => {
     await createCampaign(formData.value)
     showCreateForm.value = false
     resetForm()
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در ایجاد کمپین:', error)
   }
 }
@@ -94,7 +96,8 @@ const handleCreateCampaign = async () => {
 const handleLaunchCampaign = async (campaignId: string) => {
   try {
     await launchCampaign(campaignId)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در راه‌اندازی کمپین:', error)
   }
 }
@@ -102,7 +105,8 @@ const handleLaunchCampaign = async (campaignId: string) => {
 const handlePauseCampaign = async (campaignId: string) => {
   try {
     await pauseCampaign(campaignId)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در متوقف کردن کمپین:', error)
   }
 }
@@ -110,7 +114,8 @@ const handlePauseCampaign = async (campaignId: string) => {
 const handleResumeCampaign = async (campaignId: string) => {
   try {
     await resumeCampaign(campaignId)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('خطا در ادامه کمپین:', error)
   }
 }
@@ -119,7 +124,8 @@ const handleDeleteCampaign = async (campaignId: string) => {
   if (confirm('آیا از حذف این کمپین اطمینان دارید؟')) {
     try {
       await deleteCampaign(campaignId)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('خطا در حذف کمپین:', error)
     }
   }
@@ -127,21 +133,21 @@ const handleDeleteCampaign = async (campaignId: string) => {
 
 // Computed
 const canSubmit = computed(() => {
-  return formData.value.name.trim() && 
-         formData.value.template_id && 
-         formData.value.target_groups.length > 0
+  return formData.value.name.trim()
+    && formData.value.template_id
+    && formData.value.target_groups.length > 0
 })
 
 const scheduleTypeOptions = [
   { label: 'فوری', value: 'immediate' },
   { label: 'زمان‌بندی شده', value: 'scheduled' },
-  { label: 'تکراری', value: 'recurring' }
+  { label: 'تکراری', value: 'recurring' },
 ]
 
 const frequencyOptions = [
   { label: 'روزانه', value: 'daily' },
   { label: 'هفتگی', value: 'weekly' },
-  { label: 'ماهانه', value: 'monthly' }
+  { label: 'ماهانه', value: 'monthly' },
 ]
 </script>
 
@@ -158,7 +164,7 @@ const frequencyOptions = [
             ایجاد و مدیریت کمپین‌های اعلان‌رسانی
           </p>
         </div>
-        
+
         <BaseButton
           color="primary"
           @click="showCreateForm = true"
@@ -276,18 +282,18 @@ const frequencyOptions = [
                     {{ campaign.name }}
                   </h3>
                   <BaseBadge
-                    :color="campaign.status === 'active' ? 'success' : 
-                           campaign.status === 'draft' ? 'warning' :
-                           campaign.status === 'paused' ? 'info' : 'muted'"
+                    :color="campaign.status === 'active' ? 'success' :
+                      campaign.status === 'draft' ? 'warning' :
+                      campaign.status === 'paused' ? 'info' : 'muted'"
                     size="sm"
                   >
                     {{ campaign.status === 'active' ? 'فعال' :
-                       campaign.status === 'draft' ? 'پیش‌نویس' :
-                       campaign.status === 'paused' ? 'متوقف' :
-                       campaign.status === 'scheduled' ? 'زمان‌بندی شده' : 'تکمیل شده' }}
+                      campaign.status === 'draft' ? 'پیش‌نویس' :
+                      campaign.status === 'paused' ? 'متوقف' :
+                      campaign.status === 'scheduled' ? 'زمان‌بندی شده' : 'تکمیل شده' }}
                   </BaseBadge>
                 </div>
-                
+
                 <p class="text-muted-600 dark:text-muted-300 mb-4 text-sm">
                   {{ campaign.description }}
                 </p>

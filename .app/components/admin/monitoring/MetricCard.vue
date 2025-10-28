@@ -1,9 +1,9 @@
 <template>
-  <div class="bg-white dark:bg-muted-900 rounded-lg border border-muted-200 dark:border-muted-800 p-6">
+  <div class="dark:bg-muted-900 border-muted-200 dark:border-muted-800 rounded-lg border bg-white p-6">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div 
-          class="w-10 h-10 rounded-lg flex items-center justify-center"
+        <div
+          class="flex size-10 items-center justify-center rounded-lg"
           :class="{
             'bg-success-100 text-success-600': status === 'good',
             'bg-warning-100 text-warning-600': status === 'warning',
@@ -11,24 +11,24 @@
             'bg-muted-100 text-muted-600': status === 'neutral'
           }"
         >
-          <Icon :name="icon" class="w-5 h-5" />
+          <Icon :name="icon" class="size-5" />
         </div>
-        
+
         <div>
-          <h3 class="text-sm font-medium text-muted-600 dark:text-muted-400">
+          <h3 class="text-muted-600 dark:text-muted-400 text-sm font-medium">
             {{ title }}
           </h3>
           <div class="flex items-baseline gap-1">
-            <span class="text-2xl font-bold text-muted-800 dark:text-muted-100">
+            <span class="text-muted-800 dark:text-muted-100 text-2xl font-bold">
               {{ formatValue(value) }}
             </span>
-            <span class="text-sm text-muted-500">{{ unit }}</span>
+            <span class="text-muted-500 text-sm">{{ unit }}</span>
           </div>
         </div>
       </div>
-      
+
       <!-- Trend Indicator -->
-      <div 
+      <div
         v-if="trend !== 'neutral'"
         class="flex items-center gap-1"
         :class="{
@@ -39,17 +39,17 @@
           'text-muted-500': trend === 'neutral'
         }"
       >
-        <Icon 
-          :name="trend === 'up' ? 'lucide:trending-up' : 'lucide:trending-down'" 
-          class="w-4 h-4" 
+        <Icon
+          :name="trend === 'up' ? 'lucide:trending-up' : 'lucide:trending-down'"
+          class="size-4"
         />
       </div>
     </div>
-    
+
     <!-- Status Bar -->
     <div class="mt-4">
-      <div class="w-full bg-muted-200 dark:bg-muted-700 rounded-full h-2">
-        <div 
+      <div class="bg-muted-200 dark:bg-muted-700 h-2 w-full rounded-full">
+        <div
           class="h-2 rounded-full transition-all duration-300"
           :class="{
             'bg-success-500': status === 'good',
@@ -79,9 +79,11 @@ const props = defineProps<Props>()
 const formatValue = (value: number): string => {
   if (value >= 1000000) {
     return (value / 1000000).toFixed(1) + 'M'
-  } else if (value >= 1000) {
+  }
+  else if (value >= 1000) {
     return (value / 1000).toFixed(1) + 'K'
-  } else if (value % 1 !== 0) {
+  }
+  else if (value % 1 !== 0) {
     return value.toFixed(1)
   }
   return value.toString()
@@ -91,7 +93,7 @@ const getProgressWidth = (): string => {
   if (props.unit === '%') {
     return `${Math.min(props.value, 100)}%`
   }
-  
+
   // For other metrics, show relative progress based on status
   switch (props.status) {
     case 'good':

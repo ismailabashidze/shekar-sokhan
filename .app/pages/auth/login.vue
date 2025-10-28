@@ -114,9 +114,31 @@ const loginWithGoogle = async () => {
         email: pbMeta.email ?? record.email,
         name: pbMeta.name ?? '',
       } as MetaObj,
+      phoneNumber: record.phoneNumber as string,
+      zones: record.zones || [], // Include zones from PocketBase record
     }
 
     await setUser(appUser, 'user')
+
+    // Check and update zones if needed after login
+    if (!record.zones || record.zones === null || (Array.isArray(record.zones) && record.zones.length === 0)) {
+      try {
+        console.log('🔄 Updating user zones after login...')
+        await nuxtApp.$pb.collection('users').update(record.id, {
+          zones: ['hamdel'],
+        })
+
+        // Update local user object with updated zones
+        appUser.zones = ['hamdel']
+        await setUser(appUser, 'user')
+
+        console.log('✅ User zones updated to ["hamdel"]')
+      }
+      catch (error) {
+        console.error('❌ Failed to update user zones after login:', error)
+        // Continue login process even if zones update fails
+      }
+    }
 
     // Update premium status based on user's charge status
     const { setPremiumStatus } = useAIResponseSettings()

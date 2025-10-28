@@ -1,31 +1,31 @@
 <template>
   <div class="bg-muted-50 dark:bg-muted-800 rounded-lg p-4">
-    <div class="flex items-center justify-between mb-3">
+    <div class="mb-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div 
-          class="w-8 h-8 rounded-lg flex items-center justify-center"
+        <div
+          class="flex size-8 items-center justify-center rounded-lg"
           :class="{
             'bg-success-100 text-success-600': isHealthy,
             'bg-warning-100 text-warning-600': isWarning,
             'bg-danger-100 text-danger-600': isCritical
           }"
         >
-          <Icon :name="icon" class="w-4 h-4" />
+          <Icon :name="icon" class="size-4" />
         </div>
-        
+
         <div>
-          <h4 class="text-sm font-medium text-muted-800 dark:text-muted-100">
+          <h4 class="text-muted-800 dark:text-muted-100 text-sm font-medium">
             {{ name }}
           </h4>
-          <p class="text-xs text-muted-600 dark:text-muted-400 capitalize">
+          <p class="text-muted-600 dark:text-muted-400 text-xs capitalize">
             {{ status }}
           </p>
         </div>
       </div>
-      
+
       <!-- Status Indicator -->
-      <div 
-        class="w-3 h-3 rounded-full"
+      <div
+        class="size-3 rounded-full"
         :class="{
           'bg-success-500': isHealthy,
           'bg-warning-500': isWarning,
@@ -33,11 +33,11 @@
         }"
       />
     </div>
-    
+
     <!-- Details -->
     <div v-if="details && Object.keys(details).length > 0" class="space-y-1">
-      <div 
-        v-for="(value, key) in details" 
+      <div
+        v-for="(value, key) in details"
         :key="key"
         class="flex justify-between text-xs"
       >
@@ -45,10 +45,10 @@
         <span class="text-muted-800 dark:text-muted-200 font-medium">{{ value }}</span>
       </div>
     </div>
-    
+
     <!-- Last Check Time -->
-    <div class="mt-3 pt-3 border-t border-muted-200 dark:border-muted-700">
-      <p class="text-xs text-muted-500">
+    <div class="border-muted-200 dark:border-muted-700 mt-3 border-t pt-3">
+      <p class="text-muted-500 text-xs">
         Last checked: {{ formatLastCheck() }}
       </p>
     </div>

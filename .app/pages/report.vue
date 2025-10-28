@@ -3,7 +3,7 @@
   <div v-if="isLoading" class="grid grid-cols-12 gap-3 sm:gap-4 md:gap-6">
     <!-- Loading Header -->
     <div class="col-span-12">
-      <div class="bg-primary-800 flex animate-pulse flex-col items-center rounded-xl p-3 sm:rounded-2xl sm:p-4 sm:flex-row">
+      <div class="bg-primary-800 flex animate-pulse flex-col items-center rounded-xl p-3 sm:flex-row sm:rounded-2xl sm:p-4">
         <div class="bg-primary-700/50 relative h-[168px] w-[280px] shrink-0" />
         <div class="mt-6 w-full grow sm:mt-0">
           <div class="flex flex-col gap-4 text-center sm:text-right">
@@ -43,8 +43,17 @@
     <div class="col-span-12">
       <BaseCard class="p-4 sm:p-6 md:p-10" shape="curved">
         <div class="flex flex-col items-center text-center">
-          <img src="/img/illustrations/dashboards/health/doctor.svg" alt="No report data" class="mb-4 w-48 sm:mb-6 sm:w-72">
-          <BaseHeading tag="h2" size="2xl" weight="medium" class="text-muted-800 mb-2 dark:text-white">
+          <img
+            src="/img/illustrations/dashboards/health/doctor.svg"
+            alt="No report data"
+            class="mb-4 w-48 sm:mb-6 sm:w-72"
+          >
+          <BaseHeading
+            tag="h2"
+            size="2xl"
+            weight="medium"
+            class="text-muted-800 mb-2 dark:text-white"
+          >
             گزارشی یافت نشد
           </BaseHeading>
           <BaseParagraph size="md" class="text-muted-400 mb-8">
@@ -62,10 +71,13 @@
   <div v-else class="grid grid-cols-12 gap-3 sm:gap-4 md:gap-6">
     <!-- Header -->
     <div class="col-span-12">
-      <div class="bg-primary-800 flex flex-col items-center rounded-xl p-3 sm:rounded-2xl sm:p-4 sm:flex-row">
+      <div class="bg-primary-800 flex flex-col items-center rounded-xl p-3 sm:flex-row sm:rounded-2xl sm:p-4">
         <div class="relative hidden h-[168px] w-[280px] shrink-0 sm:block">
-          <img class="pointer-events-none absolute -start-6 -top-20 sm:-start-10"
-            src="/img/illustrations/dashboards/health/doctor.svg" alt="Report illustration">
+          <img
+            class="pointer-events-none absolute -start-6 -top-20 sm:-start-10"
+            src="/img/illustrations/dashboards/health/doctor.svg"
+            alt="Report illustration"
+          >
         </div>
         <div class="w-full grow sm:mt-0">
           <div class="text-center sm:text-right">
@@ -121,7 +133,13 @@
       <!-- Summaries Card -->
       <BaseCard class="p-3 sm:p-4 md:p-6" shape="curved">
         <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <BaseHeading as="h3" size="sm" weight="semibold" lead="tight" class="text-muted-800 dark:text-white sm:text-base">
+          <BaseHeading
+            as="h3"
+            size="sm"
+            weight="semibold"
+            lead="tight"
+            class="text-muted-800 dark:text-white sm:text-base"
+          >
             <span>خلاصه جلسات</span>
           </BaseHeading>
         </div>
@@ -133,11 +151,22 @@
         </div>
         <div class="mt-6">
           <template v-if="report.summaries && report.summaries.length > 0">
-            <div v-for="(summary, idx) in visibleSummaries" :key="summary.sessionId" class="mb-6">
-              <BaseCard shape="rounded"
-                class="border-primary-100 dark:border-primary-500/20 relative border-2 p-5 transition-all duration-300 hover:shadow-lg">
-                <BaseHeading as="h4" size="sm" weight="medium" lead="tight"
-                  class="text-primary-500 dark:text-primary-400 mb-2">
+            <div
+              v-for="(summary, idx) in visibleSummaries"
+              :key="summary.sessionId"
+              class="mb-6"
+            >
+              <BaseCard
+                shape="rounded"
+                class="border-primary-100 dark:border-primary-500/20 relative border-2 p-5 transition-all duration-300 hover:shadow-lg"
+              >
+                <BaseHeading
+                  as="h4"
+                  size="sm"
+                  weight="medium"
+                  lead="tight"
+                  class="text-primary-500 dark:text-primary-400 mb-2"
+                >
                   {{ summary.title }}
                 </BaseHeading>
                 <div class="my-2 flex flex-wrap gap-4">
@@ -155,14 +184,19 @@
                 <!-- Delete button -->
                 <button
                   class="text-danger-500 hover:text-danger-600 dark:text-danger-400 dark:hover:text-danger-300 absolute left-2 top-2 transition-colors duration-300"
-                  @click.prevent="openDeleteModal(idx, summary)">
+                  @click.prevent="openDeleteModal(idx, summary)"
+                >
                   <Icon name="ph:trash-duotone" class="size-5" />
                 </button>
               </BaseCard>
             </div>
             <!-- Show More Button -->
             <div v-if="report.summaries.length > visibleCount" class="mt-6 text-center">
-              <BaseButton color="primary" class="mx-auto" @click="showMore">
+              <BaseButton
+                color="primary"
+                class="mx-auto"
+                @click="showMore"
+              >
                 نمایش بیشتر ({{ report.summaries.length - visibleCount }} مورد دیگر)
               </BaseButton>
             </div>
@@ -170,7 +204,11 @@
           <template v-else>
             <div class="flex flex-col items-center justify-center py-10 text-center">
               <Icon name="ph:notepad-duotone" class="text-muted-300 mb-2 size-12" />
-              <BaseHeading as="h4" size="sm" class="text-muted-500 mb-2">
+              <BaseHeading
+                as="h4"
+                size="sm"
+                class="text-muted-500 mb-2"
+              >
                 خلاصه‌ای برای نمایش وجود ندارد
               </BaseHeading>
               <BaseText size="xs" class="text-muted-400">
@@ -182,10 +220,19 @@
       </BaseCard>
 
       <!-- Delete Confirmation Modal -->
-      <TairoModal :open="isDeleteModalOpen" size="sm" @close="isDeleteModalOpen = false">
+      <TairoModal
+        :open="isDeleteModalOpen"
+        size="sm"
+        @close="isDeleteModalOpen = false"
+      >
         <template #header>
           <div class="flex w-full items-center justify-between p-4 md:p-6">
-            <BaseHeading tag="h3" size="md" weight="medium" class="text-muted-800 dark:text-white">
+            <BaseHeading
+              tag="h3"
+              size="md"
+              weight="medium"
+              class="text-muted-800 dark:text-white"
+            >
               تایید حذف
             </BaseHeading>
             <div class="flex items-center gap-2">
@@ -210,7 +257,11 @@
             <BaseButton @click="isDeleteModalOpen = false">
               انصراف
             </BaseButton>
-            <BaseButton color="danger" :loading="isDeleting" @click="confirmDelete">
+            <BaseButton
+              color="danger"
+              :loading="isDeleting"
+              @click="confirmDelete"
+            >
               حذف
             </BaseButton>
           </div>
@@ -218,10 +269,19 @@
       </TairoModal>
 
       <!-- Delete All Deeper Goals Confirmation Modal -->
-      <TairoModal :open="isDeleteAllDeeperGoalsModalOpen" size="sm" @close="isDeleteAllDeeperGoalsModalOpen = false">
+      <TairoModal
+        :open="isDeleteAllDeeperGoalsModalOpen"
+        size="sm"
+        @close="isDeleteAllDeeperGoalsModalOpen = false"
+      >
         <template #header>
           <div class="flex w-full items-center justify-between p-4 md:p-6">
-            <BaseHeading tag="h3" size="md" weight="medium" class="text-muted-800 dark:text-white">
+            <BaseHeading
+              tag="h3"
+              size="md"
+              weight="medium"
+              class="text-muted-800 dark:text-white"
+            >
               تایید حذف همه اهداف
             </BaseHeading>
             <div class="flex items-center gap-2">
@@ -246,7 +306,11 @@
             <BaseButton @click="isDeleteAllDeeperGoalsModalOpen = false">
               انصراف
             </BaseButton>
-            <BaseButton color="danger" :loading="isDeletingAllDeeperGoals" @click="confirmDeleteAllDeeperGoals">
+            <BaseButton
+              color="danger"
+              :loading="isDeletingAllDeeperGoals"
+              @click="confirmDeleteAllDeeperGoals"
+            >
               حذف همه
             </BaseButton>
           </div>
@@ -256,20 +320,43 @@
       <!-- Demographic Profile Card -->
       <BaseCard shape="curved" class="mt-4 p-6">
         <div class="mb-2 flex items-center justify-between">
-          <BaseHeading as="h3" size="md" weight="semibold" lead="tight" class="text-muted-800 dark:text-white">
+          <BaseHeading
+            as="h3"
+            size="md"
+            weight="semibold"
+            lead="tight"
+            class="text-muted-800 dark:text-white"
+          >
             <span>اطلاعات دموگرافیک</span>
           </BaseHeading>
-          <BaseButton v-if="!isEditingDemographic" color="primary" size="sm" class="ms-2" :disabled="!report.finalDemographicProfile ||
-            Object.values(report.finalDemographicProfile).every(value => !value)" @click="enableEditDemographic">
+          <BaseButton
+            v-if="!isEditingDemographic"
+            color="primary"
+            size="sm"
+            class="ms-2"
+            :disabled="!report.finalDemographicProfile ||
+              Object.values(report.finalDemographicProfile).every(value => !value)"
+            @click="enableEditDemographic"
+          >
             <Icon name="ph:pencil-duotone" class="ms-1 size-4" /> ویرایش
           </BaseButton>
           <template v-else>
             <div>
-              <BaseButton color="success" size="sm" class="ms-2" :loading="isSavingDemographic"
-                @click="saveDemographicProfile">
+              <BaseButton
+                color="success"
+                size="sm"
+                class="ms-2"
+                :loading="isSavingDemographic"
+                @click="saveDemographicProfile"
+              >
                 <Icon name="ph:check-duotone" class="ms-1 size-4" /> ذخیره
               </BaseButton>
-              <BaseButton color="muted" size="sm" class="ms-2" @click="cancelEditDemographic">
+              <BaseButton
+                color="muted"
+                size="sm"
+                class="ms-2"
+                @click="cancelEditDemographic"
+              >
                 <Icon name="ph:x-duotone" class="ms-1 size-4" /> انصراف
               </BaseButton>
             </div>
@@ -289,52 +376,90 @@
             <div class="col-span-12 sm:col-span-6">
               <div class="mb-1 flex items-center justify-between">
                 <label class="text-muted-400 text-xs font-medium">نام</label>
-                <span v-if="report.finalDemographicProfile?.firstName"
-                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
-                <span v-else
-                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                <span
+                  v-if="report.finalDemographicProfile?.firstName"
+                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs"
+                >موجود</span>
+                <span
+                  v-else
+                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs"
+                >نامشخص</span>
               </div>
-              <BaseInput v-model="editDemographicProfile.firstName" :disabled="!isEditingDemographic" type="text"
-                icon="ph:user-duotone" placeholder="نام" :class="{ 'opacity-50': !isEditingDemographic }" />
+              <BaseInput
+                v-model="editDemographicProfile.firstName"
+                :disabled="!isEditingDemographic"
+                type="text"
+                icon="ph:user-duotone"
+                placeholder="نام"
+                :class="{ 'opacity-50': !isEditingDemographic }"
+              />
             </div>
 
             <!-- Last Name -->
             <div class="col-span-12 sm:col-span-6">
               <div class="mb-1 flex items-center justify-between">
                 <label class="text-muted-400 text-xs font-medium">نام خانوادگی</label>
-                <span v-if="report.finalDemographicProfile?.lastName"
-                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
-                <span v-else
-                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                <span
+                  v-if="report.finalDemographicProfile?.lastName"
+                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs"
+                >موجود</span>
+                <span
+                  v-else
+                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs"
+                >نامشخص</span>
               </div>
-              <BaseInput v-model="editDemographicProfile.lastName" :disabled="!isEditingDemographic" type="text"
-                icon="ph:user-duotone" placeholder="نام خانوادگی" :class="{ 'opacity-50': !isEditingDemographic }" />
+              <BaseInput
+                v-model="editDemographicProfile.lastName"
+                :disabled="!isEditingDemographic"
+                type="text"
+                icon="ph:user-duotone"
+                placeholder="نام خانوادگی"
+                :class="{ 'opacity-50': !isEditingDemographic }"
+              />
             </div>
 
             <!-- Age -->
             <div class="col-span-12 sm:col-span-6">
               <div class="mb-1 flex items-center justify-between">
                 <label class="text-muted-400 text-xs font-medium">سن</label>
-                <span v-if="report.finalDemographicProfile?.age"
-                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
-                <span v-else
-                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                <span
+                  v-if="report.finalDemographicProfile?.age"
+                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs"
+                >موجود</span>
+                <span
+                  v-else
+                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs"
+                >نامشخص</span>
               </div>
-              <BaseInput v-model="editDemographicProfile.age" :disabled="!isEditingDemographic" type="number"
-                icon="ph:calendar-duotone" placeholder="سن" :class="{ 'opacity-50': !isEditingDemographic }" />
+              <BaseInput
+                v-model="editDemographicProfile.age"
+                :disabled="!isEditingDemographic"
+                type="number"
+                icon="ph:calendar-duotone"
+                placeholder="سن"
+                :class="{ 'opacity-50': !isEditingDemographic }"
+              />
             </div>
 
             <!-- Gender -->
             <div class="col-span-12 sm:col-span-6">
               <div class="mb-1 flex items-center justify-between">
                 <label class="text-muted-400 text-xs font-medium">جنسیت</label>
-                <span v-if="report.finalDemographicProfile?.gender"
-                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
-                <span v-else
-                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                <span
+                  v-if="report.finalDemographicProfile?.gender"
+                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs"
+                >موجود</span>
+                <span
+                  v-else
+                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs"
+                >نامشخص</span>
               </div>
-              <BaseSelect v-model="editDemographicProfile.gender" :disabled="!isEditingDemographic" placeholder="جنسیت"
-                :class="{ 'opacity-50': !isEditingDemographic }">
+              <BaseSelect
+                v-model="editDemographicProfile.gender"
+                :disabled="!isEditingDemographic"
+                placeholder="جنسیت"
+                :class="{ 'opacity-50': !isEditingDemographic }"
+              >
                 <option value="">
                   جنسیت
                 </option>
@@ -354,13 +479,21 @@
             <div class="col-span-12 sm:col-span-6">
               <div class="mb-1 flex items-center justify-between">
                 <label class="text-muted-400 text-xs font-medium">تحصیلات</label>
-                <span v-if="report.finalDemographicProfile?.educationLevel"
-                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
-                <span v-else
-                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                <span
+                  v-if="report.finalDemographicProfile?.educationLevel"
+                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs"
+                >موجود</span>
+                <span
+                  v-else
+                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs"
+                >نامشخص</span>
               </div>
-              <BaseSelect v-model="editDemographicProfile.educationLevel" :disabled="!isEditingDemographic"
-                placeholder="تحصیلات" :class="{ 'opacity-50': !isEditingDemographic }">
+              <BaseSelect
+                v-model="editDemographicProfile.educationLevel"
+                :disabled="!isEditingDemographic"
+                placeholder="تحصیلات"
+                :class="{ 'opacity-50': !isEditingDemographic }"
+              >
                 <option value="">
                   تحصیلات
                 </option>
@@ -392,13 +525,21 @@
             <div class="col-span-12">
               <div class="mb-1 flex items-center justify-between">
                 <label class="text-muted-400 text-xs font-medium">وضعیت تأهل</label>
-                <span v-if="report.finalDemographicProfile?.maritalStatus"
-                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs">موجود</span>
-                <span v-else
-                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs">نامشخص</span>
+                <span
+                  v-if="report.finalDemographicProfile?.maritalStatus"
+                  class="bg-success-500/10 text-success-500 rounded-full px-2 py-0.5 text-xs"
+                >موجود</span>
+                <span
+                  v-else
+                  class="bg-muted-300/30 text-muted-500 dark:bg-muted-700/30 dark:text-muted-400 rounded-full px-2 py-0.5 text-xs"
+                >نامشخص</span>
               </div>
-              <BaseSelect v-model="editDemographicProfile.maritalStatus" :disabled="!isEditingDemographic"
-                placeholder="وضعیت تأهل" :class="{ 'opacity-50': !isEditingDemographic }">
+              <BaseSelect
+                v-model="editDemographicProfile.maritalStatus"
+                :disabled="!isEditingDemographic"
+                placeholder="وضعیت تأهل"
+                :class="{ 'opacity-50': !isEditingDemographic }"
+              >
                 <option value="">
                   وضعیت تأهل
                 </option>
@@ -419,9 +560,11 @@
           </div>
 
           <!-- No Data Overlay -->
-          <div v-if="!report.finalDemographicProfile ||
-            Object.values(report.finalDemographicProfile).every(value => !value)"
-            class="bg-muted-100/50 dark:bg-muted-900/50 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm">
+          <div
+            v-if="!report.finalDemographicProfile ||
+              Object.values(report.finalDemographicProfile).every(value => !value)"
+            class="bg-muted-100/50 dark:bg-muted-900/50 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm"
+          >
             <div class="text-center">
               <Icon name="ph:user-circle-minus-duotone" class="text-muted-400 mb-2 size-12" />
               <p class="text-muted-500 dark:text-muted-400">
@@ -439,11 +582,22 @@
       <div class="col-span-12">
         <BaseCard class="h-full p-6" shape="curved">
           <div class="mb-2 flex items-center justify-between">
-            <BaseHeading as="h3" size="md" weight="semibold" lead="tight" class="text-muted-800 dark:text-white">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              lead="tight"
+              class="text-muted-800 dark:text-white"
+            >
               <span>اهداف عمیق‌تر ممکن</span>
             </BaseHeading>
-            <BaseButton v-if="report.possibleDeeperGoals.length > 0" color="danger" size="sm" class="ms-2"
-              @click="openDeleteAllDeeperGoalsModal">
+            <BaseButton
+              v-if="report.possibleDeeperGoals.length > 0"
+              color="danger"
+              size="sm"
+              class="ms-2"
+              @click="openDeleteAllDeeperGoalsModal"
+            >
               <Icon name="ph:trash-duotone" class="ms-1 size-4" /> حذف همه
             </BaseButton>
           </div>
@@ -455,9 +609,15 @@
           </div>
           <div class="mt-6">
             <div v-if="report.possibleDeeperGoals.length > 0" class="space-y-4">
-              <div v-for="(goal, idx) in visibleDeeperGoals" :key="idx" class="group relative">
-                <BaseCard shape="rounded"
-                  class="border-success-100 dark:border-success-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg">
+              <div
+                v-for="(goal, idx) in visibleDeeperGoals"
+                :key="idx"
+                class="group relative"
+              >
+                <BaseCard
+                  shape="rounded"
+                  class="border-success-100 dark:border-success-500/20 border-2 p-4 transition-all duration-300 hover:shadow-lg"
+                >
                   <div class="flex w-full items-start gap-3">
                     <div class="bg-success-500/10 dark:bg-success-500/20 rounded-lg p-2">
                       <Icon name="ph:target-duotone" class="text-success-500 size-5" />
@@ -472,7 +632,12 @@
               </div>
               <!-- Show More Button for Deeper Goals -->
               <div v-if="report.possibleDeeperGoals.length > visibleDeeperGoalsCount" class="mt-4 text-center">
-                <BaseButton color="primary" size="sm" class="mx-auto" @click="showMoreDeeperGoals">
+                <BaseButton
+                  color="primary"
+                  size="sm"
+                  class="mx-auto"
+                  @click="showMoreDeeperGoals"
+                >
                   نمایش بیشتر ({{ report.possibleDeeperGoals.length - visibleDeeperGoalsCount }} مورد دیگر)
                 </BaseButton>
               </div>
@@ -492,11 +657,22 @@
     <div class="col-span-12">
       <BaseCard class="mt-4 p-6" shape="curved">
         <div class="mb-2 flex items-center justify-between">
-          <BaseHeading as="h3" size="md" weight="semibold" lead="tight" class="text-muted-800 dark:text-white">
+          <BaseHeading
+            as="h3"
+            size="md"
+            weight="semibold"
+            lead="tight"
+            class="text-muted-800 dark:text-white"
+          >
             <span>عوامل خطر احتمالی</span>
           </BaseHeading>
-          <BaseButton v-if="report.possibleRiskFactors.length > 0" color="danger" size="sm" class="ms-2"
-            @click="openDeleteAllRiskFactorsModal">
+          <BaseButton
+            v-if="report.possibleRiskFactors.length > 0"
+            color="danger"
+            size="sm"
+            class="ms-2"
+            @click="openDeleteAllRiskFactorsModal"
+          >
             <Icon name="ph:trash-duotone" class="ms-1 size-4" /> حذف همه
           </BaseButton>
         </div>
@@ -508,15 +684,27 @@
         </div>
         <div class="mt-6">
           <div v-if="report.possibleRiskFactors.length > 0" class="grid grid-cols-12 gap-4">
-            <div v-for="(risk, idx) in visibleRiskFactorsFlat" :key="idx" class="col-span-12 md:col-span-6">
-              <BaseCard shape="rounded"
-                class="border-danger-100 dark:border-danger-500/20 h-full border-2 p-4 transition-all duration-300 hover:shadow-lg">
+            <div
+              v-for="(risk, idx) in visibleRiskFactorsFlat"
+              :key="idx"
+              class="col-span-12 md:col-span-6"
+            >
+              <BaseCard
+                shape="rounded"
+                class="border-danger-100 dark:border-danger-500/20 h-full border-2 p-4 transition-all duration-300 hover:shadow-lg"
+              >
                 <div class="flex w-full items-start gap-3">
                   <div class="bg-danger-500/10 dark:bg-danger-500/20 rounded-lg p-2">
                     <Icon name="ph:warning-circle-duotone" class="text-danger-500 size-5" />
                   </div>
                   <div class="flex-1">
-                    <BaseHeading as="h4" size="sm" weight="medium" lead="none" class="text-danger-500 mb-3">
+                    <BaseHeading
+                      as="h4"
+                      size="sm"
+                      weight="medium"
+                      lead="none"
+                      class="text-danger-500 mb-3"
+                    >
                       {{ risk.title }}
                     </BaseHeading>
                     <BaseText size="xs" class="text-muted-600">
@@ -526,18 +714,25 @@
                 </div>
                 <div v-if="risk.severity" class="mt-2">
                   <span class="text-muted-500 text-xs">شدت: </span>
-                  <span :class="{
-                    'bg-danger-500/10 text-danger-500': risk.severity === 'High',
-                    'bg-warning-500/10 text-warning-500': risk.severity === 'Medium',
-                    'bg-success-500/10 text-success-500': risk.severity === 'Low'
-                  }" class="rounded-full px-2 py-0.5 text-xs">
+                  <span
+                    :class="{
+                      'bg-danger-500/10 text-danger-500': risk.severity === 'High',
+                      'bg-warning-500/10 text-warning-500': risk.severity === 'Medium',
+                      'bg-success-500/10 text-success-500': risk.severity === 'Low'
+                    }"
+                    class="rounded-full px-2 py-0.5 text-xs"
+                  >
                     {{ risk.severity === 'High' ? 'بالا' : risk.severity === 'Medium' ? 'متوسط' : 'پایین' }}
                   </span>
                 </div>
                 <div v-if="risk.evidence && risk.evidence.length > 0" class="mt-3">
                   <span class="text-muted-500 text-xs">شواهد: </span>
                   <ul class="text-muted-600 mt-1 list-disc pr-5 text-xs">
-                    <li v-for="(evidence, evidenceIdx) in risk.evidence" :key="evidenceIdx" class="mb-1">
+                    <li
+                      v-for="(evidence, evidenceIdx) in risk.evidence"
+                      :key="evidenceIdx"
+                      class="mb-1"
+                    >
                       {{ evidence }}
                     </li>
                   </ul>
@@ -550,9 +745,16 @@
                 </div>
               </BaseCard>
             </div>
-            <div v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount"
-              class="col-span-12 mt-4 text-center">
-              <BaseButton color="primary" size="sm" class="mx-auto" @click="showMoreRiskFactors">
+            <div
+              v-if="report.possibleRiskFactors.length > visibleRiskFactorsCount"
+              class="col-span-12 mt-4 text-center"
+            >
+              <BaseButton
+                color="primary"
+                size="sm"
+                class="mx-auto"
+                @click="showMoreRiskFactors"
+              >
                 نمایش بیشتر ({{ report.possibleRiskFactors.length - visibleRiskFactorsCount }} مورد دیگر)
               </BaseButton>
             </div>
@@ -569,10 +771,19 @@
   </div>
 
   <!-- Delete All Risk Factors Confirmation Modal -->
-  <TairoModal :open="isDeleteAllRiskFactorsModalOpen" size="sm" @close="isDeleteAllRiskFactorsModalOpen = false">
+  <TairoModal
+    :open="isDeleteAllRiskFactorsModalOpen"
+    size="sm"
+    @close="isDeleteAllRiskFactorsModalOpen = false"
+  >
     <template #header>
       <div class="flex w-full items-center justify-between p-4 md:p-6">
-        <BaseHeading tag="h3" size="md" weight="medium" class="text-muted-800 dark:text-white">
+        <BaseHeading
+          tag="h3"
+          size="md"
+          weight="medium"
+          class="text-muted-800 dark:text-white"
+        >
           تایید حذف همه عوامل خطر
         </BaseHeading>
         <div class="flex items-center gap-2">
@@ -597,7 +808,11 @@
         <BaseButton @click="isDeleteAllRiskFactorsModalOpen = false">
           انصراف
         </BaseButton>
-        <BaseButton color="danger" :loading="isDeletingAllRiskFactors" @click="confirmDeleteAllRiskFactors">
+        <BaseButton
+          color="danger"
+          :loading="isDeletingAllRiskFactors"
+          @click="confirmDeleteAllRiskFactors"
+        >
           حذف همه
         </BaseButton>
       </div>

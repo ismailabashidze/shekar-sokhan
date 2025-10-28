@@ -169,7 +169,7 @@ const filterOptions = [
         <div class="mb-3 sm:hidden">
           <ClientOnly>
             <!-- Mobile Status Bar -->
-            <div class="dark:bg-muted-800 flex items-center justify-between rounded-lg bg-white p-2.5 shadow-sm">              
+            <div class="dark:bg-muted-800 flex items-center justify-between rounded-lg bg-white p-2.5 shadow-sm">
               <!-- Connection Status -->
               <div v-if="isMounted && !isLoading" class="flex items-center gap-2">
                 <div
@@ -361,7 +361,7 @@ const filterOptions = [
               v-if="isMounted && unreadCount > 0"
               size="sm"
               variant="solid"
-              class="from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 flex-1 bg-gradient-to-r px-2 py-2 shadow-lg transition-all duration-200"
+              class="from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 flex-1 bg-gradient-to-r p-2 shadow-lg transition-all duration-200"
               @click="markAllAsRead"
             >
               <Icon name="ph:check-circle" class="size-3.5" />
@@ -578,7 +578,7 @@ const filterOptions = [
                     <!-- Notification icon -->
                     <div class="shrink-0">
                       <div
-                        class="flex size-9 items-center justify-center rounded-lg shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg sm:size-10 md:size-11 sm:rounded-xl"
+                        class="flex size-9 items-center justify-center rounded-lg shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg sm:size-10 sm:rounded-xl md:size-11"
                         :class="[
                           notification.type === 'success' ? 'from-success-100 to-success-200 dark:from-success-900/20 dark:to-success-800/30 bg-gradient-to-br' :
                           notification.type === 'warning' ? 'from-warning-100 to-warning-200 dark:from-warning-900/20 dark:to-warning-800/30 bg-gradient-to-br' :

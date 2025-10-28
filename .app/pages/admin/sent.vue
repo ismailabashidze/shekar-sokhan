@@ -5,7 +5,7 @@ import PersianCalendar from '~/components/PersianCalendar.vue'
 definePageMeta({
   title: 'اعلان‌های ارسال شده',
   layout: 'sidebar',
-  middleware: 'admin',
+  // Using global middlewares only
 })
 
 useHead({

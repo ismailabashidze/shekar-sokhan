@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const { 
-  lockApp, 
-  hasPin, 
+const {
+  lockApp,
+  hasPin,
   isAppLocked,
   autoLockTimer,
   remainingTime,
@@ -60,9 +60,9 @@ const strokeDashoffset = computed(() => {
 <template>
   <div v-if="shouldShow" class="relative inline-block">
     <!-- Spinning progress ring (only if timer active) -->
-    <svg 
-      v-if="autoLockTimer && !isAppLocked" 
-      class="absolute inset-0 -rotate-90 size-12"
+    <svg
+      v-if="autoLockTimer && !isAppLocked"
+      class="absolute inset-0 size-12 -rotate-90"
       viewBox="0 0 48 48"
     >
       <!-- Background circle -->
@@ -88,11 +88,11 @@ const strokeDashoffset = computed(() => {
         stroke-linecap="round"
       />
     </svg>
-    
+
     <!-- Lock button (existing design) -->
     <button
       :disabled="isLocking"
-      class="relative z-10 bg-warning-500 hover:bg-warning-600 flex size-12 flex-col items-center justify-center rounded-full text-white shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50"
+      class="bg-warning-500 hover:bg-warning-600 relative z-10 flex size-12 flex-col items-center justify-center rounded-full text-white shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50"
       :title="isLocking ? 'در حال قفل کردن...' : 'قفل کردن برنامه'"
       @click="handleLock"
     >
@@ -106,10 +106,10 @@ const strokeDashoffset = computed(() => {
         name="line-md:loading-twotone-loop"
         class="size-6"
       />
-      
+
       <!-- Countdown timer text (only if timer active) -->
-      <span 
-        v-if="autoLockTimer && remainingTime > 0" 
+      <span
+        v-if="autoLockTimer && remainingTime > 0"
         class="absolute bottom-0.5 text-[9px] font-medium leading-none"
       >
         {{ formatTime(remainingTime) }}

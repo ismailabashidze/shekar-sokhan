@@ -18,7 +18,7 @@ watch([isAppLocked, user, () => route.path], ([locked, currentUser, currentPath]
     console.log('🔒 [App.vue] Lock enforced - Redirecting to /lock from:', currentPath)
     router.replace('/lock')
   }
-  
+
   // If not locked but on lock page, redirect to dashboard
   if (currentUser && !locked && currentPath === '/lock') {
     console.log('🔓 [App.vue] Not locked - Redirecting to /dashboard from /lock')
@@ -33,6 +33,7 @@ router.beforeEach((to, from) => {
     return '/lock'
   }
 })
+
 </script>
 
 <template>

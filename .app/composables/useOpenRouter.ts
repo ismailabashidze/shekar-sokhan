@@ -119,7 +119,7 @@ const GENERIC_RETRY_DELAY_MS = 1000
 const ABORT_FLAG = '__REQUEST_ABORTED__'
 const TIMEOUT_FLAG = '__REQUEST_TIMEOUT__'
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const patientDetailsSchema = {
   type: 'object',
   properties: {
@@ -225,17 +225,18 @@ function createAbortManager(
     if (external.aborted) {
       externalAborted = true
       controller.abort()
-    } else {
+    }
+    else {
       external.addEventListener('abort', onExternalAbort, { once: true })
     }
   }
 
-  const timeoutId =
-    timeoutMs > 0
+  const timeoutId
+    = timeoutMs > 0
       ? setTimeout(() => {
-          timedOut = true
-          controller.abort()
-        }, timeoutMs)
+        timedOut = true
+        controller.abort()
+      }, timeoutMs)
       : null
 
   const cleanup = () => {
@@ -265,7 +266,8 @@ async function buildHttpError(response: Response): Promise<Error> {
       if (message) {
         return new Error(`HTTP ${response.status}: ${message}`)
       }
-    } catch {
+    }
+    catch {
       // ignore JSON parse issues and fall back to raw text
     }
     return new Error(`HTTP ${response.status}: ${text}`)
@@ -299,16 +301,17 @@ async function requestWithRetry(
 
       if (response.status === 429 && attempt < maxAttempts) {
         abortManager.cleanup()
-        const delay =
-          RATE_LIMIT_DELAYS[attempt - 1] ??
-          RATE_LIMIT_DELAYS[RATE_LIMIT_DELAYS.length - 1]
+        const delay
+          = RATE_LIMIT_DELAYS[attempt - 1]
+          ?? RATE_LIMIT_DELAYS[RATE_LIMIT_DELAYS.length - 1]
         await wait(delay)
         continue
       }
 
       abortManager.cleanup()
       throw await buildHttpError(response)
-    } catch (error: any) {
+    }
+    catch (error: any) {
       abortManager.cleanup()
 
       if (abortManager.controller.signal.aborted) {
@@ -355,7 +358,8 @@ function safeParseJson<T = any>(raw: string): T {
 
   try {
     return JSON.parse(cleaned) as T
-  } catch (parseError: any) {
+  }
+  catch (parseError: any) {
     let fixedContent = cleaned
     const quoteCount = (fixedContent.match(/"/g) || []).length
 
@@ -364,9 +368,9 @@ function safeParseJson<T = any>(raw: string): T {
       if (lastQuoteIndex > -1) {
         const afterQuote = fixedContent.substring(lastQuoteIndex + 1)
         if (
-          afterQuote.trim() === '' ||
-          afterQuote.trim().startsWith('}') ||
-          afterQuote.trim().startsWith(']')
+          afterQuote.trim() === ''
+          || afterQuote.trim().startsWith('}')
+          || afterQuote.trim().startsWith(']')
         ) {
           fixedContent = `${fixedContent.substring(
             0,
@@ -402,7 +406,8 @@ function safeParseJson<T = any>(raw: string): T {
 
       if (char === '{' || char === '[') {
         braceStack.push(char)
-      } else if (char === '}' || char === ']') {
+      }
+      else if (char === '}' || char === ']') {
         if (braceStack.length > 0) {
           braceStack.pop()
         }
@@ -413,14 +418,16 @@ function safeParseJson<T = any>(raw: string): T {
       const lastOpen = braceStack.pop()
       if (lastOpen === '{') {
         fixedContent += '}'
-      } else if (lastOpen === '[') {
+      }
+      else if (lastOpen === '[') {
         fixedContent += ']'
       }
     }
 
     try {
       return JSON.parse(fixedContent) as T
-    } catch (fixedParseError: any) {
+    }
+    catch (fixedParseError: any) {
       throw new Error(
         `Invalid JSON response even after fixing: ${fixedParseError.message}. Original error: ${parseError.message}`,
       )
@@ -512,7 +519,8 @@ async function readStreamResponse(
           fullResponse += delta.content
           onChunk(delta.content)
         }
-      } catch {
+      }
+      catch {
         // ignore malformed chunks
       }
     }
@@ -527,11 +535,13 @@ async function readStreamResponse(
       if (done) {
         streamCompleted = true
         processBuffer(true)
-      } else {
+      }
+      else {
         processBuffer(false)
       }
     }
-  } finally {
+  }
+  finally {
     reader.releaseLock()
   }
 
@@ -781,8 +791,8 @@ function postProcessResponse(
 
   // Emoji injection
   if (
-    config.post_processing.enable_emoji_injection &&
-    config.post_processing.emoji_density > 0
+    config.post_processing.enable_emoji_injection
+    && config.post_processing.emoji_density > 0
   ) {
     processedResponse = injectEmojis(
       processedResponse,
@@ -921,7 +931,8 @@ async function handleMultiMessageResponse(
         originalMessages,
         retryCallback,
       )
-    } catch {
+    }
+    catch {
       onChunk(postProcessResponse(response, config))
     }
   }
@@ -929,7 +940,8 @@ async function handleMultiMessageResponse(
   let parsed: any
   try {
     parsed = safeParseJson<any>(response)
-  } catch {
+  }
+  catch {
     await handleInvalidStructure()
     return
   }
@@ -951,7 +963,8 @@ async function handleMultiMessageResponse(
     if (i > 0 && typingConfig.enableTypingEffect) {
       try {
         await waitForDelay(typingConfig.messageDelay, typingConfig.signal)
-      } catch (delayError) {
+      }
+      catch (delayError) {
         throw normalizeRequestError(
           delayError,
           'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.',
@@ -987,10 +1000,10 @@ export function useOpenRouter() {
     if (!searchQuery.value) return allModels.value
     const query = searchQuery.value.toLowerCase()
     return allModels.value.filter(
-      (model) =>
-        model.name.toLowerCase().includes(query) ||
-        model.id.toLowerCase().includes(query) ||
-        model.description.toLowerCase().includes(query),
+      model =>
+        model.name.toLowerCase().includes(query)
+        || model.id.toLowerCase().includes(query)
+        || model.description.toLowerCase().includes(query),
     )
   })
 
@@ -998,10 +1011,10 @@ export function useOpenRouter() {
     loading.value = true
     error.value = null
     try {
-      const response = await requestWithRetry((signal) =>
+      const response = await requestWithRetry(signal =>
         fetch(`${OPENROUTER_BASE_URL}/models`, {
           headers: {
-            Authorization: `Bearer ${config.public.openRouterApiKey}`,
+            'Authorization': `Bearer ${config.public.openRouterApiKey}`,
             'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
           },
           signal,
@@ -1014,7 +1027,8 @@ export function useOpenRouter() {
       }
 
       allModels.value = data.data
-    } catch (e) {
+    }
+    catch (e) {
       const normalized = normalizeRequestError(
         e,
         'Request aborted',
@@ -1023,7 +1037,8 @@ export function useOpenRouter() {
       error.value = normalized.message
       allModels.value = []
       console.error('Error fetching models:', normalized)
-    } finally {
+    }
+    finally {
       loading.value = false
     }
   }
@@ -1180,7 +1195,7 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
 
     const headers = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.public.openRouterApiKey}`,
+      'Authorization': `Bearer ${config.public.openRouterApiKey}`,
       'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
       'X-Title': 'Therapist Chat',
     }
@@ -1199,7 +1214,8 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
 
       if (aiConfig?.response_format?.type === 'json_object') {
         payload.response_format = { type: 'json_object' }
-      } else if (aiConfig?.response_format) {
+      }
+      else if (aiConfig?.response_format) {
         payload.response_format = aiConfig.response_format
       }
 
@@ -1208,7 +1224,7 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
 
     const requestChat = (payloadMessages: ChatMessage[]) =>
       requestWithRetry(
-        (signal) =>
+        signal =>
           fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
             method: 'POST',
             headers,
@@ -1241,7 +1257,7 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
           messagesWithSystem,
           async (retryMessages: ChatMessage[]) => {
             const retryResponse = await requestWithRetry(
-              (signal) =>
+              signal =>
                 fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
                   method: 'POST',
                   headers,
@@ -1261,11 +1277,11 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
         return fullResponse
       }
 
-      const fullResponse = await readStreamResponse(response, (chunk) =>
+      return await readStreamResponse(response, chunk =>
         onChunk(chunk),
       )
-      return fullResponse
-    } catch (e) {
+    }
+    catch (e) {
       const normalized = normalizeRequestError(
         e,
         'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.',
@@ -1273,7 +1289,8 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
       )
       error.value = normalized.message
       throw normalized
-    } finally {
+    }
+    finally {
       processing.value = false
     }
   }
@@ -1296,12 +1313,12 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
       const messagesWithSystem: ChatMessage[] = [systemPrompt, lastMessage]
 
       const response = await requestWithRetry(
-        (signal) =>
+        signal =>
           fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${config.public.openRouterApiKey}`,
+              'Authorization': `Bearer ${config.public.openRouterApiKey}`,
               'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
               'X-Title':
                 'An Inline Analysis Generator to help therapists be more align with the needs of patients',
@@ -1471,10 +1488,9 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
       const data = await response.json()
       const content = data.choices?.[0]?.message?.content
 
-      const result =
-        typeof content === 'string' ? safeParseJson(content) : content
-      return result
-    } catch (e) {
+      return typeof content === 'string' ? safeParseJson(content) : content
+    }
+    catch (e) {
       const normalized = normalizeRequestError(
         e,
         'زمان پاسخ‌دهی به پایان رسید. لطفا دوباره تلاش کنید.',
@@ -1482,7 +1498,8 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
       )
       error.value = normalized.message
       throw normalized
-    } finally {
+    }
+    finally {
       processing.value = false
     }
   }
@@ -1508,12 +1525,12 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
       attempt++
       try {
         const response = await requestWithRetry(
-          (signalArg) =>
+          signalArg =>
             fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${config.public.openRouterApiKey}`,
+                'Authorization': `Bearer ${config.public.openRouterApiKey}`,
                 'HTTP-Referer': config.public.appUrl || 'http://localhost:4000',
                 'X-Title': 'Structured Analysis Generator',
               },
@@ -1550,7 +1567,8 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
         }
 
         return content
-      } catch (e) {
+      }
+      catch (e) {
         const normalized = normalizeRequestError(
           e,
           'درخواست توسط کاربر متوقف شد',
@@ -1560,8 +1578,8 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
         lastError = normalized
 
         if (
-          normalized.message === 'درخواست توسط کاربر متوقف شد' ||
-          normalized.message === 'زمان پاسخ‌دهی به پایان رسید'
+          normalized.message === 'درخواست توسط کاربر متوقف شد'
+          || normalized.message === 'زمان پاسخ‌دهی به پایان رسید'
         ) {
           error.value = normalized.message
           throw normalized
@@ -1576,8 +1594,8 @@ CRITICAL: هرگز از جملات کلیشه‌ای، تکراری و بی‌م
       }
     }
 
-    const fallbackError =
-      lastError || new Error('Structured request failed without specific error')
+    const fallbackError
+      = lastError || new Error('Structured request failed without specific error')
     error.value = fallbackError.message
     throw fallbackError
   }
@@ -1625,11 +1643,13 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
       })
 
       return result as PatientGenerateOutput
-    } catch (e) {
+    }
+    catch (e) {
       const err = e instanceof Error ? e : new Error(String(e))
       error.value = err.message
       throw err
-    } finally {
+    }
+    finally {
       processing.value = false
     }
   }
@@ -1664,11 +1684,13 @@ longDescription, definingTraits, backStory, personality, appearance, motivation,
       })
 
       return result as TherapistGenerateOutput
-    } catch (e) {
+    }
+    catch (e) {
       const err = e instanceof Error ? e : new Error(String(e))
       error.value = err.message
       throw err
-    } finally {
+    }
+    finally {
       processing.value = false
     }
   }

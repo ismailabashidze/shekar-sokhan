@@ -1,7 +1,6 @@
 # Zehna - Mental Health & Therapy Platform
 
 [![Nuxt](https://img.shields.io/badge/Nuxt-3.11.2-00DC82?logo=nuxt.js)](https://nuxt.com)
-[![Firebase](https://img.shields.io/badge/Firebase-FCM-FFCA28?logo=firebase)](https://firebase.google.com)
 [![PocketBase](https://img.shields.io/badge/PocketBase-Backend-B8DBE4)](https://pocketbase.io)
 
 ## 🎯 Overview
@@ -11,7 +10,7 @@ Zehna (ذهنا) is a comprehensive mental health and therapy management platfor
 ### Key Features
 
 - 🤖 **AI-Powered Therapy** - Intelligent conversational therapy with Mana
-- 🔔 **Smart Notifications** - Firebase-powered push notifications (works when app is closed!)
+- 🔔 **Smart Notifications** - PWA-powered push notifications (works when app is closed!)
 - 📅 **Flexible Scheduling** - Schedule notifications from minutes to months
 - 🔐 **Advanced Security** - 5-layer lock system with PIN protection
 - 📊 **Session Analysis** - Comprehensive AI analysis of therapy sessions
@@ -95,7 +94,6 @@ This will run the `dev` script from the `package.json` file.
 
 ### Notification System
 - **[Quick Start Guide](NOTIFICATIONS_QUICKSTART.md)** - Get notifications working in 30 minutes
-- **[Firebase Setup](FIREBASE_SETUP.md)** - Complete Firebase Cloud Messaging setup
 - **[Scheduling Guide](NOTIFICATION_SCHEDULING.md)** - How to configure flexible timing
 
 ### System Documentation
@@ -107,7 +105,6 @@ This will run the `dev` script from the `package.json` file.
 - [Tairo Documentation](https://tairo.cssninja.io/documentation)
 - [Shuriken UI Documentation](https://shurikenui.com)
 - [Nuxt 3 Documentation](https://nuxt.com/docs)
-- [Firebase Documentation](https://firebase.google.com/docs)
 - [PocketBase Documentation](https://pocketbase.io/docs)
 
 ## 🚀 Deployment
@@ -122,10 +119,7 @@ pnpm run build
 .app/dist
 
 # Environment variables required
-FIREBASE_API_KEY=your_key
-FIREBASE_PROJECT_ID=your_project
-FIREBASE_VAPID_KEY=your_vapid_key
-# ... (see .env.example)
+# (see .env.example)
 ```
 
 ## 🤝 Contributing

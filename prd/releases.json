@@ -1,65 +1,14 @@
 [
   {
-    "version": "3.3.1",
-    "releaseDate": "2025-09-20",
-    "product": {
-      "codename": "Vision Sync",
-      "summary": "عرضه سیستم یکپارچه مدیریت نسخه و اطلاع رسانی تغییرات برای کاربران و تیم محصول.",
-      "highlights": [
-        "کارت نسخه در اپلیکیشن اکنون همیشه مقدار دقیق نسخه را از پیکربندی دریافت می‌کند.",
-        "صفحه تاریخچه تغییرات به صورت پویا از داده‌های محصولی تغذیه می‌شود.",
-        "کاربران می‌توانند جزئیات مهم هر نسخه را در چند دسته‌بندی مشاهده کنند."
-      ]
-    },
-    "technical": {
-      "changes": [
-        "هماهنگ‌سازی خودکار نسخه بین package.json های ریشه و اپلیکیشن، مانیفست PWA و سرویس ورکر.",
-        "افزودن API داخلی برای ارائه داده‌های changelog و مصرف آن در Nuxt.",
-        "بازنویسی صفحه changelog جهت رندر مبتنی بر داده و گروه‌بندی محصول/فنی."
-      ],
-      "fixes": [
-        "حذف fallback های ناسازگار نسخه در useAppVersion و ثبت لاگ‌های غیرضروری.",
-        "تنظیم یکسان نسخه cache سرویس ورکر با نسخه محصول.",
-        "بهبود اسکریپت همگام‌سازی نسخه برای اعتبارسنجی داده‌های محصولی."
-      ]
-    },
-    "rollout": {
-      "announcement": "پس از انتشار، کاربران نسخه جدید را در گوشه پایین مشاهده می‌کنند و لینک مستقیم changelog فعال است.",
-      "checks": [
-        "اجرای build اپلیکیشن با نسخه جدید",
-        "بازنویسی سرویس ورکر و پاک‌سازی cache قبلی"
-      ]
-    }
-  },
-  {
-    "version": "3.3.0",
-    "releaseDate": "2025-09-14",
-    "product": {
-      "codename": "Cache Master",
-      "summary": "بهبود عملکرد PWA و نمایش اعلان‌های نسخه جدید برای کاربران.",
-      "highlights": [
-        "زمان بارگذاری صفحه اصلی تا ۱۴٪ کاهش یافت.",
-        "اعلان به‌روزرسانی در گوشه صفحه کاربران دسکتاپ نمایش داده می‌شود.",
-        "بهبود تجربه کاربری در صفحه changelog با مرتب‌سازی زمانی."
-      ]
-    },
-    "technical": {
-      "changes": [
-        "بازسازی استراتژی cache سرویس ورکر برای دارایی‌های استاتیک.",
-        "بهینه‌سازی manifest جهت پشتیبانی بهتر از دستگاه‌های قدیمی.",
-        "همگام‌سازی تنظیمات PWA با نسخه جدید." 
-      ],
-      "fixes": [
-        "رفع اشکال محاسبه نسخه در نمایشگر نسخه.",
-        "رفع ناهماهنگی نسخه در فایل‌های build." 
-      ]
-    },
-    "rollout": {
-      "announcement": "لطفا بعد از نصب نسخه جدید cache های قبلی را پاک کنید.",
-      "checks": [
-        "تست دستی PWA",
-        "بررسی نصب در اندروید"
-      ]
-    }
+    "version": "1.0.0",
+    "releaseDate": "2025-01-26",
+    "product": "Initial release of the Zehna therapy platform with comprehensive mental health support features.",
+    "technical": "Core platform implementation with Nuxt 3, TypeScript, and Tailwind CSS. Includes user authentication, therapy session management, and AI-powered analysis.",
+    "rollout": [
+      "Deploy production environment",
+      "Configure monitoring and alerting",
+      "Test core functionality with pilot users",
+      "Prepare user documentation"
+    ]
   }
 ]

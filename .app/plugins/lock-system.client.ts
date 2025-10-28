@@ -1,8 +1,8 @@
 export default defineNuxtPlugin((nuxtApp) => {
   // Initialize lock system on app start
   if (process.client) {
-    const { 
-      isAppLocked, 
+    const {
+      isAppLocked,
       syncPinFromServer,
       autoLockTimer,
       startInactivityMonitor,
@@ -26,7 +26,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       if (currentUserId.value && authStore?.isValid) {
         try {
           await syncPinFromServer(currentUserId.value)
-          
+
           // Start inactivity monitor if auto-lock timer is configured
           if (autoLockTimer.value && hasPin.value && !isAppLocked.value) {
             console.log('🔒 Starting inactivity monitor with timer:', autoLockTimer.value)
