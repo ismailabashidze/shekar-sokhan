@@ -17,146 +17,14 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 // Import user composable
 const { user } = useUser()
 const { getUserAvatarUrl } = useAvatarManager()
+const { ZONE_CONFIGS } = useZones()
 
-const activePosts = ref('recent')
 const showFeatures = ref(true)
-const featuredVideos = [
-  {
-    id: 1,
-    title: 'مراقبه روان شناختی و نحوه ی انجام آن',
-    slug: '/videos/1',
-    cover: '/img/illustrations/dashboards/video/1.png',
-    uploaded: 'دو ساعت پیش',
-    category: 'آموزشی',
-    author: {
-      name: 'علی بهرامی',
-      avatar: '/img/avatars/16.svg',
-    },
-  },
-  {
-    id: 2,
-    title: 'خودشفقتی و مهربانی با خود',
-    slug: '/videos/2',
-    cover: '/img/illustrations/dashboards/video/2.jpg',
-    uploaded: 'شش ساعت پیش',
-    category: 'درمان',
-    author: {
-      name: 'کاملیا مرادزاده',
-      avatar: '/img/avatars/10.svg',
-    },
-  },
-  {
-    id: 3,
-    title: 'مکانیزم های دفاعی',
-    slug: '/videos/3',
-    cover: '/img/illustrations/dashboards/video/3.png',
-    uploaded: 'دیروز',
-    category: 'آموزشی',
-    author: {
-      name: 'دکتر مرتضی زهرایی',
-      avatar: '/img/avatars/12.svg',
-    },
-  },
-  {
-    id: 4,
-    title: 'رویکرد مبتنی بر تمرکز در درمان',
-    slug: '/videos/4',
-    cover: '/img/illustrations/dashboards/video/4.png',
-    uploaded: 'دو روز پیش',
-    category: 'درمان',
-    author: {
-      name: 'علیرضا پرخانی',
-      avatar: '/img/avatars/17.svg',
-    },
-  },
-  {
-    id: 5,
-    title: 'اصول مشاوره',
-    slug: '/videos/5',
-    cover: '/img/illustrations/dashboards/video/5.png',
-    uploaded: 'هفته پیش',
-    category: 'درمان',
-    author: {
-      name: 'مریم ترابی',
-      avatar: '/img/avatars/2.svg',
-    },
-  },
-]
-
-const demoAreaMulti = reactive(useDemoAreaMulti())
-
-function useDemoAreaMulti() {
-  const { primary, info, success } = useTailwindColors()
-  const type = 'area'
-  const height = 160
-
-  const options = {
-    chart: {
-      toolbar: {
-        show: false,
-      },
-    },
-    colors: [primary.value, info.value, success.value],
-    title: {
-      text: '',
-      align: 'left',
-    },
-    legend: {
-      position: 'top',
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      width: [2, 2, 2],
-      curve: 'smooth',
-    },
-    xaxis: {
-      type: 'datetime',
-      categories: [
-        '2018-09-19T00:00:00.000Z',
-        '2018-09-19T01:30:00.000Z',
-        '2018-09-19T02:30:00.000Z',
-        '2018-09-19T03:30:00.000Z',
-        '2018-09-19T04:30:00.000Z',
-        '2018-09-19T05:30:00.000Z',
-        '2018-09-19T06:30:00.000Z',
-      ],
-    },
-    tooltip: {
-      x: {
-        format: 'dd/MM/yy HH:mm',
-      },
-    },
-  }
-
-  const series = shallowRef([
-    {
-      name: 'تکمیل شده',
-      data: [31, 120, 28, 51, 42, 109, 100],
-    },
-    {
-      name: 'در انتظار',
-      data: [11, 32, 45, 140, 34, 52, 41],
-    },
-  ])
-
-  return {
-    type,
-    height,
-    options,
-    series,
-  }
-}
-
-// Alpha state modal
 const showAlphaModal = ref(false)
-const bugReportIconRef = ref(null)
 
 onMounted(() => {
   // Check if the alpha modal has been shown before
   const alphaModalShown = localStorage.getItem('alphaModalShown')
-
   if (!alphaModalShown) {
     // Show the modal after a short delay
     setTimeout(() => {
@@ -171,12 +39,53 @@ const closeAlphaModal = () => {
   localStorage.setItem('alphaModalShown', 'true')
 }
 
+// Convert to computed to ensure reactivity with user.zones changes
+const zoneColor = computed(() => {
+  return (zone: string) => {
+    if (!user.value || !user.value.zones || !Array.isArray(user.value.zones)) {
+      return 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'
+    }
+    if (user.value.zones.includes(zone)) {
+      return 'border-green-200 bg-green-50 dark:border-green-700 dark:bg-green-800/50'
+    }
+    return 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'
+  }
+})
+
+// Icon container and icon colors based on zone access
+const zoneIconColor = computed(() => {
+  return (zone: string) => {
+    if (!user.value || !user.value.zones || !Array.isArray(user.value.zones)) {
+      return {
+        container: 'bg-gray-300 dark:bg-gray-600',
+        icon: 'text-gray-600 dark:text-gray-300',
+        text: 'text-gray-600 dark:text-gray-400'
+      }
+    }
+    if (user.value.zones.includes(zone)) {
+      return {
+        container: 'bg-green-200 dark:bg-green-700',
+        icon: 'text-green-700 dark:text-green-200',
+        text: 'text-green-700 dark:text-green-200'
+      }
+    }
+    return {
+      container: 'bg-gray-300 dark:bg-gray-600',
+      icon: 'text-gray-600 dark:text-gray-300',
+      text: 'text-gray-600 dark:text-gray-400'
+    }
+  }
+})
 </script>
 
 <template>
   <div class="relative">
     <!-- Alpha State Modal -->
-    <TairoModal :open="showAlphaModal" size="lg" @close="closeAlphaModal">
+    <TairoModal
+      :open="showAlphaModal"
+      size="lg"
+      @close="closeAlphaModal"
+    >
       <template #header>
         <div class="flex w-full items-center justify-between p-4 sm:p-5">
           <div class="flex items-center gap-2">
@@ -211,7 +120,8 @@ const closeAlphaModal = () => {
         <div class="mb-6 flex items-center justify-center">
           <div class="border-muted-200 dark:border-muted-700 flex items-center gap-4 rounded-xl border p-4">
             <div
-              class="flex size-12 cursor-pointer items-center justify-center rounded-2xl bg-yellow-500/20 text-yellow-500 transition-colors duration-300 hover:bg-yellow-500/30 hover:text-yellow-500">
+              class="flex size-12 cursor-pointer items-center justify-center rounded-2xl bg-yellow-500/20 text-yellow-500 transition-colors duration-300 hover:bg-yellow-500/30 hover:text-yellow-500"
+            >
               <Icon name="ph:bug" class="size-5" />
             </div>
             <div class="flex flex-col items-start">
@@ -247,25 +157,33 @@ const closeAlphaModal = () => {
       <!-- Grid -->
       <div class="grid grid-cols-12 gap-6">
         <!-- Main Content Column -->
-        <div :class="showFeatures ? 'ltablet:col-span-8 lg:col-span-8' : 'ltablet:col-span-12 lg:col-span-12'"
-          class="col-span-12 mb-3">
+        <div
+          :class="showFeatures ? 'ltablet:col-span-8 lg:col-span-8' : 'ltablet:col-span-12 lg:col-span-12'"
+          class="col-span-12 mb-3"
+        >
           <!-- Inner grid -->
           <div class="grid grid-cols-12 gap-6">
             <!-- Header -->
             <div class="col-span-12" data-tour="welcome-section">
               <div class="bg-primary-800 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
                 <div class="relative h-[150px] w-[320px] shrink-0 sm:h-[175px]">
-                  <img class="pointer-events-none absolute start-0 top-0 sm:-start-10"
-                    src="/img/illustrations/dashboards/writer/readers.png" alt="Readers illustration">
+                  <img
+                    class="pointer-events-none absolute start-0 top-0 sm:-start-10"
+                    src="/img/illustrations/dashboards/writer/readers.png"
+                    alt="Readers illustration"
+                  >
                 </div>
                 <div class="mt-[80px] grow sm:mt-0">
                   <div class="pb-4 text-center sm:pb-0 sm:text-right">
                     <BaseHeading tag="h1" class="text-white opacity-90">
                       <span class="flex items-center justify-center gap-2 sm:justify-start">
                         سلام،
-                        <BaseAvatar :src="getUserAvatarUrl(user) || '/img/avatars/default-male.jpg'"
-                          :text="user?.meta?.name?.substring(0, 2) || 'کا'" size="xs"
-                          class="inline-block align-middle" />
+                        <BaseAvatar
+                          :src="getUserAvatarUrl(user) || '/img/avatars/default-male.jpg'"
+                          :text="user?.meta?.name?.substring(0, 2) || 'کا'"
+                          size="xs"
+                          class="inline-block align-middle"
+                        />
                         <span>{{ user?.meta?.name || 'کاربر عزیز' }} ! 👋</span>
                       </span>
                     </BaseHeading>
@@ -287,21 +205,69 @@ const closeAlphaModal = () => {
                         <Icon name="lucide:users" class="ml-2 size-4" />
                         <span>مراجعین</span>
                       </BaseButton> -->
-                      <BaseButton size="sm" color="light" variant="outline" class="w-full sm:w-auto"
-                        to="/darmana/therapists/sessions" data-tour="therapists-button">
+                      <BaseButton
+                        size="sm"
+                        color="light"
+                        variant="outline"
+                        class="w-full sm:w-auto"
+                        to="/darmana/therapists/sessions"
+                        data-tour="therapists-button"
+                      >
                         <Icon name="ph:chat-circle-text-duotone" class="ml-2 size-4" />
                         <span>گفت و گوی آزاد</span>
                       </BaseButton>
-                      <BaseButton size="sm" color="light" variant="outline" class="w-full sm:w-auto"
-                        to="/therapy-journey/welcome" data-tour="therapists-button">
+                      <BaseButton
+                        size="sm"
+                        color="light"
+                        variant="outline"
+                        class="w-full sm:w-auto"
+                        to="/coming-soon"
+                        data-tour="therapists-button"
+                      >
                         <Icon name="ph:stethoscope" class="ml-2 size-4" />
                         <span>گفت و گوی درمانی</span>
                       </BaseButton>
-
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- All Zones Section -->
+            <div class="col-span-12">
+              <BaseCard rounded="lg" class="p-4">
+                <div class="mb-4">
+                  <BaseHeading
+                    as="h3"
+                    size="sm"
+                    weight="semibold"
+                    lead="tight"
+                    class="text-muted-800 dark:text-white"
+                  >
+                    تمام مناطق
+                  </BaseHeading>
+                </div>
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
+                  <ClientOnly>
+                    <div v-for="(zone, key) in ZONE_CONFIGS" :key="key">
+                      <div class="flex items-center gap-2 rounded-lg border p-3" :class="zoneColor(zone.name)">
+                        <div class="flex size-8 items-center justify-center rounded-lg" :class="zoneIconColor(zone.name).container">
+                          <Icon :name="zone.icon" class="size-4" :class="zoneIconColor(zone.name).icon" />
+                        </div>
+                        <div class="flex flex-col gap-1">
+                          <BaseText
+                            size="xs"
+                            weight="semibold"
+                            :class="zoneIconColor(zone.name).text"
+                          >
+                            {{ zone.label }}
+                          </BaseText>
+                        </div>
+                      </div>
+                    </div>
+                  </ClientOnly>
+                </div>
+              </BaseCard>
             </div>
 
             <!-- Content -->
@@ -310,20 +276,32 @@ const closeAlphaModal = () => {
               <div class="grid grid-cols-12 gap-6">
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
-                    <InfoImage rounded="lg" image="/img/illustrations/widgets/5.svg" title="استفاده آسان"
-                      text="پیشنهادات هوشمندانه را برای شما ارسال می کند" />
+                    <InfoImage
+                      rounded="lg"
+                      image="/img/illustrations/widgets/5.svg"
+                      title="استفاده آسان"
+                      text="پیشنهادات هوشمندانه را برای شما ارسال می کند"
+                    />
                   </BaseCard>
                 </div>
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
-                    <InfoImage rounded="lg" image="/img/illustrations/widgets/6.svg" title="مشاور روان"
-                      text="می توانید به آسانی با یک مشاور صحبت کنید" />
+                    <InfoImage
+                      rounded="lg"
+                      image="/img/illustrations/widgets/6.svg"
+                      title="مشاور روان"
+                      text="می توانید به آسانی با یک مشاور صحبت کنید"
+                    />
                   </BaseCard>
                 </div>
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
-                    <InfoImage rounded="lg" image="/img/illustrations/widgets/1.png" title="برنامه ریزی و اجرا"
-                      text="برای کارتان برنامه ریزی کنید" />
+                    <InfoImage
+                      rounded="lg"
+                      image="/img/illustrations/widgets/1.png"
+                      title="برنامه ریزی و اجرا"
+                      text="برای کارتان برنامه ریزی کنید"
+                    />
                   </BaseCard>
                 </div>
                 <!-- <div class="col-span-4">
@@ -355,13 +333,26 @@ const closeAlphaModal = () => {
         <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
           <!-- New Features Section -->
           <div class="col-span-12">
-            <Transition name="features" leave-active-class="transition origin-top duration-75 ease-in"
-              leave-from-class="transform scale-y-100 opacity-100" leave-to-class="transform scale-y-0 opacity-0">
-              <div v-if="showFeatures" class="w-full" data-tour="new-features">
+            <Transition
+              name="features"
+              leave-active-class="transition origin-top duration-75 ease-in"
+              leave-from-class="transform scale-y-100 opacity-100"
+              leave-to-class="transform scale-y-0 opacity-0"
+            >
+              <div
+                v-if="showFeatures"
+                class="w-full"
+                data-tour="new-features"
+              >
                 <!--Features widget-->
                 <NewFeatures>
                   <template #actions>
-                    <BaseButtonClose size="sm" color="muted" data-nui-tooltip="بستن" @click="showFeatures = false" />
+                    <BaseButtonClose
+                      size="sm"
+                      color="muted"
+                      data-nui-tooltip="بستن"
+                      @click="showFeatures = false"
+                    />
                   </template>
                 </NewFeatures>
               </div>
