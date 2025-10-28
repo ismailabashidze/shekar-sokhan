@@ -19,16 +19,6 @@ export default defineAppConfig({
       },
     ],
     sidebar: {
-      // toolbar: {
-      //   tools: [
-      //     {
-      //       component: 'DemoThemeToggle',
-      //       props: {
-      //         disableTransitions: false,
-      //       },
-      //     },
-      //   ],
-      // },
       navigation: {
         startOpen: false,
         logo: {
@@ -41,29 +31,19 @@ export default defineAppConfig({
           to: '/dashboard',
         },
         items: [
-          // {
-          //   // Title displayed in the sidebar
-          //   title: 'مراجعان',
-          //   icon: { name: 'ph:chalkboard-teacher', class: 'w-7 h-7' },
-          //   activePath: '/darmana/patients/choosePatient',
-          //   to: '/darmana/patients/choosePatient',
-          //   class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
-          //   click: () => {
-          //   },
-          // },
           {
             title: 'تغییر تم',
             component: 'DemoThemeToggle',
           },
           {
             // Title displayed in the sidebar
-            title: 'گفتگوها',
+            title: 'جلسات',
             icon: { name: 'ph:chats', class: 'w-7 h-7' },
-            activePath: '/darmana/therapists/sessions',
-            to: '/darmana/therapists/sessions',
-            class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
-            click: () => {
-            },
+            activePath: '/hamdel/sessions',
+            to: '/hamdel/sessions',
+            class:
+              'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
+            click: () => {},
           },
           {
             // Title displayed in the sidebar
@@ -71,41 +51,16 @@ export default defineAppConfig({
             icon: { name: 'ph:hands-praying', class: 'w-7 h-7' },
             activePath: '/deeds/start',
             to: '/deeds/start',
-            class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
-            click: () => {
-            },
+            class:
+              'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
+            click: () => {},
           },
-          // {
-          //   // Title displayed in the sidebar
-          //   title: 'ویدیوهای معرفی شده',
-          //   icon: { name: 'ph:video', class: 'w-7 h-7' },
-          //   activePath: '/videos/list',
-          //   to: '/videos/list',
-          //   class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
-          //   click: () => {
-          //   },
-          // },
-          // {
-          //   // Title displayed in the sidebar
-          //   title: 'مقالات',
-          //   icon: { name: 'ph:book', class: 'w-7 h-7' },
-          //   activePath: '/posts/list',
-          //   to: '/posts/list',
-          //   class: 'text-muted-400 hover:text-primary-500 hover:bg-primary-500/20 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300',
-          //   click: () => {
-          //   },
-          // },
           {
             title: 'خانه',
             icon: { name: 'ph:house-duotone', class: 'w-5 h-5' },
             to: '/dashboard',
             position: 'end',
           },
-          // {
-          //   title: 'اعلان‌ها',
-          //   component: 'NotificationIcon',
-          //   position: 'end',
-          // },
           {
             title: 'گزارش باگ',
             component: 'BugReportIcon',

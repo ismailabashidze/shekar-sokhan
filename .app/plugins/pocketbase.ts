@@ -1,4 +1,6 @@
 import PocketBase from 'pocketbase'
+import type { User } from '@/types'
+import { useUser } from '~/composables/user'
 
 export default defineNuxtPlugin(async () => {
   const POCKETBASE_URL = 'https://pocket.zehna.ir'
@@ -28,6 +30,28 @@ export default defineNuxtPlugin(async () => {
   try {
     // get an up-to-date auth store state by verifying and refreshing the loaded auth model (if any)
     pb.authStore.isValid && (await pb.collection('users').authRefresh())
+
+    // Sync user data from PocketBase to localStorage after auth refresh
+    if (pb.authStore.isValid && pb.authStore.model) {
+      const { user, setUser } = useUser()
+      const pbUser = pb.authStore.model as any
+
+      const syncedUser: User = {
+        id: pbUser.id,
+        username: pbUser.username,
+        email: pbUser.email,
+        hasCharge: pbUser.hasCharge,
+        startChargeTime: pbUser.startChargeTime,
+        expireChargeTime: pbUser.expireChargeTime,
+        role: pbUser.role,
+        avatar: pbUser.avatar,
+        meta: pbUser.meta,
+        phoneNumber: pbUser.phoneNumber,
+        zones: pbUser.zones || [],
+      }
+
+      await setUser(syncedUser, 'user')
+    }
   }
   catch (_) {
     // clear the auth store on failed refresh

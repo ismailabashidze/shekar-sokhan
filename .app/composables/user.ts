@@ -26,55 +26,28 @@ export function useUser() {
 
   // Function to update user zones in PocketBase if empty
   const updateEmptyZonesInDatabase = async (userData: User) => {
-    if (!userData.zones || (Array.isArray(userData.zones) && userData.zones.length === 0)) {
+    if (
+      !userData.zones
+      || (Array.isArray(userData.zones) && userData.zones.length === 0)
+    ) {
       try {
-        // Update PocketBase with default zones
-        const updatedRecord = await nuxtApp.$pb.collection('users').update(userData.id as string, {
+        await nuxtApp.$pb.collection('users').update(userData.id as string, {
           zones: ['hamdel'],
         })
 
-        // Update local user object with server response
-        const updatedUser = { ...userData, zones: ['hamdel'] }
+        const updatedUser = {
+          ...userData,
+          zones: ['hamdel'],
+        }
         user.value = updatedUser
-
-        console.log('Updated user zones in PocketBase:', userData.id)
         return updatedUser
       }
       catch (error) {
-        console.error('Failed to update zones in PocketBase:', error)
-        // Fallback: update locally only
-        const fallbackUser = { ...userData, zones: ['hamdel'] }
-        user.value = fallbackUser
-        return fallbackUser
+        console.error(error)
       }
     }
     return userData
   }
-
-  // Watch for empty zones and update database
-  const isUpdatingZones = ref(false)
-
-  watchEffect(async () => {
-    const userData = { ...user.value }
-
-    // Only proceed if we have a user ID and no zones
-    if (userData.id && (!userData.zones || (Array.isArray(userData.zones) && userData.zones.length === 0))) {
-      if (!isUpdatingZones.value) {
-        isUpdatingZones.value = true
-        await updateEmptyZonesInDatabase(userData)
-        isUpdatingZones.value = false
-      }
-    }
-  })
-
-  // Ensure zones are always available as an array
-  const userWithZones = computed(() => {
-    const userData = { ...user.value }
-    return {
-      ...userData,
-      zones: userData.zones || ['hamdel'], // Default to hamdel as fallback
-    }
-  })
 
   const getAllUsers = async () => {
     return await nuxtApp.$pb.collection('users').getFullList({
@@ -87,12 +60,14 @@ export function useUser() {
     role.value = r
     return user
   }
+
   const updateUser = async (u: User) => {
-    const result = await nuxtApp.$pb.collection('users').update(u.id as string, u)
+    const result = await nuxtApp.$pb
+      .collection('users')
+      .update(u.id as string, u)
     // Ensure zones are included in the updated user object
-    const updatedUser = { ...result, zones: result.zones || [] }
-    user.value = updatedUser
-    return updatedUser
+    user.value = result
+    return result
   }
 
   const logout = async () => {
@@ -109,11 +84,12 @@ export function useUser() {
   }
 
   return {
-    user: userWithZones,
+    user,
     role,
     getAllUsers,
     setUser,
     updateUser,
+    updateEmptyZonesInDatabase,
     logout,
   }
 }

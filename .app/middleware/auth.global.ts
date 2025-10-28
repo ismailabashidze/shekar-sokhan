@@ -1,7 +1,24 @@
-// This middleware is now handled by middleware.global.ts
-// Kept for backwards compatibility - logic moved to avoid redirect loops
 export default defineNuxtRouteMiddleware((to, from) => {
-  // Auth logic is now handled in middleware.global.ts
-  // This middleware is kept but does nothing to avoid conflicts
+  const nuxtApp = useNuxtApp()
+
+  // Public paths that don't require authentication
+  const publicPaths = [
+    '/auth',
+    '/publicDomain',
+  ]
+
+  const isPublicPath = publicPaths.some(path => to.path.startsWith(path))
+
+  // If path is public, allow access
+  if (isPublicPath) {
+    return true
+  }
+
+  // Check if user is authenticated
+  if (!nuxtApp.$pb.authStore.isValid || !nuxtApp.$pb.authStore.model?.id) {
+    console.error('User not authenticated, redirecting to login')
+    return navigateTo('/auth/login')
+  }
+
   return true
 })

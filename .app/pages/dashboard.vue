@@ -15,12 +15,22 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: 'rtl' } })
 
 // Import user composable
-const { user } = useUser()
+const { user, role } = useUser()
 const { getUserAvatarUrl } = useAvatarManager()
 const { ZONE_CONFIGS } = useZones()
 
 const showFeatures = ref(true)
 const showAlphaModal = ref(false)
+
+// Filter zones to hide admin if user is not admin
+const visibleZones = computed(() => {
+  const zones = { ...ZONE_CONFIGS }
+  // Hide admin zone if user role is not ADMIN
+  if (role.value !== 'ADMIN') {
+    delete zones.admin
+  }
+  return zones
+})
 
 onMounted(() => {
   // Check if the alpha modal has been shown before
@@ -81,11 +91,7 @@ const zoneIconColor = computed(() => {
 <template>
   <div class="relative">
     <!-- Alpha State Modal -->
-    <TairoModal
-      :open="showAlphaModal"
-      size="lg"
-      @close="closeAlphaModal"
-    >
+    <TairoModal :open="showAlphaModal" size="lg" @close="closeAlphaModal">
       <template #header>
         <div class="flex w-full items-center justify-between p-4 sm:p-5">
           <div class="flex items-center gap-2">
@@ -101,7 +107,7 @@ const zoneIconColor = computed(() => {
       </template>
       <div class="p-4 sm:p-5">
         <BaseParagraph class="mb-4 text-justify">
-          با سلام و احترام، از اینکه به ما اعتماد کرده‌اید و همراه ما هستید، صمیمانه سپاسگزاریم. این پلتفرم حاصل تلاش
+          با سلام و احترام، از اینکه به ما اعتماد کرده‌اید و همراه ما هستید، صمیمانه سپاسگزاریم. این سکوحاصل تلاش
           شبانه‌روزی تیم ما برای ارائه خدمات بهتر به شماست و هنوز در مرحله آزمایشی (آلفا) قرار دارد.
         </BaseParagraph>
         <BaseParagraph class="mb-4 text-justify">
@@ -120,8 +126,7 @@ const zoneIconColor = computed(() => {
         <div class="mb-6 flex items-center justify-center">
           <div class="border-muted-200 dark:border-muted-700 flex items-center gap-4 rounded-xl border p-4">
             <div
-              class="flex size-12 cursor-pointer items-center justify-center rounded-2xl bg-yellow-500/20 text-yellow-500 transition-colors duration-300 hover:bg-yellow-500/30 hover:text-yellow-500"
-            >
+              class="flex size-12 cursor-pointer items-center justify-center rounded-2xl bg-yellow-500/20 text-yellow-500 transition-colors duration-300 hover:bg-yellow-500/30 hover:text-yellow-500">
               <Icon name="ph:bug" class="size-5" />
             </div>
             <div class="flex flex-col items-start">
@@ -157,33 +162,25 @@ const zoneIconColor = computed(() => {
       <!-- Grid -->
       <div class="grid grid-cols-12 gap-6">
         <!-- Main Content Column -->
-        <div
-          :class="showFeatures ? 'ltablet:col-span-8 lg:col-span-8' : 'ltablet:col-span-12 lg:col-span-12'"
-          class="col-span-12 mb-3"
-        >
+        <div :class="showFeatures ? 'ltablet:col-span-8 lg:col-span-8' : 'ltablet:col-span-12 lg:col-span-12'"
+          class="col-span-12 mb-3">
           <!-- Inner grid -->
           <div class="grid grid-cols-12 gap-6">
             <!-- Header -->
             <div class="col-span-12" data-tour="welcome-section">
               <div class="bg-primary-800 flex flex-col items-center rounded-2xl p-4 sm:flex-row">
                 <div class="relative h-[150px] w-[320px] shrink-0 sm:h-[175px]">
-                  <img
-                    class="pointer-events-none absolute start-0 top-0 sm:-start-10"
-                    src="/img/illustrations/dashboards/writer/readers.png"
-                    alt="Readers illustration"
-                  >
+                  <img class="pointer-events-none absolute start-0 top-0 sm:-start-10"
+                    src="/img/illustrations/dashboards/writer/readers.png" alt="Readers illustration">
                 </div>
                 <div class="mt-[80px] grow sm:mt-0">
                   <div class="pb-4 text-center sm:pb-0 sm:text-right">
                     <BaseHeading tag="h1" class="text-white opacity-90">
                       <span class="flex items-center justify-center gap-2 sm:justify-start">
                         سلام،
-                        <BaseAvatar
-                          :src="getUserAvatarUrl(user) || '/img/avatars/default-male.jpg'"
-                          :text="user?.meta?.name?.substring(0, 2) || 'کا'"
-                          size="xs"
-                          class="inline-block align-middle"
-                        />
+                        <BaseAvatar :src="getUserAvatarUrl(user) || '/img/avatars/default-male.jpg'"
+                          :text="user?.meta?.name?.substring(0, 2) || 'کا'" size="xs"
+                          class="inline-block align-middle" />
                         <span>{{ user?.meta?.name || 'کاربر عزیز' }} ! 👋</span>
                       </span>
                     </BaseHeading>
@@ -205,25 +202,13 @@ const zoneIconColor = computed(() => {
                         <Icon name="lucide:users" class="ml-2 size-4" />
                         <span>مراجعین</span>
                       </BaseButton> -->
-                      <BaseButton
-                        size="sm"
-                        color="light"
-                        variant="outline"
-                        class="w-full sm:w-auto"
-                        to="/darmana/therapists/sessions"
-                        data-tour="therapists-button"
-                      >
+                      <BaseButton size="sm" color="light" variant="outline" class="w-full sm:w-auto"
+                        to="/hamdel/sessions" data-tour="therapists-button">
                         <Icon name="ph:chat-circle-text-duotone" class="ml-2 size-4" />
                         <span>گفت و گوی آزاد</span>
                       </BaseButton>
-                      <BaseButton
-                        size="sm"
-                        color="light"
-                        variant="outline"
-                        class="w-full sm:w-auto"
-                        to="/coming-soon"
-                        data-tour="therapists-button"
-                      >
+                      <BaseButton size="sm" color="light" variant="outline" class="w-full sm:w-auto" to="/coming-soon"
+                        data-tour="therapists-button">
                         <Icon name="ph:stethoscope" class="ml-2 size-4" />
                         <span>گفت و گوی درمانی</span>
                       </BaseButton>
@@ -237,29 +222,26 @@ const zoneIconColor = computed(() => {
             <div class="col-span-12">
               <BaseCard rounded="lg" class="p-4">
                 <div class="mb-4">
-                  <BaseHeading
-                    as="h3"
-                    size="sm"
-                    weight="semibold"
-                    lead="tight"
-                    class="text-muted-800 dark:text-white"
-                  >
-                    تمام مناطق
+                  <BaseHeading as="h3" size="sm" weight="semibold" lead="tight" class="text-muted-800 dark:text-white">
+                    تمام محصولات
                   </BaseHeading>
+                  <BaseParagraph size="xs" class="text-muted-500 dark:text-muted-400 mt-1">
+                    ذهنا یک سکوی چند محصولی است که مجموعه‌ای از اپلیکیشن‌های تخصصی در حوزه سلامت روان را در اختیار شما
+                    قرار می‌دهد. هر کدام از این محصولات برای نیازهای خاص طراحی شده‌اند و ما مدام در حال توسعه و بهبود
+                    آن‌ها
+                    هستیم. محصولات فعال شده با رنگ سبز نمایش داده می‌شوند.
+                  </BaseParagraph>
                 </div>
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
                   <ClientOnly>
-                    <div v-for="(zone, key) in ZONE_CONFIGS" :key="key">
+                    <div v-for="(zone, key) in visibleZones" :key="key">
                       <div class="flex items-center gap-2 rounded-lg border p-3" :class="zoneColor(zone.name)">
-                        <div class="flex size-8 items-center justify-center rounded-lg" :class="zoneIconColor(zone.name).container">
+                        <div class="flex size-8 items-center justify-center rounded-lg"
+                          :class="zoneIconColor(zone.name).container">
                           <Icon :name="zone.icon" class="size-4" :class="zoneIconColor(zone.name).icon" />
                         </div>
                         <div class="flex flex-col gap-1">
-                          <BaseText
-                            size="xs"
-                            weight="semibold"
-                            :class="zoneIconColor(zone.name).text"
-                          >
+                          <BaseText size="xs" weight="semibold" :class="zoneIconColor(zone.name).text">
                             {{ zone.label }}
                           </BaseText>
                         </div>
@@ -276,32 +258,20 @@ const zoneIconColor = computed(() => {
               <div class="grid grid-cols-12 gap-6">
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
-                    <InfoImage
-                      rounded="lg"
-                      image="/img/illustrations/widgets/5.svg"
-                      title="استفاده آسان"
-                      text="پیشنهادات هوشمندانه را برای شما ارسال می کند"
-                    />
+                    <InfoImage rounded="lg" image="/img/illustrations/widgets/5.svg" title="استفاده آسان"
+                      text="پیشنهادات هوشمندانه را برای شما ارسال می کند" />
                   </BaseCard>
                 </div>
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
-                    <InfoImage
-                      rounded="lg"
-                      image="/img/illustrations/widgets/6.svg"
-                      title="مشاور روان"
-                      text="می توانید به آسانی با یک مشاور صحبت کنید"
-                    />
+                    <InfoImage rounded="lg" image="/img/illustrations/widgets/6.svg" title="مشاور روان"
+                      text="می توانید به آسانی با یک مشاور صحبت کنید" />
                   </BaseCard>
                 </div>
                 <div class="col-span-12 md:col-span-4">
                   <BaseCard rounded="lg" class="p-4">
-                    <InfoImage
-                      rounded="lg"
-                      image="/img/illustrations/widgets/1.png"
-                      title="برنامه ریزی و اجرا"
-                      text="برای کارتان برنامه ریزی کنید"
-                    />
+                    <InfoImage rounded="lg" image="/img/illustrations/widgets/1.png" title="برنامه ریزی و اجرا"
+                      text="برای کارتان برنامه ریزی کنید" />
                   </BaseCard>
                 </div>
                 <!-- <div class="col-span-4">
@@ -333,26 +303,13 @@ const zoneIconColor = computed(() => {
         <div class="ltablet:col-span-4 col-span-12 lg:col-span-4">
           <!-- New Features Section -->
           <div class="col-span-12">
-            <Transition
-              name="features"
-              leave-active-class="transition origin-top duration-75 ease-in"
-              leave-from-class="transform scale-y-100 opacity-100"
-              leave-to-class="transform scale-y-0 opacity-0"
-            >
-              <div
-                v-if="showFeatures"
-                class="w-full"
-                data-tour="new-features"
-              >
+            <Transition name="features" leave-active-class="transition origin-top duration-75 ease-in"
+              leave-from-class="transform scale-y-100 opacity-100" leave-to-class="transform scale-y-0 opacity-0">
+              <div v-if="showFeatures" class="w-full" data-tour="new-features">
                 <!--Features widget-->
                 <NewFeatures>
                   <template #actions>
-                    <BaseButtonClose
-                      size="sm"
-                      color="muted"
-                      data-nui-tooltip="بستن"
-                      @click="showFeatures = false"
-                    />
+                    <BaseButtonClose size="sm" color="muted" data-nui-tooltip="بستن" @click="showFeatures = false" />
                   </template>
                 </NewFeatures>
               </div>

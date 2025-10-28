@@ -58,7 +58,7 @@ const onSubmit = handleSubmit(async (values) => {
   }
 })
 const nuxtApp = useNuxtApp()
-const { setUser } = useUser()
+const { updateEmptyZonesInDatabase, setUser } = useUser()
 const { downloadAndSaveAvatar } = useAvatarManager()
 const isGoogleLogin = ref(false)
 
@@ -204,18 +204,15 @@ const loginWithGoogle = async () => {
 }
 
 if (nuxtApp.$pb.authStore.isValid) {
+  await updateEmptyZonesInDatabase()
   navigateTo('/dashboard')
 }
 </script>
 
 <template>
   <div class="dark:bg-muted-800 flex min-h-screen bg-white">
-    <div
-      class="bg-muted-100 dark:bg-muted-900 relative hidden w-0 flex-1 items-center justify-center lg:flex lg:w-3/5"
-    >
-      <div
-        class="mx-auto flex size-full max-w-4xl items-center justify-center"
-      >
+    <div class="bg-muted-100 dark:bg-muted-900 relative hidden w-0 flex-1 items-center justify-center lg:flex lg:w-3/5">
+      <div class="mx-auto flex size-full max-w-4xl items-center justify-center">
         <!--Media image-->
         <img
           class="mx-auto max-w-xl rounded-md"
@@ -226,9 +223,7 @@ if (nuxtApp.$pb.authStore.isValid) {
         >
       </div>
     </div>
-    <div
-      class="relative flex flex-1 flex-col justify-center px-6 py-8 lg:w-2/5 lg:flex-none"
-    >
+    <div class="relative flex flex-1 flex-col justify-center px-6 py-8 lg:w-2/5 lg:flex-none">
       <div class="dark:bg-muted-800 relative mx-auto w-full max-w-sm bg-white">
         <!--Nav-->
         <div class="flex w-full items-center justify-between">
@@ -306,15 +301,11 @@ if (nuxtApp.$pb.authStore.isValid) {
           </div>
           <!-- 'or' divider -->
           <div class="flex-100 mt-8 flex items-center">
-            <hr
-              class="border-muted-200 dark:border-muted-700 flex-auto border-t-2"
-            >
+            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2">
             <span class="text-muted-400 px-4 font-sans font-light">
               یا با استفاده از
             </span>
-            <hr
-              class="border-muted-200 dark:border-muted-700 flex-auto border-t-2"
-            >
+            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2">
           </div>
         </div>
 
@@ -330,10 +321,7 @@ if (nuxtApp.$pb.authStore.isValid) {
               @submit.prevent="onSubmit"
             >
               <div class="space-y-4">
-                <Field
-                  v-slot="{ field, errorMessage, handleChange, handleBlur }"
-                  name="email"
-                >
+                <Field v-slot="{ field, errorMessage, handleChange, handleBlur }" name="email">
                   <BaseInput
                     :model-value="field.value"
                     :error="errorMessage"
@@ -350,10 +338,7 @@ if (nuxtApp.$pb.authStore.isValid) {
                   />
                 </Field>
 
-                <Field
-                  v-slot="{ field, errorMessage, handleChange, handleBlur }"
-                  name="password"
-                >
+                <Field v-slot="{ field, errorMessage, handleChange, handleBlur }" name="password">
                   <BaseInput
                     :model-value="field.value"
                     :error="errorMessage"
@@ -373,10 +358,7 @@ if (nuxtApp.$pb.authStore.isValid) {
 
               <!--Remember-->
               <div class="mt-6 flex items-center justify-between">
-                <Field
-                  v-slot="{ field, handleChange, handleBlur }"
-                  name="trustDevice"
-                >
+                <Field v-slot="{ field, handleChange, handleBlur }" name="trustDevice">
                   <BaseCheckbox
                     :model-value="field.value"
                     :disabled="isSubmitting"

@@ -28,10 +28,6 @@ export function useSessions() {
   const nuxtApp = useNuxtApp()
 
   const getSessions = async (filter?: SessionFilter) => {
-    if (!nuxtApp.$pb.authStore.isValid) {
-      throw new Error('User not authenticated')
-    }
-
     try {
       // For admin viewing another user's sessions
       if (filter?.patientId) {
@@ -57,8 +53,7 @@ export function useSessions() {
         filter: filterStr,
         expand: 'user,therapist,session_analysis_for_system',
       })
-    }
-    catch (error: any) {
+    } catch (error: any) {
       if (error?.isAbort) {
         console.log('Request was cancelled')
         return []
@@ -76,8 +71,7 @@ export function useSessions() {
       return await nuxtApp.$pb.collection('sessions').getOne(id, {
         expand: 'user,therapist,session_analysis_for_system',
       })
-    }
-    catch (error: any) {
+    } catch (error: any) {
       if (error?.isAbort) {
         console.log('Request was cancelled')
         return null
@@ -101,8 +95,7 @@ export function useSessions() {
 
     try {
       return await nuxtApp.$pb.collection('sessions').create(sessionData)
-    }
-    catch (error: any) {
+    } catch (error: any) {
       if (error?.isAbort) {
         console.log('Request was cancelled')
         return null
@@ -118,8 +111,7 @@ export function useSessions() {
 
     try {
       return await nuxtApp.$pb.collection('sessions').update(id, data)
-    }
-    catch (error: any) {
+    } catch (error: any) {
       if (error?.isAbort) {
         console.log('Request was cancelled')
         return null

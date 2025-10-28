@@ -39,19 +39,9 @@ export default defineNuxtRouteMiddleware((to, from) => {
     '/debug',
   ]
 
-  const isPublicPath = publicPaths.some((path) => to.path.startsWith(path))
+  const isPublicPath = publicPaths.some(path => to.path.startsWith(path))
   if (isPublicPath) {
     console.log('✅ ZONE MIDDLEWARE - Public path, no zone check needed')
-    return true
-  }
-
-  // Dashboard requires auth but no specific zone access (user is already authenticated)
-  const isDashboardPath =
-    to.path === '/dashboard' || to.path.startsWith('/dashboard/')
-  if (isDashboardPath) {
-    console.log(
-      '✅ ZONE MIDDLEWARE - Dashboard access allowed for authenticated user',
-    )
     return true
   }
 
@@ -59,14 +49,20 @@ export default defineNuxtRouteMiddleware((to, from) => {
   const zonePaths: Record<string, string> = {
     '/admin': 'admin',
     '/hamdel': 'hamdel',
+    '/hammasir': 'hammasir',
+    '/hampazhooh': 'hampazhooh',
+    '/baham': 'baham',
+    '/khebre': 'khebre',
     '/darmana': 'darmana',
+    '/togetherMama': 'togetherMama',
+    '/kanape': 'kanape',
+    '/synapse': 'synapse',
     '/clinic': 'clinic',
     '/therapy-journey': 'therapy-journey',
-    '/hampazhooh': 'hampazhooh',
   }
 
   // Get the zone for current path
-  const pathZone = Object.keys(zonePaths).find((zone) =>
+  const pathZone = Object.keys(zonePaths).find(zone =>
     to.path.startsWith(zone),
   )
   console.log('🔍 ZONE MIDDLEWARE - Detected zone:', pathZone)

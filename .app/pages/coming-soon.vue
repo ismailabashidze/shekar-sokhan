@@ -36,16 +36,16 @@ onMounted(() => {
               <div class="bg-primary-100 dark:bg-primary-900/30 flex size-64 items-center justify-center rounded-full p-8">
                 <!-- Animated icon -->
                 <div class="animate-pulse">
-                  <Icon name="ph:construction-duotone" class="text-primary-500 size-24" />
+                  <Icon name="ph:hard-hat-duotone" class="text-primary-500 size-24" />
                 </div>
 
                 <!-- Floating elements -->
                 <div class="bg-warning-100 dark:bg-warning-900/30 absolute -right-4 -top-4 animate-bounce rounded-full p-3">
-                  <Icon name="ph:hammer-duotone" class="text-warning-500 size-6" />
+                  <Icon name="ph:hard-hat" class="text-warning-500 size-6" />
                 </div>
 
                 <div class="bg-success-100 dark:bg-success-900/30 absolute -bottom-4 -left-4 animate-bounce rounded-full p-3" style="animation-delay: 0.5s">
-                  <Icon name="ph:gear-duotone" class="text-success-500 size-6" />
+                  <Icon name="ph:gear-six-duotone" class="text-success-500 size-6" />
                 </div>
               </div>
             </div>
@@ -178,7 +178,7 @@ onMounted(() => {
             <div class="flex flex-col gap-4 text-center sm:flex-row">
               <div class="flex-1">
                 <div class="bg-warning-100 dark:bg-warning-900/30 mx-auto mb-2 flex size-8 items-center justify-center rounded-full">
-                  <Icon name="ph:clock-duotone" class="text-warning-500 size-4" />
+                  <Icon name="ph:gear" class="text-warning-500 size-4" />
                 </div>
                 <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300">
                   در حال توسعه
@@ -186,7 +186,7 @@ onMounted(() => {
               </div>
               <div class="flex-1">
                 <div class="bg-info-100 dark:bg-info-900/30 mx-auto mb-2 flex size-8 items-center justify-center rounded-full">
-                  <Icon name="ph:test-tube-duotone" class="text-info-500 size-4" />
+                  <Icon name="ph:flask-duotone" class="text-info-500 size-4" />
                 </div>
                 <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300">
                   مرحله تست

@@ -1,12 +1,2 @@
-  
-# Ignore artifacts:
-build
-coverage
-
-# Ignore all HTML files:
-*.html
-.nuxt
-.output
-CHANGELOG.md
-.demo/public/
-layers/documentation/content/**/*.md
+# Ignore formatting for Vue template event handlers to prevent syntax errors
+# Note: Prettier with semi:false can break multi-line event handlers

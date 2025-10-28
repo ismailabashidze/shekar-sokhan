@@ -3,7 +3,7 @@ const stylistic = require('@stylistic/eslint-plugin')
 const customized = stylistic.configs.customize({
   indent: 2,
   quotes: 'single',
-  semi: false,
+  semi: true,
 })
 
 module.exports = {
@@ -22,6 +22,7 @@ module.exports = {
       },
       rules: {
         ...customized.rules,
+        '@stylistic/indent': 'off',
         'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
         'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
         'no-unused-vars': 'off',
@@ -46,6 +47,7 @@ module.exports = {
       },
       rules: {
         ...customized.rules,
+        '@stylistic/indent': 'off',
         'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
         'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
         'no-unused-vars': 'off',
@@ -81,6 +83,7 @@ module.exports = {
       },
       rules: {
         ...customized.rules,
+        '@stylistic/indent': 'off',
         'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
         'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
         'no-unused-vars': 'off',

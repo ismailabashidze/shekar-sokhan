@@ -534,7 +534,17 @@ self.addEventListener('activate', (event) => {
   console.log('[SW] Service Worker activating.')
   event.waitUntil(clients.claim())
 })
-    actions: []
+
+// Create enhanced notification options based on type and priority
+function createNotificationOptions(payload, type = 'default', priority = 'medium') {
+  const baseOptions = {
+    body: payload.body || '',
+    icon: getNotificationIcon(type, priority),
+    badge: '/pwa-192x192.png',
+    tag: getNotificationTag(payload, type),
+    data: payload.data || {},
+    timestamp: Date.now(),
+    silent: false
   }
 
   // Priority-based visual and behavioral enhancements
