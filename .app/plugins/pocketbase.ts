@@ -50,7 +50,7 @@ export default defineNuxtPlugin(async () => {
         zones: pbUser.zones || [],
       }
 
-      await setUser(syncedUser, 'user')
+      await setUser(syncedUser, pbUser.role || 'user')
     }
   }
   catch (_) {

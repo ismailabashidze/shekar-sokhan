@@ -1,212 +1,201 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
-import { Field, useForm } from 'vee-validate'
-import { z } from 'zod'
+  import { toTypedSchema } from '@vee-validate/zod';
+  import { Field, useForm } from 'vee-validate';
+  import { z } from 'zod';
 
-definePageMeta({
-  layout: 'empty',
-  title: 'ورود',
-})
+  definePageMeta({
+    layout: 'empty',
+    title: 'ورود',
+  });
 
-useHead({ htmlAttrs: { dir: 'rtl' } })
+  useHead({ htmlAttrs: { dir: 'rtl' } });
 
-const VALIDATION_TEXT = {
-  EMAIL_REQUIRED: 'آدرس ایمیل نیاز است',
-  EMAIL_INVALID: 'یک ایمیل معتبر وارد کنید',
-  PASSWORD_REQUIRED: 'رمز عبور نیاز است',
-}
+  const VALIDATION_TEXT = {
+    EMAIL_REQUIRED: 'آدرس ایمیل نیاز است',
+    EMAIL_INVALID: 'یک ایمیل معتبر وارد کنید',
+    PASSWORD_REQUIRED: 'رمز عبور نیاز است',
+  };
 
-const zodSchema = z.object({
-  email: z.string({ required_error: VALIDATION_TEXT.EMAIL_REQUIRED }).min(1, VALIDATION_TEXT.EMAIL_REQUIRED).email(VALIDATION_TEXT.EMAIL_INVALID),
-  password: z.string({ required_error: VALIDATION_TEXT.PASSWORD_REQUIRED }).min(1, VALIDATION_TEXT.PASSWORD_REQUIRED),
-  trustDevice: z.boolean(),
-})
+  const zodSchema = z.object({
+    email: z
+      .string({ required_error: VALIDATION_TEXT.EMAIL_REQUIRED })
+      .min(1, VALIDATION_TEXT.EMAIL_REQUIRED)
+      .email(VALIDATION_TEXT.EMAIL_INVALID),
+    password: z.string({ required_error: VALIDATION_TEXT.PASSWORD_REQUIRED }).min(1, VALIDATION_TEXT.PASSWORD_REQUIRED),
+    trustDevice: z.boolean(),
+  });
 
-type FormInput = z.infer<typeof zodSchema>
+  type FormInput = z.infer<typeof zodSchema>;
 
-const validationSchema = toTypedSchema(zodSchema)
-const initialValues = computed<FormInput>(() => ({
-  email: '',
-  password: '',
-  trustDevice: false,
-}))
+  const validationSchema = toTypedSchema(zodSchema);
+  const initialValues = computed<FormInput>(() => ({
+    email: '',
+    password: '',
+    trustDevice: false,
+  }));
 
-const {
-  handleSubmit,
-  isSubmitting,
-  setFieldError,
-} = useForm({
-  validationSchema,
-})
+  const { handleSubmit, isSubmitting, setFieldError } = useForm({
+    validationSchema,
+  });
 
-const router = useRouter()
-const toaster = useToaster()
+  const router = useRouter();
+  const toaster = useToaster();
 
-const onSubmit = handleSubmit(async (values) => {
-  try {
-    await new Promise((resolve, reject) => {
-      setTimeout(() => reject(new Error('backend validation error')), 2000)
-      setTimeout(resolve, 4000)
-    })
-  }
-  catch (error: any) {
-    if (error.message === 'backend validation error') {
-      setFieldError('email', 'نام کاربری یا رمز عبور اشتباه است')
-      setFieldError('password', 'نام کاربری یا رمز عبور اشتباه است')
-    }
-    return
-  }
-})
-const nuxtApp = useNuxtApp()
-const { updateEmptyZonesInDatabase, setUser } = useUser()
-const { downloadAndSaveAvatar } = useAvatarManager()
-const isGoogleLogin = ref(false)
-
-const loginWithGoogle = async () => {
-  console.log('🔄 Google login button clicked!')
-  try {
-    isGoogleLogin.value = true
-
-    // Debug: Check PocketBase instance
-    console.log('📱 PocketBase instance:', nuxtApp.$pb)
-    console.log('🌐 PocketBase URL:', nuxtApp.$pb.baseUrl)
-
-    // Debug: Check OAuth providers
-    console.log('🔍 Checking available OAuth providers...')
-
-    const authData = await nuxtApp.$pb
-      .collection('users')
-      .authWithOAuth2({ provider: 'google' })
-
-    console.log('✅ Google OAuth successful:', {
-      userId: authData.record.id,
-      email: authData.record.email,
-      hasMeta: !!authData.meta,
-    })
-
-    // ذخیره meta در PocketBase
-    await nuxtApp.$pb.collection('users').update(authData.record.id, { meta: authData.meta })
-
-    const record = authData.record
-    const pbMeta = authData.meta as Partial<MetaObj> || {}
-
-    // دانلود و ذخیره آواتار اگر وجود دارد و کاربر آواتار محلی ندارد
-    let avatarFileName = record.avatar
-    if (!avatarFileName && pbMeta.avatarUrl) {
-      console.log('🔄 Downloading avatar from Google...')
-      avatarFileName = await downloadAndSaveAvatar(record.id, pbMeta.avatarUrl)
-    }
-
-    // ساخت object کاربر
-    const appUser: User = {
-      id: record.id,
-      username: record.username,
-      email: record.email,
-      hasCharge: record.hasCharge as boolean,
-      startChargeTime: record.startChargeTime as string,
-      expireChargeTime: record.expireChargeTime as string,
-      role: record.role as string,
-      avatar: avatarFileName || undefined,
-      meta: {
-        avatarUrl: pbMeta.avatarUrl ?? '',
-        expiry: pbMeta.expiry ?? '',
-        isNew: pbMeta.isNew ?? false,
-        email: pbMeta.email ?? record.email,
-        name: pbMeta.name ?? '',
-      } as MetaObj,
-      phoneNumber: record.phoneNumber as string,
-      zones: record.zones || [], // Include zones from PocketBase record
-    }
-
-    await setUser(appUser, 'user')
-
-    // Check and update zones if needed after login
-    if (!record.zones || record.zones === null || (Array.isArray(record.zones) && record.zones.length === 0)) {
-      try {
-        console.log('🔄 Updating user zones after login...')
-        await nuxtApp.$pb.collection('users').update(record.id, {
-          zones: ['hamdel'],
-        })
-
-        // Update local user object with updated zones
-        appUser.zones = ['hamdel']
-        await setUser(appUser, 'user')
-
-        console.log('✅ User zones updated to ["hamdel"]')
+  const onSubmit = handleSubmit(async (values) => {
+    try {
+      await new Promise((resolve, reject) => {
+        setTimeout(() => reject(new Error('backend validation error')), 2000);
+        setTimeout(resolve, 4000);
+      });
+    } catch (error: any) {
+      if (error.message === 'backend validation error') {
+        setFieldError('email', 'نام کاربری یا رمز عبور اشتباه است');
+        setFieldError('password', 'نام کاربری یا رمز عبور اشتباه است');
       }
-      catch (error) {
-        console.error('❌ Failed to update user zones after login:', error)
-        // Continue login process even if zones update fails
+      return;
+    }
+  });
+  const nuxtApp = useNuxtApp();
+  const { updateEmptyZonesInDatabase, setUser } = useUser();
+  const { downloadAndSaveAvatar } = useAvatarManager();
+  const isGoogleLogin = ref(false);
+
+  const loginWithGoogle = async () => {
+    console.log('🔄 Google login button clicked!');
+    try {
+      isGoogleLogin.value = true;
+
+      // Debug: Check PocketBase instance
+      console.log('📱 PocketBase instance:', nuxtApp.$pb);
+      console.log('🌐 PocketBase URL:', nuxtApp.$pb.baseUrl);
+
+      // Debug: Check OAuth providers
+      console.log('🔍 Checking available OAuth providers...');
+
+      const authData = await nuxtApp.$pb.collection('users').authWithOAuth2({ provider: 'google' });
+
+      console.log('✅ Google OAuth successful:', {
+        userId: authData.record.id,
+        email: authData.record.email,
+        hasMeta: !!authData.meta,
+      });
+
+      // ذخیره meta در PocketBase
+      await nuxtApp.$pb.collection('users').update(authData.record.id, { meta: authData.meta });
+
+      const record = authData.record;
+      const pbMeta = (authData.meta as Partial<MetaObj>) || {};
+
+      // دانلود و ذخیره آواتار اگر وجود دارد و کاربر آواتار محلی ندارد
+      let avatarFileName = record.avatar;
+      if (!avatarFileName && pbMeta.avatarUrl) {
+        console.log('🔄 Downloading avatar from Google...');
+        avatarFileName = await downloadAndSaveAvatar(record.id, pbMeta.avatarUrl);
       }
+
+      // ساخت object کاربر
+      const appUser: User = {
+        id: record.id,
+        username: record.username,
+        email: record.email,
+        hasCharge: record.hasCharge as boolean,
+        startChargeTime: record.startChargeTime as string,
+        expireChargeTime: record.expireChargeTime as string,
+        role: record.role as string,
+        avatar: avatarFileName || undefined,
+        meta: {
+          avatarUrl: pbMeta.avatarUrl ?? '',
+          expiry: pbMeta.expiry ?? '',
+          isNew: pbMeta.isNew ?? false,
+          email: pbMeta.email ?? record.email,
+          name: pbMeta.name ?? '',
+        } as MetaObj,
+        phoneNumber: record.phoneNumber as string,
+        zones: record.zones || [], // Include zones from PocketBase record
+      };
+      await setUser(appUser, appUser.role);
+
+      // Check and update zones if needed after login
+      if (!record.zones || record.zones === null || (Array.isArray(record.zones) && record.zones.length === 0)) {
+        try {
+          console.log('🔄 Updating user zones after login...');
+          await nuxtApp.$pb.collection('users').update(record.id, {
+            zones: ['hamdel'],
+          });
+
+          // Update local user object with updated zones
+          appUser.zones = ['hamdel'];
+          await setUser(appUser, appUser.role);
+
+          console.log('✅ User zones updated to ["hamdel"]');
+        } catch (error) {
+          console.error('❌ Failed to update user zones after login:', error);
+          // Continue login process even if zones update fails
+        }
+      }
+
+      // Update premium status based on user's charge status
+      const { setPremiumStatus } = useAIResponseSettings();
+      if (appUser.hasCharge) {
+        setPremiumStatus(true);
+      }
+
+      // Check if user has lock PIN set
+      const { syncPinFromServer } = useLockSystem();
+      const hasLockPin = await syncPinFromServer(appUser.id as string);
+
+      toaster.clearAll();
+      toaster.show({
+        title: 'ورود موفق',
+        message: `خوش آمدید`,
+        color: 'success',
+        icon: 'ph:user-circle-fill',
+        closable: true,
+      });
+
+      setTimeout(() => {
+        // Redirect to lock page if user has PIN, otherwise go to dashboard
+        router.push(hasLockPin ? '/lock' : '/dashboard');
+      }, 1000);
+    } catch (error) {
+      console.error('❌ Google Login Error Details:', {
+        error,
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name,
+        response: error?.response,
+        status: error?.status,
+      });
+
+      // More specific error handling
+      let errorMessage = 'متاسفانه مشکلی در ورود پیش آمد. لطفا دوباره تلاش کنید.';
+
+      if (error?.message?.includes('OAuth2')) {
+        errorMessage = 'مشکل در تنظیمات OAuth. لطفا با پشتیبانی تماس بگیرید.';
+      } else if (error?.message?.includes('network')) {
+        errorMessage = 'مشکل در اتصال به اینترنت. لطفا اتصالتان را بررسی کنید.';
+      } else if (error?.status === 400) {
+        errorMessage = 'درخواست نامعتبر. لطفا صفحه را رفرش کنید.';
+      } else if (error?.status === 500) {
+        errorMessage = 'مشکل سرور. لطفا چند دقیقه بعد تلاش کنید.';
+      }
+
+      toaster.show({
+        title: 'خطا در ورود',
+        message: errorMessage,
+        color: 'danger',
+        icon: 'ph:warning',
+        closable: true,
+      });
+    } finally {
+      isGoogleLogin.value = false;
     }
+  };
 
-    // Update premium status based on user's charge status
-    const { setPremiumStatus } = useAIResponseSettings()
-    if (appUser.hasCharge) {
-      setPremiumStatus(true)
-    }
-
-    // Check if user has lock PIN set
-    const { syncPinFromServer } = useLockSystem()
-    const hasLockPin = await syncPinFromServer(appUser.id as string)
-
-    toaster.clearAll()
-    toaster.show({
-      title: 'ورود موفق',
-      message: `خوش آمدید`,
-      color: 'success',
-      icon: 'ph:user-circle-fill',
-      closable: true,
-    })
-
-    setTimeout(() => {
-      // Redirect to lock page if user has PIN, otherwise go to dashboard
-      router.push(hasLockPin ? '/lock' : '/dashboard')
-    }, 1000)
+  if (nuxtApp.$pb.authStore.isValid) {
+    await updateEmptyZonesInDatabase();
+    navigateTo('/dashboard');
   }
-  catch (error) {
-    console.error('❌ Google Login Error Details:', {
-      error,
-      message: error?.message,
-      stack: error?.stack,
-      name: error?.name,
-      response: error?.response,
-      status: error?.status,
-    })
-
-    // More specific error handling
-    let errorMessage = 'متاسفانه مشکلی در ورود پیش آمد. لطفا دوباره تلاش کنید.'
-
-    if (error?.message?.includes('OAuth2')) {
-      errorMessage = 'مشکل در تنظیمات OAuth. لطفا با پشتیبانی تماس بگیرید.'
-    }
-    else if (error?.message?.includes('network')) {
-      errorMessage = 'مشکل در اتصال به اینترنت. لطفا اتصالتان را بررسی کنید.'
-    }
-    else if (error?.status === 400) {
-      errorMessage = 'درخواست نامعتبر. لطفا صفحه را رفرش کنید.'
-    }
-    else if (error?.status === 500) {
-      errorMessage = 'مشکل سرور. لطفا چند دقیقه بعد تلاش کنید.'
-    }
-
-    toaster.show({
-      title: 'خطا در ورود',
-      message: errorMessage,
-      color: 'danger',
-      icon: 'ph:warning',
-      closable: true,
-    })
-  }
-  finally {
-    isGoogleLogin.value = false
-  }
-}
-
-if (nuxtApp.$pb.authStore.isValid) {
-  await updateEmptyZonesInDatabase()
-  navigateTo('/dashboard')
-}
 </script>
 
 <template>
@@ -214,13 +203,7 @@ if (nuxtApp.$pb.authStore.isValid) {
     <div class="bg-muted-100 dark:bg-muted-900 relative hidden w-0 flex-1 items-center justify-center lg:flex lg:w-3/5">
       <div class="mx-auto flex size-full max-w-4xl items-center justify-center">
         <!--Media image-->
-        <img
-          class="mx-auto max-w-xl rounded-md"
-          src="/img/illustrations/login.png"
-          alt=""
-          width="619"
-          height="594"
-        >
+        <img class="mx-auto max-w-xl rounded-md" src="/img/illustrations/login.png" alt="" width="619" height="594" />
       </div>
     </div>
     <div class="relative flex flex-1 flex-col justify-center px-6 py-8 lg:w-2/5 lg:flex-none">
@@ -238,13 +221,7 @@ if (nuxtApp.$pb.authStore.isValid) {
           <BaseThemeToggle />
         </div>
         <div>
-          <BaseHeading
-            as="h2"
-            size="3xl"
-            lead="relaxed"
-            weight="medium"
-            class="mt-6"
-          >
+          <BaseHeading as="h2" size="3xl" lead="relaxed" weight="medium" class="mt-6">
             کاربر عزیز، خوش آمدید
           </BaseHeading>
           <BaseParagraph size="sm" class="text-muted-400 mb-6 mt-3">
@@ -272,16 +249,8 @@ if (nuxtApp.$pb.authStore.isValid) {
               :disabled="isGoogleLogin"
               @click="loginWithGoogle"
             >
-              <Icon
-                v-if="!isGoogleLogin"
-                name="logos:google-icon"
-                class="size-5"
-              />
-              <Icon
-                v-else
-                name="line-md:loading-twotone-loop"
-                class="size-5"
-              />
+              <Icon v-if="!isGoogleLogin" name="logos:google-icon" class="size-5" />
+              <Icon v-else name="line-md:loading-twotone-loop" class="size-5" />
               <div>
                 {{ isGoogleLogin ? 'در حال ورود...' : 'ورود با گوگل' }}
               </div>
@@ -301,11 +270,9 @@ if (nuxtApp.$pb.authStore.isValid) {
           </div>
           <!-- 'or' divider -->
           <div class="flex-100 mt-8 flex items-center">
-            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2">
-            <span class="text-muted-400 px-4 font-sans font-light">
-              یا با استفاده از
-            </span>
-            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2">
+            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2" />
+            <span class="text-muted-400 px-4 font-sans font-light">یا با استفاده از</span>
+            <hr class="border-muted-200 dark:border-muted-700 flex-auto border-t-2" />
           </div>
         </div>
 
@@ -313,13 +280,7 @@ if (nuxtApp.$pb.authStore.isValid) {
         <div>
           <div class="mt-5">
             <!--Form-->
-            <form
-              method="POST"
-              action=""
-              class="mt-6"
-              novalidate
-              @submit.prevent="onSubmit"
-            >
+            <form method="POST" action="" class="mt-6" novalidate @submit.prevent="onSubmit">
               <div class="space-y-4">
                 <Field v-slot="{ field, errorMessage, handleChange, handleBlur }" name="email">
                   <BaseInput

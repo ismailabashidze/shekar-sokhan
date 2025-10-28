@@ -622,7 +622,7 @@ export const useZones = () => {
     if (!user.value?.zones) return false;
     if (zone === 'admin') {
       const { role } = useUser();
-      return role.value === 'ADMIN';
+      return role.value === 'admin';
     }
     return user.value.zones.includes(zone);
   };

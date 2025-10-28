@@ -18,15 +18,24 @@ useHead({ htmlAttrs: { dir: 'rtl' } })
 const { user, role } = useUser()
 const { getUserAvatarUrl } = useAvatarManager()
 const { ZONE_CONFIGS } = useZones()
+const toaster = useToaster()
 
 const showFeatures = ref(true)
 const showAlphaModal = ref(false)
 
+// Zone landing page URLs mapping
+const zoneLandingPages: Record<string, string> = {
+  hamdel: 'https://hamdel.zehna.ir/',
+  hammasir: 'https://hammasir.zehna.ir/',
+  darmana: 'https://darmana.zehna.ir/pes/',
+  togetherMama: 'https://hampa.zehna.ir/fa/',
+}
+
 // Filter zones to hide admin if user is not admin
 const visibleZones = computed(() => {
   const zones = { ...ZONE_CONFIGS }
-  // Hide admin zone if user role is not ADMIN
-  if (role.value !== 'ADMIN') {
+  // Hide admin zone if user role is not admin
+  if (role.value !== 'admin') {
     delete zones.admin
   }
   return zones
@@ -86,6 +95,30 @@ const zoneIconColor = computed(() => {
     }
   }
 })
+
+// Check if zone has landing page
+const hasLandingPage = (zoneName: string) => {
+  return !!zoneLandingPages[zoneName]
+}
+
+// Handle zone info button click
+const handleZoneInfo = (zoneName: string) => {
+  const landingPageUrl = zoneLandingPages[zoneName]
+  
+  if (landingPageUrl) {
+    // Open landing page in new tab
+    window.open(landingPageUrl, '_blank')
+  } else {
+    // Show toast notification
+    toaster.show({
+      title: 'به زودی',
+      message: 'اطلاعات این محصول به زودی در دسترس خواهد بود.',
+      color: 'info',
+      icon: 'ph:info',
+      closable: true,
+    })
+  }
+}
 </script>
 
 <template>
@@ -240,11 +273,19 @@ const zoneIconColor = computed(() => {
                           :class="zoneIconColor(zone.name).container">
                           <Icon :name="zone.icon" class="size-4" :class="zoneIconColor(zone.name).icon" />
                         </div>
-                        <div class="flex flex-col gap-1">
+                        <div class="flex flex-1 flex-col gap-1">
                           <BaseText size="xs" weight="semibold" :class="zoneIconColor(zone.name).text">
                             {{ zone.label }}
                           </BaseText>
                         </div>
+                        <button
+                          @click="handleZoneInfo(zone.name)"
+                          class="flex size-6 items-center justify-center rounded-full transition-colors hover:bg-muted-100 dark:hover:bg-muted-700"
+                          :class="hasLandingPage(zone.name) ? 'text-info-500 dark:text-info-400' : zoneIconColor(zone.name).text"
+                          :title="'اطلاعات ' + zone.label"
+                        >
+                          <Icon name="ph:info" class="size-4" />
+                        </button>
                       </div>
                     </div>
                   </ClientOnly>
