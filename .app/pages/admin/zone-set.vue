@@ -36,7 +36,8 @@
         selectedZones.value = result.zones || [];
         userName.value = result.meta?.name || result.username;
         return result;
-      } catch (error) {
+      }
+ catch (error) {
         console.error('Error fetching user:', error);
         throw createError({
           statusCode: 404,
@@ -59,7 +60,8 @@
     const index = selectedZones.value.indexOf(zoneName);
     if (index > -1) {
       selectedZones.value.splice(index, 1);
-    } else {
+    }
+ else {
       selectedZones.value.push(zoneName);
     }
   };
@@ -74,7 +76,8 @@
         icon: 'ph:arrow-clockwise',
         closable: true,
       });
-    } catch (error) {
+    }
+ catch (error) {
       console.error('Error refreshing user data:', error);
       toaster.show({
         title: 'خطا',
@@ -104,7 +107,8 @@
       });
 
       router.push('/admin/users');
-    } catch (error) {
+    }
+ catch (error) {
       console.error('Error updating user zones:', error);
       toaster.show({
         title: 'خطا',
@@ -113,7 +117,8 @@
         icon: 'ph:x-circle',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       loading.value = false;
     }
   };
@@ -151,7 +156,12 @@
       <div class="mb-6">
         <div class="flex items-center justify-between">
           <div>
-            <BaseHeading as="h2" size="xl" weight="semibold" class="text-muted-800 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="text-muted-800 dark:text-white"
+            >
               پیکربندی مناطق کاربر
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400 mt-1">
@@ -159,7 +169,11 @@
             </BaseParagraph>
           </div>
           <div class="flex gap-3">
-            <BaseButton variant="outline" @click="handleRefresh" :disabled="loading">
+            <BaseButton
+              variant="outline"
+              :disabled="loading"
+              @click="handleRefresh"
+            >
               <Icon name="ph:arrow-clockwise" class="ml-2 size-4" />
               به‌روزرسانی اطلاعات
             </BaseButton>
@@ -178,7 +192,13 @@
       <div v-else class="space-y-6">
         <BaseCard rounded="lg" class="p-6">
           <div class="mb-4">
-            <BaseHeading as="h3" size="sm" weight="semibold" lead="tight" class="text-muted-800 dark:text-white">
+            <BaseHeading
+              as="h3"
+              size="sm"
+              weight="semibold"
+              lead="tight"
+              class="text-muted-800 dark:text-white"
+            >
               انتخاب مناطق
             </BaseHeading>
             <BaseParagraph size="xs" class="text-muted-500 dark:text-muted-400 mt-1">
@@ -202,10 +222,18 @@
                   class="flex size-8 items-center justify-center rounded-lg"
                   :class="zoneIconColor(zone.name).container"
                 >
-                  <Icon :name="zone.icon" class="size-4" :class="zoneIconColor(zone.name).icon" />
+                  <Icon
+                    :name="zone.icon"
+                    class="size-4"
+                    :class="zoneIconColor(zone.name).icon"
+                  />
                 </div>
                 <div class="flex flex-1 flex-col gap-1">
-                  <BaseText size="xs" weight="semibold" :class="zoneIconColor(zone.name).text">
+                  <BaseText
+                    size="xs"
+                    weight="semibold"
+                    :class="zoneIconColor(zone.name).text"
+                  >
                     {{ zone.label }}
                   </BaseText>
                 </div>
@@ -225,8 +253,19 @@
         </BaseCard>
 
         <div class="flex items-center justify-end gap-3">
-          <BaseButton variant="outline" :disabled="loading" @click="handleDiscard">انصراف</BaseButton>
-          <BaseButton color="primary" :loading="loading" :disabled="loading" @click="handleSave">
+          <BaseButton
+            variant="outline"
+            :disabled="loading"
+            @click="handleDiscard"
+          >
+            انصراف
+          </BaseButton>
+          <BaseButton
+            color="primary"
+            :loading="loading"
+            :disabled="loading"
+            @click="handleSave"
+          >
             <Icon name="ph:check-circle" class="ml-2 size-4" />
             ذخیره تغییرات
           </BaseButton>

@@ -27,26 +27,26 @@ useHead({ htmlAttrs: { dir: 'rtl' } });
         </div>
 
         <div class="mt-8">
-          <h1 class="text-3xl font-medium leading-relaxed mb-8">
+          <h1 class="mb-8 text-3xl font-medium leading-relaxed">
             قوانین استفاده از پلتفرم هم‌پژوهش
           </h1>
 
           <div class="max-w-none">
-            <p class="text-gray-600 mb-6">
+            <p class="mb-6 text-gray-600">
               به پلتفرم هم‌پژوهش خوش آمدید. استفاده از خدمات ما به معنای پذیرش شرایط و ضوابط زیر است.
             </p>
 
-            <h2 class="text-xl font-semibold mb-4 mt-8">
+            <h2 class="mb-4 mt-8 text-xl font-semibold">
               ۱. تعاریف
             </h2>
-            <p class="text-gray-600 mb-4">
+            <p class="mb-4 text-gray-600">
               پلتفرم هم‌پژوهش یک آنلاین پلتفرم برای پژوهشگران، محققان و متخصصان روانشناسی برای همکاری، اشتراک‌گذاری داده‌ها و انجام تحقیقات مشترک است.
             </p>
 
-            <h2 class="text-xl font-semibold mb-4 mt-8">
+            <h2 class="mb-4 mt-8 text-xl font-semibold">
               ۲. شرایط استفاده
             </h2>
-            <ul class="list-disc list-inside space-y-2 mb-6 text-gray-600">
+            <ul class="mb-6 list-inside list-disc space-y-2 text-gray-600">
               <li>
                 کاربران باید اطلاعات صحیح و کامل هنگام ثبت‌نام ارائه دهند
               </li>
@@ -61,42 +61,42 @@ useHead({ htmlAttrs: { dir: 'rtl' } });
               </li>
             </ul>
 
-            <h2 class="text-xl font-semibold mb-4 mt-8">
+            <h2 class="mb-4 mt-8 text-xl font-semibold">
               ۳. مالکیت معنوی
             </h2>
-            <p class="text-gray-600 mb-4">
+            <p class="mb-4 text-gray-600">
               تمام محتوا، داده‌ها و نتایج پژوهشی بارگذاری شده توسط کاربران متعلق به همان کاربر است. پلتفرم هم‌پژوهش هیچ ادعای مالکیتی در مورد آثار کاربران ندارد.
             </p>
 
-            <h2 class="text-xl font-semibold mb-4 mt-8">
+            <h2 class="mb-4 mt-8 text-xl font-semibold">
               ۴. حریم خصوصی داده‌ها
             </h2>
-            <p class="text-gray-600 mb-4">
+            <p class="mb-4 text-gray-600">
               ما متعهد به حفاظت از اطلاعات شخصی و داده‌های پژوهشی کاربران هستیم. داده‌ها فقط با رضایت صریح کاربر با پژوهشگران دیگر به اشتراک گذاشته می‌شود.
             </p>
 
-            <h2 class="text-xl font-semibold mb-4 mt-8">
+            <h2 class="mb-4 mt-8 text-xl font-semibold">
               ۵. مسئولیت‌ها
             </h2>
-            <p class="text-gray-600 mb-4">
+            <p class="mb-4 text-gray-600">
               کاربران مسئول کامل صحت و دقت داده‌های پژوهشی خود هستند. پلتفرم هیچ مسئولیتی در مورد محتوای بارگذاری شده توسط کاربران ندارد.
             </p>
 
-            <h2 class="text-xl font-semibold mb-4 mt-8">
+            <h2 class="mb-4 mt-8 text-xl font-semibold">
               ۶. خاتمه خدمات
             </h2>
-            <p class="text-gray-600 mb-4">
+            <p class="mb-4 text-gray-600">
               ما حق تعلیق یا خاتمه خدمات کاربرانی که این قوانین را نقض کنند را برای خود محفوظ می‌داریم.
             </p>
 
-            <h2 class="text-xl font-semibold mb-4 mt-8">
+            <h2 class="mb-4 mt-8 text-xl font-semibold">
               ۷. تماس با ما
             </h2>
-            <p class="text-gray-600 mb-4">
+            <p class="mb-4 text-gray-600">
               برای هرگونه سؤال یا مشکوک در مورد این قوانین، می‌توانید با ما از طریق ایمیل info@hampazhooh.ir تماس بگیرید.
             </p>
 
-            <p class="text-gray-500 text-sm mt-12">
+            <p class="mt-12 text-sm text-gray-500">
               آخرین به‌روزرسانی: {{ new Date().toLocaleDateString('fa-IR') }}
             </p>
           </div>

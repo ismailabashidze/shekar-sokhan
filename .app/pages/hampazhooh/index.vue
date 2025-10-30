@@ -32,7 +32,7 @@ const zodSchema = z.object({
   researchField: z.string({ required_error: VALIDATION_TEXT.FIELD_REQUIRED }).min(1, VALIDATION_TEXT.FIELD_REQUIRED),
   academicDegree: z.string({ required_error: VALIDATION_TEXT.DEGREE_REQUIRED }).min(1, VALIDATION_TEXT.DEGREE_REQUIRED),
   experience: z.string().optional(),
-  acceptTerms: z.boolean().refine((val) => val === true, {
+  acceptTerms: z.boolean().refine(val => val === true, {
   message: 'لطفاً قوانین و شرایط استفاده را مطالعه و بپذیرید',
   }),
 });
@@ -68,11 +68,11 @@ const toaster = useToaster();
 const validateAndSubmit = async () => {
   // Validate all fields with vee-validate
   const validationResult = await validate();
-  
+
   // Check if terms are accepted
   const checkboxElement = document.querySelector('input[type="checkbox"]');
   const isTermsChecked = checkboxElement?.checked;
-  
+
   // If terms not checked, show specific toast
   if (!isTermsChecked) {
     toaster.clearAll();
@@ -85,7 +85,7 @@ const validateAndSubmit = async () => {
     });
     return;
   }
-  
+
   // If validation has other errors, show general toast (field errors will show automatically)
   if (!validationResult.valid) {
     toaster.clearAll();
@@ -402,21 +402,21 @@ const researchFields = [
           </form>
 
           <!--Submit-->
-            <div class="mt-6">
-              <div class="block w-full rounded-md shadow-sm">
-                <BaseButton
-                  :disabled="isSubmitting"
-                  :loading="isSubmitting"
-                  type="button"
-                  color="primary"
-                  shape="curved"
-                  class="!h-11 w-full"
-                  @click="validateAndSubmit"
-                >
-                  ثبت نام پژوهشگر
-                </BaseButton>
-              </div>
+          <div class="mt-6">
+            <div class="block w-full rounded-md shadow-sm">
+              <BaseButton
+                :disabled="isSubmitting"
+                :loading="isSubmitting"
+                type="button"
+                color="primary"
+                shape="curved"
+                class="!h-11 w-full"
+                @click="validateAndSubmit"
+              >
+                ثبت نام پژوهشگر
+              </BaseButton>
             </div>
+          </div>
         </div>
       </div>
     </div>
