@@ -99,7 +99,7 @@
     {
       title: 'فهرست چک‌لیست بازخورد',
       description: 'استفاده از چک‌لیست ساختاریافته برای بازبینی',
-      icon: 'ph:checklist',
+      icon: 'ph:clipboard-text',
       color: 'info',
     },
     {

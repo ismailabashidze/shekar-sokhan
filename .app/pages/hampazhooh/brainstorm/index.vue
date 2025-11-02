@@ -291,8 +291,8 @@
                 class="w-full"
                 @click="navigateToStage(stage.route)"
               >
-                <Icon name="ph:arrow-left" class="mr-2 size-5" />
                 شروع مرحله {{ stage.id }}
+                <Icon name="ph:arrow-left" class="mr-2 size-5" />
               </BaseButton>
             </div>
           </div>

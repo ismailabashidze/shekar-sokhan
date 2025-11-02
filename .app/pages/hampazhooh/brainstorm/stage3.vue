@@ -31,6 +31,8 @@
   useHead({ htmlAttrs: { dir: 'rtl' } });
 
   const router = useRouter();
+  const toaster = useToaster();
+  const { streamChat } = useOpenRouter();
 
   const evaluationCriteria: EvaluationCriteria[] = [
     {
@@ -78,9 +80,9 @@
       color: 'primary',
     },
     {
-      title: 'نقشهٔ مفهومی',
-      description: 'نمایش بصری روابط بین مفاهیم و ایده‌ها',
-      icon: 'ph:graph',
+      title: 'نقشهٔ ذهنی',
+      description: 'ایجاد یک نقشه بصری از مفاهیم و ارتباطات آن‌ها برای درک بهتر ایده‌ها',
+      icon: 'ph:tree-structure',
       color: 'info',
     },
     {
@@ -118,6 +120,17 @@
   const selectedIdea = ref<string | null>(null);
   const evaluationMode = ref<'matrix' | 'concept-map' | 'cards'>('matrix');
 
+  // Mind Map State
+  const showMindMapModal = ref(false);
+  const mindMapNodes = ref<Array<{ id: string; label: string; x: number; y: number }>>([]);
+  const mindMapConnections = ref<Array<{ from: string; to: string }>>([]);
+  const mindMapLoading = ref(false);
+
+  // Vue Flow Data
+  const flowNodes = ref<Node[]>([]);
+  const flowEdges = ref<Edge[]>([]);
+  const flowLoading = ref(false);
+
   const updateScore = (ideaId: string, criteriaId: string, score: number) => {
     const idea = ideas.value.find(i => i.id === ideaId);
     if (idea) {
@@ -152,6 +165,465 @@
   const exportEvaluation = () => {
     // Implementation for exporting evaluation
   };
+
+  // Mind Map Functions
+  const openMindMap = () => {
+    if (ideas.value.length === 0) {
+      toaster.show({
+        title: 'هشدار',
+        message: 'ابتدا حداقل یک ایده وارد کنید.',
+        color: 'warning',
+        icon: 'ph:warning',
+        closable: true,
+      });
+      return;
+    }
+
+    // Initialize Vue Flow with main concepts if empty
+    if (flowNodes.value.length === 0) {
+      const mainIdea = ideas.value[0];
+      flowNodes.value = [
+        {
+          id: 'main',
+          type: 'default',
+          position: { x: 400, y: 200 },
+          label: mainIdea.title,
+          style: { backgroundColor: '#10b981', color: 'white' },
+        },
+      ];
+
+      // Add other ideas as nodes
+      ideas.value.slice(1, 4).forEach((idea, index) => {
+        const angle = ((index + 1) / 4) * 2 * Math.PI;
+        const x = 400 + 200 * Math.cos(angle);
+        const y = 200 + 200 * Math.sin(angle);
+
+        flowNodes.value.push({
+          id: `idea-${idea.id}`,
+          type: 'default',
+          position: { x, y },
+          label: idea.title,
+          style: { backgroundColor: '#3b82f6', color: 'white' },
+        });
+
+        flowEdges.value.push({
+          id: `main-${idea.id}`,
+          source: 'main',
+          target: `idea-${idea.id}`,
+          type: 'smoothstep',
+        });
+      });
+
+      flowEdges.value = [];
+    }
+
+    showMindMapModal.value = true;
+  };
+
+  async function generateMindMapSuggestions() {
+    mindMapLoading.value = true;
+    try {
+      const topIdeas = sortedIdeas.value.slice(0, 3).map(idea => idea.title).join(', ');
+      const prompt = `بر اساس ایده‌های برتر زیر، ۵ مفهوم کلیدی مرتبط را پیشنهاد دهید که باید در نقشه ذهنی قرار گیرند:
+
+ایده‌های برتر: ${topIdeas}
+
+فقط لیست مفاهیم را با خط تیره بنویسید، بدون توضیحات اضافی:
+- مفهوم ۱
+- مفهوم ۲
+...`;
+
+      const messages = [{ role: 'user', content: prompt }];
+      let result = '';
+
+      await new Promise<void>((resolve, reject) => {
+        streamChat(messages, {}, (chunk) => {
+          if (chunk) {
+            result += chunk;
+          }
+        })
+          .then(resolve)
+          .catch(reject);
+      });
+
+      // Parse suggestions and add as nodes
+      const concepts = result
+        .split('\n')
+        .filter(line => line.trim().startsWith('-'))
+        .map(line => line.replace(/^-\s*/, '').trim());
+
+      // Add nodes in a circle around the main area
+      const centerX = 400;
+      const centerY = 300;
+      const radius = 250;
+
+      concepts.forEach((concept, index) => {
+        const angle = (index / concepts.length) * 2 * Math.PI;
+        const nodeId = `concept-${Date.now()}-${index}`;
+
+        mindMapNodes.value.push({
+          id: nodeId,
+          label: concept,
+          x: centerX + radius * Math.cos(angle),
+          y: centerY + radius * Math.sin(angle),
+        });
+
+        // Connect to main idea if it exists
+        if (flowNodes.value.length > 0) {
+          mindMapConnections.value.push({
+            from: 'main',
+            to: nodeId,
+          });
+        }
+      });
+
+      toaster.show({
+        title: 'موفقیت',
+        message: `${concepts.length} مفهوم جدید به نقشه ذهنی اضافه شد.`,
+        color: 'success',
+        icon: 'ph:check-circle',
+      });
+    }
+  catch (error) {
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در تولید پیشنهادات.',
+      color: 'danger',
+      icon: 'ph:warning',
+    });
+  }
+  finally {
+    mindMapLoading.value = false;
+  }
+  }
+
+  const addMindMapNode = () => {
+    const newNode = {
+      id: `node-${Date.now()}`,
+      label: 'مفهوم جدید',
+      x: 400 + Math.random() * 200 - 100,
+      y: 300 + Math.random() * 200 - 100,
+    };
+    mindMapNodes.value.push(newNode);
+  };
+
+  const removeMindMapNode = (nodeId: string) => {
+    mindMapNodes.value = mindMapNodes.value.filter(n => n.id !== nodeId);
+    mindMapConnections.value = mindMapConnections.value.filter(c => c.from !== nodeId && c.to !== nodeId);
+  };
+
+  const exportMindMapAsMarkdown = () => {
+    const mainIdea = ideas.value[0]?.title || 'ایده‌ها';
+    let markdown = `# نقشه ذهنی: ${mainIdea}\n\n`;
+    markdown += '## مفاهیم کلیدی\n\n';
+
+    // Add ideas
+    ideas.value.forEach((idea) => {
+      markdown += `- ${idea.title} (امتیاز: ${idea.totalScore})\n`;
+    });
+
+    // Add concepts
+    mindMapNodes.value.forEach((node) => {
+      markdown += `- ${node.label}\n`;
+    });
+
+    markdown += '\n## ارتباطات\n\n';
+    mindMapConnections.value.forEach((conn) => {
+      const fromNode = [...ideas.value.map(i => ({ ...i, id: `idea-${i.id}`, label: i.title })), ...mindMapNodes.value].find(n => n.id === conn.from);
+      const toNode = [...ideas.value.map(i => ({ ...i, id: `idea-${i.id}`, label: i.title })), ...mindMapNodes.value].find(n => n.id === conn.to);
+      if (fromNode && toNode) {
+        markdown += `- ${fromNode.label} → ${toNode.label}\n`;
+      }
+    });
+
+    // Download as file
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mind-map.md';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toaster.show({
+      title: 'موفقیت',
+      message: 'نقشه ذهنی دانلود شد.',
+      color: 'success',
+      icon: 'ph:check-circle',
+    });
+  };
+
+  // Vue Flow Functions
+  const onFlowNodeClick = (event: any) => {
+    console.log('Flow node clicked:', event.node);
+  };
+
+  const onFlowEdgeClick = (event: any) => {
+    console.log('Flow edge clicked:', event.edge);
+  };
+
+  const onFlowConnect = (connection: any) => {
+    console.log('Flow connected:', connection);
+  };
+
+  // Get VueFlow instance once
+  const { fitView } = useVueFlow();
+
+  // Auto-layout function
+  const autoLayoutNodes = () => {
+    if (flowNodes.value.length === 0) return;
+
+    const centerX = 400;
+    const centerY = 200;
+    const radius = 150;
+
+    flowNodes.value = flowNodes.value.map((node, index) => {
+      if (node.id === 'main') {
+        return { ...node, position: { x: centerX, y: centerY } };
+      }
+
+      // Arrange other nodes in a circle around main
+      const angle = (index / (flowNodes.value.length - 1)) * 2 * Math.PI;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+
+      return { ...node, position: { x, y } };
+    });
+
+    // Recenter view after layout
+    nextTick(() => {
+      fitView({ padding: 0.2 });
+    });
+  };
+
+  async function generateFlowMindMap() {
+    flowLoading.value = true;
+    try {
+      // Collect all available information from page
+      const topIdeas = sortedIdeas.value.slice(0, 3);
+      const allData = {
+        ideas: topIdeas,
+        evaluationCriteria: evaluationCriteria,
+      };
+
+      const prompt = `بر اساس ایده‌های ارزیابی شده زیر، یک نقشه ذهنی ساده و واضح تولید کنید:
+
+ایده‌های برتر: ${topIdeas.map(idea => `${idea.title} (امتیاز: ${idea.totalScore})`).join(', ')}
+
+پاسخ را حتماً به صورت JSON برگردانید با ساختار زیر:
+
+{
+  "nodes": [
+    {"id": "main", "label": "ایده اصلی", "type": "default", "position": {"x": 400, "y": 200}},
+    {"id": "idea1", "label": "ایده دوم", "type": "default", "position": {"x": 150, "y": 100}},
+    {"id": "idea2", "label": "ایده سوم", "type": "default", "position": {"x": 650, "y": 100}},
+    {"id": "criteria", "label": "معیارهای ارزیابی", "type": "default", "position": {"x": 200, "y": 300}},
+    {"id": "connections", "label": "ارتباطات", "type": "default", "position": {"x": 600, "y": 300}}
+  ],
+  "edges": [
+    {"id": "e-main-idea1", "source": "main", "target": "idea1", "type": "smoothstep"},
+    {"id": "e-main-idea2", "source": "main", "target": "idea2", "type": "smoothstep"},
+    {"id": "e-main-criteria", "source": "main", "target": "criteria", "type": "smoothstep", "label": "ارزیابی"},
+    {"id": "e-main-connections", "source": "main", "target": "connections", "type": "smoothstep", "animated": true, "label": "ارتباطات"}
+  ]
+}
+
+قوانین مهم:
+1. فقط ۵ گره اصلی برای سادگی و خوانایی
+2. فقط ۴ ارتباط مستقیم به گره اصلی  
+3. برچسب‌ها کوتاه و واضح
+4. فقط اطلاعات کلیدی و مهم را نمایش دهید
+5. موقعیت‌ها با فاصله مناسب از هم برای خوانایی بهتر
+6. ساختار متوازن و قرینه برای زیبایی بصری
+7. فقط JSON برگردانید`;
+
+      const messages = [{ role: 'user', content: prompt }];
+      let result = '';
+
+      await new Promise<void>((resolve, reject) => {
+        streamChat(messages, {}, (chunk) => {
+          if (chunk) {
+            result += chunk;
+          }
+        })
+          .then(resolve)
+          .catch(reject);
+      });
+
+      // Parse JSON response
+      try {
+        const jsonMatch = result.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const mindMapJson = JSON.parse(jsonMatch[0]);
+
+          if (mindMapJson.nodes && Array.isArray(mindMapJson.nodes)) {
+            flowNodes.value = mindMapJson.nodes.map((node: any) => {
+              // Determine node color based on its role
+              let style = { backgroundColor: '#6b7280', color: 'white', border: '2px solid #374151' };
+
+              if (node.id === 'main') {
+                style = {
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  border: '3px solid #059669',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                };
+              }
+ else if (node.id.includes('idea')) {
+                style = {
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: '2px solid #2563eb',
+                };
+              }
+ else if (node.id.includes('criteria')) {
+                style = {
+                  backgroundColor: '#8b5cf6',
+                  color: 'white',
+                  border: '2px solid #7c3aed',
+                };
+              }
+ else if (node.id.includes('connection')) {
+                style = {
+                  backgroundColor: '#f59e0b',
+                  color: 'white',
+                  border: '2px solid #d97706',
+                };
+              }
+
+              return {
+                ...node,
+                style,
+                data: {
+                  ...node.data,
+                  label: node.label,
+                },
+              };
+            });
+          }
+
+          if (mindMapJson.edges && Array.isArray(mindMapJson.edges)) {
+            flowEdges.value = mindMapJson.edges.map((edge: any) => ({
+              ...edge,
+              style: {
+                strokeWidth: edge.animated ? 3 : 2,
+                stroke: edge.animated ? '#10b981' : '#6b7280',
+              },
+              labelStyle: {
+                fill: '#374151',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                padding: '2px 6px',
+                borderRadius: '4px',
+              },
+              markerEnd: {
+                type: 'arrowclosed',
+                color: edge.animated ? '#10b981' : '#6b7280',
+              },
+            }));
+          }
+        }
+      }
+ catch (parseError) {
+        console.error('Error parsing mind map JSON:', parseError);
+
+        // Create simple fallback nodes with better spacing
+        const fallbackNodes = [
+          {
+            id: 'main',
+            type: 'default',
+            position: { x: 400, y: 200 },
+            label: topIdeas[0]?.title || 'ایده اصلی',
+            style: {
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: '3px solid #059669',
+              fontSize: '16px',
+              fontWeight: 'bold',
+            },
+          },
+        ];
+
+        // Add idea nodes
+        topIdeas.slice(1, 3).forEach((idea, index) => {
+          const positions = [
+            { x: 150, y: 100 },
+            { x: 650, y: 100 },
+          ];
+          if (positions[index]) {
+            fallbackNodes.push({
+              id: `idea-${index + 1}`,
+              type: 'default',
+              position: positions[index],
+              label: idea.title,
+              style: { backgroundColor: '#3b82f6', color: 'white', border: '2px solid #2563eb' },
+            });
+          }
+        });
+
+        // Add criteria node
+        fallbackNodes.push({
+          id: 'criteria',
+          type: 'default',
+          position: { x: 200, y: 300 },
+          label: 'معیارهای ارزیابی',
+          style: { backgroundColor: '#8b5cf6', color: 'white', border: '2px solid #7c3aed' },
+        });
+
+        // Add connections node
+        fallbackNodes.push({
+          id: 'connections',
+          type: 'default',
+          position: { x: 600, y: 300 },
+          label: 'ارتباطات',
+          style: { backgroundColor: '#06b6d4', color: 'white', border: '2px solid #0891b2' },
+        });
+
+        // Create simple edges
+        const fallbackEdges = [
+          { id: 'e-main-idea1', source: 'main', target: 'idea-1', type: 'smoothstep' },
+          { id: 'e-main-idea2', source: 'main', target: 'idea-2', type: 'smoothstep' },
+          { id: 'e-main-criteria', source: 'main', target: 'criteria', type: 'smoothstep', label: 'ارزیابی' },
+          { id: 'e-main-connections', source: 'main', target: 'connections', type: 'smoothstep', animated: true, label: 'ارتباطات' },
+        ];
+
+        flowNodes.value = fallbackNodes;
+        flowEdges.value = fallbackEdges;
+      }
+
+      toaster.show({
+        title: 'موفقیت',
+        message: `نقشه ذهنی جامع با ${flowNodes.value.length} مفهوم و ${flowEdges.value.length} ارتباط تولید شد.`,
+        color: 'success',
+        icon: 'ph:check-circle',
+      });
+    }
+  catch (error) {
+    toaster.show({
+      title: 'خطا',
+      message: 'خطا در تولید نقشه ذهنی.',
+      color: 'danger',
+      icon: 'ph:warning',
+    });
+  }
+  finally {
+    flowLoading.value = false;
+  }
+  }
+
+  import { VueFlow, useVueFlow } from '@vue-flow/core';
+  import { Controls } from '@vue-flow/controls';
+  import { MiniMap } from '@vue-flow/minimap';
+  import { Background } from '@vue-flow/background';
+  import type { Node, Edge, Connection } from '@vue-flow/core';
+
+  import '@vue-flow/core/dist/style.css';
+  import '@vue-flow/core/dist/theme-default.css';
+  import '@vue-flow/controls/dist/style.css';
+  import '@vue-flow/minimap/dist/style.css';
 </script>
 
 <template>
@@ -493,7 +965,11 @@
             <div
               v-for="tool in tools"
               :key="tool.title"
-              class="dark:border-muted-700 dark:bg-muted-900/30 group overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:shadow-lg"
+              :class="[
+                'dark:border-muted-700 dark:bg-muted-900/30 group overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:shadow-lg',
+                tool.title.includes('نقشه') ? 'cursor-pointer' : ''
+              ]"
+              @click="tool.title.includes('نقشه') ? openMindMap() : null"
             >
               <div
                 :class="[
@@ -582,5 +1058,138 @@
         </div>
       </div>
     </div>
+
+    <!-- Mind Map Modal -->
+    <TairoModal
+      :open="showMindMapModal"
+      size="6xl"
+      @close="showMindMapModal = false"
+    >
+      <template #header>
+        <div class="flex items-center justify-between p-6 pb-0">
+          <div class="flex items-center gap-3">
+            <div class="bg-info-500 flex size-12 items-center justify-center rounded-xl">
+              <Icon name="ph:tree-structure" class="size-6 text-white" />
+            </div>
+            <div>
+              <BaseHeading
+                as="h2"
+                size="xl"
+                weight="bold"
+              >
+                نقشه ذهنی ایده‌ها
+              </BaseHeading>
+              <BaseParagraph size="sm" class="text-muted-500">
+                مفاهیم کلیدی و ارتباطات ایده‌ها
+              </BaseParagraph>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <BaseButton
+              color="muted"
+              shape="curved"
+              size="sm"
+              @click="autoLayoutNodes"
+            >
+              <Icon name="ph:arrows-out" class="ml-2 size-4" />
+              مرتب‌سازی خودکار
+            </BaseButton>
+            <BaseButton
+              color="info"
+              shape="curved"
+              :disabled="flowLoading"
+              @click="generateFlowMindMap"
+            >
+              <Icon
+                v-if="!flowLoading"
+                name="ph:sparkle"
+                class="ml-2 size-4"
+              />
+              <Icon
+                v-else
+                name="svg-spinners:90-ring-with-bg"
+                class="ml-2 size-4"
+              />
+              تولید با هوش مصنوعی
+            </BaseButton>
+            <BaseButton
+              color="muted"
+              shape="curved"
+              @click="exportMindMapAsMarkdown"
+            >
+              <Icon name="ph:download-simple" class="ml-2 size-4" />
+              دانلود
+            </BaseButton>
+          </div>
+        </div>
+      </template>
+
+      <div class="p-8">
+        <!-- Vue Flow Container -->
+        <div class="h-[70vh] w-full p-4">
+          <VueFlow
+            v-model:nodes="flowNodes"
+            v-model:edges="flowEdges"
+            :default-zoom="0.8"
+            :min-zoom="0.1"
+            :max-zoom="4"
+            :fit-view-on-init="true"
+            class="rtl-flow"
+            @node-click="onFlowNodeClick"
+            @edge-click="onFlowEdgeClick"
+            @connect="onFlowConnect"
+          >
+            <Controls />
+            <MiniMap />
+            <Background pattern-color="#aaa" :gap="20" />
+          </VueFlow>
+        </div>
+
+        <!-- Node Count -->
+        <div class="text-muted-600 dark:text-muted-400 mt-4 text-center text-sm">
+          <Icon name="ph:tree-structure" class="ml-2 inline-block size-4" />
+          تعداد مفاهیم: {{ flowNodes.length }} | ارتباطات: {{ flowEdges.length }}
+        </div>
+      </div>
+    </TairoModal>
   </div>
 </template>
+
+<style>
+  .rtl-flow {
+    direction: ltr;
+  }
+
+  .vue-flow__controls {
+    direction: ltr;
+  }
+
+  .vue-flow__minimap {
+    direction: ltr;
+  }
+
+  /* Improve node spacing and readability */
+  .vue-flow__node {
+    font-family: inherit !important;
+    font-size: 14px !important;
+    text-align: center !important;
+  }
+
+  .vue-flow__edge-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 4px !important;
+    padding: 2px 8px !important;
+  }
+
+  /* Better edge styling */
+  .vue-flow__edge-path {
+    stroke-width: 2px !important;
+  }
+
+  .vue-flow__edge-path.animated {
+    stroke-width: 3px !important;
+  }
+</style>
