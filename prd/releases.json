@@ -1,5 +1,17 @@
 [
   {
+    "version": "3.4.0",
+    "releaseDate": "2025-11-03",
+    "product": "Enhanced brainstorming functionality and researcher features. Improved UI components and workflow optimizations for the Hampazhooh platform.",
+    "technical": "Updated brainstorm stages (stage3, stage4) with new features, added researcher registration components, and enhanced documentation structure.",
+    "rollout": [
+      "Test brainstorm workflow enhancements",
+      "Verify researcher registration functionality",
+      "Review UI/UX improvements",
+      "Deploy to production environment"
+    ]
+  },
+  {
     "version": "1.0.0",
     "releaseDate": "2025-01-26",
     "product": "Initial release of the Zehna therapy platform with comprehensive mental health support features.",

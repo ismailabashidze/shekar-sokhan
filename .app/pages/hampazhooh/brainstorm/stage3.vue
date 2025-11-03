@@ -23,16 +23,28 @@
     color: 'primary' | 'info' | 'success';
   }
 
-  definePageMeta({
-    title: 'مرحله ۳: ساختاردهی و ارزیابی',
-    layout: 'sidebar',
-  });
-
   useHead({ htmlAttrs: { dir: 'rtl' } });
 
   const router = useRouter();
   const toaster = useToaster();
-  const { streamChat } = useOpenRouter();
+  const { streamChat, processing } = useOpenRouter();
+  const { user } = useUser();
+
+  // BrainStorm data management
+  const {
+    brainStorms,
+    currentBrainStorm,
+    loading,
+    error,
+    getUserBrainStorms,
+    getBrainStorm,
+    updateBrainStorm,
+    updateLastAccessed,
+  } = useBrainStorm();
+
+  const currentSessionId = ref<string | null>(null);
+  const stage1Data = ref<any>(null);
+  const stage2Ideas = ref<any[]>([]);
 
   const evaluationCriteria: EvaluationCriteria[] = [
     {
@@ -80,12 +92,6 @@
       color: 'primary',
     },
     {
-      title: 'نقشهٔ ذهنی',
-      description: 'ایجاد یک نقشه بصری از مفاهیم و ارتباطات آن‌ها برای درک بهتر ایده‌ها',
-      icon: 'ph:tree-structure',
-      color: 'info',
-    },
-    {
       title: 'کارت‌های ایده',
       description: 'دسته‌بندی ایده‌ها بر اساس نوع رویکرد یا حوزه',
       icon: 'ph:cards',
@@ -93,32 +99,118 @@
     },
   ];
 
-  const ideas = ref<Idea[]>([
-    {
-      id: '1',
-      title: 'بررسی تأثیر فناوری بر رفتار',
-      description: 'مطالعه چگونگی تأثیر فناوری‌های نوین بر الگوهای رفتاری انسان',
-      scores: {},
-      totalScore: 0,
-    },
-    {
-      id: '2',
-      title: 'تحلیل تعاملات مجازی',
-      description: 'بررسی الگوهای تعاملی در محیط‌های مجازی و شبکه‌های اجتماعی',
-      scores: {},
-      totalScore: 0,
-    },
-    {
-      id: '3',
-      title: 'عوامل موثر بر بهره‌وری',
-      description: 'شناسایی و تحلیل عوامل کلیدی موثر بر بهره‌وری و سلامت روان',
-      scores: {},
-      totalScore: 0,
-    },
-  ]);
+  const ideas = ref<Idea[]>([]);
 
   const selectedIdea = ref<string | null>(null);
-  const evaluationMode = ref<'matrix' | 'concept-map' | 'cards'>('matrix');
+  const evaluationMode = ref<'matrix' | 'cards'>('matrix');
+  const filterCategory = ref<string>('all');
+  const sortBy = ref<'score' | 'name' | 'innovation' | 'feasibility'>('score');
+  const evaluatingWithAI = ref(false);
+  const generatingMatrix = ref(false);
+  const matrixData = ref<any>(null);
+  const matrixDescription = ref<string>('');
+  const showRankedResults = ref(false);
+
+  // Load existing brainstorm session
+  const loadExistingSession = async () => {
+    try {
+      // First, try to get the most recent session for this user
+      const result = await getUserBrainStorms(user.value.id, {
+        perPage: 1,
+        sort: '-updated',
+      });
+
+      if (result && result.items && result.items.length > 0) {
+        const session = result.items[0];
+        currentSessionId.value = session.id;
+
+        // Load session data
+        await getBrainStorm(session.id);
+
+        // Update last accessed timestamp
+        await updateLastAccessed(session.id);
+
+        // Extract stage1 data
+        stage1Data.value = {
+          mainChallenge: session.mainChallenge || '',
+          researchDomain: session.researchDomain || [],
+          keywords: session.keywords || [],
+          focusLevel: session.focusLevel || '',
+        };
+
+        // Extract ideas from stage2 (from titlesList)
+        if (session.list && Array.isArray(session.list)) {
+          ideas.value = session.list.map((item: any, index: number) => ({
+            id: item.id || `idea-${index}`,
+            title: item.title || '',
+            description: item.description || '',
+            scores: item.scores || {},
+            totalScore: item.totalScore || 0,
+            category: item.category || 'عمومی',
+          }));
+
+          // Initialize empty scores if not present
+          ideas.value.forEach((idea) => {
+            evaluationCriteria.forEach((criteria) => {
+              if (!idea.scores[criteria.id]) {
+                idea.scores[criteria.id] = 0;
+              }
+            });
+          });
+        }
+
+        // Load existing matrix result if available
+        if (session.matrixResult) {
+          matrixDescription.value = session.matrixResult;
+          matrixData.value = {
+            generatedAt: session.updated || new Date().toISOString(),
+            ideas: sortedIdeas.value.slice(0, 5),
+            description: session.matrixResult,
+          };
+        }
+
+        toaster.show({
+          title: 'موفقیت',
+          message: `جلسه طوفان فکری بارگیری شد. ${ideas.value.length} ایده یافت شد.`,
+          color: 'success',
+          icon: 'ph:check-circle',
+          timeout: 3000,
+        });
+      } else {
+        toaster.show({
+          title: 'هشدار',
+          message: 'هیچ جلسه‌ای یافت نشد. لطفاً ابتدا مراحل قبلی را تکمیل کنید.',
+          color: 'warning',
+          icon: 'ph:warning',
+          closable: true,
+        });
+      }
+    } catch (err: any) {
+      console.error('Error loading existing session:', err);
+      toaster.show({
+        title: 'خطا',
+        message: 'خطا در بارگیری جلسه. لطفاً مطمئن شوید که مراحل قبلی را تکمیل کرده‌اید.',
+        color: 'danger',
+        icon: 'ph:warning',
+        closable: true,
+      });
+    }
+  };
+
+  onMounted(async () => {
+    if (user.value) {
+      await loadExistingSession();
+    } else {
+      toaster.show({
+        title: 'خطا',
+        message: 'لطفاً ابتدا وارد حساب کاربری خود شوید.',
+        color: 'danger',
+        icon: 'ph:warning',
+        closable: true,
+      });
+      router.push('/auth/login');
+    }
+  });
 
   // Mind Map State
   const showMindMapModal = ref(false);
@@ -132,10 +224,13 @@
   const flowLoading = ref(false);
 
   const updateScore = (ideaId: string, criteriaId: string, score: number) => {
-    const idea = ideas.value.find(i => i.id === ideaId);
+    const idea = ideas.value.find((i) => i.id === ideaId);
     if (idea) {
       idea.scores[criteriaId] = score;
       idea.totalScore = Object.values(idea.scores).reduce((sum, val) => sum + val, 0);
+
+      // Auto-save to backend
+      saveEvaluationData();
     }
   };
 
@@ -146,16 +241,274 @@
     return 'muted';
   };
 
+  // Filter and sort ideas
+  const filteredIdeas = computed(() => {
+    let filtered = [...ideas.value];
+
+    // Apply category filter
+    if (filterCategory.value !== 'all') {
+      filtered = filtered.filter((idea) => idea.category === filterCategory.value);
+    }
+
+    // Apply sorting
+    switch (sortBy.value) {
+      case 'score':
+        filtered.sort((a, b) => b.totalScore - a.totalScore);
+        break;
+      case 'name':
+        filtered.sort((a, b) => a.title.localeCompare(b.title, 'fa'));
+        break;
+      case 'innovation':
+        filtered.sort((a, b) => (b.scores.innovation || 0) - (a.scores.innovation || 0));
+        break;
+      case 'feasibility':
+        filtered.sort((a, b) => (b.scores.feasibility || 0) - (a.scores.feasibility || 0));
+        break;
+    }
+
+    return filtered;
+  });
+
   const sortedIdeas = computed(() => {
     return [...ideas.value].sort((a, b) => b.totalScore - a.totalScore);
+  });
+
+  // Get unique categories for filtering
+  const categories = computed(() => {
+    const cats = new Set(ideas.value.map((idea) => idea.category || 'عمومی'));
+    return ['all', ...Array.from(cats)];
   });
 
   const selectIdea = (ideaId: string) => {
     selectedIdea.value = ideaId;
   };
 
-  const saveAndContinue = () => {
-    router.push('/hampazhooh/brainstorm/stage4');
+  // AI-powered evaluation
+  const evaluateWithAI = async () => {
+    if (ideas.value.length === 0) {
+      toaster.show({
+        title: 'هشدار',
+        message: 'هیچ ایده‌ای برای ارزیابی وجود ندارد.',
+        color: 'warning',
+        icon: 'ph:warning',
+      });
+      return;
+    }
+
+    evaluatingWithAI.value = true;
+
+    try {
+      for (const idea of ideas.value) {
+        const prompt = `به عنوان یک متخصص ارزیابی پژوهش، ایده زیر را بر اساس ۵ معیار ارزیابی کنید و به هر معیار امتیاز 1 تا 10 بدهید:
+
+عنوان ایده: ${idea.title}
+توضیحات: ${idea.description}
+
+معیارهای ارزیابی:
+1. نوآوری (innovation): آیا ایده جدید یا ترکیبی نو است؟
+2. قابلیت اجرا (feasibility): آیا با منابع و زمان موجود قابل پیاده‌سازی است؟
+3. هماهنگی با اهداف (alignment): آیا با اهداف پروژه همسو است؟
+4. پتانسیل تأثیر (impact): آیا می‌تواند به دانش یا عمل تأثیر بگذارد؟
+5. قابلیت تعمیم (scalability): آیا نتایج قابل تعمیم به سایر زمینه‌ها هستند؟
+
+${stage1Data.value?.mainChallenge ? `زمینه پژوهش: ${stage1Data.value.mainChallenge}` : ''}
+
+پاسخ را فقط به صورت JSON برگردانید:
+{
+  "innovation": 8,
+  "feasibility": 7,
+  "alignment": 9,
+  "impact": 8,
+  "scalability": 6
+}`;
+
+        const messages = [{ role: 'user', content: prompt }];
+        let result = '';
+
+        await new Promise<void>((resolve, reject) => {
+          streamChat(messages, {}, (chunk) => {
+            if (chunk) {
+              result += chunk;
+            }
+          })
+            .then(resolve)
+            .catch(reject);
+        });
+
+        // Parse JSON response
+        try {
+          const jsonMatch = result.match(/\{[\s\S]*?\}/);
+          if (jsonMatch) {
+            const scores = JSON.parse(jsonMatch[0]);
+
+            // Update idea scores
+            evaluationCriteria.forEach((criteria) => {
+              if (scores[criteria.id]) {
+                idea.scores[criteria.id] = scores[criteria.id];
+              }
+            });
+
+            idea.totalScore = Object.values(idea.scores).reduce((sum: number, val: any) => sum + Number(val), 0);
+          }
+        } catch (error) {
+          console.error('Error parsing AI evaluation:', error);
+        }
+      }
+
+      await saveEvaluationData();
+
+      toaster.show({
+        title: 'موفقیت',
+        message: `${ideas.value.length} ایده با موفقیت ارزیابی شدند.`,
+        color: 'success',
+        icon: 'ph:check-circle',
+      });
+    } catch (error: any) {
+      toaster.show({
+        title: 'خطا',
+        message: `خطا در ارزیابی: ${error.message || 'خطای ناشناخته'}`,
+        color: 'danger',
+        icon: 'ph:warning',
+      });
+    } finally {
+      evaluatingWithAI.value = false;
+    }
+  };
+
+  // Generate evaluation matrix with AI
+  const generateEvaluationMatrix = async () => {
+    if (ideas.value.length === 0) {
+      toaster.show({
+        title: 'هشدار',
+        message: 'هیچ ایده‌ای برای تولید ماتریس وجود ندارد.',
+        color: 'warning',
+        icon: 'ph:warning',
+      });
+      return;
+    }
+
+    generatingMatrix.value = true;
+
+    try {
+      const topIdeas = sortedIdeas.value.slice(0, 5);
+      const prompt = `بر اساس ایده‌های ارزیابی شده زیر، یک ماتریس ارزیابی جامع و توضیحات تفصیلی تولید کنید:
+
+${topIdeas
+  .map(
+    (idea, index) => `
+${index + 1}. ${idea.title}
+   توضیحات: ${idea.description}
+   نوآوری: ${idea.scores.innovation || 0}/10
+   قابلیت اجرا: ${idea.scores.feasibility || 0}/10
+   هماهنگی: ${idea.scores.alignment || 0}/10
+   تأثیر: ${idea.scores.impact || 0}/10
+   تعمیم: ${idea.scores.scalability || 0}/10
+   امتیاز کل: ${idea.totalScore}/50
+`,
+  )
+  .join('\n')}
+
+${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value.mainChallenge}` : ''}
+
+لطفاً:
+1. یک ماتریس مقایسه‌ای تولید کنید که نقاط قوت و ضعف هر ایده را نشان دهد
+2. توصیه‌های عملی برای بهبود ایده‌های برتر ارائه دهید
+3. ارتباطات بین ایده‌ها را شناسایی کنید
+4. اولویت‌بندی نهایی را با توجیه کامل ارائه دهید
+
+پاسخ را به صورت متن ساختاریافته برگردانید.`;
+
+      const messages = [{ role: 'user', content: prompt }];
+      let result = '';
+
+      await new Promise<void>((resolve, reject) => {
+        streamChat(messages, {}, (chunk) => {
+          if (chunk) {
+            result += chunk;
+            matrixDescription.value = result;
+          }
+        })
+          .then(resolve)
+          .catch(reject);
+      });
+
+      matrixData.value = {
+        generatedAt: new Date().toISOString(),
+        ideas: topIdeas,
+        description: result,
+      };
+
+      // Save matrix result to backend
+      if (currentSessionId.value) {
+        try {
+          await updateBrainStorm({
+            id: currentSessionId.value,
+            matrixResult: result,
+          });
+        } catch (saveError) {
+          console.error('Error saving matrix result:', saveError);
+        }
+      }
+
+      toaster.show({
+        title: 'موفقیت',
+        message: 'ماتریس ارزیابی با موفقیت تولید و ذخیره شد.',
+        color: 'success',
+        icon: 'ph:check-circle',
+      });
+    } catch (error: any) {
+      toaster.show({
+        title: 'خطا',
+        message: `خطا در تولید ماتریس: ${error.message || 'خطای ناشناخته'}`,
+        color: 'danger',
+        icon: 'ph:warning',
+      });
+    } finally {
+      generatingMatrix.value = false;
+    }
+  };
+
+  // Save evaluation data to backend
+  const saveEvaluationData = async () => {
+    if (!currentSessionId.value) return;
+
+    try {
+      await updateBrainStorm({
+        id: currentSessionId.value,
+        list: ideas.value,
+        matrixResult: matrixDescription.value || undefined,
+        stage: 'stage3',
+        status: 'in_progress',
+      });
+    } catch (error) {
+      console.error('Error saving evaluation data:', error);
+    }
+  };
+
+  const saveAndContinue = async () => {
+    try {
+      await saveEvaluationData();
+
+      toaster.show({
+        title: 'موفقیت',
+        message: 'ارزیابی‌ها ذخیره شدند. انتقال به مرحله بعد...',
+        color: 'success',
+        icon: 'ph:check-circle',
+        timeout: 2000,
+      });
+
+      // Navigate to stage4 after a short delay to show the success message
+      setTimeout(() => {
+        router.push('/hampazhooh/brainstorm/stage4');
+      }, 500);
+    } catch (error: any) {
+      toaster.show({
+        title: 'خطا',
+        message: 'خطا در ذخیره داده‌ها.',
+        color: 'danger',
+        icon: 'ph:warning',
+      });
+    }
   };
 
   const goBack = () => {
@@ -163,467 +516,51 @@
   };
 
   const exportEvaluation = () => {
-    // Implementation for exporting evaluation
-  };
-
-  // Mind Map Functions
-  const openMindMap = () => {
     if (ideas.value.length === 0) {
       toaster.show({
         title: 'هشدار',
-        message: 'ابتدا حداقل یک ایده وارد کنید.',
+        message: 'هیچ داده‌ای برای دانلود وجود ندارد.',
         color: 'warning',
         icon: 'ph:warning',
-        closable: true,
       });
       return;
     }
 
-    // Initialize Vue Flow with main concepts if empty
-    if (flowNodes.value.length === 0) {
-      const mainIdea = ideas.value[0];
-      flowNodes.value = [
-        {
-          id: 'main',
-          type: 'default',
-          position: { x: 400, y: 200 },
-          label: mainIdea.title,
-          style: { backgroundColor: '#10b981', color: 'white' },
-        },
-      ];
+    let content = `# ارزیابی ایده‌ها - مرحله ۳\n\n`;
+    content += `تاریخ: ${new Date().toLocaleString('fa-IR')}\n`;
+    content += `تعداد ایده‌ها: ${ideas.value.length}\n\n`;
 
-      // Add other ideas as nodes
-      ideas.value.slice(1, 4).forEach((idea, index) => {
-        const angle = ((index + 1) / 4) * 2 * Math.PI;
-        const x = 400 + 200 * Math.cos(angle);
-        const y = 200 + 200 * Math.sin(angle);
-
-        flowNodes.value.push({
-          id: `idea-${idea.id}`,
-          type: 'default',
-          position: { x, y },
-          label: idea.title,
-          style: { backgroundColor: '#3b82f6', color: 'white' },
-        });
-
-        flowEdges.value.push({
-          id: `main-${idea.id}`,
-          source: 'main',
-          target: `idea-${idea.id}`,
-          type: 'smoothstep',
-        });
+    sortedIdeas.value.forEach((idea, index) => {
+      content += `## ${index + 1}. ${idea.title}\n\n`;
+      content += `**توضیحات:** ${idea.description}\n\n`;
+      content += `**امتیازها:**\n`;
+      evaluationCriteria.forEach((criteria) => {
+        content += `- ${criteria.title}: ${idea.scores[criteria.id] || 0}/10\n`;
       });
+      content += `\n**امتیاز کل:** ${idea.totalScore}/50\n\n`;
+      content += `---\n\n`;
+    });
 
-      flowEdges.value = [];
+    if (matrixDescription.value) {
+      content += `## ماتریس ارزیابی\n\n`;
+      content += matrixDescription.value + '\n\n';
     }
 
-    showMindMapModal.value = true;
-  };
-
-  async function generateMindMapSuggestions() {
-    mindMapLoading.value = true;
-    try {
-      const topIdeas = sortedIdeas.value.slice(0, 3).map(idea => idea.title).join(', ');
-      const prompt = `بر اساس ایده‌های برتر زیر، ۵ مفهوم کلیدی مرتبط را پیشنهاد دهید که باید در نقشه ذهنی قرار گیرند:
-
-ایده‌های برتر: ${topIdeas}
-
-فقط لیست مفاهیم را با خط تیره بنویسید، بدون توضیحات اضافی:
-- مفهوم ۱
-- مفهوم ۲
-...`;
-
-      const messages = [{ role: 'user', content: prompt }];
-      let result = '';
-
-      await new Promise<void>((resolve, reject) => {
-        streamChat(messages, {}, (chunk) => {
-          if (chunk) {
-            result += chunk;
-          }
-        })
-          .then(resolve)
-          .catch(reject);
-      });
-
-      // Parse suggestions and add as nodes
-      const concepts = result
-        .split('\n')
-        .filter(line => line.trim().startsWith('-'))
-        .map(line => line.replace(/^-\s*/, '').trim());
-
-      // Add nodes in a circle around the main area
-      const centerX = 400;
-      const centerY = 300;
-      const radius = 250;
-
-      concepts.forEach((concept, index) => {
-        const angle = (index / concepts.length) * 2 * Math.PI;
-        const nodeId = `concept-${Date.now()}-${index}`;
-
-        mindMapNodes.value.push({
-          id: nodeId,
-          label: concept,
-          x: centerX + radius * Math.cos(angle),
-          y: centerY + radius * Math.sin(angle),
-        });
-
-        // Connect to main idea if it exists
-        if (flowNodes.value.length > 0) {
-          mindMapConnections.value.push({
-            from: 'main',
-            to: nodeId,
-          });
-        }
-      });
-
-      toaster.show({
-        title: 'موفقیت',
-        message: `${concepts.length} مفهوم جدید به نقشه ذهنی اضافه شد.`,
-        color: 'success',
-        icon: 'ph:check-circle',
-      });
-    }
-  catch (error) {
-    toaster.show({
-      title: 'خطا',
-      message: 'خطا در تولید پیشنهادات.',
-      color: 'danger',
-      icon: 'ph:warning',
-    });
-  }
-  finally {
-    mindMapLoading.value = false;
-  }
-  }
-
-  const addMindMapNode = () => {
-    const newNode = {
-      id: `node-${Date.now()}`,
-      label: 'مفهوم جدید',
-      x: 400 + Math.random() * 200 - 100,
-      y: 300 + Math.random() * 200 - 100,
-    };
-    mindMapNodes.value.push(newNode);
-  };
-
-  const removeMindMapNode = (nodeId: string) => {
-    mindMapNodes.value = mindMapNodes.value.filter(n => n.id !== nodeId);
-    mindMapConnections.value = mindMapConnections.value.filter(c => c.from !== nodeId && c.to !== nodeId);
-  };
-
-  const exportMindMapAsMarkdown = () => {
-    const mainIdea = ideas.value[0]?.title || 'ایده‌ها';
-    let markdown = `# نقشه ذهنی: ${mainIdea}\n\n`;
-    markdown += '## مفاهیم کلیدی\n\n';
-
-    // Add ideas
-    ideas.value.forEach((idea) => {
-      markdown += `- ${idea.title} (امتیاز: ${idea.totalScore})\n`;
-    });
-
-    // Add concepts
-    mindMapNodes.value.forEach((node) => {
-      markdown += `- ${node.label}\n`;
-    });
-
-    markdown += '\n## ارتباطات\n\n';
-    mindMapConnections.value.forEach((conn) => {
-      const fromNode = [...ideas.value.map(i => ({ ...i, id: `idea-${i.id}`, label: i.title })), ...mindMapNodes.value].find(n => n.id === conn.from);
-      const toNode = [...ideas.value.map(i => ({ ...i, id: `idea-${i.id}`, label: i.title })), ...mindMapNodes.value].find(n => n.id === conn.to);
-      if (fromNode && toNode) {
-        markdown += `- ${fromNode.label} → ${toNode.label}\n`;
-      }
-    });
-
-    // Download as file
-    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'mind-map.md';
+    a.download = `evaluation-${Date.now()}.md`;
     a.click();
     URL.revokeObjectURL(url);
 
     toaster.show({
       title: 'موفقیت',
-      message: 'نقشه ذهنی دانلود شد.',
+      message: 'فایل ارزیابی دانلود شد.',
       color: 'success',
       icon: 'ph:check-circle',
     });
   };
-
-  // Vue Flow Functions
-  const onFlowNodeClick = (event: any) => {
-    console.log('Flow node clicked:', event.node);
-  };
-
-  const onFlowEdgeClick = (event: any) => {
-    console.log('Flow edge clicked:', event.edge);
-  };
-
-  const onFlowConnect = (connection: any) => {
-    console.log('Flow connected:', connection);
-  };
-
-  // Get VueFlow instance once
-  const { fitView } = useVueFlow();
-
-  // Auto-layout function
-  const autoLayoutNodes = () => {
-    if (flowNodes.value.length === 0) return;
-
-    const centerX = 400;
-    const centerY = 200;
-    const radius = 150;
-
-    flowNodes.value = flowNodes.value.map((node, index) => {
-      if (node.id === 'main') {
-        return { ...node, position: { x: centerX, y: centerY } };
-      }
-
-      // Arrange other nodes in a circle around main
-      const angle = (index / (flowNodes.value.length - 1)) * 2 * Math.PI;
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
-
-      return { ...node, position: { x, y } };
-    });
-
-    // Recenter view after layout
-    nextTick(() => {
-      fitView({ padding: 0.2 });
-    });
-  };
-
-  async function generateFlowMindMap() {
-    flowLoading.value = true;
-    try {
-      // Collect all available information from page
-      const topIdeas = sortedIdeas.value.slice(0, 3);
-      const allData = {
-        ideas: topIdeas,
-        evaluationCriteria: evaluationCriteria,
-      };
-
-      const prompt = `بر اساس ایده‌های ارزیابی شده زیر، یک نقشه ذهنی ساده و واضح تولید کنید:
-
-ایده‌های برتر: ${topIdeas.map(idea => `${idea.title} (امتیاز: ${idea.totalScore})`).join(', ')}
-
-پاسخ را حتماً به صورت JSON برگردانید با ساختار زیر:
-
-{
-  "nodes": [
-    {"id": "main", "label": "ایده اصلی", "type": "default", "position": {"x": 400, "y": 200}},
-    {"id": "idea1", "label": "ایده دوم", "type": "default", "position": {"x": 150, "y": 100}},
-    {"id": "idea2", "label": "ایده سوم", "type": "default", "position": {"x": 650, "y": 100}},
-    {"id": "criteria", "label": "معیارهای ارزیابی", "type": "default", "position": {"x": 200, "y": 300}},
-    {"id": "connections", "label": "ارتباطات", "type": "default", "position": {"x": 600, "y": 300}}
-  ],
-  "edges": [
-    {"id": "e-main-idea1", "source": "main", "target": "idea1", "type": "smoothstep"},
-    {"id": "e-main-idea2", "source": "main", "target": "idea2", "type": "smoothstep"},
-    {"id": "e-main-criteria", "source": "main", "target": "criteria", "type": "smoothstep", "label": "ارزیابی"},
-    {"id": "e-main-connections", "source": "main", "target": "connections", "type": "smoothstep", "animated": true, "label": "ارتباطات"}
-  ]
-}
-
-قوانین مهم:
-1. فقط ۵ گره اصلی برای سادگی و خوانایی
-2. فقط ۴ ارتباط مستقیم به گره اصلی  
-3. برچسب‌ها کوتاه و واضح
-4. فقط اطلاعات کلیدی و مهم را نمایش دهید
-5. موقعیت‌ها با فاصله مناسب از هم برای خوانایی بهتر
-6. ساختار متوازن و قرینه برای زیبایی بصری
-7. فقط JSON برگردانید`;
-
-      const messages = [{ role: 'user', content: prompt }];
-      let result = '';
-
-      await new Promise<void>((resolve, reject) => {
-        streamChat(messages, {}, (chunk) => {
-          if (chunk) {
-            result += chunk;
-          }
-        })
-          .then(resolve)
-          .catch(reject);
-      });
-
-      // Parse JSON response
-      try {
-        const jsonMatch = result.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const mindMapJson = JSON.parse(jsonMatch[0]);
-
-          if (mindMapJson.nodes && Array.isArray(mindMapJson.nodes)) {
-            flowNodes.value = mindMapJson.nodes.map((node: any) => {
-              // Determine node color based on its role
-              let style = { backgroundColor: '#6b7280', color: 'white', border: '2px solid #374151' };
-
-              if (node.id === 'main') {
-                style = {
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  border: '3px solid #059669',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                };
-              }
- else if (node.id.includes('idea')) {
-                style = {
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: '2px solid #2563eb',
-                };
-              }
- else if (node.id.includes('criteria')) {
-                style = {
-                  backgroundColor: '#8b5cf6',
-                  color: 'white',
-                  border: '2px solid #7c3aed',
-                };
-              }
- else if (node.id.includes('connection')) {
-                style = {
-                  backgroundColor: '#f59e0b',
-                  color: 'white',
-                  border: '2px solid #d97706',
-                };
-              }
-
-              return {
-                ...node,
-                style,
-                data: {
-                  ...node.data,
-                  label: node.label,
-                },
-              };
-            });
-          }
-
-          if (mindMapJson.edges && Array.isArray(mindMapJson.edges)) {
-            flowEdges.value = mindMapJson.edges.map((edge: any) => ({
-              ...edge,
-              style: {
-                strokeWidth: edge.animated ? 3 : 2,
-                stroke: edge.animated ? '#10b981' : '#6b7280',
-              },
-              labelStyle: {
-                fill: '#374151',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                padding: '2px 6px',
-                borderRadius: '4px',
-              },
-              markerEnd: {
-                type: 'arrowclosed',
-                color: edge.animated ? '#10b981' : '#6b7280',
-              },
-            }));
-          }
-        }
-      }
- catch (parseError) {
-        console.error('Error parsing mind map JSON:', parseError);
-
-        // Create simple fallback nodes with better spacing
-        const fallbackNodes = [
-          {
-            id: 'main',
-            type: 'default',
-            position: { x: 400, y: 200 },
-            label: topIdeas[0]?.title || 'ایده اصلی',
-            style: {
-              backgroundColor: '#10b981',
-              color: 'white',
-              border: '3px solid #059669',
-              fontSize: '16px',
-              fontWeight: 'bold',
-            },
-          },
-        ];
-
-        // Add idea nodes
-        topIdeas.slice(1, 3).forEach((idea, index) => {
-          const positions = [
-            { x: 150, y: 100 },
-            { x: 650, y: 100 },
-          ];
-          if (positions[index]) {
-            fallbackNodes.push({
-              id: `idea-${index + 1}`,
-              type: 'default',
-              position: positions[index],
-              label: idea.title,
-              style: { backgroundColor: '#3b82f6', color: 'white', border: '2px solid #2563eb' },
-            });
-          }
-        });
-
-        // Add criteria node
-        fallbackNodes.push({
-          id: 'criteria',
-          type: 'default',
-          position: { x: 200, y: 300 },
-          label: 'معیارهای ارزیابی',
-          style: { backgroundColor: '#8b5cf6', color: 'white', border: '2px solid #7c3aed' },
-        });
-
-        // Add connections node
-        fallbackNodes.push({
-          id: 'connections',
-          type: 'default',
-          position: { x: 600, y: 300 },
-          label: 'ارتباطات',
-          style: { backgroundColor: '#06b6d4', color: 'white', border: '2px solid #0891b2' },
-        });
-
-        // Create simple edges
-        const fallbackEdges = [
-          { id: 'e-main-idea1', source: 'main', target: 'idea-1', type: 'smoothstep' },
-          { id: 'e-main-idea2', source: 'main', target: 'idea-2', type: 'smoothstep' },
-          { id: 'e-main-criteria', source: 'main', target: 'criteria', type: 'smoothstep', label: 'ارزیابی' },
-          { id: 'e-main-connections', source: 'main', target: 'connections', type: 'smoothstep', animated: true, label: 'ارتباطات' },
-        ];
-
-        flowNodes.value = fallbackNodes;
-        flowEdges.value = fallbackEdges;
-      }
-
-      toaster.show({
-        title: 'موفقیت',
-        message: `نقشه ذهنی جامع با ${flowNodes.value.length} مفهوم و ${flowEdges.value.length} ارتباط تولید شد.`,
-        color: 'success',
-        icon: 'ph:check-circle',
-      });
-    }
-  catch (error) {
-    toaster.show({
-      title: 'خطا',
-      message: 'خطا در تولید نقشه ذهنی.',
-      color: 'danger',
-      icon: 'ph:warning',
-    });
-  }
-  finally {
-    flowLoading.value = false;
-  }
-  }
-
-  import { VueFlow, useVueFlow } from '@vue-flow/core';
-  import { Controls } from '@vue-flow/controls';
-  import { MiniMap } from '@vue-flow/minimap';
-  import { Background } from '@vue-flow/background';
-  import type { Node, Edge, Connection } from '@vue-flow/core';
-
-  import '@vue-flow/core/dist/style.css';
-  import '@vue-flow/core/dist/theme-default.css';
-  import '@vue-flow/controls/dist/style.css';
-  import '@vue-flow/minimap/dist/style.css';
 </script>
 
 <template>
@@ -632,35 +569,23 @@
     <div class="dark:bg-muted-800 dark:border-muted-700 border-b border-gray-200 bg-white">
       <div class="px-4 py-6 sm:px-6 lg:px-8">
         <div class="flex items-center gap-4">
-          <BaseButton
-            color="muted"
-            shape="curved"
-            size="sm"
-            @click="goBack"
-          >
+          <BaseButton color="muted" shape="curved" size="sm" @click="goBack">
             <Icon name="ph:arrow-right" class="ml-2 size-4" />
             مرحله قبل
           </BaseButton>
           <div class="flex-1">
             <div class="mb-2 flex items-center gap-3">
-              <div class="bg-success-500 shadow-success-500/30 flex size-12 items-center justify-center rounded-xl shadow-lg">
+              <div
+                class="bg-success-500 shadow-success-500/30 flex size-12 items-center justify-center rounded-xl shadow-lg"
+              >
                 <Icon name="ph:funnel" class="size-6 text-white" />
               </div>
               <div>
-                <div class="text-success-500 mb-1 text-xs font-semibold uppercase tracking-wider">
-                  مرحله ۳
-                </div>
-                <BaseHeading
-                  as="h1"
-                  size="2xl"
-                  weight="bold"
-                  class="text-gray-900 dark:text-white"
-                >
+                <div class="text-success-500 mb-1 text-xs font-semibold uppercase tracking-wider">مرحله ۳</div>
+                <BaseHeading as="h1" size="2xl" weight="bold" class="text-gray-900 dark:text-white">
                   ساختاردهی و ارزیابی
                 </BaseHeading>
-                <BaseParagraph size="sm" class="text-muted-400 mt-1">
-                  Convergent Structuring & Evaluation
-                </BaseParagraph>
+                <BaseParagraph size="sm" class="text-muted-400 mt-1">Convergent Structuring & Evaluation</BaseParagraph>
               </div>
             </div>
           </div>
@@ -674,61 +599,40 @@
         <!-- Introduction -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading
-              as="h2"
-              size="xl"
-              weight="semibold"
-              class="mb-3 text-gray-900 dark:text-white"
-            >
+            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
               هدف این مرحله
             </BaseHeading>
             <BaseParagraph class="text-muted-600 dark:text-muted-300 leading-relaxed">
-              در این مرحله، ایده‌های پراکنده را فیلتر، دسته‌بندی و اولویت‌بندی می‌کنیم. هدف تبدیل ایده‌های خلاقانه به طرح‌های پژوهشی قابل اجرا و شناسایی رویکردهای پژوهشی مناسب است.
+              در این مرحله، ایده‌های پراکنده را فیلتر، دسته‌بندی و اولویت‌بندی می‌کنیم. هدف تبدیل ایده‌های خلاقانه به
+              طرح‌های پژوهشی قابل اجرا و شناسایی رویکردهای پژوهشی مناسب است.
             </BaseParagraph>
           </div>
 
           <!-- Key Features -->
           <div class="dark:border-muted-700 dark:bg-muted-900/50 rounded-xl border border-gray-100 bg-gray-50 p-6">
-            <BaseHeading
-              as="h3"
-              size="md"
-              weight="semibold"
-              class="mb-4 text-gray-900 dark:text-white"
-            >
+            <BaseHeading as="h3" size="md" weight="semibold" class="mb-4 text-gray-900 dark:text-white">
               فعالیت‌های کلیدی
             </BaseHeading>
             <div class="grid gap-4 sm:grid-cols-3">
               <div class="flex items-start gap-3">
                 <Icon name="ph:funnel-fill" class="text-success-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
-                    فیلتر کردن
-                  </div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">
-                    انتخاب ایده‌های قابل اجرا
-                  </div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">فیلتر کردن</div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">انتخاب ایده‌های قابل اجرا</div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Icon name="ph:stack-fill" class="text-success-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
-                    دسته‌بندی
-                  </div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">
-                    گروه‌بندی بر اساس موضوع
-                  </div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">دسته‌بندی</div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">گروه‌بندی بر اساس موضوع</div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Icon name="ph:ranking-fill" class="text-success-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
-                    اولویت‌بندی
-                  </div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">
-                    ترتیب براساس ارزش
-                  </div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">اولویت‌بندی</div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">ترتیب براساس ارزش</div>
                 </div>
               </div>
             </div>
@@ -738,12 +642,7 @@
         <!-- Evaluation Criteria -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading
-              as="h2"
-              size="xl"
-              weight="semibold"
-              class="mb-2 text-gray-900 dark:text-white"
-            >
+            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
               معیارهای ارزیابی
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
@@ -757,16 +656,8 @@
               :key="criteria.id"
               class="dark:border-muted-700 dark:bg-muted-900/30 rounded-xl border border-gray-100 bg-gray-50 p-4"
             >
-              <div
-                :class="[
-                  'mb-3 flex size-12 items-center justify-center rounded-xl',
-                  `bg-${criteria.color}-500/10`,
-                ]"
-              >
-                <Icon
-                  :name="criteria.icon"
-                  :class="[`text-${criteria.color}-500`, 'size-6']"
-                />
+              <div :class="['mb-3 flex size-12 items-center justify-center rounded-xl', `bg-${criteria.color}-500/10`]">
+                <Icon :name="criteria.icon" :class="[`text-${criteria.color}-500`, 'size-6']" />
               </div>
               <div class="text-muted-800 mb-2 text-sm font-semibold dark:text-white">
                 {{ criteria.title }}
@@ -778,63 +669,145 @@
           </div>
         </div>
 
-        <!-- Evaluation Matrix -->
-        <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
-          <div class="mb-6 flex items-center justify-between">
-            <div>
-              <BaseHeading
-                as="h2"
-                size="xl"
-                weight="semibold"
-                class="text-gray-900 dark:text-white"
+        <!-- Filter and Sort Controls -->
+        <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-6">
+          <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
+              ابزارهای مدیریت ایده‌ها
+            </BaseHeading>
+            <div class="flex flex-wrap gap-2">
+              <BaseButton
+                color="primary"
+                shape="curved"
+                size="sm"
+                :disabled="evaluatingWithAI || ideas.length === 0"
+                @click="evaluateWithAI"
+                class="flex-shrink-0"
               >
+                <Icon v-if="!evaluatingWithAI" name="ph:sparkle" class="ml-2 size-4" />
+                <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-4" />
+                <span class="whitespace-nowrap">{{ evaluatingWithAI ? 'در حال ارزیابی...' : 'ارزیابی با AI' }}</span>
+              </BaseButton>
+            </div>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-3">
+            <!-- Filter by Category -->
+            <div>
+              <label class="text-muted-700 dark:text-muted-200 mb-2 flex items-center text-sm font-medium">
+                <Icon name="ph:funnel" class="ml-2 size-4 flex-shrink-0" />
+                <span>فیلتر بر اساس دسته</span>
+              </label>
+              <BaseSelect v-model="filterCategory" shape="curved">
+                <option value="all">همه دسته‌ها</option>
+                <option v-for="cat in categories.filter((c) => c !== 'all')" :key="cat" :value="cat">
+                  {{ cat }}
+                </option>
+              </BaseSelect>
+            </div>
+
+            <!-- Sort By -->
+            <div>
+              <label class="text-muted-700 dark:text-muted-200 mb-2 flex items-center text-sm font-medium">
+                <Icon name="ph:arrows-down-up" class="ml-2 size-4 flex-shrink-0" />
+                <span>مرتب‌سازی</span>
+              </label>
+              <BaseSelect v-model="sortBy" shape="curved">
+                <option value="score">امتیاز کل</option>
+                <option value="name">نام (الفبا)</option>
+                <option value="innovation">نوآوری</option>
+                <option value="feasibility">قابلیت اجرا</option>
+              </BaseSelect>
+            </div>
+
+            <!-- Results Count -->
+            <div>
+              <label class="text-muted-700 dark:text-muted-200 mb-2 flex items-center text-sm font-medium">
+                <Icon name="ph:list-numbers" class="ml-2 size-4 flex-shrink-0" />
+                <span>تعداد نتایج</span>
+              </label>
+              <div
+                class="dark:bg-muted-900 dark:border-muted-700 flex h-11 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 text-lg font-bold text-gray-900 dark:text-white"
+              >
+                {{ filteredIdeas.length }} / {{ ideas.length }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evaluation Matrix -->
+        <div
+          class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-4 sm:p-8"
+        >
+          <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex-1">
+              <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-900 dark:text-white">
                 ماتریس ارزیابی ایده‌ها
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-500 mt-1">
                 به هر ایده امتیاز دهید و نتایج را مشاهده کنید
               </BaseParagraph>
             </div>
-            <BaseButton
-              color="muted"
-              shape="curved"
-              size="sm"
-              @click="exportEvaluation"
-            >
-              <Icon name="ph:download-simple" class="ml-2 size-4" />
-              دانلود
-            </BaseButton>
+            <div class="flex flex-wrap gap-2">
+              <BaseButton
+                color="info"
+                shape="curved"
+                size="sm"
+                :disabled="generatingMatrix || ideas.length === 0"
+                @click="generateEvaluationMatrix"
+                class="flex-shrink-0"
+              >
+                <Icon v-if="!generatingMatrix" name="ph:table" class="ml-2 size-4" />
+                <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-4" />
+                <span class="whitespace-nowrap">{{ generatingMatrix ? 'تولید...' : 'تولید ماتریس' }}</span>
+              </BaseButton>
+              <BaseButton color="muted" shape="curved" size="sm" @click="exportEvaluation" class="flex-shrink-0">
+                <Icon name="ph:download-simple" class="ml-2 size-4" />
+                <span class="whitespace-nowrap">دانلود</span>
+              </BaseButton>
+            </div>
           </div>
 
           <!-- Matrix Table -->
-          <div class="overflow-x-auto">
-            <div class="min-w-[800px]">
+          <div class="overflow-x-auto -mx-4 sm:mx-0">
+            <div class="min-w-[900px] px-4 sm:px-0">
               <!-- Header Row -->
-              <div class="dark:border-muted-700 dark:bg-muted-900/50 mb-2 grid grid-cols-7 gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3">
-                <div class="col-span-2 text-xs font-semibold uppercase text-gray-600 dark:text-gray-400">
-                  ایده
-                </div>
+              <div
+                class="dark:border-muted-700 dark:bg-muted-900/50 mb-2 grid grid-cols-7 gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3"
+              >
+                <div class="col-span-2 text-xs font-semibold uppercase text-gray-600 dark:text-gray-400">ایده</div>
                 <div
                   v-for="criteria in evaluationCriteria"
                   :key="criteria.id"
-                  class="text-center text-xs font-semibold uppercase text-gray-600 dark:text-gray-400"
+                  class="flex items-center justify-center text-center"
                 >
-                  {{ criteria.title }}
+                  <span class="text-xs font-semibold uppercase text-gray-600 dark:text-gray-400 leading-tight">
+                    {{ criteria.title }}
+                  </span>
                 </div>
               </div>
 
               <!-- Idea Rows -->
               <div class="space-y-2">
                 <div
-                  v-for="idea in ideas"
+                  v-if="filteredIdeas.length === 0"
+                  class="dark:bg-muted-900/30 rounded-xl border border-gray-100 bg-gray-50 p-12 text-center"
+                >
+                  <Icon name="ph:funnel-simple" class="text-muted-400 mx-auto mb-4 size-16" />
+                  <BaseParagraph class="text-muted-500">هیچ ایده‌ای با این فیلتر یافت نشد.</BaseParagraph>
+                </div>
+
+                <div
+                  v-for="idea in filteredIdeas"
                   :key="idea.id"
-                  class="dark:border-muted-700 dark:bg-muted-900/30 grid grid-cols-7 items-center gap-2 rounded-xl border border-gray-100 bg-white p-3 transition-all duration-200 hover:shadow-md"
+                  class="dark:border-muted-700 dark:bg-muted-900/30 grid grid-cols-7 items-start gap-2 rounded-xl border border-gray-100 bg-white p-3 transition-all duration-200 hover:shadow-md"
                 >
                   <!-- Idea Title -->
-                  <div class="col-span-2">
-                    <div class="text-muted-800 mb-1 text-sm font-semibold dark:text-white">
+                  <div class="col-span-2 min-w-0">
+                    <div class="text-muted-800 mb-1 text-sm font-semibold dark:text-white break-words">
                       {{ idea.title }}
                     </div>
-                    <div class="text-muted-500 line-clamp-2 text-xs">
+                    <div class="text-muted-500 line-clamp-2 text-xs break-words">
                       {{ idea.description }}
                     </div>
                   </div>
@@ -843,7 +816,7 @@
                   <div
                     v-for="criteria in evaluationCriteria"
                     :key="criteria.id"
-                    class="flex justify-center"
+                    class="flex items-center justify-center"
                   >
                     <BaseInput
                       :model-value="idea.scores[criteria.id] || 0"
@@ -851,7 +824,7 @@
                       min="0"
                       max="10"
                       shape="curved"
-                      :classes="{ input: 'h-10 w-16 text-center' }"
+                      :classes="{ input: 'h-10 w-14 text-center text-sm' }"
                       @update:model-value="(val) => updateScore(idea.id, criteria.id, Number(val))"
                     />
                   </div>
@@ -861,70 +834,105 @@
           </div>
         </div>
 
-        <!-- Ranked Results -->
-        <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
-          <div class="mb-6">
-            <BaseHeading
-              as="h2"
-              size="xl"
-              weight="semibold"
-              class="mb-2 text-gray-900 dark:text-white"
-            >
-              نتایج رتبه‌بندی شده
-            </BaseHeading>
-            <BaseParagraph size="sm" class="text-muted-500">
-              ایده‌ها بر اساس امتیاز کل مرتب شده‌اند
-            </BaseParagraph>
+        <!-- AI Generated Matrix Description -->
+        <div
+          v-if="matrixDescription"
+          class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8"
+        >
+          <div class="mb-6 flex items-center gap-3">
+            <div class="bg-info-500 flex size-12 items-center justify-center rounded-xl">
+              <Icon name="ph:table" class="size-6 text-white" />
+            </div>
+            <div>
+              <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-900 dark:text-white">
+                ماتریس ارزیابی تولید شده
+              </BaseHeading>
+              <BaseParagraph size="sm" class="text-muted-500 mt-1">تحلیل جامع و توصیه‌های عملی</BaseParagraph>
+            </div>
           </div>
 
-          <div class="space-y-4">
+          <div class="dark:bg-muted-900/30 w-full rounded-xl border border-gray-100 bg-gray-50 p-6">
+            <AddonMarkdownRemark :source="matrixDescription" fullwidth />
+          </div>
+        </div>
+
+        <!-- Ranked Results -->
+        <div
+          class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-4 sm:p-8"
+        >
+          <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex-1">
+              <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+                نتایج رتبه‌بندی شده
+              </BaseHeading>
+              <BaseParagraph size="sm" class="text-muted-500">ایده‌ها بر اساس امتیاز کل مرتب شده‌اند</BaseParagraph>
+            </div>
+            <BaseButton
+              color="success"
+              shape="curved"
+              size="sm"
+              @click="showRankedResults = !showRankedResults"
+              class="flex-shrink-0 self-start"
+            >
+              <Icon :name="showRankedResults ? 'ph:eye-slash' : 'ph:eye'" class="ml-2 size-4" />
+              <span class="whitespace-nowrap">{{ showRankedResults ? 'مخفی کردن' : 'نمایش نتایج' }}</span>
+            </BaseButton>
+          </div>
+
+          <div v-if="showRankedResults" class="space-y-4">
             <div
               v-for="(idea, index) in sortedIdeas"
               :key="idea.id"
-              class="dark:border-muted-700 dark:bg-muted-900/30 group relative overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:shadow-lg"
+              class="dark:border-muted-700 dark:bg-muted-900/30 group relative overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-4 sm:p-6 transition-all duration-300 hover:shadow-lg"
             >
               <!-- Rank Badge -->
-              <div class="absolute left-4 top-4">
+              <div class="absolute left-2 bottom-2 sm:left-4 sm:bottom-4">
                 <div
                   :class="[
-                    'flex size-10 items-center justify-center rounded-full font-bold text-white shadow-lg',
-                    index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-600' : 'bg-muted-500',
+                    'flex size-8 sm:size-10 items-center justify-center rounded-full text-sm sm:text-base font-bold text-white shadow-lg',
+                    index === 0
+                      ? 'bg-yellow-500'
+                      : index === 1
+                      ? 'bg-gray-400'
+                      : index === 2
+                      ? 'bg-orange-600'
+                      : 'bg-muted-500',
                   ]"
                 >
                   {{ index + 1 }}
                 </div>
               </div>
 
-              <div class="mr-16">
-                <div class="mb-3 flex items-start justify-between">
-                  <div class="flex-1">
+              <div class="mr-10 sm:mr-16">
+                <div class="mb-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div class="flex-1 min-w-0">
                     <BaseHeading
                       as="h3"
                       size="lg"
                       weight="semibold"
-                      class="mb-2 text-gray-900 dark:text-white"
+                      class="mb-2 text-gray-900 dark:text-white break-words"
                     >
                       {{ idea.title }}
                     </BaseHeading>
-                    <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400">
+                    <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400 break-words">
                       {{ idea.description }}
                     </BaseParagraph>
                   </div>
-                  <div class="mr-4 text-left">
-                    <div class="text-muted-500 mb-1 text-xs">
-                      امتیاز کل
-                    </div>
+                  <div class="flex-shrink-0 text-center sm:text-left sm:mr-4">
+                    <div class="text-muted-500 mb-1 text-xs">امتیاز کل</div>
                     <div
                       :class="[
-                        'text-3xl font-bold',
-                        idea.totalScore >= 40 ? 'text-success-500' : idea.totalScore >= 25 ? 'text-warning-500' : 'text-muted-400',
+                        'text-2xl sm:text-3xl font-bold',
+                        idea.totalScore >= 40
+                          ? 'text-success-500'
+                          : idea.totalScore >= 25
+                          ? 'text-warning-500'
+                          : 'text-muted-400',
                       ]"
                     >
                       {{ idea.totalScore }}
                     </div>
-                    <div class="text-muted-500 text-xs">
-                      از ۵۰
-                    </div>
+                    <div class="text-muted-500 text-xs">از ۵۰</div>
                   </div>
                 </div>
 
@@ -937,7 +945,7 @@
                     size="sm"
                     shape="full"
                   >
-                    {{ criteria.title }}: {{ idea.scores[criteria.id] || 0 }}
+                    <span class="whitespace-nowrap">{{ criteria.title }}: {{ idea.scores[criteria.id] || 0 }}</span>
                   </BaseTag>
                 </div>
               </div>
@@ -948,28 +956,17 @@
         <!-- Tools Section -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading
-              as="h2"
-              size="xl"
-              weight="semibold"
-              class="mb-2 text-gray-900 dark:text-white"
-            >
+            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
               ابزارهای پیشنهادی
             </BaseHeading>
-            <BaseParagraph size="sm" class="text-muted-500">
-              ابزارهای دیگر برای ساختاردهی بهتر ایده‌ها
-            </BaseParagraph>
+            <BaseParagraph size="sm" class="text-muted-500">ابزارهای دیگر برای ساختاردهی بهتر ایده‌ها</BaseParagraph>
           </div>
 
-          <div class="grid gap-6 lg:grid-cols-3">
+          <div class="grid gap-6 lg:grid-cols-2">
             <div
               v-for="tool in tools"
               :key="tool.title"
-              :class="[
-                'dark:border-muted-700 dark:bg-muted-900/30 group overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:shadow-lg',
-                tool.title.includes('نقشه') ? 'cursor-pointer' : ''
-              ]"
-              @click="tool.title.includes('نقشه') ? openMindMap() : null"
+              class="dark:border-muted-700 dark:bg-muted-900/30 group overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:shadow-lg"
             >
               <div
                 :class="[
@@ -977,17 +974,9 @@
                   `bg-${tool.color}-500/10`,
                 ]"
               >
-                <Icon
-                  :name="tool.icon"
-                  :class="[`text-${tool.color}-500`, 'size-6']"
-                />
+                <Icon :name="tool.icon" :class="[`text-${tool.color}-500`, 'size-6']" />
               </div>
-              <BaseHeading
-                as="h3"
-                size="md"
-                weight="semibold"
-                class="mb-2 text-gray-900 dark:text-white"
-              >
+              <BaseHeading as="h3" size="md" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
                 {{ tool.title }}
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400">
@@ -1004,12 +993,7 @@
               <Icon name="ph:lightbulb-fill" class="size-6 text-white" />
             </div>
             <div class="flex-1">
-              <BaseHeading
-                as="h3"
-                size="md"
-                weight="semibold"
-                class="mb-3 text-gray-900 dark:text-white"
-              >
+              <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
                 نکات مهم برای این مرحله
               </BaseHeading>
               <ul class="text-muted-700 dark:text-muted-200 space-y-2 text-sm">
@@ -1036,12 +1020,7 @@
 
         <!-- Navigation Buttons -->
         <div class="flex items-center justify-between">
-          <BaseButton
-            color="muted"
-            shape="curved"
-            size="lg"
-            @click="goBack"
-          >
+          <BaseButton color="muted" shape="curved" size="lg" @click="goBack">
             <Icon name="ph:arrow-right" class="ml-2 size-5" />
             مرحله قبل
           </BaseButton>
@@ -1058,138 +1037,5 @@
         </div>
       </div>
     </div>
-
-    <!-- Mind Map Modal -->
-    <TairoModal
-      :open="showMindMapModal"
-      size="6xl"
-      @close="showMindMapModal = false"
-    >
-      <template #header>
-        <div class="flex items-center justify-between p-6 pb-0">
-          <div class="flex items-center gap-3">
-            <div class="bg-info-500 flex size-12 items-center justify-center rounded-xl">
-              <Icon name="ph:tree-structure" class="size-6 text-white" />
-            </div>
-            <div>
-              <BaseHeading
-                as="h2"
-                size="xl"
-                weight="bold"
-              >
-                نقشه ذهنی ایده‌ها
-              </BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-500">
-                مفاهیم کلیدی و ارتباطات ایده‌ها
-              </BaseParagraph>
-            </div>
-          </div>
-          <div class="flex gap-2">
-            <BaseButton
-              color="muted"
-              shape="curved"
-              size="sm"
-              @click="autoLayoutNodes"
-            >
-              <Icon name="ph:arrows-out" class="ml-2 size-4" />
-              مرتب‌سازی خودکار
-            </BaseButton>
-            <BaseButton
-              color="info"
-              shape="curved"
-              :disabled="flowLoading"
-              @click="generateFlowMindMap"
-            >
-              <Icon
-                v-if="!flowLoading"
-                name="ph:sparkle"
-                class="ml-2 size-4"
-              />
-              <Icon
-                v-else
-                name="svg-spinners:90-ring-with-bg"
-                class="ml-2 size-4"
-              />
-              تولید با هوش مصنوعی
-            </BaseButton>
-            <BaseButton
-              color="muted"
-              shape="curved"
-              @click="exportMindMapAsMarkdown"
-            >
-              <Icon name="ph:download-simple" class="ml-2 size-4" />
-              دانلود
-            </BaseButton>
-          </div>
-        </div>
-      </template>
-
-      <div class="p-8">
-        <!-- Vue Flow Container -->
-        <div class="h-[70vh] w-full p-4">
-          <VueFlow
-            v-model:nodes="flowNodes"
-            v-model:edges="flowEdges"
-            :default-zoom="0.8"
-            :min-zoom="0.1"
-            :max-zoom="4"
-            :fit-view-on-init="true"
-            class="rtl-flow"
-            @node-click="onFlowNodeClick"
-            @edge-click="onFlowEdgeClick"
-            @connect="onFlowConnect"
-          >
-            <Controls />
-            <MiniMap />
-            <Background pattern-color="#aaa" :gap="20" />
-          </VueFlow>
-        </div>
-
-        <!-- Node Count -->
-        <div class="text-muted-600 dark:text-muted-400 mt-4 text-center text-sm">
-          <Icon name="ph:tree-structure" class="ml-2 inline-block size-4" />
-          تعداد مفاهیم: {{ flowNodes.length }} | ارتباطات: {{ flowEdges.length }}
-        </div>
-      </div>
-    </TairoModal>
   </div>
 </template>
-
-<style>
-  .rtl-flow {
-    direction: ltr;
-  }
-
-  .vue-flow__controls {
-    direction: ltr;
-  }
-
-  .vue-flow__minimap {
-    direction: ltr;
-  }
-
-  /* Improve node spacing and readability */
-  .vue-flow__node {
-    font-family: inherit !important;
-    font-size: 14px !important;
-    text-align: center !important;
-  }
-
-  .vue-flow__edge-label {
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    background: rgba(255, 255, 255, 0.9) !important;
-    border: 1px solid #e5e7eb !important;
-    border-radius: 4px !important;
-    padding: 2px 8px !important;
-  }
-
-  /* Better edge styling */
-  .vue-flow__edge-path {
-    stroke-width: 2px !important;
-  }
-
-  .vue-flow__edge-path.animated {
-    stroke-width: 3px !important;
-  }
-</style>

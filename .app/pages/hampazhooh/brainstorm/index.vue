@@ -365,7 +365,7 @@
             <BaseParagraph class="text-muted-600 dark:text-muted-300 mb-4 leading-relaxed">
               مستندسازی بخش جدایی‌ناپذیر این سیستم است. هر مرحله باید مستند شود (حتی ایده‌های ردشده). از الگوهای یکسان برای ثبت اطلاعات استفاده کنید. این مستندات پایه‌ای برای تولید پروپوزال، مقاله، یا طرح پژوهشی خواهند بود.
             </BaseParagraph>
-            <div class="flex flex-wrap gap-3">
+            <div class="mb-4 flex flex-wrap gap-3">
               <BaseTag
                 color="warning"
                 size="sm"
@@ -391,6 +391,15 @@
                 روزنوشتهٔ فرایند
               </BaseTag>
             </div>
+            <BaseButton
+              color="warning"
+              shape="curved"
+              @click="router.push('/hampazhooh/brainstorm/documentation')"
+            >
+              <Icon name="ph:notebook" class="ml-2 size-5" />
+              باز کردن روزنوشتهٔ فرایند
+              <Icon name="ph:arrow-left" class="mr-2 size-4" />
+            </BaseButton>
           </div>
         </div>
       </div>

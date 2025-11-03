@@ -13,20 +13,13 @@
     description: string;
     icon: string;
     color: 'primary' | 'info' | 'success';
+    route?: string;
   }
 
   interface ChecklistItem {
     id: string;
     question: string;
     checked: boolean;
-  }
-
-  interface JournalEntry {
-    id: string;
-    date: Date;
-    title: string;
-    content: string;
-    stage: string;
   }
 
   definePageMeta({
@@ -103,10 +96,11 @@
       color: 'info',
     },
     {
-      title: 'روزنوشتهٔ فرایند',
-      description: 'ثبت تصمیمات، تغییرات و یادگیری‌ها',
+      title: 'مستندسازی فرایند',
+      description: 'ثبت تصمیمات، تغییرات و یادگیری‌ها در روزنوشت',
       icon: 'ph:notebook',
       color: 'success',
+      route: '/hampazhooh/brainstorm/documentation',
     },
   ];
 
@@ -121,19 +115,6 @@
     { id: '8', question: 'آیا نتایج قابل اندازه‌گیری و ارزیابی هستند؟', checked: false },
   ]);
 
-  const journalEntries = ref<JournalEntry[]>([
-    {
-      id: '1',
-      date: new Date(),
-      title: 'تصمیم اولیه درباره حوزه پژوهش',
-      content: 'پس از بررسی، تصمیم گرفتیم روی تأثیر فناوری بر رفتار انسانی تمرکز کنیم...',
-      stage: 'مرحله ۱',
-    },
-  ]);
-
-  const newJournalTitle = ref('');
-  const newJournalContent = ref('');
-
   const completedChecks = computed(() => {
     return checklist.value.filter(item => item.checked).length;
   });
@@ -142,30 +123,12 @@
     return (completedChecks.value / checklist.value.length) * 100;
   });
 
-  const addJournalEntry = () => {
-    if (newJournalTitle.value.trim() && newJournalContent.value.trim()) {
-      journalEntries.value.unshift({
-        id: Date.now().toString(),
-        date: new Date(),
-        title: newJournalTitle.value.trim(),
-        content: newJournalContent.value.trim(),
-        stage: 'مرحله ۴',
-      });
-      newJournalTitle.value = '';
-      newJournalContent.value = '';
-    }
-  };
-
   const goBackToStage = (stageNumber: number) => {
     router.push(`/hampazhooh/brainstorm/stage${stageNumber}`);
   };
 
   const completeCycle = () => {
     router.push('/hampazhooh/brainstorm');
-  };
-
-  const exportJournal = () => {
-    // Implementation for exporting journal
   };
 </script>
 
@@ -417,104 +380,7 @@
           </div>
         </div>
 
-        <!-- Process Journal -->
-        <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
-          <div class="mb-6 flex items-center justify-between">
-            <div>
-              <BaseHeading
-                as="h2"
-                size="xl"
-                weight="semibold"
-                class="text-gray-900 dark:text-white"
-              >
-                روزنوشتهٔ فرایند
-              </BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-500 mt-1">
-                تصمیمات، تغییرات و یادگیری‌های خود را ثبت کنید
-              </BaseParagraph>
-            </div>
-            <BaseButton
-              color="muted"
-              shape="curved"
-              size="sm"
-              @click="exportJournal"
-            >
-              <Icon name="ph:download-simple" class="ml-2 size-4" />
-              دانلود
-            </BaseButton>
-          </div>
 
-          <!-- Add New Entry Form -->
-          <div class="dark:border-muted-700 dark:bg-muted-900/50 mb-6 rounded-xl border border-gray-100 bg-gray-50 p-6">
-            <div class="mb-4">
-              <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                عنوان یادداشت
-              </label>
-              <BaseInput
-                v-model="newJournalTitle"
-                placeholder="مثال: تغییر در سؤال تحقیق"
-                shape="curved"
-                :classes="{ input: 'h-12' }"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                محتوای یادداشت
-              </label>
-              <BaseTextarea
-                v-model="newJournalContent"
-                placeholder="تصمیمات، دلایل، و یادگیری‌های خود را بنویسید..."
-                rows="4"
-                shape="curved"
-              />
-            </div>
-            <BaseButton
-              color="warning"
-              shape="curved"
-              :disabled="!newJournalTitle.trim() || !newJournalContent.trim()"
-              @click="addJournalEntry"
-            >
-              <Icon name="ph:plus-circle" class="ml-2 size-5" />
-              افزودن یادداشت
-            </BaseButton>
-          </div>
-
-          <!-- Journal Entries -->
-          <div class="space-y-4">
-            <div
-              v-for="entry in journalEntries"
-              :key="entry.id"
-              class="dark:border-muted-700 dark:bg-muted-900/30 rounded-xl border border-gray-100 bg-white p-6"
-            >
-              <div class="mb-3 flex items-start justify-between">
-                <div class="flex-1">
-                  <BaseHeading
-                    as="h3"
-                    size="md"
-                    weight="semibold"
-                    class="mb-1 text-gray-900 dark:text-white"
-                  >
-                    {{ entry.title }}
-                  </BaseHeading>
-                  <div class="text-muted-500 flex items-center gap-3 text-xs">
-                    <span>{{ new Date(entry.date).toLocaleDateString('fa-IR') }}</span>
-                    <span>•</span>
-                    <BaseTag
-                      color="warning"
-                      size="sm"
-                      shape="full"
-                    >
-                      {{ entry.stage }}
-                    </BaseTag>
-                  </div>
-                </div>
-              </div>
-              <div class="text-muted-700 dark:text-muted-300 whitespace-pre-line text-sm leading-relaxed">
-                {{ entry.content }}
-              </div>
-            </div>
-          </div>
-        </div>
 
         <!-- Tools Section -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
@@ -536,7 +402,11 @@
             <div
               v-for="tool in tools"
               :key="tool.title"
-              class="dark:border-muted-700 dark:bg-muted-900/30 group overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:shadow-lg"
+              :class="[
+                'dark:border-muted-700 dark:bg-muted-900/30 group overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:shadow-lg',
+                tool.route ? 'cursor-pointer' : '',
+              ]"
+              @click="tool.route ? router.push(tool.route) : null"
             >
               <div
                 :class="[
@@ -557,9 +427,13 @@
               >
                 {{ tool.title }}
               </BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400">
+              <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400 mb-3">
                 {{ tool.description }}
               </BaseParagraph>
+              <div v-if="tool.route" class="text-success-500 flex items-center gap-1 text-xs font-medium">
+                <Icon name="ph:arrow-left" class="size-4" />
+                <span>باز کردن</span>
+              </div>
             </div>
           </div>
         </div>
