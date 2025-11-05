@@ -770,8 +770,6 @@ const bulkCategories = ref([
     completed: 0,
     selected: true,
     existingCount: 0,
-    selected: true,
-    existingCount: 0,
     disorders: [
       'Intellectual Disabilities',
       'Global Developmental Delay',
