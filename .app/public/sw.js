@@ -2,7 +2,7 @@
 // DO NOT REMOVE THIS LINE - WORKBOX WILL REPLACE IT WITH THE MANIFEST
 const PRECACHE_MANIFEST = self.__WB_MANIFEST || []
 
-const CACHE_VERSION = 'v3.4.0' // این ورژن باید با package.json همخوانی داشته باشد
+const CACHE_VERSION = 'v3.5.0' // این ورژن باید با package.json همخوانی داشته باشد
 const STATIC_CACHE = `zehna-static-${CACHE_VERSION}`
 const IMAGES_CACHE = `zehna-images-${CACHE_VERSION}`
 const ICONS_CACHE = `zehna-icons-${CACHE_VERSION}`

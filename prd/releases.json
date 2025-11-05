@@ -1,5 +1,18 @@
 [
   {
+    "version": "3.5.0",
+    "releaseDate": "2025-11-05",
+    "product": "Critical bug fix for zone-based navigation system. Fixed authentication redirect issues that caused white screens for logged-in users. Improved sidebar plugin stability and user experience.",
+    "technical": "Fixed zone-sidebar.client.ts plugin to properly handle user authentication state. Added null-safety checks and skip logic for auth pages. Enhanced plugin to prevent sidebar clearing when user data is not yet loaded.",
+    "rollout": [
+      "Test auth flow and navigation redirects",
+      "Verify sidebar rendering on all zones",
+      "Test login/logout flows",
+      "Verify zone access controls",
+      "Deploy to production environment"
+    ]
+  },
+  {
     "version": "3.4.0",
     "releaseDate": "2025-11-03",
     "product": "Enhanced brainstorming functionality and researcher features. Improved UI components and workflow optimizations for the Hampazhooh platform.",

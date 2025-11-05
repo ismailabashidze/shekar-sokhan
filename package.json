@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "tairo",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "type": "module",
   "main": "./nuxt.config.ts",
   "packageManager": "pnpm@9.1.4",
@@ -29,6 +29,7 @@
     "lint:eslint:fix-demo": "eslint -c layers/documentation/examples/.eslintrc.cjs --fix layers/documentation/examples"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.3",
     "@stylistic/eslint-plugin": "^1.5.4",
     "@typescript-eslint/eslint-plugin": "7.6.0",
     "eslint": "8.57.0",

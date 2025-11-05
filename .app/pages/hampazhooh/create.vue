@@ -85,13 +85,7 @@
     },
   ];
 
-  const categoryOptions = [
-    'روانشناسی بالینی',
-    'روانشناسی اجتماعی',
-    'روانشناسی رشد',
-    'سلامت روان',
-    'روانشناسی شناختی',
-  ];
+  const categoryOptions = ['روانشناسی بالینی', 'روانشناسی اجتماعی', 'روانشناسی رشد', 'سلامت روان', 'روانشناسی شناختی'];
 
   const steps = computed(() => [
     { number: 1, title: 'نوع پروژه', completed: currentStep.value > 1 },
@@ -160,9 +154,9 @@
     isBrainstorming.value = true;
 
     // Simulate AI brainstorming
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const projectTypeName = projectTypes.find(t => t.id === formData.value.projectType)?.title || '';
+    const projectTypeName = projectTypes.find((t) => t.id === formData.value.projectType)?.title || '';
 
     brainstormResults.value = `بر اساس نوع پروژه "${projectTypeName}"، در اینجا چند ایده و پیشنهاد برای شروع پژوهش شما:
 
@@ -195,22 +189,8 @@
       <div class="px-4 py-6 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <BaseButton
-              color="muted"
-              shape="curved"
-              size="sm"
-              @click="cancelForm"
-            >
-              <Icon name="ph:arrow-right" class="ml-2 size-4" />
-              بازگشت
-            </BaseButton>
             <div>
-              <BaseHeading
-                as="h1"
-                size="2xl"
-                weight="bold"
-                class="text-gray-900 dark:text-white"
-              >
+              <BaseHeading as="h1" size="2xl" weight="bold" class="text-gray-900 dark:text-white">
                 ایجاد پروژه پژوهشی جدید
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-400 mt-1">
@@ -227,11 +207,7 @@
       <div class="px-4 py-6 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-4xl">
           <div class="flex items-center justify-between">
-            <div
-              v-for="(step, index) in steps"
-              :key="step.number"
-              class="flex flex-1 items-center"
-            >
+            <div v-for="(step, index) in steps" :key="step.number" class="flex flex-1 items-center">
               <!-- Step Circle -->
               <div class="relative flex flex-col items-center">
                 <div
@@ -240,15 +216,11 @@
                     currentStep === step.number
                       ? 'border-primary-500 bg-primary-500 shadow-primary-500/30 text-white shadow-lg'
                       : step.completed
-                        ? 'border-success-500 bg-success-500 text-white'
-                        : 'dark:border-muted-600 dark:bg-muted-800 dark:text-muted-400 border-gray-300 bg-gray-50 text-gray-400',
+                      ? 'border-success-500 bg-success-500 text-white'
+                      : 'dark:border-muted-600 dark:bg-muted-800 dark:text-muted-400 border-gray-300 bg-gray-50 text-gray-400',
                   ]"
                 >
-                  <Icon
-                    v-if="step.completed"
-                    name="ph:check-bold"
-                    class="size-6"
-                  />
+                  <Icon v-if="step.completed" name="ph:check-bold" class="size-6" />
                   <span v-else>{{ step.number }}</span>
                 </div>
                 <span
@@ -257,8 +229,8 @@
                     currentStep === step.number
                       ? 'text-primary-500'
                       : step.completed
-                        ? 'text-success-500'
-                        : 'text-muted-400',
+                      ? 'text-success-500'
+                      : 'text-muted-400',
                   ]"
                 >
                   {{ step.title }}
@@ -285,12 +257,7 @@
         <!-- Step 1: Project Type Selection -->
         <div v-if="currentStep === 1" class="animate-fade-in">
           <div class="mb-8 text-center">
-            <BaseHeading
-              as="h2"
-              size="xl"
-              weight="semibold"
-              class="mb-2 text-gray-900 dark:text-white"
-            >
+            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
               نوع پروژه خود را انتخاب کنید
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
@@ -325,19 +292,11 @@
                   `bg-${type.color}-500/10`,
                 ]"
               >
-                <Icon
-                  :name="type.icon"
-                  :class="[`text-${type.color}-500`, 'size-8']"
-                />
+                <Icon :name="type.icon" :class="[`text-${type.color}-500`, 'size-8']" />
               </div>
 
               <!-- Content -->
-              <BaseHeading
-                as="h3"
-                size="lg"
-                weight="semibold"
-                class="mb-2 text-gray-900 dark:text-white"
-              >
+              <BaseHeading as="h3" size="lg" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
                 {{ type.title }}
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-500">
@@ -350,12 +309,7 @@
         <!-- Step 2: Brainstorm -->
         <div v-if="currentStep === 2" class="animate-fade-in">
           <div class="mb-8 text-center">
-            <BaseHeading
-              as="h2"
-              size="xl"
-              weight="semibold"
-              class="mb-2 text-gray-900 dark:text-white"
-            >
+            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
               طوفان فکری برای پروژه شما
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
@@ -372,12 +326,7 @@
                     <Icon name="ph:lightbulb-fill" class="size-6 text-white" />
                   </div>
                   <div class="flex-1">
-                    <BaseHeading
-                      as="h3"
-                      size="md"
-                      weight="semibold"
-                      class="mb-2 text-gray-900 dark:text-white"
-                    >
+                    <BaseHeading as="h3" size="md" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
                       چرا طوفان فکری؟
                     </BaseHeading>
                     <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300 mb-3">
@@ -422,12 +371,7 @@
                   <div class="dark:bg-muted-700 h-px flex-1 bg-gray-300" />
                 </div>
 
-                <BaseButton
-                  color="info"
-                  shape="curved"
-                  size="lg"
-                  @click="router.push('/hampazhooh/brainstorm')"
-                >
+                <BaseButton color="info" shape="curved" size="lg" @click="router.push('/hampazhooh/brainstorm')">
                   <Icon name="ph:circles-four" class="ml-2 size-5" />
                   استفاده از چارچوب پیشرفته RDC
                 </BaseButton>
@@ -445,25 +389,13 @@
                     <Icon name="ph:check-circle-fill" class="text-success-500 size-5" />
                   </div>
                   <div>
-                    <BaseHeading
-                      as="h3"
-                      size="md"
-                      weight="semibold"
-                      class="text-gray-900 dark:text-white"
-                    >
+                    <BaseHeading as="h3" size="md" weight="semibold" class="text-gray-900 dark:text-white">
                       نتایج طوفان فکری
                     </BaseHeading>
-                    <BaseParagraph size="xs" class="text-muted-500">
-                      پیشنهادات هوش مصنوعی برای پروژه شما
-                    </BaseParagraph>
+                    <BaseParagraph size="xs" class="text-muted-500">پیشنهادات هوش مصنوعی برای پروژه شما</BaseParagraph>
                   </div>
                 </div>
-                <BaseButton
-                  color="muted"
-                  shape="curved"
-                  size="sm"
-                  @click="brainstormResults = ''"
-                >
+                <BaseButton color="muted" shape="curved" size="sm" @click="brainstormResults = ''">
                   <Icon name="ph:arrows-counter-clockwise" class="ml-1 size-4" />
                   طوفان فکری مجدد
                 </BaseButton>
@@ -491,25 +423,16 @@
         <div v-if="currentStep === 3" class="animate-fade-in">
           <div class="dark:bg-muted-800 dark:border-muted-700 rounded-2xl border border-gray-200 bg-white p-8">
             <div class="mb-6">
-              <BaseHeading
-                as="h2"
-                size="xl"
-                weight="semibold"
-                class="mb-2 text-gray-900 dark:text-white"
-              >
+              <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
                 اطلاعات اولیه پروژه
               </BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-500">
-                اطلاعات پایه پروژه پژوهشی خود را وارد کنید
-              </BaseParagraph>
+              <BaseParagraph size="sm" class="text-muted-500">اطلاعات پایه پروژه پژوهشی خود را وارد کنید</BaseParagraph>
             </div>
 
             <div class="space-y-6">
               <!-- Title -->
               <div>
-                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                  عنوان پروژه *
-                </label>
+                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">عنوان پروژه *</label>
                 <BaseInput
                   v-model="formData.title"
                   placeholder="عنوان کامل پروژه را وارد کنید"
@@ -520,9 +443,7 @@
 
               <!-- Description -->
               <div>
-                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                  توضیحات پروژه *
-                </label>
+                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">توضیحات پروژه *</label>
                 <BaseTextarea
                   v-model="formData.description"
                   placeholder="توضیحات کامل درباره پروژه، اهداف و نتایج مورد انتظار را بنویسید"
@@ -533,9 +454,7 @@
 
               <!-- Category -->
               <div>
-                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                  دسته‌بندی *
-                </label>
+                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">دسته‌بندی *</label>
                 <BaseListbox
                   v-model="formData.category"
                   :items="categoryOptions"
@@ -548,26 +467,12 @@
               <!-- Dates Row -->
               <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                    تاریخ شروع
-                  </label>
-                  <BaseInput
-                    v-model="formData.startDate"
-                    type="date"
-                    shape="curved"
-                    :classes="{ input: 'h-12' }"
-                  />
+                  <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">تاریخ شروع</label>
+                  <BaseInput v-model="formData.startDate" type="date" shape="curved" :classes="{ input: 'h-12' }" />
                 </div>
                 <div>
-                  <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                    تاریخ پایان
-                  </label>
-                  <BaseInput
-                    v-model="formData.endDate"
-                    type="date"
-                    shape="curved"
-                    :classes="{ input: 'h-12' }"
-                  />
+                  <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">تاریخ پایان</label>
+                  <BaseInput v-model="formData.endDate" type="date" shape="curved" :classes="{ input: 'h-12' }" />
                 </div>
               </div>
 
@@ -605,12 +510,7 @@
         <div v-if="currentStep === 4" class="animate-fade-in">
           <div class="dark:bg-muted-800 dark:border-muted-700 rounded-2xl border border-gray-200 bg-white p-8">
             <div class="mb-6">
-              <BaseHeading
-                as="h2"
-                size="xl"
-                weight="semibold"
-                class="mb-2 text-gray-900 dark:text-white"
-              >
+              <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
                 جزئیات پژوهش
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-500">
@@ -621,9 +521,7 @@
             <div class="space-y-6">
               <!-- Keywords -->
               <div>
-                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                  کلیدواژه‌ها
-                </label>
+                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">کلیدواژه‌ها</label>
                 <div class="flex gap-2">
                   <BaseInput
                     v-model="newKeyword"
@@ -633,11 +531,7 @@
                     class="flex-1"
                     @keyup.enter="addKeyword"
                   />
-                  <BaseButton
-                    color="primary"
-                    shape="curved"
-                    @click="addKeyword"
-                  >
+                  <BaseButton color="primary" shape="curved" @click="addKeyword">
                     <Icon name="ph:plus" class="ml-1 size-5" />
                     افزودن
                   </BaseButton>
@@ -660,9 +554,7 @@
 
               <!-- Objectives -->
               <div>
-                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                  اهداف پژوهش *
-                </label>
+                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">اهداف پژوهش *</label>
                 <BaseTextarea
                   v-model="formData.objectives"
                   placeholder="اهداف اصلی و فرعی پژوهش را شرح دهید"
@@ -673,9 +565,7 @@
 
               <!-- Methodology -->
               <div>
-                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                  روش‌شناسی *
-                </label>
+                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">روش‌شناسی *</label>
                 <BaseTextarea
                   v-model="formData.methodology"
                   placeholder="روش‌های تحقیق و گردآوری داده را توضیح دهید"
@@ -686,9 +576,7 @@
 
               <!-- Funding Source -->
               <div>
-                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">
-                  منبع تامین مالی
-                </label>
+                <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">منبع تامین مالی</label>
                 <BaseInput
                   v-model="formData.fundingSource"
                   placeholder="نام سازمان یا منبع تامین مالی"
@@ -700,9 +588,7 @@
               <!-- Ethics Approval -->
               <div class="dark:bg-muted-700/50 flex items-center justify-between rounded-xl bg-gray-50 p-4">
                 <div>
-                  <label class="text-muted-700 dark:text-muted-200 block text-sm font-medium">
-                    تایید کمیته اخلاق
-                  </label>
+                  <label class="text-muted-700 dark:text-muted-200 block text-sm font-medium">تایید کمیته اخلاق</label>
                   <BaseParagraph size="xs" class="text-muted-500 mt-1">
                     آیا این پژوهش نیاز به تایید کمیته اخلاق دارد؟
                   </BaseParagraph>
@@ -717,12 +603,7 @@
         <div v-if="currentStep === 5" class="animate-fade-in">
           <div class="dark:bg-muted-800 dark:border-muted-700 rounded-2xl border border-gray-200 bg-white p-8">
             <div class="mb-6">
-              <BaseHeading
-                as="h2"
-                size="xl"
-                weight="semibold"
-                class="mb-2 text-gray-900 dark:text-white"
-              >
+              <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
                 بررسی نهایی
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-500">
@@ -733,19 +614,15 @@
             <div class="space-y-6">
               <!-- Project Type -->
               <div class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                <div class="text-muted-500 mb-1 text-xs font-medium">
-                  نوع پروژه
-                </div>
+                <div class="text-muted-500 mb-1 text-xs font-medium">نوع پروژه</div>
                 <div class="font-semibold text-gray-900 dark:text-white">
-                  {{ projectTypes.find(t => t.id === formData.projectType)?.title }}
+                  {{ projectTypes.find((t) => t.id === formData.projectType)?.title }}
                 </div>
               </div>
 
               <!-- Title -->
               <div class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                <div class="text-muted-500 mb-1 text-xs font-medium">
-                  عنوان
-                </div>
+                <div class="text-muted-500 mb-1 text-xs font-medium">عنوان</div>
                 <div class="font-semibold text-gray-900 dark:text-white">
                   {{ formData.title }}
                 </div>
@@ -753,9 +630,7 @@
 
               <!-- Description -->
               <div class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                <div class="text-muted-500 mb-1 text-xs font-medium">
-                  توضیحات
-                </div>
+                <div class="text-muted-500 mb-1 text-xs font-medium">توضیحات</div>
                 <div class="text-muted-700 dark:text-muted-300 text-sm">
                   {{ formData.description }}
                 </div>
@@ -764,33 +639,25 @@
               <!-- Details Grid -->
               <div class="grid gap-4 sm:grid-cols-2">
                 <div class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                  <div class="text-muted-500 mb-1 text-xs font-medium">
-                    دسته‌بندی
-                  </div>
+                  <div class="text-muted-500 mb-1 text-xs font-medium">دسته‌بندی</div>
                   <div class="text-sm font-medium text-gray-900 dark:text-white">
                     {{ formData.category }}
                   </div>
                 </div>
                 <div class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                  <div class="text-muted-500 mb-1 text-xs font-medium">
-                    سازمان
-                  </div>
+                  <div class="text-muted-500 mb-1 text-xs font-medium">سازمان</div>
                   <div class="text-sm font-medium text-gray-900 dark:text-white">
                     {{ formData.institution || '-' }}
                   </div>
                 </div>
                 <div class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                  <div class="text-muted-500 mb-1 text-xs font-medium">
-                    تاریخ شروع
-                  </div>
+                  <div class="text-muted-500 mb-1 text-xs font-medium">تاریخ شروع</div>
                   <div class="text-sm font-medium text-gray-900 dark:text-white">
                     {{ formData.startDate || '-' }}
                   </div>
                 </div>
                 <div class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                  <div class="text-muted-500 mb-1 text-xs font-medium">
-                    حداکثر شرکت‌کنندگان
-                  </div>
+                  <div class="text-muted-500 mb-1 text-xs font-medium">حداکثر شرکت‌کنندگان</div>
                   <div class="text-sm font-medium text-gray-900 dark:text-white">
                     {{ formData.maxParticipants }}
                   </div>
@@ -798,18 +665,13 @@
               </div>
 
               <!-- Keywords -->
-              <div v-if="formData.keywords.length > 0" class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                <div class="text-muted-500 mb-2 text-xs font-medium">
-                  کلیدواژه‌ها
-                </div>
+              <div
+                v-if="formData.keywords.length > 0"
+                class="dark:border-muted-700 rounded-xl border border-gray-100 p-4"
+              >
+                <div class="text-muted-500 mb-2 text-xs font-medium">کلیدواژه‌ها</div>
                 <div class="flex flex-wrap gap-2">
-                  <BaseTag
-                    v-for="keyword in formData.keywords"
-                    :key="keyword"
-                    color="primary"
-                    size="sm"
-                    shape="full"
-                  >
+                  <BaseTag v-for="keyword in formData.keywords" :key="keyword" color="primary" size="sm" shape="full">
                     {{ keyword }}
                   </BaseTag>
                 </div>
@@ -817,9 +679,7 @@
 
               <!-- Objectives -->
               <div v-if="formData.objectives" class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                <div class="text-muted-500 mb-1 text-xs font-medium">
-                  اهداف پژوهش
-                </div>
+                <div class="text-muted-500 mb-1 text-xs font-medium">اهداف پژوهش</div>
                 <div class="text-muted-700 dark:text-muted-300 text-sm">
                   {{ formData.objectives }}
                 </div>
@@ -827,9 +687,7 @@
 
               <!-- Methodology -->
               <div v-if="formData.methodology" class="dark:border-muted-700 rounded-xl border border-gray-100 p-4">
-                <div class="text-muted-500 mb-1 text-xs font-medium">
-                  روش‌شناسی
-                </div>
+                <div class="text-muted-500 mb-1 text-xs font-medium">روش‌شناسی</div>
                 <div class="text-muted-700 dark:text-muted-300 text-sm">
                   {{ formData.methodology }}
                 </div>
@@ -840,27 +698,14 @@
 
         <!-- Navigation Buttons -->
         <div class="mt-8 flex items-center justify-between">
-          <BaseButton
-            v-if="currentStep > 1"
-            color="muted"
-            shape="curved"
-            size="lg"
-            @click="previousStep"
-          >
+          <BaseButton v-if="currentStep > 1" color="muted" shape="curved" size="lg" @click="previousStep">
             <Icon name="ph:arrow-right" class="ml-2 size-5" />
             مرحله قبل
           </BaseButton>
           <div v-else />
 
           <div class="flex gap-3">
-            <BaseButton
-              color="muted"
-              shape="curved"
-              size="lg"
-              @click="cancelForm"
-            >
-              انصراف
-            </BaseButton>
+            <BaseButton color="muted" shape="curved" size="lg" @click="cancelForm">انصراف</BaseButton>
             <BaseButton
               v-if="currentStep < totalSteps"
               color="primary"

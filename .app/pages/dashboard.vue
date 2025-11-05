@@ -31,6 +31,12 @@ const zoneLandingPages: Record<string, string> = {
   togetherMama: 'https://hampa.zehna.ir/fa/',
 };
 
+// Zone navigation routes for enabled products
+const zoneRoutes: Record<string, string> = {
+  hamdel: '/hamdel/sessions',
+  hampazhooh: '/hampazhooh/create',
+};
+
 // Filter zones to hide admin if user is not admin
 const visibleZones = computed(() => {
   const zones = { ...ZONE_CONFIGS };
@@ -99,6 +105,29 @@ const zoneIconColor = computed(() => {
 // Check if zone has landing page
 const hasLandingPage = (zoneName: string) => {
   return !!zoneLandingPages[zoneName];
+};
+
+// Check if zone is enabled (user has access)
+const isZoneEnabled = (zoneName: string) => {
+  return user.value?.zones?.includes(zoneName) || false;
+};
+
+// Check if zone has navigation route
+const hasZoneRoute = (zoneName: string) => {
+  return !!zoneRoutes[zoneName];
+};
+
+// Handle zone card click
+const handleZoneClick = (zoneName: string) => {
+  console.log('Zone clicked:', zoneName);
+  console.log('Is enabled:', isZoneEnabled(zoneName));
+  console.log('Has route:', hasZoneRoute(zoneName));
+  console.log('User zones:', user.value?.zones);
+  
+  if (isZoneEnabled(zoneName) && hasZoneRoute(zoneName)) {
+    console.log('Navigating to:', zoneRoutes[zoneName]);
+    navigateTo(zoneRoutes[zoneName]);
+  }
 };
 
 // Handle zone info button click
@@ -300,7 +329,17 @@ const handleZoneInfo = (zoneName: string) => {
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
                   <ClientOnly>
                     <div v-for="(zone, key) in visibleZones" :key="key">
-                      <div class="flex items-center gap-2 rounded-lg border p-3" :class="zoneColor(zone.name)">
+                      <div
+                        class="flex items-center gap-2 rounded-lg border p-3 transition-all duration-200"
+                        :class="[
+                          zoneColor(zone.name),
+                          isZoneEnabled(zone.name) && hasZoneRoute(zone.name) 
+                            ? 'cursor-pointer hover:shadow-lg hover:scale-105' 
+                            : 'cursor-default'
+                        ]"
+                        :style="isZoneEnabled(zone.name) && hasZoneRoute(zone.name) ? 'cursor: pointer;' : 'cursor: default;'"
+                        @click="handleZoneClick(zone.name)"
+                      >
                         <div
                           class="flex size-8 items-center justify-center rounded-lg"
                           :class="zoneIconColor(zone.name).container"
@@ -324,7 +363,7 @@ const handleZoneInfo = (zoneName: string) => {
                           class="hover:bg-muted-100 dark:hover:bg-muted-700 flex size-6 items-center justify-center rounded-full transition-colors"
                           :class="hasLandingPage(zone.name) ? 'text-info-500 dark:text-info-400' : zoneIconColor(zone.name).text"
                           :title="'اطلاعات ' + zone.label"
-                          @click="handleZoneInfo(zone.name)"
+                          @click.stop="handleZoneInfo(zone.name)"
                         >
                           <Icon name="ph:info" class="size-4" />
                         </button>
