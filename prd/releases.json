@@ -1,39 +1,52 @@
 [
-  {
-    "version": "3.5.0",
-    "releaseDate": "2025-11-05",
-    "product": "Critical bug fix for zone-based navigation system. Fixed authentication redirect issues that caused white screens for logged-in users. Improved sidebar plugin stability and user experience.",
-    "technical": "Fixed zone-sidebar.client.ts plugin to properly handle user authentication state. Added null-safety checks and skip logic for auth pages. Enhanced plugin to prevent sidebar clearing when user data is not yet loaded.",
-    "rollout": [
-      "Test auth flow and navigation redirects",
-      "Verify sidebar rendering on all zones",
-      "Test login/logout flows",
-      "Verify zone access controls",
-      "Deploy to production environment"
-    ]
-  },
-  {
-    "version": "3.4.0",
-    "releaseDate": "2025-11-03",
-    "product": "Enhanced brainstorming functionality and researcher features. Improved UI components and workflow optimizations for the Hampazhooh platform.",
-    "technical": "Updated brainstorm stages (stage3, stage4) with new features, added researcher registration components, and enhanced documentation structure.",
-    "rollout": [
-      "Test brainstorm workflow enhancements",
-      "Verify researcher registration functionality",
-      "Review UI/UX improvements",
-      "Deploy to production environment"
-    ]
-  },
-  {
-    "version": "1.0.0",
-    "releaseDate": "2025-01-26",
-    "product": "Initial release of the Zehna therapy platform with comprehensive mental health support features.",
-    "technical": "Core platform implementation with Nuxt 3, TypeScript, and Tailwind CSS. Includes user authentication, therapy session management, and AI-powered analysis.",
-    "rollout": [
-      "Deploy production environment",
-      "Configure monitoring and alerting",
-      "Test core functionality with pilot users",
-      "Prepare user documentation"
-    ]
-  }
+	{
+		"version": "3.6.0",
+		"releaseDate": "2025-11-13",
+		"product": "Enhanced researcher platform with comprehensive interest management and resource collection features. Improved brainstorm workflow with better data handling and UI optimizations. Added category management system and enhanced markdown rendering.",
+		"technical": "Added researcher composable and interest management components. Implemented resource collection and category node components. Enhanced brainstorm stages with improved data flow and error handling. Updated markdown component with better list styling. Fixed code formatting and improved overall component structure.",
+		"rollout": [
+			"Test researcher interest and priority management",
+			"Verify resource collection functionality",
+			"Test enhanced brainstorm workflow",
+			"Review category management system",
+			"Deploy to production environment"
+		]
+	},
+	{
+		"version": "3.5.0",
+		"releaseDate": "2025-11-05",
+		"product": "Critical bug fix for zone-based navigation system. Fixed authentication redirect issues that caused white screens for logged-in users. Improved sidebar plugin stability and user experience.",
+		"technical": "Fixed zone-sidebar.client.ts plugin to properly handle user authentication state. Added null-safety checks and skip logic for auth pages. Enhanced plugin to prevent sidebar clearing when user data is not yet loaded.",
+		"rollout": [
+			"Test auth flow and navigation redirects",
+			"Verify sidebar rendering on all zones",
+			"Test login/logout flows",
+			"Verify zone access controls",
+			"Deploy to production environment"
+		]
+	},
+	{
+		"version": "3.4.0",
+		"releaseDate": "2025-11-03",
+		"product": "Enhanced brainstorming functionality and researcher features. Improved UI components and workflow optimizations for the Hampazhooh platform.",
+		"technical": "Updated brainstorm stages (stage3, stage4) with new features, added researcher registration components, and enhanced documentation structure.",
+		"rollout": [
+			"Test brainstorm workflow enhancements",
+			"Verify researcher registration functionality",
+			"Review UI/UX improvements",
+			"Deploy to production environment"
+		]
+	},
+	{
+		"version": "1.0.0",
+		"releaseDate": "2025-01-26",
+		"product": "Initial release of the Zehna therapy platform with comprehensive mental health support features.",
+		"technical": "Core platform implementation with Nuxt 3, TypeScript, and Tailwind CSS. Includes user authentication, therapy session management, and AI-powered analysis.",
+		"rollout": [
+			"Deploy production environment",
+			"Configure monitoring and alerting",
+			"Test core functionality with pilot users",
+			"Prepare user documentation"
+		]
+	}
 ]

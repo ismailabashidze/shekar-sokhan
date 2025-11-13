@@ -94,20 +94,23 @@
     let researchDomainArray: string[] = [];
     if (Array.isArray(currentBrainStorm.value.researchDomain)) {
       researchDomainArray = currentBrainStorm.value.researchDomain;
-    } else if (typeof currentBrainStorm.value.researchDomain === 'string') {
+    }
+ else if (typeof currentBrainStorm.value.researchDomain === 'string') {
       try {
         const parsed = JSON.parse(currentBrainStorm.value.researchDomain);
         researchDomainArray = Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
+      }
+ catch (e) {
         console.warn('Failed to parse researchDomain as JSON:', e);
         researchDomainArray = [];
       }
-    } else if (
-      typeof currentBrainStorm.value.researchDomain === 'object' &&
-      currentBrainStorm.value.researchDomain !== null
+    }
+ else if (
+      typeof currentBrainStorm.value.researchDomain === 'object'
+      && currentBrainStorm.value.researchDomain !== null
     ) {
       // If it's an object, try to extract array values
-      researchDomainArray = Object.values(currentBrainStorm.value.researchDomain).filter((v) => typeof v === 'string');
+      researchDomainArray = Object.values(currentBrainStorm.value.researchDomain).filter(v => typeof v === 'string');
     }
 
     return {
@@ -128,9 +131,9 @@
   // Check if stage1 data is properly loaded and valid
   const isStage1DataValid = computed(() => {
     return !!(
-      currentBrainStorm.value &&
-      stage1Data.value.mainChallenge &&
-      stage1Data.value.mainChallenge.trim().length > 0
+      currentBrainStorm.value
+      && stage1Data.value.mainChallenge
+      && stage1Data.value.mainChallenge.trim().length > 0
     );
   });
 
@@ -275,7 +278,8 @@
           feasibility: item.feasibility || '',
         }));
       }
-    } else {
+    }
+ else {
       toaster.show({
         title: 'هشدار',
         message: 'لطفاً ابتدا وارد حساب کاربری خود شوید.',
@@ -322,7 +326,8 @@
           timeout: 3000,
         });
       }
-    } catch (err: any) {
+    }
+ catch (err: any) {
       console.error('Error loading existing session:', err);
       toaster.show({
         title: 'هشدار',
@@ -426,7 +431,7 @@
       return;
     }
 
-    const technique = techniques.find((t) => t.id === techniqueId);
+    const technique = techniques.find(t => t.id === techniqueId);
     if (!technique) return;
 
     currentTechniqueGenerating.value = techniqueId;
@@ -442,7 +447,7 @@
       }
 
       const techniquePrompts = {
-        scamper: `با استفاده از تکنیک SCAMPER، حداقل ۵ ایده خلاقانه برای چالش تحقیقاتی زیر تولید کنید:
+        'scamper': `با استفاده از تکنیک SCAMPER، حداقل ۵ ایده خلاقانه برای چالش تحقیقاتی زیر تولید کنید:
 ${contextString}
 
 تکنیک SCAMPER شامل:
@@ -479,7 +484,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 برای هر کلاه، یک ایده یا دیدگاه ارائه دهید که نشان‌دهنده آن نگرش خاص باشد.
 پاسخ را به صورت لیستی با مشخص کردن کلاه هر ایده برگردانید:`,
 
-        analogical: `با استفاده از تفکر قیاسی (Analogical Thinking)، حداقل ۴ ایده خلاقانه برای چالش تحقیقاتی زیر تولید کنید:
+        'analogical': `با استفاده از تفکر قیاسی (Analogical Thinking)، حداقل ۴ ایده خلاقانه برای چالش تحقیقاتی زیر تولید کنید:
 ${contextString}
 
 فرایند تفکر قیاسی:
@@ -497,7 +502,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 
 پاسخ را به صورت لیستی شماره‌گذاری شده برگردانید:`,
 
-        reverse: `با استفاده از تکنیک Reverse Brainstorming، حداقل ۵ ایده برای چالش تحقیقاتی زیر تولید کنید:
+        'reverse': `با استفاده از تکنیک Reverse Brainstorming، حداقل ۵ ایده برای چالش تحقیقاتی زیر تولید کنید:
 ${contextString}
 
 فرایند طوفان فکری معکوس:
@@ -549,7 +554,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         icon: 'ph:check-circle',
         timeout: 4000,
       });
-    } catch (error: any) {
+    }
+ catch (error: any) {
       toaster.show({
         title: 'خطا',
         message: `خطا در تولید ایده‌ها: ${error.message || 'خطای ناشناخته'}`,
@@ -557,7 +563,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         icon: 'ph:warning',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       aiGenerating.value = false;
       currentTechniqueGenerating.value = null;
       showAiGuidanceModal.value = false;
@@ -589,7 +596,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 
     // If no structured items found, split by paragraphs
     if (ideas.length === 0) {
-      const paragraphs = content.split('\n\n').filter((p) => p.trim().length > 20);
+      const paragraphs = content.split('\n\n').filter(p => p.trim().length > 20);
       ideas.push(...paragraphs.slice(0, 5)); // Limit to first 5 paragraphs
     }
 
@@ -602,17 +609,17 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
   };
 
   const removeIdea = (id: string) => {
-    ideas.value = ideas.value.filter((idea) => idea.id !== id);
+    ideas.value = ideas.value.filter(idea => idea.id !== id);
   };
 
   const getTechniqueName = (id: string) => {
     if (id === 'stage1') return 'مرحله ۱';
-    return techniques.find((t) => t.id === id)?.title || '';
+    return techniques.find(t => t.id === id)?.title || '';
   };
 
   const getTechniqueColor = (id: string) => {
     if (id === 'stage1') return 'muted';
-    return techniques.find((t) => t.id === id)?.color || 'muted';
+    return techniques.find(t => t.id === id)?.color || 'muted';
   };
 
   const saveAndContinue = async () => {
@@ -651,7 +658,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
       }
 
       router.push('/hampazhooh/brainstorm/stage3');
-    } catch (err: any) {
+    }
+ catch (err: any) {
       console.error('Error saving session:', err);
       toaster.show({
         title: 'خطا',
@@ -771,7 +779,8 @@ ${context}
                   icon: 'ph:check-circle',
                   timeout: 4000,
                 });
-              } catch (saveError) {
+              }
+ catch (saveError) {
                 console.error('Error saving titles list:', saveError);
                 toaster.show({
                   title: 'هشدار',
@@ -781,7 +790,8 @@ ${context}
                   closable: true,
                 });
               }
-            } else {
+            }
+ else {
               toaster.show({
                 title: 'موفقیت',
                 message: `${titlesList.value.length} عنوان پژوهشی با کیفیت بالا تولید شد.`,
@@ -790,13 +800,16 @@ ${context}
                 timeout: 4000,
               });
             }
-          } else {
+          }
+ else {
             throw new Error('هیچ عنوانی در پاسخ یافت نشد');
           }
-        } else {
+        }
+ else {
           throw new Error('فرمت JSON معتبر پیدا نشد');
         }
-      } catch (parseError: any) {
+      }
+ catch (parseError: any) {
         console.error('Error parsing titles JSON:', parseError);
         console.error('Raw result:', result);
         toaster.show({
@@ -807,7 +820,8 @@ ${context}
           closable: true,
         });
       }
-    } catch (error: any) {
+    }
+ catch (error: any) {
       toaster.show({
         title: 'خطا',
         message: `خطا در تولید عناوین: ${error.message || 'خطای ناشناخته'}`,
@@ -815,7 +829,8 @@ ${context}
         icon: 'ph:warning',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       titlesListLoading.value = false;
     }
   };
@@ -845,7 +860,7 @@ ${context}
     }, {} as Record<string, Idea[]>);
 
     Object.entries(ideasByTechnique).forEach(([techniqueId, techniqueIdeas]) => {
-      const technique = techniques.find((t) => t.id === techniqueId);
+      const technique = techniques.find(t => t.id === techniqueId);
       content += `## ${technique?.title || techniqueId} (${techniqueIdeas.length} ایده)\n\n`;
 
       techniqueIdeas.forEach((idea, index) => {
@@ -891,11 +906,20 @@ ${context}
                 <Icon name="ph:lightbulb" class="size-6 text-white" />
               </div>
               <div>
-                <div class="text-info-500 mb-1 text-xs font-semibold uppercase tracking-wider">مرحله ۲</div>
-                <BaseHeading as="h1" size="2xl" weight="bold" class="text-gray-900 dark:text-white">
+                <div class="text-info-500 mb-1 text-xs font-semibold uppercase tracking-wider">
+                  مرحله ۲
+                </div>
+                <BaseHeading
+                  as="h1"
+                  size="2xl"
+                  weight="bold"
+                  class="text-gray-900 dark:text-white"
+                >
                   تولید ایده‌های خلاقانه
                 </BaseHeading>
-                <BaseParagraph size="sm" class="text-muted-400 mt-1">Divergent Ideation</BaseParagraph>
+                <BaseParagraph size="sm" class="text-muted-400 mt-1">
+                  Divergent Ideation
+                </BaseParagraph>
               </div>
             </div>
           </div>
@@ -915,10 +939,17 @@ ${context}
             <div class="text-primary-500 mx-auto mb-4 flex size-16 items-center justify-center rounded-full">
               <Icon name="svg-spinners:90-ring-with-bg" class="size-8" />
             </div>
-            <BaseHeading as="h3" size="lg" weight="semibold" class="text-muted-700 dark:text-muted-300 mb-2">
+            <BaseHeading
+              as="h3"
+              size="lg"
+              weight="semibold"
+              class="text-muted-700 dark:text-muted-300 mb-2"
+            >
               در حال بارگیری جلسه طوفان فکری...
             </BaseHeading>
-            <BaseParagraph size="sm" class="text-muted-500">لطفاً چند لحظه صبر کنید</BaseParagraph>
+            <BaseParagraph size="sm" class="text-muted-500">
+              لطفاً چند لحظه صبر کنید
+            </BaseParagraph>
           </div>
         </div>
 
@@ -927,19 +958,29 @@ ${context}
           v-else-if="error && !currentBrainStorm && !stage1Data.mainChallenge"
           class="flex min-h-[400px] items-center justify-center"
         >
-          <div class="text-center max-w-md">
+          <div class="max-w-md text-center">
             <div
               class="bg-danger-500/10 dark:bg-danger-500/20 mx-auto mb-4 flex size-16 items-center justify-center rounded-full"
             >
               <Icon name="ph:warning-octagon" class="text-danger-500 size-8" />
             </div>
-            <BaseHeading as="h3" size="lg" weight="semibold" class="text-muted-700 dark:text-muted-300 mb-2">
+            <BaseHeading
+              as="h3"
+              size="lg"
+              weight="semibold"
+              class="text-muted-700 dark:text-muted-300 mb-2"
+            >
               خطا در بارگیری جلسه
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500 mb-4">
               {{ error }}
             </BaseParagraph>
-            <BaseButton color="primary" shape="curved" size="sm" @click="loadExistingSession">
+            <BaseButton
+              color="primary"
+              shape="curved"
+              size="sm"
+              @click="loadExistingSession"
+            >
               <Icon name="ph:arrow-clockwise" class="ml-2 size-4" />
               تلاش مجدد
             </BaseButton>
@@ -951,7 +992,12 @@ ${context}
           <!-- Introduction (هدف این مرحله) - Moved to top -->
           <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
             <div class="mb-6">
-              <BaseHeading as="h2" size="xl" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h2"
+                size="xl"
+                weight="semibold"
+                class="mb-3 text-gray-900 dark:text-white"
+              >
                 هدف این مرحله
               </BaseHeading>
               <BaseParagraph class="text-muted-600 dark:text-muted-300 mb-4 leading-relaxed">
@@ -962,29 +1008,46 @@ ${context}
 
             <!-- Key Principles -->
             <div class="dark:border-muted-700 dark:bg-muted-900/50 rounded-xl border border-gray-100 bg-gray-50 p-6">
-              <BaseHeading as="h3" size="md" weight="semibold" class="mb-4 text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="mb-4 text-gray-900 dark:text-white"
+              >
                 اصول کلیدی
               </BaseHeading>
               <div class="grid gap-4 sm:grid-cols-3">
                 <div class="flex items-start gap-3">
                   <Icon name="ph:chart-line-up-fill" class="text-info-500 mt-0.5 size-5 shrink-0" />
                   <div>
-                    <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">کمّیت اول</div>
-                    <div class="text-muted-600 dark:text-muted-400 text-xs">هرچه ایده بیشتر، بهتر</div>
+                    <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                      کمّیت اول
+                    </div>
+                    <div class="text-muted-600 dark:text-muted-400 text-xs">
+                      هرچه ایده بیشتر، بهتر
+                    </div>
                   </div>
                 </div>
                 <div class="flex items-start gap-3">
                   <Icon name="ph:hand-palm-fill" class="text-info-500 mt-0.5 size-5 shrink-0" />
                   <div>
-                    <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">بدون قضاوت</div>
-                    <div class="text-muted-600 dark:text-muted-400 text-xs">همه ایده‌ها خوب هستند</div>
+                    <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                      بدون قضاوت
+                    </div>
+                    <div class="text-muted-600 dark:text-muted-400 text-xs">
+                      همه ایده‌ها خوب هستند
+                    </div>
                   </div>
                 </div>
                 <div class="flex items-start gap-3">
                   <Icon name="ph:arrows-merge-fill" class="text-info-500 mt-0.5 size-5 shrink-0" />
                   <div>
-                    <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">ترکیب حوزه‌ها</div>
-                    <div class="text-muted-600 dark:text-muted-400 text-xs">از حوزه‌های مختلف الهام بگیرید</div>
+                    <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                      ترکیب حوزه‌ها
+                    </div>
+                    <div class="text-muted-600 dark:text-muted-400 text-xs">
+                      از حوزه‌های مختلف الهام بگیرید
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1000,7 +1063,12 @@ ${context}
               <div class="bg-success-500/10 flex size-10 items-center justify-center rounded-lg">
                 <Icon name="ph:database" class="text-success-500 size-5" />
               </div>
-              <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="semibold"
+                class="text-gray-900 dark:text-white"
+              >
                 اطلاعات جلسه از پایگاه داده
               </BaseHeading>
             </div>
@@ -1012,7 +1080,7 @@ ${context}
                   <Icon name="ph:text-align-right" class="text-primary-500 size-4" />
                   <span class="text-muted-700 dark:text-muted-300 text-sm font-semibold">عنوان جلسه:</span>
                 </div>
-                <p class="text-muted-600 dark:text-muted-400 text-sm leading-relaxed truncate">
+                <p class="text-muted-600 dark:text-muted-400 truncate text-sm leading-relaxed">
                   {{ currentBrainStorm.title }}
                 </p>
               </div>
@@ -1028,8 +1096,8 @@ ${context}
                     currentBrainStorm.status === 'completed'
                       ? 'success'
                       : currentBrainStorm.status === 'in_progress'
-                      ? 'info'
-                      : 'muted'
+                        ? 'info'
+                        : 'muted'
                   "
                   size="sm"
                   shape="full"
@@ -1038,10 +1106,10 @@ ${context}
                     currentBrainStorm.status === 'completed'
                       ? 'تکمیل شده'
                       : currentBrainStorm.status === 'in_progress'
-                      ? 'در حال انجام'
-                      : currentBrainStorm.status === 'draft'
-                      ? 'پیش‌نویس'
-                      : 'بایگانی شده'
+                        ? 'در حال انجام'
+                        : currentBrainStorm.status === 'draft'
+                          ? 'پیش‌نویس'
+                          : 'بایگانی شده'
                   }}
                 </BaseTag>
               </div>
@@ -1067,7 +1135,7 @@ ${context}
                   <Icon name="ph:fingerprint" class="text-primary-500 size-4" />
                   <span class="text-muted-700 dark:text-muted-300 text-sm font-semibold">شناسه جلسه:</span>
                 </div>
-                <p class="text-muted-600 dark:text-muted-400 text-xs font-mono leading-relaxed truncate">
+                <p class="text-muted-600 dark:text-muted-400 truncate font-mono text-xs leading-relaxed">
                   {{ currentBrainStorm.id.slice(0, 8) }}...{{ currentBrainStorm.id.slice(-4) }}
                 </p>
               </div>
@@ -1079,7 +1147,12 @@ ${context}
               <div class="bg-primary-500/10 flex size-10 items-center justify-center rounded-lg">
                 <Icon name="ph:clipboard-text" class="text-primary-500 size-5" />
               </div>
-              <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="semibold"
+                class="text-gray-900 dark:text-white"
+              >
                 خلاصه مرحله ۱: تعریف حوزه و قاب مفهومی
               </BaseHeading>
             </div>
@@ -1144,10 +1217,10 @@ ${context}
                       stage1Data.focusLevel === 'applied'
                         ? 'success'
                         : stage1Data.focusLevel === 'theoretical'
-                        ? 'info'
-                        : stage1Data.focusLevel === 'interdisciplinary'
-                        ? 'warning'
-                        : 'muted'
+                          ? 'info'
+                          : stage1Data.focusLevel === 'interdisciplinary'
+                            ? 'warning'
+                            : 'muted'
                     "
                     size="sm"
                     shape="full"
@@ -1156,10 +1229,10 @@ ${context}
                       stage1Data.focusLevel === 'applied'
                         ? 'کاربردی'
                         : stage1Data.focusLevel === 'theoretical'
-                        ? 'نظری'
-                        : stage1Data.focusLevel === 'interdisciplinary'
-                        ? 'بین‌رشته‌ای'
-                        : 'ترکیبی'
+                          ? 'نظری'
+                          : stage1Data.focusLevel === 'interdisciplinary'
+                            ? 'بین‌رشته‌ای'
+                            : 'ترکیبی'
                     }}
                   </BaseTag>
                 </div>
@@ -1175,7 +1248,13 @@ ${context}
                   <span class="text-muted-700 dark:text-muted-300 text-sm font-semibold">کلیدواژه‌ها:</span>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                  <BaseTag v-for="keyword in stage1Data.keywords" :key="keyword" color="warning" size="sm" shape="full">
+                  <BaseTag
+                    v-for="keyword in stage1Data.keywords"
+                    :key="keyword"
+                    color="warning"
+                    size="sm"
+                    shape="full"
+                  >
                     {{ keyword }}
                   </BaseTag>
                 </div>
@@ -1192,8 +1271,16 @@ ${context}
               >
                 <Icon name="ph:info" class="text-muted-400 size-6" />
               </div>
-              <BaseParagraph size="sm" class="text-muted-500">هنوز هیچ داده‌ای از مرحله ۱ ثبت نشده است.</BaseParagraph>
-              <BaseButton color="primary" shape="curved" size="sm" class="mt-3" @click="goBack">
+              <BaseParagraph size="sm" class="text-muted-500">
+                هنوز هیچ داده‌ای از مرحله ۱ ثبت نشده است.
+              </BaseParagraph>
+              <BaseButton
+                color="primary"
+                shape="curved"
+                size="sm"
+                class="mt-3"
+                @click="goBack"
+              >
                 <Icon name="ph:arrow-right" class="ml-2 size-4" />
                 بازگشت به مرحله ۱
               </BaseButton>
@@ -1208,7 +1295,12 @@ ${context}
                   <Icon name="ph:list-bullets" class="text-success-500 size-6" />
                 </div>
                 <div>
-                  <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
+                  <BaseHeading
+                    as="h3"
+                    size="lg"
+                    weight="semibold"
+                    class="text-gray-900 dark:text-white"
+                  >
                     لیست عناوین پژوهشی
                   </BaseHeading>
                   <BaseParagraph size="sm" class="text-muted-500 mt-1">
@@ -1224,11 +1316,23 @@ ${context}
                   :disabled="titlesListLoading || !isStage1DataValid"
                   @click="generateTitlesList"
                 >
-                  <Icon v-if="!titlesListLoading" name="ph:sparkle" class="ml-2 size-5" />
-                  <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-5" />
+                  <Icon
+                    v-if="!titlesListLoading"
+                    name="ph:sparkle"
+                    class="ml-2 size-5"
+                  />
+                  <Icon
+                    v-else
+                    name="svg-spinners:90-ring-with-bg"
+                    class="ml-2 size-5"
+                  />
                   {{ titlesListLoading ? 'در حال تولید...' : 'تولید با هوش مصنوعی' }}
                 </BaseButton>
-                <BaseParagraph v-if="!isStage1DataValid" size="xs" class="text-danger-500 mt-2">
+                <BaseParagraph
+                  v-if="!isStage1DataValid"
+                  size="xs"
+                  class="text-danger-500 mt-2"
+                >
                   برای تولید عناوین، ابتدا باید اطلاعات مرحله ۱ را تکمیل کنید
                 </BaseParagraph>
               </div>
@@ -1244,7 +1348,12 @@ ${context}
               >
                 <Icon name="ph:list-bullets" class="text-muted-400 size-8" />
               </div>
-              <BaseHeading as="h4" size="md" weight="semibold" class="text-muted-700 dark:text-muted-300 mb-2">
+              <BaseHeading
+                as="h4"
+                size="md"
+                weight="semibold"
+                class="text-muted-700 dark:text-muted-300 mb-2"
+              >
                 هنوز عنوانی تولید نشده است
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-500">
@@ -1260,10 +1369,17 @@ ${context}
               <div class="text-primary-500 mx-auto mb-4 flex size-16 items-center justify-center rounded-full">
                 <Icon name="svg-spinners:90-ring-with-bg" class="size-8" />
               </div>
-              <BaseHeading as="h4" size="md" weight="semibold" class="text-muted-700 dark:text-muted-300 mb-2">
+              <BaseHeading
+                as="h4"
+                size="md"
+                weight="semibold"
+                class="text-muted-700 dark:text-muted-300 mb-2"
+              >
                 در حال تولید عناوین پژوهشی...
               </BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-500">لطفاً چند لحظه صبر کنید</BaseParagraph>
+              <BaseParagraph size="sm" class="text-muted-500">
+                لطفاً چند لحظه صبر کنید
+              </BaseParagraph>
             </div>
 
             <!-- Titles List -->
@@ -1281,7 +1397,12 @@ ${context}
                     {{ index + 1 }}
                   </div>
                   <div class="flex-1">
-                    <BaseHeading as="h4" size="md" weight="semibold" class="text-muted-800 dark:text-white mb-2">
+                    <BaseHeading
+                      as="h4"
+                      size="md"
+                      weight="semibold"
+                      class="text-muted-800 mb-2 dark:text-white"
+                    >
                       {{ titleItem.title }}
                     </BaseHeading>
                     <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300 leading-relaxed">
@@ -1350,7 +1471,12 @@ ${context}
                 <Icon name="ph:lightbulb-fill" class="size-6 text-white" />
               </div>
               <div class="flex-1">
-                <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+                <BaseHeading
+                  as="h3"
+                  size="md"
+                  weight="semibold"
+                  class="mb-3 text-gray-900 dark:text-white"
+                >
                   نکات مهم برای این مرحله
                 </BaseHeading>
                 <ul class="text-muted-700 dark:text-muted-200 space-y-2 text-sm">
@@ -1377,7 +1503,12 @@ ${context}
 
           <!-- Creativity Techniques Card (تکنیک‌های خلاقیت) - Moved to bottom -->
           <div class="dark:bg-muted-800 dark:border-muted-700 mt-8 rounded-2xl border border-gray-200 bg-white p-6">
-            <BaseHeading as="h3" size="lg" weight="semibold" class="mb-6 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h3"
+              size="lg"
+              weight="semibold"
+              class="mb-6 text-gray-900 dark:text-white"
+            >
               تکنیک‌های خلاقیت برای بهبود ایده ها
             </BaseHeading>
 
@@ -1388,7 +1519,7 @@ ${context}
                 :class="[
                   'dark:border-muted-700 cursor-pointer rounded-xl border-2 p-4 transition-all duration-200',
                   selectedTechnique === technique.id
-                    ? `border-${technique.color}-500 ring-4 ring-${technique.color}-500/10`
+                    ? `border-${technique.color}-500 ring- ring-4${technique.color}-500/10`
                     : 'dark:border-muted-700 dark:hover:border-muted-600 border-gray-200 hover:border-gray-300',
                 ]"
               >
@@ -1466,7 +1597,12 @@ ${context}
                     <Icon :name="technique.icon" :class="[`text-${technique.color}-500`, 'size-8']" />
                   </div>
                   <div class="flex-1">
-                    <BaseHeading as="h3" size="lg" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+                    <BaseHeading
+                      as="h3"
+                      size="lg"
+                      weight="semibold"
+                      class="mb-2 text-gray-900 dark:text-white"
+                    >
                       {{ technique.title }}
                     </BaseHeading>
                     <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-300">
@@ -1479,9 +1615,15 @@ ${context}
                 <div
                   class="dark:border-muted-700 dark:bg-muted-900/50 mb-6 rounded-xl border border-gray-100 bg-gray-50 p-6"
                 >
-                  <div class="text-muted-700 dark:text-muted-200 mb-4 text-sm font-semibold">مراحل استفاده:</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-4 text-sm font-semibold">
+                    مراحل استفاده:
+                  </div>
                   <div class="space-y-3">
-                    <div v-for="(step, idx) in technique.steps" :key="idx" class="flex items-start gap-3">
+                    <div
+                      v-for="(step, idx) in technique.steps"
+                      :key="idx"
+                      class="flex items-start gap-3"
+                    >
                       <div
                         :class="[
                           'flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white',
@@ -1500,7 +1642,7 @@ ${context}
                 <!-- AI Generation Button -->
                 <div class="flex items-center justify-between">
                   <div class="text-muted-600 dark:text-muted-400 text-sm">
-                    <Icon name="ph:info" class="inline-block ml-2 size-4" />
+                    <Icon name="ph:info" class="ml-2 inline-block size-4" />
                     برای تولید خودکار ایده با این تکنیک، از دکمه زیر استفاده کنید
                   </div>
                   <BaseButton
@@ -1510,8 +1652,16 @@ ${context}
                     :disabled="aiGenerating"
                     @click="openAiGuidance(technique.id)"
                   >
-                    <Icon v-if="!aiGenerating" name="ph:sparkle" class="ml-2 size-5" />
-                    <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-5" />
+                    <Icon
+                      v-if="!aiGenerating"
+                      name="ph:sparkle"
+                      class="ml-2 size-5"
+                    />
+                    <Icon
+                      v-else
+                      name="svg-spinners:90-ring-with-bg"
+                      class="ml-2 size-5"
+                    />
                     {{
                       aiGenerating && currentTechniqueGenerating === technique.id
                         ? 'در حال تولید...'
@@ -1533,7 +1683,12 @@ ${context}
                 >
                   <Icon name="ph:selection-plus" class="text-muted-400 size-10" />
                 </div>
-                <BaseHeading as="h3" size="lg" weight="semibold" class="text-muted-700 dark:text-muted-300 mb-2">
+                <BaseHeading
+                  as="h3"
+                  size="lg"
+                  weight="semibold"
+                  class="text-muted-700 dark:text-muted-300 mb-2"
+                >
                   یک تکنیک را انتخاب کنید
                 </BaseHeading>
                 <BaseParagraph size="sm" class="text-muted-500">
@@ -1545,7 +1700,12 @@ ${context}
 
           <!-- Navigation Buttons -->
           <div class="mt-8 flex items-center justify-between">
-            <BaseButton color="muted" shape="curved" size="lg" @click="goBack">
+            <BaseButton
+              color="muted"
+              shape="curved"
+              size="lg"
+              @click="goBack"
+            >
               <Icon name="ph:arrow-right" class="ml-2 size-5" />
               مرحله قبل
             </BaseButton>
@@ -1566,14 +1726,24 @@ ${context}
     </div>
 
     <!-- AI Guidance Modal -->
-    <TairoModal :open="showAiGuidanceModal" size="xl" @close="showAiGuidanceModal = false">
+    <TairoModal
+      :open="showAiGuidanceModal"
+      size="xl"
+      @close="showAiGuidanceModal = false"
+    >
       <template #header>
         <div class="flex items-center gap-3 p-6 pb-0">
           <div class="bg-info-500 flex size-12 items-center justify-center rounded-xl">
             <Icon name="ph:sparkle" class="size-6 text-white" />
           </div>
           <div class="text-right">
-            <BaseHeading as="h2" size="xl" weight="bold">تولید ایده با هوش مصنوعی</BaseHeading>
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="bold"
+            >
+              تولید ایده با هوش مصنوعی
+            </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
               {{ selectedTechnique ? techniques.find((t) => t.id === selectedTechnique)?.title : '' }}
             </BaseParagraph>
@@ -1585,7 +1755,12 @@ ${context}
         <div class="space-y-6 p-6">
           <!-- Context Display -->
           <div class="dark:border-muted-700 dark:bg-muted-900/50 rounded-xl border-2 border-gray-100 bg-gray-50 p-4">
-            <BaseHeading as="h4" size="md" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h4"
+              size="md"
+              weight="semibold"
+              class="mb-3 text-gray-900 dark:text-white"
+            >
               زمینه پژوهش (از مرحله ۱)
             </BaseHeading>
             <div class="space-y-2 text-sm">
@@ -1650,7 +1825,13 @@ ${context}
 
           <!-- Action Buttons -->
           <div class="flex items-center justify-between">
-            <BaseButton color="muted" shape="curved" @click="showAiGuidanceModal = false">انصراف</BaseButton>
+            <BaseButton
+              color="muted"
+              shape="curved"
+              @click="showAiGuidanceModal = false"
+            >
+              انصراف
+            </BaseButton>
             <BaseButton
               color="info"
               shape="curved"
@@ -1658,8 +1839,16 @@ ${context}
               :disabled="!selectedTechnique || aiGenerating"
               @click="generateIdeasWithAI(selectedTechnique!, userGuidance)"
             >
-              <Icon v-if="!aiGenerating" name="ph:sparkle" class="ml-2 size-5" />
-              <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-5" />
+              <Icon
+                v-if="!aiGenerating"
+                name="ph:sparkle"
+                class="ml-2 size-5"
+              />
+              <Icon
+                v-else
+                name="svg-spinners:90-ring-with-bg"
+                class="ml-2 size-5"
+              />
               {{ aiGenerating ? 'در حال تولید...' : 'تولید ایده‌ها' }}
             </BaseButton>
           </div>

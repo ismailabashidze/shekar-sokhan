@@ -43,7 +43,7 @@ export const useStage1Data = () => {
         .filter(([_, answer]) => answer && answer.trim())
         .map(([question, answer]) => `${question}: ${answer}`)
         .join('\n');
-      
+
       if (completedQuestions) {
         context += `سؤالات WH:\n${completedQuestions}\n\n`;
       }
@@ -63,7 +63,7 @@ export const useStage1Data = () => {
       if (data.swotData.threats?.length) {
         swotSections.push(`تهدیدها: ${data.swotData.threats.join(', ')}`);
       }
-      
+
       if (swotSections.length) {
         context += `تحلیل SWOT:\n${swotSections.join('\n')}\n\n`;
       }

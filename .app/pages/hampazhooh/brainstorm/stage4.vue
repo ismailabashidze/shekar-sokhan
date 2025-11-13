@@ -380,8 +380,6 @@
           </div>
         </div>
 
-
-
         <!-- Tools Section -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">

@@ -176,7 +176,8 @@
           icon: 'ph:check-circle',
           timeout: 3000,
         });
-      } else {
+      }
+ else {
         toaster.show({
           title: 'هشدار',
           message: 'هیچ جلسه‌ای یافت نشد. لطفاً ابتدا مراحل قبلی را تکمیل کنید.',
@@ -185,7 +186,8 @@
           closable: true,
         });
       }
-    } catch (err: any) {
+    }
+ catch (err: any) {
       console.error('Error loading existing session:', err);
       toaster.show({
         title: 'خطا',
@@ -200,7 +202,8 @@
   onMounted(async () => {
     if (user.value) {
       await loadExistingSession();
-    } else {
+    }
+ else {
       toaster.show({
         title: 'خطا',
         message: 'لطفاً ابتدا وارد حساب کاربری خود شوید.',
@@ -224,7 +227,7 @@
   const flowLoading = ref(false);
 
   const updateScore = (ideaId: string, criteriaId: string, score: number) => {
-    const idea = ideas.value.find((i) => i.id === ideaId);
+    const idea = ideas.value.find(i => i.id === ideaId);
     if (idea) {
       idea.scores[criteriaId] = score;
       idea.totalScore = Object.values(idea.scores).reduce((sum, val) => sum + val, 0);
@@ -247,7 +250,7 @@
 
     // Apply category filter
     if (filterCategory.value !== 'all') {
-      filtered = filtered.filter((idea) => idea.category === filterCategory.value);
+      filtered = filtered.filter(idea => idea.category === filterCategory.value);
     }
 
     // Apply sorting
@@ -275,7 +278,7 @@
 
   // Get unique categories for filtering
   const categories = computed(() => {
-    const cats = new Set(ideas.value.map((idea) => idea.category || 'عمومی'));
+    const cats = new Set(ideas.value.map(idea => idea.category || 'عمومی'));
     return ['all', ...Array.from(cats)];
   });
 
@@ -350,7 +353,8 @@ ${stage1Data.value?.mainChallenge ? `زمینه پژوهش: ${stage1Data.value.m
 
             idea.totalScore = Object.values(idea.scores).reduce((sum: number, val: any) => sum + Number(val), 0);
           }
-        } catch (error) {
+        }
+ catch (error) {
           console.error('Error parsing AI evaluation:', error);
         }
       }
@@ -363,14 +367,16 @@ ${stage1Data.value?.mainChallenge ? `زمینه پژوهش: ${stage1Data.value.m
         color: 'success',
         icon: 'ph:check-circle',
       });
-    } catch (error: any) {
+    }
+ catch (error: any) {
       toaster.show({
         title: 'خطا',
         message: `خطا در ارزیابی: ${error.message || 'خطای ناشناخته'}`,
         color: 'danger',
         icon: 'ph:warning',
       });
-    } finally {
+    }
+ finally {
       evaluatingWithAI.value = false;
     }
   };
@@ -445,7 +451,8 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
             id: currentSessionId.value,
             matrixResult: result,
           });
-        } catch (saveError) {
+        }
+ catch (saveError) {
           console.error('Error saving matrix result:', saveError);
         }
       }
@@ -456,14 +463,16 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
         color: 'success',
         icon: 'ph:check-circle',
       });
-    } catch (error: any) {
+    }
+ catch (error: any) {
       toaster.show({
         title: 'خطا',
         message: `خطا در تولید ماتریس: ${error.message || 'خطای ناشناخته'}`,
         color: 'danger',
         icon: 'ph:warning',
       });
-    } finally {
+    }
+ finally {
       generatingMatrix.value = false;
     }
   };
@@ -480,7 +489,8 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
         stage: 'stage3',
         status: 'in_progress',
       });
-    } catch (error) {
+    }
+ catch (error) {
       console.error('Error saving evaluation data:', error);
     }
   };
@@ -501,7 +511,8 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
       setTimeout(() => {
         router.push('/hampazhooh/brainstorm/stage4');
       }, 500);
-    } catch (error: any) {
+    }
+ catch (error: any) {
       toaster.show({
         title: 'خطا',
         message: 'خطا در ذخیره داده‌ها.',
@@ -569,7 +580,12 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
     <div class="dark:bg-muted-800 dark:border-muted-700 border-b border-gray-200 bg-white">
       <div class="px-4 py-6 sm:px-6 lg:px-8">
         <div class="flex items-center gap-4">
-          <BaseButton color="muted" shape="curved" size="sm" @click="goBack">
+          <BaseButton
+            color="muted"
+            shape="curved"
+            size="sm"
+            @click="goBack"
+          >
             <Icon name="ph:arrow-right" class="ml-2 size-4" />
             مرحله قبل
           </BaseButton>
@@ -581,11 +597,20 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
                 <Icon name="ph:funnel" class="size-6 text-white" />
               </div>
               <div>
-                <div class="text-success-500 mb-1 text-xs font-semibold uppercase tracking-wider">مرحله ۳</div>
-                <BaseHeading as="h1" size="2xl" weight="bold" class="text-gray-900 dark:text-white">
+                <div class="text-success-500 mb-1 text-xs font-semibold uppercase tracking-wider">
+                  مرحله ۳
+                </div>
+                <BaseHeading
+                  as="h1"
+                  size="2xl"
+                  weight="bold"
+                  class="text-gray-900 dark:text-white"
+                >
                   ساختاردهی و ارزیابی
                 </BaseHeading>
-                <BaseParagraph size="sm" class="text-muted-400 mt-1">Convergent Structuring & Evaluation</BaseParagraph>
+                <BaseParagraph size="sm" class="text-muted-400 mt-1">
+                  Convergent Structuring & Evaluation
+                </BaseParagraph>
               </div>
             </div>
           </div>
@@ -599,7 +624,12 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
         <!-- Introduction -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="mb-3 text-gray-900 dark:text-white"
+            >
               هدف این مرحله
             </BaseHeading>
             <BaseParagraph class="text-muted-600 dark:text-muted-300 leading-relaxed">
@@ -610,29 +640,46 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
 
           <!-- Key Features -->
           <div class="dark:border-muted-700 dark:bg-muted-900/50 rounded-xl border border-gray-100 bg-gray-50 p-6">
-            <BaseHeading as="h3" size="md" weight="semibold" class="mb-4 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              class="mb-4 text-gray-900 dark:text-white"
+            >
               فعالیت‌های کلیدی
             </BaseHeading>
             <div class="grid gap-4 sm:grid-cols-3">
               <div class="flex items-start gap-3">
                 <Icon name="ph:funnel-fill" class="text-success-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">فیلتر کردن</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">انتخاب ایده‌های قابل اجرا</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    فیلتر کردن
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    انتخاب ایده‌های قابل اجرا
+                  </div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Icon name="ph:stack-fill" class="text-success-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">دسته‌بندی</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">گروه‌بندی بر اساس موضوع</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    دسته‌بندی
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    گروه‌بندی بر اساس موضوع
+                  </div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Icon name="ph:ranking-fill" class="text-success-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">اولویت‌بندی</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">ترتیب براساس ارزش</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    اولویت‌بندی
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    ترتیب براساس ارزش
+                  </div>
                 </div>
               </div>
             </div>
@@ -642,7 +689,12 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
         <!-- Evaluation Criteria -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="mb-2 text-gray-900 dark:text-white"
+            >
               معیارهای ارزیابی
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
@@ -672,7 +724,12 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
         <!-- Filter and Sort Controls -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-6">
           <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h3"
+              size="lg"
+              weight="semibold"
+              class="text-gray-900 dark:text-white"
+            >
               ابزارهای مدیریت ایده‌ها
             </BaseHeading>
             <div class="flex flex-wrap gap-2">
@@ -681,11 +738,19 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
                 shape="curved"
                 size="sm"
                 :disabled="evaluatingWithAI || ideas.length === 0"
+                class="shrink-0"
                 @click="evaluateWithAI"
-                class="flex-shrink-0"
               >
-                <Icon v-if="!evaluatingWithAI" name="ph:sparkle" class="ml-2 size-4" />
-                <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-4" />
+                <Icon
+                  v-if="!evaluatingWithAI"
+                  name="ph:sparkle"
+                  class="ml-2 size-4"
+                />
+                <Icon
+                  v-else
+                  name="svg-spinners:90-ring-with-bg"
+                  class="ml-2 size-4"
+                />
                 <span class="whitespace-nowrap">{{ evaluatingWithAI ? 'در حال ارزیابی...' : 'ارزیابی با AI' }}</span>
               </BaseButton>
             </div>
@@ -695,12 +760,18 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
             <!-- Filter by Category -->
             <div>
               <label class="text-muted-700 dark:text-muted-200 mb-2 flex items-center text-sm font-medium">
-                <Icon name="ph:funnel" class="ml-2 size-4 flex-shrink-0" />
+                <Icon name="ph:funnel" class="ml-2 size-4 shrink-0" />
                 <span>فیلتر بر اساس دسته</span>
               </label>
               <BaseSelect v-model="filterCategory" shape="curved">
-                <option value="all">همه دسته‌ها</option>
-                <option v-for="cat in categories.filter((c) => c !== 'all')" :key="cat" :value="cat">
+                <option value="all">
+                  همه دسته‌ها
+                </option>
+                <option
+                  v-for="cat in categories.filter((c) => c !== 'all')"
+                  :key="cat"
+                  :value="cat"
+                >
                   {{ cat }}
                 </option>
               </BaseSelect>
@@ -709,21 +780,29 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
             <!-- Sort By -->
             <div>
               <label class="text-muted-700 dark:text-muted-200 mb-2 flex items-center text-sm font-medium">
-                <Icon name="ph:arrows-down-up" class="ml-2 size-4 flex-shrink-0" />
+                <Icon name="ph:arrows-down-up" class="ml-2 size-4 shrink-0" />
                 <span>مرتب‌سازی</span>
               </label>
               <BaseSelect v-model="sortBy" shape="curved">
-                <option value="score">امتیاز کل</option>
-                <option value="name">نام (الفبا)</option>
-                <option value="innovation">نوآوری</option>
-                <option value="feasibility">قابلیت اجرا</option>
+                <option value="score">
+                  امتیاز کل
+                </option>
+                <option value="name">
+                  نام (الفبا)
+                </option>
+                <option value="innovation">
+                  نوآوری
+                </option>
+                <option value="feasibility">
+                  قابلیت اجرا
+                </option>
               </BaseSelect>
             </div>
 
             <!-- Results Count -->
             <div>
               <label class="text-muted-700 dark:text-muted-200 mb-2 flex items-center text-sm font-medium">
-                <Icon name="ph:list-numbers" class="ml-2 size-4 flex-shrink-0" />
+                <Icon name="ph:list-numbers" class="ml-2 size-4 shrink-0" />
                 <span>تعداد نتایج</span>
               </label>
               <div
@@ -741,7 +820,12 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
         >
           <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex-1">
-              <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h2"
+                size="xl"
+                weight="semibold"
+                class="text-gray-900 dark:text-white"
+              >
                 ماتریس ارزیابی ایده‌ها
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-500 mt-1">
@@ -754,14 +838,28 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
                 shape="curved"
                 size="sm"
                 :disabled="generatingMatrix || ideas.length === 0"
+                class="shrink-0"
                 @click="generateEvaluationMatrix"
-                class="flex-shrink-0"
               >
-                <Icon v-if="!generatingMatrix" name="ph:table" class="ml-2 size-4" />
-                <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-4" />
+                <Icon
+                  v-if="!generatingMatrix"
+                  name="ph:table"
+                  class="ml-2 size-4"
+                />
+                <Icon
+                  v-else
+                  name="svg-spinners:90-ring-with-bg"
+                  class="ml-2 size-4"
+                />
                 <span class="whitespace-nowrap">{{ generatingMatrix ? 'تولید...' : 'تولید ماتریس' }}</span>
               </BaseButton>
-              <BaseButton color="muted" shape="curved" size="sm" @click="exportEvaluation" class="flex-shrink-0">
+              <BaseButton
+                color="muted"
+                shape="curved"
+                size="sm"
+                class="shrink-0"
+                @click="exportEvaluation"
+              >
                 <Icon name="ph:download-simple" class="ml-2 size-4" />
                 <span class="whitespace-nowrap">دانلود</span>
               </BaseButton>
@@ -769,19 +867,21 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
           </div>
 
           <!-- Matrix Table -->
-          <div class="overflow-x-auto -mx-4 sm:mx-0">
+          <div class="-mx-4 overflow-x-auto sm:mx-0">
             <div class="min-w-[900px] px-4 sm:px-0">
               <!-- Header Row -->
               <div
                 class="dark:border-muted-700 dark:bg-muted-900/50 mb-2 grid grid-cols-7 gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3"
               >
-                <div class="col-span-2 text-xs font-semibold uppercase text-gray-600 dark:text-gray-400">ایده</div>
+                <div class="col-span-2 text-xs font-semibold uppercase text-gray-600 dark:text-gray-400">
+                  ایده
+                </div>
                 <div
                   v-for="criteria in evaluationCriteria"
                   :key="criteria.id"
                   class="flex items-center justify-center text-center"
                 >
-                  <span class="text-xs font-semibold uppercase text-gray-600 dark:text-gray-400 leading-tight">
+                  <span class="text-xs font-semibold uppercase leading-tight text-gray-600 dark:text-gray-400">
                     {{ criteria.title }}
                   </span>
                 </div>
@@ -794,7 +894,9 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
                   class="dark:bg-muted-900/30 rounded-xl border border-gray-100 bg-gray-50 p-12 text-center"
                 >
                   <Icon name="ph:funnel-simple" class="text-muted-400 mx-auto mb-4 size-16" />
-                  <BaseParagraph class="text-muted-500">هیچ ایده‌ای با این فیلتر یافت نشد.</BaseParagraph>
+                  <BaseParagraph class="text-muted-500">
+                    هیچ ایده‌ای با این فیلتر یافت نشد.
+                  </BaseParagraph>
                 </div>
 
                 <div
@@ -804,10 +906,10 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
                 >
                   <!-- Idea Title -->
                   <div class="col-span-2 min-w-0">
-                    <div class="text-muted-800 mb-1 text-sm font-semibold dark:text-white break-words">
+                    <div class="text-muted-800 mb-1 break-words text-sm font-semibold dark:text-white">
                       {{ idea.title }}
                     </div>
-                    <div class="text-muted-500 line-clamp-2 text-xs break-words">
+                    <div class="text-muted-500 line-clamp-2 break-words text-xs">
                       {{ idea.description }}
                     </div>
                   </div>
@@ -844,10 +946,17 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
               <Icon name="ph:table" class="size-6 text-white" />
             </div>
             <div>
-              <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h2"
+                size="xl"
+                weight="semibold"
+                class="text-gray-900 dark:text-white"
+              >
                 ماتریس ارزیابی تولید شده
               </BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-500 mt-1">تحلیل جامع و توصیه‌های عملی</BaseParagraph>
+              <BaseParagraph size="sm" class="text-muted-500 mt-1">
+                تحلیل جامع و توصیه‌های عملی
+              </BaseParagraph>
             </div>
           </div>
 
@@ -862,17 +971,24 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
         >
           <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex-1">
-              <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h2"
+                size="xl"
+                weight="semibold"
+                class="mb-2 text-gray-900 dark:text-white"
+              >
                 نتایج رتبه‌بندی شده
               </BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-500">ایده‌ها بر اساس امتیاز کل مرتب شده‌اند</BaseParagraph>
+              <BaseParagraph size="sm" class="text-muted-500">
+                ایده‌ها بر اساس امتیاز کل مرتب شده‌اند
+              </BaseParagraph>
             </div>
             <BaseButton
               color="success"
               shape="curved"
               size="sm"
+              class="shrink-0 self-start"
               @click="showRankedResults = !showRankedResults"
-              class="flex-shrink-0 self-start"
             >
               <Icon :name="showRankedResults ? 'ph:eye-slash' : 'ph:eye'" class="ml-2 size-4" />
               <span class="whitespace-nowrap">{{ showRankedResults ? 'مخفی کردن' : 'نمایش نتایج' }}</span>
@@ -883,20 +999,20 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
             <div
               v-for="(idea, index) in sortedIdeas"
               :key="idea.id"
-              class="dark:border-muted-700 dark:bg-muted-900/30 group relative overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-4 sm:p-6 transition-all duration-300 hover:shadow-lg"
+              class="dark:border-muted-700 dark:bg-muted-900/30 group relative overflow-hidden rounded-xl border border-gray-100 bg-gray-50 p-4 transition-all duration-300 hover:shadow-lg sm:p-6"
             >
               <!-- Rank Badge -->
-              <div class="absolute left-2 bottom-2 sm:left-4 sm:bottom-4">
+              <div class="absolute bottom-2 left-2 sm:bottom-4 sm:left-4">
                 <div
                   :class="[
-                    'flex size-8 sm:size-10 items-center justify-center rounded-full text-sm sm:text-base font-bold text-white shadow-lg',
+                    'flex size-8 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg sm:size-10 sm:text-base',
                     index === 0
                       ? 'bg-yellow-500'
                       : index === 1
-                      ? 'bg-gray-400'
-                      : index === 2
-                      ? 'bg-orange-600'
-                      : 'bg-muted-500',
+                        ? 'bg-gray-400'
+                        : index === 2
+                          ? 'bg-orange-600'
+                          : 'bg-muted-500',
                   ]"
                 >
                   {{ index + 1 }}
@@ -905,12 +1021,12 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
 
               <div class="mr-10 sm:mr-16">
                 <div class="mb-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div class="flex-1 min-w-0">
+                  <div class="min-w-0 flex-1">
                     <BaseHeading
                       as="h3"
                       size="lg"
                       weight="semibold"
-                      class="mb-2 text-gray-900 dark:text-white break-words"
+                      class="mb-2 break-words text-gray-900 dark:text-white"
                     >
                       {{ idea.title }}
                     </BaseHeading>
@@ -918,21 +1034,25 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
                       {{ idea.description }}
                     </BaseParagraph>
                   </div>
-                  <div class="flex-shrink-0 text-center sm:text-left sm:mr-4">
-                    <div class="text-muted-500 mb-1 text-xs">امتیاز کل</div>
+                  <div class="shrink-0 text-center sm:mr-4 sm:text-left">
+                    <div class="text-muted-500 mb-1 text-xs">
+                      امتیاز کل
+                    </div>
                     <div
                       :class="[
-                        'text-2xl sm:text-3xl font-bold',
+                        'text-2xl font-bold sm:text-3xl',
                         idea.totalScore >= 40
                           ? 'text-success-500'
                           : idea.totalScore >= 25
-                          ? 'text-warning-500'
-                          : 'text-muted-400',
+                            ? 'text-warning-500'
+                            : 'text-muted-400',
                       ]"
                     >
                       {{ idea.totalScore }}
                     </div>
-                    <div class="text-muted-500 text-xs">از ۵۰</div>
+                    <div class="text-muted-500 text-xs">
+                      از ۵۰
+                    </div>
                   </div>
                 </div>
 
@@ -956,10 +1076,17 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
         <!-- Tools Section -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="mb-2 text-gray-900 dark:text-white"
+            >
               ابزارهای پیشنهادی
             </BaseHeading>
-            <BaseParagraph size="sm" class="text-muted-500">ابزارهای دیگر برای ساختاردهی بهتر ایده‌ها</BaseParagraph>
+            <BaseParagraph size="sm" class="text-muted-500">
+              ابزارهای دیگر برای ساختاردهی بهتر ایده‌ها
+            </BaseParagraph>
           </div>
 
           <div class="grid gap-6 lg:grid-cols-2">
@@ -976,7 +1103,12 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
               >
                 <Icon :name="tool.icon" :class="[`text-${tool.color}-500`, 'size-6']" />
               </div>
-              <BaseHeading as="h3" size="md" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="mb-2 text-gray-900 dark:text-white"
+              >
                 {{ tool.title }}
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400">
@@ -993,7 +1125,12 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
               <Icon name="ph:lightbulb-fill" class="size-6 text-white" />
             </div>
             <div class="flex-1">
-              <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="mb-3 text-gray-900 dark:text-white"
+              >
                 نکات مهم برای این مرحله
               </BaseHeading>
               <ul class="text-muted-700 dark:text-muted-200 space-y-2 text-sm">
@@ -1020,7 +1157,12 @@ ${stage1Data.value?.mainChallenge ? `\nزمینه پژوهش: ${stage1Data.value
 
         <!-- Navigation Buttons -->
         <div class="flex items-center justify-between">
-          <BaseButton color="muted" shape="curved" size="lg" @click="goBack">
+          <BaseButton
+            color="muted"
+            shape="curved"
+            size="lg"
+            @click="goBack"
+          >
             <Icon name="ph:arrow-right" class="ml-2 size-5" />
             مرحله قبل
           </BaseButton>

@@ -81,7 +81,7 @@ export function useBrainStorm() {
 
     if (filters.keywords && filters.keywords.length > 0) {
       const keywordConditions = filters.keywords
-        .map((keyword) => `keywords ~ "${keyword.replace(/"/g, '\\"')}"`)
+        .map(keyword => `keywords ~ "${keyword.replace(/"/g, '\\"')}"`)
         .join(' || ');
       conditions.push(`(${keywordConditions})`);
     }
@@ -98,14 +98,18 @@ export function useBrainStorm() {
         // Handle researchDomain as both array and object
         if (Array.isArray(value)) {
           formData.append(key, JSON.stringify(value));
-        } else {
+        }
+ else {
           formData.append(key, JSON.stringify(value || {}));
         }
-      } else if (key === 'whQuestions' || key === 'swotData') {
+      }
+ else if (key === 'whQuestions' || key === 'swotData') {
         formData.append(key, JSON.stringify(value || {}));
-      } else if (key === 'keywords' || key === 'list') {
+      }
+ else if (key === 'keywords' || key === 'list') {
         formData.append(key, JSON.stringify(value || []));
-      } else if (value !== undefined && value !== null) {
+      }
+ else if (value !== undefined && value !== null) {
         formData.append(key, String(value));
       }
     });
@@ -134,7 +138,8 @@ export function useBrainStorm() {
       totalItems.value = result.totalItems;
 
       return result;
-    } catch (e: any) {
+    }
+ catch (e: any) {
       error.value = e.message || 'خطا در دریافت جلسات طوفان فکری';
       console.error('Error fetching brainstorm sessions:', e);
       toaster.show({
@@ -144,7 +149,8 @@ export function useBrainStorm() {
         icon: 'ph:warning',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       loading.value = false;
     }
   };
@@ -161,7 +167,8 @@ export function useBrainStorm() {
 
       currentBrainStorm.value = result as BrainStorm;
       return result;
-    } catch (e: any) {
+    }
+ catch (e: any) {
       error.value = e.message || 'خطا در دریافت جلسه طوفان فکری';
       console.error('Error fetching brainstorm session:', e);
       toaster.show({
@@ -171,7 +178,8 @@ export function useBrainStorm() {
         icon: 'ph:warning',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       loading.value = false;
     }
   };
@@ -196,7 +204,8 @@ export function useBrainStorm() {
       });
 
       return result;
-    } catch (e: any) {
+    }
+ catch (e: any) {
       error.value = e.message || 'خطا در ایجاد جلسه طوفان فکری';
       console.error('Error creating brainstorm session:', e);
       toaster.show({
@@ -207,7 +216,8 @@ export function useBrainStorm() {
         closable: true,
       });
       throw e;
-    } finally {
+    }
+ finally {
       loading.value = false;
     }
   };
@@ -224,7 +234,7 @@ export function useBrainStorm() {
       const result = await nuxtApp.$pb.collection('brainstorm_sessions').update(id, formData);
 
       // Update in local state
-      const index = brainStorms.value.findIndex((item) => item.id === id);
+      const index = brainStorms.value.findIndex(item => item.id === id);
       if (index !== -1) {
         brainStorms.value[index] = result as BrainStorm;
       }
@@ -242,7 +252,8 @@ export function useBrainStorm() {
       // });
 
       return result;
-    } catch (e: any) {
+    }
+ catch (e: any) {
       error.value = e.message || 'خطا در به‌روزرسانی جلسه طوفان فکری';
       console.error('Error updating brainstorm session:', e);
       toaster.show({
@@ -253,7 +264,8 @@ export function useBrainStorm() {
         closable: true,
       });
       throw e;
-    } finally {
+    }
+ finally {
       loading.value = false;
     }
   };
@@ -267,7 +279,7 @@ export function useBrainStorm() {
       await nuxtApp.$pb.collection('brainstorm_sessions').delete(id);
 
       // Remove from local state
-      brainStorms.value = brainStorms.value.filter((item) => item.id !== id);
+      brainStorms.value = brainStorms.value.filter(item => item.id !== id);
 
       if (currentBrainStorm.value?.id === id) {
         currentBrainStorm.value = null;
@@ -282,7 +294,8 @@ export function useBrainStorm() {
       });
 
       return true;
-    } catch (e: any) {
+    }
+ catch (e: any) {
       error.value = e.message || 'خطا در حذف جلسه طوفان فکری';
       console.error('Error deleting brainstorm session:', e);
       toaster.show({
@@ -293,7 +306,8 @@ export function useBrainStorm() {
         closable: true,
       });
       throw e;
-    } finally {
+    }
+ finally {
       loading.value = false;
     }
   };
@@ -338,7 +352,8 @@ export function useBrainStorm() {
         id,
         lastAccessed: new Date().toISOString(),
       });
-    } catch (e) {
+    }
+ catch (e) {
       console.error('Error updating last accessed:', e);
     }
   };

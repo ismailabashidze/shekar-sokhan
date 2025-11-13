@@ -151,7 +151,7 @@
 
     try {
       const context = getContextForAI(stage1Data.value);
-      
+
       let basePrompt = `با استفاده از تکنیک Six Thinking Hats، ۶ ایده از دیدگاه‌های مختلف برای چالش تحقیقاتی زیر تولید کنید:
 ${context}`;
 
@@ -182,7 +182,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
       const messages = [{ role: 'user', content: prompt }];
 
       let generatedContent = '';
-      
+
       await new Promise<void>((resolve, reject) => {
         streamChat(messages, {}, (chunk) => {
           if (chunk) {
@@ -194,7 +194,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
       });
 
       const generatedIdeas = parseGeneratedIdeas(generatedContent);
-      
+
       generatedIdeas.forEach((ideaContent, index) => {
         ideas.value.push({
           id: `ai-${Date.now()}-${index}`,
@@ -212,8 +212,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         icon: 'ph:check-circle',
         timeout: 4000,
       });
-
-    } catch (error: any) {
+    }
+ catch (error: any) {
       toaster.show({
         title: 'خطا',
         message: `خطا در تولید ایده‌ها: ${error.message || 'خطای ناشناخته'}`,
@@ -221,7 +221,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         icon: 'ph:warning',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       aiGenerating.value = false;
       showAiGuidanceModal.value = false;
       userGuidance.value = '';
@@ -230,9 +231,9 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 
   const parseGeneratedIdeas = (content: string): string[] => {
     const ideas: string[] = [];
-    
+
     const items = content.split(/\n(?=\d+\.|\n(?=-))/);
-    
+
     for (const item of items) {
       const trimmedItem = item.trim();
       if (trimmedItem && (trimmedItem.match(/^\d+\./) || trimmedItem.startsWith('-'))) {
@@ -242,12 +243,12 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         }
       }
     }
-    
+
     if (ideas.length === 0) {
       const paragraphs = content.split('\n\n').filter(p => p.trim().length > 20);
       ideas.push(...paragraphs.slice(0, 6));
     }
-    
+
     return ideas.slice(0, 10);
   };
 
@@ -266,7 +267,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
     if (savedStage1Data) {
       try {
         stage1Data.value = JSON.parse(savedStage1Data);
-      } catch (e) {
+      }
+ catch (e) {
         console.warn('Could not parse saved stage1 data');
       }
     }
@@ -275,7 +277,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
     if (savedSelectedIdea) {
       try {
         selectedIdea.value = JSON.parse(savedSelectedIdea);
-      } catch (e) {
+      }
+ catch (e) {
         console.warn('Could not parse saved selected idea');
       }
     }
@@ -324,7 +327,11 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
               </div>
             </div>
           </div>
-          <BaseButton color="muted" shape="curved" @click="goBack">
+          <BaseButton
+            color="muted"
+            shape="curved"
+            @click="goBack"
+          >
             <Icon name="ph:arrow-right" class="ml-2 size-4" />
             بازگشت
           </BaseButton>
@@ -338,7 +345,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         <!-- Selected Idea (if any) -->
         <div
           v-if="selectedIdea"
-          class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border-2 border-info-200 bg-info-50 dark:bg-info-900/20 p-6"
+          class="dark:bg-muted-800 dark:border-muted-700 border-info-200 bg-info-50 dark:bg-info-900/20 mb-8 rounded-2xl border-2 p-6"
         >
           <div class="mb-4 flex items-start gap-3">
             <div class="bg-info-500 flex size-10 shrink-0 items-center justify-center rounded-lg">
@@ -353,7 +360,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
               >
                 ایده منتخب برای گسترش
               </BaseHeading>
-              <div class="text-muted-700 dark:text-muted-200 bg-white dark:bg-muted-800 rounded-lg p-3 text-sm">
+              <div class="text-muted-700 dark:text-muted-200 dark:bg-muted-800 rounded-lg bg-white p-3 text-sm">
                 {{ selectedIdea.content }}
               </div>
               <div class="text-muted-500 mt-2 text-xs">
@@ -392,7 +399,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
                 <Icon name="ph:shuffle" class="size-5 text-white" />
               </div>
               <div>
-                <div class="text-muted-800 text-sm font-semibold dark:text-white mb-2">
+                <div class="text-muted-800 mb-2 text-sm font-semibold dark:text-white">
                   فرایند کار
                 </div>
                 <div class="text-muted-700 dark:text-muted-200 text-sm">
@@ -405,7 +412,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         </div>
 
         <!-- Hats Grid -->
-        <div class="grid gap-6 lg:grid-cols-3 mb-8">
+        <div class="mb-8 grid gap-6 lg:grid-cols-3">
           <div
             v-for="hat in thinkingHats"
             :key="hat.color"
@@ -459,7 +466,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
                 <li
                   v-for="question in hat.questions"
                   :key="question"
-                  class="text-muted-600 dark:text-muted-400 text-sm flex items-start gap-2"
+                  class="text-muted-600 dark:text-muted-400 flex items-start gap-2 text-sm"
                 >
                   <Icon :name="`ph:arrow-right`" :class="`text-${hat.color}-500 mt-0.5 size-3.5 shrink-0`" />
                   {{ question }}
@@ -469,7 +476,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 
             <!-- Examples -->
             <details class="mt-4">
-              <summary class="text-muted-600 dark:text-muted-300 text-sm cursor-pointer hover:text-info-500 transition-colors">
+              <summary class="text-muted-600 dark:text-muted-300 hover:text-info-500 cursor-pointer text-sm transition-colors">
                 <Icon name="ph:lightbulb" class="ml-1 size-4" />
                 مثال‌ها
               </summary>
@@ -477,7 +484,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
                 <li
                   v-for="example in hat.examples"
                   :key="example"
-                  class="text-muted-600 dark:text-muted-400 text-sm flex items-start gap-2"
+                  class="text-muted-600 dark:text-muted-400 flex items-start gap-2 text-sm"
                 >
                   <Icon name="ph:check-circle" class="text-success-500 mt-0.5 size-3.5 shrink-0" />
                   {{ example }}
@@ -514,10 +521,19 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             >
               <div class="mb-3 flex items-start justify-between gap-3">
                 <div class="flex items-center gap-2">
-                  <BaseTag color="info" size="sm" shape="full">
+                  <BaseTag
+                    color="info"
+                    size="sm"
+                    shape="full"
+                  >
                     Six Hats
                   </BaseTag>
-                  <BaseTag v-if="idea.aiGenerated" color="info" size="sm" shape="full">
+                  <BaseTag
+                    v-if="idea.aiGenerated"
+                    color="info"
+                    size="sm"
+                    shape="full"
+                  >
                     <Icon name="ph:robot" class="ml-1 size-3" />
                     هوش مصنوعی
                   </BaseTag>
@@ -541,8 +557,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             shape="curved"
             size="lg"
             :disabled="aiGenerating"
-            @click="openAiGuidance"
             class="shadow-info-500/30 shadow-lg"
+            @click="openAiGuidance"
           >
             <Icon
               :name="aiGenerating ? 'svg-spinners:90-ring-with-bg' : 'ph:sparkle'"
@@ -568,8 +584,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             color="success"
             shape="curved"
             size="lg"
-            @click="saveAndContinue"
             class="shadow-success-500/30 shadow-lg"
+            @click="saveAndContinue"
           >
             ذخیره و ادامه
             <Icon name="ph:arrow-left" class="mr-2 size-5" />

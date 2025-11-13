@@ -209,7 +209,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         icon: 'ph:check-circle',
         timeout: 4000,
       });
-    } catch (error: any) {
+    }
+ catch (error: any) {
       toaster.show({
         title: 'خطا',
         message: `خطا در تولید ایده‌ها: ${error.message || 'خطای ناشناخته'}`,
@@ -217,7 +218,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         icon: 'ph:warning',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       aiGenerating.value = false;
       showAiGuidanceModal.value = false;
       userGuidance.value = '';
@@ -247,7 +249,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 
     // If no structured items found, split by paragraphs
     if (ideas.length === 0) {
-      const paragraphs = content.split('\n\n').filter((p) => p.trim().length > 20);
+      const paragraphs = content.split('\n\n').filter(p => p.trim().length > 20);
       ideas.push(...paragraphs.slice(0, 5)); // Limit to first 5 paragraphs
     }
 
@@ -269,7 +271,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
     if (savedStage1Data) {
       try {
         stage1Data.value = JSON.parse(savedStage1Data);
-      } catch (e) {
+      }
+ catch (e) {
         console.warn('Could not parse saved stage1 data');
       }
     }
@@ -278,7 +281,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
     if (savedSelectedIdea) {
       try {
         selectedIdea.value = JSON.parse(savedSelectedIdea);
-      } catch (e) {
+      }
+ catch (e) {
         console.warn('Could not parse saved selected idea');
       }
     }
@@ -312,15 +316,28 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
                 <Icon name="ph:arrow-u-up-left" class="size-6 text-white" />
               </div>
               <div>
-                <div class="text-warning-500 mb-1 text-xs font-semibold uppercase tracking-wider">تکنیک خلاقیت</div>
-                <BaseHeading as="h1" size="2xl" weight="bold" class="text-gray-900 dark:text-white">
+                <div class="text-warning-500 mb-1 text-xs font-semibold uppercase tracking-wider">
+                  تکنیک خلاقیت
+                </div>
+                <BaseHeading
+                  as="h1"
+                  size="2xl"
+                  weight="bold"
+                  class="text-gray-900 dark:text-white"
+                >
                   Reverse Brainstorming - نگاه معکوس
                 </BaseHeading>
-                <BaseParagraph size="sm" class="text-muted-400 mt-1">از بدتر کردن تا بهتر کردن</BaseParagraph>
+                <BaseParagraph size="sm" class="text-muted-400 mt-1">
+                  از بدتر کردن تا بهتر کردن
+                </BaseParagraph>
               </div>
             </div>
           </div>
-          <BaseButton color="muted" shape="curved" @click="goBack">
+          <BaseButton
+            color="muted"
+            shape="curved"
+            @click="goBack"
+          >
             <Icon name="ph:arrow-right" class="ml-2 size-4" />
             بازگشت
           </BaseButton>
@@ -334,7 +351,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         <!-- Selected Idea (if any) -->
         <div
           v-if="selectedIdea"
-          class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border-2 border-warning-200 bg-warning-50 dark:bg-warning-900/20 p-6"
+          class="dark:bg-muted-800 dark:border-muted-700 border-warning-200 bg-warning-50 dark:bg-warning-900/20 mb-8 rounded-2xl border-2 p-6"
         >
           <div class="mb-4 flex items-start gap-3">
             <div class="bg-warning-500 flex size-10 shrink-0 items-center justify-center rounded-lg">
@@ -349,7 +366,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
               >
                 ایده منتخب برای گسترش
               </BaseHeading>
-              <div class="text-muted-700 dark:text-muted-200 bg-white dark:bg-muted-800 rounded-lg p-3 text-sm">
+              <div class="text-muted-700 dark:text-muted-200 dark:bg-muted-800 rounded-lg bg-white p-3 text-sm">
                 {{ selectedIdea.content }}
               </div>
               <div class="text-muted-500 mt-2 text-xs">
@@ -367,7 +384,12 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         <!-- Introduction -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="mb-3 text-gray-900 dark:text-white"
+            >
               طوفان فکری معکوس چیست؟
             </BaseHeading>
             <BaseParagraph class="text-muted-600 dark:text-muted-300 mb-4 leading-relaxed">
@@ -383,7 +405,9 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
                 <Icon name="ph:arrows-clockwise" class="size-5 text-white" />
               </div>
               <div>
-                <div class="text-muted-800 text-sm font-semibold dark:text-white mb-2">منطق معکوس</div>
+                <div class="text-muted-800 mb-2 text-sm font-semibold dark:text-white">
+                  منطق معکوس
+                </div>
                 <div class="text-muted-700 dark:text-muted-200 text-sm">
                   گاهی برای پیدا کردن راه‌حل‌های خوب، باید بدانیم چه چیزی باعث خراب شدن می‌شود. راه‌های بدتر کردن،
                   معمولاً ساده‌تر و واضح‌تر از راه‌های بهتر کردن هستند.
@@ -395,14 +419,19 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 
         <!-- Process Steps -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
-          <BaseHeading as="h3" size="lg" weight="semibold" class="mb-6 text-gray-900 dark:text-white">
+          <BaseHeading
+            as="h3"
+            size="lg"
+            weight="semibold"
+            class="mb-6 text-gray-900 dark:text-white"
+          >
             فرایند طوفان فکری معکوس
           </BaseHeading>
           <div class="space-y-4">
             <div
               v-for="(step, index) in reverseProcess"
               :key="step.step"
-              class="flex items-start gap-4 p-4 rounded-xl transition-all duration-200"
+              class="flex items-start gap-4 rounded-xl p-4 transition-all duration-200"
               :class="[
                 index < reverseProcess.length - 1
                   ? 'dark:bg-muted-900/30 dark:border-muted-700 border border-gray-100 bg-gray-50'
@@ -418,16 +447,21 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
                 <Icon :name="step.icon" class="size-6 text-white" />
               </div>
               <div class="flex-1">
-                <div class="flex items-center gap-2 mb-2">
+                <div class="mb-2 flex items-center gap-2">
                   <div
                     :class="[
-                      'flex size-8 items-center justify-center rounded-full text-white font-bold text-sm',
+                      'flex size-8 items-center justify-center rounded-full text-sm font-bold text-white',
                       step.color === 'success' ? 'bg-success-500' : `bg-${step.color}-500`,
                     ]"
                   >
                     {{ step.step }}
                   </div>
-                  <BaseHeading as="h4" size="md" weight="semibold" class="text-gray-900 dark:text-white">
+                  <BaseHeading
+                    as="h4"
+                    size="md"
+                    weight="semibold"
+                    class="text-gray-900 dark:text-white"
+                  >
                     {{ step.title }}
                   </BaseHeading>
                 </div>
@@ -440,7 +474,7 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         </div>
 
         <!-- Benefits -->
-        <div class="grid gap-4 lg:grid-cols-4 mb-8">
+        <div class="mb-8 grid gap-4 lg:grid-cols-4">
           <div
             v-for="benefit in benefits"
             :key="benefit.title"
@@ -451,7 +485,12 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             >
               <Icon :name="benefit.icon" class="text-warning-500 size-6" />
             </div>
-            <BaseHeading as="h4" size="sm" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h4"
+              size="sm"
+              weight="semibold"
+              class="mb-2 text-gray-900 dark:text-white"
+            >
               {{ benefit.title }}
             </BaseHeading>
             <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-300">
@@ -461,8 +500,13 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
         </div>
 
         <!-- Examples -->
-        <div class="space-y-6 mb-8">
-          <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
+        <div class="mb-8 space-y-6">
+          <BaseHeading
+            as="h3"
+            size="lg"
+            weight="semibold"
+            class="text-gray-900 dark:text-white"
+          >
             مثال‌های عملی
           </BaseHeading>
 
@@ -472,8 +516,10 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             class="dark:bg-muted-800 dark:border-muted-700 rounded-2xl border border-gray-200 bg-white p-6"
           >
             <div class="mb-4">
-              <BaseParagraph class="text-muted-500 text-sm mb-2">هدف اصلی:</BaseParagraph>
-              <div class="bg-muted-100 dark:bg-muted-900 p-3 rounded-lg">
+              <BaseParagraph class="text-muted-500 mb-2 text-sm">
+                هدف اصلی:
+              </BaseParagraph>
+              <div class="bg-muted-100 dark:bg-muted-900 rounded-lg p-3">
                 <div class="text-muted-800 dark:text-muted-200 font-medium">
                   {{ example.original }}
                 </div>
@@ -481,8 +527,10 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             </div>
 
             <div class="mb-4">
-              <BaseParagraph class="text-muted-500 text-sm mb-2">معکوس شده:</BaseParagraph>
-              <div class="bg-warning-500/10 dark:bg-warning-500/20 border-warning-500/20 border p-3 rounded-lg">
+              <BaseParagraph class="text-muted-500 mb-2 text-sm">
+                معکوس شده:
+              </BaseParagraph>
+              <div class="bg-warning-500/10 dark:bg-warning-500/20 border-warning-500/20 rounded-lg border p-3">
                 <div class="text-warning-600 dark:text-warning-300 font-medium">
                   {{ example.reversed }}
                 </div>
@@ -491,15 +539,17 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 
             <div class="grid gap-4 lg:grid-cols-2">
               <div>
-                <div class="flex items-center gap-2 mb-3">
+                <div class="mb-3 flex items-center gap-2">
                   <Icon name="ph:minus-circle" class="text-danger-500 size-5" />
-                  <BaseParagraph class="text-danger-500 font-medium text-sm">راه‌های بدتر کردن</BaseParagraph>
+                  <BaseParagraph class="text-danger-500 text-sm font-medium">
+                    راه‌های بدتر کردن
+                  </BaseParagraph>
                 </div>
                 <ul class="space-y-2">
                   <li
                     v-for="badIdea in example.badIdeas"
                     :key="badIdea"
-                    class="text-muted-600 dark:text-muted-400 text-sm flex items-start gap-2"
+                    class="text-muted-600 dark:text-muted-400 flex items-start gap-2 text-sm"
                   >
                     <Icon name="ph:x" class="text-danger-500 mt-0.5 size-3.5 shrink-0" />
                     {{ badIdea }}
@@ -508,15 +558,17 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
               </div>
 
               <div>
-                <div class="flex items-center gap-2 mb-3">
+                <div class="mb-3 flex items-center gap-2">
                   <Icon name="ph:plus-circle" class="text-success-500 size-5" />
-                  <BaseParagraph class="text-success-500 font-medium text-sm">راه‌حل‌های معکوس شده</BaseParagraph>
+                  <BaseParagraph class="text-success-500 text-sm font-medium">
+                    راه‌حل‌های معکوس شده
+                  </BaseParagraph>
                 </div>
                 <ul class="space-y-2">
                   <li
                     v-for="goodSolution in example.goodSolutions"
                     :key="goodSolution"
-                    class="text-muted-600 dark:text-muted-400 text-sm flex items-start gap-2"
+                    class="text-muted-600 dark:text-muted-400 flex items-start gap-2 text-sm"
                   >
                     <Icon name="ph:check" class="text-success-500 mt-0.5 size-3.5 shrink-0" />
                     {{ goodSolution }}
@@ -533,7 +585,12 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
           class="dark:bg-muted-800 dark:border-muted-700 rounded-2xl border border-gray-200 bg-white p-8"
         >
           <div class="mb-6">
-            <BaseHeading as="h3" size="xl" weight="semibold" class="text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h3"
+              size="xl"
+              weight="semibold"
+              class="text-gray-900 dark:text-white"
+            >
               ایده‌های تولید شده
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500 mt-1">
@@ -549,8 +606,19 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             >
               <div class="mb-3 flex items-start justify-between gap-3">
                 <div class="flex items-center gap-2">
-                  <BaseTag color="warning" size="sm" shape="full">Reverse</BaseTag>
-                  <BaseTag v-if="idea.aiGenerated" color="info" size="sm" shape="full">
+                  <BaseTag
+                    color="warning"
+                    size="sm"
+                    shape="full"
+                  >
+                    Reverse
+                  </BaseTag>
+                  <BaseTag
+                    v-if="idea.aiGenerated"
+                    color="info"
+                    size="sm"
+                    shape="full"
+                  >
                     <Icon name="ph:robot" class="ml-1 size-3" />
                     هوش مصنوعی
                   </BaseTag>
@@ -574,8 +642,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             shape="curved"
             size="lg"
             :disabled="aiGenerating"
-            @click="openAiGuidance"
             class="shadow-warning-500/30 shadow-lg"
+            @click="openAiGuidance"
           >
             <Icon :name="aiGenerating ? 'svg-spinners:90-ring-with-bg' : 'ph:sparkle'" class="ml-2 size-5" />
             {{ aiGenerating ? 'در حال تولید...' : 'تولید ایده با هوش مصنوعی' }}
@@ -584,7 +652,12 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 
         <!-- Navigation -->
         <div class="mt-8 flex items-center justify-between">
-          <BaseButton color="muted" shape="curved" size="lg" @click="goBack">
+          <BaseButton
+            color="muted"
+            shape="curved"
+            size="lg"
+            @click="goBack"
+          >
             <Icon name="ph:arrow-right" class="ml-2 size-5" />
             بازگشت به مرحله ۲
           </BaseButton>
@@ -593,8 +666,8 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             color="success"
             shape="curved"
             size="lg"
-            @click="saveAndContinue"
             class="shadow-success-500/30 shadow-lg"
+            @click="saveAndContinue"
           >
             ذخیره و ادامه
             <Icon name="ph:arrow-left" class="mr-2 size-5" />
@@ -604,14 +677,24 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
     </div>
 
     <!-- AI Guidance Modal -->
-    <TairoModal :open="showAiGuidanceModal" size="xl" @close="showAiGuidanceModal = false">
+    <TairoModal
+      :open="showAiGuidanceModal"
+      size="xl"
+      @close="showAiGuidanceModal = false"
+    >
       <template #header>
         <div class="flex items-center gap-3 p-6 pb-0">
           <div class="bg-warning-500 flex size-12 items-center justify-center rounded-xl">
             <Icon name="ph:sparkle" class="size-6 text-white" />
           </div>
           <div class="text-right">
-            <BaseHeading as="h2" size="xl" weight="bold">تولید ایده با Reverse Brainstorming</BaseHeading>
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="bold"
+            >
+              تولید ایده با Reverse Brainstorming
+            </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
               استفاده از هوش مصنوعی برای تولید ایده‌های معکوس
             </BaseParagraph>
@@ -622,7 +705,12 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
       <div class="space-y-6 p-6">
         <!-- Context Display -->
         <div class="dark:border-muted-700 dark:bg-muted-900/50 rounded-xl border-2 border-gray-100 bg-gray-50 p-4">
-          <BaseHeading as="h4" size="md" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+          <BaseHeading
+            as="h4"
+            size="md"
+            weight="semibold"
+            class="mb-3 text-gray-900 dark:text-white"
+          >
             زمینه پژوهش
           </BaseHeading>
           <div class="space-y-2 text-sm">
@@ -651,7 +739,13 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
 
         <!-- Action Buttons -->
         <div class="flex items-center justify-between">
-          <BaseButton color="muted" shape="curved" @click="showAiGuidanceModal = false">انصراف</BaseButton>
+          <BaseButton
+            color="muted"
+            shape="curved"
+            @click="showAiGuidanceModal = false"
+          >
+            انصراف
+          </BaseButton>
           <BaseButton
             color="warning"
             shape="curved"
@@ -659,8 +753,16 @@ ${guidance ? `راهنمایی کاربر: ${guidance}` : ''}
             :disabled="aiGenerating"
             @click="generateIdeasWithAI(userGuidance)"
           >
-            <Icon v-if="!aiGenerating" name="ph:sparkle" class="ml-2 size-5" />
-            <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-5" />
+            <Icon
+              v-if="!aiGenerating"
+              name="ph:sparkle"
+              class="ml-2 size-5"
+            />
+            <Icon
+              v-else
+              name="svg-spinners:90-ring-with-bg"
+              class="ml-2 size-5"
+            />
             {{ aiGenerating ? 'در حال تولید...' : 'تولید ایده‌ها' }}
           </BaseButton>
         </div>

@@ -93,7 +93,12 @@
     <div class="dark:bg-muted-800 dark:border-muted-700 border-b border-gray-200 bg-white">
       <div class="px-4 py-6 sm:px-6 lg:px-8">
         <div class="flex items-center gap-4">
-          <BaseButton color="muted" shape="curved" size="sm" @click="goBack">
+          <BaseButton
+            color="muted"
+            shape="curved"
+            size="sm"
+            @click="goBack"
+          >
             <Icon name="ph:arrow-right" class="ml-2 size-4" />
             بازگشت
           </BaseButton>
@@ -105,10 +110,17 @@
                 <Icon name="ph:notebook" class="size-6 text-white" />
               </div>
               <div>
-                <BaseHeading as="h1" size="2xl" weight="bold" class="text-gray-900 dark:text-white">
+                <BaseHeading
+                  as="h1"
+                  size="2xl"
+                  weight="bold"
+                  class="text-gray-900 dark:text-white"
+                >
                   روزنوشتهٔ فرایند پژوهش
                 </BaseHeading>
-                <BaseParagraph size="sm" class="text-muted-400 mt-1">Process Documentation</BaseParagraph>
+                <BaseParagraph size="sm" class="text-muted-400 mt-1">
+                  Process Documentation
+                </BaseParagraph>
               </div>
             </div>
           </div>
@@ -122,7 +134,12 @@
         <!-- Introduction -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="mb-3 text-gray-900 dark:text-white"
+            >
               اهمیت مستندسازی فرایند
             </BaseHeading>
             <BaseParagraph class="text-muted-600 dark:text-muted-300 leading-relaxed">
@@ -133,29 +150,46 @@
 
           <!-- Features -->
           <div class="dark:border-muted-700 dark:bg-muted-900/50 rounded-xl border border-gray-100 bg-gray-50 p-6">
-            <BaseHeading as="h3" size="md" weight="semibold" class="mb-4 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              class="mb-4 text-gray-900 dark:text-white"
+            >
               فواید مستندسازی
             </BaseHeading>
             <div class="grid gap-4 sm:grid-cols-3">
               <div class="flex items-start gap-3">
                 <Icon name="ph:clock-clockwise-fill" class="text-success-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">ردیابی پیشرفت</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">مشاهده تحول ایده‌ها در طول زمان</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    ردیابی پیشرفت
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    مشاهده تحول ایده‌ها در طول زمان
+                  </div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Icon name="ph:lightbulb-filament-fill" class="text-success-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">یادگیری</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">درس‌گیری از تصمیمات و اشتباهات</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    یادگیری
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    درس‌گیری از تصمیمات و اشتباهات
+                  </div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Icon name="ph:users-three-fill" class="text-success-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">اشتراک‌گذاری</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">انتقال دانش به دیگران</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    اشتراک‌گذاری
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    انتقال دانش به دیگران
+                  </div>
                 </div>
               </div>
             </div>
@@ -165,7 +199,12 @@
         <!-- Add New Entry Form -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="text-gray-900 dark:text-white"
+            >
               افزودن یادداشت جدید
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500 mt-1">
@@ -187,7 +226,11 @@
             <div>
               <label class="text-muted-700 dark:text-muted-200 mb-2 block text-sm font-medium">مرحله مرتبط</label>
               <BaseSelect v-model="selectedStage" shape="curved">
-                <option v-for="stage in stageOptions" :key="stage" :value="stage">
+                <option
+                  v-for="stage in stageOptions"
+                  :key="stage"
+                  :value="stage"
+                >
                   {{ stage }}
                 </option>
               </BaseSelect>
@@ -229,7 +272,12 @@
         <!-- Journal Entries -->
         <div class="mb-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="text-gray-900 dark:text-white"
+            >
               یادداشت‌های ثبت شده
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500 mt-1">
@@ -239,7 +287,12 @@
 
           <div v-if="journalEntries.length === 0" class="dark:bg-muted-800 dark:border-muted-700 rounded-2xl border border-gray-200 bg-white p-12 text-center">
             <Icon name="ph:notebook" class="text-muted-400 mx-auto mb-4 size-16" />
-            <BaseHeading as="h3" size="md" weight="semibold" class="text-muted-600 mb-2">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              class="text-muted-600 mb-2"
+            >
               هنوز یادداشتی ثبت نشده است
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
@@ -255,7 +308,12 @@
             >
               <div class="mb-3 flex items-start justify-between">
                 <div class="flex-1">
-                  <BaseHeading as="h3" size="md" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+                  <BaseHeading
+                    as="h3"
+                    size="md"
+                    weight="semibold"
+                    class="mb-2 text-gray-900 dark:text-white"
+                  >
                     {{ entry.title }}
                   </BaseHeading>
                   <div class="text-muted-500 flex flex-wrap items-center gap-3 text-xs">
@@ -264,7 +322,11 @@
                       <span>{{ new Date(entry.date).toLocaleDateString('fa-IR') }}</span>
                     </div>
                     <span>•</span>
-                    <BaseTag color="success" size="sm" shape="full">
+                    <BaseTag
+                      color="success"
+                      size="sm"
+                      shape="full"
+                    >
                       {{ entry.stage }}
                     </BaseTag>
                   </div>
@@ -293,7 +355,12 @@
               <Icon name="ph:lightbulb-fill" class="size-6 text-white" />
             </div>
             <div class="flex-1">
-              <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="mb-3 text-gray-900 dark:text-white"
+              >
                 نکات مهم برای مستندسازی
               </BaseHeading>
               <ul class="text-muted-700 dark:text-muted-200 space-y-2 text-sm">

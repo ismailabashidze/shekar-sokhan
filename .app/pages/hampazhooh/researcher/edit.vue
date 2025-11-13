@@ -105,7 +105,7 @@
   };
 
   const removeSkill = (skill: string) => {
-    skills.value = skills.value.filter((s) => s !== skill);
+    skills.value = skills.value.filter(s => s !== skill);
   };
 
   const addInterest = () => {
@@ -116,7 +116,7 @@
   };
 
   const removeInterest = (interest: string) => {
-    interests.value = interests.value.filter((i) => i !== interest);
+    interests.value = interests.value.filter(i => i !== interest);
   };
 
   const handleAvatarUpload = (event: Event) => {
@@ -160,7 +160,7 @@
   const onSubmit = async (values: FormInput) => {
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       toaster.clearAll();
       toaster.show({
@@ -174,7 +174,8 @@
       setTimeout(() => {
         router.push('/hampazhooh/researcher');
       }, 1000);
-    } catch (error: any) {
+    }
+ catch (error: any) {
       toaster.show({
         title: 'خطا در بروزرسانی',
         message: error.message || 'متاسفانه مشکلی پیش آمد. لطفا دوباره تلاش کنید.',
@@ -205,12 +206,16 @@
 </script>
 
 <template>
-  <div class="min-h-screen bg-muted-100 dark:bg-muted-900">
+  <div class="bg-muted-100 dark:bg-muted-900 min-h-screen">
     <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-6">
         <div class="mb-4 flex items-center justify-between">
-          <BaseButton size="sm" shape="curved" @click="cancelEdit">
+          <BaseButton
+            size="sm"
+            shape="curved"
+            @click="cancelEdit"
+          >
             <Icon name="ph:arrow-right" class="size-4" />
             <span>بازگشت به پروفایل</span>
           </BaseButton>
@@ -228,7 +233,13 @@
             </BaseButton>
           </div>
         </div>
-        <BaseHeading as="h1" size="3xl" weight="bold">ویرایش پروفایل</BaseHeading>
+        <BaseHeading
+          as="h1"
+          size="3xl"
+          weight="bold"
+        >
+          ویرایش پروفایل
+        </BaseHeading>
         <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400 mt-2">
           اطلاعات پروفایل و شبکه‌های اجتماعی خود را بروزرسانی کنید
         </BaseParagraph>
@@ -239,7 +250,7 @@
         <div class="flex gap-2 overflow-x-auto p-2">
           <button
             :class="[
-              'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap',
+              'flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               activeTab === 'basic'
                 ? 'bg-primary-500 text-white'
                 : 'text-muted-600 hover:bg-muted-100 dark:text-muted-400 dark:hover:bg-muted-800',
@@ -251,7 +262,7 @@
           </button>
           <button
             :class="[
-              'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap',
+              'flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               activeTab === 'academic'
                 ? 'bg-primary-500 text-white'
                 : 'text-muted-600 hover:bg-muted-100 dark:text-muted-400 dark:hover:bg-muted-800',
@@ -263,7 +274,7 @@
           </button>
           <button
             :class="[
-              'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap',
+              'flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               activeTab === 'research'
                 ? 'bg-primary-500 text-white'
                 : 'text-muted-600 hover:bg-muted-100 dark:text-muted-400 dark:hover:bg-muted-800',
@@ -275,7 +286,7 @@
           </button>
           <button
             :class="[
-              'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap',
+              'flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors',
               activeTab === 'social'
                 ? 'bg-primary-500 text-white'
                 : 'text-muted-600 hover:bg-muted-100 dark:text-muted-400 dark:hover:bg-muted-800',
@@ -295,11 +306,22 @@
           <div v-if="activeTab === 'basic'" class="space-y-6">
             <!-- Profile Picture -->
             <div>
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">تصویر پروفایل</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                تصویر پروفایل
+              </BaseHeading>
               <div class="flex items-center gap-6">
                 <div class="relative">
                   <div class="size-32 overflow-hidden rounded-2xl">
-                    <img :src="avatarPreview" alt="Profile" class="size-full object-cover" />
+                    <img
+                      :src="avatarPreview"
+                      alt="Profile"
+                      class="size-full object-cover"
+                    >
                   </div>
                   <label
                     for="avatar-upload"
@@ -307,7 +329,13 @@
                   >
                     <Icon name="ph:camera" class="size-4" />
                   </label>
-                  <input id="avatar-upload" type="file" accept="image/*" class="hidden" @change="handleAvatarUpload" />
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="handleAvatarUpload"
+                  >
                 </div>
                 <div class="flex-1">
                   <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400">
@@ -315,12 +343,22 @@
                   </BaseParagraph>
                   <div class="mt-3 flex gap-2">
                     <label for="avatar-upload">
-                      <BaseButton as="span" size="sm" color="primary" shape="curved">
+                      <BaseButton
+                        as="span"
+                        size="sm"
+                        color="primary"
+                        shape="curved"
+                      >
                         <Icon name="ph:upload" class="size-4" />
                         بارگذاری تصویر
                       </BaseButton>
                     </label>
-                    <BaseButton size="sm" color="default" shape="curved" @click="avatarPreview = currentData.avatar">
+                    <BaseButton
+                      size="sm"
+                      color="default"
+                      shape="curved"
+                      @click="avatarPreview = currentData.avatar"
+                    >
                       حذف
                     </BaseButton>
                   </div>
@@ -331,7 +369,14 @@
             <BasePlaceload class="h-px w-full" />
 
             <div>
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">اطلاعات شخصی</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                اطلاعات شخصی
+              </BaseHeading>
               <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                   <Field v-slot="{ field, errorMessage, handleChange, handleBlur }" name="firstName">
@@ -415,7 +460,14 @@
           <!-- Academic Information Tab -->
           <div v-if="activeTab === 'academic'" class="space-y-6">
             <div>
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">اطلاعات آکادمیک</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                اطلاعات آکادمیک
+              </BaseHeading>
               <div class="space-y-4">
                 <Field v-slot="{ field, errorMessage, handleChange, handleBlur }" name="institution">
                   <BaseInput
@@ -468,7 +520,14 @@
 
             <!-- Experience Section -->
             <div>
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">سابقه پژوهشی</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                سابقه پژوهشی
+              </BaseHeading>
               <Field v-slot="{ field, errorMessage, handleChange, handleBlur }" name="experience">
                 <BaseTextarea
                   :model-value="field.value"
@@ -489,10 +548,22 @@
           <div v-if="activeTab === 'research'" class="space-y-6">
             <!-- Skills Section -->
             <div>
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">مهارت‌ها و تخصص‌ها</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                مهارت‌ها و تخصص‌ها
+              </BaseHeading>
               <div class="space-y-4">
                 <div class="flex flex-wrap gap-2">
-                  <BaseTag v-for="skill in skills" :key="skill" color="primary" shape="curved">
+                  <BaseTag
+                    v-for="skill in skills"
+                    :key="skill"
+                    color="primary"
+                    shape="curved"
+                  >
                     {{ skill }}
                     <button
                       type="button"
@@ -511,7 +582,12 @@
                     :classes="{ input: 'h-10' }"
                     @keyup.enter="addSkill"
                   />
-                  <BaseButton size="sm" color="primary" shape="curved" @click="addSkill">
+                  <BaseButton
+                    size="sm"
+                    color="primary"
+                    shape="curved"
+                    @click="addSkill"
+                  >
                     <Icon name="ph:plus" class="size-4" />
                     افزودن
                   </BaseButton>
@@ -523,10 +599,22 @@
 
             <!-- Research Interests Section -->
             <div>
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">علایق پژوهشی</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                علایق پژوهشی
+              </BaseHeading>
               <div class="space-y-4">
                 <div class="flex flex-wrap gap-2">
-                  <BaseTag v-for="interest in interests" :key="interest" color="default" shape="curved">
+                  <BaseTag
+                    v-for="interest in interests"
+                    :key="interest"
+                    color="default"
+                    shape="curved"
+                  >
                     <Icon name="ph:lightbulb" class="size-3" />
                     {{ interest }}
                     <button
@@ -546,7 +634,12 @@
                     :classes="{ input: 'h-10' }"
                     @keyup.enter="addInterest"
                   />
-                  <BaseButton size="sm" color="primary" shape="curved" @click="addInterest">
+                  <BaseButton
+                    size="sm"
+                    color="primary"
+                    shape="curved"
+                    @click="addInterest"
+                  >
                     <Icon name="ph:plus" class="size-4" />
                     افزودن
                   </BaseButton>
@@ -558,7 +651,14 @@
           <!-- Social Networks Tab -->
           <div v-if="activeTab === 'social'" class="space-y-6">
             <div>
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">وب‌سایت و شناسه‌های علمی</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                وب‌سایت و شناسه‌های علمی
+              </BaseHeading>
               <div class="space-y-4">
                 <Field v-slot="{ field, errorMessage, handleChange, handleBlur }" name="website">
                   <BaseInput
@@ -603,7 +703,14 @@
             <BasePlaceload class="h-px w-full" />
 
             <div>
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">شبکه‌های اجتماعی علمی</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                شبکه‌های اجتماعی علمی
+              </BaseHeading>
               <div class="space-y-4">
                 <Field v-slot="{ field, errorMessage, handleChange, handleBlur }" name="googleScholar">
                   <BaseInput
@@ -651,9 +758,17 @@
       <!-- Bottom Action Bar -->
       <BaseCard class="sticky bottom-4 mt-6 p-4" shape="curved">
         <div class="flex items-center justify-between gap-4">
-          <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400">آخرین بروزرسانی: امروز</BaseParagraph>
+          <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400">
+            آخرین بروزرسانی: امروز
+          </BaseParagraph>
           <div class="flex gap-2">
-            <BaseButton :disabled="isSubmitting" type="button" color="default" shape="curved" @click="cancelEdit">
+            <BaseButton
+              :disabled="isSubmitting"
+              type="button"
+              color="default"
+              shape="curved"
+              @click="cancelEdit"
+            >
               <Icon name="ph:x" class="size-4" />
               انصراف
             </BaseButton>

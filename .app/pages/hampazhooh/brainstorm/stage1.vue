@@ -278,7 +278,7 @@
       // Get focus level label if selected
       let enrichedContext = { ...context };
       if (enrichedContext.focusLevel) {
-        const selectedLevel = focusLevels.find((l) => l.value === enrichedContext.focusLevel);
+        const selectedLevel = focusLevels.find(l => l.value === enrichedContext.focusLevel);
         if (selectedLevel) {
           enrichedContext.focusLevel = `${selectedLevel.label} (${selectedLevel.description})`;
         }
@@ -329,8 +329,8 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
       };
 
       const prompt = prompts[field] || 'یک مقدار مناسب پیشنهاد بده.';
-      const userContent =
-        field === 'researchDomain' ? formData.value?.researchDomain?.join(', ') || '' : formData.value?.[field] || '';
+      const userContent
+        = field === 'researchDomain' ? formData.value?.researchDomain?.join(', ') || '' : formData.value?.[field] || '';
       const messages = [
         {
           role: 'user',
@@ -351,18 +351,21 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
               // For focus level, find matching value
               const trimmedSuggestion = suggestion.trim().toLowerCase();
               const matchedLevel = focusLevels.find(
-                (l) => trimmedSuggestion.includes(l.value) || l.value.includes(trimmedSuggestion),
+                l => trimmedSuggestion.includes(l.value) || l.value.includes(trimmedSuggestion),
               );
               if (matchedLevel && formData.value) {
                 formData.value.focusLevel = matchedLevel.value;
               }
-            } else if (field === 'researchDomain') {
+            }
+ else if (field === 'researchDomain') {
               // For research domain, wait for complete response and parse JSON
               // Don't update in real-time, wait for final result
-            } else if (field === 'keywords') {
+            }
+ else if (field === 'keywords') {
               // For keywords, wait for complete response and parse JSON
               // Don't update in real-time, wait for final result
-            } else {
+            }
+ else {
               // For text fields, replace with AI suggestion (not append)
               if (formData.value) {
                 formData.value[field] = suggestion;
@@ -384,31 +387,33 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
             if (Array.isArray(domains)) {
               // Clear existing domains and add new ones
               if (formData.value) {
-                formData.value.researchDomain = domains.filter((d) => d && typeof d === 'string').map((d) => d.trim());
+                formData.value.researchDomain = domains.filter(d => d && typeof d === 'string').map(d => d.trim());
               }
 
               // Update domain suggestions with AI-generated ones
               domainSuggestions.value = [...domains, ...defaultDomainSuggestions.slice(0, 5)];
             }
-          } else {
+          }
+ else {
             // Fallback: try to parse as comma-separated list
             const domains = suggestion
               .split(/[,،\n]/)
-              .map((d) => d.trim())
-              .filter((d) => d && !d.startsWith('-') && !d.includes('مثال'));
+              .map(d => d.trim())
+              .filter(d => d && !d.startsWith('-') && !d.includes('مثال'));
             if (domains.length > 0) {
               if (formData.value) {
                 formData.value.researchDomain = [...new Set([...formData.value.researchDomain, ...domains])];
               }
             }
           }
-        } catch (error) {
+        }
+ catch (error) {
           console.warn('Error parsing research domain suggestions:', error);
           // Fallback to simple parsing
           const domains = suggestion
             .split(/[,،\n]/)
-            .map((d) => d.trim())
-            .filter((d) => d && !d.startsWith('-'));
+            .map(d => d.trim())
+            .filter(d => d && !d.startsWith('-'));
           if (domains.length > 0) {
             if (formData.value) {
               formData.value.researchDomain = [...new Set([...formData.value.researchDomain, ...domains])];
@@ -426,29 +431,31 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
             if (Array.isArray(keywords)) {
               // Clear existing keywords and add new ones
               if (formData.value) {
-                formData.value.keywords = keywords.filter((k) => k && typeof k === 'string').map((k) => k.trim());
+                formData.value.keywords = keywords.filter(k => k && typeof k === 'string').map(k => k.trim());
               }
 
               // Update keyword suggestions with AI-generated ones
               keywordSuggestions.value = [...keywords, ...defaultKeywordSuggestions.slice(0, 5)];
             }
-          } else {
+          }
+ else {
             // Fallback: try to parse as comma-separated list
             const keywords = suggestion
               .split(/[,،\n]/)
-              .map((k) => k.trim())
-              .filter((k) => k && !k.startsWith('-') && !k.includes('مثال'));
+              .map(k => k.trim())
+              .filter(k => k && !k.startsWith('-') && !k.includes('مثال'));
             if (keywords.length > 0) {
               formData.value.keywords = [...new Set([...formData.value.keywords, ...keywords])];
             }
           }
-        } catch (error) {
+        }
+ catch (error) {
           console.warn('Error parsing keyword suggestions:', error);
           // Fallback to simple parsing
           const keywords = suggestion
             .split(/[,،\n]/)
-            .map((k) => k.trim())
-            .filter((k) => k && !k.startsWith('-'));
+            .map(k => k.trim())
+            .filter(k => k && !k.startsWith('-'));
           if (keywords.length > 0) {
             if (formData.value) {
               formData.value.keywords = [...new Set([...formData.value.keywords, ...keywords])];
@@ -463,7 +470,8 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
       if (field === 'mainChallenge') {
         await generateDomainSuggestions();
       }
-    } catch (e: any) {
+    }
+ catch (e: any) {
       toaster.show({
         title: 'خطا',
         message: `خطا در دریافت پیشنهاد: ${e.message || 'خطای ناشناخته'}`,
@@ -471,7 +479,8 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
         icon: 'ph:warning',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       // Reset loading state
       switch (field) {
         case 'mainChallenge':
@@ -521,14 +530,16 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
         try {
           await suggestAIField(fieldName);
           // Short delay between requests
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        } catch (error) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+ catch (error) {
           console.warn(`خطا در همگام‌سازی ${fieldName}:`, error);
         }
       }
 
       // Success toast removed to reduce number of notifications
-    } catch (error) {
+    }
+ catch (error) {
       console.error('خطا در همگام‌سازی:', error);
       toaster.show({
         title: 'خطا',
@@ -537,7 +548,8 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
         icon: 'ph:warning',
         closable: true,
       });
-    } finally {
+    }
+ finally {
       smartCompleteLoading.value = false;
     }
   }
@@ -632,7 +644,7 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
 
   // WH Questions completion status
   const whQuestionsStatus = computed(() => {
-    const filledQuestions = Object.values(whQuestions.value).filter((answer) => answer && answer.trim() !== '');
+    const filledQuestions = Object.values(whQuestions.value).filter(answer => answer && answer.trim() !== '');
     const totalQuestions = whQuestionOrder.length;
     const percentage = (filledQuestions.length / totalQuestions) * 100;
 
@@ -643,11 +655,11 @@ ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ''}
 
   // SWOT completion status
   const swotStatus = computed(() => {
-    const totalItems =
-      swotData.value.strengths.length +
-      swotData.value.weaknesses.length +
-      swotData.value.opportunities.length +
-      swotData.value.threats.length;
+    const totalItems
+      = swotData.value.strengths.length
+      + swotData.value.weaknesses.length
+      + swotData.value.opportunities.length
+      + swotData.value.threats.length;
 
     if (totalItems === 0) return { status: 'empty', percentage: 0, text: 'تکمیل نشده', color: 'muted' };
     if (totalItems >= 4) return { status: 'completed', percentage: 100, text: 'تکمیل شده', color: 'success' };
@@ -679,14 +691,16 @@ ${formData.value.researchDomain.length > 0 ? `حوزه دانشی: ${formData.va
       });
 
       // Success toast removed to reduce number of notifications
-    } catch (error) {
+    }
+ catch (error) {
       toaster.show({
         title: 'خطا',
         message: 'خطا در تولید پاسخ. لطفاً دوباره امتحان کنید.',
         color: 'danger',
         icon: 'ph:warning',
       });
-    } finally {
+    }
+ finally {
       whQuestionsLoading.value = false;
     }
   }
@@ -770,29 +784,31 @@ ${formData.value.researchDomain.length > 0 ? `حوزه دانشی: ${formData.va
           // Update the swotData with parsed values
           if (swotJson.strengths && Array.isArray(swotJson.strengths)) {
             swotData.value.strengths = swotJson.strengths
-              .filter((item) => item && typeof item === 'string')
-              .map((item) => item.trim());
+              .filter(item => item && typeof item === 'string')
+              .map(item => item.trim());
           }
           if (swotJson.weaknesses && Array.isArray(swotJson.weaknesses)) {
             swotData.value.weaknesses = swotJson.weaknesses
-              .filter((item) => item && typeof item === 'string')
-              .map((item) => item.trim());
+              .filter(item => item && typeof item === 'string')
+              .map(item => item.trim());
           }
           if (swotJson.opportunities && Array.isArray(swotJson.opportunities)) {
             swotData.value.opportunities = swotJson.opportunities
-              .filter((item) => item && typeof item === 'string')
-              .map((item) => item.trim());
+              .filter(item => item && typeof item === 'string')
+              .map(item => item.trim());
           }
           if (swotJson.threats && Array.isArray(swotJson.threats)) {
             swotData.value.threats = swotJson.threats
-              .filter((item) => item && typeof item === 'string')
-              .map((item) => item.trim());
+              .filter(item => item && typeof item === 'string')
+              .map(item => item.trim());
           }
-        } else {
+        }
+ else {
           // Fallback to old parsing method if JSON not found
           throw new Error('JSON response not found');
         }
-      } catch (parseError) {
+      }
+ catch (parseError) {
         // Fallback parsing if JSON parsing fails
         const strengthsMatch = result.match(/STRENGTHS:(.*?)(?=WEAKNESSES:|$)/s);
         const weaknessesMatch = result.match(/WEAKNESSES:(.*?)(?=OPPORTUNITIES:|$)/s);
@@ -803,38 +819,39 @@ ${formData.value.researchDomain.length > 0 ? `حوزه دانشی: ${formData.va
           swotData.value.strengths = strengthsMatch[1]
             .trim()
             .split('\n')
-            .filter((line) => line.trim().startsWith('-'))
-            .map((line) => line.replace(/^-\s*/, '').trim())
-            .filter((item) => item);
+            .filter(line => line.trim().startsWith('-'))
+            .map(line => line.replace(/^-\s*/, '').trim())
+            .filter(item => item);
         }
         if (weaknessesMatch) {
           swotData.value.weaknesses = weaknessesMatch[1]
             .trim()
             .split('\n')
-            .filter((line) => line.trim().startsWith('-'))
-            .map((line) => line.replace(/^-\s*/, '').trim())
-            .filter((item) => item);
+            .filter(line => line.trim().startsWith('-'))
+            .map(line => line.replace(/^-\s*/, '').trim())
+            .filter(item => item);
         }
         if (opportunitiesMatch) {
           swotData.value.opportunities = opportunitiesMatch[1]
             .trim()
             .split('\n')
-            .filter((line) => line.trim().startsWith('-'))
-            .map((line) => line.replace(/^-\s*/, '').trim())
-            .filter((item) => item);
+            .filter(line => line.trim().startsWith('-'))
+            .map(line => line.replace(/^-\s*/, '').trim())
+            .filter(item => item);
         }
         if (threatsMatch) {
           swotData.value.threats = threatsMatch[1]
             .trim()
             .split('\n')
-            .filter((line) => line.trim().startsWith('-'))
-            .map((line) => line.replace(/^-\s*/, '').trim())
-            .filter((item) => item);
+            .filter(line => line.trim().startsWith('-'))
+            .map(line => line.replace(/^-\s*/, '').trim())
+            .filter(item => item);
         }
       }
 
       // Success toast removed to reduce number of notifications
-    } catch (error) {
+    }
+ catch (error) {
       console.error('SWOT generation error:', error);
       toaster.show({
         title: 'خطا',
@@ -842,7 +859,8 @@ ${formData.value.researchDomain.length > 0 ? `حوزه دانشی: ${formData.va
         color: 'danger',
         icon: 'ph:warning',
       });
-    } finally {
+    }
+ finally {
       swotLoading.value = false;
     }
   }
@@ -1025,8 +1043,8 @@ ${formData.value.researchDomain.length > 0 ? `حوزه دانشی: ${formData.va
       // Parse suggestions and add as nodes
       const concepts = result
         .split('\n')
-        .filter((line) => line.trim().startsWith('-'))
-        .map((line) => line.replace(/^-\s*/, '').trim());
+        .filter(line => line.trim().startsWith('-'))
+        .map(line => line.replace(/^-\s*/, '').trim());
 
       // Add nodes in a circle around the main node
       const centerX = 400;
@@ -1052,14 +1070,16 @@ ${formData.value.researchDomain.length > 0 ? `حوزه دانشی: ${formData.va
       });
 
       // Success toast removed to reduce number of notifications
-    } catch (error) {
+    }
+ catch (error) {
       toaster.show({
         title: 'خطا',
         message: 'خطا در تولید پیشنهادات.',
         color: 'danger',
         icon: 'ph:warning',
       });
-    } finally {
+    }
+ finally {
       mindMapLoading.value = false;
     }
   }
@@ -1075,8 +1095,8 @@ ${formData.value.researchDomain.length > 0 ? `حوزه دانشی: ${formData.va
   };
 
   const removeMindMapNode = (nodeId: string) => {
-    mindMapNodes.value = mindMapNodes.value.filter((n) => n.id !== nodeId);
-    mindMapConnections.value = mindMapConnections.value.filter((c) => c.from !== nodeId && c.to !== nodeId);
+    mindMapNodes.value = mindMapNodes.value.filter(n => n.id !== nodeId);
+    mindMapConnections.value = mindMapConnections.value.filter(c => c.from !== nodeId && c.to !== nodeId);
   };
 
   const exportMindMapAsMarkdown = () => {
@@ -1087,8 +1107,8 @@ ${formData.value.researchDomain.length > 0 ? `حوزه دانشی: ${formData.va
     });
     markdown += '\n## ارتباطات\n\n';
     mindMapConnections.value.forEach((conn) => {
-      const fromNode = mindMapNodes.value.find((n) => n.id === conn.from);
-      const toNode = mindMapNodes.value.find((n) => n.id === conn.to);
+      const fromNode = mindMapNodes.value.find(n => n.id === conn.from);
+      const toNode = mindMapNodes.value.find(n => n.id === conn.to);
       if (fromNode && toNode) {
         markdown += `- ${fromNode.label} → ${toNode.label}\n`;
       }
@@ -1174,7 +1194,7 @@ ${formData.value.researchDomain.length > 0 ? `حوزه دانشی: ${formData.va
       };
 
       // Get focus level label
-      const focusLevelLabel = focusLevels.find((l) => l.value === allData.focusLevel)?.label || allData.focusLevel;
+      const focusLevelLabel = focusLevels.find(l => l.value === allData.focusLevel)?.label || allData.focusLevel;
 
       const prompt = `بر اساس اطلاعات پژوهش زیر، یک نقشه ذهنی ساده و واضح تولید کنید:
 
@@ -1246,19 +1266,22 @@ ${allData.swotData.strengths.length > 0 ? `نقطه قوت کلیدی: ${allData
                   fontSize: '16px',
                   fontWeight: 'bold',
                 };
-              } else if (node.id.includes('domain')) {
+              }
+ else if (node.id.includes('domain')) {
                 style = {
                   backgroundColor: '#3b82f6',
                   color: 'white',
                   border: '2px solid #2563eb',
                 };
-              } else if (node.id.includes('wh')) {
+              }
+ else if (node.id.includes('wh')) {
                 style = {
                   backgroundColor: '#8b5cf6',
                   color: 'white',
                   border: '2px solid #7c3aed',
                 };
-              } else if (node.id.includes('swot')) {
+              }
+ else if (node.id.includes('swot')) {
                 style = {
                   backgroundColor: '#f59e0b',
                   color: 'white',
@@ -1299,7 +1322,8 @@ ${allData.swotData.strengths.length > 0 ? `نقطه قوت کلیدی: ${allData
             }));
           }
         }
-      } catch (parseError) {
+      }
+ catch (parseError) {
         console.error('Error parsing mind map JSON:', parseError);
 
         // Create simple fallback nodes with better spacing
@@ -1364,7 +1388,7 @@ ${allData.swotData.strengths.length > 0 ? `نقطه قوت کلیدی: ${allData
         }
 
         // Create simple edges - all connect to main
-        const fallbackEdges = fallbackNodes.slice(1).map((node) => ({
+        const fallbackEdges = fallbackNodes.slice(1).map(node => ({
           id: `e-main-${node.id}`,
           source: 'main',
           target: node.id,
@@ -1378,14 +1402,16 @@ ${allData.swotData.strengths.length > 0 ? `نقطه قوت کلیدی: ${allData
       }
 
       // Success toast removed to reduce number of notifications
-    } catch (error) {
+    }
+ catch (error) {
       toaster.show({
         title: 'خطا',
         message: 'خطا در تولید نقشه ذهنی.',
         color: 'danger',
         icon: 'ph:warning',
       });
-    } finally {
+    }
+ finally {
       flowLoading.value = false;
     }
   }
@@ -1419,15 +1445,16 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
       // Parse suggestions
       const suggestions = result
         .split('\n')
-        .filter((line) => line.trim().startsWith('-'))
-        .map((line) => line.replace(/^-\s*/, '').trim())
-        .filter((domain) => domain && !formData.value.researchDomain.includes(domain));
+        .filter(line => line.trim().startsWith('-'))
+        .map(line => line.replace(/^-\s*/, '').trim())
+        .filter(domain => domain && !formData.value.researchDomain.includes(domain));
 
       if (suggestions.length > 0) {
         // Mix AI suggestions with some default ones
         domainSuggestions.value = [...suggestions, ...defaultDomainSuggestions.slice(0, 5)];
       }
-    } catch (error) {
+    }
+ catch (error) {
       console.warn('خطا در تولید پیشنهادات حوزه:', error);
       // Keep default suggestions on error
       domainSuggestions.value = [...defaultDomainSuggestions];
@@ -1482,7 +1509,8 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
         });
 
         // Success toast removed to reduce number of notifications
-      } else {
+      }
+ else {
         // Create new session
         await createBrainStorm(dataToSave);
 
@@ -1490,7 +1518,8 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
       }
 
       router.push('/hampazhooh/brainstorm/stage2');
-    } catch (error: any) {
+    }
+ catch (error: any) {
       console.error('Error saving data:', error);
       toaster.show({
         title: 'خطا',
@@ -1557,7 +1586,8 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
 
         // Success toast removed to reduce number of notifications
       }
-    } catch (error) {
+    }
+ catch (error) {
       console.error('Error loading existing data:', error);
     }
   });
@@ -1577,11 +1607,20 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                 <Icon name="ph:target" class="size-6 text-white" />
               </div>
               <div>
-                <div class="text-primary-500 mb-1 text-xs font-semibold uppercase tracking-wider">مرحله ۱</div>
-                <BaseHeading as="h1" size="2xl" weight="bold" class="text-gray-900 dark:text-white">
+                <div class="text-primary-500 mb-1 text-xs font-semibold uppercase tracking-wider">
+                  مرحله ۱
+                </div>
+                <BaseHeading
+                  as="h1"
+                  size="2xl"
+                  weight="bold"
+                  class="text-gray-900 dark:text-white"
+                >
                   تعریف حوزه و قاب مفهومی
                 </BaseHeading>
-                <BaseParagraph size="sm" class="text-muted-400 mt-1">Framing & Scoping</BaseParagraph>
+                <BaseParagraph size="sm" class="text-muted-400 mt-1">
+                  Framing & Scoping
+                </BaseParagraph>
               </div>
             </div>
           </div>
@@ -1595,7 +1634,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
         <!-- Introduction -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="mb-3 text-gray-900 dark:text-white"
+            >
               هدف این مرحله
             </BaseHeading>
             <BaseParagraph class="text-muted-600 dark:text-muted-300 leading-relaxed">
@@ -1606,36 +1650,57 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
 
           <!-- Key Features -->
           <div class="dark:border-muted-700 dark:bg-muted-900/50 rounded-xl border border-gray-100 bg-gray-50 p-6">
-            <BaseHeading as="h3" size="md" weight="semibold" class="mb-4 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h3"
+              size="md"
+              weight="semibold"
+              class="mb-4 text-gray-900 dark:text-white"
+            >
               ویژگی‌های کلیدی
             </BaseHeading>
             <div class="grid gap-4 sm:grid-cols-2">
               <div class="flex items-start gap-3">
                 <Icon name="ph:check-circle-fill" class="text-primary-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">مشخص کردن سؤال اصلی</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">حتی اگر در ابتدا مبهم باشد</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    مشخص کردن سؤال اصلی
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    حتی اگر در ابتدا مبهم باشد
+                  </div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Icon name="ph:check-circle-fill" class="text-primary-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">تعیین حوزهٔ دانشی</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">علوم انسانی، فناوری، محیط زیست و...</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    تعیین حوزهٔ دانشی
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    علوم انسانی، فناوری، محیط زیست و...
+                  </div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Icon name="ph:check-circle-fill" class="text-primary-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">کلیدواژه‌های تخصصی</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">مفاهیم کلیدی و اصطلاحات تخصصی پژوهش</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    کلیدواژه‌های تخصصی
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    مفاهیم کلیدی و اصطلاحات تخصصی پژوهش
+                  </div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Icon name="ph:check-circle-fill" class="text-primary-500 mt-0.5 size-5 shrink-0" />
                 <div>
-                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">تعیین سطح تمرکز</div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">کاربردی، نظری، یا بین‌رشته‌ای</div>
+                  <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
+                    تعیین سطح تمرکز
+                  </div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    کاربردی، نظری، یا بین‌رشته‌ای
+                  </div>
                 </div>
               </div>
               <div class="flex items-start gap-3">
@@ -1644,7 +1709,9 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                   <div class="text-muted-700 dark:text-muted-200 mb-1 text-sm font-semibold">
                     استفاده از ابزارهای تحلیلی
                   </div>
-                  <div class="text-muted-600 dark:text-muted-400 text-xs">نقشه ذهنی، سؤالات WH، تحلیل SWOT</div>
+                  <div class="text-muted-600 dark:text-muted-400 text-xs">
+                    نقشه ذهنی، سؤالات WH، تحلیل SWOT
+                  </div>
                 </div>
               </div>
             </div>
@@ -1654,7 +1721,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
         <!-- Scoping Form -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="mb-2 text-gray-900 dark:text-white"
+            >
               تعریف حوزه پژوهش
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
@@ -1676,8 +1748,16 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                   :disabled="mainChallengeAiLoading"
                   @click="suggestAIField('mainChallenge')"
                 >
-                  <Icon v-if="!mainChallengeAiLoading" name="ph:sparkle" class="size-4" />
-                  <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
+                  <Icon
+                    v-if="!mainChallengeAiLoading"
+                    name="ph:sparkle"
+                    class="size-4"
+                  />
+                  <Icon
+                    v-else
+                    name="svg-spinners:90-ring-with-bg"
+                    class="size-4"
+                  />
                   <span>پیشنهاد هوشمند</span>
                 </button>
               </div>
@@ -1707,8 +1787,16 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                   :disabled="researchDomainAiLoading"
                   @click="suggestAIField('researchDomain')"
                 >
-                  <Icon v-if="!researchDomainAiLoading" name="ph:sparkle" class="size-4" />
-                  <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
+                  <Icon
+                    v-if="!researchDomainAiLoading"
+                    name="ph:sparkle"
+                    class="size-4"
+                  />
+                  <Icon
+                    v-else
+                    name="svg-spinners:90-ring-with-bg"
+                    class="size-4"
+                  />
                   <span>پیشنهاد هوشمند</span>
                 </button>
               </div>
@@ -1741,7 +1829,9 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                     @keydown="handleDomainKeydown"
                   />
                   <div class="absolute left-3 top-1/2 -translate-y-1/2">
-                    <div class="text-muted-400 text-xs">Enter برای افزودن</div>
+                    <div class="text-muted-400 text-xs">
+                      Enter برای افزودن
+                    </div>
                   </div>
                 </div>
 
@@ -1749,7 +1839,9 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                 <div
                   class="border-muted-200 dark:border-muted-700 dark:bg-muted-900/50 rounded-lg border bg-gray-50 p-3"
                 >
-                  <div class="text-muted-600 dark:text-muted-400 mb-2 text-xs font-medium">پیشنهادها:</div>
+                  <div class="text-muted-600 dark:text-muted-400 mb-2 text-xs font-medium">
+                    پیشنهادها:
+                  </div>
                   <div class="flex flex-wrap gap-1.5">
                     <button
                       v-for="suggestion in domainSuggestions"
@@ -1785,8 +1877,16 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                   :disabled="keywordsAiLoading"
                   @click="suggestAIField('keywords')"
                 >
-                  <Icon v-if="!keywordsAiLoading" name="ph:sparkle" class="size-4" />
-                  <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
+                  <Icon
+                    v-if="!keywordsAiLoading"
+                    name="ph:sparkle"
+                    class="size-4"
+                  />
+                  <Icon
+                    v-else
+                    name="svg-spinners:90-ring-with-bg"
+                    class="size-4"
+                  />
                   <span>پیشنهاد هوشمند</span>
                 </button>
               </div>
@@ -1819,7 +1919,9 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                     @keydown="handleKeywordKeydown"
                   />
                   <div class="absolute left-3 top-1/2 -translate-y-1/2">
-                    <div class="text-muted-400 text-xs">Enter برای افزودن</div>
+                    <div class="text-muted-400 text-xs">
+                      Enter برای افزودن
+                    </div>
                   </div>
                 </div>
 
@@ -1827,7 +1929,9 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                 <div
                   class="border-muted-200 dark:border-muted-700 dark:bg-muted-900/50 rounded-lg border bg-gray-50 p-3"
                 >
-                  <div class="text-muted-600 dark:text-muted-400 mb-2 text-xs font-medium">پیشنهادها:</div>
+                  <div class="text-muted-600 dark:text-muted-400 mb-2 text-xs font-medium">
+                    پیشنهادها:
+                  </div>
                   <div class="flex flex-wrap gap-1.5">
                     <button
                       v-for="suggestion in keywordSuggestions"
@@ -1863,8 +1967,16 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                   :disabled="focusLevelAiLoading"
                   @click="suggestAIField('focusLevel')"
                 >
-                  <Icon v-if="!focusLevelAiLoading" name="ph:sparkle" class="size-4" />
-                  <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
+                  <Icon
+                    v-if="!focusLevelAiLoading"
+                    name="ph:sparkle"
+                    class="size-4"
+                  />
+                  <Icon
+                    v-else
+                    name="svg-spinners:90-ring-with-bg"
+                    class="size-4"
+                  />
                   <span>پیشنهاد هوشمند</span>
                 </button>
               </div>
@@ -1903,7 +2015,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
         <!-- Tools Section -->
         <div class="dark:bg-muted-800 dark:border-muted-700 mb-8 rounded-2xl border border-gray-200 bg-white p-8">
           <div class="mb-6">
-            <BaseHeading as="h2" size="xl" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="semibold"
+              class="mb-2 text-gray-900 dark:text-white"
+            >
               ابزارهای پیشنهادی
             </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
@@ -1931,22 +2048,35 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                     whQuestionsStatus.status === 'completed'
                       ? 'bg-success-100 text-success-700 dark:bg-success-900/20 dark:text-success-300'
                       : whQuestionsStatus.status === 'partial'
-                      ? 'bg-warning-100 text-warning-700 dark:bg-warning-900/20 dark:text-warning-300'
-                      : 'bg-muted-100 text-muted-600 dark:bg-muted-900/20 dark:text-muted-400',
+                        ? 'bg-warning-100 text-warning-700 dark:bg-warning-900/20 dark:text-warning-300'
+                        : 'bg-muted-100 text-muted-600 dark:bg-muted-900/20 dark:text-muted-400',
                   ]"
                 >
-                  <Icon v-if="whQuestionsStatus.status === 'completed'" name="ph:check-circle-fill" class="size-3.5" />
+                  <Icon
+                    v-if="whQuestionsStatus.status === 'completed'"
+                    name="ph:check-circle-fill"
+                    class="size-3.5"
+                  />
                   <Icon
                     v-else-if="whQuestionsStatus.status === 'partial'"
                     name="ph:circle-half-fill"
                     class="size-3.5"
                   />
-                  <Icon v-else name="ph:circle" class="size-3.5" />
+                  <Icon
+                    v-else
+                    name="ph:circle"
+                    class="size-3.5"
+                  />
                   {{ whQuestionsStatus.text }}
                 </div>
               </div>
 
-              <BaseHeading as="h3" size="md" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="mb-2 text-gray-900 dark:text-white"
+              >
                 سؤال‌های WH
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400 mb-3">
@@ -1977,18 +2107,35 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
                     swotStatus.status === 'completed'
                       ? 'bg-success-100 text-success-700 dark:bg-success-900/20 dark:text-success-300'
                       : swotStatus.status === 'partial'
-                      ? 'bg-warning-100 text-warning-700 dark:bg-warning-900/20 dark:text-warning-300'
-                      : 'bg-muted-100 text-muted-600 dark:bg-muted-900/20 dark:text-muted-400',
+                        ? 'bg-warning-100 text-warning-700 dark:bg-warning-900/20 dark:text-warning-300'
+                        : 'bg-muted-100 text-muted-600 dark:bg-muted-900/20 dark:text-muted-400',
                   ]"
                 >
-                  <Icon v-if="swotStatus.status === 'completed'" name="ph:check-circle-fill" class="size-3.5" />
-                  <Icon v-else-if="swotStatus.status === 'partial'" name="ph:circle-half-fill" class="size-3.5" />
-                  <Icon v-else name="ph:circle" class="size-3.5" />
+                  <Icon
+                    v-if="swotStatus.status === 'completed'"
+                    name="ph:check-circle-fill"
+                    class="size-3.5"
+                  />
+                  <Icon
+                    v-else-if="swotStatus.status === 'partial'"
+                    name="ph:circle-half-fill"
+                    class="size-3.5"
+                  />
+                  <Icon
+                    v-else
+                    name="ph:circle"
+                    class="size-3.5"
+                  />
                   {{ swotStatus.text }}
                 </div>
               </div>
 
-              <BaseHeading as="h3" size="md" weight="semibold" class="mb-2 text-right text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="mb-2 text-right text-gray-900 dark:text-white"
+              >
                 تحلیل SWOT
               </BaseHeading>
               <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400 mb-3">
@@ -2009,7 +2156,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
               <Icon name="ph:lightbulb-fill" class="size-6 text-white" />
             </div>
             <div class="flex-1">
-              <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-gray-900 dark:text-white">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="mb-3 text-gray-900 dark:text-white"
+              >
                 نکات مهم برای این مرحله
               </BaseHeading>
               <ul class="text-muted-700 dark:text-muted-200 space-y-2 text-sm">
@@ -2038,7 +2190,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
 
         <!-- Navigation Buttons -->
         <div class="flex items-center justify-between">
-          <BaseButton color="muted" shape="curved" size="lg" @click="goBack">
+          <BaseButton
+            color="muted"
+            shape="curved"
+            size="lg"
+            @click="goBack"
+          >
             <Icon name="ph:arrow-right" class="ml-2 size-5" />
             بازگشت به چارچوب
           </BaseButton>
@@ -2050,8 +2207,16 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
             :disabled="loading || !formData?.mainChallenge?.trim()"
             @click="saveAndContinue"
           >
-            <Icon v-if="loading" name="svg-spinners:90-ring-with-bg" class="mr-2 size-5" />
-            <Icon v-else name="ph:arrow-left" class="mr-2 size-5" />
+            <Icon
+              v-if="loading"
+              name="svg-spinners:90-ring-with-bg"
+              class="mr-2 size-5"
+            />
+            <Icon
+              v-else
+              name="ph:arrow-left"
+              class="mr-2 size-5"
+            />
             {{ loading ? 'در حال ذخیره...' : 'ذخیره و ادامه' }}
           </BaseButton>
         </div>
@@ -2059,14 +2224,24 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
     </div>
 
     <!-- WH Questions Modal -->
-    <TairoModal :open="showWhQuestionsModal" size="2xl" @close="showWhQuestionsModal = false">
+    <TairoModal
+      :open="showWhQuestionsModal"
+      size="2xl"
+      @close="showWhQuestionsModal = false"
+    >
       <template #header>
         <div class="flex items-center gap-3 p-6 pb-0">
           <div class="bg-info-500 flex size-12 items-center justify-center rounded-xl">
             <Icon name="ph:question" class="size-6 text-white" />
           </div>
           <div class="text-right">
-            <BaseHeading as="h2" size="xl" weight="bold">سؤالات WH</BaseHeading>
+            <BaseHeading
+              as="h2"
+              size="xl"
+              weight="bold"
+            >
+              سؤالات WH
+            </BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
               پاسخ به سؤالات کلیدی برای تعریف دقیق‌تر پژوهش
             </BaseParagraph>
@@ -2077,18 +2252,26 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
       <div class="space-y-6 p-6">
         <!-- Progress Steps -->
         <div class="flex items-center justify-between">
-          <div v-for="(key, index) in whQuestionOrder" :key="key" class="flex flex-1 items-center">
+          <div
+            v-for="(key, index) in whQuestionOrder"
+            :key="key"
+            class="flex flex-1 items-center"
+          >
             <div
               :class="[
                 'flex size-8 items-center justify-center rounded-full text-sm font-bold transition-all',
                 currentWhQuestion === key
                   ? 'bg-info-500 scale-110 text-white'
                   : whQuestions[key]
-                  ? 'bg-success-500 text-white'
-                  : 'bg-muted-200 text-muted-500',
+                    ? 'bg-success-500 text-white'
+                    : 'bg-muted-200 text-muted-500',
               ]"
             >
-              <Icon v-if="whQuestions[key]" name="ph:check-bold" class="size-4" />
+              <Icon
+                v-if="whQuestions[key]"
+                name="ph:check-bold"
+                class="size-4"
+              />
               <span v-else>{{ index + 1 }}</span>
             </div>
             <div
@@ -2108,7 +2291,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
           <div class="mb-4 flex items-start gap-3 text-right">
             <Icon :name="whQuestionLabels[currentWhQuestion].icon" class="text-info-500 mt-1 size-6" />
             <div class="flex-1">
-              <BaseHeading as="h3" size="lg" weight="semibold" class="mb-2">
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="semibold"
+                class="mb-2"
+              >
                 {{ whQuestionLabels[currentWhQuestion].label }}
               </BaseHeading>
               <BaseParagraph class="text-muted-600">
@@ -2122,8 +2310,16 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
               :disabled="whQuestionsLoading"
               @click="generateWhAnswer(currentWhQuestion)"
             >
-              <Icon v-if="!whQuestionsLoading" name="ph:sparkle" class="ml-2 size-4" />
-              <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-4" />
+              <Icon
+                v-if="!whQuestionsLoading"
+                name="ph:sparkle"
+                class="ml-2 size-4"
+              />
+              <Icon
+                v-else
+                name="svg-spinners:90-ring-with-bg"
+                class="ml-2 size-4"
+              />
               تولید هوشمند
             </BaseButton>
           </div>
@@ -2158,7 +2354,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
             <Icon name="ph:arrow-left" class="mr-2 size-5" />
           </BaseButton>
 
-          <BaseButton v-else color="success" shape="curved" @click="applyWhQuestions">
+          <BaseButton
+            v-else
+            color="success"
+            shape="curved"
+            @click="applyWhQuestions"
+          >
             اعمال به فرم
             <Icon name="ph:check" class="mr-2 size-5" />
           </BaseButton>
@@ -2167,7 +2368,11 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
     </TairoModal>
 
     <!-- SWOT Matrix Modal -->
-    <TairoModal :open="showSwotModal" size="3xl" @close="showSwotModal = false">
+    <TairoModal
+      :open="showSwotModal"
+      size="3xl"
+      @close="showSwotModal = false"
+    >
       <template #header>
         <div class="flex items-center justify-between gap-3 p-6 pb-0">
           <div class="flex items-center gap-3">
@@ -2175,13 +2380,34 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
               <Icon name="ph:chart-line-up" class="size-6 text-white" />
             </div>
             <div class="text-right">
-              <BaseHeading as="h2" size="xl" weight="bold">تحلیل SWOT</BaseHeading>
-              <BaseParagraph size="sm" class="text-muted-500">نقاط قوت، ضعف، فرصت‌ها و تهدیدها</BaseParagraph>
+              <BaseHeading
+                as="h2"
+                size="xl"
+                weight="bold"
+              >
+                تحلیل SWOT
+              </BaseHeading>
+              <BaseParagraph size="sm" class="text-muted-500">
+                نقاط قوت، ضعف، فرصت‌ها و تهدیدها
+              </BaseParagraph>
             </div>
           </div>
-          <BaseButton color="success" shape="curved" :disabled="swotLoading" @click="generateSwotAnalysis">
-            <Icon v-if="!swotLoading" name="ph:sparkle" class="ml-2 size-4" />
-            <Icon v-else name="svg-spinners:90-ring-with-bg" class="ml-2 size-4" />
+          <BaseButton
+            color="success"
+            shape="curved"
+            :disabled="swotLoading"
+            @click="generateSwotAnalysis"
+          >
+            <Icon
+              v-if="!swotLoading"
+              name="ph:sparkle"
+              class="ml-2 size-4"
+            />
+            <Icon
+              v-else
+              name="svg-spinners:90-ring-with-bg"
+              class="ml-2 size-4"
+            />
             تولید خودکار SWOT
           </BaseButton>
         </div>
@@ -2195,7 +2421,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
           >
             <div class="mb-3 flex items-center gap-2">
               <Icon name="ph:trend-up" class="text-success-600 size-5" />
-              <BaseHeading as="h3" size="md" weight="semibold" class="text-success-700 dark:text-success-300">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="text-success-700 dark:text-success-300"
+              >
                 نقاط قوت (Strengths)
               </BaseHeading>
             </div>
@@ -2284,7 +2515,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
           >
             <div class="mb-3 flex items-center gap-2">
               <Icon name="ph:warning" class="text-warning-600 size-5" />
-              <BaseHeading as="h3" size="md" weight="semibold" class="text-warning-700 dark:text-warning-300">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="text-warning-700 dark:text-warning-300"
+              >
                 نقاط ضعف (Weaknesses)
               </BaseHeading>
             </div>
@@ -2367,7 +2603,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
           <div class="border-info-200 dark:border-info-700 bg-info-50 dark:bg-info-900/20 rounded-xl border-2 p-4">
             <div class="mb-3 flex items-center gap-2">
               <Icon name="ph:lightbulb" class="text-info-600 size-5" />
-              <BaseHeading as="h3" size="md" weight="semibold" class="text-info-700 dark:text-info-300">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="text-info-700 dark:text-info-300"
+              >
                 فرصت‌ها (Opportunities)
               </BaseHeading>
             </div>
@@ -2452,7 +2693,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
           >
             <div class="mb-3 flex items-center gap-2">
               <Icon name="ph:warning-circle" class="text-danger-600 size-5" />
-              <BaseHeading as="h3" size="md" weight="semibold" class="text-danger-700 dark:text-danger-300">
+              <BaseHeading
+                as="h3"
+                size="md"
+                weight="semibold"
+                class="text-danger-700 dark:text-danger-300"
+              >
                 تهدیدها (Threats)
               </BaseHeading>
             </div>
@@ -2534,7 +2780,12 @@ ${formData.value.researchDomain.length > 0 ? `حوزه‌های فعلی: ${form
 
         <!-- Apply Button -->
         <div class="mt-6 flex justify-end">
-          <BaseButton color="success" shape="curved" size="lg" @click="applySwot">
+          <BaseButton
+            color="success"
+            shape="curved"
+            size="lg"
+            @click="applySwot"
+          >
             اعمال به فرم
             <Icon name="ph:check" class="mr-2 size-5" />
           </BaseButton>

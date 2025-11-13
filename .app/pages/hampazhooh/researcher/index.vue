@@ -110,11 +110,11 @@
 </script>
 
 <template>
-  <div class="min-h-screen bg-muted-100 dark:bg-muted-900">
+  <div class="bg-muted-100 dark:bg-muted-900 min-h-screen">
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <!-- Hero Section with Profile Header -->
       <BaseCard class="mb-6 overflow-hidden" shape="curved">
-        <div class="bg-gradient-to-r from-primary-500 to-primary-600 h-32" />
+        <div class="from-primary-500 to-primary-600 h-32 bg-gradient-to-r" />
         <div class="relative px-6 pb-6">
           <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <!-- Profile Image and Basic Info -->
@@ -127,12 +127,16 @@
                     :src="researcher.avatar"
                     :alt="`${researcher.firstName} ${researcher.lastName}`"
                     class="size-full object-cover"
-                  />
+                  >
                   <div class="bg-success-500 absolute bottom-2 right-2 size-4 rounded-full border-2 border-white" />
                 </div>
               </div>
               <div class="space-y-2">
-                <BaseHeading as="h1" size="2xl" weight="bold">
+                <BaseHeading
+                  as="h1"
+                  size="2xl"
+                  weight="bold"
+                >
                   {{ researcher.firstName }} {{ researcher.lastName }}
                 </BaseHeading>
                 <div class="flex flex-wrap gap-2">
@@ -147,11 +151,20 @@
                   </BaseParagraph>
                 </div>
                 <div class="flex gap-2">
-                  <BaseTag v-if="researcher.orcid" color="default" shape="curved" size="sm">
+                  <BaseTag
+                    v-if="researcher.orcid"
+                    color="default"
+                    shape="curved"
+                    size="sm"
+                  >
                     <Icon name="academicons:orcid" class="size-3" />
                     <span class="text-xs">ORCID</span>
                   </BaseTag>
-                  <BaseTag color="primary" shape="curved" size="sm">
+                  <BaseTag
+                    color="primary"
+                    shape="curved"
+                    size="sm"
+                  >
                     {{ researcher.researchField }}
                   </BaseTag>
                 </div>
@@ -160,15 +173,27 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2">
-              <BaseButton color="primary" shape="curved" @click="navigateToEdit">
+              <BaseButton
+                color="primary"
+                shape="curved"
+                @click="navigateToEdit"
+              >
                 <Icon name="ph:pencil-simple" class="size-4" />
                 <span>ویرایش پروفایل</span>
               </BaseButton>
-              <BaseButton color="default" shape="curved" @click="downloadCV">
+              <BaseButton
+                color="default"
+                shape="curved"
+                @click="downloadCV"
+              >
                 <Icon name="ph:download-simple" class="size-4" />
                 <span>دانلود رزومه</span>
               </BaseButton>
-              <BaseButton color="default" shape="curved" @click="$router.push('/hampazhooh/projects')">
+              <BaseButton
+                color="default"
+                shape="curved"
+                @click="$router.push('/hampazhooh/projects')"
+              >
                 <Icon name="ph:folder-open" class="size-4" />
               </BaseButton>
             </div>
@@ -178,13 +203,22 @@
 
       <!-- Stats Cards -->
       <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <BaseCard v-for="stat in stats" :key="stat.label" shape="curved" class="p-5">
+        <BaseCard
+          v-for="stat in stats"
+          :key="stat.label"
+          shape="curved"
+          class="p-5"
+        >
           <div class="flex items-center justify-between">
             <div>
               <BaseParagraph size="xs" class="text-muted-400 mb-1">
                 {{ stat.label }}
               </BaseParagraph>
-              <BaseHeading as="h3" size="2xl" weight="bold">
+              <BaseHeading
+                as="h3"
+                size="2xl"
+                weight="bold"
+              >
                 {{ stat.value }}
               </BaseHeading>
             </div>
@@ -256,32 +290,70 @@
           <!-- Overview Tab -->
           <div v-if="activeTab === 'overview'" class="space-y-6">
             <BaseCard shape="curved" class="p-6">
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">درباره من</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                درباره من
+              </BaseHeading>
               <BaseParagraph class="text-muted-600 dark:text-muted-300 leading-relaxed">
                 {{ researcher.bio }}
               </BaseParagraph>
             </BaseCard>
 
             <BaseCard shape="curved" class="p-6">
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">سابقه پژوهشی</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                سابقه پژوهشی
+              </BaseHeading>
               <BaseParagraph class="text-muted-600 dark:text-muted-300 leading-relaxed">
                 {{ researcher.experience }}
               </BaseParagraph>
             </BaseCard>
 
             <BaseCard shape="curved" class="p-6">
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">مهارت‌ها و تخصص‌ها</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                مهارت‌ها و تخصص‌ها
+              </BaseHeading>
               <div class="flex flex-wrap gap-2">
-                <BaseTag v-for="skill in researcher.skills" :key="skill" color="primary" shape="curved">
+                <BaseTag
+                  v-for="skill in researcher.skills"
+                  :key="skill"
+                  color="primary"
+                  shape="curved"
+                >
                   {{ skill }}
                 </BaseTag>
               </div>
             </BaseCard>
 
             <BaseCard shape="curved" class="p-6">
-              <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">علایق پژوهشی</BaseHeading>
+              <BaseHeading
+                as="h3"
+                size="lg"
+                weight="medium"
+                class="mb-4"
+              >
+                علایق پژوهشی
+              </BaseHeading>
               <div class="flex flex-wrap gap-2">
-                <BaseTag v-for="interest in researcher.interests" :key="interest" color="default" shape="curved">
+                <BaseTag
+                  v-for="interest in researcher.interests"
+                  :key="interest"
+                  color="default"
+                  shape="curved"
+                >
                   <Icon name="ph:lightbulb" class="size-3" />
                   {{ interest }}
                 </BaseTag>
@@ -298,7 +370,11 @@
               class="p-6 transition-all hover:shadow-lg"
             >
               <div class="space-y-3">
-                <BaseHeading as="h4" size="md" weight="medium">
+                <BaseHeading
+                  as="h4"
+                  size="md"
+                  weight="medium"
+                >
                   {{ pub.title }}
                 </BaseHeading>
                 <div class="flex flex-wrap items-center gap-3 text-sm">
@@ -317,8 +393,18 @@
                   </BaseParagraph>
                 </div>
                 <div class="flex items-center gap-2">
-                  <BaseTag color="default" shape="curved" size="sm">DOI: {{ pub.doi }}</BaseTag>
-                  <BaseButton size="sm" color="default" shape="curved">
+                  <BaseTag
+                    color="default"
+                    shape="curved"
+                    size="sm"
+                  >
+                    DOI: {{ pub.doi }}
+                  </BaseTag>
+                  <BaseButton
+                    size="sm"
+                    color="default"
+                    shape="curved"
+                  >
                     <Icon name="ph:link" class="size-3" />
                     مشاهده
                   </BaseButton>
@@ -329,11 +415,20 @@
 
           <!-- Projects Tab -->
           <div v-if="activeTab === 'projects'" class="space-y-4">
-            <BaseCard v-for="(project, index) in recentProjects" :key="index" shape="curved" class="p-6">
+            <BaseCard
+              v-for="(project, index) in recentProjects"
+              :key="index"
+              shape="curved"
+              class="p-6"
+            >
               <div class="space-y-4">
                 <div class="flex items-start justify-between">
                   <div>
-                    <BaseHeading as="h4" size="md" weight="medium">
+                    <BaseHeading
+                      as="h4"
+                      size="md"
+                      weight="medium"
+                    >
                       {{ project.title }}
                     </BaseHeading>
                     <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400 mt-1">
@@ -362,13 +457,22 @@
 
           <!-- Achievements Tab -->
           <div v-if="activeTab === 'achievements'" class="space-y-4">
-            <BaseCard v-for="(achievement, index) in achievements" :key="index" shape="curved" class="p-6">
+            <BaseCard
+              v-for="(achievement, index) in achievements"
+              :key="index"
+              shape="curved"
+              class="p-6"
+            >
               <div class="flex items-center gap-4">
                 <div class="bg-warning-500/10 text-warning-500 rounded-lg p-3">
                   <Icon :name="achievement.icon" class="size-8" />
                 </div>
                 <div>
-                  <BaseHeading as="h4" size="md" weight="medium">
+                  <BaseHeading
+                    as="h4"
+                    size="md"
+                    weight="medium"
+                  >
                     {{ achievement.title }}
                   </BaseHeading>
                   <BaseParagraph size="sm" class="text-muted-500 dark:text-muted-400 mt-1">
@@ -384,7 +488,14 @@
         <div class="space-y-6">
           <!-- Contact Information -->
           <BaseCard shape="curved" class="p-6">
-            <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">اطلاعات تماس</BaseHeading>
+            <BaseHeading
+              as="h3"
+              size="lg"
+              weight="medium"
+              class="mb-4"
+            >
+              اطلاعات تماس
+            </BaseHeading>
             <div class="space-y-3">
               <a
                 :href="`mailto:${researcher.email}`"
@@ -411,7 +522,14 @@
 
           <!-- Academic Networks -->
           <BaseCard shape="curved" class="p-6">
-            <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">شبکه‌های علمی</BaseHeading>
+            <BaseHeading
+              as="h3"
+              size="lg"
+              weight="medium"
+              class="mb-4"
+            >
+              شبکه‌های علمی
+            </BaseHeading>
             <div class="space-y-2">
               <a
                 v-if="researcher.googleScholar"
@@ -445,7 +563,14 @@
 
           <!-- Quick Stats -->
           <BaseCard shape="curved" class="p-6">
-            <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">آمار سریع</BaseHeading>
+            <BaseHeading
+              as="h3"
+              size="lg"
+              weight="medium"
+              class="mb-4"
+            >
+              آمار سریع
+            </BaseHeading>
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <span class="text-muted-600 dark:text-muted-400 text-sm">h-index</span>

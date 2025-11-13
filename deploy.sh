@@ -79,6 +79,11 @@ echo "Copying nitro.json..."
 scp .app/.output/nitro.json $SERVER_USER@$SERVER_IP:$SERVER_PATH/.output/ &
 NITRO_PID=$!
 
+# Copy prd directory in background
+echo "Copying prd directory..."
+scp -r prd $SERVER_USER@$SERVER_IP:$SERVER_PATH/ &
+PRD_PID=$!
+
 # Wait for all transfers to complete
 echo "Waiting for file transfers to complete..."
 wait $SERVER_PID
@@ -101,6 +106,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "✓ nitro.json transferred successfully"
+
+wait $PRD_PID
+if [ $? -ne 0 ]; then
+    echo "Error: prd directory transfer failed"
+    exit 1
+fi
+echo "✓ prd directory transferred successfully"
 
 echo "All file transfers completed successfully!"
 

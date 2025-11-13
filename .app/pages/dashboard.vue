@@ -123,7 +123,7 @@ const handleZoneClick = (zoneName: string) => {
   console.log('Is enabled:', isZoneEnabled(zoneName));
   console.log('Has route:', hasZoneRoute(zoneName));
   console.log('User zones:', user.value?.zones);
-  
+
   if (isZoneEnabled(zoneName) && hasZoneRoute(zoneName)) {
     console.log('Navigating to:', zoneRoutes[zoneName]);
     navigateTo(zoneRoutes[zoneName]);
@@ -333,8 +333,8 @@ const handleZoneInfo = (zoneName: string) => {
                         class="flex items-center gap-2 rounded-lg border p-3 transition-all duration-200"
                         :class="[
                           zoneColor(zone.name),
-                          isZoneEnabled(zone.name) && hasZoneRoute(zone.name) 
-                            ? 'cursor-pointer hover:shadow-lg hover:scale-105' 
+                          isZoneEnabled(zone.name) && hasZoneRoute(zone.name)
+                            ? 'cursor-pointer hover:scale-105 hover:shadow-lg'
                             : 'cursor-default'
                         ]"
                         :style="isZoneEnabled(zone.name) && hasZoneRoute(zone.name) ? 'cursor: pointer;' : 'cursor: default;'"

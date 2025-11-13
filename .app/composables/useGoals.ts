@@ -59,8 +59,7 @@ Return the response as a JSON array of categories.
         maxTokens: 4000,
       });
 
-      const parsedResponse = JSON.parse(response);
-      return parsedResponse;
+      return JSON.parse(response);
     }
     catch (error) {
       console.error('Failed to generate diagnosis goals:', error);
@@ -70,12 +69,10 @@ Return the response as a JSON array of categories.
 
   const updateGoalProgress = async (goalId: string, progress: number) => {
     try {
-      const result = await $pb.collection('suggestedDisordersToInvestigate').update(goalId, {
+      return await $pb.collection('suggestedDisordersToInvestigate').update(goalId, {
         progress_percentage: progress,
         status: progress === 100 ? 'achieved' : progress > 0 ? 'in_progress' : 'pending',
       });
-
-      return result;
     }
     catch (error) {
       console.error('Failed to update goal progress:', error);

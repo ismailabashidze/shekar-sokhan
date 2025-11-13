@@ -1,0 +1,6215 @@
+{
+  "categories": [
+    {
+      "id": "philosophy",
+      "name": "فلسفه",
+      "description": "مطالعات فلسفی درباره وجود، دانش و ارزش‌ها",
+      "level": 1,
+      "children": [
+        {
+          "id": "metaphysics",
+          "name": "مابعدالطبیعه",
+          "description": "مطالعه وجود، واقعیت و ماهیت اشیا",
+          "level": 2,
+          "children": [
+            {
+              "id": "ontology",
+              "name": "وجود‌شناسی",
+              "description": "مطالعه وجود و ماهیت وجود",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cosmology",
+              "name": "کیهان‌شناسی",
+              "description": "مطالعه ساختار و منشأ جهان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "philosophy_of_time",
+              "name": "فلسفه زمان",
+              "description": "مطالعه ماهیت زمان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "philosophy_of_space",
+              "name": "فلسفه فضا",
+              "description": "مطالعه ماهیت فضا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "causality",
+              "name": "علّیت",
+              "description": "مطالعه رابطه علت و معلول",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "free_will",
+              "name": "آزادی اراده",
+              "description": "مطالعه آزادی انتخاب و اراده",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "substance",
+              "name": "جوهر",
+              "description": "مطالعه جوهر و وجود اساسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "properties",
+              "name": "خواص",
+              "description": "مطالعه خواص اشیا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "universals",
+              "name": "کلیات",
+              "description": "مطالعه مفاهیم کلی و عام",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "particulars",
+              "name": "جزئیات",
+              "description": "مطالعه اشیا و موجودات خاص",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "epistemology",
+          "name": "معرفت‌شناسی",
+          "description": "مطالعه دانش، باور و توجیه",
+          "level": 2,
+          "children": [
+            {
+              "id": "theory_of_knowledge",
+              "name": "نظریه دانش",
+              "description": "مطالعه ماهیت دانش",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "justification",
+              "name": "توجیه",
+              "description": "مطالعه توجیه باورها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "skepticism",
+              "name": "شک‌گرایی",
+              "description": "مطالعه شک در امکان دانش",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rationalism",
+              "name": "عقل‌گرایی",
+              "description": "دانش مبتنی بر عقل",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "empiricism",
+              "name": "تجربه‌گرایی",
+              "description": "دانش مبتنی بر تجربه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "innatism",
+              "name": "فطرت‌گرایی",
+              "description": "دانش ذاتی و فطری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "foundationalism",
+              "name": "بنیادگرایی",
+              "description": "دانش بر پایه باورهای بنیادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "coherentism",
+              "name": "همخوانی‌گرایی",
+              "description": "دانش بر پایه همخوانی باورها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "contextualism",
+              "name": "زمینه‌گرایی",
+              "description": "دانش وابسته به زمینه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "reliabilism",
+              "name": "قابل اعتماد بودن",
+              "description": "دانش از طریق فرآیندهای قابل اعتماد",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "ethics",
+          "name": "اخلاق",
+          "description": "مطالعه خوبی، بدی و ارزش‌های اخلاقی",
+          "level": 2,
+          "children": [
+            {
+              "id": "metaethics",
+              "name": "فراخلاق",
+              "description": "مطالعه ماهیت اخلاق",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "normative_ethics",
+              "name": "اخلاق هنجاری",
+              "description": "مطالعه قواعد اخلاقی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "applied_ethics",
+              "name": "اخلاق کاربردی",
+              "description": "اخلاق در موقعیت‌های عملی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "virtue_ethics",
+              "name": "اخلاق فضیلت",
+              "description": "اخلاق مبتنی بر فضایل",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "deontology",
+              "name": "وظیفه‌شناسی",
+              "description": "اخلاق مبتنی بر وظایف",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "consequentialism",
+              "name": "پیامدگرایی",
+              "description": "اخلاق مبتنی بر پیامدها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "utilitarianism",
+              "name": "فایده‌گرایی",
+              "description": "بیشینه‌سازی فایده",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "contractarianism",
+              "name": "قراردادگرایی",
+              "description": "اخلاق مبتنی بر قرارداد اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "egoism",
+              "name": "خودگرایی",
+              "description": "اخلاق مبتنی بر منافع خود",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "altruism",
+              "name": "دیگری‌گرایی",
+              "description": "اخلاق مبتنی بر منافع دیگران",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "logic",
+          "name": "منطق",
+          "description": "مطالعه استدلال صحیح",
+          "level": 2,
+          "children": [
+            {
+              "id": "formal_logic",
+              "name": "منطق صوری",
+              "description": "منطق مبتنی بر شکل استدلال",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "informal_logic",
+              "name": "منطق غیرصوری",
+              "description": "منطق در استدلال روزمره",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "symbolic_logic",
+              "name": "منطق نمادین",
+              "description": "استفاده از نمادها در منطق",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "modal_logic",
+              "name": "منطق مدال",
+              "description": "منطق امکان و ضرورت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "fuzzy_logic",
+              "name": "منطق فازی",
+              "description": "منطق با مقادیر مبهم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mathematical_logic",
+              "name": "منطق ریاضی",
+              "description": "منطق در ریاضیات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "philosophical_logic",
+              "name": "منطق فلسفی",
+              "description": "منطق در فلسفه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "inductive_logic",
+              "name": "منطق استقرایی",
+              "description": "استدلال از خاص به عام",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "deductive_logic",
+              "name": "منطق قیاسی",
+              "description": "استدلال از عام به خاص",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "logic_of_science",
+              "name": "منطق علم",
+              "description": "منطق در روش علمی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "aesthetics",
+          "name": "زیبایی‌شناسی",
+          "description": "مطالعه زیبایی و هنر",
+          "level": 2,
+          "children": [
+            {
+              "id": "philosophy_of_art",
+              "name": "فلسفه هنر",
+              "description": "مطالعه ماهیت هنر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "beauty",
+              "name": "زیبایی",
+              "description": "مطالعه مفهوم زیبایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "taste",
+              "name": "طعم",
+              "description": "مطالعه سلیقه زیبایی‌شناختی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "aesthetic_experience",
+              "name": "تجربه زیبایی‌شناختی",
+              "description": "تجربه زیبایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "art_theory",
+              "name": "نظریه هنر",
+              "description": "نظریه‌های درباره هنر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "music_aesthetics",
+              "name": "زیبایی‌شناسی موسیقی",
+              "description": "زیبایی‌شناسی موسیقی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "literary_aesthetics",
+              "name": "زیبایی‌شناسی ادبی",
+              "description": "زیبایی‌شناسی ادبیات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "visual_arts",
+              "name": "هنرهای تجسمی",
+              "description": "زیبایی‌شناسی هنرهای بصری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "performance_arts",
+              "name": "هنرهای نمایشی",
+              "description": "زیبایی‌شناسی تئاتر و سینما",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "environmental_aesthetics",
+              "name": "زیبایی‌شناسی محیطی",
+              "description": "زیبایی‌شناسی محیط زیست",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "political_philosophy",
+          "name": "فلسفه سیاسی",
+          "description": "مطالعه حکومت و جامعه",
+          "level": 2,
+          "children": [
+            {
+              "id": "justice",
+              "name": "عدالت",
+              "description": "مطالعه مفهوم عدالت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rights",
+              "name": "حقوق",
+              "description": "مطالعه حقوق طبیعی و قانونی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "liberty",
+              "name": "آزادی",
+              "description": "مطالعه آزادی فردی و اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "equality",
+              "name": "برابری",
+              "description": "مطالعه برابری در جامعه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "democracy",
+              "name": "دموکراسی",
+              "description": "فلسفه حکومت مردم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "authoritarianism",
+              "name": "استبداد",
+              "description": "فلسفه حکومت اقتدارگرا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "anarchism",
+              "name": "آنارشیسم",
+              "description": "فلسفه بی‌حکومتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "socialism",
+              "name": "سوسیالیسم",
+              "description": "فلسفه مالکیت اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "liberalism",
+              "name": "لیبرالیسم",
+              "description": "فلسفه آزادی فردی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "conservatism",
+              "name": "محافظه‌کاری",
+              "description": "فلسفه حفظ سنت‌ها",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "philosophy_of_mind",
+          "name": "فلسفه ذهن",
+          "description": "مطالعه ذهن و آگاهی",
+          "level": 2,
+          "children": [
+            {
+              "id": "consciousness",
+              "name": "آگاهی",
+              "description": "مطالعه ماهیت آگاهی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "intentionality",
+              "name": "قصدیت",
+              "description": "مطالعه جهت‌گیری ذهنی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mental_causation",
+              "name": "علّیت ذهنی",
+              "description": "مطالعه تأثیر ذهن بر بدن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "dualism",
+              "name": "دوگانه‌انگاری",
+              "description": "جدایی ذهن و بدن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "physicalism",
+              "name": "فیزیکالیسم",
+              "description": "ذهن بخشی از فیزیک",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "functionalism",
+              "name": "کارکردگرایی",
+              "description": "ذهن بر اساس کارکرد",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "behaviorism",
+              "name": "رفتارگرایی",
+              "description": "ذهن بر اساس رفتار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "eliminativism",
+              "name": "حذف‌گرایی",
+              "description": "رد مفاهیم ذهنی سنتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "emergentism",
+              "name": "ظهورگرایی",
+              "description": "ذهن پدیده نوظهور",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "panpsychism",
+              "name": "پانروان‌گرایی",
+              "description": "آگاهی در همه چیز",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "philosophy_of_language",
+          "name": "فلسفه زبان",
+          "description": "مطالعه زبان و معنا",
+          "level": 2,
+          "children": [
+            {
+              "id": "meaning",
+              "name": "معنا",
+              "description": "مطالعه ماهیت معنا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "reference",
+              "name": "ارجاع",
+              "description": "مطالعه ارجاع کلمات به اشیا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "truth",
+              "name": "حقیقت",
+              "description": "مطالعه مفهوم حقیقت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "speech_acts",
+              "name": "کنش‌های گفتاری",
+              "description": "مطالعه اعمال گفتاری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "semantics",
+              "name": "معناشناسی",
+              "description": "مطالعه معنا در زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "syntax",
+              "name": "نحو",
+              "description": "مطالعه ساختار جمله",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "pragmatics",
+              "name": "کاربردشناسی",
+              "description": "مطالعه استفاده از زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "analytic_philosophy",
+              "name": "فلسفه تحلیلی",
+              "description": "روش تحلیلی در فلسفه زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ordinary_language_philosophy",
+              "name": "فلسفه زبان عادی",
+              "description": "مطالعه زبان روزمره",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "structuralism",
+              "name": "ساختارگرایی",
+              "description": "مطالعه ساختار زبان",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "philosophy_of_science",
+          "name": "فلسفه علم",
+          "description": "مطالعه روش علمی و دانش علمی",
+          "level": 2,
+          "children": [
+            {
+              "id": "scientific_method",
+              "name": "روش علمی",
+              "description": "مطالعه روش کسب دانش علمی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "theory_of_explanation",
+              "name": "نظریه توضیح",
+              "description": "مطالعه نحوه توضیح پدیده‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "confirmation",
+              "name": "تأیید",
+              "description": "مطالعه تأیید نظریه‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "falsification",
+              "name": "تکذیب",
+              "description": "مطالعه رد نظریه‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "realism",
+              "name": "واقع‌گرایی",
+              "description": "علم بازتاب واقعیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "instrumentalism",
+              "name": "ابزارگرایی",
+              "description": "علم ابزار پیش‌بینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "reductionism",
+              "name": "کاهش‌گرایی",
+              "description": "کاهش به سطوح پایه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "holism",
+              "name": "کل‌گرایی",
+              "description": "مطالعه کل سیستم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "philosophy_of_physics",
+              "name": "فلسفه فیزیک",
+              "description": "فلسفه فیزیک",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "philosophy_of_biology",
+              "name": "فلسفه زیست‌شناسی",
+              "description": "فلسفه زیست‌شناسی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "history_of_philosophy",
+          "name": "تاریخ فلسفه",
+          "description": "مطالعه تاریخ تفکر فلسفی",
+          "level": 2,
+          "children": [
+            {
+              "id": "ancient_philosophy",
+              "name": "فلسفه باستان",
+              "description": "فلسفه یونان و روم باستان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "medieval_philosophy",
+              "name": "فلسفه قرون وسطی",
+              "description": "فلسفه مسیحی و اسلامی قرون وسطی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "modern_philosophy",
+              "name": "فلسفه مدرن",
+              "description": "فلسفه از رنسانس تا قرن ۱۹",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "contemporary_philosophy",
+              "name": "فلسفه معاصر",
+              "description": "فلسفه قرن ۲۰ و ۲۱",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "eastern_philosophy",
+              "name": "فلسفه شرقی",
+              "description": "فلسفه آسیایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "western_philosophy",
+              "name": "فلسفه غربی",
+              "description": "فلسفه اروپایی و آمریکایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "islamic_philosophy",
+              "name": "فلسفه اسلامی",
+              "description": "فلسفه در جهان اسلام",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "greek_philosophy",
+              "name": "فلسفه یونانی",
+              "description": "فلسفه یونان باستان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "enlightenment",
+              "name": "روشنگری",
+              "description": "فلسفه عصر روشنگری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "existentialism",
+              "name": "اکسیستانسیالیسم",
+              "description": "فلسفه وجودگرا",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sociology",
+      "name": "جامعه‌شناسی",
+      "description": "مطالعه جامعه، روابط اجتماعی و رفتار گروهی",
+      "level": 1,
+      "children": [
+        {
+          "id": "criminology",
+          "name": "جرم‌شناسی",
+          "description": "مطالعه جرم، مجرم و کنترل اجتماعی",
+          "level": 2,
+          "children": [
+            {
+              "id": "criminal_behavior",
+              "name": "رفتار مجرمانه",
+              "description": "مطالعه علل رفتارهای مجرمانه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "juvenile_delinquency",
+              "name": "بزهکاری نوجوانان",
+              "description": "مطالعه جرم در نوجوانان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "white_collar_crime",
+              "name": "جرایم یقه‌سفید",
+              "description": "مطالعه جرایم حرفه‌ای و سازمانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "organized_crime",
+              "name": "جرایم سازمان‌یافته",
+              "description": "مطالعه گروه‌های مجرمانه سازمان‌یافته",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "victimology",
+              "name": "قربانی‌شناسی",
+              "description": "مطالعه قربانیان جرم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "penology",
+              "name": "کیفرشناسی",
+              "description": "مطالعه مجازات و زندان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "criminal_justice_system",
+              "name": "سیستم عدالت کیفری",
+              "description": "مطالعه نظام قضایی کیفری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "forensic_sociology",
+              "name": "جامعه‌شناسی قانونی",
+              "description": "مطالعه جنبه‌های اجتماعی پزشکی قانونی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cyber_crime",
+              "name": "جرایم سایبری",
+              "description": "مطالعه جرایم در فضای مجازی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "crime_prevention",
+              "name": "پیشگیری از جرم",
+              "description": "راهبردهای پیشگیری از جرایم",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "demography",
+          "name": "جمعیت‌شناسی",
+          "description": "مطالعه جمعیت و تغییرات جمعیتی",
+          "level": 2,
+          "children": [
+            {
+              "id": "population_growth",
+              "name": "رشد جمعیت",
+              "description": "مطالعه نرخ رشد جمعیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "migration",
+              "name": "مهاجرت",
+              "description": "مطالعه مهاجرت و جابجایی جمعیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urbanization",
+              "name": "شهرنشینی",
+              "description": "مطالعه روند شهرنشینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "fertility_rates",
+              "name": "نرخ باروری",
+              "description": "مطالعه نرخ تولد و باروری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mortality_rates",
+              "name": "نرخ مرگ‌ومیر",
+              "description": "مطالعه نرخ مرگ و امید به زندگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "age_structure",
+              "name": "ساختار سنی",
+              "description": "مطالعه توزیع سنی جمعیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "population_policy",
+              "name": "سیاست‌های جمعیتی",
+              "description": "مطالعه سیاست‌های کنترل جمعیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "demographic_transitions",
+              "name": "انتقال‌های جمعیتی",
+              "description": "مطالعه تغییرات الگوی جمعیتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "population_aging",
+              "name": "سالخوردگی جمعیت",
+              "description": "مطالعه روند پیر شدن جمعیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "demographic_data_analysis",
+              "name": "تحلیل داده‌های جمعیتی",
+              "description": "روش‌های تحلیل آمار جمعیتی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "sociology_of_education",
+          "name": "جامعه‌شناسی آموزش",
+          "description": "مطالعه نقش آموزش در جامعه",
+          "level": 2,
+          "children": [
+            {
+              "id": "educational_inequality",
+              "name": "نابرابری آموزشی",
+              "description": "مطالعه تفاوت‌های آموزشی اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "socialization_in_schools",
+              "name": "اجتماعی‌سازی در مدارس",
+              "description": "نقش مدارس در شکل‌دهی اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "educational_mobility",
+              "name": "تحرک آموزشی",
+              "description": "مطالعه ارتقای اجتماعی از طریق آموزش",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "curriculum_sociology",
+              "name": "جامعه‌شناسی برنامه درسی",
+              "description": "مطالعه محتوای آموزشی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "teacher_socialization",
+              "name": "اجتماعی‌سازی معلمان",
+              "description": "مطالعه نقش اجتماعی معلمان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "higher_education",
+              "name": "آموزش عالی",
+              "description": "جامعه‌شناسی دانشگاه‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "educational_policy",
+              "name": "سیاست‌های آموزشی",
+              "description": "مطالعه سیاست‌های آموزش و پرورش",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "gender_in_education",
+              "name": "جنسیت در آموزش",
+              "description": "مطالعه تفاوت‌های جنسیتی در آموزش",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "multicultural_education",
+              "name": "آموزش چندفرهنگی",
+              "description": "آموزش در جوامع متنوع",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "educational_reform",
+              "name": "اصلاحات آموزشی",
+              "description": "مطالعه تغییرات در نظام آموزشی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "family_sociology",
+          "name": "جامعه‌شناسی خانواده",
+          "description": "مطالعه ساختار و عملکرد خانواده",
+          "level": 2,
+          "children": [
+            {
+              "id": "family_structure",
+              "name": "ساختار خانواده",
+              "description": "مطالعه انواع ساختار خانوادگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "marriage_sociology",
+              "name": "جامعه‌شناسی ازدواج",
+              "description": "مطالعه نهاد ازدواج",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "parenting",
+              "name": "والدگری",
+              "description": "مطالعه نقش والدین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "family_violence",
+              "name": "خشونت خانوادگی",
+              "description": "مطالعه خشونت در خانواده",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "divorce_sociology",
+              "name": "جامعه‌شناسی طلاق",
+              "description": "مطالعه علل و پیامدهای طلاق",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "family_therapy",
+              "name": "درمان خانواده",
+              "description": "روش‌های درمانی خانوادگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "intergenerational_relations",
+              "name": "روابط بین‌نسلی",
+              "description": "مطالعه روابط بین نسل‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "family_economics",
+              "name": "اقتصاد خانواده",
+              "description": "مطالعه جنبه‌های اقتصادی خانواده",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "single_parent_families",
+              "name": "خانواده‌های تک‌والد",
+              "description": "مطالعه خانواده‌های تک‌والد",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "family_policy",
+              "name": "سیاست‌های خانوادگی",
+              "description": "مطالعه سیاست‌های حمایت از خانواده",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "political_sociology",
+          "name": "جامعه‌شناسی سیاسی",
+          "description": "مطالعه قدرت، حکومت و سیاست",
+          "level": 2,
+          "children": [
+            {
+              "id": "power_social_theory",
+              "name": "نظریه قدرت اجتماعی",
+              "description": "مطالعه توزیع قدرت در جامعه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_participation",
+              "name": "مشارکت سیاسی",
+              "description": "مطالعه مشارکت شهروندان در سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_movements",
+              "name": "جنبش‌های اجتماعی",
+              "description": "مطالعه جنبش‌های اجتماعی و سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_culture",
+              "name": "فرهنگ سیاسی",
+              "description": "مطالعه ارزش‌ها و نگرش‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "state_society_relations",
+              "name": "روابط دولت و جامعه",
+              "description": "مطالعه تعامل دولت و جامعه مدنی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_socialization",
+              "name": "اجتماعی‌سازی سیاسی",
+              "description": "مطالعه شکل‌گیری نگرش‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_ideology",
+              "name": "ایدئولوژی سیاسی",
+              "description": "مطالعه ایدئولوژی‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "electoral_behavior",
+              "name": "رفتار انتخاباتی",
+              "description": "مطالعه رفتار رای‌دهندگان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_conflict",
+              "name": "تضاد سیاسی",
+              "description": "مطالعه تضادها و درگیری‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "global_politics",
+              "name": "سیاست جهانی",
+              "description": "مطالعه سیاست در سطح جهانی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "race_ethnicity_sociology",
+          "name": "جامعه‌شناسی نژاد و قومیت",
+          "description": "مطالعه روابط نژادی و قومی",
+          "level": 2,
+          "children": [
+            {
+              "id": "racial_inequality",
+              "name": "نابرابری نژادی",
+              "description": "مطالعه تفاوت‌های نژادی در جامعه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ethnic_identity",
+              "name": "هویت قومی",
+              "description": "مطالعه شکل‌گیری هویت قومی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "racism_studies",
+              "name": "مطالعات نژادپرستی",
+              "description": "مطالعه پدیده نژادپرستی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "immigration_ethnicity",
+              "name": "مهاجرت و قومیت",
+              "description": "مطالعه مهاجرت و ترکیب قومی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "multiculturalism",
+              "name": "چندفرهنگی‌گری",
+              "description": "مطالعه جوامع چندفرهنگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "racial_discrimination",
+              "name": "تبعیض نژادی",
+              "description": "مطالعه تبعیض بر اساس نژاد",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ethnic_conflict",
+              "name": "تضاد قومی",
+              "description": "مطالعه درگیری‌های قومی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "assimilation",
+              "name": "همگون‌سازی",
+              "description": "مطالعه جذب مهاجران در جامعه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "racial_stereotypes",
+              "name": "کلیشه‌های نژادی",
+              "description": "مطالعه پیش‌داوری‌های نژادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ethnic_minorities",
+              "name": "اقلیت‌های قومی",
+              "description": "مطالعه گروه‌های اقلیت قومی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "rural_sociology",
+          "name": "جامعه‌شناسی روستایی",
+          "description": "مطالعه جوامع روستایی",
+          "level": 2,
+          "children": [
+            {
+              "id": "rural_community",
+              "name": "جامعه روستایی",
+              "description": "مطالعه ساختار جوامع روستایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "agricultural_sociology",
+              "name": "جامعه‌شناسی کشاورزی",
+              "description": "مطالعه کشاورزی و کشاورزان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_urban_migration",
+              "name": "مهاجرت روستا به شهر",
+              "description": "مطالعه مهاجرت از روستا به شهر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_development",
+              "name": "توسعه روستایی",
+              "description": "مطالعه توسعه جوامع روستایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_poverty",
+              "name": "فقر روستایی",
+              "description": "مطالعه فقر در مناطق روستایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_education",
+              "name": "آموزش روستایی",
+              "description": "مطالعه نظام آموزشی روستایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_health",
+              "name": "سلامت روستایی",
+              "description": "مطالعه بهداشت و درمان روستایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_economy",
+              "name": "اقتصاد روستایی",
+              "description": "مطالعه اقتصاد جوامع روستایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_social_change",
+              "name": "تغییر اجتماعی روستایی",
+              "description": "مطالعه تغییرات اجتماعی در روستاها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_policy",
+              "name": "سیاست‌های روستایی",
+              "description": "مطالعه سیاست‌های توسعه روستایی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "social_stratification",
+          "name": "طبقات اجتماعی",
+          "description": "مطالعه تقسیم اجتماعی و نابرابری",
+          "level": 2,
+          "children": [
+            {
+              "id": "class_structure",
+              "name": "ساختار طبقاتی",
+              "description": "مطالعه طبقات اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_mobility",
+              "name": "تحرک اجتماعی",
+              "description": "مطالعه تغییر موقعیت اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "income_inequality",
+              "name": "نابرابری درآمد",
+              "description": "مطالعه تفاوت‌های درآمدی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "wealth_distribution",
+              "name": "توزیع ثروت",
+              "description": "مطالعه توزیع دارایی‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "elite_studies",
+              "name": "مطالعات نخبه",
+              "description": "مطالعه گروه‌های نخبه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "poverty_sociology",
+              "name": "جامعه‌شناسی فقر",
+              "description": "مطالعه پدیده فقر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "middle_class",
+              "name": "طبقه متوسط",
+              "description": "مطالعه طبقه متوسط",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "working_class",
+              "name": "طبقه کارگر",
+              "description": "مطالعه طبقه کارگر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_capital",
+              "name": "سرمایه اجتماعی",
+              "description": "مطالعه شبکه‌های اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "status_inequality",
+              "name": "نابرابری وضعیت",
+              "description": "مطالعه تفاوت‌های اجتماعی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "sociology_of_religion",
+          "name": "جامعه‌شناسی دین",
+          "description": "مطالعه دین در جامعه",
+          "level": 2,
+          "children": [
+            {
+              "id": "religious_beliefs",
+              "name": "اعتقادات دینی",
+              "description": "مطالعه باورهای دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religious_practices",
+              "name": "پژوهش‌های دینی",
+              "description": "مطالعه اعمال دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "secularization",
+              "name": "سکولاریزاسیون",
+              "description": "مطالعه کاهش نقش دین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "fundamentalism",
+              "name": "بنیادگرایی",
+              "description": "مطالعه بنیادگرایی دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religious_pluralism",
+              "name": "پلورالیسم دینی",
+              "description": "مطالعه تنوع دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "church_state_relations",
+              "name": "روابط دین و دولت",
+              "description": "مطالعه تعامل دین و سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religious_socialization",
+              "name": "اجتماعی‌سازی دینی",
+              "description": "مطالعه انتقال باورهای دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "new_religious_movements",
+              "name": "جنبش‌های دینی جدید",
+              "description": "مطالعه فرقه‌های جدید",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religion_economy",
+              "name": "دین و اقتصاد",
+              "description": "مطالعه تأثیر دین بر اقتصاد",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religious_conflict",
+              "name": "تضاد دینی",
+              "description": "مطالعه درگیری‌های دینی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "urban_sociology",
+          "name": "جامعه‌شناسی شهری",
+          "description": "مطالعه جوامع شهری",
+          "level": 2,
+          "children": [
+            {
+              "id": "urban_community",
+              "name": "جامعه شهری",
+              "description": "مطالعه ساختار جوامع شهری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urbanization_process",
+              "name": "فرآیند شهرنشینی",
+              "description": "مطالعه روند شهرنشینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_ecology",
+              "name": "اکولوژی شهری",
+              "description": "مطالعه محیط شهری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_poverty",
+              "name": "فقر شهری",
+              "description": "مطالعه فقر در شهرها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_crime",
+              "name": "جرم شهری",
+              "description": "مطالعه جرایم در محیط شهری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_planning",
+              "name": "برنامه‌ریزی شهری",
+              "description": "مطالعه برنامه‌ریزی شهرها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "gentrification",
+              "name": "جنتریفیکاسیون",
+              "description": "مطالعه نوسازی مناطق شهری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_social_movements",
+              "name": "جنبش‌های اجتماعی شهری",
+              "description": "مطالعه جنبش‌های اجتماعی در شهرها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "suburbanization",
+              "name": "حومه‌نشینی",
+              "description": "مطالعه گسترش حومه شهرها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_culture",
+              "name": "فرهنگ شهری",
+              "description": "مطالعه فرهنگ جوامع شهری",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "psychology",
+      "name": "روانشناسی",
+      "description": "مطالعات علمی رفتار و فرآیندهای روانی انسان",
+      "level": 1,
+      "children": [
+        {
+          "id": "biological_neuropsychology",
+          "name": "روان‌شناسی زیستی و عصب‌روان‌شناسی",
+          "description": "مطالعه رابطه بین مغز، سیستم عصبی و رفتار",
+          "level": 2,
+          "children": [
+            {
+              "id": "neuroendocrinology",
+              "name": "نورواندوکرینولوژی",
+              "description": "مطالعه رابطه بین سیستم عصبی و هورمونی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "neurogenetics",
+              "name": "نوروژنتیک",
+              "description": "مطالعه تأثیر ژنتیک بر عملکرد عصبی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "neural_physiology",
+              "name": "فیزیولوژی اعصاب",
+              "description": "مطالعه عملکرد فیزیولوژیکی سیستم عصبی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "neural_imaging",
+              "name": "تصویربرداری عصبی",
+              "description": "استفاده از تکنیک‌های تصویربرداری برای مطالعه مغز",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "neuropsychopharmacology",
+              "name": "عصب‌روان‌داروشناسی",
+              "description": "مطالعه تأثیر داروها بر عملکرد عصبی و روانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cognitive_neuropsychology",
+              "name": "عصب‌روان‌شناسی شناختی",
+              "description": "مطالعه پایه‌های عصبی فرآیندهای شناختی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "behavioral_neuropsychology",
+              "name": "عصب‌روان‌شناسی رفتاری",
+              "description": "مطالعه رابطه بین آسیب‌های عصبی و رفتار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "computational_neuroscience",
+              "name": "علوم اعصاب محاسباتی",
+              "description": "مدل‌سازی ریاضی عملکرد سیستم عصبی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "neurobiology_learning_memory",
+              "name": "نوروبیولوژی یادگیری و حافظه",
+              "description": "مطالعه مکانیسم‌های عصبی یادگیری و حافظه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "neural_plasticity",
+              "name": "پلاستیسیته عصبی",
+              "description": "مطالعه قابلیت تغییر ساختار عصبی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "cognitive_psychology",
+          "name": "روان‌شناسی شناختی",
+          "description": "مطالعه فرآیندهای ذهنی مانند تفکر، یادگیری و حافظه",
+          "level": 2,
+          "children": [
+            {
+              "id": "attention",
+              "name": "توجه",
+              "description": "مطالعه مکانیسم‌های توجه و تمرکز",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "perception",
+              "name": "ادراک",
+              "description": "مطالعه نحوه پردازش اطلاعات حسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "working_memory",
+              "name": "حافظه کاری",
+              "description": "مطالعه حافظه کوتاه‌مدت و پردازش فعال",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "problem_solving",
+              "name": "حل مسئله",
+              "description": "مطالعه فرآیندهای حل مسائل پیچیده",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "decision_making",
+              "name": "تصمیم‌گیری",
+              "description": "مطالعه فرآیندهای تصمیم‌گیری انسانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_processing",
+              "name": "زبان و پردازش زبانی",
+              "description": "مطالعه پردازش و تولید زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_cognition",
+              "name": "شناخت اجتماعی",
+              "description": "مطالعه تفکر درباره دیگران و روابط اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "creativity",
+              "name": "خلاقیت",
+              "description": "مطالعه فرآیندهای خلاقانه و نوآوری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "musical_cognition",
+              "name": "شناخت موسیقایی",
+              "description": "مطالعه پردازش شناختی موسیقی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "metacognition",
+              "name": "متاکاگنیشن",
+              "description": "مطالعه آگاهی و کنترل فرآیندهای شناختی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "developmental_psychology",
+          "name": "روان‌شناسی رشد",
+          "description": "مطالعه تغییرات روانی از کودکی تا بزرگسالی",
+          "level": 2,
+          "children": [
+            {
+              "id": "cognitive_development",
+              "name": "رشد شناختی",
+              "description": "مطالعه توسعه مهارت‌های ذهنی در طول عمر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "emotional_development",
+              "name": "رشد هیجانی",
+              "description": "مطالعه توسعه احساسات و تنظیم هیجان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_development",
+              "name": "رشد اجتماعی",
+              "description": "مطالعه توسعه روابط اجتماعی و مهارت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "moral_development",
+              "name": "رشد اخلاقی",
+              "description": "مطالعه توسعه قضاوت اخلاقی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "motor_development",
+              "name": "رشد حرکتی",
+              "description": "مطالعه توسعه مهارت‌های حرکتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "infancy_development",
+              "name": "رشد در نوزادی",
+              "description": "مطالعه توسعه در مرحله نوزادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "middle_childhood_development",
+              "name": "رشد در کودکی میانه",
+              "description": "مطالعه توسعه در کودکی میانه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "adolescent_development",
+              "name": "رشد در نوجوانی",
+              "description": "مطالعه توسعه در دوره نوجوانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "adult_development",
+              "name": "رشد در بزرگسالی",
+              "description": "مطالعه توسعه در بزرگسالی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "aging_geropsychology",
+              "name": "سالخوردگی و روان‌شناسی سالمندی",
+              "description": "مطالعه تغییرات روانی در سالمندی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "personality_individual_differences",
+          "name": "روان‌شناسی شخصیت و تفاوت‌های فردی",
+          "description": "مطالعه شخصیت و تفاوت‌های رفتاری بین افراد",
+          "level": 2,
+          "children": [
+            {
+              "id": "personality_theories",
+              "name": "نظریه‌های شخصیت",
+              "description": "مطالعه نظریه‌های مختلف شخصیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "personality_assessment",
+              "name": "سنجش شخصیت",
+              "description": "روش‌های اندازه‌گیری شخصیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "personality_traits",
+              "name": "ویژگی‌های شخصیتی",
+              "description": "مطالعه ویژگی‌های پایدار شخصیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "temperament",
+              "name": "خلق‌وخوی",
+              "description": "مطالعه الگوهای هیجانی ذاتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "attachment_styles",
+              "name": "سبک‌های دلبستگی",
+              "description": "مطالعه سبک‌های ارتباط عاطفی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "self_concept_identity",
+              "name": "خودپنداره و هویت",
+              "description": "مطالعه تصویر خود و هویت شخصی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "self_regulation",
+              "name": "خودتنظیمی",
+              "description": "مطالعه کنترل رفتار و احساسات خود",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "individual_motivation",
+              "name": "انگیزش فردی",
+              "description": "مطالعه انگیزش‌های شخصی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "aptitude_nature",
+              "name": "استعداد و سرشت",
+              "description": "مطالعه استعدادهای ذاتی و محیطی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "maladaptive_personality_behaviors",
+              "name": "رفتارهای ناسازگارانه شخصیتی",
+              "description": "مطالعه رفتارهای شخصیتی مشکل‌ساز",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "social_psychology",
+          "name": "روان‌شناسی اجتماعی",
+          "description": "مطالعه رفتار انسان در زمینه اجتماعی",
+          "level": 2,
+          "children": [
+            {
+              "id": "attitudes_attitude_change",
+              "name": "نگرش‌ها و تغییر نگرش",
+              "description": "مطالعه نگرش‌ها و نحوه تغییر آنها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_influence",
+              "name": "نفوذ اجتماعی",
+              "description": "مطالعه تأثیر دیگران بر رفتار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_identity",
+              "name": "هویت اجتماعی",
+              "description": "مطالعه هویت گروهی و اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "interpersonal_relationships",
+              "name": "روابط بین‌فردی",
+              "description": "مطالعه روابط بین افراد",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "prejudice_discrimination",
+              "name": "تعصب و تبعیض",
+              "description": "مطالعه تعصبات و رفتارهای تبعیض‌آمیز",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "group_behavior",
+              "name": "رفتار جمعی",
+              "description": "مطالعه رفتار در گروه‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "aggression",
+              "name": "پرخاشگری",
+              "description": "مطالعه علل و کنترل پرخاشگری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "empathy_prosocial_behavior",
+              "name": "همدلی و کمک‌رسانی",
+              "description": "مطالعه رفتارهای همدلانه و کمک‌کننده",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_roles",
+              "name": "نقش‌های اجتماعی",
+              "description": "مطالعه نقش‌های اجتماعی و انتظارات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_perception_attribution",
+              "name": "ادراک اجتماعی و نسبت‌دهی",
+              "description": "مطالعه نحوه درک دیگران و نسبت‌دهی علل",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "clinical_abnormal_psychology",
+          "name": "روان‌شناسی بالینی و آسیب‌شناسی روانی",
+          "description": "مطالعه اختلالات روانی و درمان آنها",
+          "level": 2,
+          "children": [
+            {
+              "id": "anxiety_disorders",
+              "name": "اضطراب و اختلالات اضطرابی",
+              "description": "مطالعه اختلالات اضطرابی و درمان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "depression_mood_disorders",
+              "name": "افسردگی و اختلالات خلقی",
+              "description": "مطالعه افسردگی و اختلالات خلقی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "personality_disorders",
+              "name": "اختلالات شخصیت",
+              "description": "مطالعه اختلالات شخصیت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "psychotic_disorders",
+              "name": "اختلالات روان‌پریشی",
+              "description": "مطالعه اختلالات روان‌پریشی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "substance_use_disorders",
+              "name": "اختلالات مصرف مواد",
+              "description": "مطالعه اعتیاد و اختلالات مرتبط",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "eating_disorders",
+              "name": "اختلالات تغذیه",
+              "description": "مطالعه اختلالات خوردن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cognitive_behavioral_therapy",
+              "name": "درمان شناختی‌رفتاری",
+              "description": "روش درمانی مبتنی بر شناخت و رفتار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "psychoanalytic_therapy",
+              "name": "روان‌درمانی تحلیلی",
+              "description": "درمان مبتنی بر روان‌تحلیل فروید",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "family_couples_therapy",
+              "name": "درمان خانواده و زوج",
+              "description": "درمان روابط خانوادگی و زوجی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "clinical_assessment_diagnosis",
+              "name": "ارزیابی و تشخیص بالینی",
+              "description": "روش‌های تشخیص اختلالات روانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ai_assisted_therapy",
+              "name": "درمان کمکی هوش مصنوعی",
+              "description": "استفاده از هوش مصنوعی در فرآیندهای درمانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "digital_mental_health",
+              "name": "سلامت روان دیجیتال",
+              "description": "مداخلات روانی مبتنی بر فناوری دیجیتال",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "teletherapy_ecounseling",
+              "name": "درمان از راه دور و مشاوره آنلاین",
+              "description": "ار خدمات درمانی از طریق پلتفرم‌های آنلاین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "virtual_reality_therapy",
+              "name": "درمان واقعیت مجازی",
+              "description": "استفاده از واقعیت مجازی در درمان اختلالات روانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mobile_health_interventions",
+              "name": "مداخلات سلامت موبایلی",
+              "description": "برنامه‌های موبایل برای سلامت روان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "computational_psychiatry",
+              "name": "روان‌پزشکی محاسباتی",
+              "description": "مدل‌سازی ریاضی اختلالات روانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "digital_phenotyping",
+              "name": "فنوتیپ‌گذاری دیجیتال",
+              "description": "استفاده از داده‌های دیجیتال برای ارزیابی سلامت روان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "machine_learning_mental_health",
+              "name": "یادگیری ماشین در سلامت روان",
+              "description": "الگوریتم‌های یادگیری ماشین برای تشخیص و درمان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ethical_ai_therapy",
+              "name": "اخلاق در درمان با هوش مصنوعی",
+              "description": "ملاحظات اخلاقی استفاده از هوش مصنوعی در درمان",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "health_psychosomatic",
+          "name": "روان‌شناسی سلامت و روان‌تنی",
+          "description": "مطالعه تأثیر عوامل روانی بر سلامت جسمی",
+          "level": 2,
+          "children": [
+            {
+              "id": "psychoneuroimmunology",
+              "name": "روان‌نورواِمنی‌شناسی",
+              "description": "مطالعه رابطه بین ذهن، سیستم ایمنی و بیماری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "stress_coping",
+              "name": "استرس و مقابله",
+              "description": "مطالعه استرس و استراتژی‌های مقابله",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "lifestyle_health",
+              "name": "سبک زندگی و سلامت",
+              "description": "مطالعه تأثیر سبک زندگی بر سلامت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "psychosomatic_chronic_pain",
+              "name": "روان‌تنی و دردهای مزمن",
+              "description": "مطالعه علل روانی دردهای مزمن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "health_behaviors",
+              "name": "رفتارهای سلامت",
+              "description": "مطالعه رفتارهای مرتبط با سلامت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "occupational_health",
+              "name": "سلامت شغلی",
+              "description": "مطالعه سلامت در محیط کار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "sexual_health",
+              "name": "سلامت جنسی",
+              "description": "مطالعه جنبه‌های روانی سلامت جنسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "hospital_psychology",
+              "name": "روان‌شناسی بیمارستانی",
+              "description": "روان‌شناسی در محیط‌های پزشکی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cancer_psychology",
+              "name": "روان‌شناسی سرطان",
+              "description": "مطالعه تأثیرات روانی سرطان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "preventive_interventions",
+              "name": "مداخله‌های پیشگیرانه",
+              "description": "روش‌های پیشگیری از مشکلات سلامت روانی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "educational_learning_psychology",
+          "name": "روان‌شناسی آموزش و یادگیری",
+          "description": "مطالعه فرآیندهای یادگیری و آموزش",
+          "level": 2,
+          "children": [
+            {
+              "id": "learning_theories",
+              "name": "نظریه‌های یادگیری",
+              "description": "مطالعه نظریه‌های مختلف یادگیری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "learning_strategies",
+              "name": "راهبردهای یادگیری",
+              "description": "روش‌های مؤثر یادگیری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "educational_assessment",
+              "name": "ارزشیابی آموزشی",
+              "description": "روش‌های سنجش یادگیری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "learning_technologies",
+              "name": "فناوری‌های یادگیری",
+              "description": "استفاده از فناوری در آموزش",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "collaborative_learning",
+              "name": "یادگیری مشارکتی",
+              "description": "یادگیری در گروه‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "self_directed_learning",
+              "name": "یادگیری خودراهبری",
+              "description": "یادگیری مستقل و خودکنترل",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "teacher_psychology",
+              "name": "روان‌شناسی معلم",
+              "description": "مطالعه روان‌شناسی معلمان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "academic_motivation",
+              "name": "انگیزش تحصیلی",
+              "description": "مطالعه انگیزش در یادگیری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "learning_disabilities",
+              "name": "ناهنجاری‌های یادگیری (اختلالات یادگیری)",
+              "description": "مطالعه اختلالات یادگیری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "effective_learning_environments",
+              "name": "طراحی محیط‌های یادگیری موثر",
+              "description": "طراحی فضاهای یادگیری بهینه",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "political_science",
+      "name": "علوم سیاسی",
+      "description": "مطالعه حکومت، سیاست و سیستم‌های سیاسی",
+      "level": 1,
+      "children": [
+        {
+          "id": "political_theory",
+          "name": "نظریه سیاسی",
+          "description": "مطالعه نظریه‌های سیاسی و فلسفه سیاسی",
+          "level": 2,
+          "children": [
+            {
+              "id": "democratic_theory",
+              "name": "نظریه دموکراسی",
+              "description": "مطالعه نظریه‌های دموکراتیک",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "liberalism_theory",
+              "name": "نظریه لیبرالیسم",
+              "description": "مطالعه لیبرالیسم سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "conservatism_theory",
+              "name": "نظریه محافظه‌کاری",
+              "description": "مطالعه محافظه‌کاری سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "socialism_theory",
+              "name": "نظریه سوسیالیسم",
+              "description": "مطالعه سوسیالیسم سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "anarchism_theory",
+              "name": "نظریه آنارشیسم",
+              "description": "مطالعه آنارشیسم سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "feminism_political",
+              "name": "فمینیسم سیاسی",
+              "description": "مطالعه جنبش‌های فمینیستی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "marxism_political",
+              "name": "مارکسیسم سیاسی",
+              "description": "مطالعه مارکسیسم در سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "postcolonial_theory",
+              "name": "نظریه پسااستعماری",
+              "description": "مطالعه تأثیر استعمار بر سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "justice_theory",
+              "name": "نظریه عدالت",
+              "description": "مطالعه عدالت اجتماعی و سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "power_theory",
+              "name": "نظریه قدرت",
+              "description": "مطالعه توزیع و استفاده از قدرت",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "comparative_politics",
+          "name": "سیاست تطبیقی",
+          "description": "مقایسه سیستم‌های سیاسی مختلف",
+          "level": 2,
+          "children": [
+            {
+              "id": "democratic_systems",
+              "name": "سیستم‌های دموکراتیک",
+              "description": "مطالعه دموکراسی‌های مختلف",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "authoritarian_regimes",
+              "name": "رژیم‌های اقتدارگرا",
+              "description": "مطالعه حکومت‌های اقتدارگرا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "federalism",
+              "name": "فدرالیسم",
+              "description": "مطالعه نظام‌های فدرال",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "parliamentary_systems",
+              "name": "سیستم‌های پارلمانی",
+              "description": "مطالعه حکومت‌های پارلمانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "presidential_systems",
+              "name": "سیستم‌های ریاستی",
+              "description": "مطالعه حکومت‌های ریاستی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "electoral_systems",
+              "name": "سیستم‌های انتخاباتی",
+              "description": "مطالعه روش‌های انتخاباتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_parties",
+              "name": "احزاب سیاسی",
+              "description": "مطالعه نقش احزاب سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_institutions",
+              "name": "نهادهای سیاسی",
+              "description": "مطالعه نهادهای حکومتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_cultures",
+              "name": "فرهنگ‌های سیاسی",
+              "description": "مطالعه فرهنگ‌های سیاسی مختلف",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "transitional_democracies",
+              "name": "دموکراسی‌های انتقالی",
+              "description": "مطالعه گذار به دموکراسی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "international_relations",
+          "name": "روابط بین‌الملل",
+          "description": "مطالعه روابط بین دولت‌ها",
+          "level": 2,
+          "children": [
+            {
+              "id": "international_law",
+              "name": "حقوق بین‌الملل",
+              "description": "مطالعه قوانین بین‌المللی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "diplomacy",
+              "name": "دیپلماسی",
+              "description": "مطالعه روابط دیپلماتیک",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_organizations",
+              "name": "سازمان‌های بین‌المللی",
+              "description": "مطالعه سازمان‌هایی مانند سازمان ملل",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "global_governance",
+              "name": "حکمرانی جهانی",
+              "description": "مطالعه حکمرانی در سطح جهانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_conflict",
+              "name": "تضاد بین‌المللی",
+              "description": "مطالعه جنگ‌ها و درگیری‌های بین‌المللی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_cooperation",
+              "name": "همکاری بین‌المللی",
+              "description": "مطالعه همکاری‌های جهانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "foreign_policy",
+              "name": "سیاست خارجی",
+              "description": "مطالعه سیاست‌های خارجی دولت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_economy",
+              "name": "اقتصاد بین‌المللی",
+              "description": "مطالعه اقتصاد جهانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "human_rights_international",
+              "name": "حقوق بشر بین‌المللی",
+              "description": "مطالعه حقوق بشر در سطح جهانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_security",
+              "name": "امنیت بین‌المللی",
+              "description": "مطالعه امنیت جهانی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "public_administration",
+          "name": "مدیریت دولتی",
+          "description": "مطالعه اداره امور عمومی",
+          "level": 2,
+          "children": [
+            {
+              "id": "bureaucracy",
+              "name": "بروکراسی",
+              "description": "مطالعه نظام اداری دولتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "public_policy_implementation",
+              "name": "اجرای سیاست‌های عمومی",
+              "description": "مطالعه اجرای سیاست‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "organizational_theory",
+              "name": "نظریه سازمان",
+              "description": "مطالعه نظریه‌های سازمانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "public_management",
+              "name": "مدیریت عمومی",
+              "description": "مطالعه مدیریت بخش عمومی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "administrative_law",
+              "name": "حقوق اداری",
+              "description": "مطالعه قوانین اداری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "public_sector_reform",
+              "name": "اصلاحات بخش عمومی",
+              "description": "مطالعه تغییرات در دولت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "government_accountability",
+              "name": "پاسخگویی دولتی",
+              "description": "مطالعه مسئولیت دولت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "public_service_delivery",
+              "name": "ارائه خدمات عمومی",
+              "description": "مطالعه ارائه خدمات دولتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "administrative_ethics",
+              "name": "اخلاق اداری",
+              "description": "مطالعه اخلاق در مدیریت دولتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "performance_management",
+              "name": "مدیریت عملکرد",
+              "description": "مطالعه سنجش عملکرد دولتی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "political_economy",
+          "name": "اقتصاد سیاسی",
+          "description": "مطالعه رابطه اقتصاد و سیاست",
+          "level": 2,
+          "children": [
+            {
+              "id": "economic_policy",
+              "name": "سیاست‌های اقتصادی",
+              "description": "مطالعه سیاست‌های اقتصادی دولت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "globalization_politics",
+              "name": "سیاست جهانی‌شدن",
+              "description": "مطالعه تأثیر جهانی‌شدن بر سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "development_politics",
+              "name": "سیاست توسعه",
+              "description": "مطالعه سیاست‌های توسعه اقتصادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "welfare_state",
+              "name": "دولت رفاه",
+              "description": "مطالعه نظام‌های رفاهی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_business_cycles",
+              "name": "چرخه‌های کسب‌وکار سیاسی",
+              "description": "مطالعه تأثیر سیاست بر اقتصاد",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "income_distribution_politics",
+              "name": "سیاست توزیع درآمد",
+              "description": "مطالعه سیاست‌های توزیع ثروت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "trade_policy",
+              "name": "سیاست تجارت",
+              "description": "مطالعه سیاست‌های تجاری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "labor_politics",
+              "name": "سیاست کار",
+              "description": "مطالعه روابط کار و سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "environmental_politics",
+              "name": "سیاست محیط زیست",
+              "description": "مطالعه سیاست‌های زیست‌محیطی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_risk",
+              "name": "ریسک سیاسی",
+              "description": "مطالعه ریسک‌های سیاسی در اقتصاد",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "public_policy",
+          "name": "سیاست عمومی",
+          "description": "مطالعه فرآیند سیاست‌گذاری",
+          "level": 2,
+          "children": [
+            {
+              "id": "policy_analysis",
+              "name": "تحلیل سیاست",
+              "description": "مطالعه روش‌های تحلیل سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "policy_making_process",
+              "name": "فرآیند سیاست‌گذاری",
+              "description": "مطالعه مراحل تدوین سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "policy_evaluation",
+              "name": "ارزیابی سیاست",
+              "description": "مطالعه ارزیابی تأثیر سیاست‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "agenda_setting",
+              "name": "تنظیم دستور کار",
+              "description": "مطالعه تعیین اولویت‌های سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "policy_innovation",
+              "name": "نوآوری سیاست",
+              "description": "مطالعه سیاست‌های جدید",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "policy_networks",
+              "name": "شبکه‌های سیاست",
+              "description": "مطالعه شبکه‌های سیاست‌گذاران",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "evidence_based_policy",
+              "name": "سیاست مبتنی بر شواهد",
+              "description": "مطالعه سیاست بر اساس داده‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "policy_transfer",
+              "name": "انتقال سیاست",
+              "description": "مطالعه انتقال سیاست بین کشورها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "policy_failure",
+              "name": "شکست سیاست",
+              "description": "مطالعه سیاست‌های ناموفق",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "policy_advocacy",
+              "name": "حمایت از سیاست",
+              "description": "مطالعه لابی و حمایت از سیاست",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "political_methodology",
+          "name": "روش‌شناسی سیاسی",
+          "description": "مطالعه روش‌های تحقیق در علوم سیاسی",
+          "level": 2,
+          "children": [
+            {
+              "id": "quantitative_methods",
+              "name": "روش‌های کمی",
+              "description": "مطالعه روش‌های آماری در سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "qualitative_methods",
+              "name": "روش‌های کیفی",
+              "description": "مطالعه روش‌های کیفی در سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "game_theory",
+              "name": "نظریه بازی",
+              "description": "مطالعه نظریه بازی در سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "experimental_politics",
+              "name": "سیاست تجربی",
+              "description": "مطالعه آزمایش‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "survey_research",
+              "name": "پژوهش نظرسنجی",
+              "description": "مطالعه روش‌های نظرسنجی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "case_study_method",
+              "name": "روش مطالعه موردی",
+              "description": "مطالعه موردی در علوم سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "comparative_method",
+              "name": "روش تطبیقی",
+              "description": "مطالعه روش‌های مقایسه‌ای",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "content_analysis",
+              "name": "تحلیل محتوا",
+              "description": "مطالعه تحلیل محتوای سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "network_analysis",
+              "name": "تحلیل شبکه",
+              "description": "مطالعه شبکه‌های اجتماعی سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_forecasting",
+              "name": "پیش‌بینی سیاسی",
+              "description": "مطالعه پیش‌بینی نتایج سیاسی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "political_psychology",
+          "name": "روان‌شناسی سیاسی",
+          "description": "مطالعه رفتار سیاسی از منظر روان‌شناختی",
+          "level": 2,
+          "children": [
+            {
+              "id": "political_attitudes",
+              "name": "نگرش‌های سیاسی",
+              "description": "مطالعه نگرش‌ها نسبت به سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_socialization",
+              "name": "اجتماعی‌سازی سیاسی",
+              "description": "مطالعه شکل‌گیری نگرش‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_identity",
+              "name": "هویت سیاسی",
+              "description": "مطالعه هویت‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_leadership",
+              "name": "رهبری سیاسی",
+              "description": "مطالعه رهبری در سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_motivation",
+              "name": "انگیزش سیاسی",
+              "description": "مطالعه انگیزش‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_cognition",
+              "name": "شناخت سیاسی",
+              "description": "مطالعه پردازش اطلاعات سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_emotions",
+              "name": "احساسات سیاسی",
+              "description": "مطالعه احساسات در سیاست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_behavior",
+              "name": "رفتار سیاسی",
+              "description": "مطالعه رفتارهای سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_personality",
+              "name": "شخصیت سیاسی",
+              "description": "مطالعه شخصیت سیاستمداران",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_psychopathology",
+              "name": "روان‌پاتولوژی سیاسی",
+              "description": "مطالعه اختلالات روانی در سیاست",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "constitutional_law",
+          "name": "حقوق اساسی",
+          "description": "مطالعه قانون اساسی و حقوق اساسی",
+          "level": 2,
+          "children": [
+            {
+              "id": "constitutional_interpretation",
+              "name": "تفسیر قانون اساسی",
+              "description": "مطالعه تفسیر قوانین اساسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "judicial_review",
+              "name": "بازنگری قضایی",
+              "description": "مطالعه نقش دادگاه‌ها در تفسیر قانون",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "federal_constitutional_law",
+              "name": "حقوق اساسی فدرال",
+              "description": "مطالعه حقوق اساسی در نظام فدرال",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "human_rights_constitutional",
+              "name": "حقوق بشر اساسی",
+              "description": "مطالعه حقوق بشر در قانون اساسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "constitutional_amendments",
+              "name": "اصلاحات قانون اساسی",
+              "description": "مطالعه تغییر قوانین اساسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "constitutional_courts",
+              "name": "دادگاه‌های قانون اساسی",
+              "description": "مطالعه دادگاه‌های ویژه قانون اساسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "constitutional_democracy",
+              "name": "دموکراسی قانون اساسی",
+              "description": "مطالعه دموکراسی مبتنی بر قانون اساسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "constitutional_crisis",
+              "name": "بحران قانون اساسی",
+              "description": "مطالعه بحران‌های قانونی اساسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "constitutional_design",
+              "name": "طراحی قانون اساسی",
+              "description": "مطالعه تدوین قوانین اساسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "constitutional_theory",
+              "name": "نظریه قانون اساسی",
+              "description": "مطالعه نظریه‌های قانون اساسی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "political_history",
+          "name": "تاریخ سیاسی",
+          "description": "مطالعه تاریخ تحولات سیاسی",
+          "level": 2,
+          "children": [
+            {
+              "id": "ancient_political_history",
+              "name": "تاریخ سیاسی باستان",
+              "description": "مطالعه حکومت‌های باستانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "medieval_political_history",
+              "name": "تاریخ سیاسی قرون وسطی",
+              "description": "مطالعه حکومت‌های قرون وسطی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "modern_political_history",
+              "name": "تاریخ سیاسی مدرن",
+              "description": "مطالعه حکومت‌های مدرن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "revolutionary_history",
+              "name": "تاریخ انقلاب‌ها",
+              "description": "مطالعه انقلاب‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "colonialism_history",
+              "name": "تاریخ استعمار",
+              "description": "مطالعه تاریخ استعمار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cold_war_history",
+              "name": "تاریخ جنگ سرد",
+              "description": "مطالعه دوره جنگ سرد",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "postcolonial_history",
+              "name": "تاریخ پسااستعماری",
+              "description": "مطالعه دوره پس از استعمار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_biography",
+              "name": "زندگینامه سیاسی",
+              "description": "مطالعه زندگی سیاستمداران",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ideological_history",
+              "name": "تاریخ ایدئولوژی‌ها",
+              "description": "مطالعه تاریخ اندیشه‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_institutions_history",
+              "name": "تاریخ نهادهای سیاسی",
+              "description": "مطالعه تاریخ نهادهای حکومتی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "economics",
+      "name": "اقتصاد",
+      "description": "مطالعه تولید، توزیع و مصرف منابع",
+      "level": 1,
+      "children": [
+        {
+          "id": "microeconomics",
+          "name": "اقتصاد خرد",
+          "description": "مطالعه رفتار مصرف‌کنندگان و تولیدکنندگان",
+          "level": 2,
+          "children": [
+            {
+              "id": "consumer_theory",
+              "name": "نظریه مصرف‌کننده",
+              "description": "مطالعه تصمیم‌گیری مصرف‌کنندگان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "producer_theory",
+              "name": "نظریه تولیدکننده",
+              "description": "مطالعه تصمیم‌گیری تولیدکنندگان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "market_structures",
+              "name": "ساختارهای بازار",
+              "description": "مطالعه انواع بازارها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "price_theory",
+              "name": "نظریه قیمت",
+              "description": "مطالعه تعیین قیمت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "elasticity",
+              "name": "کشسانی",
+              "description": "مطالعه پاسخ به تغییرات قیمت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "welfare_economics",
+              "name": "اقتصاد رفاه",
+              "description": "مطالعه رفاه اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "information_economics",
+              "name": "اقتصاد اطلاعات",
+              "description": "مطالعه نقش اطلاعات در بازار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "game_theory_micro",
+              "name": "نظریه بازی در اقتصاد خرد",
+              "description": "مطالعه استراتژی‌ها در بازار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "risk_uncertainty",
+              "name": "ریسک و عدم قطعیت",
+              "description": "مطالعه تصمیم‌گیری در شرایط نامطمئن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "general_equilibrium",
+              "name": "تعادل عمومی",
+              "description": "مطالعه تعادل در کل اقتصاد",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "macroeconomics",
+          "name": "اقتصاد کلان",
+          "description": "مطالعه اقتصاد در سطح کلان",
+          "level": 2,
+          "children": [
+            {
+              "id": "national_income",
+              "name": "درآمد ملی",
+              "description": "مطالعه اندازه‌گیری تولید ملی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "inflation",
+              "name": "تورم",
+              "description": "مطالعه افزایش سطح عمومی قیمت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "unemployment",
+              "name": "بیکاری",
+              "description": "مطالعه نرخ بیکاری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "monetary_policy",
+              "name": "سیاست پولی",
+              "description": "مطالعه کنترل پول و نرخ بهره",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "fiscal_policy",
+              "name": "سیاست مالی",
+              "description": "مطالعه بودجه دولت و مالیات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "economic_growth",
+              "name": "رشد اقتصادی",
+              "description": "مطالعه افزایش تولید بلندمدت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "business_cycles",
+              "name": "چرخه‌های کسب‌وکار",
+              "description": "مطالعه نوسانات اقتصادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_trade_macro",
+              "name": "تجارت بین‌المللی در اقتصاد کلان",
+              "description": "مطالعه تأثیر تجارت بر اقتصاد کلان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "open_economy",
+              "name": "اقتصاد باز",
+              "description": "مطالعه اقتصاد با تجارت خارجی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "macroeconomic_modeling",
+              "name": "مدلسازی اقتصاد کلان",
+              "description": "مطالعه مدل‌های ریاضی اقتصاد کلان",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "international_economics",
+          "name": "اقتصاد بین‌المللی",
+          "description": "مطالعه اقتصاد جهانی و تجارت بین‌المللی",
+          "level": 2,
+          "children": [
+            {
+              "id": "trade_theory",
+              "name": "نظریه تجارت",
+              "description": "مطالعه نظریه‌های تجارت بین‌المللی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "comparative_advantage",
+              "name": "برتری نسبی",
+              "description": "مطالعه مزیت‌های نسبی کشورها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "trade_policy",
+              "name": "سیاست‌های تجاری",
+              "description": "مطالعه تعرفه‌ها و سهمیه‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "exchange_rates",
+              "name": "نرخ ارز",
+              "description": "مطالعه نرخ‌های مبادله ارزی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "balance_payments",
+              "name": "تراز پرداخت‌ها",
+              "description": "مطالعه حساب‌های بین‌المللی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_finance",
+              "name": "مالی بین‌المللی",
+              "description": "مطالعه جریان سرمایه بین‌المللی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "globalization_economics",
+              "name": "اقتصاد جهانی‌شدن",
+              "description": "مطالعه جهانی‌شدن اقتصادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "regional_integration",
+              "name": "ادغام منطقه‌ای",
+              "description": "مطالعه اتحادیه‌های اقتصادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "development_aid",
+              "name": "کمک‌های توسعه",
+              "description": "مطالعه کمک‌های بین‌المللی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_institutions",
+              "name": "نهادهای بین‌المللی",
+              "description": "مطالعه سازمان‌های اقتصادی جهانی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "development_economics",
+          "name": "اقتصاد توسعه",
+          "description": "مطالعه رشد اقتصادی کشورهای در حال توسعه",
+          "level": 2,
+          "children": [
+            {
+              "id": "economic_development_theory",
+              "name": "نظریه توسعه اقتصادی",
+              "description": "مطالعه نظریه‌های رشد اقتصادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "poverty_alleviation",
+              "name": "کاهش فقر",
+              "description": "مطالعه استراتژی‌های کاهش فقر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "human_capital",
+              "name": "سرمایه انسانی",
+              "description": "مطالعه آموزش و مهارت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "infrastructure_development",
+              "name": "توسعه زیرساخت‌ها",
+              "description": "مطالعه سرمایه‌گذاری در زیرساخت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "sustainable_development",
+              "name": "توسعه پایدار",
+              "description": "مطالعه توسعه بدون آسیب به محیط",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_development",
+              "name": "توسعه روستایی",
+              "description": "مطالعه توسعه مناطق روستایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_development",
+              "name": "توسعه شهری",
+              "description": "مطالعه توسعه مناطق شهری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "technology_transfer",
+              "name": "انتقال فناوری",
+              "description": "مطالعه انتقال فناوری به کشورهای در حال توسعه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "foreign_investment",
+              "name": "سرمایه‌گذاری خارجی",
+              "description": "مطالعه جذب سرمایه خارجی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "development_planning",
+              "name": "برنامه‌ریزی توسعه",
+              "description": "مطالعه برنامه‌های توسعه اقتصادی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "labor_economics",
+          "name": "اقتصاد کار",
+          "description": "مطالعه بازار کار و نیروی کار",
+          "level": 2,
+          "children": [
+            {
+              "id": "labor_supply",
+              "name": "عرضه نیروی کار",
+              "description": "مطالعه تصمیم‌گیری در مورد کار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "labor_demand",
+              "name": "تقاضای نیروی کار",
+              "description": "مطالعه نیاز کارفرمایان به نیروی کار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "wage_determination",
+              "name": "تعیین دستمزد",
+              "description": "مطالعه عوامل تعیین حقوق",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "labor_market_institutions",
+              "name": "نهادهای بازار کار",
+              "description": "مطالعه اتحادیه‌ها و قوانین کار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "human_resource_management",
+              "name": "مدیریت منابع انسانی",
+              "description": "مطالعه مدیریت نیروی کار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "labor_mobility",
+              "name": "تحرک نیروی کار",
+              "description": "مطالعه جابجایی نیروی کار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "discrimination_labor",
+              "name": "تبعیض در بازار کار",
+              "description": "مطالعه تبعیض جنسیتی و نژادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "education_training",
+              "name": "آموزش و آموزش حرفه‌ای",
+              "description": "مطالعه سرمایه‌گذاری در آموزش",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "labor_productivity",
+              "name": "بهره‌وری نیروی کار",
+              "description": "مطالعه کارایی نیروی کار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "labor_policy",
+              "name": "سیاست‌های کار",
+              "description": "مطالعه سیاست‌های دولتی در بازار کار",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "public_economics",
+          "name": "اقتصاد عمومی",
+          "description": "مطالعه نقش دولت در اقتصاد",
+          "level": 2,
+          "children": [
+            {
+              "id": "public_goods",
+              "name": "کالاهای عمومی",
+              "description": "مطالعه کالاهایی که دولت فراهم می‌کند",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "externalities",
+              "name": "اثرات خارجی",
+              "description": "مطالعه هزینه‌ها و منافع غیرمستقیم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "taxation",
+              "name": "مالیات‌گذاری",
+              "description": "مطالعه سیستم‌های مالیاتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "public_expenditure",
+              "name": "هزینه‌های عمومی",
+              "description": "مطالعه هزینه‌های دولتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_security",
+              "name": "امنیت اجتماعی",
+              "description": "مطالعه نظام‌های تأمین اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "health_economics",
+              "name": "اقتصاد سلامت",
+              "description": "مطالعه بازار سلامت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "education_economics",
+              "name": "اقتصاد آموزش",
+              "description": "مطالعه بازار آموزش",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "environmental_economics",
+              "name": "اقتصاد محیط زیست",
+              "description": "مطالعه حفاظت از محیط زیست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "regulation_economics",
+              "name": "اقتصاد تنظیم مقررات",
+              "description": "مطالعه تنظیم بازارها توسط دولت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "public_choice",
+              "name": "انتخاب عمومی",
+              "description": "مطالعه تصمیم‌گیری سیاسی اقتصادی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "financial_economics",
+          "name": "اقتصاد مالی",
+          "description": "مطالعه بازارهای مالی و سرمایه‌گذاری",
+          "level": 2,
+          "children": [
+            {
+              "id": "portfolio_theory",
+              "name": "نظریه سبد سرمایه‌گذاری",
+              "description": "مطالعه تنوع سرمایه‌گذاری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "asset_pricing",
+              "name": "قیمت‌گذاری دارایی‌ها",
+              "description": "مطالعه تعیین قیمت اوراق بهادار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "corporate_finance",
+              "name": "مالی شرکت‌ها",
+              "description": "مطالعه تصمیمات مالی شرکت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "banking_economics",
+              "name": "اقتصاد بانکداری",
+              "description": "مطالعه نظام بانکی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "financial_markets",
+              "name": "بازارهای مالی",
+              "description": "مطالعه بورس و بازارهای مالی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "risk_management",
+              "name": "مدیریت ریسک",
+              "description": "مطالعه مدیریت ریسک مالی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "derivatives",
+              "name": "مشتقات مالی",
+              "description": "مطالعه قراردادهای مشتقه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "behavioral_finance",
+              "name": "مالی رفتاری",
+              "description": "مطالعه روان‌شناسی در تصمیمات مالی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_finance",
+              "name": "مالی بین‌المللی",
+              "description": "مطالعه بازارهای مالی جهانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "financial_regulation",
+              "name": "تنظیم مالی",
+              "description": "مطالعه قوانین بازارهای مالی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "industrial_organization",
+          "name": "سازمان صنعتی",
+          "description": "مطالعه ساختار و رفتار صنایع",
+          "level": 2,
+          "children": [
+            {
+              "id": "market_power",
+              "name": "قدرت بازار",
+              "description": "مطالعه قدرت انحصاری شرکت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "competition_policy",
+              "name": "سیاست رقابت",
+              "description": "مطالعه قوانین ضد انحصار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "firm_behavior",
+              "name": "رفتار شرکت‌ها",
+              "description": "مطالعه تصمیمات استراتژیک شرکت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "industry_structure",
+              "name": "ساختار صنعت",
+              "description": "مطالعه سازمان صنایع",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "innovation_economics",
+              "name": "اقتصاد نوآوری",
+              "description": "مطالعه نوآوری در صنایع",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mergers_acquisitions",
+              "name": "ادغام و تملک",
+              "description": "مطالعه خرید و فروش شرکت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "pricing_strategies",
+              "name": "استراتژی‌های قیمت‌گذاری",
+              "description": "مطالعه استراتژی‌های قیمت‌گذاری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "product_differentiation",
+              "name": "تمایز محصول",
+              "description": "مطالعه تفاوت محصولات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "entry_barriers",
+              "name": "موانع ورود",
+              "description": "مطالعه موانع ورود به بازار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "network_industries",
+              "name": "صنایع شبکه‌ای",
+              "description": "مطالعه صنایع با اثرات شبکه",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "behavioral_economics",
+          "name": "اقتصاد رفتاری",
+          "description": "مطالعه روان‌شناسی در تصمیمات اقتصادی",
+          "level": 2,
+          "children": [
+            {
+              "id": "bounded_rationality",
+              "name": "عقلانیت محدود",
+              "description": "مطالعه محدودیت‌های تصمیم‌گیری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "prospect_theory",
+              "name": "نظریه چشم‌انداز",
+              "description": "مطالعه تصمیم‌گیری در شرایط ریسک",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cognitive_biases",
+              "name": "انحرافات شناختی",
+              "description": "مطالعه خطاهای تصمیم‌گیری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "nudging",
+              "name": "هدایت رفتاری",
+              "description": "مطالعه تأثیر طراحی بر رفتار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "fairness_behavioral",
+              "name": "عدالت در اقتصاد رفتاری",
+              "description": "مطالعه احساس عدالت در تصمیمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_preferences",
+              "name": "ترجیحات اجتماعی",
+              "description": "مطالعه تأثیر اجتماع بر تصمیمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "time_preferences",
+              "name": "ترجیحات زمانی",
+              "description": "مطالعه تصمیمات در مورد زمان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "loss_aversion",
+              "name": "گریز از ضرر",
+              "description": "مطالعه ترس از ضرر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "anchoring_bias",
+              "name": "انحراف لنگر",
+              "description": "مطالعه تأثیر اطلاعات اولیه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "framing_effects",
+              "name": "تأثیر قاب‌بندی",
+              "description": "مطالعه نحوه ارائه اطلاعات",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "economic_history",
+          "name": "تاریخ اقتصاد",
+          "description": "مطالعه تاریخ تحولات اقتصادی",
+          "level": 2,
+          "children": [
+            {
+              "id": "ancient_economic_history",
+              "name": "تاریخ اقتصادی باستان",
+              "description": "مطالعه اقتصاد جوامع باستانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "medieval_economic_history",
+              "name": "تاریخ اقتصادی قرون وسطی",
+              "description": "مطالعه اقتصاد قرون وسطی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "industrial_revolution",
+              "name": "انقلاب صنعتی",
+              "description": "مطالعه تغییرات اقتصادی صنعتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "great_depression",
+              "name": "رکود بزرگ",
+              "description": "مطالعه بحران اقتصادی ۱۹۲۹",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "post_war_economic_growth",
+              "name": "رشد اقتصادی پس از جنگ",
+              "description": "مطالعه رشد پس از جنگ جهانی دوم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "globalization_history",
+              "name": "تاریخ جهانی‌شدن",
+              "description": "مطالعه تاریخ جهانی‌شدن اقتصادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "economic_crisis_history",
+              "name": "تاریخ بحران‌های اقتصادی",
+              "description": "مطالعه بحران‌های مالی تاریخی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "colonial_economy",
+              "name": "اقتصاد استعماری",
+              "description": "مطالعه اقتصاد در دوره استعمار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "economic_institutions_history",
+              "name": "تاریخ نهادهای اقتصادی",
+              "description": "مطالعه تاریخ بانک‌ها و بازارها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "technological_change_history",
+              "name": "تاریخ تغییرات فناوری",
+              "description": "مطالعه تأثیر فناوری بر اقتصاد",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "history",
+      "name": "تاریخ",
+      "description": "مطالعه رویدادهای گذشته و تأثیر آنها",
+      "level": 1,
+      "children": [
+        {
+          "id": "ancient_history",
+          "name": "تاریخ باستان",
+          "description": "مطالعه تمدن‌های باستانی",
+          "level": 2,
+          "children": [
+            {
+              "id": "mesopotamia_history",
+              "name": "تاریخ بین‌النهرین",
+              "description": "مطالعه تمدن بین‌النهرین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "egyptian_history",
+              "name": "تاریخ مصر باستان",
+              "description": "مطالعه تمدن مصر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "greek_history",
+              "name": "تاریخ یونان باستان",
+              "description": "مطالعه تمدن یونان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "roman_history",
+              "name": "تاریخ روم باستان",
+              "description": "مطالعه امپراتوری روم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "persian_history",
+              "name": "تاریخ ایران باستان",
+              "description": "مطالعه تمدن ایران",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "indian_history",
+              "name": "تاریخ هند باستان",
+              "description": "مطالعه تمدن هند",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "chinese_history",
+              "name": "تاریخ چین باستان",
+              "description": "مطالعه تمدن چین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mayan_history",
+              "name": "تاریخ مایاها",
+              "description": "مطالعه تمدن مایاها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "aztec_history",
+              "name": "تاریخ آزتک‌ها",
+              "description": "مطالعه تمدن آزتک‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "prehistoric_history",
+              "name": "تاریخ پیش از تاریخ",
+              "description": "مطالعه انسان اولیه",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "medieval_history",
+          "name": "تاریخ قرون وسطی",
+          "description": "مطالعه دوره قرون وسطی",
+          "level": 2,
+          "children": [
+            {
+              "id": "byzantine_history",
+              "name": "تاریخ بیزانس",
+              "description": "مطالعه امپراتوری بیزانس",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "islamic_golden_age",
+              "name": "عصر طلایی اسلام",
+              "description": "مطالعه تمدن اسلامی قرون وسطی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "feudalism",
+              "name": "فئودالیسم",
+              "description": "مطالعه نظام فئودالی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "crusades",
+              "name": "صلاحب‌ها",
+              "description": "مطالعه جنگ‌های صلیبی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "black_death",
+              "name": "طاعون سیاه",
+              "description": "مطالعه همه‌گیری طاعون",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "renaissance",
+              "name": "رنسانس",
+              "description": "مطالعه دوره رنسانس",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ottoman_history",
+              "name": "تاریخ عثمانی",
+              "description": "مطالعه امپراتوری عثمانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mongol_empire",
+              "name": "امپراتوری مغول",
+              "description": "مطالعه امپراتوری مغول",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "medieval_europe",
+              "name": "اروپای قرون وسطی",
+              "description": "مطالعه تاریخ اروپا قرون وسطی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "medieval_asia",
+              "name": "آسیای قرون وسطی",
+              "description": "مطالعه تاریخ آسیا قرون وسطی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "modern_history",
+          "name": "تاریخ مدرن",
+          "description": "مطالعه دوره مدرن",
+          "level": 2,
+          "children": [
+            {
+              "id": "age_of_exploration",
+              "name": "عصر اکتشافات",
+              "description": "مطالعه اکتشافات جغرافیایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "industrial_revolution_history",
+              "name": "انقلاب صنعتی",
+              "description": "مطالعه تغییرات صنعتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "french_revolution",
+              "name": "انقلاب فرانسه",
+              "description": "مطالعه انقلاب ۱۷۸۹ فرانسه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "american_revolution",
+              "name": "انقلاب آمریکا",
+              "description": "مطالعه استقلال آمریکا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "napoleonic_wars",
+              "name": "جنگ‌های ناپلئونی",
+              "description": "مطالعه جنگ‌های ناپلئون",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "colonialism_modern",
+              "name": "استعمار مدرن",
+              "description": "مطالعه استعمار اروپایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "world_war_i",
+              "name": "جنگ جهانی اول",
+              "description": "مطالعه جنگ ۱۹۱۴-۱۹۱۸",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "interwar_period",
+              "name": "دوره بین دو جنگ",
+              "description": "مطالعه دوره ۱۹۱۸-۱۹۳۹",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "world_war_ii",
+              "name": "جنگ جهانی دوم",
+              "description": "مطالعه جنگ ۱۹۳۹-۱۹۴۵",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cold_war_history",
+              "name": "جنگ سرد",
+              "description": "مطالعه دوره جنگ سرد",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "contemporary_history",
+          "name": "تاریخ معاصر",
+          "description": "مطالعه تاریخ اخیر",
+          "level": 2,
+          "children": [
+            {
+              "id": "post_war_reconstruction",
+              "name": "بازسازی پس از جنگ",
+              "description": "مطالعه بازسازی پس از جنگ جهانی دوم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "decolonization",
+              "name": "استقلال‌طلبی",
+              "description": "مطالعه استقلال مستعمرات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "civil_rights_movement",
+              "name": "جنبش حقوق مدنی",
+              "description": "مطالعه جنبش حقوق مدنی آمریکا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "feminist_movement",
+              "name": "جنبش فمینیستی",
+              "description": "مطالعه جنبش زنان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "environmental_movement",
+              "name": "جنبش زیست‌محیطی",
+              "description": "مطالعه جنبش حفاظت از محیط زیست",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "globalization_contemporary",
+              "name": "جهانی‌شدن معاصر",
+              "description": "مطالعه جهانی‌شدن در دهه‌های اخیر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "digital_revolution",
+              "name": "انقلاب دیجیتال",
+              "description": "مطالعه تغییرات فناوری دیجیتال",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "middle_east_conflicts",
+              "name": "تضادهای خاورمیانه",
+              "description": "مطالعه درگیری‌های خاورمیانه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "european_integration",
+              "name": "ادغام اروپایی",
+              "description": "مطالعه اتحادیه اروپا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rise_of_china",
+              "name": "صعود چین",
+              "description": "مطالعه رشد اقتصادی و سیاسی چین",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "regional_history",
+          "name": "تاریخ منطقه‌ای",
+          "description": "مطالعه تاریخ مناطق خاص",
+          "level": 2,
+          "children": [
+            {
+              "id": "european_history",
+              "name": "تاریخ اروپا",
+              "description": "مطالعه تاریخ قاره اروپا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "asian_history",
+              "name": "تاریخ آسیا",
+              "description": "مطالعه تاریخ قاره آسیا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "african_history",
+              "name": "تاریخ آفریقا",
+              "description": "مطالعه تاریخ قاره آفریقا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "american_history",
+              "name": "تاریخ آمریکا",
+              "description": "مطالعه تاریخ قاره آمریکا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "middle_east_history",
+              "name": "تاریخ خاورمیانه",
+              "description": "مطالعه تاریخ خاورمیانه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "latin_america_history",
+              "name": "تاریخ آمریکای لاتین",
+              "description": "مطالعه تاریخ آمریکای لاتین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "south_asia_history",
+              "name": "تاریخ آسیای جنوبی",
+              "description": "مطالعه تاریخ آسیای جنوبی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "southeast_asia_history",
+              "name": "تاریخ آسیای جنوب شرقی",
+              "description": "مطالعه تاریخ آسیای جنوب شرقی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "australian_history",
+              "name": "تاریخ استرالیا",
+              "description": "مطالعه تاریخ استرالیا و اقیانوسیه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "caribbean_history",
+              "name": "تاریخ کارائیب",
+              "description": "مطالعه تاریخ منطقه کارائیب",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "social_history",
+          "name": "تاریخ اجتماعی",
+          "description": "مطالعه تاریخ زندگی اجتماعی",
+          "level": 2,
+          "children": [
+            {
+              "id": "labor_history",
+              "name": "تاریخ کارگری",
+              "description": "مطالعه تاریخ جنبش کارگری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "women_history",
+              "name": "تاریخ زنان",
+              "description": "مطالعه تاریخ نقش زنان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "family_history",
+              "name": "تاریخ خانواده",
+              "description": "مطالعه تغییرات خانوادگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "education_history",
+              "name": "تاریخ آموزش",
+              "description": "مطالعه تاریخ نظام آموزشی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_history",
+              "name": "تاریخ شهری",
+              "description": "مطالعه تاریخ شهرنشینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_history",
+              "name": "تاریخ روستایی",
+              "description": "مطالعه تاریخ جوامع روستایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "immigration_history",
+              "name": "تاریخ مهاجرت",
+              "description": "مطالعه تاریخ مهاجرت‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religious_history",
+              "name": "تاریخ مذهبی",
+              "description": "مطالعه تاریخ ادیان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cultural_history",
+              "name": "تاریخ فرهنگی",
+              "description": "مطالعه تاریخ فرهنگ",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "daily_life_history",
+              "name": "تاریخ زندگی روزمره",
+              "description": "مطالعه تاریخ زندگی عادی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "economic_history",
+          "name": "تاریخ اقتصادی",
+          "description": "مطالعه تاریخ اقتصاد",
+          "level": 2,
+          "children": [
+            {
+              "id": "agricultural_revolution",
+              "name": "انقلاب کشاورزی",
+              "description": "مطالعه گذار به کشاورزی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mercantilism",
+              "name": "بازرگانی‌گری",
+              "description": "مطالعه نظام بازرگانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "capitalism_history",
+              "name": "تاریخ سرمایه‌داری",
+              "description": "مطالعه تاریخ نظام سرمایه‌داری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "industrialization",
+              "name": "صنعتی‌شدن",
+              "description": "مطالعه روند صنعتی‌شدن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "economic_depressions",
+              "name": "رکودهای اقتصادی",
+              "description": "مطالعه بحران‌های اقتصادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "trade_history",
+              "name": "تاریخ تجارت",
+              "description": "مطالعه تاریخ تجارت جهانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "banking_history",
+              "name": "تاریخ بانکداری",
+              "description": "مطالعه تاریخ نظام بانکی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "labor_economy_history",
+              "name": "تاریخ اقتصاد کار",
+              "description": "مطالعه تاریخ بازار کار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "colonial_economy_history",
+              "name": "تاریخ اقتصاد استعماری",
+              "description": "مطالعه اقتصاد استعماری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "global_economy_history",
+              "name": "تاریخ اقتصاد جهانی",
+              "description": "مطالعه تاریخ اقتصاد جهانی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "political_history",
+          "name": "تاریخ سیاسی",
+          "description": "مطالعه تاریخ حکومت‌ها",
+          "level": 2,
+          "children": [
+            {
+              "id": "democracy_history",
+              "name": "تاریخ دموکراسی",
+              "description": "مطالعه تاریخ نظام دموکراتیک",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "monarchy_history",
+              "name": "تاریخ سلطنت",
+              "description": "مطالعه تاریخ حکومت‌های سلطنتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "dictatorship_history",
+              "name": "تاریخ دیکتاتوری",
+              "description": "مطالعه تاریخ حکومت‌های دیکتاتوری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "revolution_history",
+              "name": "تاریخ انقلاب‌ها",
+              "description": "مطالعه تاریخ انقلاب‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "war_history",
+              "name": "تاریخ جنگ‌ها",
+              "description": "مطالعه تاریخ جنگ‌های بزرگ",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "colonialism_political",
+              "name": "تاریخ استعمار سیاسی",
+              "description": "مطالعه تاریخ حکومت استعماری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "nationalism_history",
+              "name": "تاریخ ملی‌گرایی",
+              "description": "مطالعه تاریخ جنبش‌های ملی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "international_relations_history",
+              "name": "تاریخ روابط بین‌الملل",
+              "description": "مطالعه تاریخ روابط بین‌المللی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_parties_history",
+              "name": "تاریخ احزاب سیاسی",
+              "description": "مطالعه تاریخ احزاب سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "constitutional_history",
+              "name": "تاریخ قانون اساسی",
+              "description": "مطالعه تاریخ قوانین اساسی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "intellectual_history",
+          "name": "تاریخ فکری",
+          "description": "مطالعه تاریخ اندیشه‌ها",
+          "level": 2,
+          "children": [
+            {
+              "id": "philosophical_history",
+              "name": "تاریخ فلسفه",
+              "description": "مطالعه تاریخ فلسفه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "scientific_history",
+              "name": "تاریخ علم",
+              "description": "مطالعه تاریخ پیشرفت علمی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "literary_history",
+              "name": "تاریخ ادبیات",
+              "description": "مطالعه تاریخ ادبیات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "artistic_history",
+              "name": "تاریخ هنر",
+              "description": "مطالعه تاریخ هنر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religious_thought_history",
+              "name": "تاریخ اندیشه دینی",
+              "description": "مطالعه تاریخ اندیشه‌های دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_thought_history",
+              "name": "تاریخ اندیشه سیاسی",
+              "description": "مطالعه تاریخ اندیشه‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "economic_thought_history",
+              "name": "تاریخ اندیشه اقتصادی",
+              "description": "مطالعه تاریخ نظریه‌های اقتصادی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_thought_history",
+              "name": "تاریخ اندیشه اجتماعی",
+              "description": "مطالعه تاریخ نظریه‌های اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "humanism_history",
+              "name": "تاریخ انسان‌گرایی",
+              "description": "مطالعه تاریخ انسان‌گرایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "enlightenment_history",
+              "name": "تاریخ روشنگری",
+              "description": "مطالعه تاریخ عصر روشنگری",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "historiography",
+          "name": "تاریخ‌نگاری",
+          "description": "مطالعه روش‌های تاریخ‌نگاری",
+          "level": 2,
+          "children": [
+            {
+              "id": "historical_methodology",
+              "name": "روش‌شناسی تاریخ",
+              "description": "مطالعه روش‌های تحقیق تاریخی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "source_criticism",
+              "name": "نقد منابع",
+              "description": "مطالعه ارزیابی منابع تاریخی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "oral_history",
+              "name": "تاریخ شفاهی",
+              "description": "مطالعه تاریخ بر اساس روایت‌های شفاهی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "digital_history",
+              "name": "تاریخ دیجیتال",
+              "description": "مطالعه تاریخ با استفاده از فناوری دیجیتال",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "comparative_history",
+              "name": "تاریخ تطبیقی",
+              "description": "مطالعه مقایسه رویدادهای تاریخی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "microhistory",
+              "name": "تاریخ خرد",
+              "description": "مطالعه تاریخ در سطح خرد",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "macrohistory",
+              "name": "تاریخ کلان",
+              "description": "مطالعه تاریخ در سطح کلان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "historical_theory",
+              "name": "نظریه تاریخ",
+              "description": "مطالعه نظریه‌های فلسفی تاریخ",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "historical_archives",
+              "name": "بایگانی‌های تاریخی",
+              "description": "مطالعه مدیریت اسناد تاریخی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "public_history",
+              "name": "تاریخ عمومی",
+              "description": "مطالعه تاریخ برای عموم مردم",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "linguistics",
+      "name": "زبان‌شناسی",
+      "description": "مطالعه زبان و ساختار آن",
+      "level": 1,
+      "children": [
+        {
+          "id": "phonetics",
+          "name": "فونتیک",
+          "description": "مطالعه صداهای زبان",
+          "level": 2,
+          "children": [
+            {
+              "id": "articulatory_phonetics",
+              "name": "فونتیک آوایی",
+              "description": "مطالعه تولید صداها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "acoustic_phonetics",
+              "name": "فونتیک آکوستیک",
+              "description": "مطالعه خواص فیزیکی صداها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "auditory_phonetics",
+              "name": "فونتیک شنوایی",
+              "description": "مطالعه ادراک صداها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "phonetic_alphabet",
+              "name": "الفبای آوایی",
+              "description": "مطالعه نمادهای آوایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "speech_production",
+              "name": "تولید گفتار",
+              "description": "مطالعه مکانیسم تولید گفتار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "speech_perception",
+              "name": "ادراک گفتار",
+              "description": "مطالعه درک گفتار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "phonetic_variation",
+              "name": "تغییرات آوایی",
+              "description": "مطالعه تفاوت‌های آوایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "experimental_phonetics",
+              "name": "فونتیک تجربی",
+              "description": "مطالعه تجربی صداها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "forensic_phonetics",
+              "name": "فونتیک قانونی",
+              "description": "مطالعه صداها در پزشکی قانونی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "phonetic_typology",
+              "name": "طبقه‌بندی آوایی",
+              "description": "مطالعه الگوهای آوایی جهانی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "phonology",
+          "name": "فونولوژی",
+          "description": "مطالعه نظام صداهای زبان",
+          "level": 2,
+          "children": [
+            {
+              "id": "phonological_rules",
+              "name": "قواعد آوایی",
+              "description": "مطالعه قوانین تغییر صداها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "phonemes",
+              "name": "فونم‌ها",
+              "description": "مطالعه واحدهای آوایی متمایز",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "syllable_structure",
+              "name": "ساختار هجا",
+              "description": "مطالعه سازمان هجایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "stress_accent",
+              "name": "تأکید و لهجه",
+              "description": "مطالعه الگوهای تأکید",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "intonation",
+              "name": "آهنگ گفتار",
+              "description": "مطالعه الگوهای آهنگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "phonological_processes",
+              "name": "فرآیندهای آوایی",
+              "description": "مطالعه تغییرات آوایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "autosegmental_phonology",
+              "name": "فونولوژی خودبخشی",
+              "description": "مطالعه لایه‌های آوایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "optimality_theory",
+              "name": "نظریه بهینگی",
+              "description": "مطالعه محدودیت‌های آوایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "phonological_acquisition",
+              "name": "اکتساب آوایی",
+              "description": "مطالعه یادگیری نظام آوایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "phonological_disorders",
+              "name": "اختلالات آوایی",
+              "description": "مطالعه مشکلات آوایی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "morphology",
+          "name": "واژگان‌شناسی",
+          "description": "مطالعه ساختار کلمات",
+          "level": 2,
+          "children": [
+            {
+              "id": "word_formation",
+              "name": "واژه‌سازی",
+              "description": "مطالعه ساخت کلمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "inflection",
+              "name": "تصریف",
+              "description": "مطالعه تغییرات دستوری کلمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "derivation",
+              "name": "اشتقاق",
+              "description": "مطالعه ساخت کلمات جدید",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "compounding",
+              "name": "ترکیب",
+              "description": "مطالعه کلمات مرکب",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "morphemes",
+              "name": "مورفم‌ها",
+              "description": "مطالعه واحدهای معنادار کوچکترین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "morphological_typology",
+              "name": "طبقه‌بندی مورفولوژیکی",
+              "description": "مطالعه انواع ساختار کلمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "morphological_change",
+              "name": "تغییر مورفولوژیکی",
+              "description": "مطالعه تغییرات ساختاری کلمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "computational_morphology",
+              "name": "مورفولوژی محاسباتی",
+              "description": "مطالعه مورفولوژی در کامپیوتر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "morphological_acquisition",
+              "name": "اکتساب مورفولوژیکی",
+              "description": "مطالعه یادگیری ساختار کلمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "morphological_disorders",
+              "name": "اختلالات مورفولوژیکی",
+              "description": "مطالعه مشکلات ساختاری کلمات",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "syntax",
+          "name": "نحو",
+          "description": "مطالعه ساختار جمله",
+          "level": 2,
+          "children": [
+            {
+              "id": "sentence_structure",
+              "name": "ساختار جمله",
+              "description": "مطالعه سازمان نحوی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "grammatical_theory",
+              "name": "نظریه گرامری",
+              "description": "مطالعه نظریه‌های نحوی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "transformational_grammar",
+              "name": "گرامر تبدیلی",
+              "description": "مطالعه گرامر چامسکی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "minimalist_program",
+              "name": "برنامه کمینه‌گرا",
+              "description": "مطالعه نحو مدرن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "dependency_grammar",
+              "name": "گرامر وابستگی",
+              "description": "مطالعه روابط وابستگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "functional_grammar",
+              "name": "گرامر کارکردی",
+              "description": "مطالعه نحو کارکردی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "construction_grammar",
+              "name": "گرامر ساختاری",
+              "description": "مطالعه گرامر ساخت‌محور",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "syntactic_typology",
+              "name": "طبقه‌بندی نحوی",
+              "description": "مطالعه انواع ساختارهای نحوی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "syntactic_acquisition",
+              "name": "اکتساب نحوی",
+              "description": "مطالعه یادگیری ساختار جمله",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "syntactic_disorders",
+              "name": "اختلالات نحوی",
+              "description": "مطالعه مشکلات ساختاری جمله",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "semantics",
+          "name": "معناشناسی",
+          "description": "مطالعه معنا در زبان",
+          "level": 2,
+          "children": [
+            {
+              "id": "lexical_semantics",
+              "name": "معناشناسی واژگانی",
+              "description": "مطالعه معنا در کلمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "compositional_semantics",
+              "name": "معناشناسی ترکیبی",
+              "description": "مطالعه معنا در ترکیبات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "pragmatics",
+              "name": "کاربردشناسی",
+              "description": "مطالعه استفاده از زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "formal_semantics",
+              "name": "معناشناسی صوری",
+              "description": "مطالعه معنا با منطق",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cognitive_semantics",
+              "name": "معناشناسی شناختی",
+              "description": "مطالعه معنا در ذهن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "historical_semantics",
+              "name": "معناشناسی تاریخی",
+              "description": "مطالعه تغییرات معنایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cross_linguistic_semantics",
+              "name": "معناشناسی بین‌زبانی",
+              "description": "مطالعه معنا در زبان‌های مختلف",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "semantic_change",
+              "name": "تغییر معنایی",
+              "description": "مطالعه تحول معانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "semantic_acquisition",
+              "name": "اکتساب معنایی",
+              "description": "مطالعه یادگیری معانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "semantic_disorders",
+              "name": "اختلالات معنایی",
+              "description": "مطالعه مشکلات درک معنا",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "sociolinguistics",
+          "name": "جامعه‌شناسی زبان",
+          "description": "مطالعه زبان در جامعه",
+          "level": 2,
+          "children": [
+            {
+              "id": "language_variation",
+              "name": "تغییرات زبانی",
+              "description": "مطالعه تفاوت‌های زبانی اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_contact",
+              "name": "تماس زبانی",
+              "description": "مطالعه تأثیر زبان‌ها بر هم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "bilingualism",
+              "name": "دوزبانگی",
+              "description": "مطالعه استفاده از دو زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "multilingualism",
+              "name": "چندزبانگی",
+              "description": "مطالعه استفاده از چند زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_policy",
+              "name": "سیاست زبانی",
+              "description": "مطالعه سیاست‌های زبان رسمی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_planning",
+              "name": "برنامه‌ریزی زبانی",
+              "description": "مطالعه توسعه زبان‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_attitudes",
+              "name": "نگرش‌های زبانی",
+              "description": "مطالعه دیدگاه‌ها نسبت به زبان‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "gender_linguistics",
+              "name": "زبان‌شناسی جنسیتی",
+              "description": "مطالعه تفاوت‌های زبانی جنسیتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_linguistics",
+              "name": "زبان‌شناسی شهری",
+              "description": "مطالعه زبان در محیط شهری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ethnolinguistics",
+              "name": "قوم‌زبان‌شناسی",
+              "description": "مطالعه رابطه زبان و فرهنگ",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "psycholinguistics",
+          "name": "روان‌زبان‌شناسی",
+          "description": "مطالعه پردازش زبان در ذهن",
+          "level": 2,
+          "children": [
+            {
+              "id": "language_acquisition",
+              "name": "اکتساب زبان",
+              "description": "مطالعه یادگیری زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_processing",
+              "name": "پردازش زبان",
+              "description": "مطالعه درک و تولید زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "reading_processes",
+              "name": "فرآیندهای خواندن",
+              "description": "مطالعه مکانیسم خواندن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "speech_production_psych",
+              "name": "تولید گفتار روان‌شناختی",
+              "description": "مطالعه تولید گفتار در ذهن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_disorders",
+              "name": "اختلالات زبانی",
+              "description": "مطالعه مشکلات زبانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "neurolinguistics",
+              "name": "عصب‌زبان‌شناسی",
+              "description": "مطالعه پایه‌های عصبی زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "developmental_linguistics",
+              "name": "زبان‌شناسی تکوینی",
+              "description": "مطالعه توسعه زبان در کودکان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cognitive_linguistics",
+              "name": "زبان‌شناسی شناختی",
+              "description": "مطالعه رابطه زبان و شناخت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "experimental_psycholinguistics",
+              "name": "روان‌زبان‌شناسی تجربی",
+              "description": "مطالعه تجربی پردازش زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "computational_psycholinguistics",
+              "name": "روان‌زبان‌شناسی محاسباتی",
+              "description": "مطالعه مدل‌سازی پردازش زبان",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "historical_linguistics",
+          "name": "زبان‌شناسی تاریخی",
+          "description": "مطالعه تغییرات زبان در زمان",
+          "level": 2,
+          "children": [
+            {
+              "id": "language_change",
+              "name": "تغییر زبان",
+              "description": "مطالعه تحول زبان‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "comparative_linguistics",
+              "name": "زبان‌شناسی تطبیقی",
+              "description": "مطالعه مقایسه زبان‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_families",
+              "name": "خانواده‌های زبانی",
+              "description": "مطالعه گروه‌های زبانی مرتبط",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "etymology",
+              "name": "اشتقاق‌شناسی",
+              "description": "مطالعه ریشه کلمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "philology",
+              "name": "فیلولوژی",
+              "description": "مطالعه متون باستانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "historical_phonology",
+              "name": "فونولوژی تاریخی",
+              "description": "مطالعه تغییرات آوایی تاریخی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "historical_morphology",
+              "name": "واژگان‌شناسی تاریخی",
+              "description": "مطالعه تغییرات ساختاری کلمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "historical_syntax",
+              "name": "نحو تاریخی",
+              "description": "مطالعه تغییرات نحوی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_reconstruction",
+              "name": "بازسازی زبان",
+              "description": "مطالعه بازسازی زبان‌های باستانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "dialectology",
+              "name": "گویش‌شناسی",
+              "description": "مطالعه گویش‌های محلی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "computational_linguistics",
+          "name": "زبان‌شناسی محاسباتی",
+          "description": "مطالعه زبان با کامپیوتر",
+          "level": 2,
+          "children": [
+            {
+              "id": "natural_language_processing",
+              "name": "پردازش زبان طبیعی",
+              "description": "مطالعه درک زبان توسط ماشین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "machine_translation",
+              "name": "ترجمه ماشینی",
+              "description": "مطالعه ترجمه خودکار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "speech_recognition",
+              "name": "تشخیص گفتار",
+              "description": "مطالعه تبدیل گفتار به متن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "text_mining",
+              "name": "استخراج متن",
+              "description": "مطالعه استخراج اطلاعات از متن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "corpus_linguistics",
+              "name": "زبان‌شناسی پیکره‌ای",
+              "description": "مطالعه تحلیل مجموعه متون",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "computational_phonology",
+              "name": "فونولوژی محاسباتی",
+              "description": "مطالعه مدل‌سازی آوایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "computational_syntax",
+              "name": "نحو محاسباتی",
+              "description": "مطالعه تحلیل نحوی خودکار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "computational_semantics",
+              "name": "معناشناسی محاسباتی",
+              "description": "مطالعه درک معنا توسط ماشین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "artificial_intelligence_linguistics",
+              "name": "هوش مصنوعی زبانی",
+              "description": "مطالعه هوش مصنوعی در زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "human_computer_interaction",
+              "name": "تعامل انسان و کامپیوتر",
+              "description": "مطالعه رابط‌های زبانی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "applied_linguistics",
+          "name": "زبان‌شناسی کاربردی",
+          "description": "مطالعه کاربرد زبان در عمل",
+          "level": 2,
+          "children": [
+            {
+              "id": "language_teaching",
+              "name": "آموزش زبان",
+              "description": "مطالعه روش‌های تدریس زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "translation_studies",
+              "name": "مطالعات ترجمه",
+              "description": "مطالعه نظریه و عمل ترجمه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "forensic_linguistics",
+              "name": "زبان‌شناسی قانونی",
+              "description": "مطالعه زبان در زمینه قانونی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "clinical_linguistics",
+              "name": "زبان‌شناسی بالینی",
+              "description": "مطالعه اختلالات ارتباطی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "business_linguistics",
+              "name": "زبان‌شناسی کسب‌وکار",
+              "description": "مطالعه زبان در محیط کار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "literary_linguistics",
+              "name": "زبان‌شناسی ادبی",
+              "description": "مطالعه زبان در ادبیات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "stylistics",
+              "name": "سبک‌شناسی",
+              "description": "مطالعه سبک زبانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "discourse_analysis",
+              "name": "تحلیل گفتمان",
+              "description": "مطالعه ساختار مکالمات",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_assessment",
+              "name": "ارزیابی زبان",
+              "description": "مطالعه سنجش مهارت‌های زبانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "lexicography",
+              "name": "واژه‌نامه‌نویسی",
+              "description": "مطالعه تهیه فرهنگ لغت",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "anthropology",
+      "name": "انسان‌شناسی (آنتروپولوژی)",
+      "description": "مطالعه فرهنگ‌ها، جوامع انسانی و تکامل",
+      "level": 1,
+      "children": [
+        {
+          "id": "cultural_anthropology",
+          "name": "انسان‌شناسی فرهنگی",
+          "description": "مطالعه فرهنگ‌ها و جوامع انسانی",
+          "level": 2,
+          "children": [
+            {
+              "id": "ethnography",
+              "name": "قوم‌نگاری",
+              "description": "مطالعه توصیفی فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cultural_relativism",
+              "name": "نسبیت فرهنگی",
+              "description": "مطالعه درک فرهنگ‌ها بدون قضاوت",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ritual_studies",
+              "name": "مطالعات آیینی",
+              "description": "مطالعه مراسم و آیین‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mythology",
+              "name": "اسطوره‌شناسی",
+              "description": "مطالعه افسانه‌ها و اسطوره‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "symbolism",
+              "name": "نمادشناسی",
+              "description": "مطالعه نمادها در فرهنگ",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cultural_change",
+              "name": "تغییر فرهنگی",
+              "description": "مطالعه تحول فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cross_cultural_studies",
+              "name": "مطالعات بین‌فرهنگی",
+              "description": "مطالعه مقایسه فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "material_culture",
+              "name": "فرهنگ مادی",
+              "description": "مطالعه اشیا و مصنوعات فرهنگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "oral_traditions",
+              "name": "سنت‌های شفاهی",
+              "description": "مطالعه داستان‌ها و آوازهای سنتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cultural_ecology",
+              "name": "اکولوژی فرهنگی",
+              "description": "مطالعه رابطه فرهنگ و محیط",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "social_anthropology",
+          "name": "انسان‌شناسی اجتماعی",
+          "description": "مطالعه ساختارهای اجتماعی",
+          "level": 2,
+          "children": [
+            {
+              "id": "kinship_studies",
+              "name": "مطالعات خویشاوندی",
+              "description": "مطالعه روابط خانوادگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "political_anthropology",
+              "name": "انسان‌شناسی سیاسی",
+              "description": "مطالعه سازمان‌های سیاسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "economic_anthropology",
+              "name": "انسان‌شناسی اقتصادی",
+              "description": "مطالعه اقتصاد در جوامع سنتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "legal_anthropology",
+              "name": "انسان‌شناسی حقوقی",
+              "description": "مطالعه نظام‌های حقوقی سنتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_anthropology",
+              "name": "انسان‌شناسی شهری",
+              "description": "مطالعه جوامع شهری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rural_anthropology",
+              "name": "انسان‌شناسی روستایی",
+              "description": "مطالعه جوامع روستایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "gender_anthropology",
+              "name": "انسان‌شناسی جنسیتی",
+              "description": "مطالعه نقش‌های جنسیتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_organization",
+              "name": "سازمان اجتماعی",
+              "description": "مطالعه ساختارهای اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "conflict_resolution",
+              "name": "حل تعارض",
+              "description": "مطالعه حل اختلافات اجتماعی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "social_networks",
+              "name": "شبکه‌های اجتماعی",
+              "description": "مطالعه روابط اجتماعی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "biological_anthropology",
+          "name": "انسان‌شناسی زیستی",
+          "description": "مطالعه تکامل انسان",
+          "level": 2,
+          "children": [
+            {
+              "id": "human_evolution",
+              "name": "تکامل انسان",
+              "description": "مطالعه تاریخ تکاملی انسان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "primatology",
+              "name": "میمون‌شناسی",
+              "description": "مطالعه میمون‌های انسان‌وار",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "paleoanthropology",
+              "name": "انسان‌شناسی باستانی",
+              "description": "مطالعه اجداد انسان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "human_variation",
+              "name": "تغییرات انسانی",
+              "description": "مطالعه تفاوت‌های زیستی انسان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "forensic_anthropology",
+              "name": "انسان‌شناسی قانونی",
+              "description": "مطالعه استخوان‌ها در پزشکی قانونی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "nutritional_anthropology",
+              "name": "انسان‌شناسی تغذیه",
+              "description": "مطالعه تغذیه در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "medical_anthropology",
+              "name": "انسان‌شناسی پزشکی",
+              "description": "مطالعه سلامت در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "human_ecology",
+              "name": "اکولوژی انسانی",
+              "description": "مطالعه تعامل انسان و محیط",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "population_genetics",
+              "name": "ژنتیک جمعیت",
+              "description": "مطالعه ژنتیک گروه‌های انسانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "bioarchaeology",
+              "name": "بیوآرکئولوژی",
+              "description": "مطالعه بقایای انسانی باستانی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "archaeology",
+          "name": "باستان‌شناسی",
+          "description": "مطالعه گذشته از طریق مصنوعات",
+          "level": 2,
+          "children": [
+            {
+              "id": "prehistoric_archaeology",
+              "name": "باستان‌شناسی پیش از تاریخ",
+              "description": "مطالعه دوره پیش از تاریخ",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "classical_archaeology",
+              "name": "باستان‌شناسی کلاسیک",
+              "description": "مطالعه تمدن‌های یونان و روم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "egyptian_archaeology",
+              "name": "باستان‌شناسی مصر",
+              "description": "مطالعه تمدن مصر باستان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mesopotamian_archaeology",
+              "name": "باستان‌شناسی بین‌النهرین",
+              "description": "مطالعه تمدن بین‌النهرین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "mayan_archaeology",
+              "name": "باستان‌شناسی مایا",
+              "description": "مطالعه تمدن مایا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "underwater_archaeology",
+              "name": "باستان‌شناسی زیرآبی",
+              "description": "مطالعه سایت‌های زیر آب",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "industrial_archaeology",
+              "name": "باستان‌شناسی صنعتی",
+              "description": "مطالعه آثار صنعتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "archaeological_methods",
+              "name": "روش‌های باستان‌شناسی",
+              "description": "مطالعه تکنیک‌های حفاری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "artifact_analysis",
+              "name": "تحلیل مصنوعات",
+              "description": "مطالعه اشیا باستانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cultural_resource_management",
+              "name": "مدیریت منابع فرهنگی",
+              "description": "مطالعه حفاظت از آثار باستانی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "linguistic_anthropology",
+          "name": "انسان‌شناسی زبانی",
+          "description": "مطالعه زبان در فرهنگ‌ها",
+          "level": 2,
+          "children": [
+            {
+              "id": "language_culture_relationship",
+              "name": "رابطه زبان و فرهنگ",
+              "description": "مطالعه تأثیر فرهنگ بر زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ethnolinguistics",
+              "name": "قوم‌زبان‌شناسی",
+              "description": "مطالعه زبان‌های قومی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "sociolinguistics_anthropology",
+              "name": "جامعه‌شناسی زبانی",
+              "description": "مطالعه زبان در جوامع",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_endangerment",
+              "name": "تهدید زبان‌ها",
+              "description": "مطالعه زبان‌های در حال انقراض",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_revitalization",
+              "name": "احیای زبان‌ها",
+              "description": "مطالعه بازسازی زبان‌های سنتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "multilingualism_anthropology",
+              "name": "چندزبانگی",
+              "description": "مطالعه استفاده از چند زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_contact_anthropology",
+              "name": "تماس زبانی",
+              "description": "مطالعه تأثیر زبان‌ها بر هم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "verbal_art",
+              "name": "هنر کلامی",
+              "description": "مطالعه شعر و داستان‌های شفاهی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "language_ideology",
+              "name": "ایدئولوژی زبانی",
+              "description": "مطالعه باورهای درباره زبان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "conversation_analysis",
+              "name": "تحلیل مکالمه",
+              "description": "مطالعه ساختار گفتگوها",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "applied_anthropology",
+          "name": "انسان‌شناسی کاربردی",
+          "description": "مطالعه کاربرد انسان‌شناسی در حل مسائل",
+          "level": 2,
+          "children": [
+            {
+              "id": "development_anthropology",
+              "name": "انسان‌شناسی توسعه",
+              "description": "مطالعه توسعه جوامع",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "environmental_anthropology",
+              "name": "انسان‌شناسی محیط زیست",
+              "description": "مطالعه رابطه انسان و محیط",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "urban_planning_anthropology",
+              "name": "انسان‌شناسی برنامه‌ریزی شهری",
+              "description": "مطالعه توسعه شهری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "business_anthropology",
+              "name": "انسان‌شناسی کسب‌وکار",
+              "description": "مطالعه فرهنگ سازمانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "educational_anthropology",
+              "name": "انسان‌شناسی آموزشی",
+              "description": "مطالعه فرهنگ مدرسه",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "medical_anthropology_applied",
+              "name": "انسان‌شناسی پزشکی کاربردی",
+              "description": "مطالعه سلامت در جوامع",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "forensic_anthropology_applied",
+              "name": "انسان‌شناسی قانونی کاربردی",
+              "description": "مطالعه در زمینه قضایی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "policy_anthropology",
+              "name": "انسان‌شناسی سیاست‌گذاری",
+              "description": "مطالعه تأثیر بر سیاست‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "humanitarian_anthropology",
+              "name": "انسان‌شناسی بشردوستانه",
+              "description": "مطالعه کمک‌های انسانی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cultural_preservation",
+              "name": "حفاظت فرهنگی",
+              "description": "مطالعه حفظ فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "visual_anthropology",
+          "name": "انسان‌شناسی بصری",
+          "description": "مطالعه فرهنگ از طریق تصویر",
+          "level": 2,
+          "children": [
+            {
+              "id": "ethnographic_film",
+              "name": "فیلم قوم‌نگاری",
+              "description": "مطالعه فرهنگ از طریق فیلم",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "photography_anthropology",
+              "name": "عکاسی انسان‌شناختی",
+              "description": "مطالعه فرهنگ از طریق عکس",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "visual_ethics",
+              "name": "اخلاق بصری",
+              "description": "مطالعه مسائل اخلاقی تصویربرداری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "media_anthropology",
+              "name": "انسان‌شناسی رسانه",
+              "description": "مطالعه رسانه در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "digital_anthropology",
+              "name": "انسان‌شناسی دیجیتال",
+              "description": "مطالعه فرهنگ دیجیتال",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "art_anthropology",
+              "name": "انسان‌شناسی هنر",
+              "description": "مطالعه هنر در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "museum_anthropology",
+              "name": "انسان‌شناسی موزه",
+              "description": "مطالعه نمایش فرهنگی در موزه‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "visual_communication",
+              "name": "ارتباط بصری",
+              "description": "مطالعه ارتباط از طریق تصویر",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "iconography",
+              "name": "تصویرنگاری",
+              "description": "مطالعه نمادهای بصری",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "performance_studies",
+              "name": "مطالعات اجرا",
+              "description": "مطالعه نمایش‌های فرهنگی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "anthropological_theory",
+          "name": "نظریه انسان‌شناختی",
+          "description": "مطالعه نظریه‌های انسان‌شناسی",
+          "level": 2,
+          "children": [
+            {
+              "id": "functionalism",
+              "name": "کارکردگرایی",
+              "description": "مطالعه نقش عناصر فرهنگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "structuralism_anthropology",
+              "name": "ساختارگرایی",
+              "description": "مطالعه ساختارهای فرهنگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "symbolic_anthropology",
+              "name": "انسان‌شناسی نمادین",
+              "description": "مطالعه نمادها در فرهنگ",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "postmodern_anthropology",
+              "name": "انسان‌شناسی پست‌مدرن",
+              "description": "مطالعه رویکردهای پست‌مدرن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "feminist_anthropology",
+              "name": "انسان‌شناسی فمینیستی",
+              "description": "مطالعه جنسیت در انسان‌شناسی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "marxist_anthropology",
+              "name": "انسان‌شناسی مارکسیستی",
+              "description": "مطالعه اقتصاد در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "cognitive_anthropology",
+              "name": "انسان‌شناسی شناختی",
+              "description": "مطالعه شناخت در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "evolutionary_anthropology",
+              "name": "انسان‌شناسی تکاملی",
+              "description": "مطالعه تکامل فرهنگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "interpretive_anthropology",
+              "name": "انسان‌شناسی تفسیری",
+              "description": "مطالعه درک فرهنگی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "critical_anthropology",
+              "name": "انسان‌شناسی انتقادی",
+              "description": "مطالعه قدرت در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "anthropology_of_religion",
+          "name": "انسان‌شناسی دین",
+          "description": "مطالعه دین در فرهنگ‌ها",
+          "level": 2,
+          "children": [
+            {
+              "id": "religious_beliefs_anthropology",
+              "name": "اعتقادات دینی",
+              "description": "مطالعه باورهای دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "ritual_anthropology",
+              "name": "انسان‌شناسی آیینی",
+              "description": "مطالعه مراسم دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "shamanism",
+              "name": "شمن‌باوری",
+              "description": "مطالعه سنت‌های شمن",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "animism",
+              "name": "جان‌باوری",
+              "description": "مطالعه اعتقاد به روح در اشیا",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "totemism",
+              "name": "توتم‌باوری",
+              "description": "مطالعه رابطه با حیوانات مقدس",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religious_syncretism",
+              "name": "همجوشی دینی",
+              "description": "مطالعه ترکیب ادیان",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "pilgrimage_studies",
+              "name": "مطالعات زیارت",
+              "description": "مطالعه سفرهای دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religious_conversion",
+              "name": "تبدیل دینی",
+              "description": "مطالعه تغییر دین",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "sacred_spaces",
+              "name": "فضاهای مقدس",
+              "description": "مطالعه مکان‌های دینی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "religious_artifacts",
+              "name": "مصنوعات دینی",
+              "description": "مطالعه اشیا مذهبی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "anthropology_of_art",
+          "name": "انسان‌شناسی هنر",
+          "description": "مطالعه هنر در فرهنگ‌ها",
+          "level": 2,
+          "children": [
+            {
+              "id": "aesthetics_anthropology",
+              "name": "زیبایی‌شناسی انسان‌شناختی",
+              "description": "مطالعه زیبایی در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "folk_art",
+              "name": "هنر عامیانه",
+              "description": "مطالعه هنر سنتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "body_art",
+              "name": "هنر بدن",
+              "description": "مطالعه خالکوبی و آرایش",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "rock_art",
+              "name": "هنر صخره‌ای",
+              "description": "مطالعه نقاشی‌های صخره‌ای",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "textile_art",
+              "name": "هنر نساجی",
+              "description": "مطالعه پارچه‌بافی سنتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "pottery_art",
+              "name": "هنر سفالگری",
+              "description": "مطالعه سفال‌سازی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "music_anthropology",
+              "name": "انسان‌شناسی موسیقی",
+              "description": "مطالعه موسیقی در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "dance_anthropology",
+              "name": "انسان‌شناسی رقص",
+              "description": "مطالعه رقص در فرهنگ‌ها",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "theater_anthropology",
+              "name": "انسان‌شناسی تئاتر",
+              "description": "مطالعه نمایش‌های سنتی",
+              "level": 3,
+              "children": []
+            },
+            {
+              "id": "art_markets",
+              "name": "بازارهای هنری",
+              "description": "مطالعه تجارت هنر سنتی",
+              "level": 3,
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
