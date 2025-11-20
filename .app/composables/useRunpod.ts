@@ -23,6 +23,8 @@ interface RunPodStatus {
 interface UseRunPodPollingOptions {
 	pollInterval?: number;
 	maxPollAttempts?: number;
+	queuePollInterval?: number; // Interval when job is in queue (default: 15000ms = 15 seconds)
+	queueMaxAttempts?: number; // Max attempts when job is in queue (default: 10)
 }
 
 const DEFAULT_TIMEOUT_MS = 30000;
@@ -39,9 +41,13 @@ export function useRunpod(pollingOptions: UseRunPodPollingOptions = {}) {
 	const {
 		pollInterval = 2000,
 		maxPollAttempts = 60, // 2 minutes with 2s intervals
+		queuePollInterval = 15000, // 15 seconds when in queue
+		queueMaxAttempts = 10, // 10 attempts = 2.5 minutes total
 	} = pollingOptions;
 
 	let pollTimer: NodeJS.Timeout | null = null;
+	let queuePollAttempts = 0;
+	let pollingStartTime: number | null = null;
 
 	/**
 	 * Run a job on RunPod with streaming support
@@ -179,7 +185,39 @@ export function useRunpod(pollingOptions: UseRunPodPollingOptions = {}) {
 	};
 
 	/**
-	 * Start polling for job completion
+	 * Get the appropriate polling interval based on elapsed time and job status
+	 * Strategy:
+	 * - If IN_QUEUE: Use queue interval (15 seconds)
+	 * - If IN_PROGRESS:
+	 *   - 0-5 seconds: Fast polling (1 second) for cold start scenarios
+	 *   - 5-90 seconds: Medium polling (10 seconds) for normal processing
+	 *   - After 90 seconds: Default interval (2 seconds) for long processing
+	 */
+	const getPollingInterval = (elapsedTimeMs: number, isInQueue: boolean): number => {
+		// If in queue, always use queue interval
+		if (isInQueue) {
+			return queuePollInterval; // 15 seconds
+		}
+
+		// For IN_PROGRESS, use time-based intervals
+		const elapsedSeconds = elapsedTimeMs / 1000;
+
+		// Fast polling for first 5 seconds (cold start scenario - usually responds in ~1 second)
+		if (elapsedSeconds <= 5) {
+			return 1000; // 1 second - very fast for cold start
+		}
+
+		// Medium polling for 5-90 seconds (normal processing - average 1.5 minutes)
+		if (elapsedSeconds <= 90) {
+			return 10000; // 10 seconds - medium for normal processing
+		}
+
+		// Default polling after 90 seconds (long processing scenario)
+		return pollInterval; // 2 seconds - default interval
+	};
+
+	/**
+	 * Start polling for job completion with dynamic intervals based on status and elapsed time
 	 */
 	const startPolling = (
 		targetEndpointId: string,
@@ -187,43 +225,86 @@ export function useRunpod(pollingOptions: UseRunPodPollingOptions = {}) {
 		onStatusChange?: (status: RunPodStatus) => void,
 	) => {
 		if (pollTimer) {
-			clearInterval(pollTimer);
+			clearTimeout(pollTimer);
 		}
 
 		isPolling.value = true;
 		pollAttempts.value = 0;
+		queuePollAttempts = 0;
+		pollingStartTime = Date.now();
 
-		pollTimer = setInterval(async () => {
-			if (pollAttempts.value >= maxPollAttempts) {
-				stopPolling();
-				error.value = "Job timed out";
-				processing.value = false;
-				return;
-			}
-
-			pollAttempts.value++;
-
+		const poll = async () => {
 			try {
 				const status = await getJobStatus(jobId, targetEndpointId);
+				const previousStatus = currentJob.value?.status;
 				currentJob.value = status;
 
 				if (onStatusChange) {
 					onStatusChange(status);
 				}
 
+				// Stop polling if job is completed or failed
 				if (status.status === "COMPLETED" || status.status === "FAILED") {
 					stopPolling();
 					processing.value = false;
+					return;
 				}
+
+				// Determine which counter to use based on current status
+				const isInQueue = status.status === "IN_QUEUE";
+
+				// If status changed from IN_QUEUE to something else, reset queue attempts
+				if (previousStatus === "IN_QUEUE" && !isInQueue) {
+					queuePollAttempts = 0;
+					console.log("Job moved out of queue, switching to normal polling");
+				}
+
+				// Increment appropriate counter and check limits
+				if (isInQueue) {
+					queuePollAttempts++;
+					if (queuePollAttempts >= queueMaxAttempts) {
+						stopPolling();
+						error.value = "Job timed out in queue";
+						processing.value = false;
+						return;
+					}
+				} else {
+					pollAttempts.value++;
+					if (pollAttempts.value >= maxPollAttempts) {
+						stopPolling();
+						error.value = "Job timed out";
+						processing.value = false;
+						return;
+					}
+				}
+
+				// Calculate elapsed time and get appropriate interval
+				const elapsedTime = pollingStartTime ? Date.now() - pollingStartTime : 0;
+				const nextInterval = getPollingInterval(elapsedTime, isInQueue);
+				
+				pollTimer = setTimeout(poll, nextInterval);
 			} catch (err: any) {
 				console.error("Polling error:", err);
-				if (pollAttempts.value >= maxPollAttempts) {
+				const isInQueueNow = currentJob.value?.status === "IN_QUEUE";
+				const maxAttemptsReached = isInQueueNow 
+					? queuePollAttempts >= queueMaxAttempts
+					: pollAttempts.value >= maxPollAttempts;
+				
+				if (maxAttemptsReached) {
 					error.value = "Failed to check job status";
 					stopPolling();
 					processing.value = false;
+				} else {
+					// Calculate elapsed time for retry interval
+					const elapsedTime = pollingStartTime ? Date.now() - pollingStartTime : 0;
+					const nextInterval = getPollingInterval(elapsedTime, isInQueueNow);
+					pollTimer = setTimeout(poll, nextInterval);
 				}
 			}
-		}, pollInterval);
+		};
+
+		// Start first poll immediately
+		poll();
 	};
 
 	/**
@@ -231,11 +312,13 @@ export function useRunpod(pollingOptions: UseRunPodPollingOptions = {}) {
 	 */
 	const stopPolling = () => {
 		if (pollTimer) {
-			clearInterval(pollTimer);
+			clearTimeout(pollTimer);
 			pollTimer = null;
 		}
 		isPolling.value = false;
 		processing.value = false;
+		queuePollAttempts = 0;
+		pollingStartTime = null;
 	};
 
 	/**
@@ -248,6 +331,8 @@ export function useRunpod(pollingOptions: UseRunPodPollingOptions = {}) {
 		isPolling.value = false;
 		error.value = null;
 		pollAttempts.value = 0;
+		queuePollAttempts = 0;
+		pollingStartTime = null;
 	};
 
 	/**

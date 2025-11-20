@@ -184,8 +184,10 @@ const {
 	reset: resetRunpod,
 	healthCheck: checkHealth,
 } = useRunpod({
-	pollInterval: 2000,
-	maxPollAttempts: 30,
+	pollInterval: 2000, // Normal polling interval (2 seconds)
+	maxPollAttempts: 60, // Normal max attempts
+	queuePollInterval: 15000, // Queue polling interval (15 seconds)
+	queueMaxAttempts: 10, // Queue max attempts (10 times = 2.5 minutes)
 });
 
 // Local state
@@ -201,6 +203,15 @@ const abortController = ref<AbortController | null>(null);
 onMounted(() => {
 	endpointId.value = "fgzcdkl3k68v64";
 });
+
+// Watch for job completion to display result
+watch([isCompleted, currentJob], ([completed, job]) => {
+	if (completed && job?.output) {
+		finalResult.value = job.output;
+	} else if (job?.status === "FAILED") {
+		finalResult.value = { error: job.error || "Job failed" };
+	}
+}, { immediate: true });
 
 // Methods
 const runTest = async () => {
@@ -231,10 +242,17 @@ const runTest = async () => {
 					timestamp: new Date().toISOString(),
 					data: status,
 				});
+
+				// When status changes from IN_QUEUE to IN_PROGRESS or COMPLETED, update display
+				if (status.status === "COMPLETED" && status.output) {
+					finalResult.value = status.output;
+				} else if (status.status === "FAILED") {
+					finalResult.value = { error: status.error || "Job failed" };
+				}
 			},
 		);
 
-		// When completed, show final result
+		// When completed, show final result (also check after submission)
 		if (isCompleted.value && currentJob.value?.output) {
 			finalResult.value = currentJob.value.output;
 		}
@@ -261,6 +279,8 @@ const clearResults = () => {
 	streamingOutput.value = [];
 	finalResult.value = null;
 	error.value = null;
+	// Also reset the composable state
+	resetRunpod();
 };
 
 const healthCheck = async () => {
