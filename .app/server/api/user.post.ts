@@ -1,4 +1,4 @@
-// const LLM_ADDRESS = 'http://127.0.0.1:8000/query'
+// const LLM_ADDRESS = 'http://localhost:8000/query'
 const LLM_ADDRESS = 'http://193.163.201.12:8000/query';
 
 export type LLMMessage = {
@@ -40,7 +40,8 @@ async function fetchLLM(body: any) {
               temperature: 0.7,
             },
             layer_agent_3: {
-              system_prompt: 'You are an expert at logic and reasoning. Always take a logical approach to the answer. {helper_response}',
+              system_prompt:
+                'You are an expert at logic and reasoning. Always take a logical approach to the answer. {helper_response}',
               model_name: 'llama3-8b-8192',
             },
           },
@@ -50,8 +51,7 @@ async function fetchLLM(body: any) {
     });
     console.log('---SYS PROMPT---');
     return JSON.stringify({ message: sysPrompt.final_response, img: p.avatar });
-  }
-  catch (e) {
+  } catch (e) {
     console.log(e);
 
     return e;
@@ -60,7 +60,5 @@ async function fetchLLM(body: any) {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  return await fetchLLM(
-    body,
-  );
+  return await fetchLLM(body);
 });

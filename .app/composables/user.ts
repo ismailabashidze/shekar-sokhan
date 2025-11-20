@@ -26,6 +26,11 @@ export function useUser() {
 
   // Function to update user zones in PocketBase if empty
   const updateEmptyZonesInDatabase = async (userData: User) => {
+    if (!userData || !userData.id) {
+      console.error('User data or user ID is missing');
+      return userData;
+    }
+    
     if (!userData.zones || (Array.isArray(userData.zones) && userData.zones.length === 0)) {
       try {
         await nuxtApp.$pb.collection('users').update(userData.id as string, {

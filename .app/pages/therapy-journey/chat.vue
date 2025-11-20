@@ -1,13 +1,14 @@
 <script setup lang="ts">
 // import { generateInlineAnalysis } from '@/composables/useOpenRouter'  // REMOVE this import
-import { useOpenRouter } from '@/composables/useOpenRouter';
-import { convertToEmotionWheel } from '@/utils/emotion-mapper';
+import { useOpenRouter } from "@/composables/useOpenRouter";
+import { useRunpod } from "@/composables/useRunPod";
+import { convertToEmotionWheel } from "@/utils/emotion-mapper";
 
 definePageMeta({
-  title: 'گفتگو با روانشناس',
-  layout: 'empty',
+	title: "گفتگو با روانشناس",
+	layout: "empty",
 });
-useHead({ htmlAttrs: { dir: 'rtl' } });
+useHead({ htmlAttrs: { dir: "rtl" } });
 const { getTherapists } = useTherapist();
 const { getCurrentSession, endSession, createSession } = useTherapistSession();
 const { getMessages, sendMessage } = useTherapistsMessages();
@@ -21,7 +22,7 @@ const loading = ref(false);
 const messageLoading = ref(false);
 const chatEl = ref<HTMLElement>();
 const expanded = ref(false);
-const newMessage = ref('');
+const newMessage = ref("");
 const activeTherapistId = ref<string | null>(null);
 const activeSession = ref<any>(null);
 const showEmojiPicker = ref(false);
@@ -47,1008 +48,1325 @@ const currentGoalIndex = ref(0);
 const goalProgress = ref<any>({});
 const conversationContext = ref<any>({});
 const adaptiveFlow = ref({
-  currentPriority: 'high',
-  questionsAsked: [],
-  culturalAdaptations: [],
-  riskFactorsIdentified: [],
+	currentPriority: "high",
+	questionsAsked: [],
+	culturalAdaptations: [],
+	riskFactorsIdentified: [],
 });
 
-const { generateAnalysis, createAnalysis, getAnalysisForSession } = useSessionAnalysis();
+const { generateAnalysis, createAnalysis, getAnalysisForSession } =
+	useSessionAnalysis();
 const { createAndLinkAnalysis, getMessageAnalysis } = useMessageAnalysis();
 const {
-  submitFeedback,
-  getFeedbackForMessage,
-  validateFeedback,
-  FEEDBACK_CATEGORIES,
+	submitFeedback,
+	getFeedbackForMessage,
+	validateFeedback,
+	FEEDBACK_CATEGORIES,
 } = useMessageFeedback();
 const { getGoalsByUser, updateGoalProgress } = useGoals();
 
 const toggleAudioUser = () => {
-  showAudioUser.value = !showAudioUser.value;
+	showAudioUser.value = !showAudioUser.value;
 };
 
 const emojiCategories = [
-  { name: 'شاد', emojis: ['😀', '😃', '😄', '😁', '😆', '😂', '🤣', '😊', '😇', '😉', '😋', '😎', '😍', '😘', '🥳', '🤗', '😜', '😝'] },
-  { name: 'غمگین', emojis: ['😢', '😭', '😞', '😔', '😟', '😥', '😓', '🥺', '💧', '😪', '😿', '😿'] },
-  { name: 'عصبانی', emojis: ['😠', '😡', '😤', '🤬', '😒', '👿', '💢', '👺', '👹', '🤯'] },
-  { name: 'عشق', emojis: ['❤️', '💕', '💗', '💓', '💖', '😍', '🥰', '😘', '💘', '💝', '💋'] },
-  { name: 'تعجب', emojis: ['😲', '😯', '😦', '😧', '😱', '😨', '🧐', '😮‍💨', '😵‍💫', '🤔'] },
-  { name: 'ترس', emojis: ['😱', '😨', '😰', '😖', '😧', '😣', '👻', '🕷️', '🕸️'] },
-  { name: 'حیوانات', emojis: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵'] },
-  { name: 'غذا', emojis: ['🍏', '🍎', '🍌', '🍉', '🍇', '🍓', '🍔', '🍕', '🍟', '🍿', '🍩', '🍪', '🧁', '🍰', '🍣'] },
-  { name: 'ورزش', emojis: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🥊'] },
+	{
+		name: "شاد",
+		emojis: [
+			"😀",
+			"😃",
+			"😄",
+			"😁",
+			"😆",
+			"😂",
+			"🤣",
+			"😊",
+			"😇",
+			"😉",
+			"😋",
+			"😎",
+			"😍",
+			"😘",
+			"🥳",
+			"🤗",
+			"😜",
+			"😝",
+		],
+	},
+	{
+		name: "غمگین",
+		emojis: [
+			"😢",
+			"😭",
+			"😞",
+			"😔",
+			"😟",
+			"😥",
+			"😓",
+			"🥺",
+			"💧",
+			"😪",
+			"😿",
+			"😿",
+		],
+	},
+	{
+		name: "عصبانی",
+		emojis: ["😠", "😡", "😤", "🤬", "😒", "👿", "💢", "👺", "👹", "🤯"],
+	},
+	{
+		name: "عشق",
+		emojis: ["❤️", "💕", "💗", "💓", "💖", "😍", "🥰", "😘", "💘", "💝", "💋"],
+	},
+	{
+		name: "تعجب",
+		emojis: ["😲", "😯", "😦", "😧", "😱", "😨", "🧐", "😮‍💨", "😵‍💫", "🤔"],
+	},
+	{ name: "ترس", emojis: ["😱", "😨", "😰", "😖", "😧", "😣", "👻", "🕷️", "🕸️"] },
+	{
+		name: "حیوانات",
+		emojis: [
+			"🐶",
+			"🐱",
+			"🐭",
+			"🐹",
+			"🐰",
+			"🦊",
+			"🐻",
+			"🐼",
+			"🐨",
+			"🐯",
+			"🦁",
+			"🐮",
+			"🐷",
+			"🐸",
+			"🐵",
+		],
+	},
+	{
+		name: "غذا",
+		emojis: [
+			"🍏",
+			"🍎",
+			"🍌",
+			"🍉",
+			"🍇",
+			"🍓",
+			"🍔",
+			"🍕",
+			"🍟",
+			"🍿",
+			"🍩",
+			"🍪",
+			"🧁",
+			"🍰",
+			"🍣",
+		],
+	},
+	{
+		name: "ورزش",
+		emojis: [
+			"⚽",
+			"🏀",
+			"🏈",
+			"⚾",
+			"🎾",
+			"🏐",
+			"🏉",
+			"🎱",
+			"🏓",
+			"🏸",
+			"🏒",
+			"🥊",
+		],
+	},
 ];
 const currentCategory = ref(emojiCategories[0].name);
 const tabContainerRef = ref<HTMLElement | null>(null);
-const scrollTabs = (direction: 'left' | 'right') => {
-  if (!tabContainerRef.value) return;
-  const amount = tabContainerRef.value.clientWidth * 0.7;
-  tabContainerRef.value.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+const scrollTabs = (direction: "left" | "right") => {
+	if (!tabContainerRef.value) return;
+	const amount = tabContainerRef.value.clientWidth * 0.7;
+	tabContainerRef.value.scrollBy({
+		left: direction === "left" ? -amount : amount,
+		behavior: "smooth",
+	});
 };
 const insertEmoji = (emoji: string) => {
-  newMessage.value += emoji;
+	newMessage.value += emoji;
 };
 
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Enter' && e.ctrlKey) {
-    e.preventDefault();
-    submitMessage();
-  }
+	if (e.key === "Enter" && e.ctrlKey) {
+		e.preventDefault();
+		submitMessage();
+	}
 };
 
 const emojiPickerRef = ref<HTMLElement>();
 onClickOutside(emojiPickerRef, () => {
-  showEmojiPicker.value = false;
+	showEmojiPicker.value = false;
 });
 
 const formatTime = (timestamp: string | Date) => {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
-  return date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+	const date = typeof timestamp === "string" ? new Date(timestamp) : timestamp;
+	return date.toLocaleTimeString("fa-IR", {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
 };
 const scrollToBottom = () => {
-  nextTick(() => {
-    if (chatEl.value) {
-      chatEl.value.scrollTo({
-        top: chatEl.value.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
-  });
+	nextTick(() => {
+		if (chatEl.value) {
+			chatEl.value.scrollTo({
+				top: chatEl.value.scrollHeight,
+				behavior: "smooth",
+			});
+		}
+	});
 };
 
 const checkIfScrolledToBottom = () => {
-  if (!chatEl.value) return true;
-  const { scrollHeight, scrollTop, clientHeight } = chatEl.value;
-  const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
-  showScrollButton.value = !isAtBottom;
+	if (!chatEl.value) return true;
+	const { scrollHeight, scrollTop, clientHeight } = chatEl.value;
+	const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
+	showScrollButton.value = !isAtBottom;
 };
 
 const loadMessages = async (therapistId: string) => {
-  if (currentLoadingTherapistId.value === therapistId || showNoCharge.value) {
-    return;
-  }
+	if (currentLoadingTherapistId.value === therapistId || showNoCharge.value) {
+		return;
+	}
 
-  loading.value = true;
-  currentLoadingTherapistId.value = therapistId;
+	loading.value = true;
+	currentLoadingTherapistId.value = therapistId;
 
-  try {
-    if (!nuxtApp.$pb.authStore.isValid) {
-      await navigateTo('/auth/login');
-      return;
-    }
+	try {
+		if (!nuxtApp.$pb.authStore.isValid) {
+			await navigateTo("/auth/login");
+			return;
+		}
 
-    const session = await getCurrentSession(therapistId);
-    if (session) {
-      activeSession.value = session;
-      sessionId.value = session.id;
-      const loadedMessages = await getMessages(session.id);
+		const session = await getCurrentSession(therapistId);
+		if (session) {
+			activeSession.value = session;
+			sessionId.value = session.id;
+			const loadedMessages = await getMessages(session.id);
 
-      // Load analysis data for messages that have message_analysis
-      const messagesWithAnalysis = await Promise.all(
-        loadedMessages.map(async (msg) => {
-          let analysisResult = null;
+			// Load analysis data for messages that have message_analysis
+			const messagesWithAnalysis = await Promise.all(
+				loadedMessages.map(async (msg) => {
+					let analysisResult = null;
 
-          // Only try to load analysis for user messages (sent) that have message_analysis field
-          if (msg.type === 'sent' && msg.message_analysis) {
-            try {
-              const analysisData = await getMessageAnalysis(msg.message_analysis);
-              // Convert database format to the format expected by the UI
-              analysisResult = {
-                lastMessage_emotions: analysisData.emotions || [],
-                correspondingEmojis: analysisData.emojis || '',
-                // Note: emotionalResponse is not stored in message_analysis collection
-                // It's part of the full analysis result generated dynamically
-              };
-            }
-            catch (analysisError) {
-              console.error('Error loading analysis for message:', msg.id, analysisError);
-              // Continue without analysis if loading fails
-            }
-          }
+					// Only try to load analysis for user messages (sent) that have message_analysis field
+					if (msg.type === "sent" && msg.message_analysis) {
+						try {
+							const analysisData = await getMessageAnalysis(
+								msg.message_analysis,
+							);
+							// Convert database format to the format expected by the UI
+							analysisResult = {
+								lastMessage_emotions: analysisData.emotions || [],
+								correspondingEmojis: analysisData.emojis || "",
+								// Note: emotionalResponse is not stored in message_analysis collection
+								// It's part of the full analysis result generated dynamically
+							};
+						} catch (analysisError) {
+							console.error(
+								"Error loading analysis for message:",
+								msg.id,
+								analysisError,
+							);
+							// Continue without analysis if loading fails
+						}
+					}
 
-          return {
-            ...msg,
-            timestamp: msg.time,
-            analysisResult,
-          };
-        }),
-      );
+					return {
+						...msg,
+						timestamp: msg.time,
+						analysisResult,
+					};
+				}),
+			);
 
-      messages.value = messagesWithAnalysis;
-      scrollToBottom();
-      startSessionTimer(); // Start session timer when messages are loaded
-    }
-    else if (!showNoCharge.value) {
-      const newSession = await createSession(therapistId, 'therapy-journey');
-      if (newSession) {
-        activeSession.value = newSession;
-        sessionId.value = newSession.id;
-        messages.value = [];
-        startSessionTimer(); // Start session timer for new session
-      }
-    }
-  }
-  catch (error) {
-    console.error('Error loading messages:', error);
-    messages.value = [];
-  }
-  finally {
-    loading.value = false;
-    currentLoadingTherapistId.value = null;
-  }
+			messages.value = messagesWithAnalysis;
+			scrollToBottom();
+			startSessionTimer(); // Start session timer when messages are loaded
+		} else if (!showNoCharge.value) {
+			const newSession = await createSession(therapistId, "therapy-journey");
+			if (newSession) {
+				activeSession.value = newSession;
+				sessionId.value = newSession.id;
+				messages.value = [];
+				startSessionTimer(); // Start session timer for new session
+			}
+		}
+	} catch (error) {
+		console.error("Error loading messages:", error);
+		messages.value = [];
+	} finally {
+		loading.value = false;
+		currentLoadingTherapistId.value = null;
+	}
 };
 
 const selectConversation = async (therapistId: string) => {
-  activeTherapistId.value = therapistId;
-  await loadMessages(therapistId);
-  // Update session time immediately after loading messages
-  if (activeSession.value) {
-    updateSessionTime();
-  }
-  navigateTo({
-    query: {
-      ...route.query,
-      therapistId,
-    },
-  });
+	activeTherapistId.value = therapistId;
+	await loadMessages(therapistId);
+	// Update session time immediately after loading messages
+	if (activeSession.value) {
+		updateSessionTime();
+	}
+	navigateTo({
+		query: {
+			...route.query,
+			therapistId,
+		},
+	});
 };
 
 watch(
-  () => conversations.value,
-  async (newConversations) => {
-    if (newConversations.length > 0 && !activeTherapistId.value && !showNoCharge.value) {
-      const therapistId = route.query.therapistId as string;
-      if (therapistId) {
-        activeTherapistId.value = therapistId;
-        await loadMessages(therapistId);
-      }
-    }
-  },
+	() => conversations.value,
+	async (newConversations) => {
+		if (
+			newConversations.length > 0 &&
+			!activeTherapistId.value &&
+			!showNoCharge.value
+		) {
+			const therapistId = route.query.therapistId as string;
+			if (therapistId) {
+				activeTherapistId.value = therapistId;
+				await loadMessages(therapistId);
+			}
+		}
+	},
 );
 
 watch(activeTherapistId, async (newId) => {
-  if (newId) {
-    await loadMessages(newId);
-  }
+	if (newId) {
+		await loadMessages(newId);
+	}
 });
 
 onUnmounted(() => {
-  currentLoadingTherapistId.value = null;
+	currentLoadingTherapistId.value = null;
 });
 
 const selectedConversationComputed = computed(() => {
-  return conversations.value.find(
-    conversation => conversation.user.id === activeTherapistId.value,
-  );
+	return conversations.value.find(
+		(conversation) => conversation.user.id === activeTherapistId.value,
+	);
 });
 
 const getRandomColor = () => {
-  const colors = [
-    'bg-primary-500',
-    'bg-info-500',
-    'bg-success-500',
-    'bg-warning-500',
-    'bg-danger-500',
-    'bg-purple-500',
-    'bg-yellow-500',
-    'bg-pink-500',
-    'bg-indigo-500',
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
+	const colors = [
+		"bg-primary-500",
+		"bg-info-500",
+		"bg-success-500",
+		"bg-warning-500",
+		"bg-danger-500",
+		"bg-purple-500",
+		"bg-yellow-500",
+		"bg-pink-500",
+		"bg-indigo-500",
+	];
+	return colors[Math.floor(Math.random() * colors.length)];
 };
 
 const {
-  streamChat,
-  models,
-  selectedModel,
-  loading: modelsLoading,
-  error: modelsError,
-  searchQuery,
-  retryFetch,
-  filteredModels,
-  generateInlineAnalysis,
+	streamChat,
+	models,
+	selectedModel,
+	loading: modelsLoading,
+	error: modelsError,
+	searchQuery,
+	retryFetch,
+	filteredModels,
+	generateInlineAnalysis,
 } = useOpenRouter();
+
+const {
+	submitJobWithPolling,
+	processing: runpodProcessing,
+	isPolling,
+	isCompleted,
+	isFailed,
+	isPending,
+	currentJob,
+	error: runpodError,
+	stopPolling,
+	reset: resetRunpod,
+} = useRunpod({
+	pollInterval: 2000,
+	maxPollAttempts: 60,
+});
 
 const { role, user } = useUser();
 const { createReport, updateReport, getReportByUserId } = useReport();
-const streamingResponse = ref('');
+const streamingResponse = ref("");
 const showModelError = ref(false);
-const modelSearchInput = ref('');
+const modelSearchInput = ref("");
 const showModelDropdown = ref(false);
 
 watch(modelSearchInput, (newValue) => {
-  searchQuery.value = newValue;
+	searchQuery.value = newValue;
 });
 
 watch(activeTherapistId, async (newId) => {
-  streamingResponse.value = '';
-  if (newId) {
-    await loadMessages(newId);
-  }
+	streamingResponse.value = "";
+	if (newId) {
+		await loadMessages(newId);
+	}
 });
 
 // === GOAL-GUIDED CONVERSATION HELPER FUNCTIONS ===
 function generateGoalGuidedPrompt(goals, userMessage, analysisResult) {
-  if (!goals || goals.length === 0) return '';
+	if (!goals || goals.length === 0) return "";
 
-  // Extract priority disorders from the new goal structure
-  const priorityDisorders = [];
+	// Extract priority disorders from the new goal structure
+	const priorityDisorders = [];
 
-  goals.forEach((goal) => {
-    const goalData = goal?.goals || goal;
-    const disorders = goalData?.suggestedDisordersToInvestigate || [];
+	goals.forEach((goal) => {
+		const goalData = goal?.goals || goal;
+		const disorders = goalData?.suggestedDisordersToInvestigate || [];
 
-    if (Array.isArray(disorders)) {
-      disorders.forEach((category) => {
-        if (category?.disorders) {
-          category.disorders.forEach((disorder) => {
-            priorityDisorders.push({
-              category: category.categoryTitle,
-              categoryDescription: category.categoryDescription,
-              title: disorder.title,
-              code: disorder.code,
-              description: disorder.description,
-              minimumCriteria: disorder.minimumCriteria,
-              suicideRisk: disorder.suicideRisk,
-              prevalence: disorder.Prevalence,
-              developmentAndCourse: disorder.developmentAndCourse,
-              conversationGuidance: goalData?.conversation_guidance,
-            });
-          });
-        }
-      });
-    }
-  });
+		if (Array.isArray(disorders)) {
+			disorders.forEach((category) => {
+				if (category?.disorders) {
+					category.disorders.forEach((disorder) => {
+						priorityDisorders.push({
+							category: category.categoryTitle,
+							categoryDescription: category.categoryDescription,
+							title: disorder.title,
+							code: disorder.code,
+							description: disorder.description,
+							minimumCriteria: disorder.minimumCriteria,
+							suicideRisk: disorder.suicideRisk,
+							prevalence: disorder.Prevalence,
+							developmentAndCourse: disorder.developmentAndCourse,
+							conversationGuidance: goalData?.conversation_guidance,
+						});
+					});
+				}
+			});
+		}
+	});
 
-  if (priorityDisorders.length === 0) {
-    // Fallback to old structure if new structure not found
-    const lowConfidenceGoals = goals.filter(g =>
-      g.dsm5_aspects?.diagnostic_confidence < 70 && g.status !== 'completed',
-    ).sort((a, b) => a.dsm5_aspects?.diagnostic_confidence - b.dsm5_aspects?.diagnostic_confidence);
+	if (priorityDisorders.length === 0) {
+		// Fallback to old structure if new structure not found
+		const lowConfidenceGoals = goals
+			.filter(
+				(g) =>
+					g.dsm5_aspects?.diagnostic_confidence < 70 &&
+					g.status !== "completed",
+			)
+			.sort(
+				(a, b) =>
+					a.dsm5_aspects?.diagnostic_confidence -
+					b.dsm5_aspects?.diagnostic_confidence,
+			);
 
-    if (lowConfidenceGoals.length === 0) return '';
+		if (lowConfidenceGoals.length === 0) return "";
 
-    let prompt = `\n\n=== DIAGNOSTIC GUIDANCE (Legacy Structure) ===\n`;
-    prompt += `Focus on these diagnostic areas:\n\n`;
+		let prompt = `\n\n=== DIAGNOSTIC GUIDANCE (Legacy Structure) ===\n`;
+		prompt += `Focus on these diagnostic areas:\n\n`;
 
-    lowConfidenceGoals.slice(0, 3).forEach((goal, index) => {
-      const aspects = goal.dsm5_aspects || {};
-      prompt += `${index + 1}. **${goal.title}** (Confidence: ${aspects.diagnostic_confidence || 0}%)\n`;
-      prompt += `   - Category: ${aspects.dsm5_category || 'Unknown'}\n`;
-      prompt += `   - Key criteria to explore: ${aspects.criteria_evidence || 'None specified'}\n`;
-    });
+		lowConfidenceGoals.slice(0, 3).forEach((goal, index) => {
+			const aspects = goal.dsm5_aspects || {};
+			prompt += `${index + 1}. **${goal.title}** (Confidence: ${aspects.diagnostic_confidence || 0}%)\n`;
+			prompt += `   - Category: ${aspects.dsm5_category || "Unknown"}\n`;
+			prompt += `   - Key criteria to explore: ${aspects.criteria_evidence || "None specified"}\n`;
+		});
 
-    return prompt;
-  }
+		return prompt;
+	}
 
-  // Build comprehensive prompt with new structure
-  let prompt = `\n\n=== COMPREHENSIVE DSM-5 DIAGNOSTIC GUIDANCE ===\n`;
-  prompt += `You are conducting an evidence-based diagnostic interview. Focus on exploring these disorders:\n\n`;
+	// Build comprehensive prompt with new structure
+	let prompt = `\n\n=== COMPREHENSIVE DSM-5 DIAGNOSTIC GUIDANCE ===\n`;
+	prompt += `You are conducting an evidence-based diagnostic interview. Focus on exploring these disorders:\n\n`;
 
-  priorityDisorders.slice(0, 5).forEach((disorder, index) => {
-    prompt += `${index + 1}. **${disorder.title}** (${disorder.code})\n`;
-    prompt += `   - Category: ${disorder.category}\n`;
-    prompt += `   - Description: ${disorder.description}\n`;
-    prompt += `   - Key Criteria to Assess: ${disorder.minimumCriteria}\n`;
+	priorityDisorders.slice(0, 5).forEach((disorder, index) => {
+		prompt += `${index + 1}. **${disorder.title}** (${disorder.code})\n`;
+		prompt += `   - Category: ${disorder.category}\n`;
+		prompt += `   - Description: ${disorder.description}\n`;
+		prompt += `   - Key Criteria to Assess: ${disorder.minimumCriteria}\n`;
 
-    if (disorder.suicideRisk && disorder.suicideRisk !== 'low') {
-      prompt += `   - ⚠️ SUICIDE RISK: ${disorder.suicideRisk} - Monitor carefully\n`;
-    }
+		if (disorder.suicideRisk && disorder.suicideRisk !== "low") {
+			prompt += `   - ⚠️ SUICIDE RISK: ${disorder.suicideRisk} - Monitor carefully\n`;
+		}
 
-    if (disorder.prevalence) {
-      prompt += `   - Prevalence: ${disorder.prevalence}\n`;
-    }
+		if (disorder.prevalence) {
+			prompt += `   - Prevalence: ${disorder.prevalence}\n`;
+		}
 
-    prompt += `\n`;
-  });
+		prompt += `\n`;
+	});
 
-  // Add conversation guidance if available
-  if (priorityDisorders[0]?.conversationGuidance?.priority_questions) {
-    prompt += `\nPRIORITY QUESTIONS TO EXPLORE:\n`;
-    priorityDisorders[0].conversationGuidance.priority_questions.slice(0, 3).forEach((question) => {
-      prompt += `- ${question}\n`;
-    });
-  }
+	// Add conversation guidance if available
+	if (priorityDisorders[0]?.conversationGuidance?.priority_questions) {
+		prompt += `\nPRIORITY QUESTIONS TO EXPLORE:\n`;
+		priorityDisorders[0].conversationGuidance.priority_questions
+			.slice(0, 3)
+			.forEach((question) => {
+				prompt += `- ${question}\n`;
+			});
+	}
 
-  prompt += `\nCONVERSATION APPROACH:\n`;
-  prompt += `- Use natural, therapeutic conversation style\n`;
-  prompt += `- Explore symptoms systematically but sensitively\n`;
-  prompt += `- Pay attention to cultural context and individual presentation\n`;
-  prompt += `- Monitor for suicide risk throughout the conversation\n`;
-  prompt += `- Balance diagnostic assessment with emotional support\n`;
-  prompt += `- Don't make the questioning feel like a clinical checklist\n`;
+	prompt += `\nCONVERSATION APPROACH:\n`;
+	prompt += `- Use natural, therapeutic conversation style\n`;
+	prompt += `- Explore symptoms systematically but sensitively\n`;
+	prompt += `- Pay attention to cultural context and individual presentation\n`;
+	prompt += `- Monitor for suicide risk throughout the conversation\n`;
+	prompt += `- Balance diagnostic assessment with emotional support\n`;
+	prompt += `- Don't make the questioning feel like a clinical checklist\n`;
 
-  if (analysisResult?.lastMessage_emotionIntensity === 'high') {
-    prompt += `- ⚠️ HIGH EMOTIONAL INTENSITY DETECTED - Prioritize emotional regulation first\n`;
-  }
+	if (analysisResult?.lastMessage_emotionIntensity === "high") {
+		prompt += `- ⚠️ HIGH EMOTIONAL INTENSITY DETECTED - Prioritize emotional regulation first\n`;
+	}
 
-  if (analysisResult?.session_humanInterventionNeeded) {
-    prompt += `- ⚠️ HUMAN INTERVENTION MAY BE NEEDED - Consider referral or immediate support\n`;
-  }
+	if (analysisResult?.session_humanInterventionNeeded) {
+		prompt += `- ⚠️ HUMAN INTERVENTION MAY BE NEEDED - Consider referral or immediate support\n`;
+	}
 
-  // Check for high suicide risk
-  const hasHighSuicideRisk = priorityDisorders.some(d => d.suicideRisk && d.suicideRisk.includes('high'));
-  if (hasHighSuicideRisk) {
-    prompt += `- 🚨 HIGH SUICIDE RISK IDENTIFIED - Assess immediately and consider safety planning\n`;
-  }
+	// Check for high suicide risk
+	const hasHighSuicideRisk = priorityDisorders.some(
+		(d) => d.suicideRisk && d.suicideRisk.includes("high"),
+	);
+	if (hasHighSuicideRisk) {
+		prompt += `- 🚨 HIGH SUICIDE RISK IDENTIFIED - Assess immediately and consider safety planning\n`;
+	}
 
-  prompt += `\n=== END DIAGNOSTIC GUIDANCE ===\n\n`;
+	prompt += `\n=== END DIAGNOSTIC GUIDANCE ===\n\n`;
 
-  return prompt;
+	return prompt;
 }
 
-async function updateGoalProgressFromConversation(goals, userMessage, aiResponse, analysisResult) {
-  if (!goals || goals.length === 0) return;
+async function updateGoalProgressFromConversation(
+	goals,
+	userMessage,
+	aiResponse,
+	analysisResult,
+) {
+	if (!goals || goals.length === 0) return;
 
-  try {
-    for (const goal of goals) {
-      if (goal.status === 'completed') continue;
+	try {
+		for (const goal of goals) {
+			if (goal.status === "completed") continue;
 
-      const aspects = goal.dsm5_aspects || {};
-      let progressDelta = 0;
-      let confidenceDelta = 0;
-      let updatedEvidence = aspects.criteria_evidence || '';
+			const aspects = goal.dsm5_aspects || {};
+			let progressDelta = 0;
+			let confidenceDelta = 0;
+			let updatedEvidence = aspects.criteria_evidence || "";
 
-      // Analyze if user message provides evidence for this goal's criteria
-      const userMessageLower = userMessage.toLowerCase();
-      const criteriaWords = (aspects.criteria_evidence || '').toLowerCase().split(' ');
+			// Analyze if user message provides evidence for this goal's criteria
+			const userMessageLower = userMessage.toLowerCase();
+			const criteriaWords = (aspects.criteria_evidence || "")
+				.toLowerCase()
+				.split(" ");
 
-      // Check for keyword matches (enhanced matching can be implemented later)
-      const matchedCriteria = criteriaWords.filter(word =>
-        word.length > 3 && userMessageLower.includes(word),
-      );
+			// Check for keyword matches (enhanced matching can be implemented later)
+			const matchedCriteria = criteriaWords.filter(
+				(word) => word.length > 3 && userMessageLower.includes(word),
+			);
 
-      if (matchedCriteria.length > 0) {
-        // Evidence found - increase confidence
-        confidenceDelta = Math.min(10, matchedCriteria.length * 3);
-        progressDelta = 5;
+			if (matchedCriteria.length > 0) {
+				// Evidence found - increase confidence
+				confidenceDelta = Math.min(10, matchedCriteria.length * 3);
+				progressDelta = 5;
 
-        // Update evidence with new information
-        const newEvidence = `${userMessage.substring(0, 100)}...`;
-        updatedEvidence += ` | New: ${newEvidence}`;
-      }
+				// Update evidence with new information
+				const newEvidence = `${userMessage.substring(0, 100)}...`;
+				updatedEvidence += ` | New: ${newEvidence}`;
+			}
 
-      // Use analysis result to inform progress
-      if (analysisResult) {
-        // Check emotional alignment with goal
-        const primaryEmotions = analysisResult.lastMessage_primaryEmotions || [];
+			// Use analysis result to inform progress
+			if (analysisResult) {
+				// Check emotional alignment with goal
+				const primaryEmotions =
+					analysisResult.lastMessage_primaryEmotions || [];
 
-        // Example: if goal relates to depression and user shows depressive emotions
-        if (aspects.dsm5_category?.includes('Depressive')
-          && primaryEmotions.some(emotion => ['sadness', 'hopelessness', 'despair'].includes(emotion))) {
-          confidenceDelta += 5;
-          progressDelta += 3;
-        }
+				// Example: if goal relates to depression and user shows depressive emotions
+				if (
+					aspects.dsm5_category?.includes("Depressive") &&
+					primaryEmotions.some((emotion) =>
+						["sadness", "hopelessness", "despair"].includes(emotion),
+					)
+				) {
+					confidenceDelta += 5;
+					progressDelta += 3;
+				}
 
-        // Example: anxiety-related goals
-        if (aspects.dsm5_category?.includes('Anxiety')
-          && primaryEmotions.some(emotion => ['anxiety', 'fear', 'worry'].includes(emotion))) {
-          confidenceDelta += 5;
-          progressDelta += 3;
-        }
-      }
+				// Example: anxiety-related goals
+				if (
+					aspects.dsm5_category?.includes("Anxiety") &&
+					primaryEmotions.some((emotion) =>
+						["anxiety", "fear", "worry"].includes(emotion),
+					)
+				) {
+					confidenceDelta += 5;
+					progressDelta += 3;
+				}
+			}
 
-      // Apply progress updates if there's meaningful change
-      if (progressDelta > 0 || confidenceDelta > 0) {
-        const newConfidence = Math.min(100, (aspects.diagnostic_confidence || 0) + confidenceDelta);
-        const newProgress = Math.min(100, (goal.progress_percentage || 0) + progressDelta);
+			// Apply progress updates if there's meaningful change
+			if (progressDelta > 0 || confidenceDelta > 0) {
+				const newConfidence = Math.min(
+					100,
+					(aspects.diagnostic_confidence || 0) + confidenceDelta,
+				);
+				const newProgress = Math.min(
+					100,
+					(goal.progress_percentage || 0) + progressDelta,
+				);
 
-        const updatedAspects = {
-          ...aspects,
-          diagnostic_confidence: newConfidence,
-          criteria_evidence: updatedEvidence,
-          last_updated: new Date().toISOString(),
-        };
+				const updatedAspects = {
+					...aspects,
+					diagnostic_confidence: newConfidence,
+					criteria_evidence: updatedEvidence,
+					last_updated: new Date().toISOString(),
+				};
 
-        await updateGoalProgress(goal.id, {
-          progress_percentage: newProgress,
-          dsm5_aspects: updatedAspects,
-          ai_evaluation: `Updated based on conversation. Evidence: ${matchedCriteria.join(', ')}`,
-        });
+				await updateGoalProgress(goal.id, {
+					progress_percentage: newProgress,
+					dsm5_aspects: updatedAspects,
+					ai_evaluation: `Updated based on conversation. Evidence: ${matchedCriteria.join(", ")}`,
+				});
 
-        console.log(`Goal "${goal.title}" updated: confidence +${confidenceDelta}%, progress +${progressDelta}%`);
-      }
-    }
-  }
-  catch (error) {
-    console.error('Error in updateGoalProgressFromConversation:', error);
-    throw error;
-  }
+				console.log(
+					`Goal "${goal.title}" updated: confidence +${confidenceDelta}%, progress +${progressDelta}%`,
+				);
+			}
+		}
+	} catch (error) {
+		console.error("Error in updateGoalProgressFromConversation:", error);
+		throw error;
+	}
+}
+
+async function submitMessageWithRunPod(messages: any[], therapistDetails: any) {
+	try {
+		isAIResponding.value = true;
+		messageLoading.value = true;
+		streamingResponse.value = "";
+		isAIThinking.value = true;
+		thinkingResponse.value = "در حال پردازش...";
+
+		// Add a temporary thinking message
+		const tempThinkingId = "thinking-" + Date.now();
+		messages.value.push({
+			type: "received",
+			text: "در حال پردازش درخواست شما...",
+			timestamp: new Date().toISOString(),
+			id: tempThinkingId,
+			isTyping: true,
+		});
+
+		// Submit job to RunPod with polling
+		await submitJobWithPolling(
+			{
+				messages,
+				therapist: therapistDetails,
+			},
+			{
+				endpointId: "your-runpod-endpoint-id", // You'll need to configure this
+			},
+			(status) => {
+				// Update UI based on status changes
+				if (status.status === "IN_QUEUE") {
+					thinkingResponse.value = "درخواست شما در صف پردازش است...";
+				} else if (status.status === "IN_PROGRESS") {
+					thinkingResponse.value = "در حال پردازش پاسخ...";
+				}
+			},
+		);
+
+		// Remove temporary thinking message
+		messages.value = messages.value.filter((msg) => !msg.isTyping);
+
+		if (isCompleted.value && currentJob.value?.output) {
+			// Job completed successfully
+			const aiResponse = currentJob.value.output;
+			thinkingResponse.value = aiResponse;
+
+			// Save AI response to PocketBase
+			const savedAIMessage = await sendMessage(
+				activeTherapistId.value!,
+				activeSession.value!.id,
+				aiResponse,
+				"received",
+			);
+
+			// Add AI response to messages
+			messages.value.push({
+				type: "received",
+				text: aiResponse,
+				timestamp: savedAIMessage.time,
+				id: savedAIMessage.id,
+			});
+		} else if (isFailed.value) {
+			// Job failed
+			const errorMessage = currentJob.value?.error || "خطا در پردازش درخواست";
+			messages.value.push({
+				type: "received",
+				text: `متاسفانه خطایی رخ داد: ${errorMessage}`,
+				timestamp: new Date().toISOString(),
+				id: "error-" + Date.now(),
+			});
+		}
+
+		scrollToBottom();
+	} catch (error: any) {
+		console.error("RunPod error:", error);
+		messages.value.push({
+			type: "received",
+			text: "متاسفانه خطایی در ارتباط با سرور رخ داد. لطفا دوباره تلاش کنید.",
+			timestamp: new Date().toISOString(),
+			id: "error-" + Date.now(),
+		});
+	} finally {
+		isAIResponding.value = false;
+		messageLoading.value = false;
+		isAIThinking.value = false;
+	}
 }
 
 async function submitMessage() {
-  if (showNoCharge.value) {
-    toaster.show({
-      title: 'خطا',
-      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-    return;
-  }
+	if (showNoCharge.value) {
+		toaster.show({
+			title: "خطا",
+			message:
+				"بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.",
+			color: "danger",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+		return;
+	}
 
-  if (!newMessage.value || messageLoading.value || !activeSession.value?.id) return;
+	if (!newMessage.value || messageLoading.value || !activeSession.value?.id)
+		return;
 
-  try {
-    messageLoading.value = true;
-    const now = new Date().toISOString();
-    streamingResponse.value = '';
+	try {
+		messageLoading.value = true;
+		const now = new Date().toISOString();
+		streamingResponse.value = "";
 
-    const userMessage = {
-      type: 'sent',
-      text: newMessage.value,
-      timestamp: now,
-    };
+		const userMessage = {
+			type: "sent",
+			text: newMessage.value,
+			timestamp: now,
+		};
 
-    const currentTherapist = selectedConversationComputed.value?.user;
-    if (!currentTherapist?.id) {
-      console.error('No active therapist found');
-      return;
-    }
+		const currentTherapist = selectedConversationComputed.value?.user;
+		if (!currentTherapist?.id) {
+			console.error("No active therapist found");
+			return;
+		}
 
-    const session = activeSession.value;
+		const session = activeSession.value;
 
-    const savedUserMessage = await sendMessage(currentTherapist.id, session.id, userMessage.text, 'sent');
+		const savedUserMessage = await sendMessage(
+			currentTherapist.id,
+			session.id,
+			userMessage.text,
+			"sent",
+		);
 
-    // Add user message immediately (without analysis first)
-    const messageId = savedUserMessage.id;
-    messages.value.push({
-      ...userMessage,
-      id: messageId,
-      timestamp: savedUserMessage.time,
-      analysisResult: null, // Will be updated later
-    });
-    newMessage.value = '';
-    scrollToBottom();
+		// Add user message immediately (without analysis first)
+		const messageId = savedUserMessage.id;
+		messages.value.push({
+			...userMessage,
+			id: messageId,
+			timestamp: savedUserMessage.time,
+			analysisResult: null, // Will be updated later
+		});
+		newMessage.value = "";
+		scrollToBottom();
 
-    // Inline Analysis Integration (in background)
-    isAIThinking.value = true;
-    thinkingResponse.value = '';
-    let analysisResult = null;
-    let formattedAnalysis = '';
-    try {
-      // Call generateInlineAnalysis with the user message
-      const lastMessage = {
-        role: 'user',
-        content: userMessage.text,
-      };
-      analysisResult = await generateInlineAnalysis(lastMessage);
+		// Inline Analysis Integration (in background)
+		isAIThinking.value = true;
+		thinkingResponse.value = "";
+		let analysisResult = null;
+		let formattedAnalysis = "";
+		try {
+			// Call generateInlineAnalysis with the user message
+			const lastMessage = {
+				role: "user",
+				content: userMessage.text,
+			};
+			analysisResult = await generateInlineAnalysis(lastMessage);
 
-      console.log('analysisResult', analysisResult);
+			console.log("analysisResult", analysisResult);
 
-      // Save analysis to database and link to message
-      try {
-        const { analysis: savedAnalysis } = await createAndLinkAnalysis(messageId, analysisResult);
-        console.log('Analysis saved to database:', savedAnalysis);
-      }
-      catch (dbError) {
-        console.error('Error saving analysis to database:', dbError);
-        // Continue even if database save fails
-      }
+			// Save analysis to database and link to message
+			try {
+				const { analysis: savedAnalysis } = await createAndLinkAnalysis(
+					messageId,
+					analysisResult,
+				);
+				console.log("Analysis saved to database:", savedAnalysis);
+			} catch (dbError) {
+				console.error("Error saving analysis to database:", dbError);
+				// Continue even if database save fails
+			}
 
-      formattedAnalysis = formatInlineAnalysis(analysisResult);
-      thinkingResponse.value = formattedAnalysis;
+			formattedAnalysis = formatInlineAnalysis(analysisResult);
+			thinkingResponse.value = formattedAnalysis;
 
-      // Update the message with analysis result using message ID
-      const messageToUpdate = messages.value.find(msg => msg.id === messageId);
-      if (messageToUpdate) {
-        messageToUpdate.analysisResult = analysisResult;
-      }
-    }
-    catch (err) {
-      thinkingResponse.value = 'خطا در دریافت تحلیل. لطفا دوباره تلاش کنید.';
-      console.error('Inline analysis error:', err);
-    }
-    finally {
-      isAIThinking.value = false;
-    }
+			// Update the message with analysis result using message ID
+			const messageToUpdate = messages.value.find(
+				(msg) => msg.id === messageId,
+			);
+			if (messageToUpdate) {
+				messageToUpdate.analysisResult = analysisResult;
+			}
+		} catch (err) {
+			thinkingResponse.value = "خطا در دریافت تحلیل. لطفا دوباره تلاش کنید.";
+			console.error("Inline analysis error:", err);
+		} finally {
+			isAIThinking.value = false;
+		}
 
-    // Remove temp assistant message logic. Do not push empty message.
+		// Remove temp assistant message logic. Do not push empty message.
 
-    isAIResponding.value = true;
-    showScrollButton.value = false;
+		isAIResponding.value = true;
+		showScrollButton.value = false;
 
-    // --- NEW: Send analysis as detail to streamChat ---
-    // Optionally, push the analysis as a new message (for display) ONLY if it is not empty
-    if (thinkingResponse.value && thinkingResponse.value.trim() !== '') {
-      // messages.value.push({
-      //   type: 'analysis',
-      //   text: thinkingResponse.value,
-      //   timestamp: new Date().toISOString(),
-      //   id: 'analysis-' + Date.now(),
-      //   isExpanded: false,
-      // })
+		// --- NEW: Send analysis as detail to streamChat ---
+		// Optionally, push the analysis as a new message (for display) ONLY if it is not empty
+		if (thinkingResponse.value && thinkingResponse.value.trim() !== "") {
+			// messages.value.push({
+			//   type: 'analysis',
+			//   text: thinkingResponse.value,
+			//   timestamp: new Date().toISOString(),
+			//   id: 'analysis-' + Date.now(),
+			//   isExpanded: false,
+			// })
 
-      checkIfScrolledToBottom();
-    }
+			checkIfScrolledToBottom();
+		}
 
-    // === GOAL-GUIDED CONVERSATION ENHANCEMENT ===
-    // Load active diagnostic goals for the user
-    let activeUserGoals = [];
-    let goalGuidedPrompt = '';
-    try {
-      if (user.value?.id) {
-        activeUserGoals = await getGoalsByUser(user.value.id);
-        console.log('Active goals loaded:', activeUserGoals.length);
+		// === GOAL-GUIDED CONVERSATION ENHANCEMENT ===
+		// Load active diagnostic goals for the user
+		let activeUserGoals = [];
+		let goalGuidedPrompt = "";
+		try {
+			if (user.value?.id) {
+				activeUserGoals = await getGoalsByUser(user.value.id);
+				console.log("Active goals loaded:", activeUserGoals.length);
 
-        // Generate goal-guided system prompt based on current goals and confidence levels
-        if (activeUserGoals.length > 0) {
-          goalGuidedPrompt = generateGoalGuidedPrompt(activeUserGoals, userMessage.text, analysisResult);
-          console.log('Goal-guided prompt generated');
-        }
-      }
-    }
-    catch (goalError) {
-      console.error('Error loading goals:', goalError);
-      // Continue without goal guidance if there's an error
-    }
+				// Generate goal-guided system prompt based on current goals and confidence levels
+				if (activeUserGoals.length > 0) {
+					goalGuidedPrompt = generateGoalGuidedPrompt(
+						activeUserGoals,
+						userMessage.text,
+						analysisResult,
+					);
+					console.log("Goal-guided prompt generated");
+				}
+			}
+		} catch (goalError) {
+			console.error("Error loading goals:", goalError);
+			// Continue without goal guidance if there's an error
+		}
 
-    // Prepare chat history for AI with analysis; let composable inject system prompt
-    const contextMessages = messages.value.map(msg => ({
-      role: msg.type === 'sent' ? 'user' : 'assistant',
-      content: msg.text,
-    }));
-    const chatMessagesForAI = [
-      ...contextMessages,
-      { role: 'user', content: userMessage.text },
-    ];
+		// Prepare chat history for AI with analysis; let composable inject system prompt
+		const contextMessages = messages.value.map((msg) => ({
+			role: msg.type === "sent" ? "user" : "assistant",
+			content: msg.text,
+		}));
+		const chatMessagesForAI = [
+			...contextMessages,
+			{ role: "user", content: userMessage.text },
+		];
 
-    // Add goal-guided system message if available
-    if (goalGuidedPrompt) {
-      chatMessagesForAI.unshift({
-        role: 'system',
-        content: goalGuidedPrompt,
-      });
-    }
+		// Add goal-guided system message if available
+		if (goalGuidedPrompt) {
+			chatMessagesForAI.unshift({
+				role: "system",
+				content: goalGuidedPrompt,
+			});
+		}
 
-    // Call streamChat with therapistDetails option (so system prompt is automatically added)
-    let aiResponse = '';
-    // Show streaming response in real time
-    isAIThinking.value = true;
-    thinkingResponse.value = '';
-    await streamChat(chatMessagesForAI, { therapistDetails: selectedConversationComputed.value?.user }, (chunk) => {
-      aiResponse += chunk;
-      thinkingResponse.value = aiResponse;
-    });
-    isAIThinking.value = false;
+		// Choose AI provider based on selection
+		let aiResponse = "";
+		// Show streaming response in real time
+		isAIThinking.value = true;
+		thinkingResponse.value = "";
 
-    // Remove any temporary typing indicators
-    messages.value = messages.value.filter(msg => !msg.isTyping);
+		if (aiProvider.value === "runpod") {
+			// Use RunPod with polling
+			await submitMessageWithRunPod(
+				chatMessagesForAI,
+				selectedConversationComputed.value?.user,
+			);
+			return; // submitMessageWithRunPod handles the rest
+		}
 
-    // Save AI response to PocketBase
-    const savedAIMessage = await sendMessage(currentTherapist.id, session.id, aiResponse, 'received');
+		// Use OpenRouter (default)
+		await streamChat(
+			chatMessagesForAI,
+			{ therapistDetails: selectedConversationComputed.value?.user },
+			(chunk) => {
+				aiResponse += chunk;
+				thinkingResponse.value = aiResponse;
+			},
+		);
+		isAIThinking.value = false;
 
-    // Add AI response to messages with the correct ID
-    messages.value.push({
-      type: 'received',
-      text: aiResponse,
-      timestamp: savedAIMessage.time, // Use timestamp from saved message
-      id: savedAIMessage.id, // Use ID from saved message
-    });
+		// Remove any temporary typing indicators
+		messages.value = messages.value.filter((msg) => !msg.isTyping);
 
-    // === POST-CONVERSATION GOAL PROGRESS TRACKING ===
-    // Update goal progress based on conversation content
-    try {
-      if (activeUserGoals.length > 0) {
-        await updateGoalProgressFromConversation(activeUserGoals, userMessage.text, aiResponse, analysisResult);
-        console.log('Goal progress updated');
-      }
-    }
-    catch (progressError) {
-      console.error('Error updating goal progress:', progressError);
-      // Don't block the conversation flow if progress update fails
-    }
+		// Save AI response to PocketBase
+		const savedAIMessage = await sendMessage(
+			currentTherapist.id,
+			session.id,
+			aiResponse,
+			"received",
+		);
 
-    checkIfScrolledToBottom();
-    isAIResponding.value = false;
-  }
-  catch (e) {
-    console.error('Error in chat:', e);
-    messages.value.push({
-      type: 'received',
-      text: 'متاسفانه خطایی رخ داد. لطفا دوباره تلاش کنید.',
-      timestamp: new Date().toISOString(),
-      id: 'error-' + Date.now(),
-    });
-    scrollToBottom();
-  }
-  finally {
-    messageLoading.value = false;
-  }
+		// Add AI response to messages with the correct ID
+		messages.value.push({
+			type: "received",
+			text: aiResponse,
+			timestamp: savedAIMessage.time, // Use timestamp from saved message
+			id: savedAIMessage.id, // Use ID from saved message
+		});
+
+		// === POST-CONVERSATION GOAL PROGRESS TRACKING ===
+		// Update goal progress based on conversation content
+		try {
+			if (activeUserGoals.length > 0) {
+				await updateGoalProgressFromConversation(
+					activeUserGoals,
+					userMessage.text,
+					aiResponse,
+					analysisResult,
+				);
+				console.log("Goal progress updated");
+			}
+		} catch (progressError) {
+			console.error("Error updating goal progress:", progressError);
+			// Don't block the conversation flow if progress update fails
+		}
+
+		checkIfScrolledToBottom();
+		isAIResponding.value = false;
+	} catch (e) {
+		console.error("Error in chat:", e);
+		messages.value.push({
+			type: "received",
+			text: "متاسفانه خطایی رخ داد. لطفا دوباره تلاش کنید.",
+			timestamp: new Date().toISOString(),
+			id: "error-" + Date.now(),
+		});
+		scrollToBottom();
+	} finally {
+		messageLoading.value = false;
+	}
 }
 
 const showAnalysis = ref(false);
 const toggleAnalysis = () => {
-  showAnalysis.value = !showAnalysis.value;
-  nextTick(() => {
-    if (showAnalysis.value) {
-      scrollToBottom();
-    }
-  });
+	showAnalysis.value = !showAnalysis.value;
+	nextTick(() => {
+		if (showAnalysis.value) {
+			scrollToBottom();
+		}
+	});
 };
 
 function formatInlineAnalysis(analysisResult) {
-  if (!analysisResult) return 'نتیجه‌ای یافت نشد.';
-  let output = '';
+	if (!analysisResult) return "نتیجه‌ای یافت نشد.";
+	let output = "";
 
-  if (showAnalysis.value) {
-    output += '<div class="analysis-message bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">';
+	if (showAnalysis.value) {
+		output +=
+			'<div class="analysis-message bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">';
 
-    if (showAnalysis.value) {
-      output += '<div class="analysis-message bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">';
+		if (showAnalysis.value) {
+			output +=
+				'<div class="analysis-message bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">';
 
-      if (showAnalysis.value) {
-      // Session Details
-        output += `\n**جزئیات جلسه:**\n`;
-        output += `- هدف جلسه: ${analysisResult.session_mainGoal || 'نامشخص'}\n`;
-        output += `- نیاز به مداخله انسانی: ${analysisResult.session_humanInterventionNeeded ? 'بله' : 'خیر'}\n`;
-        output += `- نیازهای ناهشیار: ${analysisResult.session_unconsciousNeeds || 'نامشخص'}\n`;
+			if (showAnalysis.value) {
+				// Session Details
+				output += `\n**جزئیات جلسه:**\n`;
+				output += `- هدف جلسه: ${analysisResult.session_mainGoal || "نامشخص"}\n`;
+				output += `- نیاز به مداخله انسانی: ${analysisResult.session_humanInterventionNeeded ? "بله" : "خیر"}\n`;
+				output += `- نیازهای ناهشیار: ${analysisResult.session_unconsciousNeeds || "نامشخص"}\n`;
 
-        // Last Message Analysis
-        output += `\n**تحلیل پیام آخر:**\n`;
-        output += `- احساسات اولیه: ${(analysisResult.lastMessage_primaryEmotions || []).join(', ') || 'نامشخص'}\n`;
-        output += `- احساسات دقیق‌تر: ${(analysisResult.lastMessage_nuancedEmotions || []).join(', ') || 'نامشخص'}\n`;
-        output += `- شدت احساسات: ${analysisResult.lastMessage_emotionIntensity || 'نامشخص'}\n`;
-        output += `- تناسب با هدف جلسه: ${analysisResult.lastMessage_alignmentWithGoal || 'نامشخص'}\n`;
-        output += `- پاسخ پیشنهادی: ${analysisResult.emotionalResponse || 'نامشخص'}\n`;
-      }
-      else {
-        output = '<div class="analysis-icon cursor-pointer" @click="showAnalysis = !showAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>';
-      }
-    }
-    else {
-      output = '<div class="analysis-icon cursor-pointer flex items-center justify-center p-3" @click="toggleAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>';
-    }
-  }
-  else {
-    output = '<div class="analysis-icon cursor-pointer flex items-center justify-center p-3" @click="toggleAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>';
-  }
-  return output + '</div>' + '</div>';
+				// Last Message Analysis
+				output += `\n**تحلیل پیام آخر:**\n`;
+				output += `- احساسات اولیه: ${(analysisResult.lastMessage_primaryEmotions || []).join(", ") || "نامشخص"}\n`;
+				output += `- احساسات دقیق‌تر: ${(analysisResult.lastMessage_nuancedEmotions || []).join(", ") || "نامشخص"}\n`;
+				output += `- شدت احساسات: ${analysisResult.lastMessage_emotionIntensity || "نامشخص"}\n`;
+				output += `- تناسب با هدف جلسه: ${analysisResult.lastMessage_alignmentWithGoal || "نامشخص"}\n`;
+				output += `- پاسخ پیشنهادی: ${analysisResult.emotionalResponse || "نامشخص"}\n`;
+			} else {
+				output =
+					'<div class="analysis-icon cursor-pointer" @click="showAnalysis = !showAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>';
+			}
+		} else {
+			output =
+				'<div class="analysis-icon cursor-pointer flex items-center justify-center p-3" @click="toggleAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>';
+		}
+	} else {
+		output =
+			'<div class="analysis-icon cursor-pointer flex items-center justify-center p-3" @click="toggleAnalysis"><Icon name="ph:chart-line" class="w-6 h-6 text-primary-500" /></div>';
+	}
+	return output + "</div>" + "</div>";
 }
 
-watch(messages, () => {
-  if (!isAIResponding.value) {
-    scrollToBottom();
-  }
-}, { deep: true });
+watch(
+	messages,
+	() => {
+		if (!isAIResponding.value) {
+			scrollToBottom();
+		}
+	},
+	{ deep: true },
+);
 
 const { pause, resume } = useInterval(1000, { controls: true });
 
 const checkForHalfTime = () => {
-  if (!startChargeTime.value || !timeToShow.value) return false;
-  const start = startChargeTime.value;
-  const now = new Date();
-  const temp = Math.floor((now.getTime() - start.getTime()) / 60000);
-  return (temp / timeToShow.value > 1);
+	if (!startChargeTime.value || !timeToShow.value) return false;
+	const start = startChargeTime.value;
+	const now = new Date();
+	const temp = Math.floor((now.getTime() - start.getTime()) / 60000);
+	return temp / timeToShow.value > 1;
 };
 
 watch(timeToShow, async (newValue) => {
-  if (newValue <= 0 && activeSession.value?.id) {
-    const startTime = new Date(activeSession.value.created);
-    const endTime = new Date();
-    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60));
-    isReportModalOpen.value = true;
-    isGeneratingAnalysis.value = true;
-    await handleConfirmEndSession();
-    showNoCharge.value = true;
-    pause();
-  }
+	if (newValue <= 0 && activeSession.value?.id) {
+		const startTime = new Date(activeSession.value.created);
+		const endTime = new Date();
+		const totalTimePassedMinutes = Math.round(
+			(endTime - startTime) / (1000 * 60),
+		);
+		isReportModalOpen.value = true;
+		isGeneratingAnalysis.value = true;
+		await handleConfirmEndSession();
+		showNoCharge.value = true;
+		pause();
+	}
 });
 
 const updateSessionTime = () => {
-  if (activeSession.value?.created) {
-    try {
-      // Convert the PocketBase timestamp to a Date object
-      const startTime = new Date(activeSession.value.created);
-      const currentTime = new Date();
+	if (activeSession.value?.created) {
+		try {
+			// Convert the PocketBase timestamp to a Date object
+			const startTime = new Date(activeSession.value.created);
+			const currentTime = new Date();
 
-      // Ensure both dates are valid
-      if (isNaN(startTime.getTime()) || isNaN(currentTime.getTime())) {
-        console.error('Invalid date detected:', { start: activeSession.value.created });
-        sessionElapsedTime.value = 0;
-        return;
-      }
+			// Ensure both dates are valid
+			if (isNaN(startTime.getTime()) || isNaN(currentTime.getTime())) {
+				console.error("Invalid date detected:", {
+					start: activeSession.value.created,
+				});
+				sessionElapsedTime.value = 0;
+				return;
+			}
 
-      const elapsedMilliseconds = currentTime.getTime() - startTime.getTime();
-      const minutes = Math.floor(elapsedMilliseconds / 60000);
+			const elapsedMilliseconds = currentTime.getTime() - startTime.getTime();
+			const minutes = Math.floor(elapsedMilliseconds / 60000);
 
-      // Sanity check: if minutes is negative or too large, something is wrong
-      if (minutes < 0 || minutes > 24 * 60) {
-        console.error('Invalid elapsed time:', minutes, 'minutes');
-        sessionElapsedTime.value = 0;
-        return;
-      }
+			// Sanity check: if minutes is negative or too large, something is wrong
+			if (minutes < 0 || minutes > 24 * 60) {
+				console.error("Invalid elapsed time:", minutes, "minutes");
+				sessionElapsedTime.value = 0;
+				return;
+			}
 
-      sessionElapsedTime.value = minutes;
-    }
-    catch (error) {
-      console.error('Error calculating session time:', error);
-      sessionElapsedTime.value = 0;
-    }
-  }
-  else {
-    sessionElapsedTime.value = 0;
-  }
+			sessionElapsedTime.value = minutes;
+		} catch (error) {
+			console.error("Error calculating session time:", error);
+			sessionElapsedTime.value = 0;
+		}
+	} else {
+		sessionElapsedTime.value = 0;
+	}
 };
 
 const startSessionTimer = () => {
-  // Initial update
-  updateSessionTime();
+	// Initial update
+	updateSessionTime();
 
-  // Clear existing interval if any
-  if (timeUpdateInterval.value) {
-    clearInterval(timeUpdateInterval.value);
-  }
+	// Clear existing interval if any
+	if (timeUpdateInterval.value) {
+		clearInterval(timeUpdateInterval.value);
+	}
 
-  // Update every 30 seconds
-  timeUpdateInterval.value = setInterval(() => {
-    updateSessionTime();
-  }, 30000);
+	// Update every 30 seconds
+	timeUpdateInterval.value = setInterval(() => {
+		updateSessionTime();
+	}, 30000);
 };
 
 onMounted(async () => {
-  loading.value = true;
-  try {
-    const therapists = await getTherapists();
-    conversations.value = therapists.map(p => ({ id: p.id, user: p }));
+	loading.value = true;
+	try {
+		const therapists = await getTherapists();
+		conversations.value = therapists.map((p) => ({ id: p.id, user: p }));
 
-    const u = await nuxtApp.$pb
-      .collection('users')
-      .getOne(nuxtApp.$pb.authStore.model.id, {});
-    showNoCharge.value = !u.hasCharge;
-    remainingTime.value = new Date(u.expireChargeTime);
-    startChargeTime.value = new Date(u.startChargeTime);
-    timeToShow.value = Math.floor((remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60));
+		const u = await nuxtApp.$pb
+			.collection("users")
+			.getOne(nuxtApp.$pb.authStore.model.id, {});
+		showNoCharge.value = !u.hasCharge;
+		remainingTime.value = new Date(u.expireChargeTime);
+		startChargeTime.value = new Date(u.startChargeTime);
+		timeToShow.value = Math.floor(
+			(remainingTime.value.getTime() - new Date().getTime()) / (1000 * 60),
+		);
 
-    const therapistId = route.query.therapistId as string;
-    if (therapistId) {
-      activeTherapistId.value = therapistId;
-      const conversation = conversations.value.find(c => c.user.id === therapistId);
-      if (conversation && !showNoCharge.value) {
-        await loadMessages(therapistId);
-      }
-    }
+		const therapistId = route.query.therapistId as string;
+		if (therapistId) {
+			activeTherapistId.value = therapistId;
+			const conversation = conversations.value.find(
+				(c) => c.user.id === therapistId,
+			);
+			if (conversation && !showNoCharge.value) {
+				await loadMessages(therapistId);
+			}
+		}
 
-    if (timeToShow.value <= 0) {
-      showNoCharge.value = true;
-      pause();
-    }
+		if (timeToShow.value <= 0) {
+			showNoCharge.value = true;
+			pause();
+		}
 
-    timeUpdateInterval.value = setInterval(() => {
-      if (timeToShow.value !== undefined) {
-        timeToShow.value = timeToShow.value - 1;
-      }
-    }, 60000);
+		timeUpdateInterval.value = setInterval(() => {
+			if (timeToShow.value !== undefined) {
+				timeToShow.value = timeToShow.value - 1;
+			}
+		}, 60000);
 
-    if (nuxtApp.$pb.authStore.isValid) {
-      userSubscription.value = await nuxtApp.$pb.collection('users').subscribe(
-        nuxtApp.$pb.authStore.model?.id,
-        (e) => {
-          const expireTime = new Date(e.record.expireChargeTime).getTime();
-          timeToShow.value = Math.floor((expireTime - new Date().getTime()) / (1000 * 60));
-          if (!e.record.hasCharge) {
-            showNoCharge.value = true;
-            setTimeout(() => {
-              if (chatEl.value) {
-                chatEl.value.scrollTo({
-                  top: chatEl.value.scrollHeight,
-                  behavior: 'smooth',
-                });
-              }
-            }, 600);
-            pause();
-          }
-        },
-      );
+		if (nuxtApp.$pb.authStore.isValid) {
+			userSubscription.value = await nuxtApp.$pb
+				.collection("users")
+				.subscribe(nuxtApp.$pb.authStore.model?.id, (e) => {
+					const expireTime = new Date(e.record.expireChargeTime).getTime();
+					timeToShow.value = Math.floor(
+						(expireTime - new Date().getTime()) / (1000 * 60),
+					);
+					if (!e.record.hasCharge) {
+						showNoCharge.value = true;
+						setTimeout(() => {
+							if (chatEl.value) {
+								chatEl.value.scrollTo({
+									top: chatEl.value.scrollHeight,
+									behavior: "smooth",
+								});
+							}
+						}, 600);
+						pause();
+					}
+				});
 
-      // fetching userReport for having memory of previous sessions
-      const userReportData = await getReportByUserId(nuxtApp.$pb.authStore.model?.id);
-      if (userReportData) {
-        userReport.value = userReportData;
-        hasPreviousData.value = true;
+			// fetching userReport for having memory of previous sessions
+			const userReportData = await getReportByUserId(
+				nuxtApp.$pb.authStore.model?.id,
+			);
+			if (userReportData) {
+				userReport.value = userReportData;
+				hasPreviousData.value = true;
 
-        // If there are previous sessions (totalSessions > 0), we'll have AI start the conversation
-        if (userReportData.totalSessions && userReportData.totalSessions > 0 && userReportData.summaries.length > 0) {
-          console.log('This user has previous sessions, AI will start with a summary');
-          // Wait a moment for UI to initialize properly
-          setTimeout(() => {
-            const session = activeSession.value;
-            if (!session) {
-              console.error('No active session found');
-              return;
-            }
+				// If there are previous sessions (totalSessions > 0), we'll have AI start the conversation
+				if (
+					userReportData.totalSessions &&
+					userReportData.totalSessions > 0 &&
+					userReportData.summaries.length > 0
+				) {
+					console.log(
+						"This user has previous sessions, AI will start with a summary",
+					);
+					// Wait a moment for UI to initialize properly
+					setTimeout(() => {
+						const session = activeSession.value;
+						if (!session) {
+							console.error("No active session found");
+							return;
+						}
 
-            // Check if there are already messages in the conversation
-            // If there are messages, don't trigger the AI introduction
-            if (messages.value.length === 0) {
-              startAIConversationWithSummary(selectedConversationComputed.value?.user, session.id, userReportData);
-            }
-            else {
-              console.log('Messages already exist in conversation, skipping AI introduction');
-            }
-          }, 1000);
-        }
-      }
-    }
-  }
-  catch (error) {
-    console.error('Error initializing:', error);
-  }
-  finally {
-    loading.value = false;
-    setTimeout(() => {
-      if (chatEl.value) {
-        chatEl.value.scrollTo({
-          top: chatEl.value.scrollHeight,
-          behavior: 'smooth',
-        });
-      }
-    }, 300);
-    resume();
-  }
-  if (chatEl.value) {
-    chatEl.value.addEventListener('scroll', checkIfScrolledToBottom);
-  }
+						// Check if there are already messages in the conversation
+						// If there are messages, don't trigger the AI introduction
+						if (messages.value.length === 0) {
+							startAIConversationWithSummary(
+								selectedConversationComputed.value?.user,
+								session.id,
+								userReportData,
+							);
+						} else {
+							console.log(
+								"Messages already exist in conversation, skipping AI introduction",
+							);
+						}
+					}, 1000);
+				}
+			}
+		}
+	} catch (error) {
+		console.error("Error initializing:", error);
+	} finally {
+		loading.value = false;
+		setTimeout(() => {
+			if (chatEl.value) {
+				chatEl.value.scrollTo({
+					top: chatEl.value.scrollHeight,
+					behavior: "smooth",
+				});
+			}
+		}, 300);
+		resume();
+	}
+	if (chatEl.value) {
+		chatEl.value.addEventListener("scroll", checkIfScrolledToBottom);
+	}
 });
 
 onUnmounted(() => {
-  pause();
-  if (timeUpdateInterval.value) {
-    clearInterval(timeUpdateInterval.value);
-  }
-  try {
-    if (userSubscription.value) {
-      nuxtApp.$pb.collection('users').unsubscribe(userSubscription.value);
-    }
-  }
-  catch (error) {
-    console.error('Error unsubscribing:', error);
-  }
-  if (chatEl.value) {
-    chatEl.value.removeEventListener('scroll', checkIfScrolledToBottom);
-  }
+	pause();
+	if (timeUpdateInterval.value) {
+		clearInterval(timeUpdateInterval.value);
+	}
+	try {
+		if (userSubscription.value) {
+			nuxtApp.$pb.collection("users").unsubscribe(userSubscription.value);
+		}
+	} catch (error) {
+		console.error("Error unsubscribing:", error);
+	}
+	if (chatEl.value) {
+		chatEl.value.removeEventListener("scroll", checkIfScrolledToBottom);
+	}
 });
 
 const clearMessages = async (sessionId: string) => {
-  if (!sessionId) { throw new Error('Session ID is required'); }
-  try {
-    const messageIds = messages.value
-      .filter(msg => msg.session === sessionId)
-      .map(msg => msg.id);
+	if (!sessionId) {
+		throw new Error("Session ID is required");
+	}
+	try {
+		const messageIds = messages.value
+			.filter((msg) => msg.session === sessionId)
+			.map((msg) => msg.id);
 
-    for (const messageId of messageIds) {
-      await nuxtApp.$pb.collection('therapists_messages').delete(messageId);
-    }
-    toaster.show({
-      title: 'پاک کردن پیامها ',
-      message: 'پیام ها با موفقیت پاک شدند.',
-      color: 'success',
-      icon: 'ph:eraser',
-      closable: true,
-    });
-    messages.value = [];
-  }
-  catch (error) {
-    console.error('Error clearing messages:', error);
-    throw error;
-  }
+		for (const messageId of messageIds) {
+			await nuxtApp.$pb.collection("therapists_messages").delete(messageId);
+		}
+		toaster.show({
+			title: "پاک کردن پیامها ",
+			message: "پیام ها با موفقیت پاک شدند.",
+			color: "success",
+			icon: "ph:eraser",
+			closable: true,
+		});
+		messages.value = [];
+	} catch (error) {
+		console.error("Error clearing messages:", error);
+		throw error;
+	}
 };
 
 const confirmClearChat = async () => {
-  if (showNoCharge.value) {
-    toaster.show({
-      title: 'خطا',
-      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-    return;
-  }
+	if (showNoCharge.value) {
+		toaster.show({
+			title: "خطا",
+			message:
+				"بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.",
+			color: "danger",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+		return;
+	}
 
-  if (!activeTherapistId.value) {
-    toaster.show({
-      title: 'خطا',
-      message: 'لطفاً ابتدا یک روانشناس را انتخاب کنید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-    return;
-  }
+	if (!activeTherapistId.value) {
+		toaster.show({
+			title: "خطا",
+			message: "لطفاً ابتدا یک روانشناس را انتخاب کنید.",
+			color: "danger",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+		return;
+	}
 
-  try {
-    await clearMessages(activeSession.value.id);
-    closeDeleteModal();
-  }
-  catch (error) {
-    console.error('Error clearing messages:', error);
-    toaster.show({
-      title: 'خطا',
-      message: 'خطا در پاک کردن پیام‌ها',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-  }
+	try {
+		await clearMessages(activeSession.value.id);
+		closeDeleteModal();
+	} catch (error) {
+		console.error("Error clearing messages:", error);
+		toaster.show({
+			title: "خطا",
+			message: "خطا در پاک کردن پیام‌ها",
+			color: "danger",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+	}
 };
 
 const gotoList = () => {
-  navigateTo('/darmana/therapists/chooseTherapist');
+	navigateTo("/darmana/therapists/chooseTherapist");
 };
 const gotoReport = () => {
-  navigateTo(`/report`);
+	navigateTo(`/report`);
 };
 
 const openGoalsModal = async () => {
-  try {
-    showGoalsModal.value = true;
-    // Fetch user's therapy goals with current session
-    userGoals.value = await getTherapyGoals(activeSession.value?.id);
-  }
-  catch (error) {
-    console.error('Error fetching goals:', error);
-    userGoals.value = [];
-  }
+	try {
+		showGoalsModal.value = true;
+		// Fetch user's therapy goals with current session
+		userGoals.value = await getTherapyGoals(activeSession.value?.id);
+	} catch (error) {
+		console.error("Error fetching goals:", error);
+		userGoals.value = [];
+	}
 };
 
 // Function to have the AI start the conversation with a summary of previous sessions
-async function startAIConversationWithSummary(therapist: any, sessionId: string, report: any) {
-  if (!therapist || !sessionId || !report) return;
+async function startAIConversationWithSummary(
+	therapist: any,
+	sessionId: string,
+	report: any,
+) {
+	if (!therapist || !sessionId || !report) return;
 
-  try {
-    isAIResponding.value = true;
-    messageLoading.value = true;
-    streamingResponse.value = '';
-    isAIThinking.value = true;
-    thinkingResponse.value = '...';
+	try {
+		isAIResponding.value = true;
+		messageLoading.value = true;
+		streamingResponse.value = "";
+		isAIThinking.value = true;
+		thinkingResponse.value = "...";
 
-    // Add a temporary thinking message to show the user something is happening
-    const tempThinkingId = 'thinking-' + Date.now();
-    messages.value.push({
-      type: 'received',
-      text: 'درحال تحلیل جلسات قبلی...',
-      timestamp: new Date().toISOString(),
-      id: tempThinkingId,
-      isTyping: true,
-    });
+		// Add a temporary thinking message to show the user something is happening
+		const tempThinkingId = "thinking-" + Date.now();
+		messages.value.push({
+			type: "received",
+			text: "درحال تحلیل جلسات قبلی...",
+			timestamp: new Date().toISOString(),
+			id: tempThinkingId,
+			isTyping: true,
+		});
 
-    // Create a system message with the report summary data
-    const systemContext = {
-      role: 'system',
-      content: `مراجع قبلا ${report.totalSessions} جلسه مشاوره داشته است. خلاصه جلسات قبلی:
-${report.summaries?.map((session: any, idx: number) =>
-  `جلسه ${idx + 1}: ${session.title}\n${session.summary}`,
-).join('\n\n')}
+		// Create a system message with the report summary data
+		const systemContext = {
+			role: "system",
+			content: `مراجع قبلا ${report.totalSessions} جلسه مشاوره داشته است. خلاصه جلسات قبلی:
+${report.summaries
+	?.map(
+		(session: any, idx: number) =>
+			`جلسه ${idx + 1}: ${session.title}\n${session.summary}`,
+	)
+	.join("\n\n")}
 
 اهداف عمیق‌تر احتمالی مراجع:
-${report.possibleDeeperGoals?.join('\n')}
+${report.possibleDeeperGoals?.join("\n")}
 
 عوامل خطر احتمالی:
-${report.possibleRiskFactors?.flat().map((risk: any) =>
-  `${risk.title}: ${risk.description}`,
-).join('\n')}
+${report.possibleRiskFactors
+	?.flat()
+	.map((risk: any) => `${risk.title}: ${risk.description}`)
+	.join("\n")}
 همچنین ممکن است اطلاعات دموگرافیک ارائه شده باشند: ${report.finalDemographicProfile}
 اگر مقادیر مشخص نیستند، یعنی کاربر اطلاعات دموگرافیک را ارائه نکرده است.
 از اطلاعاتی استفاده کن که کاربر وارد کرده است.
@@ -1056,73 +1374,80 @@ ${report.possibleRiskFactors?.flat().map((risk: any) =>
  همین طور از اهداف عمیق تر احتمالی نیز استفاده کن.  کاربر را ترغیب به دادن پاسخ در مورد موضوعات احتمالی کن.
  از ایموجی های خوب و جذاب استفاده کن.
  `,
-    };
-    console.log('report', report);
+		};
+		console.log("report", report);
 
-    // Generate initial AI message
-    let aiResponse = '';
+		// Generate initial AI message
+		let aiResponse = "";
 
-    // Call the OpenRouter API with the system context
-    await streamChat([systemContext], { therapistDetails: therapist }, (chunk) => {
-      aiResponse += chunk;
-      thinkingResponse.value = aiResponse;
-    });
+		// Call the OpenRouter API with the system context
+		await streamChat(
+			[systemContext],
+			{ therapistDetails: therapist },
+			(chunk) => {
+				aiResponse += chunk;
+				thinkingResponse.value = aiResponse;
+			},
+		);
 
-    isAIThinking.value = false;
+		isAIThinking.value = false;
 
-    // Remove the temporary typing message
-    messages.value = messages.value.filter(msg => !msg.isTyping);
+		// Remove the temporary typing message
+		messages.value = messages.value.filter((msg) => !msg.isTyping);
 
-    // Save AI response to PocketBase
-    const savedAIMessage = await sendMessage(activeTherapistId.value || therapist.id, sessionId, aiResponse, 'received');
+		// Save AI response to PocketBase
+		const savedAIMessage = await sendMessage(
+			activeTherapistId.value || therapist.id,
+			sessionId,
+			aiResponse,
+			"received",
+		);
 
-    // Add AI response to messages with the correct ID
-    messages.value.push({
-      type: 'received',
-      text: aiResponse,
-      timestamp: savedAIMessage.time,
-      id: savedAIMessage.id,
-    });
+		// Add AI response to messages with the correct ID
+		messages.value.push({
+			type: "received",
+			text: aiResponse,
+			timestamp: savedAIMessage.time,
+			id: savedAIMessage.id,
+		});
 
-    scrollToBottom();
-  }
-  catch (e) {
-    console.error('Error starting AI conversation with summary:', e);
-    // Add fallback message if the summary fails
-    messages.value.push({
-      type: 'received',
-      text: 'سلام، من روانشناس شما هستم. به نظر می‌رسد جلسات قبلی با هم داشته‌ایم. امروز حالتان چطور است و درباره چه چیزی می‌خواهید صحبت کنیم؟',
-      timestamp: new Date().toISOString(),
-      id: 'auto-' + Date.now(),
-    });
-    scrollToBottom();
-  }
-  finally {
-    isAIResponding.value = false;
-    messageLoading.value = false;
-  }
+		scrollToBottom();
+	} catch (e) {
+		console.error("Error starting AI conversation with summary:", e);
+		// Add fallback message if the summary fails
+		messages.value.push({
+			type: "received",
+			text: "سلام، من روانشناس شما هستم. به نظر می‌رسد جلسات قبلی با هم داشته‌ایم. امروز حالتان چطور است و درباره چه چیزی می‌خواهید صحبت کنیم؟",
+			timestamp: new Date().toISOString(),
+			id: "auto-" + Date.now(),
+		});
+		scrollToBottom();
+	} finally {
+		isAIResponding.value = false;
+		messageLoading.value = false;
+	}
 }
 
 const isReportModalOpen = ref(false);
 
 const openReportModal = () => {
-  isReportModalOpen.value = true;
+	isReportModalOpen.value = true;
 };
 
 const closeReportModal = () => {
-  if (!isGeneratingAnalysis.value) {
-    isReportModalOpen.value = false;
-  }
+	if (!isGeneratingAnalysis.value) {
+		isReportModalOpen.value = false;
+	}
 };
 
 const isDeleteModalOpen = ref(false);
 
 const openDeleteModal = () => {
-  isDeleteModalOpen.value = true;
+	isDeleteModalOpen.value = true;
 };
 
 const closeDeleteModal = () => {
-  isDeleteModalOpen.value = false;
+	isDeleteModalOpen.value = false;
 };
 
 const isMessageDetailModalOpen = ref(false);
@@ -1131,529 +1456,569 @@ const selectedMessage = ref<any>(null);
 const isFeedbackModalOpen = ref(false);
 const selectedMessageForFeedback = ref<any>(null);
 const feedbackForm = ref({
-  rating: 0,
-  general_text: '',
-  general_other: '',
-  problems_categories: {} as Record<string, boolean>,
-  problems_other: '',
-  quality_categories: {} as Record<string, boolean>,
-  quality_other: '',
-  improvements_categories: {} as Record<string, boolean>,
-  improvements_other: '',
+	rating: 0,
+	general_text: "",
+	general_other: "",
+	problems_categories: {} as Record<string, boolean>,
+	problems_other: "",
+	quality_categories: {} as Record<string, boolean>,
+	quality_other: "",
+	improvements_categories: {} as Record<string, boolean>,
+	improvements_other: "",
 });
 const isSubmittingFeedback = ref(false);
 const feedbackStep = ref(1);
 const feedbackErrors = ref<string[]>([]);
 const existingFeedback = ref<any>(null);
 const showRetryConfirm = ref(false);
-const selectedFeedbackType = ref<'problems' | 'quality' | null>(null);
+const selectedFeedbackType = ref<"problems" | "quality" | null>(null);
 const feedbackModalContent = ref<HTMLElement | null>(null);
 
 const openMessageDetailModal = (message: any) => {
-  selectedMessage.value = message;
-  isMessageDetailModalOpen.value = true;
+	selectedMessage.value = message;
+	isMessageDetailModalOpen.value = true;
 };
 
 const closeMessageDetailModal = () => {
-  isMessageDetailModalOpen.value = false;
-  selectedMessage.value = null;
+	isMessageDetailModalOpen.value = false;
+	selectedMessage.value = null;
 };
 
 const openFeedbackModal = async (message: any) => {
-  selectedMessageForFeedback.value = message;
-  feedbackStep.value = 1;
-  feedbackErrors.value = [];
-  selectedFeedbackType.value = null;
+	selectedMessageForFeedback.value = message;
+	feedbackStep.value = 1;
+	feedbackErrors.value = [];
+	selectedFeedbackType.value = null;
 
-  // Check if feedback already exists for this message
-  try {
-    existingFeedback.value = await getFeedbackForMessage(message.id);
-    if (existingFeedback.value) {
-      // Load existing feedback data
-      feedbackForm.value = {
-        rating: existingFeedback.value.rating || 0,
-        general_text: existingFeedback.value.general_text || '',
-        general_other: existingFeedback.value.general_other || '',
-        problems_categories: existingFeedback.value.problems_categories || {},
-        problems_other: existingFeedback.value.problems_other || '',
-        quality_categories: existingFeedback.value.quality_categories || {},
-        quality_other: existingFeedback.value.quality_other || '',
-        improvements_categories: existingFeedback.value.improvements_categories || {},
-        improvements_other: existingFeedback.value.improvements_other || '',
-      };
-    }
-    else {
-      // Reset form for new feedback
-      feedbackForm.value = {
-        rating: 0,
-        general_text: '',
-        general_other: '',
-        problems_categories: {},
-        problems_other: '',
-        quality_categories: {},
-        quality_other: '',
-        improvements_categories: {},
-        improvements_other: '',
-      };
-    }
-  }
-  catch (error) {
-    console.error('Error checking existing feedback:', error);
-    existingFeedback.value = null;
-  }
+	// Check if feedback already exists for this message
+	try {
+		existingFeedback.value = await getFeedbackForMessage(message.id);
+		if (existingFeedback.value) {
+			// Load existing feedback data
+			feedbackForm.value = {
+				rating: existingFeedback.value.rating || 0,
+				general_text: existingFeedback.value.general_text || "",
+				general_other: existingFeedback.value.general_other || "",
+				problems_categories: existingFeedback.value.problems_categories || {},
+				problems_other: existingFeedback.value.problems_other || "",
+				quality_categories: existingFeedback.value.quality_categories || {},
+				quality_other: existingFeedback.value.quality_other || "",
+				improvements_categories:
+					existingFeedback.value.improvements_categories || {},
+				improvements_other: existingFeedback.value.improvements_other || "",
+			};
+		} else {
+			// Reset form for new feedback
+			feedbackForm.value = {
+				rating: 0,
+				general_text: "",
+				general_other: "",
+				problems_categories: {},
+				problems_other: "",
+				quality_categories: {},
+				quality_other: "",
+				improvements_categories: {},
+				improvements_other: "",
+			};
+		}
+	} catch (error) {
+		console.error("Error checking existing feedback:", error);
+		existingFeedback.value = null;
+	}
 
-  isFeedbackModalOpen.value = true;
+	isFeedbackModalOpen.value = true;
 };
 
 const resetModalScroll = () => {
-  if (feedbackModalContent.value) {
-    feedbackModalContent.value.scrollTop = 0;
-  }
+	if (feedbackModalContent.value) {
+		feedbackModalContent.value.scrollTop = 0;
+	}
 };
 
 const closeFeedbackModal = () => {
-  isFeedbackModalOpen.value = false;
-  selectedMessageForFeedback.value = null;
+	isFeedbackModalOpen.value = false;
+	selectedMessageForFeedback.value = null;
 };
 
 const nextFeedbackStep = () => {
-  feedbackErrors.value = [];
+	feedbackErrors.value = [];
 
-  if (feedbackStep.value === 1) {
-    // Validate basic feedback and category selection
-    const errors = validateFeedback(feedbackForm.value);
-    if (errors.length > 0) {
-      feedbackErrors.value = errors;
-      return;
-    }
+	if (feedbackStep.value === 1) {
+		// Validate basic feedback and category selection
+		const errors = validateFeedback(feedbackForm.value);
+		if (errors.length > 0) {
+			feedbackErrors.value = errors;
+			return;
+		}
 
-    // Check if user selected a feedback type
-    if (!selectedFeedbackType.value) {
-      feedbackErrors.value = ['لطفاً نوع بازخورد خود را انتخاب کنید (مشکلات یا نقاط قوت)'];
-      return;
-    }
-  }
+		// Check if user selected a feedback type
+		if (!selectedFeedbackType.value) {
+			feedbackErrors.value = [
+				"لطفاً نوع بازخورد خود را انتخاب کنید (مشکلات یا نقاط قوت)",
+			];
+			return;
+		}
+	}
 
-  if (feedbackStep.value < 3) {
-    feedbackStep.value++;
-    resetModalScroll();
-  }
+	if (feedbackStep.value < 3) {
+		feedbackStep.value++;
+		resetModalScroll();
+	}
 };
 
 const prevFeedbackStep = () => {
-  if (feedbackStep.value > 1) {
-    feedbackStep.value--;
-    resetModalScroll();
-  }
-  feedbackErrors.value = [];
+	if (feedbackStep.value > 1) {
+		feedbackStep.value--;
+		resetModalScroll();
+	}
+	feedbackErrors.value = [];
 };
 
 const submitMessageFeedback = async () => {
-  if (!selectedMessageForFeedback.value || !activeSession.value || !activeTherapistId.value) return;
+	if (
+		!selectedMessageForFeedback.value ||
+		!activeSession.value ||
+		!activeTherapistId.value
+	)
+		return;
 
-  // Final validation
-  const errors = validateFeedback(feedbackForm.value);
-  if (errors.length > 0) {
-    feedbackErrors.value = errors;
-    feedbackStep.value = 1;
-    return;
-  }
+	// Final validation
+	const errors = validateFeedback(feedbackForm.value);
+	if (errors.length > 0) {
+		feedbackErrors.value = errors;
+		feedbackStep.value = 1;
+		return;
+	}
 
-  isSubmittingFeedback.value = true;
-  try {
-    const feedbackData = {
-      message_id: selectedMessageForFeedback.value.id,
-      session_id: activeSession.value.id,
-      user_id: nuxtApp.$pb.authStore.model.id,
-      therapist_id: activeTherapistId.value || selectedConversationComputed.value?.user.id,
-      message_content: selectedMessageForFeedback.value.text,
-      ...feedbackForm.value,
-    };
+	isSubmittingFeedback.value = true;
+	try {
+		const feedbackData = {
+			message_id: selectedMessageForFeedback.value.id,
+			session_id: activeSession.value.id,
+			user_id: nuxtApp.$pb.authStore.model.id,
+			therapist_id:
+				activeTherapistId.value || selectedConversationComputed.value?.user.id,
+			message_content: selectedMessageForFeedback.value.text,
+			...feedbackForm.value,
+		};
 
-    if (existingFeedback.value) {
-      // Update existing feedback
-      await nuxtApp.$pb.collection('message_feedback').update(existingFeedback.value.id, feedbackData);
-      toaster.show({
-        title: 'موفق',
-        message: 'بازخورد شما با موفقیت به‌روزرسانی شد.',
-        color: 'success',
-        icon: 'ph:check-circle-fill',
-        closable: true,
-      });
-    }
-    else {
-      // Create new feedback
-      await submitFeedback(feedbackData);
-      toaster.show({
-        title: 'موفق',
-        message: 'بازخورد شما با موفقیت ثبت شد.',
-        color: 'success',
-        icon: 'ph:check-circle-fill',
-        closable: true,
-      });
-    }
+		if (existingFeedback.value) {
+			// Update existing feedback
+			await nuxtApp.$pb
+				.collection("message_feedback")
+				.update(existingFeedback.value.id, feedbackData);
+			toaster.show({
+				title: "موفق",
+				message: "بازخورد شما با موفقیت به‌روزرسانی شد.",
+				color: "success",
+				icon: "ph:check-circle-fill",
+				closable: true,
+			});
+		} else {
+			// Create new feedback
+			await submitFeedback(feedbackData);
+			toaster.show({
+				title: "موفق",
+				message: "بازخورد شما با موفقیت ثبت شد.",
+				color: "success",
+				icon: "ph:check-circle-fill",
+				closable: true,
+			});
+		}
 
-    closeFeedbackModal();
-  }
-  catch (error) {
-    console.error('Error submitting feedback:', error);
-    toaster.show({
-      title: 'خطا',
-      message: 'خطا در ثبت بازخورد. لطفا دوباره تلاش کنید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-  }
-  finally {
-    isSubmittingFeedback.value = false;
-  }
+		closeFeedbackModal();
+	} catch (error) {
+		console.error("Error submitting feedback:", error);
+		toaster.show({
+			title: "خطا",
+			message: "خطا در ثبت بازخورد. لطفا دوباره تلاش کنید.",
+			color: "danger",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+	} finally {
+		isSubmittingFeedback.value = false;
+	}
 };
 
 const confirmRetryMessage = () => {
-  showRetryConfirm.value = true;
+	showRetryConfirm.value = true;
 };
 
 const retryLastMessage = async () => {
-  if (messageLoading.value || isAIResponding.value || !messages.value.length) return;
+	if (messageLoading.value || isAIResponding.value || !messages.value.length)
+		return;
 
-  showRetryConfirm.value = false;
+	showRetryConfirm.value = false;
 
-  // Find the last AI message
-  const lastAIMessage = [...messages.value].reverse().find(msg => msg.type === 'received');
-  if (!lastAIMessage) {
-    toaster.show({
-      title: 'خطا',
-      message: 'هیچ پیام روانشناس برای تکرار یافت نشد.',
-      color: 'warning',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-    return;
-  }
+	// Find the last AI message
+	const lastAIMessage = [...messages.value]
+		.reverse()
+		.find((msg) => msg.type === "received");
+	if (!lastAIMessage) {
+		toaster.show({
+			title: "خطا",
+			message: "هیچ پیام روانشناس برای تکرار یافت نشد.",
+			color: "warning",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+		return;
+	}
 
-  try {
-    messageLoading.value = true;
-    isAIResponding.value = true;
+	try {
+		messageLoading.value = true;
+		isAIResponding.value = true;
 
-    // Show user feedback
-    toaster.show({
-      title: 'در حال تولید پاسخ جدید',
-      message: 'لطفا کمی صبر کنید...',
-      color: 'info',
-      icon: 'ph:arrow-clockwise',
-      closable: true,
-    });
+		// Show user feedback
+		toaster.show({
+			title: "در حال تولید پاسخ جدید",
+			message: "لطفا کمی صبر کنید...",
+			color: "info",
+			icon: "ph:arrow-clockwise",
+			closable: true,
+		});
 
-    // Remove the last AI message from the UI and database
-    const lastAIMessageIndex = messages.value.findIndex(msg => msg.id === lastAIMessage.id);
-    if (lastAIMessageIndex !== -1) {
-      messages.value.splice(lastAIMessageIndex, 1);
-    }
+		// Remove the last AI message from the UI and database
+		const lastAIMessageIndex = messages.value.findIndex(
+			(msg) => msg.id === lastAIMessage.id,
+		);
+		if (lastAIMessageIndex !== -1) {
+			messages.value.splice(lastAIMessageIndex, 1);
+		}
 
-    // Delete from database
-    try {
-      await nuxtApp.$pb.collection('therapists_messages').delete(lastAIMessage.id);
-    }
-    catch (deleteError) {
-      console.error('Error deleting message from database:', deleteError);
-      // Continue even if delete fails
-    }
+		// Delete from database
+		try {
+			await nuxtApp.$pb
+				.collection("therapists_messages")
+				.delete(lastAIMessage.id);
+		} catch (deleteError) {
+			console.error("Error deleting message from database:", deleteError);
+			// Continue even if delete fails
+		}
 
-    // Get the last user message to regenerate response
-    const lastUserMessage = [...messages.value].reverse().find(msg => msg.type === 'sent');
-    if (!lastUserMessage) {
-      toaster.show({
-        title: 'خطا',
-        message: 'پیام کاربری برای تولید پاسخ یافت نشد.',
-        color: 'danger',
-        icon: 'ph:warning-circle-fill',
-        closable: true,
-      });
-      return;
-    }
+		// Get the last user message to regenerate response
+		const lastUserMessage = [...messages.value]
+			.reverse()
+			.find((msg) => msg.type === "sent");
+		if (!lastUserMessage) {
+			toaster.show({
+				title: "خطا",
+				message: "پیام کاربری برای تولید پاسخ یافت نشد.",
+				color: "danger",
+				icon: "ph:warning-circle-fill",
+				closable: true,
+			});
+			return;
+		}
 
-    // Prepare chat history for AI
-    const contextMessages = messages.value.map(msg => ({
-      role: msg.type === 'sent' ? 'user' : 'assistant',
-      content: msg.text,
-    }));
+		// Prepare chat history for AI
+		const contextMessages = messages.value.map((msg) => ({
+			role: msg.type === "sent" ? "user" : "assistant",
+			content: msg.text,
+		}));
 
-    // Generate new AI response
-    let aiResponse = '';
-    isAIThinking.value = true;
-    thinkingResponse.value = '';
+		// Generate new AI response
+		let aiResponse = "";
+		isAIThinking.value = true;
+		thinkingResponse.value = "";
 
-    await streamChat(contextMessages, { therapistDetails: selectedConversationComputed.value?.user }, (chunk) => {
-      aiResponse += chunk;
-      thinkingResponse.value = aiResponse;
-    });
+		await streamChat(
+			contextMessages,
+			{ therapistDetails: selectedConversationComputed.value?.user },
+			(chunk) => {
+				aiResponse += chunk;
+				thinkingResponse.value = aiResponse;
+			},
+		);
 
-    isAIThinking.value = false;
+		isAIThinking.value = false;
 
-    // Save new AI response to PocketBase
-    const savedAIMessage = await sendMessage(activeTherapistId.value!, activeSession.value!.id, aiResponse, 'received');
+		// Save new AI response to PocketBase
+		const savedAIMessage = await sendMessage(
+			activeTherapistId.value!,
+			activeSession.value!.id,
+			aiResponse,
+			"received",
+		);
 
-    // Add new AI response to messages
-    messages.value.push({
-      type: 'received',
-      text: aiResponse,
-      timestamp: savedAIMessage.time,
-      id: savedAIMessage.id,
-    });
+		// Add new AI response to messages
+		messages.value.push({
+			type: "received",
+			text: aiResponse,
+			timestamp: savedAIMessage.time,
+			id: savedAIMessage.id,
+		});
 
-    scrollToBottom();
+		scrollToBottom();
 
-    toaster.show({
-      title: 'موفق',
-      message: 'پاسخ جدید تولید شد.',
-      color: 'success',
-      icon: 'ph:check-circle-fill',
-      closable: true,
-    });
-  }
-  catch (error) {
-    console.error('Error retrying message:', error);
-    toaster.show({
-      title: 'خطا',
-      message: 'خطا در تولید پاسخ جدید. لطفا دوباره تلاش کنید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-  }
-  finally {
-    messageLoading.value = false;
-    isAIResponding.value = false;
-  }
+		toaster.show({
+			title: "موفق",
+			message: "پاسخ جدید تولید شد.",
+			color: "success",
+			icon: "ph:check-circle-fill",
+			closable: true,
+		});
+	} catch (error) {
+		console.error("Error retrying message:", error);
+		toaster.show({
+			title: "خطا",
+			message: "خطا در تولید پاسخ جدید. لطفا دوباره تلاش کنید.",
+			color: "danger",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+	} finally {
+		messageLoading.value = false;
+		isAIResponding.value = false;
+	}
 };
 
 const cancelRetry = () => {
-  showRetryConfirm.value = false;
+	showRetryConfirm.value = false;
 };
 
 // Convert analysis result to EmotionWheel format
 const selectedMessageEmotions = computed(() => {
-  if (!selectedMessage.value?.analysisResult?.lastMessage_emotions) {
-    return [];
-  }
+	if (!selectedMessage.value?.analysisResult?.lastMessage_emotions) {
+		return [];
+	}
 
-  try {
-    return convertToEmotionWheel(selectedMessage.value.analysisResult.lastMessage_emotions);
-  }
-  catch (error) {
-    console.error('Error converting emotions:', error);
-    return [];
-  }
+	try {
+		return convertToEmotionWheel(
+			selectedMessage.value.analysisResult.lastMessage_emotions,
+		);
+	} catch (error) {
+		console.error("Error converting emotions:", error);
+		return [];
+	}
 });
 
 const handleEndSession = async () => {
-  if (!activeSession.value) return;
+	if (!activeSession.value) return;
 
-  if (showNoCharge.value) {
-    toaster.show({
-      title: 'خطا',
-      message: 'شارژ شما به پایان رسیده است.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-    return;
-  }
+	if (showNoCharge.value) {
+		toaster.show({
+			title: "خطا",
+			message: "شارژ شما به پایان رسیده است.",
+			color: "danger",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+		return;
+	}
 
-  if (messages.value.length < 10) {
-    toaster.show({
-      title: 'خطا',
-      message: 'برای ساخت گزارش، حداقل ۱۰ پیام باید رد و بدل شده باشد.',
-      color: 'danger',
-    });
-    return;
-  }
+	if (messages.value.length < 10) {
+		toaster.show({
+			title: "خطا",
+			message: "برای ساخت گزارش، حداقل ۱۰ پیام باید رد و بدل شده باشد.",
+			color: "danger",
+		});
+		return;
+	}
 
-  isReportModalOpen.value = true;
+	isReportModalOpen.value = true;
 };
 
 const isGeneratingAnalysis = ref(false);
 
 const handleConfirmEndSession = async () => {
-  if (!activeSession.value) return;
+	if (!activeSession.value) return;
 
-  isGeneratingAnalysis.value = true;
-  let savedAnalysisId = null;
+	isGeneratingAnalysis.value = true;
+	let savedAnalysisId = null;
 
-  try {
-    // 1. Check if analysis already exists for this session
-    let existingAnalysis = null;
-    try {
-      existingAnalysis = await getAnalysisForSession(activeSession.value.id);
-    }
-    catch (error: any) {
-      if (error?.status !== 404) {
-        console.error('Error getting analysis for session:', error);
-        toaster.show({
-          title: 'خطا',
-          message: 'خطا در بررسی آنالیز جلسه',
-          color: 'danger',
-          icon: 'ph:warning-circle-fill',
-          closable: true,
-        });
-        isGeneratingAnalysis.value = false;
-        isReportModalOpen.value = false;
-        return;
-      }
-      // If 404, just continue (analysis does not exist)
-    }
-    if (existingAnalysis) {
-      savedAnalysisId = existingAnalysis.id;
-      isReportModalOpen.value = false;
-      await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`);
-      return;
-    }
+	try {
+		// 1. Check if analysis already exists for this session
+		let existingAnalysis = null;
+		try {
+			existingAnalysis = await getAnalysisForSession(activeSession.value.id);
+		} catch (error: any) {
+			if (error?.status !== 404) {
+				console.error("Error getting analysis for session:", error);
+				toaster.show({
+					title: "خطا",
+					message: "خطا در بررسی آنالیز جلسه",
+					color: "danger",
+					icon: "ph:warning-circle-fill",
+					closable: true,
+				});
+				isGeneratingAnalysis.value = false;
+				isReportModalOpen.value = false;
+				return;
+			}
+			// If 404, just continue (analysis does not exist)
+		}
+		if (existingAnalysis) {
+			savedAnalysisId = existingAnalysis.id;
+			isReportModalOpen.value = false;
+			await navigateTo(
+				`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`,
+			);
+			return;
+		}
 
-    // 2. If not, generate and save analysis
-    // Remove first AI message if it was the starting message (for users with previous sessions)
-    let messagesToAnalyze = messages.value;
-    if (messages.value.length > 0 && messages.value[0].type === 'received') {
-      // If first message is from AI (received), exclude it from analysis
-      messagesToAnalyze = messages.value.slice(1);
-    }
+		// 2. If not, generate and save analysis
+		// Remove first AI message if it was the starting message (for users with previous sessions)
+		let messagesToAnalyze = messages.value;
+		if (messages.value.length > 0 && messages.value[0].type === "received") {
+			// If first message is from AI (received), exclude it from analysis
+			messagesToAnalyze = messages.value.slice(1);
+		}
 
-    const allMessages = messagesToAnalyze.map(msg => ({
-      role: msg.type === 'sent' ? 'patient' : 'therapist',
-      content: msg.text,
-    }));
+		const allMessages = messagesToAnalyze.map((msg) => ({
+			role: msg.type === "sent" ? "patient" : "therapist",
+			content: msg.text,
+		}));
 
-    const startTime = new Date(activeSession.value.created);
-    const endTime = new Date();
-    const totalTimePassedMinutes = Math.round((endTime - startTime) / (1000 * 60));
+		const startTime = new Date(activeSession.value.created);
+		const endTime = new Date();
+		const totalTimePassedMinutes = Math.round(
+			(endTime - startTime) / (1000 * 60),
+		);
 
-    // Generate and save analysis
-    const generatedAnalysis = await generateAnalysis({
-      sessionId: activeSession.value.id,
-      messages: allMessages,
-    });
+		// Generate and save analysis
+		const generatedAnalysis = await generateAnalysis({
+			sessionId: activeSession.value.id,
+			messages: allMessages,
+		});
 
-    const savedAnalysis = await createAnalysis({
-      session: activeSession.value.id,
-      ...generatedAnalysis,
-    });
+		const savedAnalysis = await createAnalysis({
+			session: activeSession.value.id,
+			...generatedAnalysis,
+		});
 
-    savedAnalysisId = savedAnalysis.id;
-    // Try to update session with the analysis ID
-    try {
-      await nuxtApp.$pb.collection('sessions').update(activeSession.value.id, {
-        status: 'done',
-        end_time: endTime.toISOString(),
-        count_of_total_messages: messagesToAnalyze.length,
-        total_time_passed: totalTimePassedMinutes,
-        updated: endTime.toISOString(),
-        session_analysis_for_system: savedAnalysisId,
-      });
+		savedAnalysisId = savedAnalysis.id;
+		// Try to update session with the analysis ID
+		try {
+			await nuxtApp.$pb.collection("sessions").update(activeSession.value.id, {
+				status: "done",
+				end_time: endTime.toISOString(),
+				count_of_total_messages: messagesToAnalyze.length,
+				total_time_passed: totalTimePassedMinutes,
+				updated: endTime.toISOString(),
+				session_analysis_for_system: savedAnalysisId,
+			});
 
-      activeSession.value.status = 'done';
-      activeSession.value.session_analysis_for_system = savedAnalysisId;
-      let report: Report | null = null;
+			activeSession.value.status = "done";
+			activeSession.value.session_analysis_for_system = savedAnalysisId;
+			let report: Report | null = null;
 
-      // Check if user already has a report
-      const existingReport = await getReportByUserId(nuxtApp.$pb.authStore.model?.id);
+			// Check if user already has a report
+			const existingReport = await getReportByUserId(
+				nuxtApp.$pb.authStore.model?.id,
+			);
 
-      if (!existingReport) {
-        // Create new report
-        report = await createReport({
-          user: nuxtApp.$pb.authStore.model.id,
-          totalSessions: 1,
-          summaries: [{
-            session: activeSession.value.id,
-            summary: savedAnalysis.summaryOfSession,
-            title: savedAnalysis.title,
-            date: activeSession.value.created,
-            duration: totalTimePassedMinutes,
-          }],
-          finalDemographicProfile: savedAnalysis.demographicData,
-          possibleRiskFactors: savedAnalysis.possibleRiskFactorsExtracted ? [savedAnalysis.possibleRiskFactorsExtracted] : [],
-          possibleDeeperGoals: savedAnalysis.possibleDeeperGoalsOfPatient ? [savedAnalysis.possibleDeeperGoalsOfPatient] : [],
-        });
-      }
-      else {
-        // Update existing report
-        const updatedData = {
-          totalSessions: (existingReport.totalSessions || 0) + 1,
-          summaries: [...(existingReport.summaries || []), {
-            session: activeSession.value.id,
-            summary: savedAnalysis.summaryOfSession,
-            title: savedAnalysis.title,
-            date: activeSession.value.created,
-            duration: totalTimePassedMinutes,
-          }],
-          finalDemographicProfile: {
-            ...(existingReport.finalDemographicProfile || {}),
-            // Only merge non-null values from new demographic data
-            ...Object.fromEntries(
-              Object.entries(savedAnalysis.demographicData || {})
-                .filter(([key, value]) => value !== null && value !== undefined),
-            ),
-          },
-          possibleRiskFactors: [
-            ...(existingReport.possibleRiskFactors || []),
-            ...(savedAnalysis.possibleRiskFactorsExtracted ? [savedAnalysis.possibleRiskFactorsExtracted] : []),
-          ],
-          possibleDeeperGoals: [
-            ...(existingReport.possibleDeeperGoals || []),
-            ...(savedAnalysis.possibleDeeperGoalsOfPatient ? [savedAnalysis.possibleDeeperGoalsOfPatient] : []),
-          ],
-        };
-        report = await updateReport(existingReport.id, updatedData);
-      }
-    }
-    catch (updateError) {
-      console.error('Error updating session:', updateError);
-      // Continue even if session update fails - we'll still navigate to analysis
-    }
-  }
-  catch (error) {
-    console.error('Error ending session:', error);
-    toaster.show({
-      title: 'خطا',
-      message: 'خطا در پایان جلسه. لطفا دوباره تلاش کنید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-  }
-  finally {
-    isGeneratingAnalysis.value = false;
-    isReportModalOpen.value = false;
+			if (!existingReport) {
+				// Create new report
+				report = await createReport({
+					user: nuxtApp.$pb.authStore.model.id,
+					totalSessions: 1,
+					summaries: [
+						{
+							session: activeSession.value.id,
+							summary: savedAnalysis.summaryOfSession,
+							title: savedAnalysis.title,
+							date: activeSession.value.created,
+							duration: totalTimePassedMinutes,
+						},
+					],
+					finalDemographicProfile: savedAnalysis.demographicData,
+					possibleRiskFactors: savedAnalysis.possibleRiskFactorsExtracted
+						? [savedAnalysis.possibleRiskFactorsExtracted]
+						: [],
+					possibleDeeperGoals: savedAnalysis.possibleDeeperGoalsOfPatient
+						? [savedAnalysis.possibleDeeperGoalsOfPatient]
+						: [],
+				});
+			} else {
+				// Update existing report
+				const updatedData = {
+					totalSessions: (existingReport.totalSessions || 0) + 1,
+					summaries: [
+						...(existingReport.summaries || []),
+						{
+							session: activeSession.value.id,
+							summary: savedAnalysis.summaryOfSession,
+							title: savedAnalysis.title,
+							date: activeSession.value.created,
+							duration: totalTimePassedMinutes,
+						},
+					],
+					finalDemographicProfile: {
+						...(existingReport.finalDemographicProfile || {}),
+						// Only merge non-null values from new demographic data
+						...Object.fromEntries(
+							Object.entries(savedAnalysis.demographicData || {}).filter(
+								([key, value]) => value !== null && value !== undefined,
+							),
+						),
+					},
+					possibleRiskFactors: [
+						...(existingReport.possibleRiskFactors || []),
+						...(savedAnalysis.possibleRiskFactorsExtracted
+							? [savedAnalysis.possibleRiskFactorsExtracted]
+							: []),
+					],
+					possibleDeeperGoals: [
+						...(existingReport.possibleDeeperGoals || []),
+						...(savedAnalysis.possibleDeeperGoalsOfPatient
+							? [savedAnalysis.possibleDeeperGoalsOfPatient]
+							: []),
+					],
+				};
+				report = await updateReport(existingReport.id, updatedData);
+			}
+		} catch (updateError) {
+			console.error("Error updating session:", updateError);
+			// Continue even if session update fails - we'll still navigate to analysis
+		}
+	} catch (error) {
+		console.error("Error ending session:", error);
+		toaster.show({
+			title: "خطا",
+			message: "خطا در پایان جلسه. لطفا دوباره تلاش کنید.",
+			color: "danger",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+	} finally {
+		isGeneratingAnalysis.value = false;
+		isReportModalOpen.value = false;
 
-    await navigateTo(`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`);
-  }
+		await navigateTo(
+			`/darmana/therapists/analysis?analysis_id=${savedAnalysisId}`,
+		);
+	}
 };
 
 const handleAudioText = (text: string) => {
-  newMessage.value = text;
+	newMessage.value = text;
 };
 
 const handleAudioSend = () => {
-  if (newMessage.value && !messageLoading.value) {
-    submitMessage();
-  }
+	if (newMessage.value && !messageLoading.value) {
+		submitMessage();
+	}
 };
 const handleTextareaClick = () => {
-  if (showNoCharge.value) {
-    toaster.show({
-      title: 'خطا',
-      message: 'بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.',
-      color: 'danger',
-      icon: 'ph:warning-circle-fill',
-      closable: true,
-    });
-  }
+	if (showNoCharge.value) {
+		toaster.show({
+			title: "خطا",
+			message:
+				"بسته مصرفی شما به اتمام رسیده است. لطفاً اقدام به خرید اشتراک نمایید.",
+			color: "danger",
+			icon: "ph:warning-circle-fill",
+			closable: true,
+		});
+	}
 };
-const thinkingResponse = ref('');
+const thinkingResponse = ref("");
 const isAIThinking = ref(false);
+const aiProvider = ref<"openrouter" | "runpod">("openrouter");
 // --- Ensure no 'thinking' message is pushed to messages ---
 // In submitMessage or any streaming logic, do not push a 'thinking' or empty message to messages array.
 // Only use isAIThinking and thinkingResponse for the typing indicator.
-
 </script>
 
 <template>
@@ -1841,6 +2206,16 @@ const isAIThinking = ref(false);
                   >
                     <Icon
                       name="ph:robot"
+                      class="size-5"
+                    />
+                  </button>
+                  <button
+                    class="bg-info-500/30 dark:bg-info-500/70 dark:text-muted-100 text-muted-600 hover:text-info-500 hover:bg-info-500/50 mr-3 flex size-12 items-center justify-center rounded-2xl transition-colors duration-300"
+                    :title="`تغییر به ${aiProvider === 'openrouter' ? 'RunPod' : 'OpenRouter'}`"
+                    @click="aiProvider = aiProvider === 'openrouter' ? 'runpod' : 'openrouter'"
+                  >
+                    <Icon
+                      :name="aiProvider === 'openrouter' ? 'ph:cloud-arrow-up' : 'ph:cloud-arrow-down'"
                       class="size-5"
                     />
                   </button>
@@ -2044,6 +2419,20 @@ const isAIThinking = ref(false);
                       <span class="block flex items-center font-sans">
                         <AddonMarkdownRemark :source="thinkingResponse || 'در حال فکر کردن'" />
                         <span class="typing-ellipsis ml-2" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <!-- RunPod Status Indicator -->
+                <div v-if="isPolling || isPending" class="mb-4 flex justify-start">
+                  <div class="flex max-w-[85%] flex-col items-start">
+                    <div class="bg-info-100 dark:bg-info-900 text-info-800 dark:text-info-100 rounded-xl px-4 py-2">
+                      <span class="block flex items-center font-sans">
+                        <Icon name="ph:clock-clockwise" class="mr-2 animate-spin" />
+                        {{ isPolling ? 'در حال بررسی وضعیت...' : 'در حال پردازش...' }}
+                        <span v-if="pollAttempts > 0" class="ml-2 text-sm">
+                          (تلاش {{ pollAttempts }}/60)
+                        </span>
                       </span>
                     </div>
                   </div>

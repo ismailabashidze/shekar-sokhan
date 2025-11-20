@@ -11,11 +11,8 @@ interface FormData {
 	projectType: string;
 	researchDomain: string[];
 	keywords: string[];
-	objectives: string;
 	researchGoals: string[];
-	methodology: string;
 	ethicsApproval: boolean;
-	fundingSource: string;
 	necessity: string;
 	importance: string;
 }
@@ -28,24 +25,23 @@ definePageMeta({
 useHead({ htmlAttrs: { dir: "rtl" } });
 
 const { getOrganizedCategories } = useResearcher();
+const { researchCategories, toggleNode, flattenNodes, loadResearchData } = useResearcher();
+
 const {
-	researchCategories,
-	selectedInterests,
-	toggleNode,
-	expandNode,
-	collapseNode,
-	isNodeExpanded,
-	getSelectedBranches,
-	getSelectionSummary,
-	filterNodes,
-	flattenNodes,
-	loadResearchData,
-} = useResearcher();
+	createResearchProject,
+	generateAISuggestions,
+	suggestResearchDomain,
+	suggestKeywords,
+	suggestResearchGoals,
+	suggestNecessity,
+	suggestImportance,
+} = useResearchProject();
+const { user } = useUser();
 
 const router = useRouter();
 const toaster = useToaster();
 
-const currentStep = ref(5);
+const currentStep = ref(1);
 const totalSteps = 5;
 const isBrainstorming = ref(false);
 const brainstormResults = ref("");
@@ -54,11 +50,8 @@ const formData = ref<FormData>({
 	projectType: "",
 	researchDomain: [],
 	keywords: [],
-	objectives: "",
 	researchGoals: [],
-	methodology: "",
 	ethicsApproval: false,
-	fundingSource: "",
 	necessity: "",
 	importance: "",
 });
@@ -94,32 +87,113 @@ const projectTypes: ProjectType[] = [
 	},
 ];
 
+const selectedProjectType = computed(() =>
+	projectTypes.find((type) => type.id === formData.value.projectType),
+);
+
+const truncateText = (text: string, limit = 220) => {
+	if (!text) return "";
+	return text.length > limit ? `${text.slice(0, limit)}…` : text;
+};
+
 const steps = computed(() => [
-	{ number: 1, title: "نوع پروژه", completed: currentStep.value > 1 },
-	{ number: 2, title: "طوفان فکری", completed: currentStep.value > 2 },
-	{ number: 3, title: "حوزه و اهداف", completed: currentStep.value > 3 },
-	{ number: 4, title: "جزئیات پژوهش", completed: currentStep.value > 4 },
-	{ number: 5, title: "بررسی و ثبت", completed: currentStep.value > 5 },
+	{
+		number: 1,
+		title: "نوع پروژه",
+		completed:
+			currentStep.value > 1 ||
+			(currentStep.value >= 1 && stepValidation.value.step1.isValid),
+		isValid: stepValidation.value.step1.isValid,
+	},
+	{
+		number: 2,
+		title: "طوفان فکری",
+		completed:
+			currentStep.value > 2 ||
+			(currentStep.value >= 2 && stepValidation.value.step2.isValid),
+		isValid: stepValidation.value.step2.isValid,
+	},
+	{
+		number: 3,
+		title: "حوزه و اهداف",
+		completed:
+			currentStep.value > 3 ||
+			(currentStep.value >= 3 && stepValidation.value.step3.isValid),
+		isValid: stepValidation.value.step3.isValid,
+	},
+	{
+		number: 4,
+		title: "جزئیات پژوهش",
+		completed:
+			currentStep.value > 4 ||
+			(currentStep.value >= 4 && stepValidation.value.step4.isValid),
+		isValid: stepValidation.value.step4.isValid,
+	},
+	{
+		number: 5,
+		title: "بررسی و ثبت",
+		completed: currentStep.value > 5,
+		isValid: true,
+	},
 ]);
 
+// Enhanced validation for each step with real-time feedback
+const stepValidation = computed(() => {
+	return {
+		step1: {
+			isValid: formData.value.projectType !== "",
+			message: formData.value.projectType
+				? ""
+				: "لطفاً نوع پروژه را انتخاب کنید",
+		},
+		step2: {
+			isValid: true, // Step 2 has no required fields
+			message: "",
+		},
+		step3: {
+			isValid:
+				formData.value.researchDomain.length > 0 &&
+				formData.value.researchGoals.length > 0 &&
+				formData.value.keywords.length > 0,
+			message:
+				formData.value.researchDomain.length === 0
+					? "حداقل یک حوزه دانشی انتخاب کنید"
+					: formData.value.researchGoals.length === 0
+						? "حداقل یک هدف پژوهشی وارد کنید"
+						: formData.value.keywords.length === 0
+							? "حداقل یک کلیدواژه وارد کنید"
+							: "",
+		},
+		step4: {
+			isValid: formData.value.necessity && formData.value.importance,
+			message: !formData.value.necessity
+				? "ضرورت تحقیق را وارد کنید"
+				: !formData.value.importance
+					? "اهمیت تحقیق را وارد کنید"
+					: "",
+		},
+	};
+});
+
+// Specific validation for step 4 fields
+const step4FieldValidation = computed(() => ({
+	necessity: {
+		isValid:
+			formData.value.necessity && formData.value.necessity.trim().length > 10,
+		message: "ضرورت تحقیق باید حداقل ۱۰ کاراکتر باشد",
+	},
+	importance: {
+		isValid:
+			formData.value.importance && formData.value.importance.trim().length > 10,
+		message: "اهمیت تحقیق باید حداقل ۱۰ کاراکتر باشد",
+	},
+}));
+
 const canGoNext = computed(() => {
-	if (currentStep.value === 1) return formData.value.projectType !== "";
-	if (currentStep.value === 2) return true;
-	if (currentStep.value === 3) {
-		return (
-			formData.value.researchDomain.length > 0 &&
-			formData.value.researchGoals.length > 0 &&
-			formData.value.keywords.length > 0
-		);
-	}
-	if (currentStep.value === 4) {
-		return (
-			formData.value.objectives &&
-			formData.value.methodology &&
-			formData.value.necessity &&
-			formData.value.importance
-		);
-	}
+	if (currentStep.value === 1) return stepValidation.value.step1.isValid;
+	if (currentStep.value === 2) return stepValidation.value.step2.isValid;
+	if (currentStep.value === 3) return stepValidation.value.step3.isValid;
+	if (currentStep.value === 4) return stepValidation.value.step4.isValid;
 	return true;
 });
 
@@ -127,9 +201,26 @@ const selectProjectType = (typeId: string) => {
 	formData.value.projectType = typeId;
 };
 
+const validateStep4Fields = () => {
+	// Force reactivity update for step 4 validation
+	// This ensures real-time validation feedback
+	// Validation is handled by computed properties
+};
+
 const nextStep = () => {
 	if (canGoNext.value && currentStep.value < totalSteps) {
 		currentStep.value++;
+	} else if (!canGoNext.value) {
+		// Show validation feedback
+		toaster.show({
+			title: "تکمیل اطلاعات",
+			message:
+				stepValidation[`step${currentStep.value}`].message ||
+				"لطفاً تمام فیلدهای الزامی را تکمیل کنید",
+			color: "warning",
+			icon: "ph:warning-circle",
+			closable: true,
+		});
 	}
 };
 
@@ -139,15 +230,40 @@ const previousStep = () => {
 	}
 };
 
-const submitForm = () => {
-	toaster.show({
-		title: "موفق",
-		message: "پروژه با موفقیت ایجاد شد",
-		color: "success",
-		icon: "ph:check-circle-fill",
-		closable: true,
-	});
-	router.push("/hampazhooh/projects");
+const submitForm = async () => {
+	try {
+		const projectData = {
+			user: user.value.id,
+			projectType: formData.value.projectType,
+			status: "collectingRelatedArticles",
+			researchDomain: formData.value.researchDomain,
+			keywords: formData.value.keywords,
+			researchGoals: formData.value.researchGoals,
+			ethicsApproval: formData.value.ethicsApproval,
+			necessity: formData.value.necessity,
+			importance: formData.value.importance,
+			brainstormResults: brainstormResults.value,
+		};
+
+		await createResearchProject(projectData);
+
+		toaster.show({
+			title: "موفق",
+			message: "پروژه با موفقیت ایجاد شد",
+			color: "success",
+			icon: "ph:check-circle-fill",
+			closable: true,
+		});
+		router.push("/hampazhooh/projects");
+	} catch (error: any) {
+		toaster.show({
+			title: "خطا",
+			message: `خطا در ایجاد پروژه: ${error.message || "خطای ناشناخته"}`,
+			color: "danger",
+			icon: "ph:warning",
+			closable: true,
+		});
+	}
 };
 
 const cancelForm = () => {
@@ -170,6 +286,7 @@ const defaultDomainSuggestions = [
 	"فیزیک",
 ];
 
+
 // Use useResearcher for domain and keyword management
 const researchDomains = computed(() => {
 	return flattenNodes(researchCategories.value).filter(
@@ -178,6 +295,14 @@ const researchDomains = computed(() => {
 });
 
 const domainSuggestions = computed(() => {
+	// Prioritize AI-generated suggestions if available
+	if (aiGeneratedDomainSuggestions.value.length > 0) {
+		return aiGeneratedDomainSuggestions.value.filter(
+			(domain) => !formData.value.researchDomain.includes(domain)
+		);
+	}
+
+	// Fallback to static suggestions from research categories
 	const domains = researchDomains.value;
 	const selected = formData.value.researchDomain;
 	return domains
@@ -186,24 +311,92 @@ const domainSuggestions = computed(() => {
 		.map((domain) => domain.name);
 });
 
+const keywordSuggestions = computed(() => {
+	// Prioritize AI-generated suggestions if available
+	if (aiGeneratedKeywordSuggestions.value.length > 0) {
+		return aiGeneratedKeywordSuggestions.value.filter(
+			(keyword) => !formData.value.keywords.includes(keyword)
+		);
+	}
+
+	// Return empty array if no AI suggestions yet
+	return [];
+});
+
+const buildAiContext = () => ({
+	projectType: formData.value?.projectType || "",
+	researchDomain: formData.value?.researchDomain || [],
+	keywords: formData.value?.keywords || [],
+	researchGoals: formData.value?.researchGoals || [],
+});
+
+const ensureAiContextComplete = () => {
+	const missing: string[] = [];
+
+	if (!formData.value.projectType) {
+		missing.push("نوع پروژه");
+	}
+	if (formData.value.researchDomain.length === 0) {
+		missing.push("حوزه دانشی");
+	}
+	if (formData.value.keywords.length === 0) {
+		missing.push("کلیدواژه");
+	}
+	if (formData.value.researchGoals.length === 0) {
+		missing.push("هدف پژوهشی");
+	}
+
+	if (missing.length > 0) {
+		toaster.show({
+			title: "تکمیل اطلاعات پایه",
+			message: `برای تولید متن با هوش مصنوعی، ابتدا ${missing.join(
+				"، ",
+			)} را تکمیل کنید.`,
+			color: "warning",
+			icon: "ph:warning-circle",
+			closable: true,
+		});
+		return false;
+	}
+
+	return true;
+};
+
 const researchGoalsSuggestions = computed(() => {
+	// Prioritize AI-generated suggestions if available
+	if (aiGeneratedResearchGoalsSuggestions.value.length > 0) {
+		return aiGeneratedResearchGoalsSuggestions.value.filter(
+			(goal) => !formData.value.researchGoals.includes(goal)
+		);
+	}
+
+	// Fallback to metadata-based suggestions
 	if (formData.value.researchDomain.length === 0) return [];
 
-	const selectedBranches = getSelectedBranches();
-	const goals = [];
+	const goals: string[] = [];
+	const allDomains = researchDomains.value;
 
-	// Generate goals based on selected domains
-	Object.keys(selectedBranches).forEach((branchId) => {
-		const branch = selectedBranches[branchId];
-		branch.forEach((item) => {
-			if (item.metadata?.applications) {
-				goals.push(...item.metadata.applications);
-			}
-		});
+	// Generate goals based on selected domains from formData
+	formData.value.researchDomain.forEach((domainName) => {
+		// Find matching domain in researchDomains
+		const domain = allDomains.find((d) => d.name === domainName);
+		if (domain?.metadata?.applications) {
+			goals.push(...domain.metadata.applications);
+		}
+
+		// Also check in flattened nodes for deeper matches
+		const flattened = flattenNodes(researchCategories.value);
+		const matchedNode = flattened.find((node) => node.name === domainName);
+		if (matchedNode?.metadata?.applications) {
+			goals.push(...matchedNode.metadata.applications);
+		}
 	});
 
-	return [...new Set(goals)].slice(0, 8);
+	return [...new Set(goals)].slice(0, 8).filter(
+		(goal) => !formData.value.researchGoals.includes(goal)
+	);
 });
+
 // AI Loading states for each field
 const mainChallengeAiLoading = ref(false);
 const researchDomainAiLoading = ref(false);
@@ -211,28 +404,91 @@ const researchGoalsAiLoading = ref(false);
 const keywordsAiLoading = ref(false);
 const focusLevelAiLoading = ref(false);
 const smartCompleteLoading = ref(false);
-const theoriesAiLoading = ref(false);
 const importanceAiLoading = ref(false);
 const necessityAiLoading = ref(false);
+const suggestionsLoading = ref(false);
+
+// AI-generated domain suggestions
+const aiGeneratedDomainSuggestions = ref<string[]>([]);
+
+// AI-generated keyword suggestions
+const aiGeneratedKeywordSuggestions = ref<string[]>([]);
+const keywordSuggestionsLoading = ref(false);
+
+// AI-generated research goals suggestions
+const aiGeneratedResearchGoalsSuggestions = ref<string[]>([]);
+const researchGoalsSuggestionsLoading = ref(false);
 
 // Modal states
 const showResearchDomainInfoModal = ref(false);
 const showSelectedInterestsModal = ref(false);
 const showResearchGoalsInfoModal = ref(false);
 const showKeywordsInfoModal = ref(false);
-const showTheoriesInfoModal = ref(false);
 const showImportanceInfoModal = ref(false);
 const showNecessityInfoModal = ref(false);
 const showObjectivesInfoModal = ref(false);
 const showMethodologyInfoModal = ref(false);
 
-// Theory extraction data
-const extractedTheories = ref<
-	Array<{ name: string; description: string; authors: string[] }>
->([]);
+// Search query for interests modal
+const selectedInterestsSearchQuery = ref("");
 
+// Reset search query when modal closes
+watch(showSelectedInterestsModal, (isOpen) => {
+	if (!isOpen) {
+		selectedInterestsSearchQuery.value = "";
+	}
+});
+
+// Clear AI suggestions when domains change (to keep suggestions fresh)
+watch(() => formData.value.researchDomain, () => {
+	// Don't clear immediately, allow user to see suggestions
+	// Only clear after a delay if they want fresh suggestions
+});
+
+// Theory extraction data
 const organizedCategories = computed(() => {
-	return getOrganizedCategories(["philosophy", "sociology"]);
+	// Show a curated subset of popular and relevant research categories
+	const relevantCategoryIds = [
+		"psychology",
+		"education",
+		"computer-science",
+		"medicine",
+		"engineering",
+		"business",
+		"sociology",
+		"philosophy",
+	];
+	return getOrganizedCategories(relevantCategoryIds);
+});
+
+// Filtered categories based on search query
+const filteredCategories = computed(() => {
+	if (!selectedInterestsSearchQuery.value.trim()) {
+		return organizedCategories.value;
+	}
+
+	const query = selectedInterestsSearchQuery.value.toLowerCase().trim();
+	
+	return Object.entries(organizedCategories.value)
+		.map(([catId, category]) => {
+			const filteredLevel3 = category.level3.filter(
+				(item) =>
+					item.name.toLowerCase().includes(query) ||
+					item.description?.toLowerCase().includes(query) ||
+					category.name.toLowerCase().includes(query)
+			);
+
+			if (filteredLevel3.length === 0) return null;
+
+			return {
+				[catId]: {
+					name: category.name,
+					level3: filteredLevel3,
+				},
+			};
+		})
+		.filter(Boolean)
+		.reduce((acc, item) => ({ ...acc, ...item }), {});
 });
 
 // Remove old updateSuggestions function and replace with computed properties
@@ -271,134 +527,31 @@ const addKeyword = () => {
 
 // Remove old duplicate functions - they are now defined above
 
-const removeTheory = (index: number) => {
-	extractedTheories.value.splice(index, 1);
-};
-
-const extractTheories = async () => {
-	if (formData.value.researchDomain.length === 0) {
-		toaster.show({
-			title: "هشدار",
-			message:
-				"لطفاً ابتدا حوزه دانشی را وارد کنید تا بتوانیم نظریه‌های مرتبط را استخراج کنیم.",
-			color: "warning",
-			icon: "ph:warning",
-			closable: true,
-		});
-		return;
-	}
-
-	theoriesAiLoading.value = true;
-
-	try {
-		const selectedBranches = getSelectedBranches();
-		const theories = [];
-
-		// Extract theories from selected domains metadata
-		Object.keys(selectedBranches).forEach((branchId) => {
-			const branch = selectedBranches[branchId];
-			branch.forEach((item) => {
-				if (item.metadata?.methodologies) {
-					item.metadata.methodologies.forEach((method) => {
-						theories.push({
-							name: method,
-							description: `روش‌شناسی ${method} برای حوزه ${item.name}`,
-							authors: ["متخصصان حوزه"],
-						});
-					});
-				}
-			});
-		});
-
-		// If no metadata found, use default theories based on domains
-		if (theories.length === 0) {
-			const domains = formData.value.researchDomain.join(" ").toLowerCase();
-
-			if (domains.includes("روانشناسی")) {
-				theories.push(
-					{
-						name: "نظریه یادگیری اجتماعی بندورا",
-						description:
-							"افراد از طریق مشاهده و تقلید رفتارهای دیگران یاد می‌گیرند. این نظریه برای مطالعه الگوهای رفتاری در محیط‌های آموزشی کاربرد دارد.",
-						authors: ["آلبرت بندورا"],
-					},
-					{
-						name: "نظریه شناخت اجتماعی",
-						description:
-							"تفکرات و باورها بر رفتار و هیجان‌ها تأثیر می‌گذارند. برای تحلیل عوامل شناختی در سلامت روان کاربرد دارد.",
-						authors: ["آرون بک", "آلبرت الیس"],
-					},
-					{
-						name: "نظریه تعلق اجتماعی",
-						description:
-							"انسان‌ها نیاز اساسی به تعلق و ارتباط اجتماعی دارند. کمبود تعلق منجر به مشکلات روانی می‌شود.",
-						authors: ["Roy Baumeister", "Mark Leary"],
-					},
-				);
-			} else if (domains.includes("آموزش") || domains.includes("تربیتی")) {
-				theories.push(
-					{
-						name: "نظریه ساختار شناختی پیاژه",
-						description:
-							"افراد از طریق مراحل رشد شناختی یاد می‌گیرند. برای طراحی برنامه‌های آموزشی متناسب با سن کاربرد دارد.",
-						authors: ["ژان پیاژه"],
-					},
-					{
-						name: "نظریه منطقه نزدیک توسعه ویگوتسکی",
-						description:
-							"یادگیری در interaction با دیگران و با راهنمایی مناسب اتفاق می‌افتد. برای یادگیری collaborative کاربرد دارد.",
-						authors: ["Lev Vygotsky"],
-					},
-					{
-						name: "نظریه چندگانه هوش گاردنر",
-						description:
-							"افراد انواع مختلفی از هوش دارند. برای طراحی روش‌های آموزشی متنوع کاربرد دارد.",
-						authors: ["Howard Gardner"],
-					},
-				);
-			}
-		}
-
-		extractedTheories.value = theories;
-
-		toaster.show({
-			title: "موفق",
-			message: `${extractedTheories.value.length} نظریه مرتبط استخراج شد.`,
-			color: "success",
-			icon: "ph:check-circle-fill",
-			closable: true,
-		});
-	} catch (error: any) {
-		toaster.show({
-			title: "خطا",
-			message: `خطا در استخراج نظریه‌ها: ${error.message || "خطای ناشناخته"}`,
-			color: "danger",
-			icon: "ph:warning",
-			closable: true,
-		});
-	} finally {
-		theoriesAiLoading.value = false;
-	}
-};
-
 const toggleResearchDomain = (domainName: string) => {
+	// Update formData directly first
+	const index = formData.value.researchDomain.indexOf(domainName);
+	if (index > -1) {
+		formData.value.researchDomain.splice(index, 1);
+	} else {
+		formData.value.researchDomain.push(domainName);
+	}
+
+	// Try to find and update useResearcher state if domain exists
 	const domain = researchDomains.value.find((d) => d.name === domainName);
 	if (domain) {
 		toggleNode(domain);
-
-		// Update formData to match
-		const index = formData.value.researchDomain.indexOf(domainName);
-		if (index > -1) {
-			formData.value.researchDomain.splice(index, 1);
-		} else {
-			formData.value.researchDomain.push(domainName);
-		}
 	}
 };
 
 const addDomain = (domainName: string) => {
 	if (domainName && !formData.value.researchDomain.includes(domainName)) {
 		formData.value.researchDomain.push(domainName);
+
+		// Also update useResearcher selection
+		const domain = researchDomains.value.find((d) => d.name === domainName);
+		if (domain && !domain.selected) {
+			toggleNode(domain);
+		}
 	}
 };
 
@@ -413,13 +566,62 @@ const removeDomain = (index: number) => {
 	}
 };
 
-// AI Suggestion Function
-async function suggestAIField(field: string) {
-	// Check if main challenge exists for keywords generation
-	if (
-		field === "keywords" &&
-		(!formData.value || !formData.value.researchDomain?.length)
-	) {
+const clearAllDomains = () => {
+	// Clear all domains from formData
+	const domainsToClear = [...formData.value.researchDomain];
+	formData.value.researchDomain = [];
+
+	// Also clear from useResearcher selection
+	domainsToClear.forEach((domainName) => {
+		const domain = researchDomains.value.find((d) => d.name === domainName);
+		if (domain && domain.selected) {
+			toggleNode(domain);
+		}
+	});
+};
+
+// AI Suggestion Functions with specific methods
+// Research Domain Suggestion
+const suggestAIFieldResearchDomain = async () => {
+	researchDomainAiLoading.value = true;
+
+	try {
+		const context = {
+			projectType: formData.value?.projectType || "",
+			researchDomain: formData.value?.researchDomain || [],
+			keywords: formData.value?.keywords || [],
+			researchGoals: formData.value?.researchGoals || [],
+		};
+
+		const suggestions = await suggestResearchDomain(context);
+
+		suggestions.forEach((suggestion: string) => {
+			addDomain(suggestion);
+		});
+
+		toaster.show({
+			title: "موفق",
+			message: `${suggestions.length} پیشنهاد حوزه دانشی اضافه شد.`,
+			color: "success",
+			icon: "ph:check-circle-fill",
+			closable: true,
+		});
+	} catch (e: any) {
+		toaster.show({
+			title: "خطا",
+			message: `خطا در دریافت پیشنهاد حوزه دانشی: ${e.message || "خطای ناشناخته"}`,
+			color: "danger",
+			icon: "ph:warning",
+			closable: true,
+		});
+	} finally {
+		researchDomainAiLoading.value = false;
+	}
+};
+
+// Keywords Suggestion
+const suggestAIFieldKeywords = async () => {
+	if (!formData.value?.researchDomain?.length) {
 		toaster.show({
 			title: "هشدار",
 			message:
@@ -430,280 +632,233 @@ async function suggestAIField(field: string) {
 		});
 		return;
 	}
-	// Set loading state
-	switch (field) {
-		case "researchDomain":
-			researchDomainAiLoading.value = true;
-			break;
-		case "keywords":
-			keywordsAiLoading.value = true;
-			break;
-		case "researchGoals":
-			researchGoalsAiLoading.value = true;
-			break;
-		case "importance":
-			importanceAiLoading.value = true;
-			break;
-		case "necessity":
-			necessityAiLoading.value = true;
-			break;
-		case "focusLevel":
-			focusLevelAiLoading.value = true;
-			break;
-	}
+
+	keywordsAiLoading.value = true;
 
 	try {
-		// Get context from existing fields
-		const context = {
-			researchDomain: formData.value?.researchDomain?.join(", ") || "",
-			keywords: formData.value?.keywords?.join(", ") || "",
-		};
+		const context = buildAiContext();
 
-		const contextMapping = {
-			researchDomain: "حوزه دانشی",
-			keywords: "کلیدواژه‌ها",
-		};
+		const suggestions = await suggestKeywords(context);
 
-		const contextString = Object.entries(context)
-			.filter(([key]) => key !== field && context[key])
-			.map(([key, val]) => `${contextMapping[key] || key}: ${val}`)
-			.join("\n");
+		// Store suggestions for the suggestions card (before adding to form)
+		aiGeneratedKeywordSuggestions.value = suggestions;
 
-		// Field-specific prompts
-		const prompts = {
-			researchDomain: `بر اساس اطلاعات موجود، حوزه‌های دانشی مناسب برای این پژوهش را به صورت یک آرایه JSON پیشنهاد بده. حوزه‌ها باید:
-  - با موضوع تحقیق مرتبط باشند
-  - مشخص و دقیق باشند
-  - در صورت نیاز، رویکردهای بین‌رشته‌ای را شامل شوند
-  ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ""}
+		// Filter out already selected keywords
+		const newSuggestions = suggestions.filter(
+			(suggestion: string) => !formData.value.keywords.includes(suggestion)
+		);
 
-  فقط یک آرایه JSON معتبر با فرمت زیر برگردان:
-  ["حوزه اول", "حوزه دوم", "حوزه سوم", "حوزه چهارم", "حوزه پنجم"]`,
-
-			keywords: `بر اساس حوزه‌های دانشی، کلیدواژه‌های تخصصی و مهم این پژوهش را به صورت یک آرایه JSON پیشنهاد بده. کلیدواژه‌ها باید:
-          - تخصصی و دقیق باشند
-          - مفاهیم اصلی پژوهش را پوشش دهند
-          - برای جستجو در پایگاه‌های علمی مناسب باشند
-          - فارسی باشند
-          ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ""}
-
-          فقط یک آرایه JSON معتبر با فرمت زیر برگردان:
-          ["کلیدواژه اول", "کلیدواژه دوم", "کلیدواژه سوم", "کلیدواژه چهارم", "کلیدواژه پنجم"]`,
-
-			researchGoals: `بر اساس حوزه‌های دانشی، اهداف پژوهشی مناسب و کاربردی را به صورت یک آرایه JSON پیشنهاد بده. اهداف باید:
-          - کاربردی و قابل دستیابی باشند
-          - با حوزه دانشی مرتبط باشند
-          - تأثیر اجتماعی یا علمی داشته باشند
-          - SMART (مشخص، قابل اندازه‌گیری، دست یافتنی، مرتبط، زمان‌دار) باشند
-          - فارسی باشند
-          ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ""}
-
-          فقط یک آرایه JSON معتبر با فرمت زیر برگردان:
-          ["هدف اول", "هدف دوم", "هدف سوم", "هدف چهارم", "هدف پنجم"]`,
-
-			importance: `بر اساس اطلاعات پروژه، اهمیت این پژوهش را توضیح دهید. این متن باید:
-          - تأثیر علمی، عملیاتی یا اجتماعی پژوهش را مشخص کند
-          - چه ارزشی برای علم، جامعه یا صنعت دارد
-          - چگونه به دانش فعلی اضافه می‌کند
-          - کاربردهای عملی یافته‌ها
-          - حدود 3-5 پاراگراف باشد
-          ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ""}
-
-          متن اهمیت تحقیق را به فارسی و به صورت علمی بنویسید.`,
-
-			necessity: `بر اساس اطلاعات پروژه، ضرورت این تحقیق را توضیح دهید. این متن باید:
-          - چه مشکلی قرار است حل شود
-          - چه خلاء دانشی را پر می‌کند
-          - چرا این تحقیق الان ضروری است
-          - چه نیجی اجتماعی یا علمی پاسخ داده می‌شود
-          - حدود 3-5 پاراگراف باشد
-          ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ""}
-
-          متن ضرورت تحقیق را به فارسی و به صورت علمی بنویسید.`,
-			focusLevel: `بر اساس توضیحات پروژه، مناسب‌ترین سطح تمرکز را از بین گزینه‌های زیر انتخاب کن:
-  - applied (کاربردی): تحقیق با هدف حل مسائل عملی
-  - theoretical (نظری): تحقیق با هدف توسعه دانش نظری
-  - interdisciplinary (بین‌رشته‌ای): تحقیق که از چند حوزه استفاده می‌کند
-  - mixed (ترکیبی): ترکیبی از رویکردهای نظری و کاربردی
-
-  ${contextString ? `\nاطلاعات موجود:\n${contextString}` : ""}
-  فقط یکی از مقادیر: applied, theoretical, interdisciplinary, mixed را برگردان.`,
-		};
-
-		const prompt = prompts[field] || "یک مقدار مناسب پیشنهاد بده.";
-		const userContent = formData.value?.[field] || "";
-		const messages = [
-			{
-				role: "user",
-				content: userContent
-					? `${prompt}\n\nمقدار فعلی: ${userContent}`
-					: prompt,
-			},
-		];
-
-		let suggestion = "";
-
-		// Stream AI response (simplified for now)
-		await new Promise<void>((resolve) => {
-			setTimeout(() => {
-				if (field === "researchDomain") {
-					suggestion = '["روانشناسی", "علوم تربیتی", "آموزش"]';
-				} else if (field === "keywords") {
-					suggestion = '["یادگیری ماشین", "هوش مصنوعی", "آموزش"]';
-				} else if (field === "researchGoals") {
-					suggestion =
-						'["بهبود کیفیت آموزش", "افزایش بهره‌وری آموزشی", "تقویت مهارت‌های دانشجویان"]';
-				} else if (field === "importance") {
-					suggestion =
-						"این پژوهش از نظر علمی اهمیت زیادی دارد زیرا به یکی از چالش‌های اساسی در حوزه سلامت روان جامعه می‌پردازد. از نظر عملیاتی، نتایج این تحقیق می‌تواند به توسعه برنامه‌های پیشگیرانه و درمانی مؤثر کمک کند. از نظر اجتماعی، این پژوهش به افزایش آگاهی عمومی و کاهش stigma مرتبط با مشکلات روانی کمک می‌کند. همچنین، یافته‌های این تحقیق می‌تواند مبنایی برای سیاست‌گذاری‌های بهداشتی و آموزشی در سطح ملی قرار گیرد.";
-				} else if (field === "necessity") {
-					suggestion =
-						"این تحقیق ضروری است زیرا خلاء دانشی مشخصی در زمینه شناخت عوامل خطر و عوامل محافظت‌کننده در مورد سلامت روان در جمعیت مورد مطالعه وجود دارد. با توجه به افزایش شیوع اختلالات روانی در سال‌های اخیر و تأثیر مستقیم آن بر بهره‌وری و کیفیت زندگی، انجام این پژوهش برای شناسایی راهکارهای مؤثرurgence ضروری است. علاوه بر این، عدم وجود برنامه‌های مداخله‌ای مبتنی بر شواهد و متناسب با فرهنگ زمینه، این تحقیق را از نظر زمانی ضروری‌تر می‌کند.";
-				} else if (field === "focusLevel") {
-					suggestion = "applied";
-				} else {
-					suggestion = "پیشنهاد هوش مصنوعی برای " + field;
-				}
-				resolve();
-			}, 1000);
+		// Add new suggestions to form
+		newSuggestions.forEach((suggestion: string) => {
+			formData.value.keywords.push(suggestion);
 		});
 
-		// Handle researchDomain and keywords separately after completion
-		if (field === "researchDomain") {
-			try {
-				const domains = JSON.parse(suggestion);
-				if (Array.isArray(domains)) {
-					if (formData.value) {
-						formData.value.researchDomain = domains
-							.filter((d) => d && typeof d === "string")
-							.map((d) => d.trim());
-					}
-					domainSuggestions.value = [
-						...domains,
-						...defaultDomainSuggestions.slice(0, 5),
-					];
-				}
-			} catch (error) {
-				console.warn("Error parsing research domain suggestions:", error);
-			}
-		}
-
-		if (field === "keywords") {
-			try {
-				const keywords = JSON.parse(suggestion);
-				if (Array.isArray(keywords)) {
-					if (formData.value) {
-						formData.value.keywords = keywords
-							.filter((k) => k && typeof k === "string")
-							.map((k) => k.trim());
-					}
-				}
-			} catch (error) {
-				console.warn("Error parsing keyword suggestions:", error);
-			}
-		}
-
-		if (field === "researchGoals") {
-			try {
-				const goals = JSON.parse(suggestion);
-				if (Array.isArray(goals)) {
-					if (formData.value) {
-						formData.value.researchGoals = goals
-							.filter((g) => g && typeof g === "string")
-							.map((g) => g.trim());
-					}
-				}
-			} catch (error) {
-				console.warn("Error parsing research goals suggestions:", error);
-			}
-		}
-
-		if (field === "focusLevel") {
-			if (formData.value) {
-				formData.value.focusLevel = suggestion.trim();
-			}
-		}
-
-		if (field === "importance") {
-			if (formData.value) {
-				formData.value.importance = suggestion;
-			}
-		}
-
-		if (field === "necessity") {
-			if (formData.value) {
-				formData.value.necessity = suggestion;
-			}
-		}
-
-		if (field === "necessity") {
-			if (formData.value) {
-				formData.value.necessity = suggestion;
-			}
-		}
-
-		if (field === "mainChallenge") {
-			if (formData.value) {
-				formData.value.title = suggestion;
-			}
-		}
-
-		// Success toast removed to reduce number of notifications
+		toaster.show({
+			title: "موفق",
+			message: `${newSuggestions.length} پیشنهاد کلیدواژه اضافه شد.`,
+			color: "success",
+			icon: "ph:check-circle-fill",
+			closable: true,
+		});
 	} catch (e: any) {
 		toaster.show({
 			title: "خطا",
-			message: `خطا در دریافت پیشنهاد: ${e.message || "خطای ناشناخته"}`,
+			message: `خطا در دریافت پیشنهاد کلیدواژه: ${e.message || "خطای ناشناخته"}`,
 			color: "danger",
 			icon: "ph:warning",
 			closable: true,
 		});
 	} finally {
-		// Reset loading state
-		switch (field) {
-			case "mainChallenge":
-				mainChallengeAiLoading.value = false;
-				break;
-			case "researchDomain":
-				researchDomainAiLoading.value = false;
-				break;
-			case "keywords":
-				keywordsAiLoading.value = false;
-				break;
-			case "importance":
-				importanceAiLoading.value = false;
-				break;
-			case "necessity":
-				necessityAiLoading.value = false;
-				break;
-			case "focusLevel":
-				focusLevelAiLoading.value = false;
-				break;
-		}
+		keywordsAiLoading.value = false;
 	}
-}
+};
+
+// Research Goals Suggestion
+const suggestAIFieldResearchGoals = async () => {
+	researchGoalsAiLoading.value = true;
+
+	try {
+		const context = buildAiContext();
+
+		const suggestions = await suggestResearchGoals(context);
+
+		// Store suggestions for the suggestions card (before adding to form)
+		aiGeneratedResearchGoalsSuggestions.value = suggestions;
+
+		// Filter out already selected goals
+		const newSuggestions = suggestions.filter(
+			(suggestion: string) => !formData.value.researchGoals.includes(suggestion)
+		);
+
+		// Add new suggestions to form
+		newSuggestions.forEach((suggestion: string) => {
+			addResearchGoal(suggestion);
+		});
+
+		toaster.show({
+			title: "موفق",
+			message: `${newSuggestions.length} پیشنهاد هدف پژوهشی اضافه شد.`,
+			color: "success",
+			icon: "ph:check-circle-fill",
+			closable: true,
+		});
+	} catch (e: any) {
+		toaster.show({
+			title: "خطا",
+			message: `خطا در دریافت پیشنهاد اهداف پژوهشی: ${e.message || "خطای ناشناخته"}`,
+			color: "danger",
+			icon: "ph:warning",
+			closable: true,
+		});
+	} finally {
+		researchGoalsAiLoading.value = false;
+	}
+};
+
+// Necessity Suggestion
+const suggestAIFieldNecessity = async () => {
+	if (!ensureAiContextComplete()) {
+		return;
+	}
+
+	necessityAiLoading.value = true;
+
+	try {
+		const suggestion = await suggestNecessity(buildAiContext());
+
+		formData.value.necessity = suggestion;
+
+		toaster.show({
+			title: "موفق",
+			message: "متن پیشنهادی ضرورت تحقیق اضافه شد.",
+			color: "success",
+			icon: "ph:check-circle-fill",
+			closable: true,
+		});
+	} catch (e: any) {
+		toaster.show({
+			title: "خطا",
+			message: `خطا در دریافت پیشنهاد ضرورت تحقیق: ${e.message || "خطای ناشناخته"}`,
+			color: "danger",
+			icon: "ph:warning",
+			closable: true,
+		});
+	} finally {
+		necessityAiLoading.value = false;
+	}
+};
+
+// Importance Suggestion
+const suggestAIFieldImportance = async () => {
+	if (!ensureAiContextComplete()) {
+		return;
+	}
+
+	importanceAiLoading.value = true;
+
+	try {
+		const suggestion = await suggestImportance(buildAiContext());
+
+		formData.value.importance = suggestion;
+
+		toaster.show({
+			title: "موفق",
+			message: "متن پیشنهادی اهمیت تحقیق اضافه شد.",
+			color: "success",
+			icon: "ph:check-circle-fill",
+			closable: true,
+		});
+	} catch (e: any) {
+		toaster.show({
+			title: "خطا",
+			message: `خطا در دریافت پیشنهاد اهمیت تحقیق: ${e.message || "خطای ناشناخته"}`,
+			color: "danger",
+			icon: "ph:warning",
+			closable: true,
+		});
+	} finally {
+		importanceAiLoading.value = false;
+	}
+};
 
 const generateNewSuggestions = async () => {
-	await loadResearchData();
+	suggestionsLoading.value = true;
 
-	const domains = researchDomains.value.map((d) => d.name);
-	const newSuggestions = domains
-		.filter((domain) => !formData.value.researchDomain.includes(domain))
-		.slice(0, 8);
+	try {
+		// First, reload data to ensure we have latest domains
+		await loadResearchData();
 
-	toaster.show({
-		title: "پیشنهادها بروزرسانی شد",
-		message: `${newSuggestions.length} پیشنهاد جدید تولید شد.`,
-		color: "success",
-		icon: "ph:check-circle-fill",
-		closable: true,
-	});
+		// Get context from current form data
+		const context = {
+			projectType: formData.value?.projectType || "",
+			researchDomain: formData.value?.researchDomain || [],
+			keywords: formData.value?.keywords || [],
+			researchGoals: formData.value?.researchGoals || [],
+		};
+
+		// Use AI to generate creative and related domain suggestions
+		const suggestions = await suggestResearchDomain(context);
+
+		// Filter out already selected domains
+		const filteredSuggestions = suggestions.filter(
+			(domain) => !formData.value.researchDomain.includes(domain)
+		);
+
+		// Store AI-generated suggestions
+		aiGeneratedDomainSuggestions.value = filteredSuggestions;
+
+		if (filteredSuggestions.length > 0) {
+			toaster.show({
+				title: "پیشنهادها بروزرسانی شد",
+				message: `${filteredSuggestions.length} پیشنهاد خلاقانه و مرتبط تولید شد.`,
+				color: "success",
+				icon: "ph:check-circle-fill",
+				closable: true,
+			});
+		} else {
+			// If no new suggestions after filtering, show fallback
+			const domains = researchDomains.value.map((d) => d.name);
+			const fallbackSuggestions = domains
+				.filter((domain) => !formData.value.researchDomain.includes(domain))
+				.slice(0, 8);
+
+			aiGeneratedDomainSuggestions.value = fallbackSuggestions;
+
+			toaster.show({
+				title: "پیشنهادها بروزرسانی شد",
+				message: `${fallbackSuggestions.length} پیشنهاد جدید تولید شد.`,
+				color: "success",
+				icon: "ph:check-circle-fill",
+				closable: true,
+			});
+		}
+	} catch (error: any) {
+		// Fallback to static suggestions on error
+		await loadResearchData();
+		const domains = researchDomains.value.map((d) => d.name);
+		const fallbackSuggestions = domains
+			.filter((domain) => !formData.value.researchDomain.includes(domain))
+			.slice(0, 8);
+
+		aiGeneratedDomainSuggestions.value = fallbackSuggestions;
+
+		toaster.show({
+			title: "پیشنهادها بروزرسانی شد",
+			message: `${fallbackSuggestions.length} پیشنهاد جدید تولید شد.`,
+			color: "success",
+			icon: "ph:check-circle-fill",
+			closable: true,
+		});
+	} finally {
+		suggestionsLoading.value = false;
+	}
 };
 
 const generateResearchGoalsSuggestions = async () => {
 	if (formData.value.researchDomain.length === 0) {
 		toaster.show({
 			title: "هشدار",
-			message: "لطفاً ابتدا حوزه دانشی را وارد کنید.",
+			message: "لطفاً ابتدا حوزه دانشی را وارد کنید تا بتوانیم اهداف پژوهشی مرتبط را پیشنهاد دهیم.",
 			color: "warning",
 			icon: "ph:warning",
 			closable: true,
@@ -711,15 +866,155 @@ const generateResearchGoalsSuggestions = async () => {
 		return;
 	}
 
-	const suggestions = researchGoalsSuggestions.value;
+	researchGoalsSuggestionsLoading.value = true;
 
-	toaster.show({
-		title: "پیشنهادها بروزرسانی شد",
-		message: `${suggestions.length} پیشنهاد هدف پژوهشی تولید شد.`,
-		color: "success",
-		icon: "ph:check-circle-fill",
-		closable: true,
-	});
+	try {
+		// Get context from current form data
+		const context = {
+			projectType: formData.value?.projectType || "",
+			researchDomain: formData.value?.researchDomain || [],
+			keywords: formData.value?.keywords || [],
+			researchGoals: formData.value?.researchGoals || [],
+		};
+
+		// Use AI to generate research goals suggestions
+		const suggestions = await suggestResearchGoals(context);
+
+		// Filter out already selected goals
+		const filteredSuggestions = suggestions.filter(
+			(goal) => !formData.value.researchGoals.includes(goal)
+		);
+
+		// Store AI-generated suggestions
+		aiGeneratedResearchGoalsSuggestions.value = filteredSuggestions;
+
+		if (filteredSuggestions.length > 0) {
+			toaster.show({
+				title: "پیشنهادها بروزرسانی شد",
+				message: `${filteredSuggestions.length} پیشنهاد هدف پژوهشی مرتبط تولید شد.`,
+				color: "success",
+				icon: "ph:check-circle-fill",
+				closable: true,
+			});
+		} else {
+			toaster.show({
+				title: "اطلاع",
+				message: "همه پیشنهادات قبلاً اضافه شده‌اند. لطفاً از دکمه 'پیشنهاد هوشمند' برای افزودن مستقیم استفاده کنید.",
+				color: "info",
+				icon: "ph:info",
+				closable: true,
+			});
+		}
+	} catch (error: any) {
+		// Fallback to metadata-based suggestions on error
+		await loadResearchData();
+		
+		// Get metadata-based suggestions directly (not from computed property to avoid circular reference)
+		const goals: string[] = [];
+		const allDomains = researchDomains.value;
+
+		formData.value.researchDomain.forEach((domainName) => {
+			const domain = allDomains.find((d) => d.name === domainName);
+			if (domain?.metadata?.applications) {
+				goals.push(...domain.metadata.applications);
+			}
+
+			const flattened = flattenNodes(researchCategories.value);
+			const matchedNode = flattened.find((node) => node.name === domainName);
+			if (matchedNode?.metadata?.applications) {
+				goals.push(...matchedNode.metadata.applications);
+			}
+		});
+
+		const metadataSuggestions = [...new Set(goals)]
+			.slice(0, 8)
+			.filter((goal) => !formData.value.researchGoals.includes(goal));
+
+		if (metadataSuggestions.length > 0) {
+			aiGeneratedResearchGoalsSuggestions.value = metadataSuggestions;
+			toaster.show({
+				title: "پیشنهادها بروزرسانی شد",
+				message: `${metadataSuggestions.length} پیشنهاد هدف پژوهشی تولید شد.`,
+				color: "success",
+				icon: "ph:check-circle-fill",
+				closable: true,
+			});
+		} else {
+			toaster.show({
+				title: "خطا",
+				message: `خطا در تولید پیشنهادات اهداف پژوهشی: ${error.message || "خطای ناشناخته"}`,
+				color: "danger",
+				icon: "ph:warning",
+				closable: true,
+			});
+		}
+	} finally {
+		researchGoalsSuggestionsLoading.value = false;
+	}
+};
+
+const generateKeywordSuggestions = async () => {
+	if (formData.value.researchDomain.length === 0) {
+		toaster.show({
+			title: "هشدار",
+			message: "لطفاً ابتدا حوزه دانشی را وارد کنید تا بتوانیم کلیدواژه‌های مرتبط را پیشنهاد دهیم.",
+			color: "warning",
+			icon: "ph:warning",
+			closable: true,
+		});
+		return;
+	}
+
+	keywordSuggestionsLoading.value = true;
+
+	try {
+		// Get context from current form data
+		const context = {
+			projectType: formData.value?.projectType || "",
+			researchDomain: formData.value?.researchDomain || [],
+			keywords: formData.value?.keywords || [],
+			researchGoals: formData.value?.researchGoals || [],
+		};
+
+		// Use AI to generate keyword suggestions
+		const suggestions = await suggestKeywords(context);
+
+		// Filter out already selected keywords
+		const filteredSuggestions = suggestions.filter(
+			(keyword) => !formData.value.keywords.includes(keyword)
+		);
+
+		// Store AI-generated suggestions
+		aiGeneratedKeywordSuggestions.value = filteredSuggestions;
+
+		if (filteredSuggestions.length > 0) {
+			toaster.show({
+				title: "پیشنهادها بروزرسانی شد",
+				message: `${filteredSuggestions.length} پیشنهاد کلیدواژه مرتبط تولید شد.`,
+				color: "success",
+				icon: "ph:check-circle-fill",
+				closable: true,
+			});
+		} else {
+			toaster.show({
+				title: "اطلاع",
+				message: "همه پیشنهادات قبلاً اضافه شده‌اند. لطفاً از دکمه 'پیشنهاد هوشمند' برای افزودن مستقیم استفاده کنید.",
+				color: "info",
+				icon: "ph:info",
+				closable: true,
+			});
+		}
+	} catch (error: any) {
+		toaster.show({
+			title: "خطا",
+			message: `خطا در تولید پیشنهادات کلیدواژه: ${error.message || "خطای ناشناخته"}`,
+			color: "danger",
+			icon: "ph:warning",
+			closable: true,
+		});
+	} finally {
+		keywordSuggestionsLoading.value = false;
+	}
 };
 
 // Computed properties for validation
@@ -759,220 +1054,6 @@ const missingInformation = computed(() => {
 onMounted(() => {
 	loadResearchData();
 });
-
-const startBrainstorm = async () => {
-	isBrainstorming.value = true;
-
-	// Simulate AI brainstorming
-	await new Promise((resolve) => setTimeout(resolve, 2000));
-
-	const projectTypeName =
-		projectTypes.find((t) => t.id === formData.value.projectType)?.title || "";
-
-	brainstormResults.value = `بر اساس نوع پروژه "${projectTypeName}"، در اینجا چند ایده و پیشنهاد برای شروع پژوهش شما:
-
-  🎯 پیشنهادات موضوعی:
-  • بررسی تأثیر فناوری‌های نوین بر رفتار انسانی
-  • مطالعه الگوهای تعاملی در محیط‌های مجازی
-  • تحلیل عوامل موثر بر بهره‌وری و سلامت روان
-
-  📚 رویکردهای پژوهشی پیشنهادی:
-  • استفاده از روش‌های ترکیبی (کمی و کیفی)
-  • مطالعات طولی برای بررسی روند تغییرات
-  • استفاده از تکنیک‌های نوین جمع‌آوری داده
-
-  💡 نکات کلیدی:
-  • تعریف دقیق جامعه آماری
-  • انتخاب ابزارهای معتبر سنجش
-  • در نظر گرفتن ملاحظات اخلاقی
-
-  🔍 کلیدواژه‌های پیشنهادی:
-  روانشناسی، رفتار، مداخله، اثربخشی، سلامت روان`;
-
-	isBrainstorming.value = false;
-};
-
-// Mock data function for step 5
-const loadMockData = () => {
-	const projectType = formData.value.projectType || "project";
-
-	// Set project type if not already set
-	if (!formData.value.projectType) {
-		formData.value.projectType = projectType;
-	}
-
-	// Mock data based on project type
-	const mockDataMap = {
-		project: {
-			researchDomain: ["روانشناسی", "علوم تربیتی", "فناوری آموزشی"],
-			keywords: [
-				"یادگیری الکترونیکی",
-				"سلامت روان",
-				"دانشجویان",
-				"آموزش از راه دور",
-				"مداخله رفتاری",
-			],
-			researchGoals: [
-				"بررسی تأثیر آموزش الکترونیکی بر سلامت روان دانشجویان",
-				"شناسایی عوامل موثر بر موفقیت تحصیلی در محیط‌های مجازی",
-				"توسعه برنامه‌های پیشگیرانه برای کاهش استرس تحصیلی",
-			],
-			necessity:
-				"با توجه به گسترش آموزش الکترونیکی پس از همه‌گیری کووید-۱۹ و افزایش نگرانی‌ها در مورد سلامت روان دانشجویان، این تحقیق برای شناسایی چالش‌ها و ارائه راهکارهای مؤثر ضروری است. خلاء تحقیقاتی در زمینه ارزیابی بلندمدت تأثیرات آموزش مجازی بر سلامت روان در زمینه فرهنگی ایران وجود دارد.",
-			importance:
-				"این پژوهش از نظر علمی به درک بهتر روابط بین آموزش الکترونیکی و سلامت روان کمک می‌کند. از نظر عملیاتی، نتایج آن می‌تواند به طراحی بهتر برنامه‌های آموزشی و توسعه سیستم‌های پشتیبانی دانشجویان منجر شود. از نظر اجتماعی، این تحقیق به بهبود کیفیت آموزش و کاهش مشکلات روانی در جامعه دانشگاهی کمک شایانی خواهد کرد.",
-			ethicsApproval: true,
-			extractedTheories: [
-				{
-					name: "نظریه یادگیری اجتماعی بندورا",
-					description:
-						"افراد از طریق مشاهده و تقلید رفتارهای دیگران یاد می‌گیرند. این نظریه برای مطالعه الگوهای رفتاری در محیط‌های آموزشی کاربرد دارد.",
-					authors: ["آلبرت بندورا"],
-				},
-				{
-					name: "نظریه شناخت اجتماعی",
-					description:
-						"تفکرات و باورها بر رفتار و هیجان‌ها تأثیر می‌گذارند. برای تحلیل عوامل شناختی در سلامت روان کاربرد دارد.",
-					authors: ["آرون بک", "آلبرت الیس"],
-				},
-			],
-		},
-		doctoral: {
-			researchDomain: ["هوش مصنوعی", "علوم شناختی", "عصب‌شناسی"],
-			keywords: [
-				"یادگیری عمیق",
-				"شبکه‌های عصبی",
-				"پردازش زبان طبیعی",
-				"شناخت مصنوعی",
-				"مدل‌های زبانی",
-			],
-			researchGoals: [
-				"توسعه مدل‌های هوش مصنوعی برای شبیه‌سازی فرآیندهای شناختی انسان",
-				"تحلیل تطبیقی الگوریتم‌های یادگیری ماشین و مکانیسم‌های یادگیری مغز",
-				"ارائه چارچوب نظری جدید برای درک هم‌افزایی هوش مصنوعی و شناخت انسانی",
-			],
-			necessity:
-				"با پیشرفت سریع هوش مصنوعی و نیاز درک عمیق‌تر از مکانیسم‌های شناختی انسان، این رساله برای ایجاد پل میان علوم کامپیوتر و علوم شناختی ضروری است. عدم وجود چارچوب‌های نظری یکپارچه برای تحلیل شباهت‌ها و تفاوت‌های یادگیری در سیستم‌های بیولوژیکی و مصنوعی، خلاء دانشی مهمی است که این تحقیق به آن می‌پردازد.",
-			importance:
-				"این رساله از نظر نظری به توسعه درک ما از هوش و شناخت کمک می‌کند و ممکن است منجر به نظریه‌های جدید در زمینه علوم شناختی شود. از نظر عملی، نتایج آن می‌تواند به طراحی بهتر سیستم‌های هوش مصنوعی و همچنین درک بهتر اختلالات شناختی انسان منجر شود. این تحقیق مرزهای دانش فعلی را جابجا کرده و به پیشرفت بین‌رشته‌ای کمک می‌کند.",
-			ethicsApproval: true,
-			extractedTheories: [
-				{
-					name: "نظریه محاسبات ذهن",
-					description:
-						"ذهن انسان به عنوان یک سیستم پردازشی اطلاعات عمل می‌کند. این نظریه پایه‌ای برای هوش مصنوعی و علوم شناختی است.",
-					authors: ["آلن تورینگ", "ماروین مینسکی"],
-				},
-				{
-					name: "نظریه اتصال‌گرایی",
-					description:
-						"یادگیری از طریق تقویت ارتباطات بین نورون‌ها اتفاق می‌افتد. اساس شبکه‌های عصبی مصنوعی است.",
-					authors: ["دونالد هب"],
-				},
-			],
-		},
-		masters: {
-			researchDomain: ["مدیریت آموزشی", "توسعه حرفه‌ای", "آموزش عالی"],
-			keywords: [
-				"کیفیت آموزش",
-				"ارزیابی آموزشی",
-				"توسعه دانشکده",
-				"بهبود مستمر",
-				"نظام‌های آموزشی",
-			],
-			researchGoals: [
-				"ارزیابی اثربخشی برنامه‌های توسعه حرفه‌ای اعضای هیئت علمی",
-				"شناسایی عوامل کلیدی موثر بر کیفیت آموزش در دانشگاه‌ها",
-				"طراحی مدل بهبود مستمر برای نظام‌های آموزشی عالی",
-			],
-			necessity:
-				"با توجه به اهمیت کیفیت در آموزش عالی و نیاز به بهبود مستمر برنامه‌های آموزشی، این تحقیق برای شناسایی راهکارهای مؤثر و عملی در زمینه توسعه حرفه‌ای اعضای هیئت علمی ضروری است. عدم وجود مدل‌های ارزیابی جامع و متناسب با شرایط آموزشی ایران، این پژوهش را ضروری‌تر می‌کند.",
-			importance:
-				"این پایان‌نامه از نظر عملیاتی به بهبود کیفیت آموزش در دانشگاه‌ها کمک می‌کند. از نظر مدیریتی، نتایج آن می‌تواند به سیاست‌گذاری‌های آموزشی بهتر و تخصیص بهینه منابع منجر شود. از نظر اجتماعی، این تحقیق به ارتقای سطح علمی کشور و افزایش رضایت دانشجویان کمک خواهد کرد.",
-			ethicsApproval: false,
-			extractedTheories: [
-				{
-					name: "نظریه مدیریت کیفیت جامع",
-					description:
-						"تمرکز بر بهبود مستمر و رضایت مشتری (دانشجو) در نظام‌های آموزشی.",
-					authors: ["ادوارد دمینگ", "جوزف جوران"],
-				},
-			],
-		},
-		article: {
-			researchDomain: ["پزشکی", "اپیدمیولوژی", "سلامت عمومی"],
-			keywords: [
-				"بیماری‌های غیرواگیر",
-				"پیشگیری",
-				"سبک زندگی",
-				"عوامل خطر",
-				"سلامت جامعه",
-			],
-			researchGoals: [
-				"بررسی شیوع عوامل خطر قلبی-عروقی در جمعیت شهری",
-				"ارزیابی اثربخشی برنامه‌های پیشگیری از دیابت نوع ۲",
-				"تحلیل ارتباط بین سبک زندگی و بیماری‌های مزمن",
-			],
-			necessity:
-				"با افزایش شیوع بیماری‌های غیرواگیر در کشور و نیاز به داده‌های به‌روز برای برنامه‌ریزی‌های سلامت عمومی، این تحقیق برای شناسایی الگوهای بیماری و عوامل خطر مرتبط ضروری است. عدم وجود مطالعات اخیر در زمینه اپیدمیولوژی بیماری‌های مزمن در مناطق مختلف کشور، خلاء اطلاعاتی مهمی ایجاد کرده است.",
-			importance:
-				"این مقاله از نظر علمی به درک بهتر اپیدمیولوژی بیماری‌های مزمن کمک می‌کند. از نظر بهداشتی، نتایج آن می‌تواند به طراحی برنامه‌های پیشگیری بهتر و تخصیص بهینه منابع سلامت منجر شود. از نظر اجتماعی، این تحقیق به کاهش بار بیماری‌ها و بهبود سلامت جامعه کمک شایانی خواهد داشت.",
-			ethicsApproval: true,
-			extractedTheories: [
-				{
-					name: "مدل بیو-روانشناختی",
-					description:
-						"بیماری‌ها نتیجه تعامل عوامل بیولوژیکی، روانی و اجتماعی هستند.",
-					authors: ["جورج انگل"],
-				},
-			],
-		},
-	};
-
-	const mockData = mockDataMap[projectType] || mockDataMap.project;
-
-	// Update form data
-	formData.value.researchDomain = [...mockData.researchDomain];
-	formData.value.keywords = [...mockData.keywords];
-	formData.value.researchGoals = [...mockData.researchGoals];
-	formData.value.necessity = mockData.necessity;
-	formData.value.importance = mockData.importance;
-	formData.value.ethicsApproval = mockData.ethicsApproval;
-	extractedTheories.value = [...mockData.extractedTheories];
-
-	// Generate brainstorm results if not already present
-	if (!brainstormResults.value) {
-		const projectTypeName =
-			projectTypes.find((t) => t.id === projectType)?.title || "";
-		brainstormResults.value = `بر اساس نوع پروژه "${projectTypeName}"، در اینجا چند ایده و پیشنهاد برای شروع پژوهش شما:
-
-🎯 پیشنهادات موضوعی:
-• بررسی تأثیر ${mockData.researchDomain[0]} بر ${mockData.keywords[0]}
-• مطالعه الگوهای ${mockData.keywords[1]} در ${mockData.researchDomain[1]}
-• تحلیل عوامل موثر بر ${mockData.researchGoals[0]}
-
-📚 رویکردهای پژوهشی پیشنهادی:
-• استفاده از روش‌های ترکیبی (کمی و کیفی)
-• مطالعات طولی برای بررسی روند تغییرات
-• استفاده از تکنیک‌های نوین جمع‌آوری داده
-
-💡 نکات کلیدی:
-• تعریف دقیق جامعه آماری
-• انتخاب ابزارهای معتبر سنجش
-• در نظر گرفتن ملاحظات اخلاقی
-
-🔍 کلیدواژه‌های پیشنهادی:
-${mockData.keywords.slice(0, 5).join("، ")}`;
-	}
-
-	toaster.show({
-		title: "داده‌های نمونه بارگذاری شد",
-		message: "اطلاعات نمونه بر اساس نوع پروژه انتخاب شده پر شد.",
-		color: "success",
-		icon: "ph:check-circle-fill",
-		closable: true,
-	});
-};
 </script>
 
 <template>
@@ -1007,7 +1088,9 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                   :class="[
                     'flex size-12 items-center justify-center rounded-full border-2 font-semibold transition-all duration-300',
                     currentStep === step.number
-                      ? 'border-primary-500 bg-primary-500 shadow-primary-500/30 text-white shadow-lg'
+                      ? step.isValid
+                        ? 'border-success-500 bg-success-500 shadow-success-500/30 text-white shadow-lg'
+                        : 'border-primary-500 bg-primary-500 shadow-primary-500/30 text-white shadow-lg'
                       : step.completed
                       ? 'border-success-500 bg-success-500 text-white'
                       : 'dark:border-muted-600 dark:bg-muted-800 dark:text-muted-400 border-gray-300 bg-gray-50 text-gray-400',
@@ -1262,7 +1345,7 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                       type="button"
                       class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
                       :disabled="researchDomainAiLoading"
-                      @click="suggestAIField('researchDomain')"
+                      @click="suggestAIFieldResearchDomain"
                     >
                       <Icon v-if="!researchDomainAiLoading" name="ph:sparkle" class="size-4" />
                       <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
@@ -1319,11 +1402,13 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                       <div class="text-muted-600 dark:text-muted-400 text-xs font-medium">پیشنهادها:</div>
                       <button
                         type="button"
-                        class="nui-focus border-muted-200 hover:border-success-500 text-muted-700 dark:text-muted-200 hover:text-success-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-success-500 dark:hover:text-success-600 flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-sm transition-colors duration-300"
+                        :disabled="suggestionsLoading"
+                        class="nui-focus border-muted-200 hover:border-success-500 text-muted-700 dark:text-muted-200 hover:text-success-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-success-500 dark:hover:text-success-600 flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-sm transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         @click="generateNewSuggestions"
                       >
-                        <Icon name="ph:lightbulb" class="size-4" />
-                        <span>پیشنهادها</span>
+                        <Icon v-if="!suggestionsLoading" name="ph:lightbulb" class="size-4" />
+                        <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
+                        <span>{{ suggestionsLoading ? 'در حال تولید...' : 'پیشنهادها' }}</span>
                       </button>
                     </div>
                     <div class="flex flex-wrap gap-1.5">
@@ -1362,7 +1447,7 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                       type="button"
                       class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
                       :disabled="keywordsAiLoading"
-                      @click="suggestAIField('keywords')"
+                      @click="suggestAIFieldKeywords"
                     >
                       <Icon v-if="!keywordsAiLoading" name="ph:sparkle" class="size-4" />
                       <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
@@ -1402,6 +1487,47 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                       <div class="text-muted-400 text-xs">Enter برای افزودن</div>
                     </div>
                   </div>
+
+                  <!-- Suggestions -->
+                  <div
+                    class="border-muted-200 dark:border-muted-700 dark:bg-muted-900/50 rounded-lg border bg-gray-50 p-3"
+                  >
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="text-muted-600 dark:text-muted-400 text-xs font-medium">پیشنهادها:</div>
+                      <button
+                        type="button"
+                        :disabled="keywordSuggestionsLoading || formData.researchDomain.length === 0"
+                        class="nui-focus border-muted-200 hover:border-success-500 text-muted-700 dark:text-muted-200 hover:text-success-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-success-500 dark:hover:text-success-600 flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-sm transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        @click="generateKeywordSuggestions"
+                      >
+                        <Icon v-if="!keywordSuggestionsLoading" name="ph:lightbulb" class="size-4" />
+                        <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
+                        <span>{{ keywordSuggestionsLoading ? 'در حال تولید...' : 'پیشنهادها' }}</span>
+                      </button>
+                    </div>
+                    <div v-if="keywordSuggestions.length > 0" class="flex flex-wrap gap-1.5">
+                      <button
+                        v-for="suggestion in keywordSuggestions"
+                        :key="suggestion"
+                        type="button"
+                        :disabled="formData.keywords.includes(suggestion)"
+                        class="nui-focus border-muted-200 hover:border-warning-500 hover:bg-warning-50 text-muted-600 dark:text-muted-300 dark:border-muted-700 dark:hover:bg-warning-900/20 dark:hover:border-warning-500 rounded-full border px-3 py-1 text-xs transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="
+                          if (!formData.keywords.includes(suggestion)) {
+                            formData.keywords.push(suggestion);
+                          }
+                        "
+                      >
+                        {{ suggestion }}
+                      </button>
+                    </div>
+                    <div v-else-if="formData.researchDomain.length === 0" class="text-muted-500 text-xs text-center py-2">
+                      ابتدا حوزه دانشی را وارد کنید
+                    </div>
+                    <div v-else class="text-muted-500 text-xs text-center py-2">
+                      روی دکمه "پیشنهادها" کلیک کنید تا کلیدواژه‌های مرتبط تولید شوند
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1433,7 +1559,7 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                       type="button"
                       class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
                       :disabled="researchGoalsAiLoading"
-                      @click="suggestAIField('researchGoals')"
+                      @click="suggestAIFieldResearchGoals"
                     >
                       <Icon v-if="!researchGoalsAiLoading" name="ph:sparkle" class="size-4" />
                       <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
@@ -1479,17 +1605,19 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                     class="border-muted-200 dark:border-muted-700 dark:bg-muted-900/50 rounded-lg border bg-gray-50 p-3"
                   >
                     <div class="flex items-center justify-between mb-2">
-                      <div class="text-muted-600 dark:text-muted-400 text-xs font-medium">پیشنهادهای اهداف:</div>
+                      <div class="text-muted-600 dark:text-muted-400 text-xs font-medium">پیشنهادها:</div>
                       <button
                         type="button"
-                        class="nui-focus border-muted-200 hover:border-success-500 text-muted-700 dark:text-muted-200 hover:text-success-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-success-500 dark:hover:text-success-600 flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-sm transition-colors duration-300"
+                        :disabled="researchGoalsSuggestionsLoading || formData.researchDomain.length === 0"
+                        class="nui-focus border-muted-200 hover:border-success-500 text-muted-700 dark:text-muted-200 hover:text-success-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-success-500 dark:hover:text-success-600 flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-sm transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         @click="generateResearchGoalsSuggestions"
                       >
-                        <Icon name="ph:lightbulb" class="size-4" />
-                        <span>پیشنهادها</span>
+                        <Icon v-if="!researchGoalsSuggestionsLoading" name="ph:lightbulb" class="size-4" />
+                        <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
+                        <span>{{ researchGoalsSuggestionsLoading ? 'در حال تولید...' : 'پیشنهادها' }}</span>
                       </button>
                     </div>
-                    <div class="flex flex-wrap gap-1.5">
+                    <div v-if="researchGoalsSuggestions.length > 0" class="flex flex-wrap gap-1.5">
                       <button
                         v-for="suggestion in researchGoalsSuggestions"
                         :key="suggestion"
@@ -1501,93 +1629,16 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                         {{ suggestion }}
                       </button>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Theory Extraction -->
-              <div>
-                <div class="mb-2 flex items-center justify-between">
-                  <label class="text-muted-700 dark:text-muted-200 flex items-center gap-2 text-sm font-medium">
-                    <Icon name="ph:graduation-cap" class="text-primary-500 size-5" />
-                    نظریه‌های مرتبط
-                  </label>
-                  <div class="flex items-center gap-2">
-                    <button
-                      type="button"
-                      class="nui-focus border-muted-200 hover:border-info-500 text-muted-700 dark:text-muted-200 hover:text-info-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-info-500 dark:hover:text-info-600 flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-sm transition-colors duration-300"
-                      @click="showTheoriesInfoModal = true"
-                    >
-                      <Icon name="ph:info" class="size-4" />
-                      <span>راهنما</span>
-                    </button>
-                    <button
-                      type="button"
-                      class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
-                      :disabled="theoriesAiLoading"
-                      @click="extractTheories"
-                    >
-                      <Icon v-if="!theoriesAiLoading" name="ph:sparkle" class="size-4" />
-                      <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
-                      <span>استخراج نظریه‌ها</span>
-                    </button>
-                  </div>
-                </div>
-                <div class="space-y-3">
-                  <!-- Theories Display -->
-                  <div v-if="extractedTheories.length > 0" class="space-y-3">
-                    <div
-                      v-for="(theory, index) in extractedTheories"
-                      :key="index"
-                      class="dark:bg-muted-800 dark:border-muted-700 border border-gray-200 bg-white rounded-xl p-4"
-                    >
-                      <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                          <div class="flex items-center gap-2 mb-2">
-                            <Icon name="ph:bookmark-simple-fill" class="text-info-500 size-4" />
-                            <BaseHeading as="h4" size="sm" weight="semibold" class="text-gray-900 dark:text-white">
-                              {{ theory.name }}
-                            </BaseHeading>
-                          </div>
-                          <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400 mb-2">
-                            {{ theory.description }}
-                          </BaseParagraph>
-                          <div class="flex flex-wrap gap-1">
-                            <BaseTag v-for="author in theory.authors" :key="author" color="info" size="xs" shape="full">
-                              {{ author }}
-                            </BaseTag>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          class="text-muted-400 hover:text-danger-500 transition-colors"
-                          @click="removeTheory(index)"
-                        >
-                          <Icon name="ph:x" class="size-4" />
-                        </button>
-                      </div>
+                    <div v-else-if="formData.researchDomain.length === 0" class="text-muted-500 text-xs text-center py-2">
+                      ابتدا حوزه دانشی را وارد کنید
                     </div>
-                  </div>
-
-                  <!-- Empty State -->
-                  <div
-                    v-else
-                    class="dark:bg-muted-800 dark:border-muted-700 border border-gray-200 bg-white rounded-xl p-8 text-center"
-                  >
-                    <div class="flex flex-col items-center gap-3">
-                      <Icon name="ph:graduation-cap" class="text-muted-300 size-12" />
-                      <div>
-                        <BaseHeading as="h4" size="md" weight="medium" class="text-muted-600 dark:text-muted-400">
-                          نظریه‌ای استخراج نشده است
-                        </BaseHeading>
-                        <BaseParagraph size="sm" class="text-muted-500">
-                          با استفاده از دکمه "استخراج نظریه‌ها"، نظریه‌های مرتبط با حوزه و اهداف پژوهش خود را پیدا کنید
-                        </BaseParagraph>
-                      </div>
+                    <div v-else class="text-muted-500 text-xs text-center py-2">
+                      روی دکمه "پیشنهادها" کلیک کنید تا اهداف پژوهشی مرتبط تولید شوند
                     </div>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -1619,8 +1670,18 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
               <div>
                 <div class="mb-2 flex items-center justify-between">
                   <label class="text-muted-700 dark:text-muted-200 flex items-center gap-2 text-sm font-medium">
-                    <Icon name="ph:warning-circle" class="text-primary-500 size-5" />
+                    <Icon 
+                      :name="step4FieldValidation.necessity.isValid ? 'ph:check-circle-fill' : 'ph:warning-circle'" 
+                      :class="step4FieldValidation.necessity.isValid ? 'text-success-500' : 'text-primary-500'" 
+                      class="size-5" 
+                    />
                     ضرورت تحقیق
+                    <span 
+                      v-if="!step4FieldValidation.necessity.isValid && formData.necessity" 
+                      class="text-xs text-warning-500"
+                    >
+                      ({{ step4FieldValidation.necessity.message }})
+                    </span>
                   </label>
                   <div class="flex items-center gap-2">
                     <button
@@ -1635,7 +1696,7 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                       type="button"
                       class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
                       :disabled="necessityAiLoading"
-                      @click="suggestAIField('necessity')"
+                      @click="suggestAIFieldNecessity"
                     >
                       <Icon v-if="!necessityAiLoading" name="ph:sparkle" class="size-4" />
                       <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
@@ -1647,6 +1708,11 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                   v-model="formData.necessity"
                   placeholder="ضرورت و اهمیت انجام این پژوهش را توضیح دهید. چه مشکلی قرار است حل شود؟..."
                   rows="4"
+                  :class="{
+                    'border-success-500 focus:border-success-500': step4FieldValidation.necessity.isValid,
+                    'border-warning-500 focus:border-warning-500': !step4FieldValidation.necessity.isValid && formData.necessity
+                  }"
+                  @input="validateStep4Fields"
                 />
                 <BaseParagraph size="xs" class="text-muted-500 mt-1">
                   توضیح دهید که چرا این تحقیق ضروری است و چه خلاء دانشی را پر می‌کند
@@ -1657,8 +1723,18 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
               <div>
                 <div class="mb-2 flex items-center justify-between">
                   <label class="text-muted-700 dark:text-muted-200 flex items-center gap-2 text-sm font-medium">
-                    <Icon name="ph:star" class="text-primary-500 size-5" />
+                    <Icon 
+                      :name="step4FieldValidation.importance.isValid ? 'ph:check-circle-fill' : 'ph:star'" 
+                      :class="step4FieldValidation.importance.isValid ? 'text-success-500' : 'text-primary-500'" 
+                      class="size-5" 
+                    />
                     اهمیت تحقیق
+                    <span 
+                      v-if="!step4FieldValidation.importance.isValid && formData.importance" 
+                      class="text-xs text-warning-500"
+                    >
+                      ({{ step4FieldValidation.importance.message }})
+                    </span>
                   </label>
                   <div class="flex items-center gap-2">
                     <button
@@ -1673,7 +1749,7 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                       type="button"
                       class="nui-focus border-muted-200 hover:border-primary-500 text-muted-700 dark:text-muted-200 hover:text-primary-600 dark:border-muted-700 dark:bg-muted-900 dark:hover:border-primary-500 dark:hover:text-primary-600 flex items-center gap-2 rounded-full border bg-white px-4 py-1 text-sm transition-colors duration-300"
                       :disabled="importanceAiLoading"
-                      @click="suggestAIField('importance')"
+                      @click="suggestAIFieldImportance"
                     >
                       <Icon v-if="!importanceAiLoading" name="ph:sparkle" class="size-4" />
                       <Icon v-else name="svg-spinners:90-ring-with-bg" class="size-4" />
@@ -1685,6 +1761,11 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                   v-model="formData.importance"
                   placeholder="اهمیت این پژوهش را از نظر علمی، عملیاتی یا اجتماعی توضیح دهید..."
                   rows="4"
+                  :class="{
+                    'border-success-500 focus:border-success-500': step4FieldValidation.importance.isValid,
+                    'border-warning-500 focus:border-warning-500': !step4FieldValidation.importance.isValid && formData.importance
+                  }"
+                  @input="validateStep4Fields"
                 />
                 <BaseParagraph size="xs" class="text-muted-500 mt-1">
                   توضیح دهید که نتایج این تحقیق چه تأثیری بر علم، جامعه یا صنعت خواهد داشت
@@ -1707,23 +1788,16 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                     اطلاعات وارد شده را بررسی کرده و در صورت صحت بودن، پروژه را ثبت کنید
                   </BaseParagraph>
                 </div>
-                <BaseButton
-                  color="info"
-                  shape="curved"
-                  size="sm"
-                  @click="loadMockData"
-                >
-                  <Icon name="ph:database" class="ml-2 size-4" />
-                  داده‌های نمونه
-                </BaseButton>
               </div>
             </div>
             <!-- Project Summary Card -->
-            <div class="dark:bg-muted-900/50 dark:border-muted-700 rounded-xl border border-gray-100 bg-gray-50 p-6 mb-6">
+            <div
+              class="dark:bg-muted-900/50 dark:border-muted-700 rounded-xl border border-gray-100 bg-gray-50 p-6 mb-6"
+            >
               <BaseHeading as="h3" size="lg" weight="semibold" class="mb-4 text-muted-800 dark:text-muted-200">
                 خلاصه پروژه
               </BaseHeading>
-              
+
               <div class="grid gap-4 md:grid-cols-2">
                 <!-- Project Type -->
                 <div class="flex items-start gap-3">
@@ -1733,7 +1807,7 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                   <div>
                     <div class="text-xs text-muted-500 dark:text-muted-400 font-medium">نوع پروژه</div>
                     <div class="text-sm font-medium text-muted-800 dark:text-muted-200">
-                      {{ projectTypes.find(t => t.id === formData.projectType)?.title || '-' }}
+                      {{ projectTypes.find((t) => t.id === formData.projectType)?.title || '-' }}
                     </div>
                   </div>
                 </div>
@@ -1783,7 +1857,12 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
             <div class="space-y-6">
               <!-- Research Domains Details -->
               <div v-if="formData.researchDomain.length > 0">
-                <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2">
+                <BaseHeading
+                  as="h3"
+                  size="md"
+                  weight="semibold"
+                  class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2"
+                >
                   <Icon name="ph:books" class="text-primary-500 size-5" />
                   حوزه‌های دانشی
                 </BaseHeading>
@@ -1802,7 +1881,12 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
 
               <!-- Keywords Details -->
               <div v-if="formData.keywords.length > 0">
-                <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2">
+                <BaseHeading
+                  as="h3"
+                  size="md"
+                  weight="semibold"
+                  class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2"
+                >
                   <Icon name="ph:key" class="text-warning-500 size-5" />
                   کلیدواژه‌ها
                 </BaseHeading>
@@ -1821,7 +1905,12 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
 
               <!-- Research Goals Details -->
               <div v-if="formData.researchGoals.length > 0">
-                <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2">
+                <BaseHeading
+                  as="h3"
+                  size="md"
+                  weight="semibold"
+                  class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2"
+                >
                   <Icon name="ph:target" class="text-success-500 size-5" />
                   اهداف پژوهش
                 </BaseHeading>
@@ -1832,7 +1921,9 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                     class="dark:bg-muted-800 dark:border-muted-700 border border-gray-200 bg-white rounded-lg p-3"
                   >
                     <div class="flex items-start gap-3">
-                      <div class="bg-success-100 dark:bg-success-900/30 flex size-6 items-center justify-center rounded-full mt-0.5">
+                      <div
+                        class="bg-success-100 dark:bg-success-900/30 flex size-6 items-center justify-center rounded-full mt-0.5"
+                      >
                         <Icon name="ph:check" class="text-success-500 size-3" />
                       </div>
                       <div class="flex-1">
@@ -1845,49 +1936,14 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                 </div>
               </div>
 
-              <!-- Theories Details -->
-              <div v-if="extractedTheories.length > 0">
-                <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2">
-                  <Icon name="ph:graduation-cap" class="text-info-500 size-5" />
-                  نظریه‌های مرتبط
-                </BaseHeading>
-                <div class="space-y-3">
-                  <div
-                    v-for="(theory, index) in extractedTheories"
-                    :key="index"
-                    class="dark:bg-muted-800 dark:border-muted-700 border border-gray-200 bg-white rounded-lg p-3"
-                  >
-                    <div class="flex items-start gap-3">
-                      <div class="bg-info-100 dark:bg-info-900/30 flex size-6 items-center justify-center rounded-full mt-0.5">
-                        <Icon name="ph:bookmark-simple" class="text-info-500 size-3" />
-                      </div>
-                      <div class="flex-1">
-                        <div class="text-sm font-medium text-muted-800 dark:text-muted-200 mb-1">
-                          {{ theory.name }}
-                        </div>
-                        <div class="text-xs text-muted-600 dark:text-muted-400 mb-2">
-                          {{ theory.description }}
-                        </div>
-                        <div class="flex flex-wrap gap-1">
-                          <BaseTag
-                            v-for="author in theory.authors"
-                            :key="author"
-                            color="info"
-                            size="xs"
-                            shape="full"
-                          >
-                            {{ author }}
-                          </BaseTag>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               <!-- Research Necessity -->
               <div v-if="formData.necessity">
-                <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2">
+                <BaseHeading
+                  as="h3"
+                  size="md"
+                  weight="semibold"
+                  class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2"
+                >
                   <Icon name="ph:warning-circle" class="text-danger-500 size-5" />
                   ضرورت تحقیق
                 </BaseHeading>
@@ -1900,7 +1956,12 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
 
               <!-- Research Importance -->
               <div v-if="formData.importance">
-                <BaseHeading as="h3" size="md" weight="semibold" class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2">
+                <BaseHeading
+                  as="h3"
+                  size="md"
+                  weight="semibold"
+                  class="mb-3 text-muted-800 dark:text-muted-200 flex items-center gap-2"
+                >
                   <Icon name="ph:star" class="text-warning-500 size-5" />
                   اهمیت تحقیق
                 </BaseHeading>
@@ -1915,7 +1976,9 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
               <div class="dark:bg-muted-800 dark:border-muted-700 border border-gray-200 bg-white rounded-lg p-4">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
-                    <div class="bg-warning-100 dark:bg-warning-900/30 flex size-8 items-center justify-center rounded-lg">
+                    <div
+                      class="bg-warning-100 dark:bg-warning-900/30 flex size-8 items-center justify-center rounded-lg"
+                    >
                       <Icon name="ph:shield-check" class="text-warning-500 size-4" />
                     </div>
                     <div>
@@ -1929,9 +1992,7 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                     <div
                       :class="[
                         'flex size-6 items-center justify-center rounded-full',
-                        formData.ethicsApproval 
-                          ? 'bg-success-100 text-success-600' 
-                          : 'bg-muted-100 text-muted-400'
+                        formData.ethicsApproval ? 'bg-success-100 text-success-600' : 'bg-muted-100 text-muted-400',
                       ]"
                     >
                       <Icon :name="formData.ethicsApproval ? 'ph:check' : 'ph:minus'" class="size-3" />
@@ -1939,11 +2000,25 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
                   </div>
                 </div>
               </div>
-
-
             </div>
+          </div>
+        </div>
 
-
+        <!-- Validation Message -->
+        <div 
+          v-if="currentStep < totalSteps && !canGoNext && stepValidation[`step${currentStep}`].message" 
+          class="mt-6 rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-800 dark:bg-warning-900/20"
+        >
+          <div class="flex items-start gap-3">
+            <Icon name="ph:warning-circle" class="mt-0.5 text-warning-600 size-5" />
+            <div>
+              <div class="text-sm font-medium text-warning-800 dark:text-warning-200">
+                لطفاً موارد زیر را تکمیل کنید:
+              </div>
+              <div class="text-sm text-warning-700 dark:text-warning-300 mt-1">
+                {{ stepValidation[`step${currentStep}`].message }}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2370,61 +2445,206 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
     <!-- Selected Interests Modal -->
     <TairoModal :open="showSelectedInterestsModal" size="xl" @close="showSelectedInterestsModal = false">
       <template #header>
-        <div class="flex items-center gap-3 p-6 pb-0">
-          <div class="bg-success-500 flex size-12 items-center justify-center rounded-xl">
-            <Icon name="ph:lightbulb-fill" class="size-6 text-white" />
+        <div class="flex items-center gap-4 p-6 pb-4">
+          <div class="bg-gradient-to-br from-success-500 to-success-600 flex size-14 items-center justify-center rounded-2xl shadow-lg shadow-success-500/20">
+            <Icon name="ph:lightbulb-fill" class="size-7 text-white" />
           </div>
-          <div class="text-right">
-            <BaseHeading as="h2" size="xl" weight="bold">علایق پژوهشی انتخاب شده</BaseHeading>
+          <div class="text-right flex-1">
+            <BaseHeading as="h2" size="xl" weight="bold" class="mb-1">علایق پژوهشی منتخب</BaseHeading>
             <BaseParagraph size="sm" class="text-muted-500">
-              نمایش علایق پژوهشی سطح سوم به صورت دسته‌بندی شده
+              مجموعه‌ای از پرطرفدارترین حوزه‌های پژوهشی برای انتخاب سریع
             </BaseParagraph>
           </div>
         </div>
       </template>
 
-      <div class="p-6 text-right">
-        <div class="max-h-96 overflow-y-auto">
-          <!-- Categories -->
-          <div v-for="(category, catId) in organizedCategories" :key="catId" class="mb-8">
-            <BaseHeading as="h3" size="lg" weight="medium" class="mb-4">
-              {{ category.name }}
-            </BaseHeading>
+      <div class="flex flex-col max-h-[calc(100vh-200px)]">
+        <!-- Sticky Search & Count Section -->
+        <div class="flex-shrink-0 p-6 pb-4 space-y-4 bg-white dark:bg-muted-900 border-b border-muted-200 dark:border-muted-700">
+          <!-- Search Bar -->
+          <div class="relative">
+            <Icon name="ph:magnifying-glass" class="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-muted-400" />
+            <BaseInput
+              v-model="selectedInterestsSearchQuery"
+              placeholder="جستجو در حوزه‌های پژوهشی..."
+              shape="curved"
+              class="pr-11"
+            />
+            <button
+              v-if="selectedInterestsSearchQuery"
+              type="button"
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-400 hover:text-muted-600 dark:hover:text-muted-300 transition-colors"
+              @click="selectedInterestsSearchQuery = ''"
+            >
+              <Icon name="ph:x" class="size-4" />
+            </button>
+          </div>
 
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <BaseCard
-                v-for="item in category.level3"
-                :key="item.id"
-                shape="curved"
-                :class="[
-                  'p-4 transition-all hover:shadow-lg cursor-pointer',
-                  formData.researchDomain.includes(item.name)
-                    ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500'
-                    : 'hover:bg-gray-50 dark:hover:bg-muted-800/50',
-                ]"
-                @click="toggleResearchDomain(item.name)"
-              >
-                <BaseHeading as="h4" size="md" weight="medium" class="mb-2">
-                  {{ item.name }}
-                </BaseHeading>
-                <BaseParagraph size="sm" class="text-muted-600 dark:text-muted-400">
-                  {{ item.description }}
-                </BaseParagraph>
-                <div v-if="formData.researchDomain.includes(item.name)" class="mt-2 flex items-center gap-1">
-                  <Icon name="ph:check-circle-fill" class="text-primary-500 size-4" />
-                  <span class="text-primary-600 dark:text-primary-400 text-xs">انتخاب شده</span>
+          <!-- Selected Count & Actions -->
+          <div class="flex items-center justify-between rounded-xl bg-primary-50 dark:bg-primary-900/10 border border-primary-200 dark:border-primary-900/30 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="bg-primary-500 text-white rounded-full size-8 flex items-center justify-center font-bold text-sm shadow-lg shadow-primary-500/30">
+                {{ formData.researchDomain.length }}
+              </div>
+              <div>
+                <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                  حوزه انتخاب شده
                 </div>
-              </BaseCard>
+                <div class="text-xs text-muted-500">
+                  {{ formData.researchDomain.length === 0 ? 'هنوز حوزه‌ای انتخاب نشده' : 'حوزه‌های منتخب شما' }}
+                </div>
+              </div>
             </div>
+            <BaseButton
+              v-if="formData.researchDomain.length > 0"
+              color="danger"
+              shape="curved"
+              size="sm"
+              class="shadow-lg shadow-danger-500/20"
+              @click="clearAllDomains"
+            >
+              <Icon name="ph:trash" class="ml-1 size-4" />
+              حذف همه
+            </BaseButton>
           </div>
         </div>
 
-        <!-- Close Button -->
-        <div class="flex justify-end mt-6">
-          <BaseButton color="success" shape="curved" size="lg" @click="showSelectedInterestsModal = false">
-            متوجه شدم
-            <Icon name="ph:check" class="mr-2 size-5" />
-          </BaseButton>
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-300 dark:scrollbar-thumb-muted-700 scrollbar-track-transparent">
+          <div class="p-6 pt-4 text-right">
+            <!-- Categories -->
+            <div>
+              <div v-if="Object.keys(filteredCategories).length === 0" class="flex flex-col items-center justify-center py-12">
+                <div class="bg-muted-100 dark:bg-muted-800 rounded-full size-16 flex items-center justify-center mb-4">
+                  <Icon name="ph:magnifying-glass" class="size-8 text-muted-400" />
+                </div>
+                <BaseHeading as="h3" size="md" weight="semibold" class="text-muted-600 dark:text-muted-400 mb-2">
+                  نتیجه‌ای یافت نشد
+                </BaseHeading>
+                <BaseParagraph size="sm" class="text-muted-500 text-center max-w-sm">
+                  متأسفانه با این کلمه کلیدی هیچ حوزه پژوهشی پیدا نشد. لطفاً کلمه دیگری را امتحان کنید.
+                </BaseParagraph>
+              </div>
+
+              <div v-for="(category, catId) in filteredCategories" :key="catId" class="mb-10 last:mb-0">
+                <!-- Category Header -->
+                <div class="flex items-center gap-3 mb-5 pb-3 border-b border-muted-200 dark:border-muted-700">
+                  <div class="bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg size-9 flex items-center justify-center shadow-md shadow-primary-500/20">
+                    <Icon name="ph:folder-open" class="size-5 text-white" />
+                  </div>
+                  <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
+                    {{ category.name }}
+                  </BaseHeading>
+                  <div class="bg-muted-200 dark:bg-muted-700 text-muted-600 dark:text-muted-300 rounded-full px-3 py-0.5 text-xs font-medium">
+                    {{ category.level3.length }} مورد
+                  </div>
+                </div>
+
+                <!-- Items Grid -->
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <BaseCard
+                    v-for="item in category.level3"
+                    :key="`${item.id}-${formData.researchDomain.includes(item.name)}`"
+                    shape="curved"
+                    :class="[
+                      'group relative overflow-hidden transition-all duration-300 cursor-pointer border-2',
+                      'hover:scale-[1.02] hover:shadow-xl',
+                      formData.researchDomain.includes(item.name)
+                        ? 'bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-900/20 border-primary-400 dark:border-primary-600 ring-2 ring-primary-500/40 shadow-lg shadow-primary-500/20'
+                        : 'bg-white dark:bg-muted-800 border-muted-200 dark:border-muted-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg',
+                    ]"
+                    @click.stop="toggleResearchDomain(item.name)"
+                  >
+                    <!-- Selection Indicator -->
+                    <div
+                      v-if="formData.researchDomain.includes(item.name)"
+                      class="absolute left-3 top-3 bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-full size-8 flex items-center justify-center shadow-lg shadow-primary-500/40 animate-in fade-in zoom-in duration-200"
+                    >
+                      <Icon name="ph:check-bold" class="size-4" />
+                    </div>
+
+                    <!-- Hover indicator -->
+                    <div
+                      v-if="!formData.researchDomain.includes(item.name)"
+                      class="absolute left-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 border-2 border-primary-400 dark:border-primary-600 rounded-full size-8 flex items-center justify-center"
+                    >
+                      <Icon name="ph:plus" class="size-4 text-primary-500 dark:text-primary-400" />
+                    </div>
+
+                    <div class="p-5 pt-7">
+                      <BaseHeading 
+                        as="h4" 
+                        size="md" 
+                        weight="semibold"
+                        :class="[
+                          'mb-3 transition-colors',
+                          formData.researchDomain.includes(item.name)
+                            ? 'text-primary-900 dark:text-primary-100'
+                            : 'text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400'
+                        ]"
+                      >
+                        {{ item.name }}
+                      </BaseHeading>
+                      <BaseParagraph 
+                        size="sm"
+                        :class="[
+                          'line-clamp-2 mb-3 leading-relaxed',
+                          formData.researchDomain.includes(item.name)
+                            ? 'text-primary-700 dark:text-primary-300'
+                            : 'text-muted-600 dark:text-muted-400'
+                        ]"
+                      >
+                        {{ item.description }}
+                      </BaseParagraph>
+                      
+                      <!-- Selected Badge -->
+                      <div
+                        v-if="formData.researchDomain.includes(item.name)"
+                        class="inline-flex items-center gap-1.5 bg-primary-500/10 dark:bg-primary-500/20 text-primary-700 dark:text-primary-300 rounded-lg px-2.5 py-1 text-xs font-medium"
+                      >
+                        <Icon name="ph:check-circle-fill" class="size-3.5" />
+                        <span>انتخاب شده</span>
+                      </div>
+                    </div>
+
+                    <!-- Decorative gradient overlay -->
+                    <div
+                      v-if="formData.researchDomain.includes(item.name)"
+                      class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600"
+                    ></div>
+                  </BaseCard>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-between items-center mt-8 pt-6 border-t border-muted-200 dark:border-muted-700">
+              <div class="flex items-center gap-2 text-sm text-muted-500">
+                <Icon name="ph:info" class="size-4" />
+                <span>برای افزودن یا حذف حوزه‌ها، روی کارت‌ها کلیک کنید</span>
+              </div>
+              <div class="flex gap-3">
+                <BaseButton 
+                  color="muted" 
+                  shape="curved" 
+                  size="lg"
+                  @click="showSelectedInterestsModal = false"
+                >
+                  بستن
+                </BaseButton>
+                <BaseButton 
+                  color="success" 
+                  shape="curved" 
+                  size="lg"
+                  class="shadow-lg shadow-success-500/20"
+                  @click="showSelectedInterestsModal = false"
+                >
+                  <Icon name="ph:check" class="mr-2 size-5" />
+                  تایید انتخاب
+                </BaseButton>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </TairoModal>
@@ -2572,200 +2792,6 @@ ${mockData.keywords.slice(0, 5).join("، ")}`;
         <!-- Close Button -->
         <div class="flex justify-end">
           <BaseButton color="warning" shape="curved" size="lg" @click="showKeywordsInfoModal = false">
-            متوجه شدم
-            <Icon name="ph:check" class="mr-2 size-5" />
-          </BaseButton>
-        </div>
-      </div>
-    </TairoModal>
-
-    <!-- Theories Info Modal -->
-    <TairoModal :open="showTheoriesInfoModal" size="lg" @close="showTheoriesInfoModal = false">
-      <template #header>
-        <div class="flex items-center gap-3 p-6 pb-0">
-          <div class="bg-info-500 flex size-12 items-center justify-center rounded-xl">
-            <Icon name="ph:graduation-cap-fill" class="size-6 text-white" />
-          </div>
-          <div class="text-right">
-            <BaseHeading as="h2" size="xl" weight="bold">راهنمای نظریه‌های علمی</BaseHeading>
-            <BaseParagraph size="sm" class="text-muted-500">
-              نکات مهم برای استخراج و استفاده از نظریه‌های مرتبط
-            </BaseParagraph>
-          </div>
-        </div>
-      </template>
-
-      <div class="space-y-6 p-6 max-h-96 overflow-y-auto text-right">
-        <!-- Introduction -->
-        <div class="bg-info-500/10 dark:bg-info-500/20 rounded-xl p-6">
-          <div class="flex items-start gap-4">
-            <Icon name="ph:graduation-cap-fill" class="text-info-500 mt-1 size-6 shrink-0" />
-            <div class="flex-1">
-              <BaseHeading as="h3" size="md" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
-                چرا نظریه‌ها مهم هستند؟
-              </BaseHeading>
-              <BaseParagraph class="text-muted-600 dark:text-muted-300 text-sm leading-relaxed">
-                نظریه‌ها چارچوب علمی برای پژوهش شما فراهم می‌کنند، به یافته‌ها اعتبار می‌بخشند و تحقیق شما را به دانش
-                موجود متصل می‌کنند.
-              </BaseParagraph>
-            </div>
-          </div>
-        </div>
-
-        <!-- Guidelines -->
-        <div class="space-y-4">
-          <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
-            نقش نظریه‌ها در پژوهش
-          </BaseHeading>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div class="dark:bg-muted-800 dark:border-muted-700 rounded-xl border border-gray-200 bg-white p-4">
-              <div class="flex items-start gap-3">
-                <div class="bg-info-500/10 flex size-8 items-center justify-center rounded-lg">
-                  <Icon name="ph:compass" class="text-info-500 size-4" />
-                </div>
-                <div class="flex-1">
-                  <BaseHeading as="h4" size="sm" weight="semibold" class="mb-1 text-gray-900 dark:text-white">
-                    راهنمایی پژوهش
-                  </BaseHeading>
-                  <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400">
-                    نظریه‌ها مسیر تحقیق و سوالات پژوهشی را مشخص می‌کنند.
-                  </BaseParagraph>
-                </div>
-              </div>
-            </div>
-
-            <div class="dark:bg-muted-800 dark:border-muted-700 rounded-xl border border-gray-200 bg-white p-4">
-              <div class="flex items-start gap-3">
-                <div class="bg-success-500/10 flex size-8 items-center justify-center rounded-lg">
-                  <Icon name="ph:microscope" class="text-success-500 size-4" />
-                </div>
-                <div class="flex-1">
-                  <BaseHeading as="h4" size="sm" weight="semibold" class="mb-1 text-gray-900 dark:text-white">
-                    تفسیر یافته‌ها
-                  </BaseHeading>
-                  <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400">
-                    برای تحلیل و تفسیر نتایج به چارچوب نظری نیاز است.
-                  </BaseParagraph>
-                </div>
-              </div>
-            </div>
-
-            <div class="dark:bg-muted-800 dark:border-muted-700 rounded-xl border border-gray-200 bg-white p-4">
-              <div class="flex items-start gap-3">
-                <div class="bg-warning-500/10 flex size-8 items-center justify-center rounded-lg">
-                  <Icon name="ph:link" class="text-warning-500 size-4" />
-                </div>
-                <div class="flex-1">
-                  <BaseHeading as="h4" size="sm" weight="semibold" class="mb-1 text-gray-900 dark:text-white">
-                    اتصال به دانش
-                  </BaseHeading>
-                  <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400">
-                    پژوهش شما را به تحقیقات قبلی و دانش موجود متصل می‌کند.
-                  </BaseParagraph>
-                </div>
-              </div>
-            </div>
-
-            <div class="dark:bg-muted-800 dark:border-muted-700 rounded-xl border border-gray-200 bg-white p-4">
-              <div class="flex items-start gap-3">
-                <div class="bg-primary-500/10 flex size-8 items-center justify-center rounded-lg">
-                  <Icon name="ph:medal" class="text-primary-500 size-4" />
-                </div>
-                <div class="flex-1">
-                  <BaseHeading as="h4" size="sm" weight="semibold" class="mb-1 text-gray-900 dark:text-white">
-                    اعتبار علمی
-                  </BaseHeading>
-                  <BaseParagraph size="xs" class="text-muted-600 dark:text-muted-400">
-                    استفاده از نظریه‌ها به پژوهش شما اعتبار علمی می‌بخشد.
-                  </BaseParagraph>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Examples by Domain -->
-        <div class="space-y-4">
-          <BaseHeading as="h3" size="lg" weight="semibold" class="text-gray-900 dark:text-white">
-            مثال‌هایی از نظریه‌ها بر اساس حوزه
-          </BaseHeading>
-
-          <div class="dark:bg-muted-900/50 dark:border-muted-700 rounded-xl border border-gray-100 bg-gray-50 p-4">
-            <div class="space-y-4 text-sm">
-              <div>
-                <BaseHeading as="h4" size="sm" weight="medium" class="mb-2 text-muted-700 dark:text-muted-300">
-                  روانشناسی:
-                </BaseHeading>
-                <div class="grid gap-2">
-                  <div class="flex items-center gap-2">
-                    <Icon name="ph:check-circle-fill" class="text-success-500 size-3" />
-                    <span class="text-muted-600 dark:text-muted-400">نظریه یادگیری اجتماعی (بندورا)</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Icon name="ph:check-circle-fill" class="text-success-500 size-3" />
-                    <span class="text-muted-600 dark:text-muted-400">نظریه شناخت اجتماعی (بک، الیس)</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <BaseHeading as="h4" size="sm" weight="medium" class="mb-2 text-muted-700 dark:text-muted-300">
-                  آموزش:
-                </BaseHeading>
-                <div class="grid gap-2">
-                  <div class="flex items-center gap-2">
-                    <Icon name="ph:check-circle-fill" class="text-success-500 size-3" />
-                    <span class="text-muted-600 dark:text-muted-400">نظریه ساختار شناختی (پیاژه)</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Icon name="ph:check-circle-fill" class="text-success-500 size-3" />
-                    <span class="text-muted-600 dark:text-muted-400">نظریه zone نزدیک توسعه (ویگوتسکی)</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <BaseHeading as="h4" size="sm" weight="medium" class="mb-2 text-muted-700 dark:text-muted-300">
-                  کامپیوتر/هوش مصنوعی:
-                </BaseHeading>
-                <div class="grid gap-2">
-                  <div class="flex items-center gap-2">
-                    <Icon name="ph:check-circle-fill" class="text-success-500 size-3" />
-                    <span class="text-muted-600 dark:text-muted-400">نظریه محاسبات ذهن (تورینگ)</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Icon name="ph:check-circle-fill" class="text-success-500 size-3" />
-                    <span class="text-muted-600 dark:text-muted-400">نظریه اتصال‌گرایی (هب)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tips -->
-        <div class="bg-warning-500/10 dark:bg-warning-500/20 rounded-xl p-4">
-          <div class="flex items-start gap-3">
-            <Icon name="ph:warning-circle-fill" class="text-warning-500 mt-0.5 size-5 shrink-0" />
-            <div class="flex-1">
-              <BaseHeading as="h4" size="sm" weight="semibold" class="mb-2 text-gray-900 dark:text-white">
-                نکات مهم
-              </BaseHeading>
-              <ul class="text-muted-700 dark:text-muted-300 space-y-1 text-sm">
-                <li>• نظریه‌ها باید مستقیماً به سوالات پژوهشی شما مرتبط باشند</li>
-                <li>• از منابع معتبر و جدید برای نظریه‌ها استفاده کنید</li>
-                <li>• می‌توانید از چندین نظریه به صورت ترکیبی استفاده کنید</li>
-                <li>• نظریه‌ها را در مقدمه و مبانی نظری تحقیق خود توضیح دهید</li>
-                <li>• از استاد راهنما و متخصصان حوزه برای انتخاب نظریه‌ها مشورت بگیرید</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Close Button -->
-        <div class="flex justify-end">
-          <BaseButton color="info" shape="curved" size="lg" @click="showTheoriesInfoModal = false">
             متوجه شدم
             <Icon name="ph:check" class="mr-2 size-5" />
           </BaseButton>

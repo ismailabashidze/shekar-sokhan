@@ -57,7 +57,7 @@
     }
   });
   const nuxtApp = useNuxtApp();
-  const { updateEmptyZonesInDatabase, setUser } = useUser();
+  const { updateEmptyZonesInDatabase, setUser, user } = useUser();
   const { downloadAndSaveAvatar } = useAvatarManager();
   const isGoogleLogin = ref(false);
 
@@ -200,7 +200,7 @@
   };
 
   if (nuxtApp.$pb.authStore.isValid) {
-    await updateEmptyZonesInDatabase();
+    await updateEmptyZonesInDatabase(user.value);
     navigateTo('/dashboard');
   }
 </script>

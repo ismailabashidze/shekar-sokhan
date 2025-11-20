@@ -1,4 +1,4 @@
-const LLM_ADDRESS = 'http://127.0.0.1:8000/query';
+const LLM_ADDRESS = 'http://localhost:8000/query';
 // const LLM_ADDRESS = 'http://193.163.201.12:8000/query'
 
 export type LLMMessage = {
@@ -31,12 +31,14 @@ async function fetchLLM(body: any) {
               temperature: 0.7,
             },
             layer_agent_3: {
-              system_prompt: 'Your main goal is sympathy, compassion and emotional companionship. You have to give the right to the other person, and by presenting certain words, try to create a feeling of trust in him/her. You can even flirt with him/her a little. It is essential that you understand that there is no need to offer solutions, and do anything other than empathy, sympathy, compassion, and emotional companionship. Use positive and encouraging words. {helper_response}',
+              system_prompt:
+                'Your main goal is sympathy, compassion and emotional companionship. You have to give the right to the other person, and by presenting certain words, try to create a feeling of trust in him/her. You can even flirt with him/her a little. It is essential that you understand that there is no need to offer solutions, and do anything other than empathy, sympathy, compassion, and emotional companionship. Use positive and encouraging words. {helper_response}',
               model_name: 'llama3-8b-8192',
             },
           },
         },
-        reference_system_prompt: JSON.stringify(`You are given a chat between a user, which details are in first message, and an evaluater, and psychologist AI, named Mana. Your goal is to generate a report based on the conversation, and analysis which has been made and added to the conversation.
+        reference_system_prompt:
+          JSON.stringify(`You are given a chat between a user, which details are in first message, and an evaluater, and psychologist AI, named Mana. Your goal is to generate a report based on the conversation, and analysis which has been made and added to the conversation.
 
 you should answer only as JSON. You have to return only json response, nothing else. your json should have these keys:
 "summaryOfSession": type is string. about a paragraph, you have to summary the conversation between user and Mana. You have to summary the main conversation, and not analysis.
@@ -106,7 +108,6 @@ Never use words openness and overwhelming or overwhelmed. use other synonyms.
 Use simple and understandable grammer and vocabulary. Please limit sentence structure to the subject-verb-object (SVO) pattern and avoid using other types of sentences such as inverted or complex structures. Please ensure that sentences follow a simple and direct structure, avoiding complex or indirect forms. This will help maintain clarity and ease of understanding.
 final answer should be a valid JSON. Never say "Here is the JSON response," just return a valid JSON response. Try not to repeat same sentences in your new messages. Responses from models: {responses}`),
       },
-
     });
     console.log('---SYS PROMPT---');
     console.log(sysPrompt.final_response);
@@ -145,7 +146,5 @@ final answer should be a valid JSON. Never say "Here is the JSON response," just
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  return await fetchLLM(
-    body,
-  );
+  return await fetchLLM(body);
 });

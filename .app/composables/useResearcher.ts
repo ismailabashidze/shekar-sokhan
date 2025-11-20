@@ -397,8 +397,8 @@ export const useResearcher = () => {
 					});
 				});
 
-				// Limit to first 5 level 3 items per category
-				result[level1.id].level3 = result[level1.id].level3.slice(0, 5);
+				// Show a limited selection of level 3 items per category for better UX
+				result[level1.id].level3 = result[level1.id].level3.slice(0, 6);
 			});
 
 		return result;

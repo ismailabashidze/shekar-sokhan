@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-// const LLM_ADDRESS = 'http://127.0.0.1:8000/query'
+// const LLM_ADDRESS = 'http://localhost:8000/query'
 const LLM_ADDRESS = 'http://193.163.201.12:8000/query';
 const LLM_ADDRESS_RUNPOD = 'https://api.runpod.ai/v2/6psbp5s1llu4c8/openai/v1/chat/completions';
 const RUNPOD_TOKEN = '8ASLOFSZNUV6LBP0FD0D51300FRF0TZFEBFHPSV3';
@@ -61,8 +61,7 @@ async function fetchLLM(body: any) {
 
     // else JSON.stringify(sysPrompt.final_response)
     return msg;
-  }
-  catch (e) {
+  } catch (e) {
     console.log('here');
     console.log(e);
     return e;
@@ -71,7 +70,5 @@ async function fetchLLM(body: any) {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  return await fetchLLM(
-    body,
-  );
+  return await fetchLLM(body);
 });
